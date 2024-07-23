@@ -28,7 +28,7 @@ module.exports = {
           fontWeight:'600'
         }],
         subtitleSmall1:'13px',
-        subtitleSmall2:'15px',
+        // subtitleSmall2:'15px',
         subtitleMain:'41px',
         small:['15px',{
           fontFamily:'saira condensed'

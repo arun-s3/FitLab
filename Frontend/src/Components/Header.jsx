@@ -13,7 +13,7 @@ export default function Header(){
             {/* <Logo/> */}
             <img src="/Logo_main.png" alt="" className="h-[5rem] "/>   {/*mt-[10px]*/}
             <nav>
-                <ul className="inline-flex items-center gap-[30px] list-none"> {/*mt-[4px]*/}
+                <ul className="inline-flex items-center gap-[30px] list-none text-descReg1 tracking-[0.2px]"> {/*mt-[4px]*/}
                     <li><a>Home</a>
                     </li>
                     <li><a>Shop by Categories</a>

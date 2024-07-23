@@ -1,0 +1,2 @@
+subtitleSmall1 -15px to 13px
+descReg1 - 19px to 15px

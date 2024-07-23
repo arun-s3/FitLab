@@ -1,6 +1,27 @@
-/*
-! tailwindcss v3.4.6 | MIT License | https://tailwindcss.com
-*/
+@import url('https://fonts.googleapis.com/css2?family=Saira:ital,wght@0,100..900;1,100..900&display=swap');
+
+@import url('https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+
+*{
+  font-family: "Saira", sans-serif;
+}
+
+@font-face{
+  font-family:'funcity';
+
+  src:url('/FunCityLevel2Basic.otf');
+
+  /* font-size: 40px; */
+}
+
+:root{
+  --PRIMARY:rgba(215, 241, 72, 1);
+  --SECONDARY:rgba(159, 42, 240, 1);
+}
+
+/* ! tailwindcss v3.4.6 | MIT License | https://tailwindcss.com */
 
 /*
 1. Prevent padding and border from affecting element width. (https://github.com/mozdevs/cssremedy/issues/4)
@@ -446,7 +467,7 @@ video {
   display: none;
 }
 
-*, ::before, ::after {
+*, ::before, ::after{
   --tw-border-spacing-x: 0;
   --tw-border-spacing-y: 0;
   --tw-translate-x: 0;
@@ -500,7 +521,7 @@ video {
   --tw-contain-style:  ;
 }
 
-::backdrop {
+::backdrop{
   --tw-border-spacing-x: 0;
   --tw-border-spacing-y: 0;
   --tw-translate-x: 0;
@@ -552,4 +573,148 @@ video {
   --tw-contain-layout:  ;
   --tw-contain-paint:  ;
   --tw-contain-style:  ;
+}
+
+.absolute{
+  position: absolute;
+}
+
+.sticky{
+  position: sticky;
+}
+
+.left-\[10\%\]{
+  left: 10%;
+}
+
+.top-\[30\%\]{
+  top: 30%;
+}
+
+.mb-\[8px\]{
+  margin-bottom: 8px;
+}
+
+.ml-\[25px\]{
+  margin-left: 25px;
+}
+
+.mt-\[10px\]{
+  margin-top: 10px;
+}
+
+.mt-\[30px\]{
+  margin-top: 30px;
+}
+
+.mt-\[4px\]{
+  margin-top: 4px;
+}
+
+.mt-\[1px\]{
+  margin-top: 1px;
+}
+
+.mt-\[px\]{
+  margin-top: px;
+}
+
+.flex{
+  display: flex;
+}
+
+.inline-flex{
+  display: inline-flex;
+}
+
+.h-\[5rem\]{
+  height: 5rem;
+}
+
+.h-\[70rem\]{
+  height: 70rem;
+}
+
+.w-1\/2{
+  width: 50%;
+}
+
+.w-\[101\%\]{
+  width: 101%;
+}
+
+.w-\[70\%\]{
+  width: 70%;
+}
+
+.transform{
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+.list-none{
+  list-style-type: none;
+}
+
+.items-center{
+  align-items: center;
+}
+
+.justify-between{
+  justify-content: space-between;
+}
+
+.gap-\[15px\]{
+  gap: 15px;
+}
+
+.gap-\[30px\]{
+  gap: 30px;
+}
+
+.overflow-visible{
+  overflow: visible;
+}
+
+.bg-home{
+  --tw-bg-opacity: 1;
+  background-color: rgb(235 234 236 / var(--tw-bg-opacity));
+}
+
+.bg-primary{
+  background-color: rgba(215, 241, 72, 1);
+}
+
+.text-descReg1{
+  font-size: 15px;
+}
+
+.text-subtitleSmall1{
+  font-size: 13px;
+}
+
+.leading-\[27px\]{
+  line-height: 27px;
+}
+
+.text-black{
+  --tw-text-opacity: 1;
+  color: rgb(0 0 0 / var(--tw-text-opacity));
+}
+
+.text-primary{
+  color: rgba(215, 241, 72, 1);
+}
+
+.text-secondary{
+  color: rgba(159, 42, 240, 1);
+}
+
+.text-white{
+  --tw-text-opacity: 1;
+  color: rgb(255 255 255 / var(--tw-text-opacity));
+}
+
+.padding-main{
+  padding-left:30px;
+  padding-right:60px;
 }

@@ -25,9 +25,9 @@ export default function HomePage(){
             <div id="socials" className='text-secondary text-[28px] flex flex-col gap-[1rem] items-center justify-center
                                          absolute top-[16rem] right-[2rem]'>
                 <hr className='w-[1px] h-[10rem] bg-primary opacity-[0.41] mb-[1rem]'/>
-                <CiFacebook/>
-                <CiInstagram/>
-                <CiLinkedin/>
+                <CiFacebook className='cursor-pointer'/>
+                <CiInstagram className='cursor-pointer'/>
+                <CiLinkedin className='cursor-pointer'/>
             </div>
         </div>
     )

@@ -12,7 +12,7 @@ module.exports = {
         funCity:['funCity']
       },
       fontSize:{
-        TitleMain:'40px',
+        TitleMain:['35px'],
         descReg1:'15px',
         descReg2:'17px',
         descReg2Med:['17px',{

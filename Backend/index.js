@@ -28,14 +28,15 @@ app.use(cors({
 
 const userRoutes = require('./Routes/userRoutes.js')
 const adminRoutes = require('./Routes/adminRoutes.js')
-app.use('/', userRoutes)
-app.use('/admin', adminRoutes)
-
 app.use((error,req,res,next)=>{
     const message = error.message||'Internal Server Error'
     const statusCode = error.statusCode||500
     res.status(statusCode).json({errorMessage:message})
 })
+app.use('/', userRoutes)
+app.use('/admin', adminRoutes)
+
+
 
 const port = process.env.PORT||3000
 app.listen(port, ()=>{ console.log(`Listening to port ${port}...`)})

@@ -68,8 +68,7 @@ const createUser = async(req,res,next)=>{
 const loginUser = async(req,res,next)=>{
     try{
         const {identifier, password} = req.body
-        let username=""
-        let email=""
+        let username,email=""
         let userData={}
         if(!identifier||!password)
         {
@@ -94,16 +93,22 @@ const loginUser = async(req,res,next)=>{
                         next(errorHandler(401, "Enter a valid username"))
                     }
             }
-            const test = username?`username=${username}` :`email=${email}`
-            console.log("username or email-->"+test)
-            console.log("password-->"+userData.password)
-            const passwordMatched = await bcryptjs.compare(password, userData.password)
-            console.log("passwordMatchd-->"+passwordMatched)
-            if(passwordMatched){
-                const token = generateToken(res,userData._id)
-                console.log("token-->"+token)
-                res.status(200).json({message:"Logged in successfully!",token:token, user:userData})
-                }       
+            if(userData){
+                const test = username?`username=${username}` :`email=${email}`
+                console.log("username or email-->"+test)
+                console.log("password-->"+userData.password)
+                const passwordMatched = await bcryptjs.compare(password, userData.password)
+                console.log("passwordMatchd-->"+passwordMatched)
+                if(passwordMatched){
+                    const token = generateToken(res,userData._id)
+                    console.log("token-->"+token)
+                    res.status(200).json({message:"Logged in successfully!",token:token, user:userData})
+                  }
+                else{
+                    next(errorHandler(401, "Wrong password entered"))
+                  }  
+            }
+                 
            }
         }
  catch(error){

@@ -4,6 +4,7 @@ const userSchema = mongoose.Schema({
     username:{
         type:String,
         required:true,
+        unique:true,
         maxlength:100
     },
     email:{
@@ -21,19 +22,18 @@ const userSchema = mongoose.Schema({
         required:true,
         unique:true
     },
-    is_admin:{
+    isAdmin:{
+        type:Boolean, 
+        required:true,
+        default:false
+    },
+    isVerified:{
         type:Boolean,
         required:true,
         default:false
     },
-    is_verified:{
+    isBlocked:{
         type:Boolean,
-        required:true,
-        default:false
-    },
-    is_Blocked:{
-        type:Boolean,
-        required:true,
         default:false
     }
 })

@@ -1,10 +1,15 @@
 const jwt = require('jsonwebtoken')
 
-const generateToken = async(res,userId)=>{
+const generateToken = (res,userId)=>{
     try{
         console.log("Inside generateToken")
         const token = jwt.sign({userId}, process.env.JWTSECRET, {expiresIn:'10d'})
         console.log("Token mande-->"+token)
+        res.cookie(jwt,token,{
+            expires:10*24*60*60,
+            httpOnly:true,
+            sameSite:'strict'
+        })
         return token
     }
     catch(error){
@@ -13,7 +18,7 @@ const generateToken = async(res,userId)=>{
     }
 }
 
-const verifyToken = async(res, token)=>{
+const verifyToken = (token)=>{
     try{
         const tokenVerified = jwt.verify(token,process.env.JWTSECRET,(err,decoded)=>{
             if(error){
@@ -27,6 +32,7 @@ const verifyToken = async(res, token)=>{
         error.statusCode = error.statusCode||401
         error.message = error.message + "---Unauthorized user"
     }
+    
 }
 
 module.exports = {generateToken, verifyToken}

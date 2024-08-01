@@ -575,6 +575,10 @@ video {
   --tw-contain-style:  ;
 }
 
+.static{
+  position: static;
+}
+
 .absolute{
   position: absolute;
 }
@@ -585,6 +589,10 @@ video {
 
 .left-\[10\%\]{
   left: 10%;
+}
+
+.left-\[50\%\]{
+  left: 50%;
 }
 
 .right-\[2rem\]{
@@ -599,20 +607,62 @@ video {
   top: 30%;
 }
 
+.top-\[50\%\]{
+  top: 50%;
+}
+
+.my-\[4\%\]{
+  margin-top: 4%;
+  margin-bottom: 4%;
+}
+
+.my-\[50px\]{
+  margin-top: 50px;
+  margin-bottom: 50px;
+}
+
 .mb-\[1rem\]{
   margin-bottom: 1rem;
+}
+
+.mb-\[3px\]{
+  margin-bottom: 3px;
+}
+
+.mb-\[60px\]{
+  margin-bottom: 60px;
 }
 
 .mb-\[8px\]{
   margin-bottom: 8px;
 }
 
-.ml-\[25px\]{
-  margin-left: 25px;
+.ml-\[10px\]{
+  margin-left: 10px;
+}
+
+.ml-\[28px\]{
+  margin-left: 28px;
+}
+
+.ml-\[6\.7rem\]{
+  margin-left: 6.7rem;
+}
+
+.mr-\[25px\]{
+  margin-right: 25px;
 }
 
 .mt-\[10px\]{
   margin-top: 10px;
+}
+
+.mt-\[1rem\]{
+  margin-top: 1rem;
+}
+
+.mt-\[24px\]{
+  margin-top: 24px;
 }
 
 .mt-\[30px\]{
@@ -621,6 +671,22 @@ video {
 
 .mt-\[4px\]{
   margin-top: 4px;
+}
+
+.mb-\[\]{
+  margin-bottom: ;
+}
+
+.mb-\[60\]{
+  margin-bottom: 60;
+}
+
+.mb-\[60p\]{
+  margin-bottom: 60p;
+}
+
+.inline-block{
+  display: inline-block;
 }
 
 .flex{
@@ -633,6 +699,10 @@ video {
 
 .h-\[10rem\]{
   height: 10rem;
+}
+
+.h-\[120vh\]{
+  height: 120vh;
 }
 
 .h-\[5rem\]{
@@ -651,12 +721,38 @@ video {
   width: 101%;
 }
 
+.w-\[17rem\]{
+  width: 17rem;
+}
+
 .w-\[1px\]{
   width: 1px;
 }
 
+.w-\[40\%\]{
+  width: 40%;
+}
+
+.w-\[430px\]{
+  width: 430px;
+}
+
 .w-\[70\%\]{
   width: 70%;
+}
+
+.basis-\[380px\]{
+  flex-basis: 380px;
+}
+
+.translate-x-\[-50\%\]{
+  --tw-translate-x: -50%;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+.translate-y-\[-50\%\]{
+  --tw-translate-y: -50%;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
 .transform{
@@ -673,6 +769,10 @@ video {
 
 .flex-col{
   flex-direction: column;
+}
+
+.items-start{
+  align-items: flex-start;
 }
 
 .items-center{
@@ -695,12 +795,36 @@ video {
   gap: 1rem;
 }
 
+.gap-\[20px\]{
+  gap: 20px;
+}
+
+.gap-\[3\.8rem\]{
+  gap: 3.8rem;
+}
+
 .gap-\[30px\]{
   gap: 30px;
 }
 
+.gap-\[35px\]{
+  gap: 35px;
+}
+
+.gap-\[4rem\]{
+  gap: 4rem;
+}
+
 .overflow-visible{
   overflow: visible;
+}
+
+.rounded-\[22px\]{
+  border-radius: 22px;
+}
+
+.rounded-\[7px\]{
+  border-radius: 7px;
 }
 
 .bg-black{
@@ -717,16 +841,63 @@ video {
   background-color: rgba(215, 241, 72, 1);
 }
 
+.px-\[50px\]{
+  padding-left: 50px;
+  padding-right: 50px;
+}
+
+.py-\[2\.3rem\]{
+  padding-top: 2.3rem;
+  padding-bottom: 2.3rem;
+}
+
+.py-\[6px\]{
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.pl-\[14px\]{
+  padding-left: 14px;
+}
+
+.text-left{
+  text-align: left;
+}
+
+.font-funCity{
+  font-family: funCity;
+}
+
+.font-sairaCondensed{
+  font-family: "Saira Condensed", sans-serif;
+}
+
 .text-\[28px\]{
   font-size: 28px;
+}
+
+.text-\[35px\]{
+  font-size: 35px;
 }
 
 .text-descReg1{
   font-size: 15px;
 }
 
+.text-small{
+  font-size: 15px;
+}
+
 .text-subtitleSmall1{
   font-size: 13px;
+}
+
+.font-medium{
+  font-weight: 500;
+}
+
+.capitalize{
+  text-transform: capitalize;
 }
 
 .leading-\[27px\]{
@@ -742,6 +913,11 @@ video {
   color: rgb(0 0 0 / var(--tw-text-opacity));
 }
 
+.text-muted{
+  --tw-text-opacity: 1;
+  color: rgb(125 124 140 / var(--tw-text-opacity));
+}
+
 .text-primary{
   color: rgba(215, 241, 72, 1);
 }
@@ -755,6 +931,14 @@ video {
   color: rgb(255 255 255 / var(--tw-text-opacity));
 }
 
+.placeholder-\[13px\]::-moz-placeholder{
+  color: 13px;
+}
+
+.placeholder-\[13px\]::placeholder{
+  color: 13px;
+}
+
 .opacity-\[0\.41\]{
   opacity: 0.41;
 }
@@ -762,4 +946,12 @@ video {
 .padding-main{
   padding-left:30px;
   padding-right:60px;
+}
+
+.placeholder\:text-\[12px\]::-moz-placeholder{
+  font-size: 12px;
+}
+
+.placeholder\:text-\[12px\]::placeholder{
+  font-size: 12px;
 }

@@ -72,22 +72,22 @@ const loginUser = async(req,res,next)=>{
         let userData={}
         if(!identifier||!password)
         {
-            console.log("inside 1st if")
+                console.log("inside 1st if")
             next(errorHandler(400,"Enter all the fields"))
         }
         else{
             if(identifier.trim().includes("@")){
                 email = identifier
-                console.log("inside 2nd if")
+                    console.log("inside 2nd if")
                 userData = await User.findOne({email:email})
-                console.log("userData inside loginuser-->"+userData)
+                    console.log("userData inside loginuser-->"+userData)
                 if(!userData){
                     next(errorHandler(401, "Enter a valid email id"))
                 }
             }
             else{
                     username = identifier
-                    console.log("Inside else")
+                        console.log("Inside else")
                     userData = await User.findOne({username:username})
                     if(!userData){
                         next(errorHandler(401, "Enter a valid username"))
@@ -95,13 +95,13 @@ const loginUser = async(req,res,next)=>{
             }
             if(userData){
                 const test = username?`username=${username}` :`email=${email}`
-                console.log("username or email-->"+test)
-                console.log("password-->"+userData.password)
+                    console.log("username or email-->"+test)
+                    console.log("password-->"+userData.password)
                 const passwordMatched = await bcryptjs.compare(password, userData.password)
-                console.log("passwordMatchd-->"+passwordMatched)
+                    console.log("passwordMatchd-->"+passwordMatched)
                 if(passwordMatched){
                     const token = generateToken(res,userData._id)
-                    console.log("token-->"+token)
+                        console.log("token-->"+token)
                     res.status(200).json({message:"Logged in successfully!",token:token, user:userData})
                   }
                 else{

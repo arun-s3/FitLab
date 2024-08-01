@@ -6,14 +6,16 @@ module.exports = {
       colors:{
         primary:"rgba(215, 241, 72, 1)",
         secondary:"rgba(159, 42, 240, 1)",
+        muted:"rgb(125, 124, 140)",    //rgb(111, 110, 127)
         home:"#EBEAEC"
       },
       fontFamily:{
-        funCity:['funCity']
+        funCity:['funCity'],
+        sairaCondensed:['"Saira Condensed", sans-serif']
       },
       fontSize:{
         TitleMain:['35px'],
-        descReg1:'15px',
+        descReg1:'15px', // can use this for "subtitleSmall1"
         descReg2:'17px',
         descReg2Med:['17px',{
           fontWeight:'500'
@@ -31,7 +33,7 @@ module.exports = {
         // subtitleSmall2:'15px',
         subtitleMain:'41px',
         small:['15px',{
-          fontFamily:'saira condensed'
+          fontFamily:"Saira Condensed"
         }],
         h3Semibold:['30px',{
           fontWeight:'700'

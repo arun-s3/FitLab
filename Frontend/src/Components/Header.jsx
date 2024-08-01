@@ -11,7 +11,7 @@ export default function Header(){
     return(
         <header className="flex justify-between items-center text-white padding-main sticky">
             {/* <Logo/> */}
-            <img src="/Logo_main.png" alt="" className="h-[5rem] "/>   {/*mt-[10px]*/}
+            <img src="/Logo_main.png" alt="Fitlab" className="h-[5rem] "/>   {/*mt-[10px]*/}
             <nav>
                 <ul className="inline-flex items-center gap-[30px] list-none text-descReg1 tracking-[0.2px]"> {/*mt-[4px]*/}
                     <li><a>Home</a>
@@ -31,7 +31,7 @@ export default function Header(){
                 <CiUser style={{fontSize:'25px'}}/>
                 <IoCartOutline style={{fontSize:'23px'}}/>
                 <MdFavoriteBorder style={{fontSize:'25px'}}/>
-                <SiteButton text="Sign In"/>
+                <SiteButton text="Sign In" customStyle={{marginLeft:'25px'}}/>
             </div>
             
         </header>

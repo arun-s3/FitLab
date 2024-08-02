@@ -673,16 +673,20 @@ video {
   margin-top: 4px;
 }
 
-.mb-\[\]{
-  margin-bottom: ;
+.ml-\[\]{
+  margin-left: ;
 }
 
-.mb-\[60\]{
-  margin-bottom: 60;
+.ml-\[2\]{
+  margin-left: 2;
 }
 
-.mb-\[60p\]{
-  margin-bottom: 60p;
+.ml-\[2px\]{
+  margin-left: 2px;
+}
+
+.ml-\[1px\]{
+  margin-left: 1px;
 }
 
 .inline-block{

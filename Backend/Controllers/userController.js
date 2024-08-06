@@ -51,7 +51,7 @@ const createUser = async(req,res,next)=>{
                 next(errorHandler(409, "User already exists"))
             }
         if(userData){
-                res.status(201).json({message:"Success!", user:userData})
+                res.status(201).json({message:"success", user:userData})
             }
             else{
                 next(errorHandler(500, "Internal Server Error"))

@@ -619,11 +619,6 @@ video {
   z-index: 10;
 }
 
-.my-\[10\%\]{
-  margin-top: 10%;
-  margin-bottom: 10%;
-}
-
 .my-\[50px\]{
   margin-top: 50px;
   margin-bottom: 50px;
@@ -687,10 +682,6 @@ video {
 
 .mt-\[4px\]{
   margin-top: 4px;
-}
-
-.mt-\[\]{
-  margin-top: ;
 }
 
 .mt-\[5px\]{
@@ -886,10 +877,6 @@ video {
 
 .font-sairaCondensed{
   font-family: "Saira Condensed", sans-serif;
-}
-
-.text-\[13px\]{
-  font-size: 13px;
 }
 
 .text-\[28px\]{

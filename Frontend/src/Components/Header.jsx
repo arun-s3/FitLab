@@ -1,28 +1,29 @@
 import React from 'react'
 import Logo from './Logo'
 import './Header.css'
+import {Link} from 'react-router-dom'
 import {SiteButton} from './SiteButton'
 import { IoIosSearch } from "react-icons/io";
 import { CiUser } from "react-icons/ci";
 import { IoCartOutline } from "react-icons/io5";
 import { MdFavoriteBorder } from "react-icons/md";
 
-export default function Header(){
+export default function Header({customStyle}){
     return(
-        <header className="flex justify-between items-center text-white padding-main sticky">
+        <header className="flex justify-between items-center text-white padding-main sticky z-10"  style={customStyle}>
             {/* <Logo/> */}
             <img src="/Logo_main.png" alt="Fitlab" className="h-[5rem] "/>   {/*mt-[10px]*/}
             <nav>
                 <ul className="inline-flex items-center gap-[30px] list-none text-descReg1 tracking-[0.2px]"> {/*mt-[4px]*/}
-                    <li><a>Home</a>
+                    <li><Link>Home</Link>
                     </li>
-                    <li><a>Shop by Categories</a>
+                    <li><Link>Shop by Categories</Link>
                     </li>
-                    <li><a>Products</a>
+                    <li><Link>Products</Link>
                     </li>
-                    <li><a>Blogs</a>
+                    <li><Link>Blogs</Link>
                     </li>
-                    <li><a>About Us</a> 
+                    <li><Link>About Us</Link> 
                     </li>
                 </ul>
             </nav>

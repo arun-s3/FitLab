@@ -29,7 +29,7 @@ module.exports = {
         snackbar:['11px',{
           fontWeight:'600'
         }],
-        subtitleSmall1:'13px',
+        subtitleSmall1:'13px', // this is actually 15px in Figma. Use this if wanted 13px
         // subtitleSmall2:'15px',
         subtitleMain:'41px',
         small:['15px',{

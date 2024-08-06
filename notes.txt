@@ -1,2 +1,17 @@
 subtitleSmall1 -15px to 13px
 descReg1 - 19px to 15px
+
+TODO(5/8/2024)--
+        Jumping error displays
+        Designing error with clip-path (check if wanted)
+        Write submit code
+        Push in git for sign up valiation nd submit
+        Do everything for SIGN IN
+        Push in git for sign up valiation nd submit
+        Create redux nd slice, Token
+        Complete authentication
+        Make an excel for everything, see a small tutorial
+        button hovering and clicking code in common
+
+        Start LeetCode 
+        Start TypingTest

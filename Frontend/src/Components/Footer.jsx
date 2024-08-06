@@ -1,4 +1,5 @@
 import React from 'react'
+import {Link} from 'react-router-dom'
 import './Footer.css'
 import { FaFacebook, FaTwitter, FaInstagram , FaPinterest, FaYoutube    } from "react-icons/fa";
 import { CiYoutube } from "react-icons/ci";
@@ -27,17 +28,17 @@ export default function Footer(){
             <nav className='flex gap-[4rem] items-center text-primary'>
                     <ul className='inline-block list-none text-descReg1'>
                         <li> <h6 className='text-secondary'>CATEGORY</h6> </li>
-                        <li> <a>Strength</a> </li>
-                        <li> <a>Cardio</a> </li>
-                        <li> <a>Supplements</a> </li>
-                        <li> <a>Accessories</a> </li>
+                        <li> <Link>Strength</Link> </li>
+                        <li> <Link>Cardio</Link> </li>
+                        <li> <Link>Supplements</Link> </li>
+                        <li> <Link>Accessories</Link> </li>
                     </ul>
                     <ul className='inline-block list-none text-descReg1'>
                         <li> <h6 className='text-secondary'>SUPPORT</h6> </li>
-                        <li> <a>Help & Support</a> </li>
-                        <li> <a>Terms & Conditions</a> </li>
-                        <li> <a>Privacy Policy</a> </li>
-                        <li> <a>Help</a> </li>
+                        <li> <Link>Help & Support</Link> </li>
+                        <li> <Link>Terms & Conditions</Link> </li>
+                        <li> <Link>Privacy Policy</Link> </li>
+                        <li> <Link>Help</Link> </li>
                     </ul>
             </nav>
             <div className='ml-[6.7rem] w-[430px]'>

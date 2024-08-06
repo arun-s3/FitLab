@@ -1,12 +1,29 @@
 
+#signup-and-in::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:130vh;
+    /* border: 1px solid red; */
+    background-image: linear-gradient(rgba(0,0,0,0.3),rgba(0,0,0,0.3));
+    backdrop-filter:blur(2px);
+}
 #signup-and-in>main{
-    background-image: linear-gradient(rgba(255,255,255,0.5),rgba(255,255,255,0.5));
-    box-shadow: 0px 0px 15px rgb(215, 241, 72);
+    /* background-image: linear-gradient(rgba(255,255,255,0.5),rgba(255,255,255,0.5)); */
+    background-image: linear-gradient(rgba(0,0,0,0.3),rgba(0,0,0,0.3));
+    border:1px solid var(--SECONDARY)
+    /* box-shadow: 0px 0px 15px rgb(215, 241, 72); */
+}
+#signup-and-in>main h1{
+   color:#fff; 
 }
 #signup-and-in>main label{
     display:block;
     margin-bottom:5px;
     text-align: left;
+    color:#fff;
 }
 #signup-and-in>main input{
     border:2px solid #fff;
@@ -17,7 +34,6 @@
 }
 #signup-and-in>main #email, #signup-and-in>main #password{
     width:31.5rem;
-    /* remove ml in all siteButtons nd thereby change pages accordingly*/
 }
 #signup-and-in>main input::placeholder{
     font-size:12px;
@@ -28,4 +44,12 @@
 #signup-and-in>main input:focus-visible{
     border-color: var(--SECONDARY);
     outline:none;
+}
+#signup-and-in>main form .error{
+    visibility:hidden;
+    font-size: 11px;
+    margin-left: 5px;
+    margin-top: 5px;
+    height:17px;
+    color:yellow;
 }

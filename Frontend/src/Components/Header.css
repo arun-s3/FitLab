@@ -2,3 +2,7 @@
 /* #home{
     font-weight: 700;
 } */
+
+#icons >*{
+    cursor:pointer;
+}

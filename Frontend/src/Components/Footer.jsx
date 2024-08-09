@@ -46,7 +46,7 @@ export default function Footer(){
                 <div>
                     <input type="email" placeholder="Your email" name="email" autocomplete 
                            className='placeholder-[13px] py-[6px] pl-[14px] mr-[25px] rounded-[7px] w-[17rem] placeholder:text-[12px]'/>
-                    <SiteButtonSquare text="Subscribe"/>
+                    <SiteButtonSquare> Subscribe </SiteButtonSquare>
                     <p className='text-descReg1 text-muted mt-[1rem]'>Get daily news on upcoming offers from many suppliers all over the world</p>
                 </div>
             </div>

@@ -1,21 +1,25 @@
 import React from 'react'
 import './SiteButton.css'
+import {useSelector} from 'react-redux'
 
-export function SiteButton({text,customStyle,shouldSubmit=false}){
+export function SiteButton({customStyle,children,shouldSubmit=false}){
     
     return(
-        <button type={shouldSubmit?"submit":"button"} className="bg-primary text-black text-descReg1 site-button" style={customStyle}>{text}</button>
+        <button type={shouldSubmit?"submit":"button"} className="bg-primary text-black text-descReg1 site-button" 
+                style={customStyle}>{children}</button>
     )
 }
 
-export function SiteButtonDark({text,customStyle,shouldSubmit=false}){
+export function SiteButtonDark({customStyle,children,shouldSubmit=false}){
     return(
-        <button type={shouldSubmit?"submit":"button"} className='bg-black text-white text-descReg1 site-button-dark' style={customStyle}>{text}</button>
+        <button type={shouldSubmit?"submit":"button"} className='bg-black text-white text-descReg1 site-button-dark'
+                style={customStyle}>{children}</button>
     )
 }
 
-export function SiteButtonSquare({text,customStyle,shouldSubmit=false}){
+export function SiteButtonSquare({customStyle,children,shouldSubmit=false}){
     return(
-        <button type={shouldSubmit?"submit":"button"} className="bg-primary text-black text-descReg1 site-button-square" style={customStyle}>{text}</button>
+        <button type={shouldSubmit?"submit":"button"} className="bg-primary text-black text-descReg1 site-button-square" 
+                style={customStyle}>{children}</button>
     )
 }

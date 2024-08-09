@@ -4,14 +4,23 @@ descReg1 - 19px to 15px
 TODO(5/8/2024)--
         Jumping error displays
         Designing error with clip-path (check if wanted)
-        Write submit code
-        Push in git for sign up valiation nd submit
-        Do everything for SIGN IN
-        Push in git for sign up valiation nd submit
-        Create redux nd slice, Token
         Complete authentication
         Make an excel for everything, see a small tutorial
         button hovering and clicking code in common
 
+        [SOON--Hovering States, Clicking States]
+        [SOON--Carousal]
+        [SOON--Animation- +Motion Framer]
+
         Start LeetCode 
         Start TypingTest
+
+        Write down the notes on useRef, Navigate vs Link
+        Logout controller
+        Logout reducer
+        Logout Header + design
+        Sign up with google and fb + design
+        See how to unstage "notes" + unstage it
+        Push design to Github
+
+        See how ecommerce project made properly

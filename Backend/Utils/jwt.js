@@ -4,12 +4,12 @@ const generateToken = (res,userId)=>{
     try{
         console.log("Inside generateToken")
         const token = jwt.sign({userId}, process.env.JWTSECRET, {expiresIn:'10d'})
-        console.log("Token mande-->"+token)
-        res.cookie(jwt,token,{
-            expires:10*24*60*60,
-            httpOnly:true,
-            sameSite:'strict'
-        })
+        console.log("Token made token inside jwt-->"+token)
+        // res.cookie(jwt,token,{
+        //     expires:10*24*60*60,
+        //     httpOnly:true,
+        //     sameSite:'strict'
+        // })
         return token
     }
     catch(error){

@@ -27,12 +27,12 @@ export default function Header({customStyle}){
                     </li>
                 </ul>
             </nav>
-            <div className="inline-flex gap-[15px] items-center">
+            <div className="inline-flex gap-[15px] items-center" id="icons">
                 <IoIosSearch style={{fontSize:'23px'}}/>
                 <CiUser style={{fontSize:'25px'}}/>
                 <IoCartOutline style={{fontSize:'23px'}}/>
                 <MdFavoriteBorder style={{fontSize:'25px'}}/>
-                <SiteButton text="Sign In" customStyle={{marginLeft:'25px'}}/>
+                <SiteButton customStyle={{marginLeft:'25px'}}> <Link to='/signin'> Sign In </Link></SiteButton>
             </div>
             
         </header>

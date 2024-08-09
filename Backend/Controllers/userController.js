@@ -16,6 +16,7 @@ const securePassword = async(password)=>{
 
 const createUser = async(req,res,next)=>{
     try{
+        console.log("Inside backend createuser controller")
         const {username, email, password, confirmPassword, mobile} = req.body
         // console.log("!username.trim()-->"+!username.trim())
         if( !username||!email||!password||!mobile)
@@ -51,7 +52,9 @@ const createUser = async(req,res,next)=>{
                 next(errorHandler(409, "User already exists"))
             }
         if(userData){
+            console.log("Just befores response sent-->"+JSON.stringify(userData))
                 res.status(201).json({message:"success", user:userData})
+                console.log("Response sent from backend-->"+JSON.stringify(userData))
             }
             else{
                 next(errorHandler(500, "Internal Server Error"))
@@ -67,6 +70,7 @@ const createUser = async(req,res,next)=>{
 
 const loginUser = async(req,res,next)=>{
     try{
+        console.log("Inside backend loginuser controller")
         const {identifier, password} = req.body
         let username,email=""
         let userData={}
@@ -101,7 +105,8 @@ const loginUser = async(req,res,next)=>{
                     console.log("passwordMatchd-->"+passwordMatched)
                 if(passwordMatched){
                     const token = generateToken(res,userData._id)
-                        console.log("token-->"+token)
+                        console.log("token inside signinControllr-->"+token)
+                    console.log("userData from backend-->"+userData)
                     res.status(200).json({message:"Logged in successfully!",token:token, user:userData})
                   }
                 else{

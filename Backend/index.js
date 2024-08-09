@@ -21,7 +21,7 @@ app.use(express.urlencoded({extended:true}))
 
 const cors = require('cors')
 app.use(cors({
-    origin:'http://localhost/:5173',
+    origin:'http://localhost:5173',
     method:['GET','POST','PUT','PATCH','DELETE'],
     credentials:true
 }))

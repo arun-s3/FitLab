@@ -1,23 +1,72 @@
-import React,{useState} from 'react'
+import React,{useState, useEffect, useLayoutEffect, useRef} from 'react'
 import './SignUpAndInPage.css'
-import { SiteButtonSquare } from '../Components/SiteButton'
+import {SiteButtonSquare} from '../Components/SiteButton'
 import Header from '../Components/Header'
 import Footer from '../Components/Footer'
-import { Link } from 'react-router-dom'
-import { toast } from 'react-toastify'
+import {Link, useNavigate} from 'react-router-dom'
+import {toast} from 'react-toastify'
+import {signup, signin, resetStates} from '../Slices/userSlice'
+import {useDispatch, useSelector} from 'react-redux'
+import HashLoader from 'react-spinners/HashLoader'
 
 export default function SignUpAndInPage({type}){
     const bgImg = {
         backgroundImage:"url('/SignIn-bg.png')",
         backgroundSize:"cover"
     }
+    const override= {
+        display: "block",
+        margin: "0 auto",
+        borderColor: "red",
+    };
 
     const [formData,setFormData] = useState({})
-      
+
+    const navigate = useNavigate()
+    const identifierRef = useRef(null)
+    const passwordRef = useRef(null)
+ 
+    const dispatch = useDispatch()
+    const {error, loading, success, userToken} = useSelector((state)=>state.user)
+     
+    useEffect(()=>{
+        if(type=='signup' && success){
+            toast.success("Registered succesfully!")
+            console.log("Just after success toast!")
+            navigate('/signin',{replace:true})
+            dispatch(resetStates())
+        }
+        if(type=='signin' && success){
+            navigate('/',{replace:true})
+            dispatch(resetStates())
+        }
+        if(error){
+            toast.error(error)
+            console.log("Just after error toast!")
+            dispatch(resetStates())
+        }
+        if(userToken){
+            console.log("Cannot go coz u got token")
+            navigate('/',{replace:true})
+        } 
+    })
+    useLayoutEffect(()=>{
+        console.log("inside typecheck useEffect--,formData-->"+JSON.stringify(formData))
+        setFormData({})
+        console.log("inside same typecheck useEffect after clearing properties of formdata--,formData-->"+JSON.stringify(formData))
+        if(identifierRef.current) identifierRef.current.value=""
+        passwordRef.current.value=""
+    },[type])
+
     const handleChange = (e)=>{
         setFormData({...formData, [e.target.id.toString()]:e.target.value})
     }
-    
+
+    const displaySuccess = (e)=>{
+        console.log("Success!")
+        e.target.nextElementSibling.style.visibility = 'hidden'
+        e.target.style.borderColor = 'green'
+    }
     const displayError = (e,message)=>{
         e.target.style.borderColor = 'red'
         e.target.nextElementSibling.style.visibility = 'visible'
@@ -30,21 +79,30 @@ export default function SignUpAndInPage({type}){
         usernamePattern: /^[\w-]{5,15}$/,
         mobilePattern: /^\d{10}$/,
         passwordPattern: /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[`~@#$%^&*()\-+={}\\/;:"'|,.?<>])[a-zA-Z\d`~@#$%^&*()\-+={}\\/;:"'|,.\?<>]{5,}/,
-
+        // identifierPattern: new RegExp(`^(${this.emailPattern.toString().slice(2,-2).trim()})|(${this.usernamePattern.toString().slice(2,-2).trim()})$`),
         validator: function(e,errorMessage){
             const currentPattern = Object.keys(this).find( (pattern,index)=> {
                 if(pattern.toString().match(e.target.id.toString())) return pattern[index]
             } )
-            if(this[currentPattern].test(e.target.value)){
-                console.log("Success!")
-                e.target.nextElementSibling.style.visibility = 'hidden'
-                e.target.style.borderColor = 'green'
+            if(currentPattern){
+                if(this[currentPattern].test(e.target.value)){
+                    displaySuccess(e)
+                }
+                else{
+                    displayError(e,errorMessage)
+                }
             }
             else{
-                displayError(e,errorMessage)
+                if(new RegExp(`^(${this.emailPattern.source})|(${this.usernamePattern.source})$`).test(e.target.value)){
+                    displaySuccess(e)
+                }
+                else{
+                    displayError(e, errorMessage)
+                }
             }
         }
     }
+    
     const handleInput = (e)=>{
         if(!e.target.value.trim().length){
             displayError(e,"This field cannot be empty")
@@ -55,6 +113,8 @@ export default function SignUpAndInPage({type}){
                     return regexPatterns.validator(e,"Please enter a valid email-id!")
                 case "username":
                     return regexPatterns.validator(e,"Username can be alphanumeric. Must have atleast 5 letters! ")
+                case "identifier":
+                    return regexPatterns.validator(e,"Enter a valid username or email address!")
                 case "mobile":
                     return regexPatterns.validator(e,"Please enter a valid Mobile number!")
                 case "password":
@@ -67,7 +127,6 @@ export default function SignUpAndInPage({type}){
                     else {
                         displayError(e,"The passwords doesn't match!")
                     }
-
             }
         }
     }
@@ -76,15 +135,28 @@ export default function SignUpAndInPage({type}){
         e.preventDefault()
         console.log("Inside submitData()--")
         if((type=="signup"? Object.keys(formData).length<5: Object.keys(formData).length<2) || Object.values(formData).find(inputValues=>inputValues==='undefined')){
-            console.log("Check errors"+JSON.stringify(formData))
-            toast.error("Please check the fields and submit again!",{bodyClassName:"toastStyle"})
+            if(!formData.size){
+                console.log("No Fields entered!")
+                toast.error("Please enter all the fields!")
+            }
+            else{
+                console.log("Check errors"+JSON.stringify(formData))
+                toast.error("Please check the fields and submit again!")
+            }
         } 
         else{
-            console.log("no errors--"+JSON.stringify(formData))
-            toast.success("Registered Successfullly!")
+            console.log("Inside else(no errors) of submitData() ")
+            console.log("FormData now-->"+JSON.stringify(formData))
+            console.log("type of this page-->"+type)
+            type=="signup"? dispatch(signup(formData)):dispatch(signin(formData))
+            console.log("Dispatched successfully--")
         }
         
     }
+
+
+    console.log("Store states from signUpAndInPage- loading-->"+loading)
+    console.log("Success before JSX"+success)
 
     return(
        <>
@@ -97,9 +169,17 @@ export default function SignUpAndInPage({type}){
 
                 <form className='flex flex-col gap-[15px] text-descReg1 items-start' onSubmit={(e)=>submitData(e)} >
                     <div>
-                        <label htmlFor='email'>Enter your email address</label>
-                        <input type="email" placeholder="Email Address" id="email" onChange={(e)=>handleChange(e)} 
+                    {type=='signup'? <>
+                                        <label htmlFor='email'>Enter your email address</label>
+                                        <input type="email" placeholder="Email Address" id="email" onChange={(e)=>handleChange(e)} 
                                                              onBlur={(e)=>{handleInput(e)}} value={formData.email}/>
+                                    </>
+                                    :<> 
+                                        <label htmlFor='identifier'>Enter your username or email address</label>
+                                        <input type="text" placeholder="Username or email address" id="identifier" className='w-[31.5rem]' autoComplete="off" ref={identifierRef}
+                                                onChange={(e)=>handleChange(e)} onBlur={(e)=>{handleInput(e)}} />
+                                     </>
+                        }
                         <p className='error'></p>
                     </div>
                     {
@@ -123,8 +203,8 @@ export default function SignUpAndInPage({type}){
                     
                     <div>
                         <label htmlFor='password'>Enter your Password</label>
-                        <input type="password" placeholder="Password" id="password" onChange={(e)=>handleChange(e)} 
-                                                                        onBlur={(e)=>{handleInput(e)}} value={formData.password} />
+                        <input type="password" placeholder="Password" id="password" onChange={(e)=>handleChange(e)} autoComplete="off" ref={passwordRef}
+                                                                        onBlur={(e)=>{handleInput(e)}} />
                         <p className='error' ></p>
                         {
                             type==="signup"?
@@ -132,7 +212,7 @@ export default function SignUpAndInPage({type}){
                                                 <div className='mt-[15px]'>
                                                     <label htmlFor='confirmPassword'>Confirm your Password</label>
                                                     <input type="password" placeholder="Password" id="confirmPassword" className='w-[31.5rem]'
-                                                        onBlur={(e)=>{handleInput(e)}} onChange={(e)=>handleChange(e)} value={formData.confirmPassword} />
+                                                        onBlur={(e)=>{handleInput(e)}} onChange={(e)=>handleChange(e)}/>
                                                     <p className='error'></p>
 
                                                     <p className='text-white mt-[1rem] text-subtitleSmall1 ml-[4px]'>Already have an account?
@@ -154,9 +234,17 @@ export default function SignUpAndInPage({type}){
                                             </div>
                                            )
                         }
+                    
                     </div>   
-                    <SiteButtonSquare text={'Sign'+' '+type.slice(4,5).toUpperCase()+type.slice(5)} shouldSubmit={true}
-                                      customStyle={{ marginBottom:'60px', width:'31.5rem'}}  />
+                    <SiteButtonSquare shouldSubmit={true} customStyle={{ marginBottom:'60px', width:'31.5rem'}} >
+                        {loading? <HashLoader loading={loading} cssOverride={override} size={20} aria-label="Loading HashLoader" 
+                                                     color="rgba(159, 42, 240, 1)" data-testid="loader"/> 
+                                :  'Sign'+' '+type.slice(4,5).toUpperCase()+type.slice(5)
+                        }
+                    </SiteButtonSquare>
+                    {/* {
+                        error && toast.error(error)
+                    } */}
                 </form>
             </main>
         </section>

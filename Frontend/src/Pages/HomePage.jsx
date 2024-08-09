@@ -23,7 +23,7 @@ export default function HomePage(){
                    At  Fitlab, we deliver only the highest quality equipments with the next level precision, stability and endurance.
                    We also provide you with  revolutionary supplements and accessories for men and women
                 </p>
-                <SiteButtonDark text="Start Looking"/>
+                <SiteButtonDark> Start Looking </SiteButtonDark>
             </section>
             <aside id="socials" className='text-secondary text-[28px] flex flex-col gap-[1rem] items-center justify-center
                                          absolute top-[16rem] right-[2rem]'>

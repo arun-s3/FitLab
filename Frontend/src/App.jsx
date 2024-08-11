@@ -6,6 +6,7 @@ import PrivateRoutes from './Components/PrivateRoutes'
 
 import {ToastContainer} from 'react-toastify'
 import "react-toastify/dist/ReactToastify.css";
+import Header from './Components/Header'
 
 export default function App(){
     

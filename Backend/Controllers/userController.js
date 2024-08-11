@@ -123,6 +123,15 @@ const loginUser = async(req,res,next)=>{
 
 }
 
+const logout = (req,res,next)=>{
+    try{
+        res.clearCookie('jwt').status(200).json({message:"signed out"})
+        console.log("Sent response from logout controller-->"+JSON.stringify(res))
+    }
+    catch(error){
+        console.log("Error in logout controller--"+error.message)
+        next(error)
+    }
+}
 
-
-module.exports = {tester, createUser, loginUser}
+module.exports = {tester, createUser, loginUser, logout}

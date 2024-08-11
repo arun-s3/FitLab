@@ -1,0 +1,24 @@
+
+#userhead-list{
+    /* direction:rtl; */
+}
+#userhead-list li{
+    margin-bottom:5px;
+    padding-left: 20px;
+    padding-right: 6px;
+    padding-bottom: 5px;
+}
+#userhead-list li:first-child{
+    color: var(--SECONDARY);
+    font-weight: 600;
+    font-size: 14.6px;
+    letter-spacing: 0.3px;
+    border-bottom: 1.5px solid var(--SECONDARY);
+    border-bottom-style: dotted;
+}
+#userhead-list li:last-child{
+    border-top: 1px solid white;
+}
+#userhead-list li:first-child{
+   
+}

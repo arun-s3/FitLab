@@ -1,14 +1,21 @@
 import React from 'react'
 import Logo from './Logo'
 import './Header.css'
+import UserHead from './UserHead'
 import {Link} from 'react-router-dom'
 import {SiteButton} from './SiteButton'
 import { IoIosSearch } from "react-icons/io";
 import { CiUser } from "react-icons/ci";
 import { IoCartOutline } from "react-icons/io5";
 import { MdFavoriteBorder } from "react-icons/md";
+import {useDispatch, useSelector} from 'react-redux'
+import {signout} from '../Slices/userSlice'
 
 export default function Header({customStyle}){
+
+    const {userToken} = useSelector((state)=>state.user)
+    const dispatch = useDispatch()
+
     return(
         <header className="flex justify-between items-center text-white padding-main sticky z-10"  style={customStyle}>
             {/* <Logo/> */}
@@ -32,7 +39,10 @@ export default function Header({customStyle}){
                 <CiUser style={{fontSize:'25px'}}/>
                 <IoCartOutline style={{fontSize:'23px'}}/>
                 <MdFavoriteBorder style={{fontSize:'25px'}}/>
-                <SiteButton customStyle={{marginLeft:'25px'}}> <Link to='/signin'> Sign In </Link></SiteButton>
+                {
+                    userToken?<UserHead/> 
+                             :<SiteButton customStyle={{marginLeft:'25px'}}> <Link to='/signin'> Sign In </Link></SiteButton>
+                }
             </div>
             
         </header>

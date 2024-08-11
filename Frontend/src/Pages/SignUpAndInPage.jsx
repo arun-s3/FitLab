@@ -45,10 +45,10 @@ export default function SignUpAndInPage({type}){
             console.log("Just after error toast!")
             dispatch(resetStates())
         }
-        if(userToken){
-            console.log("Cannot go coz u got token")
-            navigate('/',{replace:true})
-        } 
+        // if(userToken){
+        //     console.log("Cannot go coz u got token")
+        //     navigate('/',{replace:true})
+        // } 
     })
     useLayoutEffect(()=>{
         console.log("inside typecheck useEffect--,formData-->"+JSON.stringify(formData))

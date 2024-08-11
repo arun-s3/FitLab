@@ -31,6 +31,18 @@ export const signin = createAsyncThunk('signin', async(formData, thunkAPI)=>{
     }
 })
 
+export const signout = createAsyncThunk('signout',async(thunkAPI)=>{
+    try{
+        const response = axios.get('/signout')
+        console.log("response from signout createAsyncThunk-->"+JSON.stringify(response.data))
+        return response.data
+    }
+    catch(error){
+        console.log("error in signout createAsyncThunk-->"+error.message)
+        return thunkAPI.rejectWithValue(error.message)
+    }
+})
+
 const initialState = {
     userToken: null,
     user: null,
@@ -91,7 +103,12 @@ const userSlice = createSlice({
                 state.loading = false
                 state.success = false
                 console.log("error from userSlice- signin.rejected after assignment-->"+ state.error)
-    })
+         })
+        .addCase(signout.fulfilled, (state,action)=>{
+                console.log("inside signout.fulfilled, action.payload"+JSON.stringify(action.payload))
+                state.userToken = null
+                console.log("state.userToken now-->"+state.userToken )
+        })
     }
 })
 

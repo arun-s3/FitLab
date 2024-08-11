@@ -30,7 +30,9 @@ export default function SignUpAndInPage({type}){
     const {error, loading, success, userToken} = useSelector((state)=>state.user)
      
     useEffect(()=>{
+        console.log("Inside useEffect()")
         if(type=='signup' && success){
+            console.log("success state now-->"+success)
             toast.success("Registered succesfully!")
             console.log("Just after success toast!")
             navigate('/signin',{replace:true})
@@ -41,6 +43,7 @@ export default function SignUpAndInPage({type}){
             dispatch(resetStates())
         }
         if(error){
+            console.log("Just after before toast!-->"+error)
             toast.error(error)
             console.log("Just after error toast!")
             dispatch(resetStates())

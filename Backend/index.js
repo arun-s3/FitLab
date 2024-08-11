@@ -18,6 +18,8 @@ app.use('/Public',express.static(path.join(__dirname,'/Public')))
 
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
+const cookieParser = require('cookie-parser')
+app.use(cookieParser())
 
 const cors = require('cors')
 app.use(cors({
@@ -28,13 +30,16 @@ app.use(cors({
 
 const userRoutes = require('./Routes/userRoutes.js')
 const adminRoutes = require('./Routes/adminRoutes.js')
+
+app.use('/', userRoutes)
+app.use('/admin', adminRoutes)
+
 app.use((error,req,res,next)=>{
     const message = error.message||'Internal Server Error'
     const statusCode = error.statusCode||500
-    res.status(statusCode).json({errorMessage:message})
+    console.log(`From index.js errorHandling middleware message is $(message) and statusCode is ${statusCode}`)
+    res.status(statusCode).json({message:message})
 })
-app.use('/', userRoutes)
-app.use('/admin', adminRoutes)
 
 
 

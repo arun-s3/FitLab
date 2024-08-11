@@ -9,11 +9,10 @@ export const signup = createAsyncThunk('userSignup', async(formData, thunkAPI)=>
     }
     catch(error){
         console.log("inside catch of signup")
-        console.log("Error from signup asyncThunk--error message"+error.message)
-        console.log("Error from signup asyncThunk--error obj"+JSON.stringify(error))
-        console.log("hello")
-        // return error.message
-        return thunkAPI.rejectWithValue(error.message)
+        const errorMessage = error.response?.data?.message
+        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
+        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
+        return thunkAPI.rejectWithValue(errorMessage)
     }
 })
 
@@ -24,10 +23,11 @@ export const signin = createAsyncThunk('signin', async(formData, thunkAPI)=>{
         return response.data
     }
     catch(error){
-        console.log("inside catch of signin")
-        console.log("Error from signup asyncThunk--error message"+error.message)
-        console.log("Error from signup asyncThunk--error obj"+JSON.stringify(error))
-        return thunkAPI.rejectWithValue(error.message)
+        console.log("inside catch of signup")
+        const errorMessage = error.response?.data?.message
+        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
+        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
+        return thunkAPI.rejectWithValue(errorMessage)
     }
 })
 
@@ -38,8 +38,11 @@ export const signout = createAsyncThunk('signout',async(thunkAPI)=>{
         return response.data
     }
     catch(error){
-        console.log("error in signout createAsyncThunk-->"+error.message)
-        return thunkAPI.rejectWithValue(error.message)
+        console.log("inside catch of signup")
+        const errorMessage = error.response?.data?.message
+        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
+        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
+        return thunkAPI.rejectWithValue(errorMessage)
     }
 })
 
@@ -55,9 +58,12 @@ const userSlice = createSlice({
     initialState,
     reducers:{
         resetStates: (state,action)=>{
+            console.log("state(success) before reset-->"+state.success)
+            console.log("Reseting states")
             state.error = null
             state.loading = false
             state.success = false
+            console.log("state(success) after reset-->"+state.success)
         }
     },
     extraReducers:(builder)=>{

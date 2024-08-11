@@ -1,4 +1,4 @@
-import React,{useState, useRef, useEffect} from 'react'
+import React,{useState, useRef} from 'react'
 import './UserHead.css'
 import {IoMdArrowDropdown, IoMdArrowDropup} from "react-icons/io";
 import {useSelector, useDispatch} from 'react-redux'
@@ -14,6 +14,7 @@ export default function UserHead(){
 
     const listRef = useRef(null)
     const [beVisible, setBeVisible] = useState(false)
+
     const toggleList = {
         showList: ()=>listRef.current.style.display='inline-block',
         hideList: ()=>listRef.current.style.display='none'

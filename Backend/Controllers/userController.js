@@ -110,7 +110,7 @@ const loginUser = async(req,res,next)=>{
                     res.status(200).json({message:"Logged in successfully!",token:token, user:userData})
                   }
                 else{
-                    next(errorHandler(401, "Wrong password entered"))
+                    next(errorHandler(401, "You have entered a wrong password!"))
                   }  
             }
                  

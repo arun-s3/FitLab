@@ -8,7 +8,7 @@ export const signup = createAsyncThunk('userSignup', async(formData, thunkAPI)=>
         return response.data
     }
     catch(error){
-        console.log("inside catch of signup")
+        console.log("inside catch of signup from Userslice")
         const errorMessage = error.response?.data?.message
         console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
         console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
@@ -18,12 +18,12 @@ export const signup = createAsyncThunk('userSignup', async(formData, thunkAPI)=>
 
 export const signin = createAsyncThunk('signin', async(formData, thunkAPI)=>{
     try{
-        const response = await axios.post('/signin',formData)
+        const response = await axios.post('/signin',formData,{withCredentials:true})
         console.log("returning success response from sigin createAsyncThunk..."+JSON.stringify(response.data))
         return response.data
     }
     catch(error){
-        console.log("inside catch of signup")
+        console.log("inside catch of signup from Userslice")
         const errorMessage = error.response?.data?.message
         console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
         console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
@@ -31,14 +31,32 @@ export const signin = createAsyncThunk('signin', async(formData, thunkAPI)=>{
     }
 })
 
-export const signout = createAsyncThunk('signout',async(thunkAPI)=>{
+export const googleSignin = createAsyncThunk('googleSignin', async(userData,thunkAPI)=>{
     try{
-        const response = axios.get('/signout')
+        console.log("inside googlesigin of createAsyncThunk")
+        const response = await axios.post('/googleSignin',userData,{withCredentials:true})
+        console.log("returning success response from googleSignin createAsyncThunk..."+JSON.stringify(response)) 
+        console.log("userInfo from googleSignin createAsyncThunk--"+JSON.stringify(userData))
+        return response.data
+    }
+    catch(error){
+        console.log("inside catch of googleSignin from userSlice")
+        const errorMessage = error.response?.data?.message
+        console.log("error object inside createAsyncThunk error.response of googleSignin-->"+JSON.stringify(error.response))
+        return thunkAPI.rejectWithValue(errorMessage)
+    }
+} )
+
+export const signout = createAsyncThunk('signout', async(googleId,thunkAPI)=>{
+    // console.log("inside userSlice signout-userToken"+userToken)
+    try{ console.log("inside userSlice googlesignout, googleId"+googleId)
+        const response = googleId? await axios.get('/googlesignout',{withCredentials:true}) 
+                                 : await axios.get('/signout',{withCredentials:true})
         console.log("response from signout createAsyncThunk-->"+JSON.stringify(response.data))
         return response.data
     }
     catch(error){
-        console.log("inside catch of signup")
+        console.log("inside catch of signout from Userslice")
         const errorMessage = error.response?.data?.message
         console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
         console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
@@ -52,6 +70,7 @@ const initialState = {
     error:null,
     loading:false,
     success:false,
+    googleSuccess:true
 }
 const userSlice = createSlice({
     name:'user',
@@ -113,8 +132,37 @@ const userSlice = createSlice({
         .addCase(signout.fulfilled, (state,action)=>{
                 console.log("inside signout.fulfilled, action.payload"+JSON.stringify(action.payload))
                 state.userToken = null
+                state.user = null
                 console.log("state.userToken now-->"+state.userToken )
         })
+       
+        .addCase(googleSignin.pending, (state,action)=>{
+                state.loading = true
+                state.success = false
+                state.googleSuccess = false
+                console.log("loading from userSlice googleSignin.pending--"+state.loading)
+        })
+        .addCase(googleSignin.fulfilled, (state,action)=>{
+                state.loading = false
+                state.error = null
+                state.success = true
+                state.googleSuccess = true
+                state.userToken = action.payload.token
+                state.user = action.payload.user
+                // console.log("userData from userSlice--user-->"+JSON.stringify(state.user))
+                console.log("token from userSlice googleSignin--token-->"+JSON.stringify(state.userToken))
+                console.log("message from userSlice googleSignin-->"+JSON.stringify(action.payload.message))
+        })
+        .addCase(googleSignin.rejected, (state,action)=>{
+                console.log("error from userSlice- signin.rejected before assignment-->"+ state.error)
+                console.log("error payload from userSlice- signin.rejected-->"+JSON.stringify(action.payload))
+                state.error = action.payload
+                state.loading = false
+                state.success = false
+                state.googleSuccess = false
+                console.log("error from userSlice- signin.rejected after assignment-->"+ state.error)
+        })
+    
     }
 })
 

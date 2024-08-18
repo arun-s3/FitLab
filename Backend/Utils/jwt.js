@@ -6,10 +6,9 @@ const generateToken = (res,userId)=>{
         const token = jwt.sign({userId}, process.env.JWTSECRET, {expiresIn:'10d'})
         console.log("Token made token inside jwt-->"+token)
         res.cookie('jwt',token,{
-            expires:new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
-            httpOnly:true,
-            sameSite:'strict'
+            
         })
+        // console.log("JWT cookie from generateToken-->"+res.cookie)
         return token
     }
     catch(error){

@@ -23,3 +23,10 @@ export function SiteButtonSquare({customStyle,children,shouldSubmit=false}){
                 style={customStyle}>{children}</button>
     )
 }
+
+export function GoogleButtonSquare({customStyle,children,clickHandler,shouldSubmit=false}){
+    return(
+        <button type={shouldSubmit?"submit":"button"} className="bg-black text-primary text-descReg1 site-button-google" 
+                style={customStyle} onClick={()=>clickHandler()}> {children} </button>
+    )
+}

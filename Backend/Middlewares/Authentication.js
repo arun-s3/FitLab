@@ -3,11 +3,12 @@ const User = require('../Models/userModel')
 
 const isLogin = async(req,res,next)=>{
     try{
+        console.log("Inside isLogin JWT Cookie-->"+req.cookies.jwt)
         if(req.cookies.jwt){
             const token = req.cookies.jwt
-            console.log("extracted token from cookie inside isLogin-->"+token)
+            console.log("Inside isLogin extracted token from cookie inside isLogin-->"+token)
             const decoded = verifyToken(token)
-            console.log("Verifying token inside isLogin-->"+decoded)
+            console.log("Inside isLogin Verifying token inside isLogin-->"+decoded)
             if(decoded){
                 const currentUser = await User.findOne({_id:decoded.userId})
                 if(currentUser.isBlocked){ 
@@ -19,10 +20,12 @@ const isLogin = async(req,res,next)=>{
                 }
             }
             else{
+                console.log("Inside isLogin Can't verify token")
                 res.status(401).json({message:"Unauthorized!"})
             }
         }
         else{
+            console.log("Inside isLogin Can't find jwt cookie")
             res.status(401).json({message:"Unauthorized!"})
         }
     }

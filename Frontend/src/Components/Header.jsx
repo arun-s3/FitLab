@@ -4,17 +4,15 @@ import './Header.css'
 import UserHead from './UserHead'
 import {Link} from 'react-router-dom'
 import {SiteButton} from './SiteButton'
-import { IoIosSearch } from "react-icons/io";
-import { CiUser } from "react-icons/ci";
-import { IoCartOutline } from "react-icons/io5";
-import { MdFavoriteBorder } from "react-icons/md";
-import {useDispatch, useSelector} from 'react-redux'
-import {signout} from '../Slices/userSlice'
+import {IoIosSearch} from "react-icons/io";
+import {CiUser} from "react-icons/ci";
+import {IoCartOutline} from "react-icons/io5";
+import {MdFavoriteBorder} from "react-icons/md";
+import {useSelector} from 'react-redux'
 
 export default function Header({customStyle}){
 
-    const {userToken} = useSelector((state)=>state.user)
-    const dispatch = useDispatch()
+    const {userToken,user} = useSelector((state)=>state.user)
 
     return(
         <header className="flex justify-between items-center text-white padding-main sticky z-10"  style={customStyle}>
@@ -40,7 +38,7 @@ export default function Header({customStyle}){
                 <IoCartOutline style={{fontSize:'23px'}}/>
                 <MdFavoriteBorder style={{fontSize:'25px'}}/>
                 {
-                    userToken?<UserHead/> 
+                    (userToken && user)?<UserHead/> 
                              :<SiteButton customStyle={{marginLeft:'25px'}}> <Link to='/signin'> Sign In </Link></SiteButton>
                 }
             </div>

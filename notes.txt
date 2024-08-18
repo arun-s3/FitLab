@@ -12,15 +12,10 @@ TODO(5/8/2024)--
         [SOON--Carousal]
         [SOON--Animation- +Motion Framer]
 
-        Start LeetCode 
-        Start TypingTest
-
-        Write down the notes on useRef, Navigate vs Link
-        Logout controller
-        Logout reducer
-        Logout Header + design
+        Welcome User and "see you next time" on signout
         Sign up with google and fb + design
-        See how to unstage "notes" + unstage it
         Push design to Github
+
+        See how to unstage "notes" + unstage it
 
         See how ecommerce project made properly

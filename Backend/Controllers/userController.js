@@ -70,28 +70,28 @@ const createUser = async(req,res,next)=>{
 
 const loginUser = async(req,res,next)=>{
     try{
-        console.log("Inside backend loginuser controller")
+        console.log("req.cookies from loginUser controller-->"+JSON.stringify(req.cookies))
         const {identifier, password} = req.body
         let username,email=""
         let userData={}
         if(!identifier||!password)
         {
-                console.log("inside 1st if")
+            console.log("inside 1st if")
             next(errorHandler(400,"Enter all the fields"))
         }
         else{
             if(identifier.trim().includes("@")){
                 email = identifier
-                    console.log("inside 2nd if")
+                console.log("inside 2nd if")
                 userData = await User.findOne({email:email})
-                    console.log("userData inside loginuser-->"+userData)
+                console.log("userData inside loginuser-->"+userData)
                 if(!userData){
                     next(errorHandler(401, "Enter a valid email id"))
                 }
             }
             else{
                     username = identifier
-                        console.log("Inside else")
+                    console.log("Inside else")
                     userData = await User.findOne({username:username})
                     if(!userData){
                         next(errorHandler(401, "Enter a valid username"))
@@ -99,14 +99,15 @@ const loginUser = async(req,res,next)=>{
             }
             if(userData){
                 const test = username?`username=${username}` :`email=${email}`
-                    console.log("username or email-->"+test)
-                    console.log("password-->"+userData.password)
+                console.log("username or email-->"+test)
+                console.log("password-->"+userData.password)
                 const passwordMatched = await bcryptjs.compare(password, userData.password)
-                    console.log("passwordMatchd-->"+passwordMatched)
+                console.log("passwordMatchd-->"+passwordMatched)
                 if(passwordMatched){
                     const token = generateToken(res,userData._id)
-                        console.log("token inside signinControllr-->"+token)
+                    console.log("token inside signinControllr-->"+token)
                     console.log("userData from backend-->"+userData)
+                    // console.log("from signin controller--JWT Cookie inserted-->"+res.cookies)
                     res.status(200).json({message:"Logged in successfully!",token:token, user:userData})
                   }
                 else{
@@ -122,16 +123,45 @@ const loginUser = async(req,res,next)=>{
  } 
 
 }
-
-const logout = (req,res,next)=>{
+const googleSignin = async(req,res,next)=>{
     try{
-        res.clearCookie('jwt').status(200).json({message:"signed out"})
-        console.log("Sent response from logout controller-->"+JSON.stringify(res))
+        const {username, email, sub:googleId, picture:profilePic} = req.body
+        console.log("username-->"+ username+ "email--> "+ email+ "googleId(sub) -->"+ googleId+ "profilePic(picture)"+ profilePic)
+        if(googleId){
+            const token = generateToken(res, googleId)
+            console.log("Token made from googleToken from backend-->"+token)
+            console.log("COOKIE made from googleSignin backend-->"+req.cookies.jwt)
+            if(token){
+                console.log("Success from backend, res sent")
+                res.json({message:"success", token, user:{username,email,googleId,profilePic}})
+            }
+            else{
+                console.log("500 error")
+                next(errorHandler(500,"Internal Server Error"))
+            }
+        }
+        else{
+                console.log("401 error")
+                next(errorHandler(401,"Unauthorized!"))
+        }
     }
     catch(error){
-        console.log("Error in logout controller--"+error.message)
+        console.log("Inside catch of googleSignin controller")
         next(error)
     }
 }
 
-module.exports = {tester, createUser, loginUser, logout}
+const signout = (req,res,next)=>{
+    console.log("JWT Cookie from signout controller-->"+req.cookies.jwt)
+    try{
+        res.clearCookie('jwt').status(200).json({message:"signed out"})
+    }
+    catch(error){
+        console.log("JWT Cookie inside signout controller catch-->"+req.cookies.jwt)
+        console.log("Error in signout controller--"+error.message)
+        next(error)
+    }
+}
+
+
+module.exports = {tester, createUser, loginUser, googleSignin, signout}

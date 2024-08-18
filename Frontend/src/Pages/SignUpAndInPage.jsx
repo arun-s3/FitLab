@@ -1,37 +1,35 @@
 import React,{useState, useEffect, useLayoutEffect, useRef} from 'react'
 import './SignUpAndInPage.css'
-import {SiteButtonSquare} from '../Components/SiteButton'
+import {SiteButtonSquare, GoogleButtonSquare} from '../Components/SiteButton'
 import Header from '../Components/Header'
 import Footer from '../Components/Footer'
 import {Link, useNavigate} from 'react-router-dom'
 import {toast} from 'react-toastify'
-import {signup, signin, resetStates} from '../Slices/userSlice'
+import {signup, signin, googleSignin, resetStates} from '../Slices/userSlice'
 import {useDispatch, useSelector} from 'react-redux'
-import HashLoader from 'react-spinners/HashLoader'
+import { CustomHashLoader } from '../Components/Loader'
+import { useGoogleLogin } from '@react-oauth/google';
+import axios from 'axios'
 
 export default function SignUpAndInPage({type}){
     const bgImg = {
         backgroundImage:"url('/SignIn-bg.png')",
         backgroundSize:"cover"
     }
-    const override= {
-        display: "block",
-        margin: "0 auto",
-        borderColor: "red",
-    };
 
     const [formData,setFormData] = useState({})
+    const [googlePromptLoading, setGooglePromptLoading] = useState(false)
 
     const navigate = useNavigate()
     const identifierRef = useRef(null)
     const passwordRef = useRef(null)
  
     const dispatch = useDispatch()
-    const {error, loading, success, userToken} = useSelector((state)=>state.user)
+    const {error, loading, success, userToken, googleSuccess} = useSelector((state)=>state.user)
      
     useEffect(()=>{
         console.log("Inside useEffect()")
-        if(type=='signup' && success){
+        if(type=='signup' && success && (!googleSuccess||googleSuccess)){
             console.log("success state now-->"+success)
             toast.success("Registered succesfully!")
             console.log("Just after success toast!")
@@ -48,10 +46,10 @@ export default function SignUpAndInPage({type}){
             console.log("Just after error toast!")
             dispatch(resetStates())
         }
-        // if(userToken){
-        //     console.log("Cannot go coz u got token")
-        //     navigate('/',{replace:true})
-        // } 
+        if(userToken){
+            console.log("Cannot go coz u got token")
+            navigate('/',{replace:true})
+        } 
     })
     useLayoutEffect(()=>{
         console.log("inside typecheck useEffect--,formData-->"+JSON.stringify(formData))
@@ -157,6 +155,38 @@ export default function SignUpAndInPage({type}){
         
     }
 
+    const googleSuccessHandler = async (response)=>{
+        console.log("Inside googleSuccessHandler Success login from google-->"+JSON.stringify(response))
+        const googleToken = response.access_token
+        console.log("Inside googleSuccessHandler Fetching userDetails..")
+        const userDetails = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {headers:{
+            Authorization:`Bearer ${googleToken}`
+        }})
+        if(userDetails){
+            console.log("Fetched userDetails-->"+JSON.stringify(userDetails))
+            const {email,name,sub,picture} = userDetails.data
+            console.log("Fetched name & email-->"+name+" "+email+ "sub-(id)->"+sub+"picture-->"+picture)
+            const username = name.split(" ").join("").trim() + Math.random().toString().substr(2,4) 
+            const userData = {username, email, sub, picture}
+            console.log("Inside googleSignin userData(Dispatching....)-->"+JSON.stringify(userData))
+            setGooglePromptLoading(false)
+            dispatch(googleSignin(userData))
+            console.log("Success from googleSuccessHandler, dispatched googleSignin() successfully")
+        } 
+        else{
+            console.log("Inside googleSuccessHandler else-userDetails, couldn't fetch userDetails")
+            toast.error("Couldn't find the user details!")
+        }  
+    }
+    const googleFailureHandler = (error)=>{
+        console.log("Success login from google-->"+JSON.stringify(error))
+        toast.error("Please check your gmail id")
+    }
+    const googleLogin = useGoogleLogin({
+            onSuccess:googleSuccessHandler,
+            onFailure:googleFailureHandler
+    })
+    
 
     console.log("Store states from signUpAndInPage- loading-->"+loading)
     console.log("Success before JSX"+success)
@@ -174,7 +204,7 @@ export default function SignUpAndInPage({type}){
                     <div>
                     {type=='signup'? <>
                                         <label htmlFor='email'>Enter your email address</label>
-                                        <input type="email" placeholder="Email Address" id="email" onChange={(e)=>handleChange(e)} 
+                                        <input type="email" placeholder="Email Address" id="email" onChange={(e)=>handleChange(e)} autoFocus
                                                              onBlur={(e)=>{handleInput(e)}} value={formData.email}/>
                                     </>
                                     :<> 
@@ -204,15 +234,18 @@ export default function SignUpAndInPage({type}){
                                       : <></>
                     }
                     
-                    <div>
-                        <label htmlFor='password'>Enter your Password</label>
-                        <input type="password" placeholder="Password" id="password" onChange={(e)=>handleChange(e)} autoComplete="off" ref={passwordRef}
-                                                                        onBlur={(e)=>{handleInput(e)}} />
-                        <p className='error' ></p>
+                    <div className='flex flex-col gap-[15px]'>
+                        <div>
+                            <label htmlFor='password'>Enter your Password</label>
+                            <input type="password" placeholder="Password" id="password" onChange={(e)=>handleChange(e)} 
+                                                autoComplete="off" ref={passwordRef}  onBlur={(e)=>{handleInput(e)}} />
+                            <p className='error' ></p>
+                        </div>
+                        
                         {
                             type==="signup"?
                                             (<>
-                                                <div className='mt-[15px]'>
+                                                <div>   {/*className='mt-[15px]'*/}
                                                     <label htmlFor='confirmPassword'>Confirm your Password</label>
                                                     <input type="password" placeholder="Password" id="confirmPassword" className='w-[31.5rem]'
                                                         onBlur={(e)=>{handleInput(e)}} onChange={(e)=>handleChange(e)}/>
@@ -239,15 +272,20 @@ export default function SignUpAndInPage({type}){
                         }
                     
                     </div>   
-                    <SiteButtonSquare shouldSubmit={true} customStyle={{ marginBottom:'60px', width:'31.5rem'}} >
-                        {loading? <HashLoader loading={loading} cssOverride={override} size={20} aria-label="Loading HashLoader" 
-                                                     color="rgba(159, 42, 240, 1)" data-testid="loader"/> 
-                                :  'Sign'+' '+type.slice(4,5).toUpperCase()+type.slice(5)
-                        }
+                    <SiteButtonSquare shouldSubmit={true} customStyle={ type=='signup'?{width:'31.5rem'}:{width:'31.5rem',marginBottom:'60px'} } >
+                        { loading? <CustomHashLoader loading={loading}/>: 'Sign'+' '+type.slice(4,5).toUpperCase()+type.slice(5) }
                     </SiteButtonSquare>
-                    {/* {
-                        error && toast.error(error)
-                    } */}
+                    {
+                        type=="signup"? <GoogleButtonSquare customStyle={{marginBottom:'60px', width:'31.5rem', display:'flex',
+                                                                         justifyContent:'center', alignItems:'center'}}
+                                                            clickHandler={()=>{
+                                                                setGooglePromptLoading(true)
+                                                                googleLogin()
+                                                            }}>
+                                             <img src="/google.png" alt="" className='mr-[15px] inline-block'/> 
+                                             { (loading||googlePromptLoading)? <CustomHashLoader loading={googlePromptLoading||loading}/>: "Continue with Google" }
+                                        </GoogleButtonSquare>: <></>
+                    }
                 </form>
             </main>
         </section>

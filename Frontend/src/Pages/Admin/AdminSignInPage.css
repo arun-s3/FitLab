@@ -1,0 +1,52 @@
+#admin-signin::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:130vh;
+    /* border: 1px solid red; */
+    background-image: linear-gradient(rgba(0,0,0,0.3),rgba(0,0,0,0.3));
+    backdrop-filter:blur(2px);
+}
+#admin-signin>main .admin-form{
+    /* background-image: linear-gradient(rgba(255,255,255,0.5),rgba(255,255,255,0.5)); */
+    background-image: linear-gradient(rgba(0,0,0,0.3),rgba(0,0,0,0.3));
+    border:1px solid var(--SECONDARY)
+    /* box-shadow: 0px 0px 15px rgb(215, 241, 72); */
+}
+#admin-signin>main h1{
+   color:#fff; 
+}
+#admin-signin>main label{
+    display:block;
+    margin-bottom:5px;
+    text-align: left;
+    color:#fff;
+}
+#admin-signin>main input{
+    border:2px solid #fff;
+    border-radius:8px;
+    padding:10px;
+    padding-left:20px;
+    margin-left: 0px; 
+    width:31.5rem;
+}
+#admin-signin>main input::placeholder{
+    font-size:12px;
+}
+#admin-signin>main input:focus{
+    border-color: var(--SECONDARY);
+}
+#admin-signin>main input:focus-visible{
+    border-color: var(--SECONDARY);
+    outline:none;
+}
+#admin-signin>main .admin-form .error{
+    visibility:hidden;
+    font-size: 11px;
+    margin-left: 5px;
+    margin-top: 5px;
+    height:17px;
+    color:yellow;
+}

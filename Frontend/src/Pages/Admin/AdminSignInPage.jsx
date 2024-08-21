@@ -1,10 +1,12 @@
-import React from 'react'
+import React,{useState, useEffect} from 'react'
 import './AdminSignInPage.css'
-import {Link} from 'react-router-dom'
+import {Link,useNavigate} from 'react-router-dom'
 import Logo from '../../Components/Logo'
 import {useSelector,useDispatch} from 'react-redux'
+import {resetStates, adminSignin} from '../../Slices/adminSlice'
 import {SiteButtonSquare} from '../../Components/SiteButton'
-import { RiAdminLine } from "react-icons/ri";
+import {CustomHashLoader} from '../../Components/Loader'
+import {RiAdminLine} from "react-icons/ri";
 
 export default function AdminSignInPage(){
 
@@ -13,8 +15,98 @@ export default function AdminSignInPage(){
         backgroundSize:"cover"
     }
 
-    // const {loading} = useSelector(state=>state.admin)
-    const loading = false
+    const [formData,setFormData] = useState({})
+
+    const navigate = useNavigate()
+
+    const dispatch = useDispatch()
+    const {adminError, adminLoading, adminSuccess, adminToken} = useSelector((state)=>state.admin)
+
+    useEffect(()=>{
+        console.log("Inside useEffect()")
+        if(adminSuccess){
+            navigate('/admin',{replace:true})
+            dispatch(resetStates())
+        }
+        if(adminError){
+            console.log("Just after before toast!-->"+adminError)
+            toast.error(adminError)
+            console.log("Just after error toast!")
+            dispatch(resetStates())
+        }
+        // if(adminToken){
+        //     console.log("Cannot go coz u got token")
+        //     navigate('/admin',{replace:true})
+        // } 
+    })
+
+    const handleChange = (e)=>{
+        setFormData({...formData, [e.target.id.toString()]:e.target.value})
+    }
+
+    const displaySuccess = (e)=>{
+        console.log("Success!")
+        e.target.nextElementSibling.style.visibility = 'hidden'
+        e.target.style.borderColor = 'green'
+    }
+    const displayError = (e,errorMessage)=>{
+        e.target.style.borderColor = 'red'
+        e.target.nextElementSibling.style.visibility = 'visible'
+        console.log("msg-->"+errorMessage)
+        delete formData[e.target.id.toString()]
+        e.target.nextElementSibling.innerText = errorMessage
+    }
+
+    const handleInput = (e)=>{
+
+        const emailPattern = /^([a-z\d\.-]+)@([a-z\d-]+)\.([a-z]{2,10})([\.a-z]?)$/
+        const usernamePattern =  /^[\w-]{5,15}$/
+        const passwordPattern = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[`~@#$%^&*()\-+={}\\/;:"'|,.?<>])[a-zA-Z\d`~@#$%^&*()\-+={}\\/;:"'|,.\?<>]{5,}/
+
+        if(!e.target.value.trim().length){
+            displayError(e,"This field cannot be empty")
+        }
+        else{
+            if(e.target.id=="identifier"){
+                if(new RegExp(`^(${emailPattern.source})|(${usernamePattern.source})$`).test(e.target.value)){
+                    displaySuccess(e)
+                }
+                else{
+                    displayError(e,"Enter a valid username or email address!")
+                }
+            }
+            else{
+                if(passwordPattern.test(e.target.value)){
+                    displaySuccess(e)
+                }
+                else{
+                    displayError(e,"Password should have atleast a special characteer and a number. Must have atleast 5 letters!")
+                }
+            }
+          }
+    }
+
+    const submitData = (e)=>{
+        e.preventDefault()
+        console.log("Inside submitData()--")
+        if((Object.keys(formData).length<2) || Object.values(formData).find(inputValues=>inputValues==='undefined')){
+            if(!formData.size){
+                console.log("No Fields entered!")
+                toast.error("Please enter all the fields!")
+            }
+            else{
+                console.log("Check errors"+JSON.stringify(formData))
+                toast.error("Please check the fields and submit again!")
+            }
+        } 
+        else{
+            console.log("Inside else(no errors) of submitData() ")
+            console.log("FormData now-->"+JSON.stringify(formData))
+            dispatch(adminSignin(formData))
+            console.log("Dispatched successfully--")
+        }
+        
+    }
     
     return(
             <section style={bgImg} className='h-[130vh]' id="admin-signin">
@@ -46,7 +138,7 @@ export default function AdminSignInPage(){
                             </div>
                             <Link to="" className='text-subtitleSmall1 text-secondary ml-[4px]'> Forgot Password</Link>
                             <SiteButtonSquare shouldSubmit={true} customStyle={{width:'31.5rem', marginBottom:'60px'}} >
-                                { loading? <CustomHashLoader loading={loading}/>: "Sign In" }
+                                { adminLoading? <CustomHashLoader adminLoading={adminLoading}/>: "Sign In" }
                              </SiteButtonSquare>
                         </form>
                     </div>

@@ -48,7 +48,7 @@ const signinAdmin = async(req,res,next)=>{
                         console.log("token inside signinControllr-->"+token)
                         console.log("userData from backend-->"+userData)
                         // console.log("from signin controller--JWT Cookie inserted-->"+res.cookies)
-                        res.status(200).json({message:"Logged in successfully!",token:token, user:userData})
+                        res.status(200).json({message:"Logged in successfully!",adminToken:token, admin:userData})
                       }
                     else{
                         next(errorHandler(401, "You have entered a wrong password!"))
@@ -69,4 +69,17 @@ const signinAdmin = async(req,res,next)=>{
  } 
 }
 
-module.exports = {tester, signinAdmin}
+const signoutAdmin = (req,res,next)=>{
+    console.log("Inside signoutAdmin controller")
+    console.log("JWT Cookie from signout controller-->"+req.cookies.jwt)
+    try{
+        res.clearCookie('jwt').status(200).json({message:"signed out"})
+    }
+    catch(error){
+        console.log("JWT Cookie inside signout controller catch-->"+req.cookies.jwt)
+        console.log("Error in signout controller--"+error.message)
+        next(error)
+    }
+}
+
+module.exports = {tester, signinAdmin, signoutAdmin}

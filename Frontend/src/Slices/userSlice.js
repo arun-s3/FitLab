@@ -3,6 +3,7 @@ import axios from '../Utils/axiosConfig'
 
 export const signup = createAsyncThunk('userSignup', async(formData, thunkAPI)=>{
     try{
+        console.log("Inside signup createAsyncThunk")
         const response = await axios.post('/signup',formData)
         console.log("returning success response from signup createAsyncThunk..."+JSON.stringify(response))
         return response.data
@@ -18,6 +19,7 @@ export const signup = createAsyncThunk('userSignup', async(formData, thunkAPI)=>
 
 export const signin = createAsyncThunk('signin', async(formData, thunkAPI)=>{
     try{
+        console.log("Inside signin createAsyncThunk")
         const response = await axios.post('/signin',formData,{withCredentials:true})
         console.log("returning success response from sigin createAsyncThunk..."+JSON.stringify(response.data))
         return response.data
@@ -49,7 +51,8 @@ export const googleSignin = createAsyncThunk('googleSignin', async(userData,thun
 
 export const signout = createAsyncThunk('signout', async(googleId,thunkAPI)=>{
     // console.log("inside userSlice signout-userToken"+userToken)
-    try{ console.log("inside userSlice googlesignout, googleId"+googleId)
+    try{ 
+        console.log("inside userSlice googlesignout, googleId"+googleId)
         const response = googleId? await axios.get('/googlesignout',{withCredentials:true}) 
                                  : await axios.get('/signout',{withCredentials:true})
         console.log("response from signout createAsyncThunk-->"+JSON.stringify(response.data))
@@ -78,7 +81,7 @@ const userSlice = createSlice({
     reducers:{
         resetStates: (state,action)=>{
             console.log("state(success) before reset-->"+state.success)
-            console.log("Reseting states")
+            console.log("Reseting states..inside resetStates() of userSlice ")
             state.error = null
             state.loading = false
             state.success = false
@@ -96,12 +99,12 @@ const userSlice = createSlice({
                 state.error = null
                 state.loading = false
                 state.success = true
-                console.log("userData from userSlice--user-->"+JSON.stringify(action.payload.user))
-                console.log("message from userSlice-->"+JSON.stringify(action.payload.message))
+                console.log("userData from userSlice-signup.fulfilled-user-->"+JSON.stringify(action.payload.user))
+                console.log("message from userSlice-signup.fulfilled->"+JSON.stringify(action.payload.message))
         })
         .addCase(signup.rejected, (state,action)=>{
                 console.log("error from userSlice- signup.rejected-->"+ state.error)
-                console.log("error payload from userSlice- signup.rejected-->"+JSON.stringify(action.payload))
+                console.log("error payload from userSlice-signup.rejected-->"+JSON.stringify(action.payload))
                 state.error = action.payload
                 state.loading = false
                 state.success = false
@@ -117,9 +120,9 @@ const userSlice = createSlice({
                 state.success = true
                 state.userToken = action.payload.token
                 state.user = action.payload.user
-                console.log("userData from userSlice--user-->"+JSON.stringify(state.user))
-                console.log("token from userSlice--token-->"+JSON.stringify(state.userToken))
-                console.log("message from userSlice-->"+JSON.stringify(action.payload.message))
+                console.log("userData from userSlice-signin.fulfilled-user-->"+JSON.stringify(state.user))
+                console.log("token from userSlice-signin.fulfilled-token-->"+JSON.stringify(state.userToken))
+                console.log("message from userSlice-signin.fulfilled->"+JSON.stringify(action.payload.message))
         })
         .addCase(signin.rejected, (state,action)=>{
                 console.log("error from userSlice- signin.rejected before assignment-->"+ state.error)

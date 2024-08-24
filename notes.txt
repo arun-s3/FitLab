@@ -25,3 +25,5 @@ TODO(5/8/2024)--
         Admin Signipage complete+ dashboard page with ShowUser, blockUnblock and del user
         AdminSlice, connect backend nd frontend
         Folder for each component
+
+        WRITE DOWN-- Svg basics, Svg filter, 

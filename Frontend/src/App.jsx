@@ -2,8 +2,10 @@ import React from 'react'
 import {BrowserRouter, Route, Routes} from 'react-router-dom'
 import HomePage from './Pages/HomePage'
 import SignUpAndInPage from './Pages/SignUpAndInPage'
-import PrivateRoutes from './Components/PrivateRoutes'
+import PrivateUserRoutes from './Components/PrivateUserRoutes'
+import PrivateAdminRoutes from './Components/PrivateAdminRoutes'
 import AdminSignInPage from './Pages/Admin/AdminSignInPage'
+import AdminPageWrapper from './Pages/Admin/AdminPageWrapper'
 
 import {ToastContainer} from 'react-toastify'
 import "react-toastify/dist/ReactToastify.css";
@@ -15,13 +17,16 @@ export default function App(){
         <BrowserRouter>
             <ToastContainer theme='dark' autoClose={1500} style={{fontSize:'12px'}} hideProgressBar />
             <Routes path="/">
-                <Route element={<PrivateRoutes/>}>
+                <Route element={<PrivateUserRoutes/>}>
                 </Route>
                 <Route index element={<HomePage/>}/>
                 <Route path='signup' element={<SignUpAndInPage type='signup' />}/>
                 <Route path='signin' element={<SignUpAndInPage type='signin' />}/>
                 <Route path="admin/">
                     <Route path="signin" element={<AdminSignInPage/>}/>
+                    <Route element={<PrivateAdminRoutes/>}>
+                        <Route path="customers" element={<AdminPageWrapper/>}/>
+                    </Route>
                 </Route>
             </Routes>
         </BrowserRouter>

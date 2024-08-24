@@ -1,14 +1,31 @@
 import {createSlice, createAsyncThunk} from '@reduxjs/toolkit'
 import axios from '../Utils/axiosConfig'
 
-export const adminSignin = createAsyncThunk('signin', async(formData, thunkAPI)=>{
+export const adminSignin = createAsyncThunk('adminsignin', async(formData, thunkAPI)=>{
     try{
+        console.log("Inside adminSignin createAsyncThunk")
         const response = await axios.post('/admin/signin',formData,{withCredentials:true})
         console.log("returning success response from adminSigin createAsyncThunk..."+JSON.stringify(response.data))
         return response.data
     }
     catch(error){
         console.log("inside catch of adminSigin from Userslice")
+        const errorMessage = error.response?.data?.message
+        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
+        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
+        return thunkAPI.rejectWithValue(errorMessage)
+    }
+})
+
+export const adminSignout = createAsyncThunk('adminSignout', async(thunkAPI)=>{
+    try{ 
+        console.log("Inside adminSignout createAsyncThunk")
+        const response = await axios.get('/admin/signout',{withCredentials:true})
+        console.log("response from signout createAsyncThunk-->"+JSON.stringify(response.data))
+        return response.data
+    }
+    catch(error){
+        console.log("inside catch of signout from Userslice")
         const errorMessage = error.response?.data?.message
         console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
         console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
@@ -59,7 +76,17 @@ const adminSlice = createSlice({
             state.adminLoading = false
             state.adminSuccess = false
             console.log("Error from adminSlice- Adminsignin.rejected after assignment-->"+ state.adminError)
-     })
+    })
+        .addCase(adminSignout.fulfilled, (state,action)=>{
+           console.log("inside adminSignout.fulfilled, action.payload"+JSON.stringify(action.payload))
+           state.adminToken = null
+           state.admin = null
+           console.log("state.userToken now-->"+state.adminToken)
+    })
+    .addCase(adminSignout.rejected, (state,action)=>{
+        console.log("inside adminSignout.rejected"+JSON.stringify(action.payload))
+        console.log("state.userToken now-->"+state.adminToken)
+ })
     }
 
 })

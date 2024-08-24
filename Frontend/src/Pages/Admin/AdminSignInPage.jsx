@@ -20,17 +20,18 @@ export default function AdminSignInPage(){
     const navigate = useNavigate()
 
     const dispatch = useDispatch()
-    const {adminError, adminLoading, adminSuccess, adminToken} = useSelector((state)=>state.admin)
+    const {adminError, adminLoading, adminSuccess, adminToken,admin} = useSelector((state)=>state.admin)
 
     useEffect(()=>{
         console.log("Inside useEffect()")
         if(adminSuccess){
+            console.log("ADMIN TOKEN-->"+adminToken)
+            console.log("ADMIN DATA-->"+JSON.stringify(admin))
             navigate('/admin',{replace:true})
             dispatch(resetStates())
         }
         if(adminError){
             console.log("Just after before toast!-->"+adminError)
-            toast.error(adminError)
             console.log("Just after error toast!")
             dispatch(resetStates())
         }

@@ -1,0 +1,22 @@
+
+#admin-wrapper-aside ul li a>:first-child{
+    display:inline-block;
+    color:var(--PRIMARY);
+    margin-right:7px;
+}
+#admin-wrapper-header{
+    box-shadow: 0px 2px 22px rgb(47, 43, 49);
+}
+#admin-wrapper-curve::after{
+    content: "";
+    width: 11%;
+    height: 100%;
+    background-color: transparent;
+    box-shadow: 62px 0px 15px rgb(47, 43, 49);
+    position: absolute;
+    top: 0;
+    left: -63px;
+}
+#admin-wrapper-header #admin-wrapper-aside #aside-content{
+    box-shadow: 0px 16px 20px rgb(47, 43, 49);
+}

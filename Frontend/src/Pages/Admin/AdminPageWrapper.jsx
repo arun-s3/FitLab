@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import  './AdminPageWrapper.css'
 import {FaRegBell} from "react-icons/fa";
-import {Link, useNavigate} from 'react-router-dom'
+import {Link, useNavigate, Outlet} from 'react-router-dom'
 import {useSelector, useDispatch} from 'react-redux'
 import {adminSignout} from '../../Slices/adminSlice'
 
@@ -125,9 +125,11 @@ export default function AdminCustomersPage(){
                     </svg> */}
                     
             </aside>
-            <p>
-            sd,csnnsokfvkfv
-            </p>
+
+            <div style={{display:'inline-block'}}>
+                <Outlet/>
+            </div>
+
        </div>
     )
 }

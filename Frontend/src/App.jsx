@@ -4,8 +4,11 @@ import HomePage from './Pages/HomePage'
 import SignUpAndInPage from './Pages/SignUpAndInPage'
 import PrivateUserRoutes from './Components/PrivateUserRoutes'
 import PrivateAdminRoutes from './Components/PrivateAdminRoutes'
+
 import AdminSignInPage from './Pages/Admin/AdminSignInPage'
 import AdminPageWrapper from './Pages/Admin/AdminPageWrapper'
+import AdminCustomersPage from './Pages/Admin/AdminCustomersPage'
+
 
 import {ToastContainer} from 'react-toastify'
 import "react-toastify/dist/ReactToastify.css";
@@ -25,7 +28,9 @@ export default function App(){
                 <Route path="admin/">
                     <Route path="signin" element={<AdminSignInPage/>}/>
                     <Route element={<PrivateAdminRoutes/>}>
-                        <Route path="customers" element={<AdminPageWrapper/>}/>
+                        <Route element={<AdminPageWrapper/>}>
+                            <Route path="customers" element={<AdminCustomersPage/>} />
+                        </Route>
                     </Route>
                 </Route>
             </Routes>

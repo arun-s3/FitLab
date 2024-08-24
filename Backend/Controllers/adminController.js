@@ -82,4 +82,76 @@ const signoutAdmin = (req,res,next)=>{
     }
 }
 
-module.exports = {tester, signinAdmin, signoutAdmin}
+const showUsers = async(req,res,next)=>{
+    try{
+        console.log("Inside showUsers controller")
+        const users = await User.find({isAdmin:false},{password:0})
+        if(users){
+            console.log("Users found-->"+JSON.stringify(users))
+            res.status(200).json({users})
+        }
+        else{
+            console.log("No records!")
+            res.status(404).json({message:"Users not found!"})
+        }
+    }
+    catch(error){
+        console.log("Inside catch of showUsers controller")
+        next(error)
+    }
+}
+
+const deleteUser = async(req,res,next)=>{
+    try{
+        console.log("Inside deleteUser controller")
+        const {id} = req.query 
+        const userData = await User.findOne({_id:id},{password:0})
+        console.log("User-->"+JSON.stringify(userData))
+        if(userData){
+            if(userData.isAdmin){
+                res.status(401).json({message:"Can't delete Admin"})
+            }
+            else{
+                await User.deleteOne({_id:id})
+                res.status(200).json({message:"Successfully deleted!"})
+            }
+        }   
+        else{
+            next(errorHandler(400,"User not found!"))
+        }
+    }
+    catch(error){
+        console.log("Inside deleteUser controller")
+        next(error)
+    }
+}
+
+const toggleBlockUser = async(req,res,next)=>{
+    try{
+        console.log("Inside toggleBlockUser controller")
+        const {id} = req.query
+        const user = await User.findOne({_id:id},{password:0})
+        if(user){
+            console.log("User-->"+JSON.stringify(user))
+            if(!user.isAdmin){
+                await User.updateOne({_id:id},{$set:{isBlocked:!user.isBlocked}}).exec().then(doc=>{
+                        console.log("Updated user!")
+                        res.status(200).json({message:`Succesfully ${!user.isBlocked? 'Blocked!':'Unblocked!'}`})
+                }).catch(error=>{
+                        next(error)
+                })
+                    
+                }
+        }
+        else{
+            next(errorHandler(400,"User not found!"))
+        }
+    }
+    catch(error){
+        console.log("Inside toggleBlockUser controller")
+        next(error)
+    }
+}
+
+
+module.exports = {tester, signinAdmin, signoutAdmin, showUsers, deleteUser, toggleBlockUser}

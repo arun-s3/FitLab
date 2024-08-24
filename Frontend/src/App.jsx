@@ -1,5 +1,6 @@
 import React from 'react'
 import {BrowserRouter, Route, Routes} from 'react-router-dom'
+
 import HomePage from './Pages/HomePage'
 import SignUpAndInPage from './Pages/SignUpAndInPage'
 import PrivateUserRoutes from './Components/PrivateUserRoutes'

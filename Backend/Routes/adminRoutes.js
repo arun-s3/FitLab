@@ -1,12 +1,15 @@
 const express = require('express')
 const adminRouter = express.Router()
-const {tester, signinAdmin, signoutAdmin} = require('../Controllers/adminController')
+const {isLogin, isLogout, authorizeAdmin} = require('../Middlewares/Authentication')
+const {tester, signinAdmin, signoutAdmin, showUsers, deleteUser, toggleBlockUser} = require('../Controllers/adminController')
 
 adminRouter.get('/test', tester)
 
-adminRouter.post('/signin', signinAdmin)
-adminRouter.get('/signout', signoutAdmin)
-
+adminRouter.post('/signin', isLogout, signinAdmin)
+adminRouter.get('/signout', isLogin, signoutAdmin)
+adminRouter.get('/customers', isLogin, authorizeAdmin, showUsers)
+adminRouter.get('/deleteuser', isLogin, authorizeAdmin, deleteUser)
+adminRouter.get('/toggleblockuser', isLogin, authorizeAdmin, toggleBlockUser)
 
 
 

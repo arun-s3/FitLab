@@ -33,11 +33,6 @@ export default function AdminCustomersPage(){
     const dispatch = useDispatch()
     const navigate = useNavigate()
 
-    useEffect(()=>{
-        console.log("Inside useEffect of AdminWrapperPage")
-        !admin && navigate('/admin/signin',{replace:true})
-    })
-
     return(
         <div>
             <header className='bg-black h-[5rem] w-full flex justify-between items-center px-[33px]' id='admin-wrapper-header'

@@ -88,7 +88,7 @@ const showUsers = async(req,res,next)=>{
         const users = await User.find({isAdmin:false},{password:0})
         if(users){
             console.log("Users found-->"+JSON.stringify(users))
-            res.status(200).json({users})
+            res.status(200).json({users:users})
         }
         else{
             console.log("No records!")
@@ -152,6 +152,5 @@ const toggleBlockUser = async(req,res,next)=>{
         next(error)
     }
 }
-
 
 module.exports = {tester, signinAdmin, signoutAdmin, showUsers, deleteUser, toggleBlockUser}

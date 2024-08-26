@@ -33,12 +33,62 @@ export const adminSignout = createAsyncThunk('adminSignout', async(thunkAPI)=>{
     }
 })
 
+export const showUsers = createAsyncThunk('showUsers', async(thunkAPI)=>{
+    try{
+        console.log("Inside createAsyncThunk for getUsers")
+        const response = await axios.get('/admin/customers',{withCredentials:true})
+        console.log("Response from createAsyncThunk for getUsers-->"+JSON.stringify(response.data))
+        return response.data
+    }
+    catch(error){
+        console.log("inside catch of createAsyncThunk for getUsers")
+        const errorMessage = error.response?.data?.message
+        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
+        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
+        return thunkAPI.rejectWithValue(errorMessage)
+    }
+})
+
+export const toggleBlockUser = createAsyncThunk('toggleBlockUser', async(id,thunkAPI)=>{
+    try{
+        console.log("Inside createAsyncThunk for toggleBlockUser")
+        const response = await axios.get(`/admin/toggleblockuser?id=${id}`,{withCredentials:true})
+        console.log("Response from createAsyncThunk for toggleBlockUser-->"+JSON.stringify(response.data))
+        return response.data
+    }
+    catch(error){
+        console.log("inside catch of createAsyncThunk for toggleBlockUser")
+        const errorMessage = error.response?.data?.message
+        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
+        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
+        return thunkAPI.rejectWithValue(errorMessage)
+    }
+})
+
+export const deleteUser = createAsyncThunk('deleteUser', async(id,thunkAPI)=>{
+    try{
+        console.log("Inside createAsyncThunk for deleteUser")
+        const response = await axios.get(`/admin/deleteuser?id=${id}`,{withCredentials:true})
+        console.log("Response from createAsyncThunk for deleteUser-->"+JSON.stringify(response.data))
+        return response.data
+    }
+    catch(error){
+        console.log("inside catch of createAsyncThunk for deleteUser")
+        const errorMessage = error.response?.data?.message
+        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
+        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
+        return thunkAPI.rejectWithValue(errorMessage)
+    }
+})
+
 const initialState = {
     adminToken: null,
     admin: null,
     adminError:null,
     adminLoading:false,
     adminSuccess:false,
+    adminMessage:null,
+    allUsers:null
 }
 const adminSlice = createSlice({
     name:'admin',
@@ -50,6 +100,7 @@ const adminSlice = createSlice({
             state.adminError = null
             state.adminLoading = false
             state.adminSuccess = false
+            state.adminMessage = null
             console.log("state(adminSuccess) after reset-->"+state.adminSuccess)
         }
     },
@@ -83,10 +134,70 @@ const adminSlice = createSlice({
            state.admin = null
            console.log("state.userToken now-->"+state.adminToken)
     })
-    .addCase(adminSignout.rejected, (state,action)=>{
-        console.log("inside adminSignout.rejected"+JSON.stringify(action.payload))
-        console.log("state.userToken now-->"+state.adminToken)
+        .addCase(adminSignout.rejected, (state,action)=>{
+            console.log("inside adminSignout.rejected"+JSON.stringify(action.payload))
+            console.log("state.userToken now-->"+state.adminToken)
  })
+        .addCase(showUsers.pending, (state,action)=>{
+            console.log("Inside showUsers.pending")
+            state.adminLoading = true
+            state.success = false
+            state.adminError = false
+        })
+        .addCase(showUsers.fulfilled, (state,action)=>{
+            console.log("Inside showUsers.fulfilled")
+            state.adminLoading = false
+            state.success = true
+            state.adminError = false
+            state.allUsers = action.payload.users
+            console.log("allUsers from showUsers.fulfilled"+JSON.stringify(action.payload))
+        })
+        .addCase(showUsers.rejected, (state,action)=>{
+            console.log("Inside showUsers.rejected")
+            state.adminLoading = false
+            state.success = false
+            state.adminError = true
+        })
+        .addCase(toggleBlockUser.pending, (state,action)=>{
+            console.log("Inside toggleBlockUser.pending")
+            state.adminLoading = true
+            state.success = false
+            state.adminError = false
+        })
+        .addCase(toggleBlockUser.fulfilled, (state,action)=>{
+            console.log("Inside toggleBlockUser.fulfilled")
+            state.adminLoading = false
+            state.success = true
+            state.adminError = false
+            state.adminMessage = action.payload.message
+            console.log("allUsers from toggleBlockUser.fulfilled"+JSON.stringify(action.payload))
+        })
+        .addCase(toggleBlockUser.rejected, (state,action)=>{
+            console.log("Inside toggleBlockUser.rejected")
+            state.adminLoading = false
+            state.success = false
+            state.adminError = true
+        })
+        .addCase(deleteUser.pending, (state,action)=>{
+            console.log("Inside deleteUser.pending")
+            state.adminLoading = true
+            state.success = false
+            state.adminError = false
+        })
+        .addCase(deleteUser.fulfilled, (state,action)=>{
+            console.log("Inside deleteUser.fulfilled")
+            state.adminLoading = false
+            state.success = true
+            state.adminError = false
+            state.adminMessage = action.payload.message
+            console.log("allUsers from deleteUser.fulfilled"+JSON.stringify(action.payload))
+        })
+        .addCase(deleteUser.rejected, (state,action)=>{
+            console.log("Inside deleteUser.rejected")
+            state.adminLoading = false
+            state.success = false
+            state.adminError = true
+        })
     }
 
 })

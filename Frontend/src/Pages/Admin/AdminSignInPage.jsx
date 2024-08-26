@@ -35,10 +35,10 @@ export default function AdminSignInPage(){
             console.log("Just after error toast!")
             dispatch(resetStates())
         }
-        // if(adminToken){
-        //     console.log("Cannot go coz u got token")
-        //     navigate('/admin',{replace:true})
-        // } 
+        if(adminToken){
+            console.log("Cannot go coz u got token")
+            navigate('/admin',{replace:true})
+        } 
     })
 
     const handleChange = (e)=>{

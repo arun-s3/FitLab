@@ -20,10 +20,14 @@ TODO(5/8/2024)--
 
         See how ecommerce project made properly
 
-        Admin Sigin page overflow-y control
         CHECK ABHI SENT EVORA LOOK
-        Admin Signipage complete+ dashboard page with ShowUser, blockUnblock and del user
-        AdminSlice, connect backend nd frontend
+        
         Folder for each component
 
-        WRITE DOWN-- Svg basics, Svg filter, 
+        WRITE DOWN-- Svg basics, Svg filter,
+
+        2##Admin CustomersPage--> SEARCH- Strict search(current), Not Strict search, Match case
+                               UNDO with timer, on the side
+                               SORT for name, email, mobile, wallet+ createdAt all with 2arrows showing tooltip on hover
+        1##EMAIL Verification
+        3##FB login

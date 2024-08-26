@@ -31,3 +31,12 @@
 .Toastify__close-button>svg ,.Toastify__close-button--dark>svg{
     color:var(--PRIMARY)
 }
+
+@layer compenents{
+    .secondaryLight-box{
+        @apply bg-secondaryLight rounded-[8px]
+    }
+    .secondaryLight-boxBorder{
+        @apply secondaryLight-box border border-secondary 
+    }
+}

@@ -1,0 +1,49 @@
+
+#AdminCustomersPage table td{
+    width:20vw;
+    padding:10px;
+} 
+
+#AdminCustomersPage table input:focus{
+    border:none;
+    outline:none;
+}
+#AdminCustomersPage table input:focus-visible{
+    border:none;
+    outline:none;
+}
+#AdminCustomersPage table input::placeholder{
+    margin-left:5px;
+}
+#AdminCustomersPage>main{
+    border-color: rgb(207, 193, 216);
+    border-width: 2px;
+    box-shadow: -2px 2px 11px #bbbbae;
+}
+#AdminCustomersPage>main .table-header{
+    border-width: 1px;
+    border-color: rgb(220, 230, 166);
+}
+#AdminCustomersPage table>tbody .action-buttons button{
+    padding-block: 2px;
+    padding-inline: 16px;
+    border: 1px solid rgb(190, 200, 138);
+    border-radius: 4px;
+    color: black;
+    background: var(--PRIMARY);
+    box-shadow: -1px 1px 8px #babaa5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    /* border: 1px solid var(--SECONDARY); */
+    /* box-shadow: 1px 1px 2px #b7b2b2; */
+}
+#AdminCustomersPage table>tbody .action-buttons button>svg:first-child{
+    color:red;
+    font-size:12px;
+}
+#AdminCustomersPage table>tbody .action-buttons button>svg:last-child{
+    color:red;
+    font-size:15px;
+}

@@ -28,15 +28,18 @@ export default function AdminCustomersPage(){
     const headerBgImg = {
         backgroundImage: "linear-gradient(to right, black, var(--SECONDARY) 400%)"
     }
+    const adminContentBgImg = {
+        backgroundImage: "linear-gradient(to right,rgba(255,255,255,0.9),rgba(255,255,255,0.9)), url('/admin-bg.jpg')"
+    }
 
     const {adminToken, admin} = useSelector(state=>state.admin)
     const dispatch = useDispatch()
     const navigate = useNavigate()
 
     return(
-        <div>
-            <header className='bg-black h-[5rem] w-full flex justify-between items-center px-[33px]' id='admin-wrapper-header'
-                            style={headerBgImg}>
+        <div id='admin-wrapper'>
+            <header className='bg-black h-[5rem] w-full flex justify-between items-center px-[33px] fixed top-0 z-[10]' 
+                                    id='admin-wrapper-header' style={headerBgImg}>
                 <img src="/Logo_main.png" alt="Fitlab" className="h-[5rem] mt-[15px]"/> 
                 <div className='flex gap-[15px] justify-between items-center'>
                     <i className='relative'>
@@ -55,75 +58,82 @@ export default function AdminCustomersPage(){
                     </div>
                 </div>
             </header>
-            <aside className='inline-flex gap-0' id='admin-wrapper-aside'>
-                <div className='h-screen w-[14rem] bg-black' style={asideBgImg}id='aside-content' >
-                    <nav className='flex justify-center items-center mt-[4rem]'>
-                        <ul className='list-none flex flex-col gap-[2rem] justify-center items-start text-white text-descReg1'>
-                            <li> 
-                                <Link> <MdOutlineDashboardCustomize className='inline-block'/> Dashboard</Link> 
-                            </li>
-                            <li> 
-                                <Link> <HiOutlineUsers/> Customers</Link> 
-                            </li>
-                            <li> 
-                                <Link> <BsCart3/> Products</Link> 
-                            </li>
-                            <li>
-                                 <Link> <LuLayoutList/> Category</Link> 
-                            </li>
-                            <li> 
-                                <Link> <IoPricetagOutline/> Coupon Generator</Link> 
-                            </li>
-                            <li> 
-                                <Link> <TbTruckDelivery/> Orders</Link>
-                             </li>
-                            <li>
-                                 <Link> <FaChartLine/> Sales Report</Link> 
-                            </li>
-                            <li> 
-                                <Link> <RiDiscountPercentLine/> Offers</Link> 
-                            </li>
-                            <li> 
-                                <Link> <GrGallery/> Banners</Link>
-                             </li>
-                            <hr className='bg-gray-600 text-gray-600 w-[70%] mt-[5px]'></hr>
-                            <ul className='list-none flex flex-col gap-[1rem] justify-center items-start
-                                             text-white text-descReg1 mt-[-10px] '>
-                                <li>
-                                    <Link> <IoSettingsOutline/> Settings</Link>
+            <div className='flex fixed top-[5em]'>
+                <aside className='inline-flex gap-0' id='admin-wrapper-aside'>
+                    <div className='h-screen w-[14rem] bg-black' style={asideBgImg}id='aside-content' >
+                        <nav className='flex justify-center items-center mt-[4rem]'>
+                            <ul className='list-none flex flex-col gap-[2rem] justify-center items-start text-white text-descReg1'>
+                                <li> 
+                                    <Link> <MdOutlineDashboardCustomize className='inline-block'/> Dashboard</Link> 
+                                </li>
+                                <li> 
+                                    <Link> <HiOutlineUsers/> Customers</Link> 
+                                </li>
+                                <li> 
+                                    <Link> <BsCart3/> Products</Link> 
                                 </li>
                                 <li>
-                                    <Link onClick={()=>{
-                                        dispatch(adminSignout())
-                                        console.log("Dispatching adminSignout()....")}}> <MdLogout/> Logout</Link>
+                                     <Link> <LuLayoutList/> Category</Link> 
                                 </li>
+                                <li> 
+                                    <Link> <IoPricetagOutline/> Coupon Generator</Link> 
+                                </li>
+                                <li> 
+                                    <Link> <TbTruckDelivery/> Orders</Link>
+                                 </li>
+                                <li>
+                                     <Link> <FaChartLine/> Sales Report</Link> 
+                                </li>
+                                <li> 
+                                    <Link> <RiDiscountPercentLine/> Offers</Link> 
+                                </li>
+                                <li> 
+                                    <Link> <GrGallery/> Banners</Link>
+                                 </li>
+                                <hr className='bg-gray-600 text-gray-600 w-[70%] mt-[5px]'></hr>
+                                <ul className='list-none flex flex-col gap-[1rem] justify-center items-start
+                                                 text-white text-descReg1 mt-[-10px] '>
+                                    <li>
+                                        <Link> <IoSettingsOutline/> Settings</Link>
+                                    </li>
+                                    <li>
+                                        <Link onClick={()=>{
+                                            dispatch(adminSignout())
+                                            console.log("Dispatching adminSignout()....")}}> <MdLogout/> Logout</Link>
+                                    </li>
+                                </ul>
                             </ul>
-                        </ul>
-                    </nav> 
-                </div>
-                {/* <svg xmlns="http://www.w3.org/2000/svg" viewBox="-0.25 -2.25 2.25 2.25">
-	                <path d="M 0 0 L 2 -2 Q -1 -3 0 0 Z" fill="#000000"/>
-                </svg> */}
-                <div id="admin-wrapper-curve" className='relative'>
-                    <svg xmlns="http://www.w3.org/2000/svg" className='h-[40px] w-[40px]'>
-                        {/* <defs>
-                            <filter id="shadow" x="0" y="0" width="150%" height="150%">
-                                <feDropShadow dx="5" dy="5" stdDeviation="3" flood-color="rgba(0, 0, 0, 0.5)" />
-                            </filter>
-                        </defs> */}
-	                    <path d="M 0 40 L-20 -40 L40 0 Q0 0 0 40" fill="#000000" filter="url(#shadow)"/>
-                    </svg>
-                </div>
-                    
+                        </nav> 
+                    </div>
                     {/* <svg xmlns="http://www.w3.org/2000/svg" viewBox="-0.25 -2.25 2.25 2.25">
-	                    <path d="M 0 0 L 2 -2 Q -1 -3 0 0" stroke="#FF0000" stroke-width="0.1" fill="none"/>
+	                    <path d="M 0 0 L 2 -2 Q -1 -3 0 0 Z" fill="#000000"/>
                     </svg> */}
-                    
-            </aside>
+                    <div id="admin-wrapper-curve" className='relative w-0 h-0'>
+                        <svg xmlns="http://www.w3.org/2000/svg" className='h-[40px] w-[40px]'>
+                            {/* <defs>
+                                <filter id="shadow" x="0" y="0" width="150%" height="150%">
+                                    <feDropShadow dx="5" dy="5" stdDeviation="3" flood-color="rgba(0, 0, 0, 0.5)" />
+                                </filter>
+                            </defs> */}
+	                        <path d="M 0 40 L-20 -40 L40 0 Q0 0 0 40" fill="#000000" filter="url(#shadow)"/>
+                        </svg>
+                    </div>
+                            
+                        {/* <svg xmlns="http://www.w3.org/2000/svg" viewBox="-0.25 -2.25 2.25 2.25">
+	                        <path d="M 0 0 L 2 -2 Q -1 -3 0 0" stroke="#FF0000" stroke-width="0.1" fill="none"/>
+                        </svg> */}
 
-            <div style={{display:'inline-block'}}>
+                </aside>
+            <div className='basis-full pt-[2rem]' id='admin-content-outlet' style={adminContentBgImg}>
                 <Outlet/>
+            </div>                        
+            
+
             </div>
+
+            {/* <div style={{display:'inline-block'}}>
+                <Outlet/>
+            </div> */}
 
        </div>
     )

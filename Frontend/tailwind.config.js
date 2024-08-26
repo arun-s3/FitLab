@@ -6,6 +6,7 @@ module.exports = {
       colors:{
         primary:"rgba(215, 241, 72, 1)",
         secondary:"rgba(159, 42, 240, 1)",
+        secondaryLight: "rgba(113, 34, 168, 0.09)",
         muted:"rgb(125, 124, 140)",    //rgb(111, 110, 127)
         home:"#EBEAEC"
       },
@@ -58,9 +59,7 @@ module.exports = {
         adminTitle:['24px',{
           fontWeight:'700'
         }],
-        adminSubtitle:['18px',{
-          fontWeight:'500'
-        }],
+        adminSubtitle:['18px'],
         adminSubtitleSmall:['16px',{
           fontWeight:'500'
         }],

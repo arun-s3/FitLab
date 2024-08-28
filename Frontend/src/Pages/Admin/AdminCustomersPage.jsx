@@ -1,22 +1,33 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import './AdminCustomersPage.css';
 import axios from '../../Utils/axiosConfig';
 import { useSelector, useDispatch } from 'react-redux';
 import { showUsers, toggleBlockUser, deleteUser, resetStates } from '../../Slices/adminSlice';
 
-import { RiArrowDropDownLine } from 'react-icons/ri';
-import { MdBlock, MdDeleteOutline } from 'react-icons/md';
-import { toast } from 'react-toastify';
+import {RiArrowDropDownLine} from 'react-icons/ri';
+import {MdBlock, MdDeleteOutline} from 'react-icons/md';
+import {FaSortUp,FaSortDown} from "react-icons/fa6";
+import {toast} from 'react-toastify';
 
 export default function AdminCustomersPage() {
     const dispatch = useDispatch();
     const { adminLoading, adminError, adminSuccess, adminMessage, allUsers } = useSelector(state => state.admin);
 
     const [localUsers, setLocalUsers] = useState([]);
-
+    const [sortIconStyler, setSortIconStyler] = useState({current:false, default:true})
+    // const usernameSortUpIcon, emailSortUpIcon, mobileSortUpIcon
+    const [activeSorter, setActiveSorter] = useState({field:'',order:''})
     const mainBgImg = {
-        backgroundImage : "linear-gradient(to right,rgba(255,255,255),rgba(255,255,255))"
+        colorImage : "linear-gradient(to right,rgba(255,255,255),rgba(255,255,255))"
     }
+
+    
+    useEffect(() => {
+        if (sortIconStyler) {
+            console.log("Sort icon styler is now true");
+            // Perform actions that depend on sortIconStyler being true
+        }
+    }, [sortIconStyler]);
 
     useEffect(() => {
         dispatch(showUsers());
@@ -65,6 +76,35 @@ export default function AdminCustomersPage() {
         }
     }
 
+    const sortHandler = (e,type,order)=>{
+        console.log("typeof localUsers[0][type]-->"+typeof localUsers[0][type])
+
+        if(e.target.style.height=='15px'){
+                e.target.style.height='10px'
+                e.target.style.color='rgba(159, 42, 240, 0.5)'
+                console.log("Going to default icon settings and localUsers--")
+                setLocalUsers(allUsers)
+                console.log("Localusers now-->"+JSON.stringify(localUsers))
+            }
+            else {
+                setActiveSorter({field:type, order})
+                const sortedNames = order==1? localUsers.map(user=>user[type]).sort() 
+                                        : typeof localUsers[0][type] == "string"? localUsers.map(user=>user[type]).sort((a,b)=>b.localeCompare(a))
+                                                                         : localUsers.map(user=>user[type]).sort((a,b)=>b-a)
+                const sortedUsers = []
+                for(let i=0; i<sortedNames.length; i++){
+                    for(let user in localUsers){
+                        if(localUsers[user][type] == sortedNames[i])
+                            sortedUsers.push(localUsers[user])
+                    }
+                }
+                setLocalUsers(sortedUsers)
+                console.log("SortedNames-->"+sortedNames)
+                console.log("sortedUsers-->"+JSON.stringify(sortedUsers)) 
+            }
+            
+    }
+
     return (
         <section className='h-screen pl-[3rem] z-[-1]' id='AdminCustomersPage'>
             <h1 className='text-h3Semibold'>Customers</h1>
@@ -99,10 +139,51 @@ export default function AdminCustomersPage() {
                             </td>
                         </tr>
                         <tr className='secondaryLight-box border border-[rgb(220, 230, 166)] font-[500] text-secondary table-header'>
-                            <td>Name</td>
-                            <td>Email</td>
-                            <td>Mobile</td>
-                            <td>Wallet</td>
+                            <td>
+                                <div className='flex items-center'>
+                                    <span>Name</span>
+                                    <i className='flex flex-col h-[5px]'>
+                                        <FaSortUp  onClick = {(e)=>{ sortHandler(e,"username",1)}} 
+                                                style={{height: activeSorter.field === "username" && activeSorter.order === 1 ? '15px' : '10px',
+                                                        color: activeSorter.field === "username" && activeSorter.order === 1 ? 'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
+                                        <FaSortDown onClick = {(e)=>sortHandler(e,"username",-1)} 
+                                            style={{height: activeSorter.field === "username" && activeSorter.order === -1 ? '15px' : '10px',color: activeSorter.field === "username" && activeSorter.order === -1 ? 'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)' }}/>
+                                    </i>
+                                </div> 
+                            </td>
+                            <td>
+                                <div className='flex items-center'>
+                                    <span>Email</span>
+                                    <i className='flex flex-col h-[5px]'>
+                                        <FaSortUp onClick = {(e)=>sortHandler(e,"email",1)} 
+                                            style={{height: activeSorter.field === "email" && activeSorter.order === 1 ? '15px' : '10px',color: activeSorter.field === "email" && activeSorter.order === 1 ? 'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
+                                        <FaSortDown onClick = {(e)=>sortHandler(e,"email",-1)} 
+                                            style={{height: activeSorter.field === "email" && activeSorter.order === -1 ? '15px' : '10px',color: activeSorter.field === "email" && activeSorter.order === -1 ? 'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
+                                    </i>
+                                </div>
+                            </td>
+                            <td>
+                                <div className='flex items-center'>
+                                    <span>Mobile</span>
+                                    <i className='flex flex-col h-[5px]'>
+                                        <FaSortUp onClick = {(e)=>sortHandler(e,"mobile",1)} 
+                                            style={{height: activeSorter.field === "mobile" && activeSorter.order === 1 ? '15px' : '10px', color: activeSorter.field === "mobile" && activeSorter.order === 1 ? 'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
+                                        <FaSortDown onClick = {(e)=>sortHandler(e,"mobile",-1)} 
+                                            style={{height: activeSorter.field === "mobile" && activeSorter.order === -1 ? '15px' : '10px', color: activeSorter.field === "mobile" && activeSorter.order === -1 ? 'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}} />
+                                    </i>
+                                </div>
+                            </td>
+                            <td>
+                                <div className='flex items-center'>
+                                    <span>Wallet</span>
+                                    <i className='flex flex-col h-[5px]'>
+                                        <FaSortUp onClick = {(e)=>sortHandler(e,"wallet",1)} 
+                                            style={{height: activeSorter.field === "wallet" && activeSorter.order === 1 ? '15px' : '10px', color: activeSorter.field === "wallet" && activeSorter.order === 1 ? 'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
+                                        <FaSortDown onClick = {(e)=>sortHandler(e,"wallet",-1)} 
+                                            style={{height: activeSorter.field === "wallet" && activeSorter.order === -1 ? '15px' : '10px', color: activeSorter.field === "wallet" && activeSorter.order === -1 ? 'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
+                                    </i>
+                                </div>
+                            </td>
                             <td></td>
                         </tr>
                     </thead>

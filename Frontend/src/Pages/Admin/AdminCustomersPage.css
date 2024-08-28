@@ -24,6 +24,16 @@
     border-width: 1px;
     border-color: rgb(220, 230, 166);
 }
+#AdminCustomersPage>main .table-header i{
+    margin-top: 6px;
+    margin-left: 4px;
+}
+#AdminCustomersPage>main .table-header i>svg{
+    height: 10px;
+    width: 8px;
+    margin-top: -7px;
+    cursor: pointer;
+}
 #AdminCustomersPage table>tbody .action-buttons button{
     padding-block: 2px;
     padding-inline: 16px;
@@ -46,4 +56,11 @@
 #AdminCustomersPage table>tbody .action-buttons button>svg:last-child{
     color:red;
     font-size:15px;
+}
+#AdminCustomersPage #Layer_1 .svg-upsort{
+    fill:none;
+    stroke:#000;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    stroke-width:66.67px;
 }

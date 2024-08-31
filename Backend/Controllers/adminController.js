@@ -2,6 +2,7 @@ const User = require('../Models/userModel')
 const bcryptjs = require('bcryptjs')
 const {errorHandler} = require('../Utils/errorHandler')
 const {generateToken, verifyToken} = require('../Utils/jwt')
+const user = require('../Models/userModel')
 
 const tester = async(req,res)=>{ res.send("AdminTest-- Success")}
 
@@ -109,7 +110,7 @@ const deleteUser = async(req,res,next)=>{
         console.log("User-->"+JSON.stringify(userData))
         if(userData){
             if(userData.isAdmin){
-                res.status(401).json({message:"Can't delete Admin"})
+                res.status(403).json({message:"Can't delete Admin"})
             }
             else{
                 await User.deleteOne({_id:id})
@@ -122,6 +123,43 @@ const deleteUser = async(req,res,next)=>{
     }
     catch(error){
         console.log("Inside deleteUser controller")
+        next(error)
+    }
+}
+
+const deleteUserList = async(req,res,next)=>{
+    try{
+        console.log("Inside deleteUserList controller")
+        console.log("req,body-->"+JSON.stringify(req.body))
+        const {userList} = req.body
+        console.log('userLIst-->'+JSON.stringify(userList))
+        const userDocs = []
+        for(let i=0; i<userList.length; i++){
+            console.log("inside for-loop of deleteUserList controller")
+            userDocs[i] = await User.findOne({_id:userList[i]},{password:0})
+            console.log("userList[i]-->"+userList[i])
+            console.log("userDocs[i]-->"+JSON.stringify(userDocs))
+        }
+        console.log("userDocs after for-loop-->"+userDocs)
+        console.log("userDocs.filter(doc=>doc.isAdmin)-->"+userDocs.filter(doc=>!doc.isAdmin))
+        if(userDocs.filter(doc=>!doc.isAdmin)){
+            if(userDocs && userDocs.length==userList.length){
+                for(let i=0; i<userList.length; i++){
+                    User.deleteOne({_id:userList[i]}).exec().then(result=>{
+                        console.log("Deleted successfully--"+result)
+                        res.status(200).json({message:"Successfully deleted!"})}).catch(error=>console.log("Error during deletion--"+error))
+                    
+                }
+            }
+            else{
+                next(errorHandler(400,"Some users not found!"))
+            }
+        }
+        else{
+            next(errorHandler(403,"Admin cannot be deleted!"))
+        }
+    }
+    catch(error){
         next(error)
     }
 }
@@ -153,4 +191,4 @@ const toggleBlockUser = async(req,res,next)=>{
     }
 }
 
-module.exports = {tester, signinAdmin, signoutAdmin, showUsers, deleteUser, toggleBlockUser}
+module.exports = {tester, signinAdmin, signoutAdmin, showUsers, deleteUser, deleteUserList, toggleBlockUser}

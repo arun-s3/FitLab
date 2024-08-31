@@ -34,6 +34,21 @@
     margin-top: -7px;
     cursor: pointer;
 }
+#AdminCustomersPage table>thead #searcher>.case-tooltip:hover::after{
+    position: absolute;
+    left: 11px;
+    bottom: 22px;
+    content: 'Match Case';
+    width: 4rem;
+    border: 1px solid var(--SECONDARY);
+    font-size: 8px;
+    text-align: center;
+    border-radius: 4px;
+}
+#AdminCustomersPage table>thead .customer-dropdown>svg{
+    color: var(--SECONDARY);
+    font-size: 16px;
+}
 #AdminCustomersPage table>tbody .action-buttons button{
     padding-block: 2px;
     padding-inline: 16px;

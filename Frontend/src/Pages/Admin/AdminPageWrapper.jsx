@@ -58,8 +58,9 @@ export default function AdminCustomersPage(){
                     </div>
                 </div>
             </header>
-            <div className='flex fixed top-[5em]'>
-                <aside className='inline-flex gap-0' id='admin-wrapper-aside'>
+            <div className='flex fixed top-[5rem]'>
+            
+                <aside className='inline-flex gap-0 z-[10]' id='admin-wrapper-aside'>
                     <div className='h-screen w-[14rem] bg-black' style={asideBgImg}id='aside-content' >
                         <nav className='flex justify-center items-center mt-[4rem]'>
                             <ul className='list-none flex flex-col gap-[2rem] justify-center items-start text-white text-descReg1'>
@@ -123,40 +124,17 @@ export default function AdminCustomersPage(){
 	                        <path d="M 0 0 L 2 -2 Q -1 -3 0 0" stroke="#FF0000" stroke-width="0.1" fill="none"/>
                         </svg> */}
 
-                </aside>
-            <div className='basis-full pt-[2rem]' id='admin-content-outlet' style={adminContentBgImg}>
-                <Outlet/>
-            </div>                        
+                </aside>                      
             
+                <div className='basis-full pt-[2rem] flex-grow overflow-scroll' id='admin-content-outlet' style={adminContentBgImg}>
+                        <Outlet/>
+                </div>  
 
-            </div>
-
-            {/* <div style={{display:'inline-block'}}>
-                <Outlet/>
-            </div> */}
-
+                {/* <div style={{display:'inline-block'}}>
+                    <Outlet/>
+                </div> */}
+        </div>
        </div>
     )
 }
 
-
-
-
-
-
-// <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 12">
-// 	<path d="M 0 0 L 16 0 L 16 1 L 3 1 Q 2 1 2 4 L 2 12 H 0 Z" fill="#000000"/> //d="M 0 0 L 16 0 L 16 1 L 3 1 Q 2 1 2 4 L 2 12 H 0 Z"
-//     <foreignObject x="50" y="50" width="200" height="100">
-//     <h1> {/*mt-[4px]*/}
-//                     wjsdcsmdkclsdmcs;cldc;sdlcsdc
-//     </h1>
-//     </foreignObject>
-    
-// </svg>
-
-{/* <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 12">
-	<path d="M 0 0 L 16 0 L 16 3 L 4 3 Q 3 3 3 4 L 3 12 H 0 Z" fill="#000000"/>
-</svg>
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 12">
-	<path d="M 0 0 L 16 0 L 16 1 L 3 1 Q 2 1 2 4 L 2 12 H 0 Z" fill="#000000"/> //d="M 0 0 L 16 0 L 16 1 L 3 1 Q 2 1 2 4 L 2 12 H 0 Z"
-</svg>  */}

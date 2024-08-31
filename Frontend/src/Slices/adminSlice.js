@@ -81,6 +81,22 @@ export const deleteUser = createAsyncThunk('deleteUser', async(id,thunkAPI)=>{
     }
 })
 
+export const deleteUsersList = createAsyncThunk('deleteUser', async(userList,thunkAPI)=>{
+    try{
+        console.log("Inside createAsyncThunk for deleteUser")
+        const response = await axios.post('/admin/deleteuserslist',userList, {withCredentials:true})
+        console.log("Response from createAsyncThunk for deleteUser-->"+JSON.stringify(response.data))
+        return response.data
+    }
+    catch(error){
+        console.log("inside catch of createAsyncThunk for deleteUser")
+        const errorMessage = error.response?.data?.message
+        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
+        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
+        return thunkAPI.rejectWithValue(errorMessage)
+    }
+})
+
 const initialState = {
     adminToken: null,
     admin: null,
@@ -178,13 +194,13 @@ const adminSlice = createSlice({
             state.success = false
             state.adminError = true
         })
-        .addCase(deleteUser.pending, (state,action)=>{
+        .addCase(deleteUser.pending||deleteUsersList.pending, (state,action)=>{
             console.log("Inside deleteUser.pending")
             state.adminLoading = true
             state.success = false
             state.adminError = false
         })
-        .addCase(deleteUser.fulfilled, (state,action)=>{
+        .addCase(deleteUser.fulfilled||deleteUsersList.fulfilled, (state,action)=>{
             console.log("Inside deleteUser.fulfilled")
             state.adminLoading = false
             state.success = true
@@ -192,7 +208,7 @@ const adminSlice = createSlice({
             state.adminMessage = action.payload.message
             console.log("allUsers from deleteUser.fulfilled"+JSON.stringify(action.payload))
         })
-        .addCase(deleteUser.rejected, (state,action)=>{
+        .addCase(deleteUser.rejected||deleteUserLists.rejected, (state,action)=>{
             console.log("Inside deleteUser.rejected")
             state.adminLoading = false
             state.success = false

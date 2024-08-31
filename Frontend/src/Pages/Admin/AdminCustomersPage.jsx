@@ -1,12 +1,15 @@
 import React, {useEffect, useState, useRef} from 'react';
 import './AdminCustomersPage.css';
 import axios from '../../Utils/axiosConfig';
-import { useSelector, useDispatch } from 'react-redux';
-import { showUsers, toggleBlockUser, deleteUser, resetStates } from '../../Slices/adminSlice';
+import {useSelector, useDispatch} from 'react-redux';
+import {showUsers, toggleBlockUser, deleteUser, deleteUsersList, resetStates} from '../../Slices/adminSlice';
 
 import {RiArrowDropDownLine} from 'react-icons/ri';
 import {MdBlock, MdDeleteOutline} from 'react-icons/md';
 import {FaSortUp,FaSortDown} from "react-icons/fa6";
+import {FaTrashAlt} from "react-icons/fa";
+import {LuCaseSensitive} from "react-icons/lu";
+import {VscCaseSensitive} from "react-icons/vsc";
 import {toast} from 'react-toastify';
 
 export default function AdminCustomersPage() {
@@ -14,29 +17,23 @@ export default function AdminCustomersPage() {
     const { adminLoading, adminError, adminSuccess, adminMessage, allUsers } = useSelector(state => state.admin);
 
     const [localUsers, setLocalUsers] = useState([]);
-    const [sortIconStyler, setSortIconStyler] = useState({current:false, default:true})
-    // const usernameSortUpIcon, emailSortUpIcon, mobileSortUpIcon
+
+    const [trashUserList, setTrashUserList] = useState(false)
+
+    const [deleteDelay, setDeleteDelay ] = useState(null)
+    let timerId = useRef(null)
+
+    const [matchCase, setMatchCase] = useState(false)
+
     const [activeSorter, setActiveSorter] = useState({field:'',order:''})
+
     const mainBgImg = {
         colorImage : "linear-gradient(to right,rgba(255,255,255),rgba(255,255,255))"
     }
 
-    
-    useEffect(() => {
-        if (sortIconStyler) {
-            console.log("Sort icon styler is now true");
-            // Perform actions that depend on sortIconStyler being true
-        }
-    }, [sortIconStyler]);
-
     useEffect(() => {
         dispatch(showUsers());
     }, [dispatch]);
-
-    const deleteHandler = (id) => {
-        setLocalUsers(prevUsers => prevUsers.filter(user => user._id !== id));
-        dispatch(deleteUser(id));
-    };
 
     useEffect(() => {
         if (allUsers) {
@@ -63,16 +60,56 @@ export default function AdminCustomersPage() {
         dispatch(toggleBlockUser(id));
     };
 
-    
-    
+    const deleteHandler = (id,clearTimer=false) => {
+        setDeleteDelay(10);
+        console.log("Set delete delay to 10 seconds");
+        
+        timerId.current = setInterval(() => {
+            setDeleteDelay(prevCount => {
+                if (prevCount <= 1) {
+                    clearInterval(timerId.current); 
+                    dispatch(deleteUser(id)); 
+                    setLocalUsers(prevUsers => prevUsers.filter(user => user._id !== id));
+                    console.log("User deletion dispatched");
+                    return null;
+                } else {
+                    console.log(`Countdown: ${prevCount - 1} seconds remaining`);
+                    return prevCount - 1;
+                }
+            });
+        }, 1000);
+    };
+
+    const undoDeleteHandler = ()=>{
+        if(timerId.current){
+            clearInterval(timerId.current)
+            setDeleteDelay(0)
+            timerId.current = null
+        }
+    }
+
+    const trashHandler = (userIdList)=>{
+        setLocalUsers(prevUsers => prevUsers.filter(user => userIdList.userList.every(userId=> user._id !== userId)));
+        dispatch(deleteUsersList(userIdList))
+    }
+
     const searchHandler = (e)=>{
         console.log("Inside searchHandler")
         if(e.target.value.trim()==""){
             dispatch(showUsers());
         }
         else{
-            const searchRegex = new RegExp(`^(${e.target.value.trim()})`)
-            setLocalUsers(localUsers.filter(user=>searchRegex.test(user.username)||searchRegex.test(user.email)||searchRegex.test(user.mobile)))
+            if(matchCase){
+                console.log("Inside searchHandler matchCase true case")
+                const searchRegex = new RegExp(`^(${e.target.value.trim()})`) 
+                setLocalUsers(localUsers.filter(user=>searchRegex.test(user.username)||searchRegex.test(user.email)||searchRegex.test(user.mobile)))
+            }
+            else{
+                const searchValue = e.target.value.toString().toLowerCase()
+                console.log("Inside searchHandler matchCase false case")
+                console.log("localUsers.filter(user=> user.username.includes(e.target.value))-->"+JSON.stringify(localUsers.filter(user=> user.username.includes(e.target.value.toLowerCase||e.target.value.toUpperCase))))
+                setLocalUsers(localUsers.filter(user=> user.username.toLowerCase().includes(searchValue)||user.email.toLowerCase().includes(searchValue)||user.mobile.toString().toLowerCase().includes(searchValue)))
+            }
         }
     }
 
@@ -109,32 +146,49 @@ export default function AdminCustomersPage() {
         <section className='h-screen pl-[3rem] z-[-1]' id='AdminCustomersPage'>
             <h1 className='text-h3Semibold'>Customers</h1>
 
-            <p className='mt-[5rem] h-[30px] '>{showUsers && adminLoading?"LOADING...":""}</p>
+            <p className='mt-[2rem] h-[30px] '>{showUsers && adminLoading?"LOADING...":""}</p>
+            <p className='h-[27px] ml-[4px]'><span className='text-[12px]'>{deleteDelay? (<span className='text-red-500 ml-[6px] whitespace-nowrap align-[1px]'>
+                                                                <span className='text-secondary font-bold mr-[4px] cursor-pointer' onClick={(e)=>{
+                                                                                undoDeleteHandler(); 
+                                                                                // e.target.parentElement.style.display = 'none'
+                                                                             }}>
+                                                                    Undo?
+                                                                </span> Deleting in {deleteDelay} seconds...`
+                                                            </span>): null}</span></p>
             <main className='p-[1rem] border border-secondary flex items-center justify-center w-[80%] 
-                                    rounded-[9px]' style={mainBgImg}>
+                                    rounded-[9px] gap-[5px]' style={mainBgImg}>
                 <table cellSpacing={10} cellPadding={10} className='border-spacing-[24px]'>
                     <thead>
                         <tr>
                             <td colSpan='2'>
-                                <input type='search' placeholder='Search..' className='secondaryLight-box text-[13px] 
+                                <div className='flex gap-[8px]' id='searcher'>
+                                    <input type='search' placeholder='Search..' className='secondaryLight-box text-[13px] 
                                                     w-full h-[35px] pl-[10px]' onChange={(e)=>searchHandler(e)}/>
+                                    <span className='self-end px-[3px] mb-[3px] bg-primary rounded-[4px] cursor-pointer relative case-tooltip' 
+                                            style={matchCase? {outlineWidth:'1.5px', outlineColor:'#9f2af0', outlineOffset:'2px', outlineStyle:'solid'}:null}
+                                                    onClick={()=>{console.log("clicked Matchase-->"+matchCase); setMatchCase(!matchCase)}}>
+                                        <VscCaseSensitive/>
+                                    </span>
+                                </div>
                             </td>
                             <td></td>
                             <td>
-                                <div className='inline-flex items-center secondaryLight-box text-[13px] w-[75%] h-[35px] '>
+                                <div className='inline-flex items-center justify-between secondaryLight-box 
+                                                                                text-[13px] px-[11px] w-[75%] h-[35px] customer-dropdown'>
                                     <button className='ml-[15px]'>Status</button>
                                     <RiArrowDropDownLine/>
                                 </div>
                             </td>
                             <td>
-                                <div className='inline-flex items-center secondaryLight-box text-[13px] w-[75%] h-[35px] '> 
+                                <div className='inline-flex items-center justify-between secondaryLight-box 
+                                                                                            text-[13px] px-[11px] w-[75%] h-[35px] customer-dropdown'> 
                                     <button className='ml-[15px]'>Show Entries: </button>
                                     <RiArrowDropDownLine/>
                                 </div>
                             </td>
                         </tr>
                         <tr>
-                            <td colSpan='5'>
+                            <td colSpan='6'>
                                 <hr></hr>
                             </td>
                         </tr>
@@ -177,15 +231,25 @@ export default function AdminCustomersPage() {
                                 <div className='flex items-center'>
                                     <span>Wallet</span>
                                     <i className='flex flex-col h-[5px]'>
-                                        <FaSortUp onClick = {(e)=>sortHandler(e,"wallet",1)} 
+                                        <FaSortUp onClick = {(e)=>sortHandler(e,"wallet",1)}
                                             style={{height: activeSorter.field === "wallet" && activeSorter.order === 1 ? '15px' : '10px', color: activeSorter.field === "wallet" && activeSorter.order === 1 ? 'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
-                                        <FaSortDown onClick = {(e)=>sortHandler(e,"wallet",-1)} 
+                                        <FaSortDown onClick = {(e)=>sortHandler(e,"wallet",-1)}
                                             style={{height: activeSorter.field === "wallet" && activeSorter.order === -1 ? '15px' : '10px', color: activeSorter.field === "wallet" && activeSorter.order === -1 ? 'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
                                     </i>
                                 </div>
                             </td>
                             <td></td>
-                        </tr>
+                            <td>
+                                 <div className='flex gap-[5px] items-center'>
+                                     <input type='checkbox' name='trashAllItems'/>
+                                     <FaTrashAlt onClick={()=>{
+                                        const userIdList = {userList:trashUserList}
+                                        console.log('userList from AdmnCustomerPage.jsx-->'+JSON.stringify())
+                                        trashHandler(userIdList)
+                                        }} /> 
+                                </div>
+                            </td>
+                        </tr> 
                     </thead>
                     <tr><td colSpan='5'></td></tr>
                     
@@ -205,6 +269,10 @@ export default function AdminCustomersPage() {
                                             <button type='button' onClick={() => deleteHandler(user._id)} 
                                                     className='text-red-500'> Delete <MdDeleteOutline/></button>
                                         </div>
+                                    </td>
+                                    <td className='text-left'>
+                                        <input type='checkbox' name='trashItem' value={user._id} 
+                                                    onClick={()=>setTrashUserList([...trashUserList, user._id])}/> 
                                     </td>
                                 </tr>
                             ) :<tr><td>No Records!</td></tr>

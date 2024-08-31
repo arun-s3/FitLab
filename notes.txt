@@ -26,8 +26,8 @@ TODO(5/8/2024)--
 
         WRITE DOWN-- Svg basics, Svg filter,
 
-        2##Admin CustomersPage--> SEARCH- Strict search(current), Not Strict search, Match case
-                               UNDO with timer, on the side
-                               SORT for name, email, mobile, wallet+ createdAt all with 2arrows showing tooltip on hover
+        2##Admin CustomersPage--> Status column + Status dropdown workings
+                                  Paginations
+                                  Content scroll
         1##EMAIL Verification
         3##FB login

@@ -27,6 +27,10 @@ export default function AdminCustomersPage() {
 
     const [activeSorter, setActiveSorter] = useState({field:'',order:''})
 
+    const statusDropdownRef = useRef(null)
+    const statusButtonRef = useRef(null)
+    const [showStatusDropdown, setShowStatusDropdown] = useState(false)
+
     const mainBgImg = {
         colorImage : "linear-gradient(to right,rgba(255,255,255),rgba(255,255,255))"
     }
@@ -102,13 +106,13 @@ export default function AdminCustomersPage() {
             if(matchCase){
                 console.log("Inside searchHandler matchCase true case")
                 const searchRegex = new RegExp(`^(${e.target.value.trim()})`) 
-                setLocalUsers(localUsers.filter(user=>searchRegex.test(user.username)||searchRegex.test(user.email)||searchRegex.test(user.mobile)))
+                setLocalUsers( localUsers.filter(user=>searchRegex.test(user.username)||searchRegex.test(user.email)||searchRegex.test(user.mobile)) )
             }
             else{
                 const searchValue = e.target.value.toString().toLowerCase()
                 console.log("Inside searchHandler matchCase false case")
-                console.log("localUsers.filter(user=> user.username.includes(e.target.value))-->"+JSON.stringify(localUsers.filter(user=> user.username.includes(e.target.value.toLowerCase||e.target.value.toUpperCase))))
-                setLocalUsers(localUsers.filter(user=> user.username.toLowerCase().includes(searchValue)||user.email.toLowerCase().includes(searchValue)||user.mobile.toString().toLowerCase().includes(searchValue)))
+                console.log("localUsers.filter(user=> user.username.includes(e.target.value))-->"+JSON.stringify(localUsers.filter(user=> user.username.includes(e.target.value.toLowerCase||e.target.value.toUpperCase))) )
+                setLocalUsers( localUsers.filter(user=> user.username.toLowerCase().includes(searchValue)||user.email.toLowerCase().includes(searchValue)||user.mobile.toString().toLowerCase().includes(searchValue)) )
             }
         }
     }
@@ -142,6 +146,14 @@ export default function AdminCustomersPage() {
             
     }
 
+    const statusDropdownToggle = (e)=>{
+        setShowStatusDropdown(false)
+        e.target.tagName=='BUTTON'?e.target.parentElement.style.borderBottomLeftRadius = e.target.parentElement.style.borderBottomRightRadius = showStatusDropdown?'8px' : '0px'
+                                  :e.target.style.borderBottomLeftRadius = e.target.style.borderBottomRightRadius = showStatusDropdown?'8px' : '0px'
+        statusDropdownRef.current.style.display = 'inline-block'
+        setShowStatusDropdown(!showStatusDropdown)
+    }
+
     return (
         <section className='h-screen pl-[3rem] z-[-1]' id='AdminCustomersPage'>
             <h1 className='text-h3Semibold'>Customers</h1>
@@ -173,17 +185,46 @@ export default function AdminCustomersPage() {
                             </td>
                             <td></td>
                             <td>
-                                <div className='inline-flex items-center justify-between secondaryLight-box 
-                                                                                text-[13px] px-[11px] w-[75%] h-[35px] customer-dropdown'>
-                                    <button className='ml-[15px]'>Status</button>
+                                <div className='inline-flex relative items-center justify-between secondaryLight-box cursor-pointer
+                                     text-[13px] px-[11px] w-[75%] h-[35px] border-solid bottom-0 border-secondary customer-dropdown' 
+                                                 style={showStatusDropdown? {borderWidth:'1px', borderBottom:'0', borderBottomLeftRadius:'0px', borderBottomRightRadius:'0px', background:'rgb(227, 219, 232)', boxShadow:'2px -5px 6px rgba(72, 69, 75, 0.2)'}:{border:0, borderBottomLeftRadius:'8px', borderBottomRightRadius:'8px'}}
+                                                 onClick={(e)=>{statusDropdownToggle(e)}}>
+                                    
+                                    <div className='absolute top-full left-[-1px] w-[102%] rounded-none rounded-bl-[8px] rounded-br-[8px]
+                                       secondaryLight-box cursor-pointer border border-secondary border-t-0 pb-[10px] hidden' ref={statusDropdownRef}
+                                                                style={showStatusDropdown? {display:'inline-block', background:'rgb(227, 219, 232)', boxShadow:'2px 5px 6px rgba(72, 69, 75, 0.2)'}: null}>
+                                        <ul className='list-none text-[11px] text-secondary font-[450]'>
+                                            <li className='text-right flex items-center justify-center' onClick={()=>{
+                                                setLocalUsers(allUsers)
+                                                statusButtonRef.current.textContent = "Active"
+                                                console.log("Indide onClick of Blocked users, AllUsers-->"+JSON.stringify(allUsers))
+                                                setLocalUsers(currentUsers=>currentUsers.filter(user=>!user.isBlocked))
+                                            }}>
+                                                 <hr/>Active<hr/> </li>
+
+                                            <li className='text-right flex items-center justify-center'onClick={()=>{
+                                                setLocalUsers(allUsers)
+                                                statusButtonRef.current.textContent = "Blocked"
+                                                setLocalUsers(currentUsers=>currentUsers.filter(user=>user.isBlocked))
+                                            }}> 
+                                                <hr/>Blocked<hr/> </li>
+                                            
+                                                <li className='text-right flex items-center justify-center'onClick={()=>{
+                                                setLocalUsers(allUsers)
+                                                statusButtonRef.current.textContent = "Status"
+                                            }}> 
+                                                <hr/>Status<hr/> </li>
+                                        </ul>
+                                    </div>
+                                    <button className='ml-[15px]' ref={statusButtonRef} >Status</button>
                                     <RiArrowDropDownLine/>
                                 </div>
                             </td>
                             <td>
-                                <div className='inline-flex items-center justify-between secondaryLight-box 
+                                <div className='inline-flex items-center justify-between secondaryLight-box cursor-pointer
                                                                                             text-[13px] px-[11px] w-[75%] h-[35px] customer-dropdown'> 
                                     <button className='ml-[15px]'>Show Entries: </button>
-                                    <RiArrowDropDownLine/>
+                                    <RiArrowDropDownLine />
                                 </div>
                             </td>
                         </tr>
@@ -198,10 +239,13 @@ export default function AdminCustomersPage() {
                                     <span>Name</span>
                                     <i className='flex flex-col h-[5px]'>
                                         <FaSortUp  onClick = {(e)=>{ sortHandler(e,"username",1)}} 
-                                                style={{height: activeSorter.field === "username" && activeSorter.order === 1 ? '15px' : '10px',
-                                                        color: activeSorter.field === "username" && activeSorter.order === 1 ? 'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
+                                                style={{height: activeSorter.field === "username" && activeSorter.order === 1 ?
+                                                            color: activeSorter.field === "username" && activeSorter.order === 1 ? 
+                                                                        'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
                                         <FaSortDown onClick = {(e)=>sortHandler(e,"username",-1)} 
-                                            style={{height: activeSorter.field === "username" && activeSorter.order === -1 ? '15px' : '10px',color: activeSorter.field === "username" && activeSorter.order === -1 ? 'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)' }}/>
+                                            style={{height: activeSorter.field === "username" && activeSorter.order === -1 ?'15px':'10px',
+                                                        color: activeSorter.field === "username" && activeSorter.order === -1 ? 
+                                                        'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)' }}/>
                                     </i>
                                 </div> 
                             </td>
@@ -210,9 +254,13 @@ export default function AdminCustomersPage() {
                                     <span>Email</span>
                                     <i className='flex flex-col h-[5px]'>
                                         <FaSortUp onClick = {(e)=>sortHandler(e,"email",1)} 
-                                            style={{height: activeSorter.field === "email" && activeSorter.order === 1 ? '15px' : '10px',color: activeSorter.field === "email" && activeSorter.order === 1 ? 'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
+                                            style={{height: activeSorter.field === "email" && activeSorter.order === 1 ?'15px':'10px',
+                                                        color: activeSorter.field === "email" && activeSorter.order === 1 ?
+                                                            'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
                                         <FaSortDown onClick = {(e)=>sortHandler(e,"email",-1)} 
-                                            style={{height: activeSorter.field === "email" && activeSorter.order === -1 ? '15px' : '10px',color: activeSorter.field === "email" && activeSorter.order === -1 ? 'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
+                                            style={{height: activeSorter.field === "email" && activeSorter.order === -1 ?'15px':'10px',
+                                                        color: activeSorter.field === "email" && activeSorter.order === -1 ? 
+                                                         'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
                                     </i>
                                 </div>
                             </td>
@@ -221,9 +269,13 @@ export default function AdminCustomersPage() {
                                     <span>Mobile</span>
                                     <i className='flex flex-col h-[5px]'>
                                         <FaSortUp onClick = {(e)=>sortHandler(e,"mobile",1)} 
-                                            style={{height: activeSorter.field === "mobile" && activeSorter.order === 1 ? '15px' : '10px', color: activeSorter.field === "mobile" && activeSorter.order === 1 ? 'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
+                                            style={{height: activeSorter.field === "mobile" && activeSorter.order === 1 ?'15px':'10px',
+                                                    color: activeSorter.field === "mobile" && activeSorter.order === 1 ? 
+                                                       'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
                                         <FaSortDown onClick = {(e)=>sortHandler(e,"mobile",-1)} 
-                                            style={{height: activeSorter.field === "mobile" && activeSorter.order === -1 ? '15px' : '10px', color: activeSorter.field === "mobile" && activeSorter.order === -1 ? 'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}} />
+                                            style={{height: activeSorter.field === "mobile" && activeSorter.order === -1 ?'15px':'10px',
+                                                        color: activeSorter.field === "mobile" && activeSorter.order === -1 ? 
+                                                            'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}} />
                                     </i>
                                 </div>
                             </td>
@@ -231,10 +283,14 @@ export default function AdminCustomersPage() {
                                 <div className='flex items-center'>
                                     <span>Wallet</span>
                                     <i className='flex flex-col h-[5px]'>
-                                        <FaSortUp onClick = {(e)=>sortHandler(e,"wallet",1)}
-                                            style={{height: activeSorter.field === "wallet" && activeSorter.order === 1 ? '15px' : '10px', color: activeSorter.field === "wallet" && activeSorter.order === 1 ? 'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
-                                        <FaSortDown onClick = {(e)=>sortHandler(e,"wallet",-1)}
-                                            style={{height: activeSorter.field === "wallet" && activeSorter.order === -1 ? '15px' : '10px', color: activeSorter.field === "wallet" && activeSorter.order === -1 ? 'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
+                                        <FaSortUp onClick = {(e)=>{/*sortHandler(e,"wallet",1)*/}}
+                                            style={{height: activeSorter.field === "wallet" && activeSorter.order === 1 ?'15px':'10px',
+                                                        color: activeSorter.field === "wallet" && activeSorter.order === 1 ? 
+                                                            'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
+                                        <FaSortDown onClick = {(e)=>{/*sortHandler(e,"wallet",-1)*/}}
+                                            style={{height: activeSorter.field === "wallet" && activeSorter.order === -1 ?'15px':'10px',
+                                                         color: activeSorter.field === "wallet" && activeSorter.order === -1 ? 
+                                                            'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
                                     </i>
                                 </div>
                             </td>

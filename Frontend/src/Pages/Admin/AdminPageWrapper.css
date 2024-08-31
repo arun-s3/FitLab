@@ -26,9 +26,3 @@
 #admin-wrapper #admin-content-outlet{
     box-shadow: 2px 3px 22px #89897f inset;
 }
-/* #admin-wrapper #admin-content-outlet::before{
-    content:'';
-    width:225px;
-    height: 100%;
-    border:1px solid red;
-} */

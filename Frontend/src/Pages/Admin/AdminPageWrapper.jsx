@@ -126,7 +126,7 @@ export default function AdminCustomersPage(){
 
                 </aside>                      
             
-                <div className='basis-full pt-[2rem] flex-grow overflow-scroll' id='admin-content-outlet' style={adminContentBgImg}>
+                <div className='basis-full pt-[2rem] flex-grow overflow-scroll ' id='admin-content-outlet' style={adminContentBgImg}>
                         <Outlet/>
                 </div>  
 

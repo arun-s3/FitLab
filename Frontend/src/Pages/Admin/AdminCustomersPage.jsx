@@ -12,7 +12,7 @@ import {LuCaseSensitive} from "react-icons/lu";
 import {VscCaseSensitive} from "react-icons/vsc";
 import {toast} from 'react-toastify';
 
-export default function AdminCustomersPage() {
+export default function AdminCustomersPageV1() {
     const dispatch = useDispatch();
     const { adminLoading, adminError, adminSuccess, adminMessage, allUsers } = useSelector(state => state.admin);
 
@@ -36,12 +36,25 @@ export default function AdminCustomersPage() {
     }
 
     useEffect(() => {
+        console.log("Dispatching showUsers()--- ")
         dispatch(showUsers());
-    }, [dispatch]);
+    }, [dispatch, adminMessage]);
 
     useEffect(() => {
+        console.log("Setting localUsers to allUsers--- ")
         if (allUsers) {
             setLocalUsers(allUsers);
+        }
+        if(statusButtonRef.current){
+            console.log("Inside useEffet, statusButtonRef.current")
+            if(statusButtonRef.current.textContent == "Blocked"){
+                console.log("Inside useEffect, statusButtonRef.current.textContent == Blocked ")
+                setLocalUsers(currentUsers=>currentUsers.filter(user=>user.isBlocked))
+            }
+            if(statusButtonRef.current.textContent == "Active"){
+                console.log("Inside useEffect, statusButtonRef.current.textContent == Active ")
+                setLocalUsers(currentUsers=>currentUsers.filter(user=>!user.isBlocked))
+            }
         }
     }, [allUsers]);
 
@@ -61,6 +74,7 @@ export default function AdminCustomersPage() {
                 user._id === id ? { ...user, isBlocked: !user.isBlocked } : user
             )
         );
+        console.log("Dispatching toggleBlockUser()-- ")
         dispatch(toggleBlockUser(id));
     };
 
@@ -239,7 +253,7 @@ export default function AdminCustomersPage() {
                                     <span>Name</span>
                                     <i className='flex flex-col h-[5px]'>
                                         <FaSortUp  onClick = {(e)=>{ sortHandler(e,"username",1)}} 
-                                                style={{height: activeSorter.field === "username" && activeSorter.order === 1 ?
+                                                style={{height: activeSorter.field === "username" && activeSorter.order === 1 ?'15px':'10px',
                                                             color: activeSorter.field === "username" && activeSorter.order === 1 ? 
                                                                         'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
                                         <FaSortDown onClick = {(e)=>sortHandler(e,"username",-1)} 
@@ -283,11 +297,11 @@ export default function AdminCustomersPage() {
                                 <div className='flex items-center'>
                                     <span>Wallet</span>
                                     <i className='flex flex-col h-[5px]'>
-                                        <FaSortUp onClick = {(e)=>{/*sortHandler(e,"wallet",1)*/}}
+                                        <FaSortUp onClick = {(e)=>sortHandler(e,"wallet",1)}
                                             style={{height: activeSorter.field === "wallet" && activeSorter.order === 1 ?'15px':'10px',
                                                         color: activeSorter.field === "wallet" && activeSorter.order === 1 ? 
                                                             'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
-                                        <FaSortDown onClick = {(e)=>{/*sortHandler(e,"wallet",-1)*/}}
+                                        <FaSortDown onClick = {(e)=>sortHandler(e,"wallet",-1)}
                                             style={{height: activeSorter.field === "wallet" && activeSorter.order === -1 ?'15px':'10px',
                                                          color: activeSorter.field === "wallet" && activeSorter.order === -1 ? 
                                                             'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
@@ -310,7 +324,7 @@ export default function AdminCustomersPage() {
                     <tr><td colSpan='5'></td></tr>
                     
                     <tbody className='text-[14px]'>
-                        {
+                        {   
                             localUsers.length > 0 ? localUsers.map(user =>
                                 <tr key={user._id}>
                                     <td>{user.username}</td>

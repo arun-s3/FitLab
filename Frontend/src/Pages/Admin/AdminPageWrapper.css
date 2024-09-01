@@ -25,4 +25,9 @@
 }
 #admin-wrapper #admin-content-outlet{
     box-shadow: 2px 3px 22px #89897f inset;
+    scroll-snap-type: y proximity;
+    scroll-padding-top: 1rem;
+}
+#admin-wrapper #admin-content-outlet >:first-child{
+    scroll-snap-align: start;   
 }

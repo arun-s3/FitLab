@@ -42,7 +42,7 @@
 #productlist aside #filter-body::marker{
     color: var(--SECONDARY);
 }
-#productlist aside .price-buttons input[type="number"]{
+/* #productlist aside .price-buttons input[type="number"]{
     -moz-appearance: textfield;
 }
 #productlist aside .price-buttons input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button{
@@ -63,7 +63,7 @@
 }   
 #productlist aside .price-buttons .incdec-btn{
     font-size: 17px;
-}
+} */
 #productlist #filter-content-header > input:first-child{
     border-color: rgb(212, 176, 236);
     box-shadow: 2px 2px 12px rgb(233, 222, 242);

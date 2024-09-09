@@ -858,14 +858,6 @@ select{
   top: 16rem;
 }
 
-.top-\[1px\]{
-  top: 1px;
-}
-
-.top-\[20px\]{
-  top: 20px;
-}
-
 .top-\[30\%\]{
   top: 30%;
 }
@@ -1154,10 +1146,6 @@ select{
 
 .w-\[102\%\]{
   width: 102%;
-}
-
-.w-\[11rem\]{
-  width: 11rem;
 }
 
 .w-\[14rem\]{
@@ -1486,16 +1474,6 @@ select{
 .border-gray-500{
   --tw-border-opacity: 1;
   border-color: rgb(107 114 128 / var(--tw-border-opacity));
-}
-
-.border-red-400{
-  --tw-border-opacity: 1;
-  border-color: rgb(248 113 113 / var(--tw-border-opacity));
-}
-
-.border-red-500{
-  --tw-border-opacity: 1;
-  border-color: rgb(239 68 68 / var(--tw-border-opacity));
 }
 
 .border-secondary{

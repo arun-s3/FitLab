@@ -6,7 +6,7 @@ import {SiteButtonSquare} from './SiteButton';
 import {MdFavoriteBorder} from "react-icons/md";
 import {IoStarOutline,IoStarHalfSharp,IoStarSharp} from "react-icons/io5";
 
-export default function Products() {
+export default function Products({gridView}) {
   const [products, setProducts] = useState([]);
   const [totalCounts, setTotalCounts] = useState(0)
   const [currentPage, setCurrentPage] = useState(1)
@@ -20,6 +20,7 @@ export default function Products() {
         setTotalCounts(response.data.total)
         console.log("PRODUCTS-->", JSON.stringify(response.data.products));
         console.log("TOTAL COUNTS-->"+ response.data.total)
+        console.log("TAGS-->"+ response.data.products[0].tags[0])
       } catch (error) {
         console.log("ERROR IN PRODUCTLISTING-->", error.message);
       }
@@ -54,12 +55,12 @@ export default function Products() {
 
   return (
     <>
-    <div className='grid grid-cols-3 gap-y-[2rem]' id="products-display">
+    <div className= {gridView ? 'grid grid-cols-3 gap-y-[2rem]' : 'flex flex-col gap-[2rem]' } id="products-display">
       {
         products.map((product) => (
-          <div key={product.id} className='w-[275px]'>
+          <div key={product.id} className= {gridView ? 'w-[275px]' : 'flex gap-[1rem] w-full'}>
             <figure className='relative h-auto rounded-[10px] thumbnail'>
-              <img src={product.thumbnail} alt={product.title} />
+              <img src={product.thumbnail} alt={product.title} className='rounded-[10px]'/>
               <figcaption className='absolute bottom-[12px] w-full text-center'>
                 <SiteButtonSquare customStyle={{width:'12rem', paddingBlock:'8px', fontSize:'13px'}}> Add to Cart </SiteButtonSquare>
               </figcaption>
@@ -67,16 +68,31 @@ export default function Products() {
                 <MdFavoriteBorder />
               </div>
             </figure>
-            <div className='mt-[10px] flex flex-col gap-[5px] pl-[10px] py-[8px] rounded-[10px] product-infos'>
+            <div className= {gridView? 'mt-[10px] flex flex-col gap-[5px] pl-[10px] py-[8px] rounded-[10px] product-infos' 
+                                 : 'inline-flex flex-col gap-[10px] justify-center pl-[1rem] py-[8px] rounded-[10px] ml-[1rem] product-infos w-full'}>
               {product?.reviews ? ( <p className='text-secondary flex items-center gap-[10px]'> 
                                         { produceStarRating(product).stars } 
-                                        <span className='text-[13px]'> ({ produceStarRating(product).avgRating }) </span> 
+                                        <span className='text-[13px]'> ({ product.reviews.length }) </span> 
                                     </p>)
                                  : ( <p className='text-secondary'>No rating available!</p> )
 
               }
-              <p className='text-[13px] capitalize font-[500]'>{product.title}</p>
-              <p className='text-[15px]'>&#8377; {product.price}</p>
+              <p className= {(gridView ? 'text-[13px]' : 'text-[16px]')  + ' capitalize font-[500]'}>{product.title}</p>
+              {
+                !gridView && 
+                  <p className='text-[14px]'>{product.description}</p>
+              }
+              <p className='text-[15px]'> &#8377; {Math.ceil(product.price*84)}</p>
+              {
+                !gridView && 
+                <div>
+                  {product.tags.map(tag=> 
+                    <span className='text-[13px] px-[14px] py-[1px] border-[1.5px]  border-[#eae0f0] rounded-[7px] text-secondary mr-[1rem]'> 
+                      {tag} 
+                    </span>
+                )}
+                </div>
+              }
             </div>
           </div>
         ))

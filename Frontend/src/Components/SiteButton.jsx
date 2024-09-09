@@ -24,6 +24,13 @@ export function SiteButtonSquare({customStyle,children,shouldSubmit=false}){
     )
 }
 
+export function SiteSecondaryButtonSquare({customStyle,children,shouldSubmit=false}){
+    return(
+        <button type={shouldSubmit?"submit":"button"} className=" text-black text-descReg1 site-button-square site-button-secondary-square" 
+                style={customStyle}>{children}</button>
+    )
+}
+
 export function GoogleButtonSquare({customStyle,children,clickHandler,shouldSubmit=false}){
     return(
         <button type={shouldSubmit?"submit":"button"} className="bg-black text-primary text-descReg1 site-button-google" 

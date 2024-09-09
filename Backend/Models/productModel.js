@@ -4,7 +4,6 @@ const productSchema = mongoose.Schema({
      name: {
        type: String,
        required: true,
-       trim: true
      },
      description: {
        type: String,
@@ -12,22 +11,22 @@ const productSchema = mongoose.Schema({
      },
      weights: {
         type: Number,
-        required: true
+        required: false
      },
      price: {
        type: Number,
-       required: true,
-       maxLength: 8
+       maxLength: 8,
+       required: [true, "Must enter the product price"]
      },
      discountPercentage: {
         type: Number,
-        required: false,
         min: [1, "Must be more than 1%"],
-        max: [90, "Must be less than 90%"]
+        max: [90, "Must be less than 90%"],
+        required: false
      },
      brand: {
         type: String,
-        required: true
+        required: [true, "Must enter the brand name"]
      },
      ratings: {
        type: Number,
@@ -43,13 +42,13 @@ const productSchema = mongoose.Schema({
      },
      category: {
        type: String,
-       required: true
+       required: [true, "Must enter the category the product belongs to"]
      },
      stock: {
        type: Number,
-       required: true,
        maxLength: 4,
        default: 1,
+       required: true
      },
      totalReviews: {
        type: Number,

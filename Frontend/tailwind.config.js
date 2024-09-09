@@ -39,8 +39,8 @@ module.exports = {
         h3Semibold:['30px',{
           fontWeight:'700'
         }],
-        breadcrumbTitle:['43px',{
-          fontWeight:'700'
+        breadcrumbTitle:['23px',{
+          fontWeight:'600'
         }],
         h3InterMed1:['54px',{
           fontFamily:'Inter',
@@ -75,5 +75,7 @@ module.exports = {
       }
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/forms')
+  ],
 }

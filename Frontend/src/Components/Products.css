@@ -1,0 +1,16 @@
+
+#products-display .thumbnail{
+    background: rgb(243, 245, 247);
+}
+#products-display .favourite > svg{
+    font-size: 18px;
+    color: var(--SECONDARY);
+}
+#products-display .product-infos{
+    background: rgba(243, 230, 251, 0.52);
+    /* border: 1px solid rgba(159, 42, 240, 0.44); */
+}
+#products-display .product-infos .emptystar > svg{
+    height: 15px;
+    width: 15px;
+}

@@ -30,9 +30,11 @@ app.use(cors({
 
 const userRoutes = require('./Routes/userRoutes.js')
 const adminRoutes = require('./Routes/adminRoutes.js')
+const productRoutes = require('./Routes/productRoutes.js')
 
 app.use('/', userRoutes)
 app.use('/admin', adminRoutes)
+// app.use('/product', productRoutes)
 
 app.use((error,req,res,next)=>{
     const message = error.message||'Internal Server Error'

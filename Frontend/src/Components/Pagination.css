@@ -1,0 +1,22 @@
+ 
+#pagination-bar > span{
+    padding: 5px;
+    border: 2px solid #F1F1F1;
+    border-radius: 7px;
+    width: 37px;
+    height: 35px;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 14px;
+    font-weight: 450;
+    cursor: pointer;
+}
+
+#pagination-bar span:first-child, #pagination-bar span:last-child{
+    background: #959393;
+}
+#pagination-bar span:first-child > svg, #pagination-bar span:last-child > svg{
+    font-size: 24px;
+    font-weight: 382;
+    color: #e1e1e1;
+}

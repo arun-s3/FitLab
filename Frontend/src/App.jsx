@@ -12,6 +12,8 @@ import AdminCustomersPage from './Pages/Admin/AdminCustomersPage'
 // import AdminCustomersPageV2 from './Pages/Admin/TesterPages/TesterV2AdminCustomersPage' //For Testing Purpose
 // import AdminCustomersPageV3 from './Pages/Admin/TesterPages/TesterV3AdminCustomersPage'  //For Testing Purpose
 
+import ProductListPage from './Pages/ProductListPage'
+
 
 import {ToastContainer} from 'react-toastify'
 import "react-toastify/dist/ReactToastify.css";
@@ -35,6 +37,9 @@ export default function App(){
                             <Route path="customers" element={<AdminCustomersPage/>} />
                         </Route>
                     </Route>
+                </Route>
+                <Route path='products'>
+                    <Route index element={<ProductListPage/>}/>
                 </Route>
             </Routes>
         </BrowserRouter>

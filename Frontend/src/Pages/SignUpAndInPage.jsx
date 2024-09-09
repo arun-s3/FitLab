@@ -74,7 +74,7 @@ export default function SignUpAndInPage({type}){
         console.log("msg-->"+message)
         delete formData[e.target.id.toString()]
         e.target.nextElementSibling.innerText = message
-    }
+    } 
     const regexPatterns = {
         emailPattern: /^([a-z\d\.-]+)@([a-z\d-]+)\.([a-z]{2,10})([\.a-z]?)$/,
         usernamePattern: /^[\w-]{5,15}$/,

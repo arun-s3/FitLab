@@ -1,0 +1,80 @@
+
+#productlist aside ul label{
+    margin-right:5px;
+}
+#productlist aside .filter-head > svg{
+    color: var(--SECONDARY);
+}
+#productlist aside #filter-header{
+    margin-bottom: 6px;
+    display: flex; 
+    justify-content: space-between;
+    align-items: center;
+}
+#productlist aside #filter-header > svg{
+    color: var(--SECONDARY);
+    font-size: 21px;
+}
+#productlist aside #filter-header > h4{
+    font-size: 14px;
+    font-weight: 500;
+}
+#productlist aside #filter-body{
+    padding-left: 3px;
+    color: #505050;
+    padding-left: 5px;
+    padding-top: 4px;
+    font-size: 14px;
+}
+#productlist aside #filter-body > li{
+    margin-bottom: 4px; 
+}
+#productlist aside #filter-body label{
+    font-size: 13px;
+}
+#productlist aside #filter-body input[type="checkbox"]{
+    height: 13px;
+    width: 13px;
+    margin-right: 5px;
+    border-color: var(--SECONDARY);
+    border-width: 1.6px;
+}
+#productlist aside #filter-body::marker{
+    color: var(--SECONDARY);
+}
+#productlist aside .price-buttons input[type="number"]{
+    -moz-appearance: textfield;
+}
+#productlist aside .price-buttons input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button{
+    -webkit-appearance: none;
+    margin: 0;
+}
+#productlist aside .price-buttons input[type="number"]::placeholder{
+    font-size:14px;
+    color:var(--SECONDARY);
+}
+#productlist aside .price-buttons button{
+    background: var(--PRIMARY);
+    height: 2rem;
+    width: 1rem;
+    color: var(--SECONDARY);
+    font-weight: 550;
+    box-shadow: 2px 2px 7px rgb(194, 190, 198);
+}   
+#productlist aside .price-buttons .incdec-btn{
+    font-size: 17px;
+}
+#productlist #filter-content-header > input:first-child{
+    border-color: rgb(212, 176, 236);
+    box-shadow: 2px 2px 12px rgb(233, 222, 242);
+}
+#productlist #filter-content-header .sort-by > svg{
+    color:var(--SECONDARY)
+}
+#productlist #filter-content-header .view-type > svg{
+    color: var(--SECONDARY);
+    padding: 4px;
+    height: 24px;
+    width: 24px;
+    background: rgb(242, 245, 229); 
+}

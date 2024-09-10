@@ -1,23 +1,23 @@
 import React from 'react'
 import {BrowserRouter, Route, Routes} from 'react-router-dom'
 
-import HomePage from './Pages/HomePage'
-import SignUpAndInPage from './Pages/SignUpAndInPage'
-import PrivateUserRoutes from './Components/PrivateUserRoutes'
-import PrivateAdminRoutes from './Components/PrivateAdminRoutes'
+import HomePage from './Pages/User/HomePage/HomePage'
+import SignUpAndInPage from './Pages/User/SignUpAndInPage/SignUpAndInPage'
+import PrivateUserRoutes from './Components/PrivateUserRoutes/PrivateUserRoutes'
+import PrivateAdminRoutes from './Components/PrivateAdminRoutes/PrivateAdminRoutes'
 
-import AdminSignInPage from './Pages/Admin/AdminSignInPage'
-import AdminPageWrapper from './Pages/Admin/AdminPageWrapper'
-import AdminCustomersPage from './Pages/Admin/AdminCustomersPage'
+import AdminSignInPage from './Pages/Admin/AdminSignInPage/AdminSignInPage'
+import AdminPageWrapper from './Pages/Admin/AdminPageWrapper/AdminPageWrapper'
+import AdminCustomersPage from './Pages/Admin/AdminCustomersPage/AdminCustomersPage'
 // import AdminCustomersPageV2 from './Pages/Admin/TesterPages/TesterV2AdminCustomersPage' //For Testing Purpose
 // import AdminCustomersPageV3 from './Pages/Admin/TesterPages/TesterV3AdminCustomersPage'  //For Testing Purpose
 
-import ProductListPage from './Pages/ProductListPage'
+import ProductListPage from './Pages/User/ProductListPage/ProductListPage'
 
 
 import {ToastContainer} from 'react-toastify'
 import "react-toastify/dist/ReactToastify.css";
-import Header from './Components/Header'
+import Header from './Components/Header/Header'
 
 export default function App(){
     

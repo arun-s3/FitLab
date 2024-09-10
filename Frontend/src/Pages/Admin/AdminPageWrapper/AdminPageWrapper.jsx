@@ -3,7 +3,7 @@ import  './AdminPageWrapper.css'
 import {FaRegBell} from "react-icons/fa";
 import {Link, useNavigate, Outlet} from 'react-router-dom'
 import {useSelector, useDispatch} from 'react-redux'
-import {adminSignout} from '../../Slices/adminSlice'
+import {adminSignout} from '../../../Slices/adminSlice'
 
 import {MdOutlineDashboardCustomize, MdLogout} from "react-icons/md";
 import {FaCartShopping, FaChartLine} from "react-icons/fa6";

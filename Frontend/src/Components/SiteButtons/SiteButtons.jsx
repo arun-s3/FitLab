@@ -1,5 +1,5 @@
 import React from 'react'
-import './SiteButton.css'
+import './SiteButtons.css'
 import {useSelector} from 'react-redux'
 
 export function SiteButton({customStyle,children,shouldSubmit=false}){

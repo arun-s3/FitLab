@@ -1,7 +1,7 @@
 import React from 'react'
-import Header from '../Components/Header'
-import Footer from '../Components/Footer'
-import {SiteButtonDark} from '../Components/SiteButton'
+import Header from '../../../Components/Header/Header'
+import Footer from '../../../Components/Footer/Footer'
+import {SiteButtonDark} from '../../../Components/SiteButtons/SiteButtons'
 import {FaFacebook, FaInstagramSquare, FaLinkedin} from "react-icons/fa";
 import {CiFacebook, CiInstagram, CiLinkedin} from "react-icons/ci";
 

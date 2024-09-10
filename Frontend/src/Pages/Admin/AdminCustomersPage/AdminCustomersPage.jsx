@@ -2,7 +2,7 @@ import React, {useEffect, useState, useRef} from 'react';
 import './AdminCustomersPage.css';
 import axios from '../../Utils/axiosConfig';
 import {useSelector, useDispatch} from 'react-redux';
-import {showUsers, toggleBlockUser, deleteUser, deleteUsersList, resetStates} from '../../Slices/adminSlice';
+import {showUsers, toggleBlockUser, deleteUser, deleteUsersList, resetStates} from '../../../Slices/adminSlice';
 
 import {RiArrowDropDownLine} from 'react-icons/ri';
 import {MdBlock, MdDeleteOutline} from 'react-icons/md';

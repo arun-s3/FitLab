@@ -1,9 +1,9 @@
 import React from 'react'
-import Logo from './Logo'
+import Logo from '../Logo/Logo'
 import './Header.css'
-import UserHead from './UserHead'
+import UserHead from '../UserHead/UserHead'
 import {Link} from 'react-router-dom'
-import {SiteButton} from './SiteButton'
+import {SiteButton} from '../SiteButtons/SiteButtons'
 import {IoIosSearch} from "react-icons/io";
 import {CiUser} from "react-icons/ci";
 import {IoCartOutline} from "react-icons/io5";

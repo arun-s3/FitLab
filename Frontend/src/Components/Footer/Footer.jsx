@@ -1,9 +1,9 @@
 import React from 'react'
 import {Link} from 'react-router-dom'
 import './Footer.css'
-import { FaFacebook, FaTwitter, FaInstagram , FaPinterest, FaYoutube    } from "react-icons/fa";
-import { CiYoutube } from "react-icons/ci";
-import { SiteButtonSquare } from './SiteButton';
+import {FaFacebook, FaTwitter, FaInstagram , FaPinterest, FaYoutube    } from "react-icons/fa";
+import {CiYoutube} from "react-icons/ci";
+import {SiteButtonSquare} from '../SiteButtons/SiteButtons';
 
 export default function Footer(){
     return(

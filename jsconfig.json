@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./", // Sets the base URL for imports (root of your project)
+    "paths": {
+     
+    }
+  },
+  "include": ["Backend/**/*", "Frontend/**/*"], // Include all files in the src directory
+  "exclude": ["node_modules", "Frontend/node_modules"]
+}
+
+// "@components/*": ["src/components/*"], // Optional path alias (customize this for your project)
+// "@utils/*": ["src/utils/*"]

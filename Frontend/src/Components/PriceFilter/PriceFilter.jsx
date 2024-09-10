@@ -1,6 +1,6 @@
 import React,{useState, useEffect, useRef} from 'react'
 import './PriceFilter.css'
-import {SiteSecondaryButtonSquare} from '../Components/SiteButton'
+import {SiteSecondaryButtonSquare} from '../SiteButtons/SiteButtons'
 import {RiArrowDropUpLine, RiArrowDropDownLine} from "react-icons/ri";
 
 export default function PriceFilter(){

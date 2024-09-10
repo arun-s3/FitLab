@@ -1,8 +1,8 @@
 import React, {useState, useEffect} from 'react';
 import axios from 'axios';
 import './Products.css';
-import Pagination from './Pagination'
-import {SiteButtonSquare} from './SiteButton';
+import Pagination from '../Pagination/Pagination'
+import {SiteButtonSquare} from '../SiteButtons/SiteButtons';
 import {MdFavoriteBorder} from "react-icons/md";
 import {IoStarOutline,IoStarHalfSharp,IoStarSharp} from "react-icons/io5";
 

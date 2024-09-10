@@ -1,11 +1,11 @@
 import React,{useState, useEffect} from 'react'
 import './AdminSignInPage.css'
 import {Link,useNavigate} from 'react-router-dom'
-import Logo from '../../Components/Logo'
+import Logo from '../../../Components/Logo/Logo'
 import {useSelector,useDispatch} from 'react-redux'
-import {resetStates, adminSignin} from '../../Slices/adminSlice'
-import {SiteButtonSquare} from '../../Components/SiteButton'
-import {CustomHashLoader} from '../../Components/Loader'
+import {resetStates, adminSignin} from '../../../Slices/adminSlice'
+import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
+import {CustomHashLoader} from '../../../Components/Loader/Loader'
 import {RiAdminLine} from "react-icons/ri";
 
 export default function AdminSignInPage(){

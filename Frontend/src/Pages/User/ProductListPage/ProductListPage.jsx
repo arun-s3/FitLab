@@ -1,11 +1,11 @@
 import React,{useState, useEffect, useRef} from 'react'
 import {Link} from 'react-router-dom'
 import './ProductListPage.css'
-import Header from '../Components/Header'
-import BreadcrumbBar from '../Components/BreadcrumbBar'
-import PriceFilter from '../Components/PriceFilter'
-import {SearchInput} from '../Components/FormComponents'
-import Products from '../Components/Products'
+import Header from '../../../Components/Header/Header'
+import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
+import PriceFilter from '../../../Components/PriceFilter/PriceFilter'
+import {SearchInput} from '../../../Components/FromComponents/FormComponents'
+import Products from '../../../Components/Products/Products'
 
 import {VscSettings} from "react-icons/vsc";
 import {RiArrowDropUpLine, RiArrowDropDownLine} from "react-icons/ri";

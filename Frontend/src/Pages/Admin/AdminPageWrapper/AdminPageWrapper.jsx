@@ -18,7 +18,7 @@ import {RiSignpostLine} from "react-icons/ri";
 import {GrGallery} from "react-icons/gr";
 
 
-export default function AdminCustomersPage(){
+export default function AdminWrapperPage(){
 
     const asideBgImg={
         // backgroundImage:"url('/mask-bg.png')",
@@ -58,7 +58,7 @@ export default function AdminCustomersPage(){
                     </div>
                 </div>
             </header>
-            <div className='flex fixed top-[5rem]'>
+            <div className='flex fixed top-[5rem] w-full'>
             
                 <aside className='inline-flex gap-0 z-[10]' id='admin-wrapper-aside'>
                     <div className='h-screen w-[14rem] bg-black' style={asideBgImg}id='aside-content' >
@@ -126,7 +126,8 @@ export default function AdminCustomersPage(){
 
                 </aside>                      
             
-                <div className='basis-full pt-[2rem] flex-grow overflow-scroll ' id='admin-content-outlet' style={adminContentBgImg}>
+                <div className='basis-full pt-[2rem] pl-[3rem] flex-grow overflow-scroll h-screen' id='admin-content-outlet' style={adminContentBgImg}>
+
                         <Outlet/>
                 </div>  
 

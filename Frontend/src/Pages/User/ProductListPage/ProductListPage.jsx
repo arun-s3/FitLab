@@ -4,6 +4,7 @@ import './ProductListPage.css'
 import Header from '../../../Components/Header/Header'
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
 import PriceFilter from '../../../Components/PriceFilter/PriceFilter'
+import TestPriceFilter from '../../../Components/PriceFilter/TestPriceFilter' // For Enhancing Original PriceFiter feature
 import {SearchInput} from '../../../Components/FromComponents/FormComponents'
 import Products from '../../../Components/Products/Products'
 
@@ -146,6 +147,7 @@ export default function ProductList(){
                     <div id='filter-body'>
                         {
                             showPriceFilter && <PriceFilter/>
+                            // showPriceFilter && <TestPriceFilter/>
                         }
                     </div>
                     </div>
@@ -156,7 +158,7 @@ export default function ProductList(){
                         <SearchInput/>
                         <div className='flex gap-[2rem] items-center'>
                             <div className='flex items-center sort-by relative sort-dropdown cursor-pointer' 
-                                                                    onClick={()=> setShowSortBy(status=> !status)}>
+                                                                    onClick={(e)=> setShowSortBy(status=> !status)}>
                                 <span className='text-[13px] font-[500]'> Sort By </span>
                                 <RiArrowDropDownLine/>
                                 {showSortBy && 

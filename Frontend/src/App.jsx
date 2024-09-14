@@ -11,6 +11,7 @@ import AdminPageWrapper from './Pages/Admin/AdminPageWrapper/AdminPageWrapper'
 import AdminCustomersPage from './Pages/Admin/AdminCustomersPage/AdminCustomersPage'
 // import AdminCustomersPageV2 from './Pages/Admin/TesterPages/TesterV2AdminCustomersPage' //For Testing Purpose
 // import AdminCustomersPageV3 from './Pages/Admin/TesterPages/TesterV3AdminCustomersPage'  //For Testing Purpose
+import AdminAddProductPage from './Pages/Admin/AdminAddProductPage/AdminAddProductPage'
 
 import ProductListPage from './Pages/User/ProductListPage/ProductListPage'
 
@@ -35,6 +36,9 @@ export default function App(){
                     <Route element={<PrivateAdminRoutes/>}>
                         <Route element={<AdminPageWrapper/>}>
                             <Route path="customers" element={<AdminCustomersPage/>} />
+                            <Route path='products'>
+                                <Route path='add' element={<AdminAddProductPage/>} />
+                            </Route>
                         </Route>
                     </Route>
                 </Route>

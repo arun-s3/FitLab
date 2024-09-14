@@ -3,7 +3,7 @@ import './UserHead.css'
 import {IoMdArrowDropdown, IoMdArrowDropup} from "react-icons/io";
 import {useSelector, useDispatch} from 'react-redux'
 import {Link} from 'react-router-dom'
-import {signout} from '../../Slices/userSlicee'
+import {signout} from '../../Slices/userSlice'
 import axios from 'axios'
 
 export default function UserHead(){

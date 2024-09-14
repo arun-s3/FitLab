@@ -25,9 +25,16 @@
 }
 #admin-wrapper #admin-content-outlet{
     box-shadow: 2px 3px 22px #89897f inset;
-    scroll-snap-type: y proximity;
+    /* scroll-snap-type: y proximity; */
     scroll-padding-top: 1rem;
 }
-#admin-wrapper #admin-content-outlet >:first-child{
+#admin-wrapper #admin-content-outlet > section:first-child{
     scroll-snap-align: start;   
+    z-index: -1;
+    margin-bottom: 7rem;
+}
+#admin-wrapper #admin-content-outlet > section:first-child > h1:first-of-type{
+    font-size: 30px;
+    font-weight: 700;
+    margin-bottom: 2rem;
 }

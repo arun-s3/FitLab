@@ -1,6 +1,6 @@
 import React, {useEffect, useState, useRef} from 'react';
 import './AdminCustomersPage.css';
-import axios from '../../Utils/axiosConfig';
+import axios from '../../../Utils/axiosConfig';
 import {useSelector, useDispatch} from 'react-redux';
 import {showUsers, toggleBlockUser, deleteUser, deleteUsersList, resetStates} from '../../../Slices/adminSlice';
 
@@ -169,7 +169,7 @@ export default function AdminCustomersPageV1() {
     }
 
     return (
-        <section className='h-screen pl-[3rem] z-[-1]' id='AdminCustomersPage'>
+        <section className='h-screen z-[-1]' id='AdminCustomersPage'>
             <h1 className='text-h3Semibold'>Customers</h1>
 
             <p className='mt-[2rem] h-[30px] '>{showUsers && adminLoading?"LOADING...":""}</p>

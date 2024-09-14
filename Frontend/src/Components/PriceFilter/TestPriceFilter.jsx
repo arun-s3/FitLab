@@ -11,9 +11,11 @@ export default function PriceFilter(){
     let currentLeft = useRef(0); let collisionCheck = useRef(false)
     const showRangeRef = useRef(null)
 
+    let moveFromLeft = useRef(false)
+
     let currentX = useRef(0); let leftValueNow = useRef(0) // For mouse events
-    let checkDragging = useRef(false); let checkMouseDown = useRef(false)                   // For mouse events
-    let dragCursor = useRef(false)
+    let checkStartDrag = useRef(false); let checkMouseDown = useRef(false)                   // For mouse events
+    let checkDragging = useRef(false)
 
     const [minPrice, setMinPrice] = useState(0)
     const [maxPrice, setMaxPrice] = useState(3750)
@@ -70,14 +72,13 @@ export default function PriceFilter(){
      }
      const dragStartHandler = (e, rangeStart)=>{
          if(true || !collisionCheck.current){
-        //  checkDragging.current = true
+         checkStartDrag.current = true
          const currentLeft = parseInt(window.getComputedStyle(e.target).left) || 0;
          rangeStart.current = e.clientX - currentLeft;
          const img = new Image();
          img.src = ''; 
          e.dataTransfer.setDragImage(img, 0, 0);
          e.target.style.cursor = 'grab'
-         dragCursor.current  =true
          console.log("rangeStart value--> " + rangeStart.current);
          }
      }
@@ -110,6 +111,7 @@ export default function PriceFilter(){
              // const moveFromLeft = leftValueNow + (e.clientX-currentX)
              // e.target.style.left = `${moveFromLeft}px`
              e.target.style.cursor = 'grabbing'
+             checkDragging.current = true
              const currentHandlerRect = e.target.getBoundingClientRect()
              const otherHandlerRect = e.target.nextElementSibling.getBoundingClientRect()
              console.log("getBoundingClientRect() of firstHandler-->"+ JSON.stringify(currentHandlerRect))
@@ -134,9 +136,9 @@ export default function PriceFilter(){
      }
      const dropHandler = (e)=>{
          console.log("Dropped!")
+         checkStartDrag.current = false
          checkDragging.current = false
          checkMouseDown.current = false
-         dragCursor.current = false
          e.preventDefault()
          // if(collisionCheck.current){
          //     e.preventDefault()
@@ -144,47 +146,76 @@ export default function PriceFilter(){
      }
  
      
-     const mouseDownHandler = (e)=>{
-        // if(checkDragging.current){
+     const mouseDownHandler = (e, rangeStart)=>{
+        // if(checkStartDrag.current){
         //     console.log("Inside mouseDownHandler")
         //     checkMouseDown.current = true
         // }
+    
+            checkStartDrag.current = true
+            const currentLeft = parseInt(window.getComputedStyle(e.target).left) || 0;
+            rangeStart.current = e.clientX - currentLeft;
+            console.log("rangeStart value--> " + rangeStart.current);
          console.log("Inside mouseDownHandler")
          leftValueNow.current = parseInt(window.getComputedStyle(e.target).left);  
          currentX.current = e.clientX
-         checkDragging.current = true  
-         e.target.style.cursor = 'pointer' 
+        //  checkStartDrag.current = true  
+         e.target.style.cursor = 'grab' 
      }
-     const mouseMoveHandler = (e)=>{
-        // if(checkDragging.current && checkMouseDown.current){
-        //     console.log(`Inside mouseMoveHandler, checkDragging.current and checkMouseDown.current-->${checkDragging.current} & ${checkMouseDown.current}`)
+     const mouseMoveHandler = (e, rangeStart, rangeEnd, range)=>{
+        // if(checkStartDrag.current && checkMouseDown.current){
+        //     console.log(`Inside mouseMoveHandler, checkStartDrag.current and checkMouseDown.current-->${checkStartDrag.current} & ${checkMouseDown.current}`)
         //     leftValueNow.current = rangeStart.current + e.clientX
         //     e.target.style.left = `${leftValueNow.current}px`
         // }
         // console.log("Inside mouseMoveHandler")
-         if(checkDragging.current){
-             console.log("checkDragging.current" + checkDragging.current)
-             let moveFromLeft = leftValueNow.current + (e.clientX-currentX.current)
+         if(checkStartDrag.current){
+             console.log("checkStartDrag.current" + checkStartDrag.current)
+             console.log("checkStartDrag.current" + checkDragging.current)
+             moveFromLeft.current = leftValueNow.current + (e.clientX-currentX.current)
              console.log("moveFromLeft"+ moveFromLeft)
-             if(moveFromLeft < 0){
+             if(moveFromLeft.current < 0){
                 console.log("moveFromLeft < 0")
                 console.log("e.target.style.left before--"+ e.target.style.left)
                 e.target.style.left = '0px'
                 console.log("e.target.style.left now--"+ e.target.style.left)
                 return
              }
-             if(moveFromLeft > window.getComputedStyle(e.target.parentElement).width){
+             if(moveFromLeft.current > window.getComputedStyle(e.target.parentElement).width){
                 console.log("e.target.style.left before--"+ e.target.style.left)
                 e.target.style.left = `${window.getComputedStyle(e.target.parentElement).width}px`
                 console.log("e.target.style.left now--"+ e.target.style.left)
                 return
              }
-             else  e.target.style.left = `${moveFromLeft}px`
+             else  e.target.style.left = `${moveFromLeft.current}px`
+
+             console.log("Dragging ended")
+         const parentWidth = parseInt(window.getComputedStyle(e.target.parentElement).width);
+         const draggedPoint =  e.clientX - rangeStart.current
+         if(draggedPoint > parentWidth){
+             rangeEnd.current = parentWidth
+         }
+         else if(draggedPoint < 0){
+             rangeEnd.current = 0
+         }
+         else{
+             rangeEnd.current = draggedPoint
+         }
+          
+         console.log("range end value" + rangeEnd.current)
+         range.current = rangeEnd.current - e.target.style.width
+         console.log("rage calculated-->" + range.current)
+         e.target.style.left = range.current.toString() + 'px'
+         console.log("range.toString()+'px'-->"+ range.current.toString() + 'px')
+         secondRange && displayRange()
+         setPriceUnit(e)
+         return
          }
      }
      const mouseUpHandler = (e)=>{
-         // checkDragging.current? checkDragging.current = !checkDragging.current: null
-         // checkDragging.current = false
+         // checkStartDrag.current? checkStartDrag.current = !checkStartDrag.current: null
+         checkStartDrag.current = false
+         checkDragging.current = false
      }
  
      const calculateRangeFromPrice = (minPriceLimit, maxPriceLimit)=>{
@@ -235,27 +266,7 @@ export default function PriceFilter(){
      }
 
      return(
-        <div id='price-filter-component' className='h-auto' onDrop={(e)=> { 
-            e.preventDefault()
-            console.log("CURSOR Changing...")
-            e.dataTransfer.dropEffect = 'move'
-            if(dragCursor.current){
-                e.target.style.cursor = 'grabbing' 
-            }
-        }} onDragEnter={(e)=>{
-            console.log("CURSOR Changing...")
-            e.dataTransfer.dropEffect = 'move'
-            if(dragCursor.current){
-                e.target.style.cursor = 'grabbing' 
-            } 
-        }} onDragOver={(e)=>{
-            e.preventDefault()
-            console.log("CURSOR Changing...")
-            e.dataTransfer.dropEffect = 'move'
-            if(dragCursor.current){
-                e.target.style.cursor = 'grabbing' 
-            }
-        }}>
+        <div id='price-filter-component'>
             <p className='text-[15px] text-secondary text-center'>{minPrice} - {maxPrice ? maxPrice+"+":"-"}</p>
             <div id='pricerange-wrapper' className='relative mt-[1rem]' onDragOver={(e)=>dragOverHandler(e)} 
                                                 onDrop={(e)=>dropHandler(e)} ref={priceRangeWrapperRef}>
@@ -263,11 +274,10 @@ export default function PriceFilter(){
                 <div className='relative w-[15rem] h-[4px] bg-[#AFD0FF] rounded-[2px]' 
                                   onDragOver={(e)=>dragOverHandler(e)} onDrop={(e)=>dropHandler(e)}>  {/* ref={rangeRef} bg-[#cfb6ee]*/}
 
-                    <div draggable='true' className='absolute left-0 top-[-8px] w-[20px] h-[20px] rounded-[10px] 
-                           border-[2px] border-[#AFD0FF]' onDragStart={(e)=>dragStartHandler(e, firstRangeStart)} onDrag={(e)=>dragHandler(e, "firstHandler")}
-                               onDragEnd={(e)=>dragEndHandler(e, firstRangeStart, firstRangeEnd, firstRange)} 
-                                   onClick={(e)=>{e.target.draggable=true; collisionCheck.current=false;}} onMouseDown={(e)=>mouseDownHandler(e)}
-                                    onMouseMove={(e)=>mouseMoveHandler(e)} onMouseUp={(e)=>mouseUpHandler(e)} ref={minPriceRef}></div>  {/* ref={rangeHandlerRef} */}
+                    <div className='absolute left-0 top-[-8px] w-[20px] h-[20px] rounded-[10px] 
+                           border-[2px] border-[#AFD0FF]'
+                                    onMouseDown={(e)=>mouseDownHandler(e, firstRangeStart)}
+                                    onMouseMove={(e)=>mouseMoveHandler(e,firstRangeStart, firstRangeEnd, firstRange )} onMouseUp={(e)=>mouseUpHandler(e)} ref={minPriceRef}></div>  {/* ref={rangeHandlerRef} */}
                     <div draggable='true' className='absolute left-[9px] top-[-8px] w-[20px] h-[20px] rounded-[10px] 
                          border-[2px] border-[#AFD0FF]' onDragStart={(e)=>dragStartHandler(e, secondRangeStart)} onDrag={(e)=>dragHandler(e, "secondHandler")}
                              onDragEnd={(e)=>dragEndHandler(e, secondRangeStart, secondRangeEnd, secondRange)} 

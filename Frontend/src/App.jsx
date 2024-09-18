@@ -29,7 +29,7 @@ export default function App(){
             <Routes path="/">
                 <Route element={<PrivateUserRoutes/>}>
                 </Route>
-                <Route path='imageeditor' element={<ImageEditor/>} />
+                {/* <Route path='imageeditor' element={<ImageEditor/>} /> */}
                 <Route index element={<HomePage/>}/>
                 <Route path='signup' element={<SignUpAndInPage type='signup' />}/>
                 <Route path='signin' element={<SignUpAndInPage type='signin' />}/>

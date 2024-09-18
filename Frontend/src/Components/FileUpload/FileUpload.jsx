@@ -1,6 +1,8 @@
 import React,{useState, useEffect, useRef} from 'react'
 import './FileUpload.css'
-import {SiteButtonSquare} from '../SiteButtons/SiteButtons';
+import {SiteButtonSquare} from '../SiteButtons/SiteButtons'
+import ImageEditor from '../ImageEditor/ImageEditor'
+import PopupWindow from '../PopupWindow/PopupWindow'
 
 import {IoCloseSharp} from "react-icons/io5";
 import {RiImageEditLine} from "react-icons/ri";
@@ -24,6 +26,8 @@ export default function FileUpload({images, setImages, thumbnail, setThumbnail})
     const [checkDragging, setCheckDragging] = useState(false)
     const imageDropHeaderRef = useRef(null)
     const fileDropContainerRef = useRef(null)
+
+    const imageEditorWindowRef = useRef(null)
 
     const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
@@ -129,6 +133,10 @@ export default function FileUpload({images, setImages, thumbnail, setThumbnail})
         setThumbnail(images[currentImageIndex])
     }
 
+    const openImageEditor = ()=>{
+        imageEditorWindowRef.current.click()
+    }
+
     return(
         <main className='w-full h-screen' id='fileupload'>
             <div className={ `rounded-[5px] border border-dashed h-[17%] w-full flex justify-center
@@ -158,8 +166,12 @@ export default function FileUpload({images, setImages, thumbnail, setThumbnail})
                                     <span className=' rounded-[4px] text-secondary'>
                                         <IoCloseSharp onClick={(e)=> closeHandler(image.url, index)}/> 
                                     </span>
-                                    <span className=' rounded-[4px] text-secondary absolute bottom-[40px] text-[15px]'>
+                                    <span className=' rounded-[4px] text-secondary absolute cursor-pointer
+                                            bottom-[40px] text-[15px]' onClick={()=> openImageEditor()} >
                                         <RiImageEditLine/>
+
+                                        <PopupWindow Component={<ImageEditor/>} ref={imageEditorWindowRef}/>
+
                                     </span>
                                 </span>
                             </figure>

@@ -47,8 +47,8 @@ export default function SignUpAndInPage({type}){
             dispatch(resetStates())
         }
         if(userToken){
-            console.log("Cannot go coz u got token")
-            navigate('/',{replace:true})
+            // console.log("Cannot go coz u got token")
+            // navigate('/',{replace:true})
         } 
     })
     useLayoutEffect(()=>{

@@ -162,25 +162,25 @@ export default function PriceFilter(){
         //     e.target.style.left = `${leftValueNow.current}px`
         // }
         // console.log("Inside mouseMoveHandler")
-         if(checkDragging.current){
-             console.log("checkDragging.current" + checkDragging.current)
-             let moveFromLeft = leftValueNow.current + (e.clientX-currentX.current)
-             console.log("moveFromLeft"+ moveFromLeft)
-             if(moveFromLeft < 0){
-                console.log("moveFromLeft < 0")
-                console.log("e.target.style.left before--"+ e.target.style.left)
-                e.target.style.left = '0px'
-                console.log("e.target.style.left now--"+ e.target.style.left)
-                return
-             }
-             if(moveFromLeft > window.getComputedStyle(e.target.parentElement).width){
-                console.log("e.target.style.left before--"+ e.target.style.left)
-                e.target.style.left = `${window.getComputedStyle(e.target.parentElement).width}px`
-                console.log("e.target.style.left now--"+ e.target.style.left)
-                return
-             }
-             else  e.target.style.left = `${moveFromLeft}px`
-         }
+        //  if(checkDragging.current){
+        //      console.log("checkDragging.current" + checkDragging.current)
+        //      let moveFromLeft = leftValueNow.current + (e.clientX-currentX.current)
+        //      console.log("moveFromLeft"+ moveFromLeft)
+        //      if(moveFromLeft < 0){
+        //         console.log("moveFromLeft < 0")
+        //         console.log("e.target.style.left before--"+ e.target.style.left)
+        //         e.target.style.left = '0px'
+        //         console.log("e.target.style.left now--"+ e.target.style.left)
+        //         return
+        //      }
+        //      if(moveFromLeft > window.getComputedStyle(e.target.parentElement).width){
+        //         console.log("e.target.style.left before--"+ e.target.style.left)
+        //         e.target.style.left = `${window.getComputedStyle(e.target.parentElement).width}px`
+        //         console.log("e.target.style.left now--"+ e.target.style.left)
+        //         return
+        //      }
+        //      else  e.target.style.left = `${moveFromLeft}px`
+        //  }
      }
      const mouseUpHandler = (e)=>{
          // checkDragging.current? checkDragging.current = !checkDragging.current: null

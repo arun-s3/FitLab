@@ -1,0 +1,8 @@
+
+#fileupload #thumbnail-setter .arrows span{
+    padding: 7px;
+    background: var(--PRIMARY);
+    border-radius: 5px;
+    color: var(--SECONDARY);
+    cursor: pointer;
+}

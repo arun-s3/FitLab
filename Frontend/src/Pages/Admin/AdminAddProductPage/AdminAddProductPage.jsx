@@ -1,5 +1,6 @@
 import React,{useState, useRef, useEffect} from 'react'
 import './AdminAddProductPage.css'
+import FileUpload from '../../../Components/FileUpload/FileUpload';
 
 import {GoPackage} from "react-icons/go";
 import {MdCurrencyRupee} from "react-icons/md";
@@ -20,6 +21,8 @@ function PlaceholderIcon({icon, fromBottom}){
 export default function AdminAddProductPage(){
 
     const [singleTags, setSingleTags] = useState([])
+    const [thumbnail, setThumbnail] = useState({})
+    const [images, setImages] = useState([])
 
     useEffect(()=>{
         console.log("singleTags-->", JSON.stringify(singleTags))
@@ -44,7 +47,7 @@ export default function AdminAddProductPage(){
                 }
                 if(e.target.value.length == e.target.maxLength){
                     console.log("Maxlength exceeded!")
-                }
+                }              
                 if(( (/\w+\s+/).test(e.target.value) )){
                     console.log("Space found!")     
                     const currentTag = e.target.value.trim()   
@@ -64,12 +67,22 @@ export default function AdminAddProductPage(){
             }
         }
     }
+    const tagsKeyDownHandler = (e)=>{
+        if(e.key=='Backspace' && !e.target.value){
+            console.log("Inside tagsKeyDownHandler conditn success")
+            singleTags && setSingleTags(singleTags=> singleTags.slice(0,-1) )
+        } 
+    }
+
+    const imageSetter = (e)=>{
+
+    }
 
     return(
         <section id='AdminAddProduct'>
             <h1> Add Product </h1>
-            <main className='flex gap-[10px]'>
-                <div className='flex flex-col gap-[10px] justify-center basis[55%] w-[55%]'>
+            <main className='flex gap-[10px] mr-[2rem]'>
+                <div className='flex flex-col gap-[15px] basis[60%] w-[60%]'>
                     <div className='flex flex-col gap-[1rem] justify-center product-input-wrapper'>
                         <div className='input-wrapper'>
                             <label for='product-name'> Product Name</label>
@@ -135,14 +148,16 @@ export default function AdminAddProductPage(){
                                         <input type='text' placeholder='Type each tag followed by a space' maxlength='60'
                                                  className='w-[11rem] h-[2rem] text-[11px] text-secondary'
                                                  style={{width:'10rem', height:'2rem', marginLeft:'9px', border:'0'}} id='product-tags'
-                                                    onChange={(e)=> tagsInputHandler(e)}/>
+                                                    onChange={(e)=> tagsInputHandler(e)} onKeyDown={(e)=> tagsKeyDownHandler(e)}/>
                                 
                             </div>
                         </div>
                     </div>
                 </div>
-                <div>
+                <div className='w-full h-screen basis-[37%]'>
 
+                     <FileUpload images={images} setImages={setImages} thumbnail={thumbnail} setThumbnail={setThumbnail}/>
+                     
                 </div>
             </main>
         </section>

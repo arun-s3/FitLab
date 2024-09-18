@@ -806,6 +806,10 @@ select{
   bottom: 35%;
 }
 
+.bottom-\[40px\]{
+  bottom: 40px;
+}
+
 .left-0{
   left: 0px;
 }
@@ -832,6 +836,10 @@ select{
 
 .right-0{
   right: 0px;
+}
+
+.right-\[-17px\]{
+  right: -17px;
 }
 
 .right-\[15px\]{
@@ -912,6 +920,11 @@ select{
   margin-bottom: 50px;
 }
 
+.my-auto{
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
 .mb-\[1rem\]{
   margin-bottom: 1rem;
 }
@@ -930,6 +943,10 @@ select{
 
 .mb-\[60px\]{
   margin-bottom: 60px;
+}
+
+.mb-\[6px\]{
+  margin-bottom: 6px;
 }
 
 .mb-\[8px\]{
@@ -952,8 +969,16 @@ select{
   margin-left: 28px;
 }
 
+.ml-\[2px\]{
+  margin-left: 2px;
+}
+
 .ml-\[4px\]{
   margin-left: 4px;
+}
+
+.ml-\[5px\]{
+  margin-left: 5px;
 }
 
 .ml-\[6\.7rem\]{
@@ -980,6 +1005,10 @@ select{
   margin-right: 25px;
 }
 
+.mr-\[2rem\]{
+  margin-right: 2rem;
+}
+
 .mr-\[4px\]{
   margin-right: 4px;
 }
@@ -998,6 +1027,10 @@ select{
 
 .mt-\[1rem\]{
   margin-top: 1rem;
+}
+
+.mt-\[20px\]{
+  margin-top: 20px;
 }
 
 .mt-\[24px\]{
@@ -1038,6 +1071,10 @@ select{
 
 .mt-\[5rem\]{
   margin-top: 5rem;
+}
+
+.mt-\[7px\]{
+  margin-top: 7px;
 }
 
 .block{
@@ -1082,6 +1119,14 @@ select{
 
 .h-\[15px\]{
   height: 15px;
+}
+
+.h-\[17\%\]{
+  height: 17%;
+}
+
+.h-\[200px\]{
+  height: 200px;
 }
 
 .h-\[20px\]{
@@ -1140,6 +1185,10 @@ select{
   height: 70rem;
 }
 
+.h-\[75px\]{
+  height: 75px;
+}
+
 .h-\[7rem\]{
   height: 7rem;
 }
@@ -1150,6 +1199,10 @@ select{
 
 .h-auto{
   height: auto;
+}
+
+.h-full{
+  height: 100%;
 }
 
 .h-screen{
@@ -1196,6 +1249,10 @@ select{
   width: 1px;
 }
 
+.w-\[200px\]{
+  width: 200px;
+}
+
 .w-\[20px\]{
   width: 20px;
 }
@@ -1240,12 +1297,16 @@ select{
   width: 430px;
 }
 
-.w-\[55\%\]{
-  width: 55%;
+.w-\[46\%\]{
+  width: 46%;
 }
 
 .w-\[5px\]{
   width: 5px;
+}
+
+.w-\[60\%\]{
+  width: 60%;
 }
 
 .w-\[70\%\]{
@@ -1258,6 +1319,10 @@ select{
 
 .w-\[75\%\]{
   width: 75%;
+}
+
+.w-\[75px\]{
+  width: 75px;
 }
 
 .w-\[80\%\]{
@@ -1282,6 +1347,10 @@ select{
 
 .basis-\[15rem\]{
   flex-basis: 15rem;
+}
+
+.basis-\[37\%\]{
+  flex-basis: 37%;
 }
 
 .basis-\[380px\]{
@@ -1328,6 +1397,10 @@ select{
   flex-direction: column;
 }
 
+.flex-wrap{
+  flex-wrap: wrap;
+}
+
 .items-start{
   align-items: flex-start;
 }
@@ -1372,6 +1445,10 @@ select{
   gap: 20px;
 }
 
+.gap-\[27px\]{
+  gap: 27px;
+}
+
 .gap-\[2rem\]{
   gap: 2rem;
 }
@@ -1382,6 +1459,10 @@ select{
 
 .gap-\[30px\]{
   gap: 30px;
+}
+
+.gap-\[3px\]{
+  gap: 3px;
 }
 
 .gap-\[4rem\]{
@@ -1500,6 +1581,15 @@ select{
   border-style: solid;
 }
 
+.border-dashed{
+  border-style: dashed;
+}
+
+.border-\[\#5997f0\]{
+  --tw-border-opacity: 1;
+  border-color: rgb(89 151 240 / var(--tw-border-opacity));
+}
+
 .border-\[\#AFD0FF\]{
   --tw-border-opacity: 1;
   border-color: rgb(175 208 255 / var(--tw-border-opacity));
@@ -1513,6 +1603,11 @@ select{
 .border-\[\#ced1d7\]{
   --tw-border-opacity: 1;
   border-color: rgb(206 209 215 / var(--tw-border-opacity));
+}
+
+.border-\[\#dde7a8\]{
+  --tw-border-opacity: 1;
+  border-color: rgb(221 231 168 / var(--tw-border-opacity));
 }
 
 .border-\[\#eae0f0\]{
@@ -1581,6 +1676,11 @@ select{
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
 }
 
+.object-cover{
+  -o-object-fit: cover;
+     object-fit: cover;
+}
+
 .p-\[1px\]{
   padding: 1px;
 }
@@ -1628,6 +1728,11 @@ select{
   padding-right: 60px;
 }
 
+.px-\[8px\]{
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
 .py-\[1px\]{
   padding-top: 1px;
   padding-bottom: 1px;
@@ -1636,6 +1741,11 @@ select{
 .py-\[2\.3rem\]{
   padding-top: 2.3rem;
   padding-bottom: 2.3rem;
+}
+
+.py-\[2px\]{
+  padding-top: 2px;
+  padding-bottom: 2px;
 }
 
 .py-\[6px\]{
@@ -1696,6 +1806,10 @@ select{
   text-align: right;
 }
 
+.align-middle{
+  vertical-align: middle;
+}
+
 .align-\[1px\]{
   vertical-align: 1px;
 }
@@ -1718,6 +1832,10 @@ select{
 
 .text-\[12px\]{
   font-size: 12px;
+}
+
+.text-\[13\.5px\]{
+  font-size: 13.5px;
 }
 
 .text-\[13px\]{
@@ -1754,6 +1872,10 @@ select{
 
 .text-\[40px\]{
   font-size: 40px;
+}
+
+.text-\[9px\]{
+  font-size: 9px;
 }
 
 .text-breadcrumbTitle{
@@ -1820,6 +1942,11 @@ select{
 
 .tracking-\[0\.2px\]{
   letter-spacing: 0.2px;
+}
+
+.text-\[\#5997f0\]{
+  --tw-text-opacity: 1;
+  color: rgb(89 151 240 / var(--tw-text-opacity));
 }
 
 .text-\[\#6b7280\]{

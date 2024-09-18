@@ -12,6 +12,7 @@ import AdminCustomersPage from './Pages/Admin/AdminCustomersPage/AdminCustomersP
 // import AdminCustomersPageV2 from './Pages/Admin/TesterPages/TesterV2AdminCustomersPage' //For Testing Purpose
 // import AdminCustomersPageV3 from './Pages/Admin/TesterPages/TesterV3AdminCustomersPage'  //For Testing Purpose
 import AdminAddProductPage from './Pages/Admin/AdminAddProductPage/AdminAddProductPage'
+import ImageEditor from './Components/ImageEditor/ImageEditor'
 
 import ProductListPage from './Pages/User/ProductListPage/ProductListPage'
 
@@ -28,6 +29,7 @@ export default function App(){
             <Routes path="/">
                 <Route element={<PrivateUserRoutes/>}>
                 </Route>
+                <Route path='imageeditor' element={<ImageEditor/>} />
                 <Route index element={<HomePage/>}/>
                 <Route path='signup' element={<SignUpAndInPage type='signup' />}/>
                 <Route path='signin' element={<SignUpAndInPage type='signin' />}/>

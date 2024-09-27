@@ -1,5 +1,7 @@
 import React,{useState, useEffect, useRef} from 'react'
+import {useSelector, useDispatch} from 'react-redux'
 import './FileUpload.css'
+
 import {SiteButtonSquare} from '../SiteButtons/SiteButtons'
 import ImageEditor from '../ImageEditor/ImageEditor'
 import PopupWindow from '../PopupWindow/PopupWindow'
@@ -7,6 +9,7 @@ import PopupWindow from '../PopupWindow/PopupWindow'
 import {IoCloseSharp} from "react-icons/io5";
 import {RiImageEditLine} from "react-icons/ri";
 import {FaArrowUp, FaArrowDown} from "react-icons/fa";
+// import { uploadImages } from 'Frontend/src/Slices/productSlice'
 
 export default function FileUpload({images, setImages, thumbnail, setThumbnail}){
 
@@ -23,11 +26,46 @@ export default function FileUpload({images, setImages, thumbnail, setThumbnail})
         setCurrentImageIndex(0)
     },[images])
 
+    let windowRef = useRef(null)
+    const [editedImage, setEditedImage] = useState({})
+
+    useEffect(()=>{
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'edited-image') {
+                const updatedImage = event.data.payload;
+                windowRef.current.close()
+                const reader = new FileReader()
+                reader.onload = ()=>{
+                    const base64URL = reader.result
+                    setEditedImage({...updatedImage, url:base64URL})
+                }
+                reader.onprogress = (event)=>{
+                    const progress = (event.loaded/event.total)*100
+                    console.log("LOADING..."+ progress)
+                    windowRef.current.postMessage({type:'loading-img', progress}, '*')
+                }
+                reader.readAsDataURL(updatedImage.blob)
+                console.log("RECEIVED UPDATED IMAGE FROM CHILD WINDOW-->", JSON.stringify(updatedImage))
+                // setEditedImage(updatedImage)
+            }
+        });        
+    })
+    useEffect(() => {
+        console.log("editedImage in editedimage useEffect-->", JSON.stringify(editedImage))
+        setImages((prevImages) => 
+            prevImages.map((image) => 
+                image.name === editedImage.name ? { ...image, ...editedImage } : image
+            )
+        );
+    }, [editedImage]); 
+      
+
     const [checkDragging, setCheckDragging] = useState(false)
     const imageDropHeaderRef = useRef(null)
     const fileDropContainerRef = useRef(null)
 
-    const imageEditorWindowRef = useRef(null)
+    // const windowRef = useRef(null)
+    const editorPath = useRef(null)
 
     const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
@@ -50,7 +88,7 @@ export default function FileUpload({images, setImages, thumbnail, setThumbnail})
                     continue;
                 }
 
-                newImages.push({ name: files[i].name, size: files[i].size, url: URL.createObjectURL(files[i]) });
+                newImages.push({ name: files[i].name, size: files[i].size, url: URL.createObjectURL(files[i]), blob: files[i] });
             } else {
                 console.log("Not an image -->", JSON.stringify(files[i]));
                 setError("Only images will be added!");
@@ -133,8 +171,25 @@ export default function FileUpload({images, setImages, thumbnail, setThumbnail})
         setThumbnail(images[currentImageIndex])
     }
 
-    const openImageEditor = ()=>{
-        imageEditorWindowRef.current.click()
+    const openImageEditor = (imageUrl, name, blob)=>{
+        editorPath.current = encodeURIComponent(imageUrl)
+        console.log("editorPath.current-->"+editorPath.current)
+        windowRef.current = window.open(`../image-editor?name=${name}`, "", "width=1300,height=700,left=300,top=300,resizable=no")
+        // windowRef.current.postMessage({type:'target-img', blob, name}, '*')
+        const messageHandler = (event) => {
+            // Ensure this message is from the child window
+            if (event.source === windowRef.current && event.data === 'child-ready') {
+                console.log('Child window is ready. Sending image blob...');
+                windowRef.current.postMessage({ type: 'target-img', blob, name }, '*');
+            }
+        };
+    
+        window.addEventListener('message', messageHandler);
+    
+        // Clean up when the child window is closed
+        windowRef.current.onbeforeunload = () => {
+            window.removeEventListener('message', messageHandler);
+        };
     }
 
     return(
@@ -167,10 +222,10 @@ export default function FileUpload({images, setImages, thumbnail, setThumbnail})
                                         <IoCloseSharp onClick={(e)=> closeHandler(image.url, index)}/> 
                                     </span>
                                     <span className=' rounded-[4px] text-secondary absolute cursor-pointer
-                                            bottom-[40px] text-[15px]' onClick={()=> openImageEditor()} >
+                                            bottom-[40px] text-[15px]' onClick={()=> openImageEditor(image.url, image.name, image.blob)} >
                                         <RiImageEditLine/>
 
-                                        <PopupWindow Component={<ImageEditor/>} ref={imageEditorWindowRef}/>
+                                        {/* <PopupWindow path={`../image-editor?image=${editorPath.current}`} ref={windowRef}/> */}
 
                                     </span>
                                 </span>

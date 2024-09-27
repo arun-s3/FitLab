@@ -17,10 +17,10 @@ export function SiteButtonDark({customStyle,children,shouldSubmit=false}){
     )
 }
 
-export function SiteButtonSquare({customStyle,children,shouldSubmit=false}){
+export function SiteButtonSquare({customStyle,children,clickHandler,shouldSubmit=false}){
     return(
         <button type={shouldSubmit?"submit":"button"} className="bg-primary text-black text-descReg1 site-button-square" 
-                style={customStyle}>{children}</button>
+                style={customStyle} onClick={()=>clickHandler()}>{children}</button>
     )
 }
 

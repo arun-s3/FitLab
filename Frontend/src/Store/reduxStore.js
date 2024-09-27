@@ -5,10 +5,12 @@ import { PAUSE,PERSIST,REGISTER,REHYDRATE,PURGE,FLUSH } from 'redux-persist';
 
 import userReducer from '../Slices/userSlice'
 import adminReducer from '../Slices/adminSlice'
+import productReducer from '../Slices/productSlice'
 
 const rootReducer = combineReducers({
     user: userReducer,
-    admin: adminReducer
+    admin: adminReducer,
+    product: productReducer
 })
 
 const persistConfig = {

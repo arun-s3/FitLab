@@ -8,7 +8,10 @@ module.exports = {
         secondary:"rgba(159, 42, 240, 1)",
         secondaryLight: "rgba(113, 34, 168, 0.09)",
         muted:"rgb(125, 124, 140)",    //rgb(111, 110, 127)
-        home:"#EBEAEC"
+        home:"#EBEAEC",
+        borderLight: "rgb(222 226 231)",
+        grayMuted: "#e7e7e7",
+        grayLightMuted: 'rgb(244, 244, 244)'
       },
       fontFamily:{
         funCity:['funCity'],

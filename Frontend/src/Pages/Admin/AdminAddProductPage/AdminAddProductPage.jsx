@@ -1,6 +1,8 @@
 import React,{useState, useRef, useEffect} from 'react'
+import {useSelector, useDispatch} from 'react-redux'
 import './AdminAddProductPage.css'
 import FileUpload from '../../../Components/FileUpload/FileUpload';
+import {uploadImages} from '../../../Slices/productSlice'
 
 import {GoPackage} from "react-icons/go";
 import {MdCurrencyRupee} from "react-icons/md";
@@ -24,9 +26,16 @@ export default function AdminAddProductPage(){
     const [thumbnail, setThumbnail] = useState({})
     const [images, setImages] = useState([])
 
+    // const {} = useSelector(state=> state.product)
+    const dispatch = useDispatch()
+
     useEffect(()=>{
         console.log("singleTags-->", JSON.stringify(singleTags))
     },[singleTags])
+
+    useEffect(()=>{
+        dispatch(uploadImages(images))
+    },[images])
 
     const inputFocusHandler = (e)=>{ e.target.nextElementSibling.style.display = 'none' }
     const inputBlurHandler = (e)=>{ e.target.value.trim()? null : e.target.nextElementSibling.style.display = 'inline-block'}

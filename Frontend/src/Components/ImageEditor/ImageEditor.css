@@ -1,0 +1,80 @@
+/* 
+#image-editor .color-setting-icon > svg{
+    transform: rotateZ(90deg);
+} */
+#image-editor header::after{
+    position: absolute;
+    top: 0;
+    left: 0;
+    content: '';
+    width: 100%;
+    height: 100%;
+    background-color: #f3efef;
+    z-index: -2;
+}
+#image-editor nav .icon-wrapper{
+    width: 100%;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+#image-editor nav .icon-wrapper:hover{
+    background-color: var(--PRIMARY);
+}
+#image-editor nav i{
+    margin-inline: auto;
+}
+#image-editor nav i > svg{
+    font-size: 17px;
+    color: var(--SECONDARY);
+}
+#image-editor main{
+    width: calc(100vw - 4rem);
+}
+#image-editor main .control-panel label{
+    display: block;
+    font-size: 15px;
+}
+#image-editor main .control-panel input{
+    height: 3.5px;
+}
+#image-editor main .control-panel #panel h3{
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--SECONDARY);
+}
+#image-editor main .control-panel #panel .ranges{
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 4rem;
+}
+#image-editor main .control-panel #rotation-tool h3{
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--SECONDARY);
+}
+#image-editor main .control-panel #rotation-tool i{
+    padding: 2px;
+    border-radius: 4px;
+}
+#image-editor main .control-panel #rotation-tool i:hover{
+    outline: 1px solid var(--SECONDARY);
+}
+#image-editor main .control-panel #rotation-tool .rotate i >svg{
+    height: 22px;
+    width: 22px;
+}
+#image-editor main .control-panel #rotation-tool .flip  i >svg{
+    height: 17px;
+    width: 17px;
+}
+#image-editor main .content-panel .undoredo i > svg{
+    height: 20px;
+    width: 20px;
+}
+
+
+
+

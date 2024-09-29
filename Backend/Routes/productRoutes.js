@@ -1,6 +1,9 @@
 const express = require('express')
 const productRouter = express.Router()
-const {createProduct} = require('../Controllers/productController')
+const upload = require('../Utils/multer')
+const {createProduct, getSingleProduct, getAllProducts, updateProduct} = require('../Controllers/productController')
 
-productRouter.route('/').get()
-productRouter.route('/new').get(createProduct)
+productRouter.post('/add', upload(10, images), createProduct)
+
+
+module.exports = productRouter

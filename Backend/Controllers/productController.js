@@ -3,12 +3,16 @@ const {errorHandler} = require('../Utils/errorHandler')
 
 const createProduct = async(req,res,next)=>{
     try {
-        const requiredField = ["name", "description", "price", "brand", "images", "thumbnail", "category", "stock", "user"]
+        console.log("Inside createProduct controller")
+        const requiredField = ["title", "description", "price", "brand", "images", "thumbnail", "category", "stock"] // needed "user"?
         for(let field of requiredField){
-            if (req.body[field].trim() == "") next(errorHandler(400, "Please fill all the required fields!"))
+            if (!req.body[field] || req.body[field].toString().trim() === ""){
+                next(errorHandler(400, "Please fill all the required fields!"))
+            }
         }
-        const newProduct = await Product.save(req.body);
-        res.status(201).json({success:'true', product:newProduct});  
+        const newProduct = new Product(req.body)
+        const savedProduct = await newProduct.save();
+        res.status(201).json({success:'true', product:savedProduct});  
     } 
     catch (error) {
         console.log("Error in productController-createUser-->"+error.message);
@@ -29,7 +33,7 @@ const getSingleProduct = async (req, res, next) => {
     }
   };
 
-const getProducts = async(req,res,next)=>{
+const getAllProducts = async(req,res,next)=>{
     
     try{
         const productList = await Product.find({})
@@ -78,4 +82,4 @@ const updateProduct = async (req, res, next) => {
     }
   };
 
-module.exports = {createProduct, getSingleProduct, getProducts, updateProduct}
+module.exports = {createProduct, getSingleProduct, getAllProducts, updateProduct}

@@ -100,12 +100,8 @@ export default function ImageEditor(){
     //         }
     //     });        
     // },[])
-    // Add this in the child window (image editor page)
 useEffect(() => {
-    // Notify the parent window that the child is ready to receive messages
     window.opener.postMessage('child-ready', '*');
-
-    // Listen for the message containing the image blob
     const messageHandler = (event) => {
         if (event.data.type === 'target-img') {
             const { blob, name } = event.data;
@@ -189,7 +185,7 @@ const applyEffects = ()=>{
             ctx.scale(1,-1)
         }
         ctx.drawImage(img, 0, 0, img.width, img.height)
-        
+
         if(rotate){
             ctx.translate(canvas.width, canvas.height)
             const radians = rotate * Math.PI/180

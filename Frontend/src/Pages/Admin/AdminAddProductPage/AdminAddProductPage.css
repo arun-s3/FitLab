@@ -1,4 +1,11 @@
-
+#AdminAddProduct > .header i:first-child >svg{
+    color: #666363;
+}
+/* #AdminAddProduct > .header i:last-child >svg{
+    color: var(--SECONDARY);
+    height: 22px;
+    width: 22px;
+} */
 #AdminAddProduct main textarea{
     resize: none;
     border: 1px solid var(--PRIMARY);
@@ -7,7 +14,8 @@
 }
 #AdminAddProduct main .product-input-wrapper{
     padding-inline: 17px;
-    padding-block: 19px;
+    padding-bottom: 19px;
+    padding-top: 21px;
     border: 1.5px solid rgba(187, 168, 198, 0.52);
     border-radius: 7px;
     background: rgba(243, 230, 251, 0.52);
@@ -20,6 +28,8 @@
 }
 #AdminAddProduct main .product-input-wrapper label{
     font-size: 11.6px;
+    color: var(--SECONDARY);
+    margin-bottom: 2px;
 }
 #AdminAddProduct main .product-input-wrapper input{
     width: 100%;
@@ -27,6 +37,23 @@
     border: 1px solid var(--PRIMARY);
     border-radius: 5px;
     padding-right: 0;
+}
+#AdminAddProduct main .product-input-wrapper .error{
+    visibility: visible;
+    font-size: 10px;
+    color: red;
+    letter-spacing: 0.2px;
+    height: 17px;
+    margin-top: 3px;
+}
+#AdminAddProduct main .product-input-wrapper > .categories input{
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
+    margin-left: 10px;
+}
+#AdminAddProduct main .product-input-wrapper > .categories label{
+    color: #454242;
 }
 #AdminAddProduct main .product-input-wrapper .input-wrapper #product-tags:focus{
     border: 0px !important;

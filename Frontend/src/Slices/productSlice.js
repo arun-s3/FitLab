@@ -1,8 +1,26 @@
-import {createSlice} from '@reduxjs/toolkit'
+import {createSlice, createAsyncThunk} from '@reduxjs/toolkit'
+import axios from '../Utils/axiosConfig'
+
+export const createProduct = createAsyncThunk('createProduct', async(formData, thunkAPI)=>{
+    try{
+        console.log("Inside createProduct createAsyncThunk")
+        const response = await axios.post('/admin/products/add',formData,{withCredentials:true})
+        console.log("returning success response from createProduct createAsyncThunk..."+JSON.stringify(response.data))
+        return response.data
+    }
+    catch(error){
+        console.log("inside catch of createProduct from productSlice")
+        const errorMessage = error.response?.data?.message
+        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
+        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
+        return thunkAPI.rejectWithValue(errorMessage)
+    }
+})
 
 const initialState = {
-    images : [],
-    editedImage: {}
+    products: [],
+    loading: false,
+    error: false
 }
 
 const productSlice = createSlice({
@@ -19,6 +37,21 @@ const productSlice = createSlice({
         updateImage: (state, action)=>{
             state.editedImage = action.payload
         }
+    },
+    extraReducers: (builder)=>{
+        builder.addCase(createProduct.fulfilled, (state, action)=>{
+            state.products = action.payload.product
+            state.error = false
+            state.loading = false
+        })
+        .addCase(createProduct.pending, (state,action)=>{
+            state.loading = true
+            state.error = false
+        })
+        .addCase(createProduct.rejected, (state,action)=>{
+            state.loading = false
+            state.error = true
+        })
     }
 })
 

@@ -72,6 +72,10 @@ export default function FileUpload({images, setImages, thumbnail, setThumbnail})
     const validateAndSetImage = (files)=>{
         console.log("Got files! -->", JSON.stringify(files));
         const newImages = [];
+        if(files.length > 10){
+            setError("Only 10 images are allowed to upload!")
+            return;
+        }
         for (let i = 0; i < files.length; i++) {
             if (files[i].type.split('/')[0] === 'image') {
                 console.log("Image file -->", JSON.stringify(files[i]));
@@ -82,9 +86,9 @@ export default function FileUpload({images, setImages, thumbnail, setThumbnail})
                     continue;
                 }
 
-                if (files[i].size > (10 * 1024 * 1024)) {
+                if (files[i].size > (5 * 1024 * 1024)) {
                     console.log("Big image -->", JSON.stringify(files[i]));
-                    setError("Please add files each of size below 10Mb!");
+                    setError("Please add files each of size below 5Mb!");
                     continue;
                 }
 

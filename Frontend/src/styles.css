@@ -802,10 +802,6 @@ select{
   bottom: 12px;
 }
 
-.bottom-\[35\%\]{
-  bottom: 35%;
-}
-
 .bottom-\[40px\]{
   bottom: 40px;
 }
@@ -880,6 +876,10 @@ select{
 
 .top-\[22px\]{
   top: 22px;
+}
+
+.top-\[25\%\]{
+  top: 25%;
 }
 
 .top-\[30\%\]{
@@ -1681,6 +1681,11 @@ select{
   border-color: rgb(222 226 231 / var(--tw-border-opacity));
 }
 
+.border-\[\#c4c6ca\]{
+  --tw-border-opacity: 1;
+  border-color: rgb(196 198 202 / var(--tw-border-opacity));
+}
+
 .border-\[\#ced1d7\]{
   --tw-border-opacity: 1;
   border-color: rgb(206 209 215 / var(--tw-border-opacity));
@@ -1707,6 +1712,10 @@ select{
 
 .border-secondary{
   border-color: rgba(159, 42, 240, 1);
+}
+
+.border-transparent{
+  border-color: transparent;
 }
 
 .border-l-borderLight{
@@ -1796,6 +1805,10 @@ select{
 
 .p-\[5px\]{
   padding: 5px;
+}
+
+.p-\[7px\]{
+  padding: 7px;
 }
 
 .px-\[1\.5rem\]{
@@ -1956,6 +1969,10 @@ select{
 
 .text-\[10px\]{
   font-size: 10px;
+}
+
+.text-\[11\.6px\]{
+  font-size: 11.6px;
 }
 
 .text-\[11px\]{

@@ -31,9 +31,11 @@ app.use(cors({
 const userRoutes = require('./Routes/userRoutes.js')
 const adminRoutes = require('./Routes/adminRoutes.js')
 const productRoutes = require('./Routes/productRoutes.js')
+// const productRoutes = require('./Routes/productRoutes.js')
 
 app.use('/', userRoutes)
 app.use('/admin', adminRoutes)
+app.use('/admin/products', productRoutes)
 // app.use('/product', productRoutes)
 
 app.use((error,req,res,next)=>{
@@ -42,8 +44,6 @@ app.use((error,req,res,next)=>{
     console.log(`From index.js errorHandling middleware message is---> ${message} and statusCode is- ${statusCode}`)
     res.status(statusCode).json({message:message})
 })
-
-
 
 const port = process.env.PORT||3000
 app.listen(port, ()=>{ console.log(`Listening to port ${port}...`)})

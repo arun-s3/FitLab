@@ -12,10 +12,10 @@ export default function RotationAndFilpTool({setters}){
             <div className=' mt-[1rem] pb-[10px]'>
                 <h3> Rotate </h3>
                 <div className='flex gap-[1rem] items-center  mt-[10px] rotate text-[#3c3939]'>
-                    <i onClick={()=> setRotate(rotate=> { return rotate = (rotate+90) > 360 ? 0 : rotate+90 })}>
+                    <i onClick={()=> setRotate(rotate=> { return rotate = (rotate+90)>360 ? 0 : rotate+90 })}>
                         <AiOutlineRotateRight />
                     </i>
-                    <i onClick={()=> setRotate(rotate=> { return rotate = (rotate-90) < 0 ? 360 : rotate-90 })}>
+                    <i onClick={()=> setRotate(rotate=> { return rotate = (rotate-90)<0 ? 360 : rotate-90 })}>
                         <AiOutlineRotateLeft />
                     </i>
                 </div>

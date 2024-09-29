@@ -2,137 +2,131 @@ import React,{useState, useRef, useEffect} from 'react'
 import {useSelector, useDispatch} from 'react-redux'
 import './AdminAddProductPage.css'
 import FileUpload from '../../../Components/FileUpload/FileUpload';
-import {uploadImages} from '../../../Slices/productSlice'
+import TagGenerator from '../../../Components/TagGenerator/TagGenerator';
+import {createProduct} from '../../../Slices/productSlice'
+import {handleInputValidation, displaySuccess, displayError} from '../../../Utils/fieldValidator'
 
+import {ProductIcon, ProductIcon2} from '../../../Components/Icons/Icons'
+import {IoArrowBackSharp} from "react-icons/io5";
+import {IoIosArrowRoundBack} from "react-icons/io";
 import {GoPackage} from "react-icons/go";
 import {MdCurrencyRupee} from "react-icons/md";
-import {LuPackageSearch} from "react-icons/lu";
+import {LuPackage, LuPackageSearch} from "react-icons/lu";
 import {RiWeightLine} from "react-icons/ri";
 import {AiOutlineSafetyCertificate} from "react-icons/ai";
 import {CgDetailsMore} from "react-icons/cg";
-import {BsTags} from "react-icons/bs";
-import {IoIosClose} from "react-icons/io";
 
-function PlaceholderIcon({icon, fromBottom}){
+function PlaceholderIcon({icon, fromTop}){
     return(
-        <span className='absolute bottom-[35%] left-[8px] text-[#6b7280] text-[11px]' style={fromBottom? {bottom: `${fromBottom}%`}: null}>
+        <span className='absolute top-[25%] left-[8px] text-[#6b7280] text-[11px]' style={fromTop? {top: `${fromTop}%`}: null}>
              {icon} 
         </span>
     )
 }
 export default function AdminAddProductPage(){
 
-    const [singleTags, setSingleTags] = useState([])
+    const [tag, setTags] = useState([])
     const [thumbnail, setThumbnail] = useState({})
     const [images, setImages] = useState([])
+    const [productData, setProductData] = useState({})
 
     // const {} = useSelector(state=> state.product)
     const dispatch = useDispatch()
 
     useEffect(()=>{
-        console.log("singleTags-->", JSON.stringify(singleTags))
-    },[singleTags])
+        setProductData({...productData, images: images})
+    },[setImages])
 
     useEffect(()=>{
-        dispatch(uploadImages(images))
-    },[images])
+        console.log("tag-->", JSON.stringify(tag))
+        let tagStrings = tag.map(tag=> tag.key)
+        console.log("tagStrings-->", tagStrings)
+        setProductData({...productData, tags: tagStrings})
+    },[tag])
 
-    const inputFocusHandler = (e)=>{ e.target.nextElementSibling.style.display = 'none' }
-    const inputBlurHandler = (e)=>{ e.target.value.trim()? null : e.target.nextElementSibling.style.display = 'inline-block'}
+    useEffect(()=>{
+        console.log("productData-->", JSON.stringify(productData))
+    },[productData])
 
-    const tagsInputHandler = (e)=>{
-        if(e.target.value.trim()){
-            console.log("Value inside tag")
-            if(e.target.parentElement.scrollHeight > e.target.parentElement.clientHeight ){
-                e.target.value = ''
-                e.target.style.display = 'none'
-                console.log("Overflowing..")
-                return
-            }
-            else{
-                if(e.target.scrollWidth > e.target.clientWidth){
-                    console.log("Overflowing width")
-                    e.target.style.width = `${e.target.scrollWidth}px`
-                }
-                if(e.target.value.length == e.target.maxLength){
-                    console.log("Maxlength exceeded!")
-                }              
-                if(( (/\w+\s+/).test(e.target.value) )){
-                    console.log("Space found!")     
-                    const currentTag = e.target.value.trim()   
-                    if( singleTags.find(tag=> tag.key == currentTag ) ){
-                        console.log("Tag must be unique")
-                        return
-                    } 
-                    setSingleTags([...singleTags,
-                        (<span className='single-tag' key={currentTag}>
-                            <span> {currentTag}</span>
-                            <IoIosClose onClick={(e)=> setSingleTags(singleTags=> singleTags.filter(tag=> tag.key !== currentTag))}/>   
-                        </span>)
-                    ])
-                    e.target.value=''
-               }
-            
-            }
-        }
-    }
-    const tagsKeyDownHandler = (e)=>{
-        if(e.key=='Backspace' && !e.target.value){
-            console.log("Inside tagsKeyDownHandler conditn success")
-            singleTags && setSingleTags(singleTags=> singleTags.slice(0,-1) )
-        } 
+    const changeHandler = (e, fieldName)=>{
+        console.log(" inside Changehandler")
+        setProductData({...productData, [fieldName]: e.target.value})
     }
 
-    const imageSetter = (e)=>{
+    const inputFocusHandler = (e)=>{ e.target.previousElementSibling.style.display = 'none' }
 
+    const inputBlurHandler = (e, fieldName)=>{
+         console.log("inside inputBlurHandler, fieldname", fieldName)
+         e.target.value.trim()? null : e.target.previousElementSibling.style.display = 'inline-block'
+         if(fieldName){
+            const value = e.target.value
+            const statusObj = handleInputValidation(fieldName, value)
+            console.log("statusObj from inputBlurHandler--> ", JSON.stringify(statusObj))
+            if(statusObj.error){
+                const message = statusObj.message
+                displayError(e, message, productData, fieldName)
+            }else{
+                displaySuccess(e)
+            }
+         }
     }
 
     return(
         <section id='AdminAddProduct'>
-            <h1> Add Product </h1>
+            <div className='flex gap-[10px] items-center header'>
+                <i className='p-[7px] border border-[#c4c6ca] rounded-[4px]'> <IoArrowBackSharp/> </i>
+                <h1> Add Product </h1>
+                {/* <i className='p-[7px] border border-transparent rounded-[4px]'>  <ProductIcon2/> </i>    <LuPackage/> <ProductIcon/> */}
+            </div>
             <main className='flex gap-[10px] mr-[2rem]'>
                 <div className='flex flex-col gap-[15px] basis[60%] w-[60%]'>
                     <div className='flex flex-col gap-[1rem] justify-center product-input-wrapper'>
                         <div className='input-wrapper'>
                             <label for='product-name'> Product Name</label>
                             <div className='relative'>
-                                <input type='text' placeholder='Type name here' id='product-name' required className='pl-[21px] w-full' 
-                                            onFocus={(e)=> inputFocusHandler(e)} onBlur={(e)=> inputBlurHandler(e)}/>
                                 <PlaceholderIcon icon={<GoPackage/>}/>
+                                <input type='text' placeholder='Type name here' id='product-name' required className='pl-[21px] w-full' 
+                                            onFocus={(e)=> inputFocusHandler(e)} onBlur={(e)=> inputBlurHandler(e, "productName")}
+                                                onChange={(e)=> changeHandler(e, "productName")}/>
+                                <p className='error'></p>
                             </div>
                         </div>
                         <div className='flex gap-[5px] items-center'>
                             <div className='input-wrapper'>
                                 <label for='product-price'> Price </label>
                                 <div className='relative'>
-                                    <input type='number' id='product-price' required className='pl-[21px]' 
-                                                onFocus={(e)=> inputFocusHandler(e)} onBlur={(e)=> inputBlurHandler(e)}/>
                                     <PlaceholderIcon icon={<MdCurrencyRupee/>}/>
+                                    <input type='text' id='product-price' required className='pl-[21px]' onFocus={(e)=> inputFocusHandler(e)} 
+                                       onBlur={(e)=> inputBlurHandler(e, "price")} onChange={(e)=> changeHandler(e, "price")}/>
+                                    <p className='error'></p>
                                 </div>
                             </div>
                             <div className='input-wrapper'>
                                 <label for='product-stock'> Stock </label>
                                 <div className='relative'>
-                                    <input type='number' placeholder='' id='product-stock' required className='pl-[21px]' 
-                                            onFocus={(e)=> inputFocusHandler(e)} onBlur={(e)=> inputBlurHandler(e)} />
                                     <PlaceholderIcon icon={<LuPackageSearch/>}/>
+                                    <input type='text' placeholder='' id='product-stock' required className='pl-[21px]' onFocus={(e)=> inputFocusHandler(e)} 
+                                            onBlur={(e)=> inputBlurHandler(e, "stock")} onChange={(e)=> changeHandler(e, "stock")}/>
+                                    <p className='error'></p>
                                 </div>
                             </div>
                             <div className='input-wrapper'>
                                 <label for='product-weight'> Weight </label>
                                 <div className='relative'>
-                                    <input type='number' placeholder='' id='product-weight' required  className='pl-[21px]' 
-                                                onFocus={(e)=> inputFocusHandler(e)} onBlur={(e)=> inputBlurHandler(e)} />
                                     <PlaceholderIcon icon={<RiWeightLine/>}/>
+                                    <input type='text' placeholder='' id='product-weight' required  className='pl-[21px]' onFocus={(e)=> inputFocusHandler(e)} 
+                                         onBlur={(e)=> inputBlurHandler(e, "weight")}  onChange={(e)=> changeHandler(e, "weight")} />
+                                    <p className='error'></p>
                                 </div>
                             </div>
                         </div>
                         <div className='input-wrapper'>
                             <label for='product-brand'> Brand </label>
                             <div className='relative'>
-                                <input type='text' placeholder='Brand name' id='product-brand' required  className='pl-[21px] w-full' 
-                                                onFocus={(e)=> inputFocusHandler(e)} onBlur={(e)=> inputBlurHandler(e)}/>
                                 <PlaceholderIcon icon={<AiOutlineSafetyCertificate/>}/>
+                                <input type='text' placeholder='Brand name' id='product-brand' required  className='pl-[21px] w-full' 
+                                   onFocus={(e)=> inputFocusHandler(e)} onBlur={(e)=> inputBlurHandler(e , "brand")} onChange={(e)=> changeHandler(e, "brand")}/>
+                                <p className='error'></p>
                             </div>
                         </div>
                     </div>
@@ -140,27 +134,46 @@ export default function AdminAddProductPage(){
                         <div className='input-wrapper'>
                             <label for='product-description'> Description </label>
                             <div className='relative'>
-                                <textarea placeholder='Type description here' rows='3' cols='70' maxlength='100' id='product-description'
-                                    required className='pl-[21px]' onFocus={(e)=> inputFocusHandler(e)} onBlur={(e)=> inputBlurHandler(e)}/>
-                                <PlaceholderIcon icon={<CgDetailsMore/>} fromBottom={70} />
+                                <PlaceholderIcon icon={<CgDetailsMore/>} fromTop={8} />
+                                <textarea placeholder='Type description here' rows='7' cols='70' maxlength='2000' id='product-description'
+                                    required className='pl-[21px]' onFocus={(e)=> inputFocusHandler(e)} onBlur={(e)=> inputBlurHandler(e, "description")}
+                                     onChange={(e)=> changeHandler(e, "description")}/>
+                                <p className='error'></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className='flex justify-center items-center product-input-wrapper'>
+                        <div className='input-wrapper categories'>
+                            <h4 className='text-[11.6px] text-secondary'> Select category / categories </h4> 
+                                <div className='flex justify-between items-center mt-[10px] text-black'>
+                                  <div>
+                                      <label for= 'strength'>Strength</label>
+                                      <input type='checkbox' id='strength' />
+                                  </div>
+                                  <div>
+                                      <label for= 'cardio'>Cardio</label>
+                                      <input type='checkbox' id='cardio' />
+                                  </div>
+                                  <div>
+                                      <label for= 'supplements'>Supplements</label>
+                                      <input type='checkbox' id='supplements' />
+                                  </div>
+                                  <div>
+                                      <label for= 'accessories'>Acessories</label>
+                                      <input type='checkbox' id='accessories' />
+                                  </div>
                             </div>
                         </div>
                     </div>
                     <div className='flex justify-center items-center product-input-wrapper'>
                         <div className='input-wrapper'>
-                            <label for='product-tags'> Tags </label>
-                            <div className='relative w-full h-[5rem] border border-primary rounded-[5px] bg-white tags-wrapper'>
-                                {/* <textarea placeholder='Type each tag followed by a space' rows='3' cols='70' maxlength='100' id='product-tags' 
-                                        required className='pl-[21px]' onFocus={(e)=> inputFocusHandler(e)} onBlur={(e)=> inputBlurHandler(e)}/> */}
-                                        {singleTags? singleTags: ''}
-                                        <PlaceholderIcon icon={<BsTags/>} fromBottom={70} />
-                                        <input type='text' placeholder='Type each tag followed by a space' maxlength='60'
-                                                 className='w-[11rem] h-[2rem] text-[11px] text-secondary'
-                                                 style={{width:'10rem', height:'2rem', marginLeft:'9px', border:'0'}} id='product-tags'
-                                                    onChange={(e)=> tagsInputHandler(e)} onKeyDown={(e)=> tagsKeyDownHandler(e)}/>
-                                
-                            </div>
+                            
+                            <TagGenerator tag={tag} setTags={setTags} SetPlaceholderIcon={PlaceholderIcon}/> 
+
                         </div>
+                    </div>
+                    <div>
+                        <button onClick={()=>console.log("ProductData-->", JSON.stringify(productData))}> Click here </button>
                     </div>
                 </div>
                 <div className='w-full h-screen basis-[37%]'>

@@ -1,12 +1,12 @@
 import React, {useState, useEffect} from 'react';
 import axios from 'axios';
-import './Products.css';
+import './ProductsDisplay.css';
 import Pagination from '../Pagination/Pagination'
 import {SiteButtonSquare} from '../SiteButtons/SiteButtons';
 import {MdFavoriteBorder} from "react-icons/md";
 import {IoStarOutline,IoStarHalfSharp,IoStarSharp} from "react-icons/io5";
 
-export default function Products({gridView}) {
+export default function ProductsDisplay({gridView, admin}) {
   const [products, setProducts] = useState([]);
   const [totalCounts, setTotalCounts] = useState(0)
   const [currentPage, setCurrentPage] = useState(1)
@@ -55,18 +55,28 @@ export default function Products({gridView}) {
 
   return (
     <>
-    <div className= {gridView ? 'grid grid-cols-3 gap-y-[2rem]' : 'flex flex-col gap-[2rem]' } id="products-display">
+    <div className= {gridView ? 'grid grid-cols-3 gap-y-[2rem]' : 'flex flex-col gap-[2rem]' } id="products-display"
+                     style={admin? {justifyItems:'center'} : {}}>
       {
         products.map((product) => (
           <div key={product.id} className= {gridView ? 'w-[275px]' : 'flex gap-[1rem] w-full'}>
             <figure className='relative h-auto rounded-[10px] thumbnail'>
               <img src={product.thumbnail} alt={product.title} className='rounded-[10px]'/>
               <figcaption className='absolute bottom-[12px] w-full text-center'>
-                <SiteButtonSquare customStyle={{width:'12rem', paddingBlock:'8px', fontSize:'13px'}}> Add to Cart </SiteButtonSquare>
+                {
+                  admin ?
+                  <div className='flex justify-around'>
+                    <SiteButtonSquare customStyle={{paddingBlock:'6px', paddingInline:'22px', fontWeight:'430', borderRadius:'6px'}}> Edit </SiteButtonSquare>
+                    <SiteButtonSquare customStyle={{paddingBlock:'6px', paddingInline:'22px', fontWeight:'430', borderRadius:'6px'}}> Block </SiteButtonSquare>
+                  </div> :
+                  <SiteButtonSquare customStyle={{width:'12rem', paddingBlock:'8px', fontSize:'13px'}}> Add to Cart </SiteButtonSquare>
+                }
               </figcaption>
+              { !admin &&
               <div className='absolute top-[15px] right-[15px] p-[5px] rounded-[15px] bg-white favourite'>
                 <MdFavoriteBorder />
               </div>
+              }
             </figure>
             <div className= {gridView? 'mt-[10px] flex flex-col gap-[5px] pl-[10px] py-[8px] rounded-[10px] product-infos' 
                                  : 'inline-flex flex-col gap-[10px] justify-center pl-[1rem] py-[8px] rounded-[10px] ml-[1rem] product-infos w-full'}>

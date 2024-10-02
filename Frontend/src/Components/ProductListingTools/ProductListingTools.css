@@ -1,0 +1,29 @@
+
+#ProductListingTools > input:first-child{
+    border-color: rgb(212, 176, 236);
+    box-shadow: 2px 2px 12px rgb(233, 222, 242);
+}
+#ProductListingTools .sort-by > svg{
+    color:var(--SECONDARY)
+}
+#ProductListingTools .view-type span > svg{
+    color: var(--SECONDARY);
+    padding: 4px;
+    height: 24px;
+    width: 24px;
+    background: rgb(242, 245, 229); 
+    cursor: pointer;
+}
+#ProductListingTools .sort-dropdown > ul{
+    background: rgb(245, 245, 246);
+    color: #3498db;
+    border-color: rgb(215, 209, 219);
+}
+#ProductListingTools .sort-dropdown > ul li{
+    display: inherit;
+    align-items: center;
+    gap: 5px;
+}
+#ProductListingTools .sort-dropdown > ul li > svg{
+    color: #09f;
+}

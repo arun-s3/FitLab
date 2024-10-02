@@ -5,19 +5,14 @@ import Header from '../../../Components/Header/Header'
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
 import PriceFilter from '../../../Components/PriceFilter/PriceFilter'
 import TestPriceFilter from '../../../Components/PriceFilter/TestPriceFilter' // For Enhancing Original PriceFiter feature
-import {SearchInput} from '../../../Components/FromComponents/FormComponents'
-import Products from '../../../Components/Products/Products'
+import ProductsDisplay from '../../../Components/ProductsDisplay/ProductsDisplay'
+import ProductListingTools from '../../../Components/ProductListingTools/ProductListingTools'
 
 import {VscSettings} from "react-icons/vsc";
-import {RiArrowDropUpLine, RiArrowDropDownLine} from "react-icons/ri";
-import {BsFillGrid3X3GapFill} from "react-icons/bs";
-import {FaList} from "react-icons/fa";
-import {IoPricetagOutline} from "react-icons/io5";
-import {FaIndianRupeeSign, FaChartLine } from "react-icons/fa6";
-import {VscFeedback} from "react-icons/vsc";
-import {MdOutlineFeaturedVideo, MdOutlineNewReleases} from "react-icons/md";
+import {RiArrowDropUpLine} from "react-icons/ri";
 
-export default function ProductList(){
+
+export default function ProductList({admin}){
 
     const headerBg = {
         backgroundImage: "url('/header-bg.png')",
@@ -39,7 +34,7 @@ export default function ProductList(){
             </header>
             
             <BreadcrumbBar/>
-
+                
             <main className='px-[60px] mt-[3rem] flex gap-[2.5rem] items-start justify-start' id='productlist'>
                 <aside className='basis-[15rem] flex flex-col gap-[10px]'>
                     <div className='flex gap-[5px] items-center pb-[10px] border-b border-[#DEE2E7] filter-head'>
@@ -154,35 +149,12 @@ export default function ProductList(){
                 </aside>
 
                 <section className='basis-full flex-grow'>
-                    <div className='flex justify-between' id='filter-content-header'>
-                        <SearchInput/>
-                        <div className='flex gap-[2rem] items-center'>
-                            <div className='flex items-center sort-by relative sort-dropdown cursor-pointer' 
-                                                                    onClick={(e)=> setShowSortBy(status=> !status)}>
-                                <span className='text-[13px] font-[500]'> Sort By </span>
-                                <RiArrowDropDownLine/>
-                                {showSortBy && 
-                                <ul className='list-none cursor-pointer absolute top-[22px] flex flex-col gap-[5px] justify-center 
-                                        w-[10rem] h-[10rem] border rounded-[8px] text-[10px] z-[5] px-[19px]'>
-                                    <li> Price: High to Low <FaIndianRupeeSign/> </li>
-                                    <li> Price: Low to High <FaIndianRupeeSign/> </li>
-                                    <li> Ratings: High to Low <VscFeedback/> </li>
-                                    <li> Ratings: Low to High <VscFeedback/> </li>
-                                    <li> Featured <MdOutlineFeaturedVideo/> </li>
-                                    <li> Best Sellers <FaChartLine/> </li>
-                                    <li> Newest Arrivals <MdOutlineNewReleases/> </li>
-                                </ul>
-                                }
-                            </div>
-                            <div className='flex items-center gap-[5px] view-type'>
-                                <span onClick={()=> setShowByGrid(true)}>  <BsFillGrid3X3GapFill/> </span>
-                                <span onClick={()=> setShowByGrid(false)}> <FaList/> </span>
-                            </div>
-                        </div>
-                    </div>
+
+                    <ProductListingTools showSortBy={showSortBy} setShowSortBy={setShowSortBy} showByGrid={showByGrid} setShowByGrid={setShowByGrid}/>
+
                     <div className='mt-[2rem]'>
 
-                        <Products gridView={showByGrid} />
+                        <ProductsDisplay gridView={showByGrid} />
 
                     </div>
                 </section>

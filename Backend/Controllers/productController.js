@@ -3,14 +3,14 @@ const {errorHandler} = require('../Utils/errorHandler')
 
 const createProduct = async(req,res,next)=>{
     try {
-        console.log("Inside createProduct controller")
-        const requiredField = ["title", "description", "price", "brand", "images", "thumbnail", "category", "stock"] // needed "user"?
-        for(let field of requiredField){
-            if (!req.body[field] || req.body[field].toString().trim() === ""){
-                next(errorHandler(400, "Please fill all the required fields!"))
-            }
-        }
-        const newProduct = new Product(req.body)
+        console.log("Inside createProduct controller, received productForm-->", JSON.stringify(req.body.productData))
+        // const requiredField = ["title", "description", "price", "brand", "images", "thumbnail", "category", "stock"] // needed "user"?
+        // for(let field of requiredField){
+        //     if (!req.body.productData[field] || req.body.productData[field].toString().trim() === ""){
+        //         next(errorHandler(400, "Please fill all the required fields!"))
+        //     }
+        // }
+        const newProduct = new Product(req.body.productData)
         const savedProduct = await newProduct.save();
         res.status(201).json({success:'true', product:savedProduct});  
     } 

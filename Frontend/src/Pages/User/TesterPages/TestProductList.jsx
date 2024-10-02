@@ -5,7 +5,7 @@ import Header from '../../../Components/Header/Header'
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
 import {SiteButtonSquare, SiteSecondaryButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
 import {SearchInput} from '../../../Components/FromComponents/FormComponents'
-import Products from '../../../Components/Products/Products'
+import Products from '../../../Components/ProductsDisplay/ProductsDisplay'
 
 import {VscSettings} from "react-icons/vsc";
 import {RiArrowDropUpLine, RiArrowDropDownLine} from "react-icons/ri";

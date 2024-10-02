@@ -34,17 +34,20 @@ export default function FileUpload({images, setImages, thumbnail, setThumbnail})
             if (event.data.type === 'edited-image') {
                 const updatedImage = event.data.payload;
                 windowRef.current.close()
-                const reader = new FileReader()
-                reader.onload = ()=>{
-                    const base64URL = reader.result
-                    setEditedImage({...updatedImage, url:base64URL})
-                }
-                reader.onprogress = (event)=>{
-                    const progress = (event.loaded/event.total)*100
-                    console.log("LOADING..."+ progress)
-                    windowRef.current.postMessage({type:'loading-img', progress}, '*')
-                }
-                reader.readAsDataURL(updatedImage.blob)
+                // IMP----> IF wanted base64Url set as editedImage's url use the commented
+                // const reader = new FileReader()
+                // reader.onload = ()=>{
+                //     const base64URL = reader.result
+                //     setEditedImage({...updatedImage, url:base64URL})
+                // }
+                // reader.onprogress = (event)=>{
+                //     const progress = (event.loaded/event.total)*100
+                //     console.log("LOADING..."+ progress)
+                //     windowRef.current.postMessage({type:'loading-img', progress}, '*')
+                // }
+                // reader.readAsDataURL(updatedImage.blob)
+                updatedImage.url = URL.createObjectURL(updatedImage.blob)
+                setEditedImage({...updatedImage})
                 console.log("RECEIVED UPDATED IMAGE FROM CHILD WINDOW-->", JSON.stringify(updatedImage))
                 // setEditedImage(updatedImage)
             }
@@ -181,7 +184,6 @@ export default function FileUpload({images, setImages, thumbnail, setThumbnail})
         windowRef.current = window.open(`../image-editor?name=${name}`, "", "width=1300,height=700,left=300,top=300,resizable=no")
         // windowRef.current.postMessage({type:'target-img', blob, name}, '*')
         const messageHandler = (event) => {
-            // Ensure this message is from the child window
             if (event.source === windowRef.current && event.data === 'child-ready') {
                 console.log('Child window is ready. Sending image blob...');
                 windowRef.current.postMessage({ type: 'target-img', blob, name }, '*');
@@ -190,7 +192,6 @@ export default function FileUpload({images, setImages, thumbnail, setThumbnail})
     
         window.addEventListener('message', messageHandler);
     
-        // Clean up when the child window is closed
         windowRef.current.onbeforeunload = () => {
             window.removeEventListener('message', messageHandler);
         };

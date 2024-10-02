@@ -818,6 +818,14 @@ select{
   left: 10%;
 }
 
+.left-\[150px\]{
+  left: 150px;
+}
+
+.left-\[300px\]{
+  left: 300px;
+}
+
 .left-\[4rem\]{
   left: 4rem;
 }
@@ -854,8 +862,20 @@ select{
   right: 2rem;
 }
 
+.right-\[5px\]{
+  right: 5px;
+}
+
 .top-0{
   top: 0px;
+}
+
+.top-\[-30px\]{
+  top: -30px;
+}
+
+.top-\[-39px\]{
+  top: -39px;
 }
 
 .top-\[-8px\]{
@@ -1013,10 +1033,6 @@ select{
   margin-right: 25px;
 }
 
-.mr-\[2rem\]{
-  margin-right: 2rem;
-}
-
 .mr-\[4px\]{
   margin-right: 4px;
 }
@@ -1067,6 +1083,10 @@ select{
 
 .mt-\[3rem\]{
   margin-top: 3rem;
+}
+
+.mt-\[4\.3rem\]{
+  margin-top: 4.3rem;
 }
 
 .mt-\[4px\]{
@@ -1267,6 +1287,10 @@ select{
 
 .w-\[14rem\]{
   width: 14rem;
+}
+
+.w-\[150px\]{
+  width: 150px;
 }
 
 .w-\[15rem\]{
@@ -1478,12 +1502,20 @@ select{
   justify-content: space-between;
 }
 
+.justify-around{
+  justify-content: space-around;
+}
+
 .gap-0{
   gap: 0px;
 }
 
 .gap-\[1\.3rem\]{
   gap: 1.3rem;
+}
+
+.gap-\[1\.5rem\]{
+  gap: 1.5rem;
 }
 
 .gap-\[10px\]{
@@ -1540,6 +1572,14 @@ select{
 
 .gap-\[8px\]{
   gap: 8px;
+}
+
+.gap-\[px\]{
+  gap: px;
+}
+
+.gap-\[7px\]{
+  gap: 7px;
 }
 
 .gap-y-\[2rem\]{
@@ -1618,8 +1658,16 @@ select{
   border-bottom-right-radius: 8px;
 }
 
+.rounded-tl-\[10px\]{
+  border-top-left-radius: 10px;
+}
+
 .rounded-tr-\[20px\]{
   border-top-right-radius: 20px;
+}
+
+.rounded-tr-\[5px\]{
+  border-top-right-radius: 5px;
 }
 
 .border{
@@ -1716,6 +1764,11 @@ select{
 
 .border-transparent{
   border-color: transparent;
+}
+
+.border-b-\[\#e5e7eb\]{
+  --tw-border-opacity: 1;
+  border-bottom-color: rgb(229 231 235 / var(--tw-border-opacity));
 }
 
 .border-l-borderLight{
@@ -1871,6 +1924,11 @@ select{
   padding-bottom: 1px;
 }
 
+.py-\[1rem\]{
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
 .py-\[2\.3rem\]{
   padding-top: 2.3rem;
   padding-bottom: 2.3rem;
@@ -2023,6 +2081,10 @@ select{
   font-size: 40px;
 }
 
+.text-\[8px\]{
+  font-size: 8px;
+}
+
 .text-\[9px\]{
   font-size: 9px;
 }
@@ -2156,6 +2218,14 @@ select{
 
 .opacity-\[0\.41\]{
   opacity: 0.41;
+}
+
+.opacity-\[0\.75\]{
+  opacity: 0.75;
+}
+
+.opacity-\[1\]{
+  opacity: 1;
 }
 
 .shadow{

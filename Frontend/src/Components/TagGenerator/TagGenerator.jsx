@@ -50,7 +50,7 @@ export default function TagGenerator({tag, setTags, SetPlaceholderIcon}){
     
     return(
         <>
-            <label for='product-tags'> Tags </label>
+            <label for='product-tags'> Tags (optional) </label>
             <div className='relative w-full h-[5rem] border border-primary rounded-[5px] bg-white tags-wrapper'>        
                 {tag? tag: ''}
                <SetPlaceholderIcon icon={<BsTags/>} fromTop={15} />

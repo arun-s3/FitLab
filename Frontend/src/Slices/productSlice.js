@@ -1,10 +1,10 @@
 import {createSlice, createAsyncThunk} from '@reduxjs/toolkit'
 import axios from '../Utils/axiosConfig'
 
-export const createProduct = createAsyncThunk('createProduct', async(formData, thunkAPI)=>{
+export const createProduct = createAsyncThunk('createProduct', async(productData, thunkAPI)=>{
     try{
         console.log("Inside createProduct createAsyncThunk")
-        const response = await axios.post('/admin/products/add',formData,{withCredentials:true})
+        const response = await axios.post('/admin/products/add',{productData},{withCredentials:true})
         console.log("returning success response from createProduct createAsyncThunk..."+JSON.stringify(response.data))
         return response.data
     }
@@ -40,6 +40,7 @@ const productSlice = createSlice({
     },
     extraReducers: (builder)=>{
         builder.addCase(createProduct.fulfilled, (state, action)=>{
+            console.log("action.payload.product-->",action.payload.product)
             state.products = action.payload.product
             state.error = false
             state.loading = false

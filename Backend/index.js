@@ -16,8 +16,8 @@ app.use(nocache())
 const path = require('node:path')
 app.use('/Public',express.static(path.join(__dirname,'/Public')))
 
-app.use(express.json())
-app.use(express.urlencoded({extended:true}))
+app.use(express.json({limit: '10mb'}))
+app.use(express.urlencoded({extended: true, limit:'10mb'}))
 const cookieParser = require('cookie-parser')
 app.use(cookieParser())
 

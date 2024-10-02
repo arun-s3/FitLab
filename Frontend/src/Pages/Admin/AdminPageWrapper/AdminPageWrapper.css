@@ -28,15 +28,18 @@
     /* scroll-snap-type: y proximity; */
     scroll-padding-top: 1rem;
 }
+#admin-wrapper #admin-content-outlet > section{
+    margin-right: 1rem;
+}
 #admin-wrapper #admin-content-outlet > section:first-child{
     scroll-snap-align: start;   
     z-index: -1;
     margin-bottom: 7rem;
 }
-#admin-wrapper #admin-content-outlet > section:first-child > .header{
+#admin-wrapper #admin-content-outlet > section:first-child > header{
     margin-bottom: 2rem;
 }
-#admin-wrapper #admin-content-outlet > section:first-child > .header > h1{
+#admin-wrapper #admin-content-outlet > section:first-child > header > h1{
     font-size: 25px;
     font-weight: 600;
     letter-spacing: 0.5px;

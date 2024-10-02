@@ -33,7 +33,7 @@ const productSchema = mongoose.Schema({
        default: 0,
      },
      category: {
-        type: String,
+        type: [String],
         required: [true, "Must enter the category the product belongs to"]
      },
      stock: {
@@ -50,27 +50,50 @@ const productSchema = mongoose.Schema({
        default: 0,
      },
      images:{
-        type: [String],
+        type: [{
+          name: {
+            type: String,
+            required: true
+          },
+          size: {
+            type: Number,
+            required: true
+          },
+          url: {
+            type: String,
+            required: true
+          }
+        }],
         required: true,
-        validate: {
-            validator: function(images){
-                return images.length >= 3
-            },
-            message: "Product must have atleast 3 images"}
+        // validate: {
+        //     validator: function(images){
+        //         return images.length >= 3
+        //     },
+        //     message: "Product must have atleast 3 images"}
      },
      thumbnail:{
-        type: String,
-        required: true
-     },
-     idBlocked:{
+          name: {
+            type: String,
+            required: true
+          },
+          size: {
+            type: Number,
+            required: true
+          },
+          url: {
+            type: String,
+            required: true
+          },
+        },
+     isBlocked:{
         type: Boolean,
         default: false
      },
-     user: {
-        type: mongoose.Schema.ObjectId,
-        ref: "User",
-        // required: true,
-      },
+    //  user: {
+    //     type: mongoose.Schema.ObjectId,
+    //     ref: "User",
+    //     // required: true,
+    //   },
      reviews: [
        {
          user: {

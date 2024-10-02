@@ -1,4 +1,4 @@
-#AdminAddProduct > .header i:first-child >svg{
+#AdminAddProduct > header i:first-child >svg{
     color: #666363;
 }
 /* #AdminAddProduct > .header i:last-child >svg{
@@ -51,6 +51,7 @@
     height: 20px;
     border-radius: 3px;
     margin-left: 10px;
+    color: var(--PRIMARY);
 }
 #AdminAddProduct main .product-input-wrapper > .categories label{
     color: #454242;

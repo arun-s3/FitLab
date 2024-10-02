@@ -214,10 +214,9 @@ const applyEffects = ()=>{
         // imgRef.current.src = blobUrl
         // let blobUrl = ''
         canvas.toBlob((blob)=>{
-            const blobUrl = URL.createObjectURL(blob)
-            console.log("blobURL ceated from canvas-->",blobUrl)
-            const imageData = {name: image.name, url: blobUrl, size: blob.size, blob}
-            sessionStorage.setItem('image', JSON.stringify(imageData));
+            // const blobUrl = URL.createObjectURL(blob)
+            // console.log("blobURL ceated from canvas-->",blobUrl)
+            const imageData = {name: image.name, size: blob.size, blob}   //, url: blobUrl
             window.opener.postMessage({ type: 'edited-image', payload: imageData }, '*');
             console.log("STORED IN SESSIONSTORAGE")
         },'image/png')

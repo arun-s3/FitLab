@@ -814,6 +814,10 @@ select{
   left: -1px;
 }
 
+.left-\[-40px\]{
+  left: -40px;
+}
+
 .left-\[10\%\]{
   left: 10%;
 }
@@ -900,6 +904,10 @@ select{
 
 .top-\[25\%\]{
   top: 25%;
+}
+
+.top-\[2px\]{
+  top: 2px;
 }
 
 .top-\[30\%\]{
@@ -1345,6 +1353,10 @@ select{
   width: 34rem;
 }
 
+.w-\[35px\]{
+  width: 35px;
+}
+
 .w-\[40\%\]{
   width: 40%;
 }
@@ -1363,6 +1375,10 @@ select{
 
 .w-\[4rem\]{
   width: 4rem;
+}
+
+.w-\[50px\]{
+  width: 50px;
 }
 
 .w-\[5px\]{
@@ -1546,6 +1562,10 @@ select{
   gap: 27px;
 }
 
+.gap-\[2px\]{
+  gap: 2px;
+}
+
 .gap-\[2rem\]{
   gap: 2rem;
 }
@@ -1570,16 +1590,12 @@ select{
   gap: 5px;
 }
 
-.gap-\[8px\]{
-  gap: 8px;
-}
-
-.gap-\[px\]{
-  gap: px;
-}
-
 .gap-\[7px\]{
   gap: 7px;
+}
+
+.gap-\[8px\]{
+  gap: 8px;
 }
 
 .gap-y-\[2rem\]{
@@ -1794,6 +1810,11 @@ select{
 .bg-\[\#f3efef\]{
   --tw-bg-opacity: 1;
   background-color: rgb(243 239 239 / var(--tw-bg-opacity));
+}
+
+.bg-\[\#f3f5f7\]{
+  --tw-bg-opacity: 1;
+  background-color: rgb(243 245 247 / var(--tw-bg-opacity));
 }
 
 .bg-black{

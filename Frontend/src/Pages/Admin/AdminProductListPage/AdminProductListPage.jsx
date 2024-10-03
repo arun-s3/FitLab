@@ -16,6 +16,7 @@ export default function AdminProductListPage(){
 
     const [showSortBy, setShowSortBy] = useState(false)
     const [showByGrid, setShowByGrid] = useState(true)
+    const [showByTable, setShowByTable] = useState(false)
     const [toggleTab, setToggleTab] = useState({goTo: 'all'})
 
     return(
@@ -68,17 +69,17 @@ export default function AdminProductListPage(){
                     <h4 className={toggleTab.goTo == 'blocked' ? 'opacity-[1]' : 'opacity-[0.75]'}> Blocked </h4>
                 </div>
                 <div className='absolute right-[5px] top-[-30px] flex items-center gap-[7px] view-type'>
-                    <span onClick={()=> setShowByGrid(false)}> <VscTable/> </span>
-                    <span onClick={()=> setShowByGrid(false)}> <FaList/> </span>
-                    <span onClick={()=> setShowByGrid(true)}>  <BsFillGrid3X3GapFill/> </span>
+                    <span data-label='Table View' onClick={()=> setShowByTable(true)}> <VscTable/> </span>
+                    <span data-label='List View' onClick={()=> setShowByGrid(false)}> <FaList/> </span>
+                    <span data-label='Grid View' onClick={()=> setShowByGrid(true)}>  <BsFillGrid3X3GapFill/> </span>
                 </div>
                 <div className='border py-[1rem] px-[2rem] bg-white'>
 
-                    <ProductListingTools admin={true} showSortBy={showSortBy} setShowSortBy={setShowSortBy} />
+                    <ProductListingTools admin={true} showSortBy={showSortBy} setShowSortBy={setShowSortBy} showByTable={showByTable}/>
 
-                    <div className='mt-[2rem]'>
+                    <div className='mt-[2rem] px-[2rem]'>
 
-                        <ProductsDisplay gridView={showByGrid} admin={true}/>
+                        <ProductsDisplay gridView={showByGrid} showByTable={showByTable} admin={true}/>
 
                     </div>
 

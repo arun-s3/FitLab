@@ -11,8 +11,9 @@ import {VscFeedback} from "react-icons/vsc";
 import {MdOutlineFeaturedVideo, MdOutlineNewReleases} from "react-icons/md";
 
 
-export default function ProductListingTools({admin, showSortBy, setShowSortBy, showByGrid, setShowByGrid}){
+export default function ProductListingTools({admin, showSortBy, setShowSortBy, showByGrid, setShowByGrid, showByTable}){
 
+    console.log("showByTable", showByTable)
     return(
 
         <div className='flex justify-between' id='ProductListingTools'>
@@ -24,9 +25,9 @@ export default function ProductListingTools({admin, showSortBy, setShowSortBy, s
                     <RiArrowDropDownLine/>
                     {showSortBy && 
                     <ul className='list-none cursor-pointer absolute top-[22px] flex flex-col gap-[5px] justify-center 
-                            w-[10rem] h-[10rem] border rounded-[8px] text-[10px] z-[5] px-[19px]'>
-                        <li> Price: High to Low <FaIndianRupeeSign/> </li>
-                        <li> Price: Low to High <FaIndianRupeeSign/> </li>
+                            w-[10rem] h-[10rem] border rounded-[8px] text-[10px] z-[5] px-[19px]' style={admin && {right:'0px'}}>
+                        <li style={showByTable ? {display:'none'}:{}}> Price: High to Low <FaIndianRupeeSign/> </li>
+                        <li style={showByTable ? {display:'none'}:{}}> Price: Low to High <FaIndianRupeeSign/> </li>
                         <li> Ratings: High to Low <VscFeedback/> </li>
                         <li> Ratings: Low to High <VscFeedback/> </li>
                         <li> Featured <MdOutlineFeaturedVideo/> </li>

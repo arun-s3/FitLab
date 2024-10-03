@@ -3,14 +3,20 @@ import axios from 'axios';
 import './ProductsDisplay.css';
 import Pagination from '../Pagination/Pagination'
 import {SiteButtonSquare} from '../SiteButtons/SiteButtons';
+import ProductsTableView from './ProductsTableView';
 import {MdFavoriteBorder} from "react-icons/md";
 import {IoStarOutline,IoStarHalfSharp,IoStarSharp} from "react-icons/io5";
 
-export default function ProductsDisplay({gridView, admin}) {
+import {RiFileEditLine} from "react-icons/ri";
+import {MdBlock} from "react-icons/md";
+
+
+
+export default function ProductsDisplay({gridView, showByTable, admin}) {
+
   const [products, setProducts] = useState([]);
   const [totalCounts, setTotalCounts] = useState(0)
-  const [currentPage, setCurrentPage] = useState(1)
-  
+  const [currentPage, setCurrentPage] = useState(1)  
 
   useEffect(() => {
     const getProducts = async () => {
@@ -55,20 +61,32 @@ export default function ProductsDisplay({gridView, admin}) {
 
   return (
     <>
-    <div className= {gridView ? 'grid grid-cols-3 gap-y-[2rem]' : 'flex flex-col gap-[2rem]' } id="products-display"
-                     style={admin? {justifyItems:'center'} : {}}>
-      {
+     <div className={`${gridView ? 'grid grid-cols-3 gap-y-[2rem]' : showByTable ? '' : 'flex flex-col gap-[2rem]'}`} id="products-display"
+            style={admin ? { justifyItems: 'center' } : {}}>
+
+      { !showByTable &&
         products.map((product) => (
           <div key={product.id} className= {gridView ? 'w-[275px]' : 'flex gap-[1rem] w-full'}>
             <figure className='relative h-auto rounded-[10px] thumbnail'>
               <img src={product.thumbnail} alt={product.title} className='rounded-[10px]'/>
-              <figcaption className='absolute bottom-[12px] w-full text-center'>
+              <figcaption className={`${admin ? 'top-[2px] left-[-40px]' : 'bottom-[12px]'} absolute w-full text-center`}>
                 {
-                  admin ?
-                  <div className='flex justify-around'>
-                    <SiteButtonSquare customStyle={{paddingBlock:'6px', paddingInline:'22px', fontWeight:'430', borderRadius:'6px'}}> Edit </SiteButtonSquare>
-                    <SiteButtonSquare customStyle={{paddingBlock:'6px', paddingInline:'22px', fontWeight:'430', borderRadius:'6px'}}> Block </SiteButtonSquare>
-                  </div> :
+                 admin ?
+                  <div className='w-[35px] flex flex-col gap-[1rem] text-secondary'>
+                    <span data-label='Edit' className='w-[30px] p-[5px] border rounded-[20px] flex items-center justify-center relative 
+                            cursor-pointer admin-control'>
+                      <i> <RiFileEditLine/> </i>
+                    </span>
+                    <span data-label='Block' className='w-[30px] p-[5px] border rounded-[20px] flex items-center justify-center relative 
+                            cursor-pointer admin-control'>
+                      <i> <MdBlock/> </i>
+                    </span>
+                  </div>
+                  // <div className='flex justify-around'>
+                  //   <SiteButtonSquare customStyle={{paddingBlock:'6px', paddingInline:'22px', fontWeight:'430', borderRadius:'6px'}}> Edit </SiteButtonSquare>
+                  //   <SiteButtonSquare customStyle={{paddingBlock:'6px', paddingInline:'22px', fontWeight:'430', borderRadius:'6px'}}> Block </SiteButtonSquare>
+                  // </div> 
+                  :
                   <SiteButtonSquare customStyle={{width:'12rem', paddingBlock:'8px', fontSize:'13px'}}> Add to Cart </SiteButtonSquare>
                 }
               </figcaption>
@@ -87,27 +105,35 @@ export default function ProductsDisplay({gridView, admin}) {
                                  : ( <p className='text-secondary'>No rating available!</p> )
 
               }
-              <p className= {(gridView ? 'text-[13px]' : 'text-[16px]')  + ' capitalize font-[500]'}>{product.title}</p>
+              <p className= {(gridView ? 'text-[13px]' : (admin && !gridView)? 'text-[14px]' :'text-[16px]')  + ' capitalize font-[500]'}>{product.title}</p>
               {
                 !gridView && 
-                  <p className='text-[14px]'>{product.description}</p>
+                  <p className={(admin && !gridView)? 'text-[12px]' : 'text-[14px]'}> {product.description} </p>
               }
-              <p className='text-[15px]'> &#8377; {Math.ceil(product.price*84)}</p>
+              <p className={(admin && !gridView)? 'text-[13px]' : 'text-[15px]'}> &#8377; {Math.ceil(product.price*84)}</p>
               {
                 !gridView && 
                 <div>
                   {product.tags.map(tag=> 
-                    <span className='text-[13px] px-[14px] py-[1px] border-[1.5px]  border-[#eae0f0] rounded-[7px] text-secondary mr-[1rem]'> 
+                    <span className={`${admin? 'text-[12px]' :'text-[13px]'} px-[14px] py-[1px] border-[1.5px]  border-[#eae0f0] rounded-[7px] text-secondary mr-[1rem]`}> 
                       {tag} 
                     </span>
                 )}
                 </div>
               }
             </div>
+           
           </div>
         ))
       }
     </div>
+    { showByTable &&
+      <div>
+
+          <ProductsTableView products={products} />
+          
+      </div>
+    }
     <div>
 
       <Pagination totalCounts={totalCounts} currentPage={currentPage} currentPageChanger={currentPageChanger}/>

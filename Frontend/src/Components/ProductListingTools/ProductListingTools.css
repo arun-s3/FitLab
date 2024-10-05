@@ -27,3 +27,20 @@
 #ProductListingTools .sort-dropdown > ul li > svg{
     color: #09f;
 }
+#ProductListingTools .view-type span:hover::before{
+    content: attr(data-label);
+    width: 5.2rem;
+    height: 14px;
+    position: absolute;
+    font-size: 11px;
+    padding: 2px;
+    border-radius: 4px;
+    color: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    top: -22px;
+    left: -15px;
+    font-weight: 500;
+    letter-spacing: 0.4px;
+}

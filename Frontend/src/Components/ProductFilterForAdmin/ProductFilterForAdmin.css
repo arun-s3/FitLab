@@ -1,0 +1,17 @@
+
+#admin-product-filter .filter-label{
+    color: #8f8f8f;
+    font-size: 13px;
+}
+#admin-product-filter .category-radios label{
+    font-size: 13px;
+    margin-left: 5px;
+}
+#admin-product-filter .category-radios input{
+    height: 10px;
+    width: 10px;
+}
+#admin-product-filter i > svg{
+    color: var(--SECONDARY);
+    cursor: pointer;
+}

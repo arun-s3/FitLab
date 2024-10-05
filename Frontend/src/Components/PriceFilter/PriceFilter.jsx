@@ -3,7 +3,12 @@ import './PriceFilter.css'
 import {SiteSecondaryButtonSquare} from '../SiteButtons/SiteButtons'
 import {RiArrowDropUpLine, RiArrowDropDownLine} from "react-icons/ri";
 
-export default function PriceFilter(){
+export default function PriceFilter({priceGetter, priceSetter, mountingComponent}){
+
+    const {minPrice, maxPrice} = priceGetter
+    const {setMinPrice, setMaxPrice} = priceSetter
+    // const {inputLocalMinPrice : inputForeignMinPrice , inputForeignMaxPrice} = foreignPriceGetter
+    // const {setInputLocalMinPrice : setInputForeignMinPrice, setInputLocalMaxPrice : setInputForeignMaxPrice} = foreignPriceSetter
 
     let firstRangeStart = useRef(0); let secondRangeStart = useRef(0)
     let firstRangeEnd = useRef(0);  let secondRangeEnd = useRef(0)
@@ -15,16 +20,20 @@ export default function PriceFilter(){
     let checkDragging = useRef(false); let checkMouseDown = useRef(false)                   // For mouse events
     let dragCursor = useRef(false)
 
-    const [minPrice, setMinPrice] = useState(0)
-    const [maxPrice, setMaxPrice] = useState(3750)
     const minPriceRef = useRef(null)
     const maxPriceRef = useRef(null)
     const priceRangeWrapperRef = useRef(null)
     const maxPriceRupee = useRef(100000)
 
+    const priceErrorRef = useRef(null)
+
     const [minInputPrice, setMinInputPrice] = useState(0)
     const [maxInputPrice, setMaxInputPrice] = useState(null)
-    const priceErrorRef = useRef(null)
+
+    useEffect(()=>{
+        setMinInputPrice(minPrice)
+        setMaxInputPrice(maxPrice)
+    },[minPrice, maxPrice])
 
     const calculatePrice = (e, priceUnit)=>{
         const parentWidthPx = Number.parseInt(window.getComputedStyle(e.target.parentElement).width)
@@ -256,12 +265,14 @@ export default function PriceFilter(){
                 e.target.style.cursor = 'grabbing' 
             }
         }}>
-            <p className='text-[15px] text-secondary text-center'>{minPrice} - {maxPrice ? maxPrice+"+":"-"}</p>
+            <p className={`${(mountingComponent=='AdminProductListPage'? 'text-[13px] ':'text-[15px] ') + 'text-secondary text-center'}`}>
+                {minPrice} - {maxPrice ? maxPrice+"+":"-"}
+            </p>
             <div id='pricerange-wrapper' className='relative mt-[1rem]' onDragOver={(e)=>dragOverHandler(e)} 
                                                 onDrop={(e)=>dropHandler(e)} ref={priceRangeWrapperRef}>
 
                 <div className='relative w-[15rem] h-[4px] bg-[#AFD0FF] rounded-[2px]' 
-                                  onDragOver={(e)=>dragOverHandler(e)} onDrop={(e)=>dropHandler(e)}>  {/* ref={rangeRef} bg-[#cfb6ee]*/}
+                                  onDragOver={(e)=>dragOverHandler(e)} onDrop={(e)=>dropHandler(e)} >  {/* ref={rangeRef} bg-[#cfb6ee]*/}
 
                     <div draggable='true' className='absolute left-0 top-[-8px] w-[20px] h-[20px] rounded-[10px] 
                            border-[2px] border-[#AFD0FF]' onDragStart={(e)=>dragStartHandler(e, firstRangeStart)} onDrag={(e)=>dragHandler(e, "firstHandler")}
@@ -276,35 +287,43 @@ export default function PriceFilter(){
 
                 </div>
             </div>
-                <div className='flex justify-between w-full mb-[5px] price-buttons mt-[25px]'>
+            <div>
+                <div className='flex justify-between w-full mb-[5px] price-buttons mt-[25px]' style={mountingComponent=='AdminProductListPage'? {marginTop:'8px'} :{} }>
                     <div>
                         <label className='text-[12px] text-secondary'> Min </label>
                         <div>    
                             <button onClick={(e)=> {
                                 setMinInputPrice(price=> Number.parseInt(price)+1)
                                 // calculateRangeFromPrice(minInputPrice, "firstRange")
-                             }} className='incdec-btn'> + </button>
+                             }} className='incdec-btn' style={mountingComponent=='AdminProductListPage'? {height:'1.4rem'} :{} }> + </button>
                             <input type="number" defaultValue="0" className='w-[70px] border-[#ced1d7] border-l-0 border-r-0 
-                                      p-[1px] h-[23px] placeholder:text-secondary placeholder:text-[14px]'
+                                      p-[1px] h-[23px] placeholder:text-secondary placeholder:text-[14px]' style={mountingComponent=='AdminProductListPage'? {height:'18px'} :{} }
                                       onChange={(e)=> setMinInputPrice(e.target.value)} value={minInputPrice}/>
-                        <button className='incdec-btn' onClick={(e)=> setMinInputPrice(price=> (Number.parseInt(price)-1 < 0)? 0 :Number.parseInt(price)-1 )}>-</button>
+                        <button className='incdec-btn' onClick={(e)=> setMinInputPrice(price=> (Number.parseInt(price)-1 < 0)? 0 :Number.parseInt(price)-1 )}
+                                    style={mountingComponent=='AdminProductListPage'? {height:'1.4rem'} :{} }>-</button>
                         </div>
                     </div>
                     <div>
                         <label className='text-[12px] text-secondary'> Max </label>
                         <div>
-                            <button className='incdec-btn' onClick={(e)=> setMaxInputPrice(price=> Number.parseInt(price)+1)}> + </button>
+                            <button className='incdec-btn' onClick={(e)=> setMaxInputPrice(price=> Number.parseInt(price)+1)}
+                                        style={mountingComponent=='AdminProductListPage'? {height:'1.4rem'} :{} }> + </button>
                             <input type="number" defaultValue="0" className='w-[70px] border-[#ced1d7] border-l-0 border-r-0  
-                                                p-[1px] h-[23px] placeholder:text-secondary placeholder:text-[14px]'
-                                                onChange={(e)=> setMaxInputPrice(e.target.value)} value={maxInputPrice}/>
-                            <button className='incdec-btn' onClick={(e)=> setMaxInputPrice(price=> (Number.parseInt(price)-1 < 0)? 0 :Number.parseInt(price)-1 )}> - </button>
+                                                p-[1px] h-[23px] placeholder:text-secondary placeholder:text-[14px]' style={mountingComponent=='AdminProductListPage'? {height:'18px'} :{} }
+                                                onChange={(e)=> setMaxInputPrice(e.target.value)} value={maxInputPrice}
+                                                    onBlur={()=> validateAndCompute()}/>
+                            <button className='incdec-btn' onClick={(e)=> setMaxInputPrice(price=> (Number.parseInt(price)-1 < 0)? 0 :Number.parseInt(price)-1 )}
+                                        style={mountingComponent=='AdminProductListPage'? {height:'1.4rem'} :{} }> - </button>
                         </div>
                     </div>
                 </div>
+                { (mountingComponent == 'AdminProductListPage') ? null :
                 <div onClick={()=> validateAndCompute()} className='mt-[15px] text-center'>
                     <SiteSecondaryButtonSquare customStyle={{width:'60%', paddingBlock:'5px', fontSize:'13px'}}> Apply </SiteSecondaryButtonSquare>
                 </div>
+                }
                 <p className='hidden text-red-500 text-[10px] mt-[5px] text-center' ref={priceErrorRef}></p>
+            </div>
         </div>
      )
 }

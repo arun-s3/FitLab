@@ -1,7 +1,8 @@
-import React,{useState} from 'react'
+import React,{useState, useEffect, useRef} from 'react'
 import './AdminProductListPage.css'
 import ProductListingTools from '../../../Components/ProductListingTools/ProductListingTools'
 import ProductsDisplay from '../../../Components/ProductsDisplay/ProductsDisplay';
+import ProductFilterForAdmin from '../../../Components/ProductFilterForAdmin/ProductFilterForAdmin';
 
 import {LiaSlidersHSolid} from "react-icons/lia";
 import {FiDownload} from "react-icons/fi";
@@ -19,6 +20,37 @@ export default function AdminProductListPage(){
     const [showByTable, setShowByTable] = useState(false)
     const [toggleTab, setToggleTab] = useState({goTo: 'all'})
 
+    const [showFilter, setShowFilter] = useState(false)
+    const [filter, setFilter] = useState({status: ''})
+    const mouseInFilter = useRef(true)
+
+    const [minPrice, setMinPrice] = useState(0)
+    const [maxPrice, setMaxPrice] = useState(3750)
+    const [inputLocalMinPrice, setInputLocalMinPrice] = useState(0)
+    const [inputLocalMaxPrice, setInputLocalMaxPrice] = useState(0)
+
+    const displayFilter = (e)=>{
+        if (showFilter && !mouseInFilter.current){
+            setShowFilter(false)
+            return
+        }
+        if(!showFilter){
+            setShowFilter(true)
+            return
+        }
+    }
+
+    useEffect(()=>{
+        // const setCloseMenus = ()=>{
+        //     setShowFilter(false)
+        // }
+        // window.addEventListener('click', ()=> setCloseMenus)
+
+        // return ()=>{
+        //     window.removeEventListener('click', ()=> setCloseMenus)
+        // }
+    })
+
     return(
 
         <section id='AdminProductList' >
@@ -26,11 +58,17 @@ export default function AdminProductListPage(){
             <header className='flex justify-between items-center'>
                 <h1> Products </h1>
                 <div className='flex items-center gap-[1.5rem]'>
-                    <div className='chip'>
+                    <div className='chip relative cursor-pointer' onClick={(e)=> displayFilter(e)}>
                         <i>
                             <LiaSlidersHSolid/>
                         </i>
                         <span> Filter </span>
+                        {showFilter &&
+                        <div className='absolute top-[2rem] right-0 z-[10]' onMouseLeave={()=> mouseInFilter.current = false}
+                                    onMouseEnter={()=>  mouseInFilter.current = true}>
+                            <ProductFilterForAdmin filter={filter} setFilter={setFilter} priceGetter={{minPrice, maxPrice}} priceSetter={{setMinPrice, setMaxPrice}}/>
+                        </div>
+                        }
                     </div>
                     <div className='chip'>
                         <i>

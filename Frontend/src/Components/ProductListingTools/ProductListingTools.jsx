@@ -37,9 +37,9 @@ export default function ProductListingTools({admin, showSortBy, setShowSortBy, s
                     }
                 </div>
                 { !admin &&
-                <div className='flex items-center gap-[5px] view-type'>
-                    <span onClick={()=> setShowByGrid(true)}>  <BsFillGrid3X3GapFill/> </span>
-                    <span onClick={()=> setShowByGrid(false)}> <FaList/> </span>
+                <div className='flex items-center gap-[5px] relative view-type'>
+                    <span data-label='Grid View' onClick={()=> setShowByGrid(true)}>  <BsFillGrid3X3GapFill/> </span>
+                    <span data-label='List View' onClick={()=> setShowByGrid(false)}> <FaList/> </span>
                 </div>
                 }
             </div>

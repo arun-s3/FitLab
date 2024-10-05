@@ -19,6 +19,9 @@ export default function ProductList({admin}){
         backgrounSize: 'cover'
     }
 
+    const [minPrice, setMinPrice] = useState(0)
+    const [maxPrice, setMaxPrice] = useState(3750)
+
     const [showCategory, setShowCategory ] = useState(true)
     const [showProductsFilter, setShowProductsFilter] = useState(true)
     const [showPriceFilter, setShowPriceFilter] = useState(true)
@@ -141,7 +144,7 @@ export default function ProductList({admin}){
                         </div>
                     <div id='filter-body'>
                         {
-                            showPriceFilter && <PriceFilter/>
+                            showPriceFilter && <PriceFilter priceGetter={{minPrice, maxPrice}} priceSetter={{setMinPrice, setMaxPrice}}/>
                             // showPriceFilter && <TestPriceFilter/>
                         }
                     </div>

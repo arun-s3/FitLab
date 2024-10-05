@@ -1,0 +1,19 @@
+
+#calender .date-picker input{
+    width: 8rem;
+    height: 2rem;
+    border: 1px solid var(--SECONDARY);
+    border-radius: 7px;
+}
+#calender .date-picker input::placeholder{
+    font-size: 10px;
+    color: #4f5359;
+    letter-spacing: 0.2px;
+    word-spacing: 1px;
+}
+#calender .date-picker svg{
+    position: absolute;
+    top: 7px;
+    left: 4px;
+    color: var(--SECONDARY);
+}

@@ -1,15 +1,18 @@
 import React,{useState, useEffect, useLayoutEffect, useRef} from 'react'
 import './SignUpAndInPage.css'
+import {Link, useNavigate} from 'react-router-dom'
+import {useDispatch, useSelector} from 'react-redux'
+
+import {toast} from 'react-toastify'
+import {useGoogleLogin} from '@react-oauth/google';
+import axios from 'axios'
+
 import {SiteButtonSquare, GoogleButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
 import Header from '../../../Components/Header/Header'
 import Footer from '../../../Components/Footer/Footer'
-import {Link, useNavigate} from 'react-router-dom'
-import {toast} from 'react-toastify'
 import {signup, signin, googleSignin, resetStates} from '../../../Slices/userSlice'
-import {useDispatch, useSelector} from 'react-redux'
-import { CustomHashLoader } from '../../../Components/Loader/Loader'
-import { useGoogleLogin } from '@react-oauth/google';
-import axios from 'axios'
+import {CustomHashLoader} from '../../../Components/Loader/Loader'
+
 
 export default function SignUpAndInPage({type}){
     const bgImg = {

@@ -1,19 +1,21 @@
 
 #calender .date-picker input{
-    width: 8rem;
+    width: 7.86rem;
     height: 2rem;
-    border: 1px solid var(--SECONDARY);
+    border: 1px solid var(--SECONDARYLIGHT2);
     border-radius: 7px;
+    font-size: 10px;
+    letter-spacing: 0.2px;
+    word-spacing: 1px;
 }
 #calender .date-picker input::placeholder{
-    font-size: 10px;
     color: #4f5359;
     letter-spacing: 0.2px;
     word-spacing: 1px;
 }
 #calender .date-picker svg{
     position: absolute;
-    top: 7px;
+    top: 9px;
     left: 4px;
     color: var(--SECONDARY);
 }

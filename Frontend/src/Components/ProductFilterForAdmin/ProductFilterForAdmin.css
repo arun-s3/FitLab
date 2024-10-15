@@ -4,8 +4,9 @@
     font-size: 13px;
 }
 #admin-product-filter .category-radios label{
-    font-size: 13px;
+    font-size: 12px;
     margin-left: 5px;
+    margin-bottom: 5px;
 }
 #admin-product-filter .category-radios input{
     height: 10px;

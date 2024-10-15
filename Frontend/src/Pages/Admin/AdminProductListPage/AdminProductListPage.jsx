@@ -1,8 +1,7 @@
 import React,{useState, useEffect, useRef} from 'react'
 import './AdminProductListPage.css'
-import ProductListingTools from '../../../Components/ProductListingTools/ProductListingTools'
-import ProductsDisplay from '../../../Components/ProductsDisplay/ProductsDisplay';
-import ProductFilterForAdmin from '../../../Components/ProductFilterForAdmin/ProductFilterForAdmin';
+import {useNavigate} from 'react-router-dom'
+import {useSelector, useDispatch} from 'react-redux'
 
 import {LiaSlidersHSolid} from "react-icons/lia";
 import {FiDownload} from "react-icons/fi";
@@ -13,6 +12,13 @@ import {FaList} from "react-icons/fa";
 import {CiViewTable} from "react-icons/ci";
 import {VscTable} from "react-icons/vsc";
 
+import {resetStates} from '../../../Slices/productSlice'
+import ProductListingTools from '../../../Components/ProductListingTools/ProductListingTools'
+import ProductsDisplay from '../../../Components/ProductsDisplay/ProductsDisplay';
+import ProductFilterForAdmin from '../../../Components/ProductFilterForAdmin/ProductFilterForAdmin';
+
+
+
 export default function AdminProductListPage(){
 
     const [showSortBy, setShowSortBy] = useState(false)
@@ -20,14 +26,27 @@ export default function AdminProductListPage(){
     const [showByTable, setShowByTable] = useState(false)
     const [toggleTab, setToggleTab] = useState({goTo: 'all'})
 
-    const [showFilter, setShowFilter] = useState(false)
-    const [filter, setFilter] = useState({status: ''})
-    const mouseInFilter = useRef(true)
+    const [startDate, setStartDate] = useState(null)
+    const [endDate, setEndDate] = useState(null)
 
     const [minPrice, setMinPrice] = useState(0)
     const [maxPrice, setMaxPrice] = useState(3750)
     const [inputLocalMinPrice, setInputLocalMinPrice] = useState(0)
     const [inputLocalMaxPrice, setInputLocalMaxPrice] = useState(0)
+
+    const [showFilter, setShowFilter] = useState(false)
+    const [filter, setFilter] = useState({status: 'all', categories: [], brands: []})
+    const [totalFilter, setTotalFilter] = useState({})
+    const mouseInFilter = useRef(true)
+
+    const [limit, setLimit] = useState(12)  
+    const [currentPage, setCurrentPage] = useState(1)
+    const [sorts, setSorts] = useState({})
+    const [queryOptions, setQueryOptions] = useState({})
+    
+
+    const navigate = useNavigate()
+    const {productSuccess, error, loading} = useSelector(state=> state.productStore)
 
     const displayFilter = (e)=>{
         if (showFilter && !mouseInFilter.current){
@@ -39,6 +58,28 @@ export default function AdminProductListPage(){
             return
         }
     }
+
+    useEffect(()=>{
+        setTotalFilter({...filter,startDate, endDate, minPrice, maxPrice})
+        console.log(`From AdminProductListPage startDate-->${startDate}, endDate-->${endDate}`)
+        console.log("TotalFilters-->", JSON.stringify(totalFilter))
+    },[filter, startDate, endDate, minPrice, maxPrice])
+
+    useEffect(()=>{
+        console.log("FILTER-->", JSON.stringify(totalFilter))
+        console.log("SORTS-->", JSON.stringify(sorts))
+        setQueryOptions( {filter: {...queryOptions.filter, ...totalFilter}, sort: {...queryOptions.sort, ...sorts}, page: currentPage, limit} )
+    },[totalFilter, sorts, currentPage, limit])
+
+    useEffect(()=>{
+        console.log("QUERYOPTIONS-->", JSON.stringify(queryOptions))
+    },[queryOptions])
+
+    // useEffect(()=>{
+    //     if(productSuccess){
+
+    //     }
+    // },[productSuccess])
 
     useEffect(()=>{
         // const setCloseMenus = ()=>{
@@ -58,7 +99,7 @@ export default function AdminProductListPage(){
             <header className='flex justify-between items-center'>
                 <h1> Products </h1>
                 <div className='flex items-center gap-[1.5rem]'>
-                    <div className='chip relative cursor-pointer' onClick={(e)=> displayFilter(e)}>
+                    <div className='chip relative' onClick={(e)=> displayFilter(e)}>
                         <i>
                             <LiaSlidersHSolid/>
                         </i>
@@ -66,7 +107,8 @@ export default function AdminProductListPage(){
                         {showFilter &&
                         <div className='absolute top-[2rem] right-0 z-[10]' onMouseLeave={()=> mouseInFilter.current = false}
                                     onMouseEnter={()=>  mouseInFilter.current = true}>
-                            <ProductFilterForAdmin filter={filter} setFilter={setFilter} priceGetter={{minPrice, maxPrice}} priceSetter={{setMinPrice, setMaxPrice}}/>
+                            <ProductFilterForAdmin filter={filter} setFilter={setFilter} priceGetter={{minPrice, maxPrice}} priceSetter={{setMinPrice, setMaxPrice}}
+                                     dateGetter={{startDate, endDate}} dateSetter={{setStartDate, setEndDate}}/>
                         </div>
                         }
                     </div>
@@ -79,7 +121,7 @@ export default function AdminProductListPage(){
                             <RiArrowDropDownLine/>
                         </i>
                     </div>
-                    <div className='chip'>
+                    <div className='chip' onClick={()=> navigate('/admin/products/add')}>
                         <i>
                             <IoMdAdd/>
                         </i>
@@ -107,17 +149,18 @@ export default function AdminProductListPage(){
                     <h4 className={toggleTab.goTo == 'blocked' ? 'opacity-[1]' : 'opacity-[0.75]'}> Blocked </h4>
                 </div>
                 <div className='absolute right-[5px] top-[-30px] flex items-center gap-[7px] view-type'>
-                    <span data-label='Table View' onClick={()=> setShowByTable(true)}> <VscTable/> </span>
-                    <span data-label='List View' onClick={()=> setShowByGrid(false)}> <FaList/> </span>
-                    <span data-label='Grid View' onClick={()=> setShowByGrid(true)}>  <BsFillGrid3X3GapFill/> </span>
+                    <span data-label='Table View' onClick={()=> setShowByTable(!showByTable)}> <VscTable/> </span>
+                    <span data-label='List View' onClick={()=> {setShowByTable(false); setShowByGrid(false)}}> <FaList/> </span>
+                    <span data-label='Grid View' onClick={()=> {setShowByTable(false); setShowByGrid(true)}}>  <BsFillGrid3X3GapFill/> </span>
                 </div>
                 <div className='border py-[1rem] px-[2rem] bg-white'>
 
-                    <ProductListingTools admin={true} showSortBy={showSortBy} setShowSortBy={setShowSortBy} showByTable={showByTable}/>
+                    <ProductListingTools admin={true} showSortBy={showSortBy} setShowSortBy={setShowSortBy} showByTable={showByTable}
+                                sortHandlers={{sorts, setSorts}} limiter={{limit, setLimit}}/>
 
                     <div className='mt-[2rem] px-[2rem]'>
 
-                        <ProductsDisplay gridView={showByGrid} showByTable={showByTable} admin={true}/>
+                        <ProductsDisplay gridView={showByGrid} showByTable={showByTable} pageReader={{currentPage, setCurrentPage}} limiter={{limit, setLimit}} admin={true}/>
 
                     </div>
 

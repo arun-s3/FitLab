@@ -1,6 +1,9 @@
 import React, {useState, useEffect} from 'react';
+import {useNavigate} from 'react-router-dom'
+import {useDispatch, useSelector} from 'react-redux'
 import axios from 'axios';
 import './ProductsDisplay.css';
+import {getAllProducts} from '../../Slices/productSlice'
 import Pagination from '../Pagination/Pagination'
 import {SiteButtonSquare} from '../SiteButtons/SiteButtons';
 import ProductsTableView from './ProductsTableView';
@@ -12,27 +15,36 @@ import {MdBlock} from "react-icons/md";
 
 
 
-export default function ProductsDisplay({gridView, showByTable, admin}) {
+export default function ProductsDisplay({gridView, showByTable, pageReader, limiter, queryOptions, admin}) {
 
-  const [products, setProducts] = useState([]);
-  const [totalCounts, setTotalCounts] = useState(0)
-  const [currentPage, setCurrentPage] = useState(1)  
+  const {currentPage, setCurrentPage} = pageReader
+
+  // const [products, setProducts] = useState([]);             //Use this for dummy data
+  // const [productCounts, setProductCounts] = useState(null)  //Use this for dummy data
+  const dispatch = useDispatch()
+  const {products, productCounts} = useSelector(state=> state.productStore)
+
+  const navigate = useNavigate()
 
   useEffect(() => {
-    const getProducts = async () => {
-      try {
-        const response = await axios.get('https://dummyjson.com/products');
-        setProducts(response.data.products); 
-        setTotalCounts(response.data.total)
-        console.log("PRODUCTS-->", JSON.stringify(response.data.products));
-        console.log("TOTAL COUNTS-->"+ response.data.total)
-        console.log("TAGS-->"+ response.data.products[0].tags[0])
-      } catch (error) {
-        console.log("ERROR IN PRODUCTLISTING-->", error.message);
-      }
-    };
-
-    getProducts();
+    // const getDummyProducts = async () => {
+    //   try {
+    //     const response = await axios.get('https://dummyjson.com/products');
+    //     setProducts(response.data.products); 
+    //     setProductCounts(response.data.total)
+    //     console.log("PRODUCTS-->", JSON.stringify(response.data.products));
+    //     console.log("TOTAL COUNTS-->"+ response.data.total)
+    //     console.log("TAGS-->"+ response.data.products[0].tags[0])
+    //   } catch (error) {
+    //     console.log("ERROR IN PRODUCTLISTING-->", error.message);
+    //   }
+    // };
+    const getFitlabProducts =  async ()=>{
+      dispatch( getAllProducts({}) )
+    }
+    getFitlabProducts()
+    console.log("PRODUCTS----",JSON.stringify(products))
+    // getDummyProducts();
   }, []);
 
   const produceStarRating = (product)=>{
@@ -64,21 +76,21 @@ export default function ProductsDisplay({gridView, showByTable, admin}) {
      <div className={`${gridView ? 'grid grid-cols-3 gap-y-[2rem]' : showByTable ? '' : 'flex flex-col gap-[2rem]'}`} id="products-display"
             style={admin ? { justifyItems: 'center' } : {}}>
 
-      { !showByTable &&
+      { !showByTable && 
         products.map((product) => (
           <div key={product.id} className= {gridView ? 'w-[275px]' : 'flex gap-[1rem] w-full'}>
             <figure className='relative h-auto rounded-[10px] thumbnail'>
-              <img src={product.thumbnail} alt={product.title} className='rounded-[10px]'/>
+              <img src={product.thumbnail.url || product.thumbnail} alt={product.title} className='rounded-[10px] h-[275px] w-[275px] object-cover'/>
               <figcaption className={`${admin ? 'top-[2px] left-[-40px]' : 'bottom-[12px]'} absolute w-full text-center`}>
                 {
                  admin ?
                   <div className='w-[35px] flex flex-col gap-[1rem] text-secondary'>
-                    <span data-label='Edit' className='w-[30px] p-[5px] border rounded-[20px] flex items-center justify-center relative 
-                            cursor-pointer admin-control'>
+                    <span data-label='Edit' className='w-[30px] p-[5px] border rounded-[20px] z-[2] flex items-center justify-center 
+                          relative cursor-pointer admin-control' onClick={()=> navigate('../edit', {state: {product}})}>
                       <i> <RiFileEditLine/> </i>
                     </span>
-                    <span data-label='Block' className='w-[30px] p-[5px] border rounded-[20px] flex items-center justify-center relative 
-                            cursor-pointer admin-control'>
+                    <span data-label='Block' className='w-[30px] p-[5px] border rounded-[20px] z-[2] flex items-center justify-center
+                         relative cursor-pointer admin-control'>
                       <i> <MdBlock/> </i>
                     </span>
                   </div>
@@ -92,7 +104,7 @@ export default function ProductsDisplay({gridView, showByTable, admin}) {
               </figcaption>
               { !admin &&
               <div className='absolute top-[15px] right-[15px] p-[5px] rounded-[15px] bg-white favourite'>
-                <MdFavoriteBorder />
+                <i className='cursor-pointer'> <MdFavoriteBorder /> </i>
               </div>
               }
             </figure>
@@ -136,7 +148,7 @@ export default function ProductsDisplay({gridView, showByTable, admin}) {
     }
     <div>
 
-      <Pagination totalCounts={totalCounts} currentPage={currentPage} currentPageChanger={currentPageChanger}/>
+      <Pagination productCounts={productCounts} currentPage={currentPage} currentPageChanger={currentPageChanger} limiter={limiter} />
 
     </div>
     <div className='h-[7rem] w-full'></div>

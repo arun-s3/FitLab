@@ -10,7 +10,7 @@ import productReducer from '../Slices/productSlice'
 const rootReducer = combineReducers({
     user: userReducer,
     admin: adminReducer,
-    product: productReducer
+    productStore: productReducer
 })
 
 const persistConfig = {

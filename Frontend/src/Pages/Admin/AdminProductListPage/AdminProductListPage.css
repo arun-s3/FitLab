@@ -14,6 +14,7 @@
     color: #332929;
     box-shadow: 2px 2px 7px rgb(201, 204, 183);
     border: 1px solid rgb(214, 201, 223);
+    cursor: pointer;
 }
 #AdminProductList .chip i{
     color: var(--SECONDARY);

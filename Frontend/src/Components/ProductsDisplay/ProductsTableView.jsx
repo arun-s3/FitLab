@@ -125,8 +125,8 @@ export default function ProductsTableView({products}){
                     <tr key={product.id}>
                         <td>
                             <div className='flex items-center gap-[1rem]'>
-                                <figure className='w-[50px] h-auto rounded-[8px] border-primary bg-[#f3f5f7]'>
-                                    <img src={product.thumbnail} alt='product-thumbnail' className='w-[50px] h-auto rounded-[5px]'/>
+                                <figure className='w-[50px] h-[50px] rounded-[8px] border-primary bg-[#f3f5f7]'>
+                                    <img src={product.thumbnail.url} alt='product-thumbnail' className='w-[50px] h-[50px] object-cover rounded-[5px]'/>
                                 </figure>
                                 <span> {product.title} </span>
                             </div>

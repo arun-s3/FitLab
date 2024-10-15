@@ -13,7 +13,7 @@ adminRouter.get('/deleteuser', isLogin, authorizeAdmin, deleteUser)
 adminRouter.post('/deleteuserslist', isLogin, authorizeAdmin, deleteUserList)
 adminRouter.get('/toggleblockuser', isLogin, authorizeAdmin, toggleBlockUser)
 
-adminRouter.post('/products', (req, res)=> res.send("Hello"))
+// adminRouter.post('/products', (req, res)=> res.send("Hello"))
 
 
 

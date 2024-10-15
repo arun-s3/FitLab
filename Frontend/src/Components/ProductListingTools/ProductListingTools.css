@@ -3,6 +3,16 @@
     border-color: rgb(212, 176, 236);
     box-shadow: 2px 2px 12px rgb(233, 222, 242);
 }
+#ProductListingTools #limit-dropdown ul{
+    background: rgba(243, 230, 251, 0.9);
+}
+#ProductListingTools #limit-dropdown ul li{
+    width: 100%;
+    text-align: center;
+}
+#ProductListingTools #limit-dropdown ul li:hover{
+    background: var(--PRIMARY);
+}
 #ProductListingTools .sort-by > svg{
     color:var(--SECONDARY)
 }
@@ -15,17 +25,29 @@
     cursor: pointer;
 }
 #ProductListingTools .sort-dropdown > ul{
-    background: rgb(245, 245, 246);
-    color: #3498db;
-    border-color: rgb(215, 209, 219);
+    background: white;
+    color: #121212;
 }
 #ProductListingTools .sort-dropdown > ul li{
-    display: inherit;
-    align-items: center;
-    gap: 5px;
+    margin-inline: 6px;
+    width: 100%;
+}
+#ProductListingTools .sort-dropdown > ul li>span:hover{
+    color: var(--SECONDARY);
+}
+#ProductListingTools .sort-dropdown > ul li>span input{
+    height: 9px;
+    width: 9px;
+    color: var(--SECONDARY);
+    border-radius: 5px;
+    border-color: var(--SECONDARY);
+    margin-right: 5px; 
+}
+#ProductListingTools .sort-dropdown > ul li>span input:focus{
+    --tw-ring-shadow: none;
 }
 #ProductListingTools .sort-dropdown > ul li > svg{
-    color: #09f;
+    color: var(--SECONDARY);
 }
 #ProductListingTools .view-type span:hover::before{
     content: attr(data-label);

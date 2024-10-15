@@ -1,10 +1,30 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import {BsTags} from "react-icons/bs";
 import {IoIosClose} from "react-icons/io";
 
 
-export default function TagGenerator({tag, setTags, SetPlaceholderIcon}){
+export default function TagGenerator({tag, setTags, editTags, SetPlaceholderIcon}){
 
+    useEffect(()=>{
+        if(editTags){
+            console.log(`editTags length-->${editTags.length} editTags tags--> ${editTags}`)
+            const uniqueTags = [...new Set([...editTags])]
+            console.log("UNIQUE TAGS-->", uniqueTags)
+            setTags(prevTags => [
+                ...prevTags,
+                ...uniqueTags.filter(tag => !prevTags.includes(tagConstructor(tag))).map(tag => tagConstructor(tag))
+            ]);
+        }
+    },[editTags])
+
+    const tagConstructor = (currentTag)=>{
+        return(
+            <span className='single-tag' key={currentTag}>
+                <span> {currentTag}</span>
+                <IoIosClose onClick={(e)=> setTags(tag=> tag.filter(tag=> tag.key !== currentTag))}/>   
+             </span>
+        )
+    }
     const tagsInputHandler = (e)=>{
         if(e.target.value.trim()){
             console.log("Value inside tag")
@@ -30,10 +50,7 @@ export default function TagGenerator({tag, setTags, SetPlaceholderIcon}){
                         return
                     } 
                     setTags([...tag,
-                        (<span className='single-tag' key={currentTag}>
-                            <span> {currentTag}</span>
-                            <IoIosClose onClick={(e)=> setTags(tag=> tag.filter(tag=> tag.key !== currentTag))}/>   
-                        </span>)
+                        ( tagConstructor(currentTag) )
                     ])
                     e.target.value=''
                }

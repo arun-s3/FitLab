@@ -3,8 +3,8 @@ import {Link} from 'react-router-dom'
 import './ProductListPage.css'
 import Header from '../../../Components/Header/Header'
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
-import PriceFilter from '../../../Components/PriceFilter/PriceFilter'
-import TestPriceFilter from '../../../Components/PriceFilter/TestPriceFilter' // For Enhancing Original PriceFiter feature
+import PriceSliderAndFilter from '../../../Components/PriceSliderAndFilter/PriceSliderAndFilter'
+import TestPriceFilter from '../../../Components/PriceSliderAndFilter/TestPriceSliderAndFilter' // For Enhancing Original PriceFiter feature
 import ProductsDisplay from '../../../Components/ProductsDisplay/ProductsDisplay'
 import ProductListingTools from '../../../Components/ProductListingTools/ProductListingTools'
 
@@ -21,12 +21,57 @@ export default function ProductList({admin}){
 
     const [minPrice, setMinPrice] = useState(0)
     const [maxPrice, setMaxPrice] = useState(3750)
+    let firstSlideRef = useRef(false)
 
     const [showCategory, setShowCategory ] = useState(true)
     const [showProductsFilter, setShowProductsFilter] = useState(true)
     const [showPriceFilter, setShowPriceFilter] = useState(true)
     const [showSortBy, setShowSortBy] = useState(false)
     const [showByGrid, setShowByGrid] = useState(true)
+
+    const [filter, setFilter] = useState({categories: [], products: []})
+    const [sorts, setSorts] = useState({})
+
+    const [currentPage, setCurrentPage] = useState(1)
+    const [limit, setLimit] = useState(12)  
+
+    const [queryOptions, setQueryOptions] = useState({})
+
+
+    useEffect(()=>{
+        console.log("FILTER-->", JSON.stringify(filter))
+        console.log("SORTS-->", JSON.stringify(sorts))
+        setQueryOptions( {filter: {...queryOptions.filter, ...filter}, sort: {...queryOptions.sort, ...sorts}, page: currentPage, limit} )
+    },[filter, sorts, currentPage, limit])
+
+    useEffect(()=>{
+        console.log("QUERYOPTIONS-->", JSON.stringify(queryOptions))
+    },[queryOptions])
+
+    useEffect(()=>{
+        if(firstSlideRef.current){
+            setFilter({...filter, minPrice, maxPrice})
+        }
+    },[minPrice, maxPrice])
+
+    const categoryClickHandler = (e)=>{
+        const value = e.target.innerText.toLowerCase()
+        if( filter.categories.includes(e.target.innerText.toLowerCase()) ){
+            e.target.previousElementSibling.style.visibility = 'hidden'
+            setFilter({...filter, categories: filter.categories.filter(category=> category !== value)})
+        }else{
+            e.target.previousElementSibling.style.visibility = 'visible'
+            setFilter({...filter, categories: [...filter.categories, value]})
+        }
+    }
+
+   const checkHandler = (e)=>{
+        const value = e.target.value.trim().split(',')
+        console.log("Value of checks-->", [...filter.products, ...value])
+        if(e.target.checked){
+            setFilter({...filter, products: [...filter.products, ...value]})
+        }
+   } 
 
     return(
         <>  
@@ -47,14 +92,14 @@ export default function ProductList({admin}){
                     <div className='pb-[10px] border-b border-[#DEE2E7]'>
                         <div className='flex justify-between items-center' id='filter-header'>
                             <h4 className='text-[15px] font-[500]'>By Category</h4>
-                            <span onClick={()=> setShowCategory(status=> !status)}> <RiArrowDropUpLine/> </span>
+                            <span className='cursor-pointer' onClick={()=> setShowCategory(status=> !status)}> <RiArrowDropUpLine/> </span>
                         </div>
                         {showCategory && <>
                         <ul className='list-none cursor-pointer' id='filter-body'>
-                            <li> <Link to=''> Strength </Link> </li>
-                            <li> <Link to=''> Cardio </Link> </li>
-                            <li> <Link to=''> Accessories </Link> </li>
-                            <li> <Link to=''> Supplements </Link> </li>
+                            <li> <span className='bullet'></span> <span to='' onClick={(e)=>{categoryClickHandler(e)}}> Strength </span> </li>
+                            <li> <span className='bullet'></span> <span to='' onClick={(e)=>{categoryClickHandler(e)}}> Cardio </span> </li>
+                            <li> <span className='bullet'></span> <span to='' onClick={(e)=>{categoryClickHandler(e)}}> Accessories </span> </li>
+                            <li> <span className='bullet'></span> <span to='' onClick={(e)=>{categoryClickHandler(e)}}> Supplements </span> </li>
                         </ul>
                         <span className='mt-[5px] text-secondary text-[13px]'>See all</span>
                         </>
@@ -63,73 +108,61 @@ export default function ProductList({admin}){
                     <div className='pb-[10px] border-b border-[#DEE2E7]' > 
                         <div id='filter-header'>
                             <h4>By Product</h4>
-                            <span onClick={()=> setShowProductsFilter(status=> !status)}> <RiArrowDropUpLine/> </span>
+                            <span className='cursor-pointer' onClick={()=> setShowProductsFilter(status=> !status)}> <RiArrowDropUpLine/> </span>
                         </div>
                         {showProductsFilter && 
                         <ul className='list-none' id='filter-body' >
                             <li>
                                 <div>
-                                    <input type='checkbox' className='' id='weights'/>
-                                    <label HTMLfor='weights'>Weights</label>
-                                </div>
-                            </li>
-                            <li>
-                                <div>
-                                    <input type='checkbox' className='' id='benchesAndRacks'/>
+                                    <input type='checkbox' className='' id='benchesAndRacks' value='benches,racks' onChange={(e)=> checkHandler(e)}/>
                                     <label HTMLfor='benchesAndRacks'>Benches and Racks</label>
                                 </div>
                             </li>
                             <li>
                                 <div>
-                                    <input type='checkbox' className='' id='gymbell'/>
+                                    <input type='checkbox' className='' id='gymbell' value='gymbell' onChange={(e)=> checkHandler(e)}/>
                                     <label HTMLfor='gymbell'>Gymbell</label>
                                 </div>
                             </li>
                             <li>
                                 <div>
-                                    <input type='checkbox' className='' id='treadmills'/>
+                                    <input type='checkbox' className='' id='treadmills' value='treadmill'  onChange={(e)=> checkHandler(e)}/>
                                     <label HTMLfor='treadmills'>Treadmills</label>
                                 </div>
                             </li>
                             <li>
                                 <div>
-                                    <input type='checkbox' className='' id='plates'/>
+                                    <input type='checkbox' className='' id='plates' value='plates'  onChange={(e)=> checkHandler(e)}/>
                                     <label HTMLfor='plates'>Plates</label>
                                 </div>
                             </li>
                             <li>
                                 <div>
-                                    <input type='checkbox' className='' id='bikesAndEllipticals'/>
+                                    <input type='checkbox' className='' id='bikesAndEllipticals' value='bikes,ellipticals'  onChange={(e)=> checkHandler(e)}/>
                                     <label HTMLfor='bikesAndEllipticals'>Bikes and Ellipticals</label>
                                 </div>
                             </li>
                             <li>
                                 <div>
-                                    <input type='checkbox' className='' id='proteinPowders'/>
+                                    <input type='checkbox' className='' id='proteinPowders' value='protein powder'  onChange={(e)=> checkHandler(e)}/>
                                     <label HTMLfor='proteinPowders'>Protein Powders</label>
                                 </div>
                             </li>
                             <li>
                                 <div>
-                                    <input type='checkbox' className='' id='strengthMachines'/>
-                                    <label HTMLfor='strengthMachines'>Strength Machines</label>
-                                </div>
-                            </li>
-                            <li>
-                                <div>
-                                    <input type='checkbox' className='' id='multistationMachines'/>
+                                    <input type='checkbox' className='' id='multistationMachines' value='multistation machines'  onChange={(e)=> checkHandler(e)}/>
                                     <label HTMLfor='multistationMachine'>MultistationMachine</label>
                                 </div>
                             </li>
                             <li>
                                 <div>
-                                    <input type='checkbox' className='' id='resistanceBands'/>
+                                    <input type='checkbox' className='' id='resistanceBands' value='resistance bands'  onChange={(e)=> checkHandler(e)}/>
                                     <label HTMLfor='resistanceBands'>Resistance Bands</label>
                                 </div>
                             </li>
                             <li>
                                 <div>
-                                    <input type='checkbox' className='' id='yogaMats'/>
+                                    <input type='checkbox' className='' id='yogaMats' value='yoga mats'  onChange={(e)=> checkHandler(e)}/>
                                     <label HTMLfor='yogaMats'>Yoga Mats</label>
                                 </div>
                             </li>
@@ -140,11 +173,11 @@ export default function ProductList({admin}){
                     <div className='pb-[10px] border-gray-500'>
                         <div id='filter-header'>
                             <h4>Price Range</h4>
-                            <span onClick={()=> setShowPriceFilter(status=> !status)}> <RiArrowDropUpLine/> </span>
+                            <span className='cursor-pointer' onClick={()=> setShowPriceFilter(status=> !status)}> <RiArrowDropUpLine/> </span>
                         </div>
                     <div id='filter-body'>
                         {
-                            showPriceFilter && <PriceFilter priceGetter={{minPrice, maxPrice}} priceSetter={{setMinPrice, setMaxPrice}}/>
+                            showPriceFilter && < PriceSliderAndFilter priceGetter={{minPrice, maxPrice}} priceSetter={{setMinPrice, setMaxPrice}}  firstSlide={firstSlideRef} />
                             // showPriceFilter && <TestPriceFilter/>
                         }
                     </div>
@@ -152,12 +185,13 @@ export default function ProductList({admin}){
                 </aside>
 
                 <section className='basis-full flex-grow'>
-
-                    <ProductListingTools showSortBy={showSortBy} setShowSortBy={setShowSortBy} showByGrid={showByGrid} setShowByGrid={setShowByGrid}/>
-
+                    <div>
+                        <ProductListingTools showSortBy={showSortBy} setShowSortBy={setShowSortBy} showByGrid={showByGrid}
+                                 setShowByGrid={setShowByGrid} sortHandlers={{sorts, setSorts}} limiter={{limit, setLimit}}/>
+                    </div>
                     <div className='mt-[2rem]'>
 
-                        <ProductsDisplay gridView={showByGrid} />
+                        <ProductsDisplay gridView={showByGrid} pageReader={{currentPage, setCurrentPage}} limiter={{limit, setLimit}} queryOptions={queryOptions}/>
 
                     </div>
                 </section>

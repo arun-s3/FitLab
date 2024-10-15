@@ -2,7 +2,7 @@
 #products-display .thumbnail{
     background: rgb(243, 245, 247);
 }
-#products-display .favourite > svg{
+#products-display .favourite i > svg{
     font-size: 18px;
     color: var(--SECONDARY);
 }
@@ -14,35 +14,37 @@
     height: 15px;
     width: 15px;
 }
-#products-display figcaption .admin-control:hover::after{
+#products-display figcaption .admin-control:hover::before{
     content: attr(data-label);
     width: 3.3rem;
-    height: 27px;
+    height: 28px;
     position: absolute;
-    left: 4px;
-    bottom: 0px;
+    left: -1px;
+    bottom: -1px;
     /* top: 0.5px; */
     padding: 2px;
     padding-inline: 55px;
     /* padding-right: 20px; */
-    border: 1px solid var(--PRIMARY); 
-    border-left: transparent;
-    border-radius: 5px;
+    border: 1px solid var(--SECONDARY); 
+    /* border-left: transparent; */
+    border-radius: 7px;
     font-size: 13px;
+    color: transparent;
+    background: white;
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: -1;
     opacity: 0;
     animation-name: fadeIn-caption;
     animation-duration: 0.4s;
     animation-delay: 0.1s;
     animation-timing-function: ease-in-out;
     animation-fill-mode: forwards;
-}       
+}      
 #products-display figcaption .admin-control > i > svg {
     transform: rotate(0deg); 
   }
-
 #products-display figcaption .admin-control:hover > i > svg {
     animation-name: rotate-icon;
     animation-duration: 0.5s;
@@ -67,6 +69,7 @@
     }
     to {
       opacity: 1;
+      color: var(--SECONDARY);
       width: 3.3rem;
       padding-inline: 55px;
     }

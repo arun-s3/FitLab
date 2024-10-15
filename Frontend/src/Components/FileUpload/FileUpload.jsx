@@ -11,20 +11,36 @@ import {RiImageEditLine} from "react-icons/ri";
 import {FaArrowUp, FaArrowDown} from "react-icons/fa";
 // import { uploadImages } from 'Frontend/src/Slices/productSlice'
 
-export default function FileUpload({images, setImages, thumbnail, setThumbnail}){
+export default function FileUpload({images, setImages, thumbnail, setThumbnail, thumbnailIndexOnEditProduct, handleImageCompression}){
 
     const [error, setError] = useState(null)
+    const [imageMessage, setImageMessage] = useState('')
+    const imageMessageDisplay = useRef(null)
+    const [displayCompressButton, setDisplayCompressButton] = useState(false)
+
     useEffect(()=>{
         if(error){
-            setTimeout(()=> setError(""), 2000)
+            setTimeout(()=> setError(""), 3000)
+        }
+        if(error && error == 'Please add files each of size below 3Mb!'){
+            console.log("Inside useEffect for error of image size between 3 and 5mb")
+            imageMessageDisplay.current.parentElement.style.visibility = 'visible'
+            imageMessageDisplay.current.style.display = 'none'
+            setImageMessage('Please upload images smaller than 3MB. Images between 3MB and 5MB can be compressed or deleted.')
+            setDisplayCompressButton(true)
         }
     },[error])
 
     useEffect(()=>{
         console.log("Images array-->" + JSON.stringify(images))
         images.length && console.log("images[0].url"+ images.length && JSON.stringify(images[0].name))
-        setCurrentImageIndex(0)
-    },[images])
+        thumbnail && console.log("thumbnail.url"+ JSON.stringify(thumbnail))
+        console.log("Images array with isThumbnail -->", images.map(img => img.isThumbnail));
+        if(images.length){
+            console.log("thumbnailIndexOnEditProduct received from parent-->",thumbnailIndexOnEditProduct)
+            setCurrentImageIndex(thumbnailIndexOnEditProduct);
+        }
+    },[thumbnailIndexOnEditProduct])
 
     let windowRef = useRef(null)
     const [editedImage, setEditedImage] = useState({})
@@ -48,18 +64,41 @@ export default function FileUpload({images, setImages, thumbnail, setThumbnail})
                 // reader.readAsDataURL(updatedImage.blob)
                 updatedImage.url = URL.createObjectURL(updatedImage.blob)
                 setEditedImage({...updatedImage})
-                console.log("RECEIVED UPDATED IMAGE FROM CHILD WINDOW-->", JSON.stringify(updatedImage))
+                console.log("RECEIVED EDITED IMAGE FROM IMAGE EDITOR-->", JSON.stringify(updatedImage))
                 // setEditedImage(updatedImage)
             }
         });        
     })
     useEffect(() => {
         console.log("editedImage in editedimage useEffect-->", JSON.stringify(editedImage))
-        setImages((prevImages) => 
-            prevImages.map((image) => 
-                image.name === editedImage.name ? { ...image, ...editedImage } : image
-            )
-        );
+        if(editedImage.size > (5*1024*1024)){
+            imageMessageDisplay.current.parentElement.style.visibility = 'visible'
+            imageMessageDisplay.current.style.display = 'inline-block'
+            setImageMessage('Compressing ')
+        }   
+        if( editedImage && editedImage.blob && imageMessageDisplay.current){
+            console.log("Inside if imageMessageDisplay.current")
+            const compressAndPutToImages = async()=>{
+                try{
+                    console.log("Inside async compressAndPutToImages")
+                    const compressedBlob = await handleImageCompression(editedImage.blob)
+                    const compressedImgObj = {...editedImage, blob: compressedBlob, size: compressedBlob.size}
+                    console.log("Size now-->", compressedImgObj.size)
+                    setImages((prevImages) => 
+                        prevImages.map((image) => 
+                            image.name === editedImage.name ? { ...image, ...compressedImgObj } : image
+                        )
+                    )
+                    setImageMessage(null)
+                    imageMessageDisplay.current.parentElement.style.visibility = 'hidden'
+                    imageMessageDisplay.current.style.display = 'none'
+                }
+                catch(error){
+                    console.log("Error inside compressAndPutToImages during compression of edited image--", error.message)
+                }
+            }
+            compressAndPutToImages()
+        }
     }, [editedImage]); 
       
 
@@ -81,17 +120,21 @@ export default function FileUpload({images, setImages, thumbnail, setThumbnail})
         }
         for (let i = 0; i < files.length; i++) {
             if (files[i].type.split('/')[0] === 'image') {
-                console.log("Image file -->", JSON.stringify(files[i]));
+                console.log("Image file -->", JSON.stringify(files[i]))
                 
-                if (images.find(img => img.name === files[i].name && img.size === files[i].size)) {
-                    console.log("Duplicate image -->", JSON.stringify(files[i]));
-                    setError("Duplicate Images won't be added!");
+                if (images.find(img => img.name === files[i].name)) {
+                    console.log("Duplicate image -->", JSON.stringify(files[i]))
+                    setError("Duplicate Images won't be added!")
                     continue;
                 }
 
+                if (files[i].size > (3 * 1024 * 1024) && files[i].size < (5 * 1024 * 1024)) {
+                    console.log("Big image -->", JSON.stringify(files[i]))
+                    setError("Please add files each of size below 3Mb!")
+                }
                 if (files[i].size > (5 * 1024 * 1024)) {
-                    console.log("Big image -->", JSON.stringify(files[i]));
-                    setError("Please add files each of size below 5Mb!");
+                    console.log("Really big image -->", JSON.stringify(files[i]))
+                    setError("Please upload an image smaller than 5MB. Images between 3MB and 5MB can be compressed or deleted. Files larger than 5MB are not allowed.")
                     continue;
                 }
 
@@ -176,6 +219,42 @@ export default function FileUpload({images, setImages, thumbnail, setThumbnail})
     }
     const thumbnailSetter = (e)=>{
         setThumbnail(images[currentImageIndex])
+        const updatedImages = images.map((img, index) => {
+            if (index === currentImageIndex) {
+                return {...img, isThumbnail:true}
+            } else {
+                return {...img, isThumbnail:false}
+            }
+        });
+        setImages(updatedImages);
+    }
+
+    const findImageSize = (size)=>{
+        if(size < (1024*1024)){
+            return `${(size/1024).toFixed(2)} kb`
+        }else{
+            return `${(size/(1024*1024)).toFixed(2)} mb`
+        }
+    }
+
+    const compressBigImages = async()=>{
+        console.log("Inside compressBigImages()")
+        setDisplayCompressButton(false)
+        setImageMessage('Compressing')
+        imageMessageDisplay.current.style.display = 'inline-block'
+        const compressedImages = await Promise.all(
+            images.map( async (image)=> {
+                if(image.size > (3*1024*1024)){
+                    const newBlob = await handleImageCompression(image.blob)
+                    return {...image, blob:newBlob, size:newBlob.size}
+                }
+                return image
+            })
+        )
+        console.log("Compressed images-->", JSON.stringify(compressedImages))
+        setImages([...compressedImages])
+        setImageMessage(null)
+        imageMessageDisplay.current.parentElement.style.visibility = 'hidden'
     }
 
     const openImageEditor = (imageUrl, name, blob)=>{
@@ -187,6 +266,7 @@ export default function FileUpload({images, setImages, thumbnail, setThumbnail})
             if (event.source === windowRef.current && event.data === 'child-ready') {
                 console.log('Child window is ready. Sending image blob...');
                 windowRef.current.postMessage({ type: 'target-img', blob, name }, '*');
+                console.log("SENT IMAGE TO IMAGE EDITOR AFTER CHILD-READY", JSON.stringify({ type: 'target-img', blob, name }))
             }
         };
     
@@ -216,7 +296,7 @@ export default function FileUpload({images, setImages, thumbnail, setThumbnail})
                 </h3>
             </div>
             <p className='text-red-500 text-[10px] h-[20px] mt-[5px]'> {error} </p>
-            <div className='flex gap-[27px] flex-wrap mt-[20px]'>
+            <div className='flex gap-[27px] flex-wrap mt-[20px]' id='image-section'>
                 {
                     images.map((image,index)=> 
                         (<div key={image.name} className='flex flex-col'>
@@ -235,6 +315,7 @@ export default function FileUpload({images, setImages, thumbnail, setThumbnail})
                                     </span>
                                 </span>
                             </figure>
+                            <span className='text-[11px] text-secondary mt-[5px]'> { findImageSize(image.size) } </span>
                             {/* <button type='button' className='px-[3px] py-[2px] border border-[#dde7a8] rounded-[4px] text-[9px] 
                                     mt-[2px] bg-primary text-secondary font-[550] flex items-center justify-center gap-[3px]'>
                                  Edit <RiImageEditLine/>
@@ -243,6 +324,16 @@ export default function FileUpload({images, setImages, thumbnail, setThumbnail})
                     )
                 }
             </div>
+            <h5 className='text-[12px] text-green-500 invisible h-[17px] mt-[5px] leading-[18px] tracking-[0.2px]' id='image-compress-message' 
+                                style={displayCompressButton? {color:'red', fontSize:'10px'}:{}}>
+                {imageMessage} 
+                <span className='text-[18px] hidden' ref={imageMessageDisplay}> {imageMessage && ' ....'}</span>
+                { displayCompressButton &&
+                    <button className='px-[13px] py-[2px] rounded-[5px] ml-[1rem] text-black bg-primary cursor-pointer ' onClick={()=> compressBigImages()}> 
+                        Compress 
+                    </button>
+                }
+            </h5>
             {
             images.length ?
                 <div id='thumbnail-setter' className='mt-[2rem]'>

@@ -1,7 +1,6 @@
 import React,{useState, useEffect, useRef} from 'react'
 import {useLocation,useSearchParams} from 'react-router-dom'
 import {useDispatch} from 'react-redux'
-import {updateImage} from '../../Slices/productSlice'
 import Panel from './Panel'
 import ColorAdjuster from './ColorAdjuster'
 import Filters from './Filters'
@@ -105,12 +104,13 @@ useEffect(() => {
     const messageHandler = (event) => {
         if (event.data.type === 'target-img') {
             const { blob, name } = event.data;
-            console.log("Received image blob:", blob, "Name:", name);
+            console.log("RECIEVED IMAGE FROM FILE-UPLOAD ON CHILD READY-->", JSON.stringify({ blob, name }));
             const reader = new FileReader()
             reader.onload = ()=>{
                 console.log("Inside fileReader")
                 const base64URL = reader.result
                 setImage({name, url: base64URL});  
+                console.log("MADE A BASE64URL from BLOB FOR EDITING-->", JSON.stringify({name, url: base64URL}))
             }
             reader.readAsDataURL(blob) 
         }
@@ -218,7 +218,7 @@ const applyEffects = ()=>{
             // console.log("blobURL ceated from canvas-->",blobUrl)
             const imageData = {name: image.name, size: blob.size, blob}   //, url: blobUrl
             window.opener.postMessage({ type: 'edited-image', payload: imageData }, '*');
-            console.log("STORED IN SESSIONSTORAGE")
+            console.log("EDITED IMAGE SET BACK TO FILE-UPLOAD-->", JSON.stringify(imageData))
         },'image/png')
     }
 }

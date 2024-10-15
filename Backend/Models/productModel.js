@@ -7,7 +7,7 @@ const productSchema = mongoose.Schema({
      },
      description: {
        type: String,
-       required: true
+       required: false
      },
      weights: {
         type: [Number],
@@ -62,6 +62,14 @@ const productSchema = mongoose.Schema({
           url: {
             type: String,
             required: true
+          },
+          public_id:{
+            type: String,
+            required: true
+          },
+          isThumbnail:{
+            type: String,
+            required:true
           }
         }],
         required: true,
@@ -84,6 +92,10 @@ const productSchema = mongoose.Schema({
             type: String,
             required: true
           },
+          public_id:{
+            type: String,
+            required: true
+          }
         },
      isBlocked:{
         type: Boolean,

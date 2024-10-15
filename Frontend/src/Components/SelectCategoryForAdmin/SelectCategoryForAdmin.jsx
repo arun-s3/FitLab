@@ -1,6 +1,35 @@
-import React from 'react'
+import React,{useEffect, useState, useRef} from 'react'
 
-export default function SelectCategoryForAdmin({category, setCategory}){
+export default function SelectCategoryForAdmin({category, setCategory, editCategory}){
+
+    const [categoryStatus, setCategoryStatus] = useState({strength:false, cardio:false, supplements:false, accessories:false})
+
+    useEffect(() => {
+        if (editCategory) {
+            const updatedStatus = { ...categoryStatus };
+            editCategory.forEach(category => {
+                if (Object.keys(categoryStatus).includes(category)) {
+                    updatedStatus[category] = true;
+                }
+            });
+            setCategoryStatus(updatedStatus);
+        }
+        console.log("editCategory-->",JSON.stringify(editCategory))
+    }, [editCategory]);
+
+    // useEffect(() => {
+    //     editCategory.forEach(category => {
+    //         if (Object.keys(categoryStatus.current).includes(category)) {
+    //             categoryStatus.current[category] = true;
+    //         }
+    //     });
+    //     Object.keys(categoryStatus.current).forEach(categoryKey => {
+    //         if (categoryStatus.current[categoryKey]) {
+    //             categoryStatus.current[categoryKey].checked = true;
+    //         }
+    //     });
+    // }, [editCategory]);
+    
 
     const categorySelectHandler = (e) => {
         if (e.target.checked) {
@@ -40,19 +69,23 @@ export default function SelectCategoryForAdmin({category, setCategory}){
             <div className='flex justify-between items-center mt-[10px] text-black'>
                 <div>
                     <label for= 'strength'>Strength</label>
-                    <input type='checkbox' id='strength' value='strength' onChange={(e)=> categorySelectHandler(e)}/>
+                    <input type='checkbox' id='strength' value='strength' checked={editCategory && categoryStatus.strength}
+                         onChange={(e)=> categorySelectHandler(e)}/>
                 </div>
                 <div>
                     <label for= 'cardio'>Cardio</label>
-                    <input type='checkbox' id='cardio' value='cardio' onChange={(e)=> categorySelectHandler(e)}/>
+                    <input type='checkbox' id='cardio' value='cardio' checked={editCategory && categoryStatus.cardio}
+                         onChange={(e)=> categorySelectHandler(e)}/>
                 </div>
                 <div>
                     <label for= 'supplements'>Supplements</label>
-                    <input type='checkbox' id='supplements' value='supplements' onChange={(e)=> categorySelectHandler(e)}/>
+                    <input type='checkbox' id='supplements' value='supplements' checked={editCategory && categoryStatus.supplements}
+                         onChange={(e)=> categorySelectHandler(e)}/>
                 </div>
                 <div>
-                    <label for= 'accessories'>Acessories</label>
-                    <input type='checkbox' id='accessories' value='accessories' onChange={(e)=> categorySelectHandler(e)}/>
+                    <label for= 'accessories'>Accessories</label>
+                    <input type='checkbox' id='accessories' value='accessories' checked={editCategory && categoryStatus.accessories} 
+                        onChange={(e)=> categorySelectHandler(e)}/>
                 </div>
             </div>
         </>

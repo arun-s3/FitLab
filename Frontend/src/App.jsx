@@ -12,7 +12,7 @@ import PrivateAdminRoutes from './Components/PrivateAdminRoutes/PrivateAdminRout
 import AdminCustomersPage from './Pages/Admin/AdminCustomersPage/AdminCustomersPage'
 // import AdminCustomersPageV2 from './Pages/Admin/TesterPages/TesterV2AdminCustomersPage' //For Testing Purpose
 // import AdminCustomersPageV3 from './Pages/Admin/TesterPages/TesterV3AdminCustomersPage'  //For Testing Purpose
-import AdminAddProductPage from './Pages/Admin/AdminAddProductPage/AdminAddProductPage'
+import AdminAddAndEditProductPage from './Pages/Admin/AdminAddAndEditProductPage/AdminAddAndEditProductPage'
 import ImageEditor from './Components/ImageEditor/ImageEditor'
 import AdminProductListPage from './Pages/Admin/AdminProductListPage/AdminProductListPage'
 
@@ -46,7 +46,8 @@ export default function App(){
                             <Route path="customers" element={<AdminCustomersPage/>} />
                             <Route path='products'>
                                 <Route path='list' element={<AdminProductListPage/>} />
-                                <Route path='add' element={<AdminAddProductPage/>} />
+                                <Route path='add' element={<AdminAddAndEditProductPage/>} />
+                                <Route path='edit' element={<AdminAddAndEditProductPage editProduct={true}/>} />
                             </Route>
                         </Route>
                     </Route>

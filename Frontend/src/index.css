@@ -13,6 +13,7 @@
 :root{
     --PRIMARY:rgba(215, 241, 72, 1);
     --SECONDARY:rgba(159, 42, 240, 1);
+    --SECONDARYLIGHT2: rgb(203, 142, 245);
 }
 @tailwind base;
 @tailwind utilities;

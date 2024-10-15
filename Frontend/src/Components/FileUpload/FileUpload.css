@@ -6,3 +6,23 @@
     color: var(--SECONDARY);
     cursor: pointer;
 }
+
+#fileupload #image-compress-message > span{
+    word-spacing: 0.5px;
+    opacity: 1;
+    animation-name: ping;
+    animation-duration: 0.5s;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+}
+@keyframes ping{
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}

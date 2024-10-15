@@ -1,20 +1,95 @@
 const Product = require('../Models/productModel')
+const cloudinary = require('../Utils/cloudinary')
 const {errorHandler} = require('../Utils/errorHandler')
+
+const packProductData = async (req)=>{
+    try{
+        console.log("req.body-->", JSON.stringify(req.body))
+        console.log("req.files-->", JSON.stringify(req.files))
+        console.log("Image path:", req.files['images'][0].path);
+        console.log("Thumbnail path:", req.files['thumbnail'][0].path);
+        
+        // const uploadedImages = []
+        // for (let i=0; i<req.files['images'].length; i++) {
+        //     const result = await cloudinary.uploader.upload(req.files['images'][i].path, {
+        //       folder: 'products/images', 
+        //       resource_type: 'image' 
+        //     });
+        //     uploadedImages.push({
+        //         public_id: result.public_id,
+        //         name: req.files['images'][i].originalname,
+        //         url: result.secure_url, 
+        //         size: result.bytes,
+        //         isThumbnail: i == req.body.thumbnailImageIndex? true : false
+        //     });
+        //   }
+        const uploadedImages = await Promise.all(
+            req.files['images'].map(async (image, index) => {
+              const result = await cloudinary.uploader.upload(image.path, {
+                folder: 'products/images',
+                resource_type: 'image',
+              });
+              return {
+                public_id: result.public_id,
+                name: image.originalname,
+                url: result.secure_url,
+                size: result.bytes,
+                isThumbnail: index == req.body.thumbnailImageIndex ? true : false,
+              };
+            })
+          );
+          
+        console.log("uploadedImages-->", JSON.stringify(uploadedImages))
+
+        const thumbnailResult = await cloudinary.uploader.upload( req.files['thumbnail'][0].path, {
+          folder: 'products/thumbnails',
+          resource_type: 'image'
+        });
+        const thumbnailImage = {
+            public_id: thumbnailResult.public_id,
+            name: req.files['thumbnail'][0].originalname,
+            url: thumbnailResult.secure_url,
+            size: thumbnailResult.bytes,
+          
+        }
+        console.log("thumbnailImage-->", JSON.stringify(thumbnailImage))
+
+        const productDatas = {
+            title: req.body.title, 
+            price: req.body.price,
+            stock: req.body.stock,
+            weights: req.body?.weights|| [],
+            brand: req.body.brand,
+            category: req.body.category,
+            description: req.body?.description || '',
+            tags: req.body?.tags|| [],
+            images: uploadedImages,
+            thumbnail: thumbnailImage
+        }
+        for(field in productDatas){
+            !productDatas[field] && delete productDatas[field]
+        }
+        console.log("Weights-->" ,productDatas.weights)
+        console.log("Weights Array?-->" ,Array.isArray(productDatas.weights))
+        console.log("Tags Array?-->" ,Array.isArray(productDatas.tags))
+        console.log("productData--->", JSON.stringify(productDatas))
+
+        return productDatas
+    }
+    catch(error){
+        console.log("Error in packProductData function-->"+error.message);
+    }
+}
 
 const createProduct = async(req,res,next)=>{
     try {
-        console.log("Inside createProduct controller, received productForm-->", JSON.stringify(req.body.productData))
-        // const requiredField = ["title", "description", "price", "brand", "images", "thumbnail", "category", "stock"] // needed "user"?
-        // for(let field of requiredField){
-        //     if (!req.body.productData[field] || req.body.productData[field].toString().trim() === ""){
-        //         next(errorHandler(400, "Please fill all the required fields!"))
-        //     }
-        // }
-        const newProduct = new Product(req.body.productData)
+        console.log("Inside createProduct controller, received productForm-->", JSON.stringify(req.body.title))
+        const productDatas = await packProductData(req)
+        const newProduct = new Product(productDatas)
         const savedProduct = await newProduct.save();
-        res.status(201).json({success:'true', product:savedProduct});  
+        res.status(201).json({createdProduct:'true', product:savedProduct});  
     } 
-    catch (error) {
+    catch (error) { 
         console.log("Error in productController-createUser-->"+error.message);
         next(error)
     }
@@ -34,31 +109,82 @@ const getSingleProduct = async (req, res, next) => {
   };
 
 const getAllProducts = async(req,res,next)=>{
-    
     try{
-        const productList = await Product.find({})
+        console.log("Inside getAllProducts controller--")
+        const productList = Product.find({})
+        console.log("req.body-->", JSON.stringify(req.body))
+        const {queryOptions} = req?.body
         let resultList = {}
 
-        if(req.query.brand){
-            const brands = req.query.brand
-            resultList = productList.find({brand:{$in:brands.split(',')}})
+        if (Object.keys(queryOptions).length>0){
+            if(queryOptions?.brands){
+                const brands = queryOptions.brands
+                resultList = productList.find({brand:{$in:brands}})
+            }
+            if(queryOptions?.categories){
+                const categories = queryOptions.categories
+                resultList = productList.find({category:{$in:categories}})
+            }
+            if(queryOptions?.products){
+                const products = queryOptions.products
+                resultList = productList.find({title:{$in:products}})
+            }
+            if(queryOptions?.minPrice && queryOptions?.maxPrice){``
+                const minPrice = queryOptions.minPrice
+                const maxPrice = queryOptions.maxPrice
+                resultList = productList.find({ $and: [{price: {$gte:minPrice}}, {price: {$lte:maxPrice}}]})
+            }
+            if(queryOptions?.maxPrice){
+                const minPrice = queryOptions.minPrice
+                resultList = productList.find({price:{$gte:minPrice}})
+            }
+            if(queryOptions?.status && queryOptions?.status !== 'all'){
+                const status = queryOptions.status 
+                const isBlocked = status == 'blocked'? true : false
+                resultList = productList.find({isBlocked})
+            }
+            if(queryOptions?.startDate || queryOptions?.endDate){
+                const startDate = queryOptions.startDate
+                const endDate = queryOptions.endDate
+                if(!queryOptions.startDate){
+                    resultList = productList.find({createdAt: {$lte: endDate}})
+                }
+                else if(!queryOptions.endDate){
+                    resultList = productList.find({createdAt: {$gte: startDate}})
+                }
+                else{
+                    resultList = productList.find({createdAt: {$gte: startDate, $lte: endDate}})
+                }
+            }
+            if(queryOptions?.sort){
+                const sorts = queryOptions.sort
+                for(sortKey in sorts){
+                    if(sortKey !== ('featured' || 'bestSellers' || 'newestArrivals')){
+                        resultList = productList.sort({[sortKey]: sorts[sortKey] })
+                    }
+                    if(sortKey == 'featured'){
+    
+                    }
+                    if(sortKey == 'bestSellers'){
+                        
+                    }
+                    if(sortKey == 'newestArrivals'){
+                        
+                    }
+                }
+            }
+            if(queryOptions?.limit && queryOptions?.page){
+                const skipables = (queryOptions.page - 1) * queryOptions.limit
+                resultList = productList.skip(skipables).limit(queryOptions.limit)
+            }
         }
-        if(req.query.category){
-            const categories = req.query.catgeory
-            resultList = productList.find({category:{$in:categories.split(',')}})
-        }
-        if(req.query.limit && req.query.page){
-            const page = req.query.page
-            const limit = req.query.limit
-            const skipables = (page-1)*limit
-            resultList = productList.skip(skipables).limit(limit)
-        }
-        if(req.query.order && req.query.sort){
-            resultList = productList.sort({[req.quer.sort]:req.query.order})
+        else{
+            resultList = productList
         }
 
-        docList = await resultList.exec()
-        res.status(200).json({docList})
+        const productCounts = await Product.countDocuments(resultList)
+        const productBundle = await resultList.exec()
+        res.status(200).json({productBundle, productCounts})
     }
     catch(error){
         console.log("Error in productController-getProducts-->"+error.message);
@@ -69,11 +195,13 @@ const getAllProducts = async(req,res,next)=>{
 const updateProduct = async (req, res, next) => {    
     try {
         const {id} = req.params;
-        const product = await Product.find()
+        console.log("Id from params-->",id)
+        const product = await Product.findOne({_id: id})
         if(product){
-            const product = await Product.findByIdAndUpdate(id, req.body, {new:true});
-            const updatedProduct = await product.save()
-            res.status(200).json(updatedProduct);
+            const productDatas = await packProductData(req)
+            const updatedProduct = await Product.updateOne({_id: id}, {$set: productDatas});
+            // const updatedProduct = await product.save()
+            res.status(200).json({updatedProduct:true, product:productDatas});
         }
        else{ next(errorHandler(400, "No such product available to update"))}
     } catch (error) {

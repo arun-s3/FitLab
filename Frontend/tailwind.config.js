@@ -7,9 +7,12 @@ module.exports = {
         primary:"rgba(215, 241, 72, 1)",
         secondary:"rgba(159, 42, 240, 1)",
         secondaryLight: "rgba(113, 34, 168, 0.09)",
+        secondaryLight2: "rgb(216, 174, 245)",
+        secondaryLighter: "rgba(243, 230, 251, 0.52)",
         muted:"rgb(125, 124, 140)",    //rgb(111, 110, 127)
         home:"#EBEAEC",
         borderLight: "rgb(222 226 231)",
+        borderLight2: "rgb(223, 195, 242)",
         grayMuted: "#e7e7e7",
         grayLightMuted: 'rgb(244, 244, 244)'
       },

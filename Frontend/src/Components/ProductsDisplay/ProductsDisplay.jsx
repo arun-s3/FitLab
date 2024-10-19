@@ -1,28 +1,29 @@
 import React, {useState, useEffect} from 'react';
+import './ProductsDisplay.css';
 import {useNavigate} from 'react-router-dom'
 import {useDispatch, useSelector} from 'react-redux'
+
 import axios from 'axios';
-import './ProductsDisplay.css';
-import {getAllProducts} from '../../Slices/productSlice'
-import Pagination from '../Pagination/Pagination'
-import {SiteButtonSquare} from '../SiteButtons/SiteButtons';
-import ProductsTableView from './ProductsTableView';
+import {toast} from 'react-toastify'
 import {MdFavoriteBorder} from "react-icons/md";
 import {IoStarOutline,IoStarHalfSharp,IoStarSharp} from "react-icons/io5";
-
 import {RiFileEditLine} from "react-icons/ri";
 import {MdBlock} from "react-icons/md";
 
+import {getAllProducts, toggleProductStatus} from '../../Slices/productSlice'
+import Pagination from '../Pagination/Pagination'
+import {SiteButtonSquare} from '../SiteButtons/SiteButtons';
+import ProductsTableView from './ProductsTableView';
 
-
-export default function ProductsDisplay({gridView, showByTable, pageReader, limiter, queryOptions, admin}) {
+export default function ProductsDisplay({gridView, showByTable, pageReader, limiter, queryOptions, showTheseProducts, admin}) {
 
   const {currentPage, setCurrentPage} = pageReader
 
   // const [products, setProducts] = useState([]);             //Use this for dummy data
   // const [productCounts, setProductCounts] = useState(null)  //Use this for dummy data
   const dispatch = useDispatch()
-  const {products, productCounts} = useSelector(state=> state.productStore)
+  const {products:items, productCounts} = useSelector(state=> state.productStore)
+  const [products, setProducts] = useState([])
 
   const navigate = useNavigate()
 
@@ -46,6 +47,14 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
     console.log("PRODUCTS----",JSON.stringify(products))
     // getDummyProducts();
   }, []);
+
+  useEffect(()=>{
+    !admin && setProducts(items)
+  },[items])
+
+  useEffect(()=>{
+    admin && setProducts(showTheseProducts)
+  },[showTheseProducts])
 
   const produceStarRating = (product)=>{
     let avgRating = (product.reviews.map(review=> Number.parseInt(review.rating)).reduce((total,rating)=> total+=rating,0) / product.reviews.length).toFixed(1)
@@ -78,7 +87,7 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
 
       { !showByTable && 
         products.map((product) => (
-          <div key={product.id} className= {gridView ? 'w-[275px]' : 'flex gap-[1rem] w-full'}>
+          <div key={product._id} className= {gridView ? 'w-[275px]' : 'flex gap-[1rem] w-full'}>
             <figure className='relative h-auto rounded-[10px] thumbnail'>
               <img src={product.thumbnail.url || product.thumbnail} alt={product.title} className='rounded-[10px] h-[275px] w-[275px] object-cover'/>
               <figcaption className={`${admin ? 'top-[2px] left-[-40px]' : 'bottom-[12px]'} absolute w-full text-center`}>
@@ -90,7 +99,7 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
                       <i> <RiFileEditLine/> </i>
                     </span>
                     <span data-label='Block' className='w-[30px] p-[5px] border rounded-[20px] z-[2] flex items-center justify-center
-                         relative cursor-pointer admin-control'>
+                         relative cursor-pointer admin-control' onClick={()=> dispatch(toggleProductStatus(product._id))}>
                       <i> <MdBlock/> </i>
                     </span>
                   </div>

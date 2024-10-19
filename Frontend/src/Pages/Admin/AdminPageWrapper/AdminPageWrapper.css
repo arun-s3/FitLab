@@ -39,7 +39,7 @@
 #admin-wrapper #admin-content-outlet > section:first-child > header{
     margin-bottom: 2rem;
 }
-#admin-wrapper #admin-content-outlet > section:first-child > header > h1{
+#admin-wrapper #admin-content-outlet > section:first-child > header h1{
     font-size: 25px;
     font-weight: 600;
     letter-spacing: 0.5px;

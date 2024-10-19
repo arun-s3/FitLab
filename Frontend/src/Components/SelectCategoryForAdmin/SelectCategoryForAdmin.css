@@ -1,0 +1,35 @@
+#SelectSubCategoryForAdmin .subcategory-body > div h5{
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: 12px;
+    letter-spacing: 0.3px;
+    color: #757575;
+}
+#SelectSubCategoryForAdmin .subcategory-body ul {
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: center;
+    gap:3px;
+}
+#SelectSubCategoryForAdmin .subcategory-body ul li{
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    gap: 5px;
+}
+#SelectSubCategoryForAdmin .subcategory-body ul li input[type='radio']{
+    height: 10px;
+    width: 10px;
+    border-radius: 5px;
+    color: inherit;
+}
+/* #SelectSubCategoryForAdmin .subcategory-body ul li input[type='checkbox']{
+    height: 10px;
+    width: 10px;
+    border-radius: 5px;
+    color: inherit;
+} */
+#SelectSubCategoryForAdmin .subcategory-body ul li label{
+    color:inherit !important;
+}

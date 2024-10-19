@@ -17,7 +17,7 @@ import {toast} from 'react-toastify';
 
 import FileUpload from '../../../Components/FileUpload/FileUpload';
 import TagGenerator from '../../../Components/TagGenerator/TagGenerator';
-import SelectCategoryForAdmin from '../../../Components/SelectCategoryForAdmin/SelectCategoryForAdmin';
+import SelectCategoryForAdmin,{SelectSubCategoryForAdmin} from '../../../Components/SelectCategoryForAdmin/SelectCategoryForAdmin';
 import {createProduct, updateProduct, resetStates} from '../../../Slices/productSlice'
 import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons';
 import {CustomHashLoader} from '../../../Components/Loader/Loader'
@@ -163,7 +163,7 @@ export default function AdminAddAndEditProductPage({ editProduct }){
     const handleImageCompression = async (file) => {
         console.log("Inside imageCompressor")
         const options = {
-            maxSizeMB: 1,         
+            maxSizeMB: 2,         
             maxWidthOrHeight: 1024, 
         }
         try {
@@ -235,7 +235,7 @@ export default function AdminAddAndEditProductPage({ editProduct }){
     }
 
     return(
-        <section id='AdminAddProduct'>
+        <section id='AdminAddProduct'> 
             <header className='flex gap-[10px] items-center'>
                 <i className='p-[7px] border border-[#c4c6ca] rounded-[4px]'> <IoArrowBackSharp/> </i>
                 <h1>{ editProduct ? 'Edit Product' : 'Add Product'}</h1>
@@ -313,6 +313,11 @@ export default function AdminAddAndEditProductPage({ editProduct }){
                         
                         <SelectCategoryForAdmin category={category} setCategory={setCategory} {...(editProduct && { editCategory: editProductItem?.current?.category})}/>
                             
+                        </div>
+                    </div>
+                    <div className='flex justify-center items-center product-input-wrapper'>
+                        <div className='input-wrapper categories'>
+                            <SelectSubCategoryForAdmin category={category} setCategory={setCategory}/>                    
                         </div>
                     </div>
                     <div className='flex justify-center items-center product-input-wrapper'>

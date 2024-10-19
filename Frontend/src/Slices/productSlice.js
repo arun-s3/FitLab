@@ -34,6 +34,22 @@ export const updateProduct = createAsyncThunk('updateProduct', async({formData, 
     }
 })
 
+export const toggleProductStatus = createAsyncThunk('toggleProductStatus', async(id, thunkAPI)=>{
+    try{
+        console.log("Inside toggleProductStatus createAsyncThunk")
+        const response = await axios.get(`/admin/products/status/${id}`,{withCredentials:true})
+        console.log("returning success response from toggleProductStatus createAsyncThunk..."+JSON.stringify(response.data))
+        return response.data
+    }
+    catch(error){
+        console.log("inside catch of toggleProductStatus from productSlice")
+        const errorMessage = error.response?.data?.message
+        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
+        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
+        return thunkAPI.rejectWithValue(errorMessage)
+    }
+})
+
 export const getAllProducts = createAsyncThunk('getAllProducts', async(queryOptions, thunkAPI)=>{
     try{
         console.log("Inside getAllProducts createAsyncThunk")
@@ -50,13 +66,16 @@ export const getAllProducts = createAsyncThunk('getAllProducts', async(queryOpti
     }
 })
 
+
 const initialState = {
     products: [],
     productCounts: null,
     loading: false,
     error: false,
+    success:false,
+    message: null,
     productCreated: false,
-    productUpdated: false
+    productUpdated: false 
 }
 
 const productSlice = createSlice({
@@ -77,6 +96,7 @@ const productSlice = createSlice({
             state.error = false
             state.loading = false
             state.productCreated = true
+            state.products.push(action.payload.product)
         })
         .addCase(createProduct.pending, (state,action)=>{
             state.loading = true
@@ -93,6 +113,9 @@ const productSlice = createSlice({
             state.error = false
             state.loading = false
             state.productUpdated = true
+            const updatingProductIndex = state.products.findIndex(product=> product._id === action.payload.product._id)
+            state.products[updatingProductIndex] = action.payload.product
+            console.log("state.products[updatingProductIndex]-->", JSON.stringify(state.products[updatingProductIndex]))
         })
         .addCase(updateProduct.pending, (state,action)=>{
             state.loading = true
@@ -121,6 +144,23 @@ const productSlice = createSlice({
             state.loading = false
             state.error = true
             // state.productSuccess = false
+        })
+        .addCase(toggleProductStatus.fulfilled, (state,action)=>{
+            state.success = true
+            state.message = action.payload.productBlocked
+            state.loading = false
+            state.error = false
+            const updatingProductIndex = state.products.findIndex(product=> product._id === action.payload.productId)
+            state.products[updatingProductIndex].isBlocked = state.message === 'Blocked'? true : false
+            console.log("state.products[updatingProductIndex].isBlocked-->", state.products[updatingProductIndex].isBlocked)
+        })
+        .addCase(toggleProductStatus.pending, (state,action)=>{
+            state.loading = true
+            state.error = false
+        })
+        .addCase(toggleProductStatus.rejected, (state,action)=>{
+            state.loading = false
+            state.error = true
         })
     }
 })

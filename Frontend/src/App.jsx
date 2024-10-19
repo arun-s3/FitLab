@@ -15,8 +15,7 @@ import AdminCustomersPage from './Pages/Admin/AdminCustomersPage/AdminCustomersP
 import AdminAddAndEditProductPage from './Pages/Admin/AdminAddAndEditProductPage/AdminAddAndEditProductPage'
 import ImageEditor from './Components/ImageEditor/ImageEditor'
 import AdminProductListPage from './Pages/Admin/AdminProductListPage/AdminProductListPage'
-
-
+import AdminAddAndEditCategoryPage from './Pages/Admin/AdminAddAndEditCategoryPage/AdminAddAndEditCategoryPage'
 
 import {ToastContainer} from 'react-toastify'
 import "react-toastify/dist/ReactToastify.css";
@@ -48,6 +47,7 @@ export default function App(){
                                 <Route path='list' element={<AdminProductListPage/>} />
                                 <Route path='add' element={<AdminAddAndEditProductPage/>} />
                                 <Route path='edit' element={<AdminAddAndEditProductPage editProduct={true}/>} />
+                                <Route path='category' element={<AdminAddAndEditCategoryPage/>} />
                             </Route>
                         </Route>
                     </Route>

@@ -194,13 +194,13 @@ const getAllProducts = async(req,res,next)=>{
 
 const updateProduct = async (req, res, next) => {    
     try {
+        console.log("Inside updateProduct controller--")
         const {id} = req.params;
         console.log("Id from params-->",id)
         const product = await Product.findOne({_id: id})
         if(product){
             const productDatas = await packProductData(req)
             const updatedProduct = await Product.updateOne({_id: id}, {$set: productDatas});
-            // const updatedProduct = await product.save()
             res.status(200).json({updatedProduct:true, product:productDatas});
         }
        else{ next(errorHandler(400, "No such product available to update"))}
@@ -208,6 +208,32 @@ const updateProduct = async (req, res, next) => {
         console.log("Error in productController-updateProduct-->"+error.message);
         next(error)
     }
-  };
+  }
 
-module.exports = {createProduct, getSingleProduct, getAllProducts, updateProduct}
+  const toggleProductStatus = async(req,res,next)=>{
+    try{
+        console.log("Inside toggleProductStatus controller--")
+        const {id} = req.params
+        console.log("ID-->", id)
+        const product = await Product.findOne({_id:id},{password:0})
+        if (!product) {
+            return next(errorHandler(404, "No such product found!"));
+        }
+        const status = product.isBlocked
+        console.log("Blocked status-->", status)
+        const returnedProduct = await Product.findOneAndUpdate({_id:id},{$set: {isBlocked: !status}}, {new: true})
+        if(returnedProduct){
+            const status = returnedProduct.isBlocked? 'Blocked' : 'Unblocked'
+            res.status(200).json({productBlocked: status, productId:id})
+        }
+        else{
+            next(errorHandler(400, "No such product available to update status!"))
+        }
+    }  
+    catch(error){
+        console.log("Error in updateProductStatus controller-->", error.message)
+        next(error)
+    } 
+  }
+
+module.exports = {createProduct, getSingleProduct, getAllProducts, updateProduct, toggleProductStatus}

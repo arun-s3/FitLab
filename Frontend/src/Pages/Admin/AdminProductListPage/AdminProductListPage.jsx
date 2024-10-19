@@ -3,6 +3,7 @@ import './AdminProductListPage.css'
 import {useNavigate} from 'react-router-dom'
 import {useSelector, useDispatch} from 'react-redux'
 
+import {toast} from 'react-toastify'
 import {LiaSlidersHSolid} from "react-icons/lia";
 import {FiDownload} from "react-icons/fi";
 import {RiArrowDropDownLine} from "react-icons/ri";
@@ -26,6 +27,8 @@ export default function AdminProductListPage(){
     const [showByTable, setShowByTable] = useState(false)
     const [toggleTab, setToggleTab] = useState({goTo: 'all'})
 
+    const [showTheseProducts, setShowTheseProducts] = useState([])
+
     const [startDate, setStartDate] = useState(null)
     const [endDate, setEndDate] = useState(null)
 
@@ -46,7 +49,7 @@ export default function AdminProductListPage(){
     
 
     const navigate = useNavigate()
-    const {productSuccess, error, loading} = useSelector(state=> state.productStore)
+    const {products, productSuccess, error, loading, message} = useSelector(state=> state.productStore)
 
     const displayFilter = (e)=>{
         if (showFilter && !mouseInFilter.current){
@@ -58,6 +61,17 @@ export default function AdminProductListPage(){
             return
         }
     }
+
+    useEffect(()=>{
+        setShowTheseProducts(products)
+    },[])
+
+    useEffect(()=> {
+        if(message.includes('block')){
+          console.log("message arrived-->", message)
+          toast.success(`${message} successfully`)
+        }
+      },[message])
 
     useEffect(()=>{
         setTotalFilter({...filter,startDate, endDate, minPrice, maxPrice})
@@ -91,6 +105,20 @@ export default function AdminProductListPage(){
         //     window.removeEventListener('click', ()=> setCloseMenus)
         // }
     })
+
+    const showProducts = (type)=>{
+        console.log("Inside showProducts(), type--", type)
+        setToggleTab({goTo: type})
+        if(type == 'all'){
+            setShowTheseProducts(products)
+        }
+        if(type == 'active'){
+            setShowTheseProducts( products.filter(product=> !product.isBlocked) )
+        }
+        if(type == 'blocked'){
+            setShowTheseProducts( products.filter(product=> product.isBlocked) )
+        }
+    }
 
     return(
 
@@ -134,17 +162,17 @@ export default function AdminProductListPage(){
                     <path stroke="red" stroke-width="1" fill="transparent"  d='M0 35  Q0 0, 20 0 h90 Q130 0, 145 35'/>
                 </svg> */}
                 <div className='h-[40px] w-[150px] bg-white border border-b-[#e5e7eb] rounded-tl-[10px] cursor-pointer
-                                 flex justify-center items-center absolute top-[-39px] tab' onClick={()=>setToggleTab({goTo: 'all'})}
+                                 flex justify-center items-center absolute top-[-39px] tab' onClick={()=> showProducts('all')} 
                         style={toggleTab.goTo == 'all'? {borderBottomColor:'transparent'}:{}}>
                     <h4 className={toggleTab.goTo == 'all' ? 'opacity-[1]' : 'opacity-[0.75]'}> All </h4>
                 </div>
                 <div className='h-[40px] w-[150px] bg-white border border-b-[#e5e7eb] flex justify-center items-center absolute cursor-pointer
-                                    top-[-39px] left-[150px] tab' onClick={()=>setToggleTab({goTo: 'active'})}
+                                    top-[-39px] left-[150px] tab' onClick={()=> showProducts('active')}
                                 style={toggleTab.goTo == 'active'? {borderBottomColor:'transparent'}:{}}>
                     <h4 className={toggleTab.goTo == 'active' ? 'opacity-[1]' : 'opacity-[0.75]'}> Active </h4>
                 </div>
                 <div className='h-[40px] w-[150px] bg-white border border-b-[#e5e7eb] rounded-tr-[5px] flex justify-center items-center cursor-pointer
-                             absolute top-[-39px] left-[300px] tab' onClick={()=>setToggleTab({goTo: 'blocked'})}
+                             absolute top-[-39px] left-[300px] tab' onClick={()=> showProducts('blocked')}
                                 style={toggleTab.goTo == 'blocked'? {borderBottomColor:'transparent'}:{}}>
                     <h4 className={toggleTab.goTo == 'blocked' ? 'opacity-[1]' : 'opacity-[0.75]'}> Blocked </h4>
                 </div>
@@ -160,7 +188,7 @@ export default function AdminProductListPage(){
 
                     <div className='mt-[2rem] px-[2rem]'>
 
-                        <ProductsDisplay gridView={showByGrid} showByTable={showByTable} pageReader={{currentPage, setCurrentPage}} limiter={{limit, setLimit}} admin={true}/>
+                        <ProductsDisplay gridView={showByGrid} showByTable={showByTable} pageReader={{currentPage, setCurrentPage}} limiter={{limit, setLimit}} showTheseProducts={showTheseProducts} admin={true}/>
 
                     </div>
 

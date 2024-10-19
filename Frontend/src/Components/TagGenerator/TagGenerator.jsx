@@ -1,9 +1,11 @@
-import React, { useEffect } from 'react'
+import React, {useState, useEffect} from 'react'
 import {BsTags} from "react-icons/bs";
 import {IoIosClose} from "react-icons/io";
 
 
 export default function TagGenerator({tag, setTags, editTags, SetPlaceholderIcon}){
+
+    const [error, setError] = useState('')
 
     useEffect(()=>{
         if(editTags){
@@ -16,6 +18,10 @@ export default function TagGenerator({tag, setTags, editTags, SetPlaceholderIcon
             ]);
         }
     },[editTags])
+
+    useEffect(()=>{
+        setTimeout(()=> setError(''), 2500)
+    },[error])
 
     const tagConstructor = (currentTag)=>{
         return(
@@ -47,6 +53,7 @@ export default function TagGenerator({tag, setTags, editTags, SetPlaceholderIcon
                     const currentTag = e.target.value.trim()   
                     if( tag.find(tag=> tag.key == currentTag ) ){
                         console.log("Tag must be unique")
+                        setError('Tag must be unique')
                         return
                     } 
                     setTags([...tag,
@@ -75,6 +82,7 @@ export default function TagGenerator({tag, setTags, editTags, SetPlaceholderIcon
                      className='w-[11rem] h-[2rem] text-[11px] text-secondary' style={{width:'10rem', height:'2rem', marginLeft:'9px', border:'0'}} 
                                onChange={(e)=> tagsInputHandler(e)} onKeyDown={(e)=> tagsKeyDownHandler(e)}/>
             </div>
+            <p className='h-[15px] w-full text-[11px] text-red-500 tracking-[0.1px] mt-[5px]'> {error} </p>
         </>
     )
 }

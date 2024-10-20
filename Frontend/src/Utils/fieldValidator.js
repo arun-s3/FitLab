@@ -11,6 +11,12 @@ const regexPatterns = {
     brandPattern: /^(?!^\d+$)[a-zA-Z0-9\s,'-]{1,50}$/,     
     descriptionPattern: /^[\w\s.,"'!-]{30,2000}$/,
 
+    categoryNamePattern: /^[a-zA-Z0-9\s,'-]{2,50}$/,
+    categoryDescriptionPattern: /^[a-zA-Z0-9\s.,'!?&()-]{2,200}$/,
+    categoryDiscountPattern: /^(100|[1-9]?[0-9])(\.\d{1,2})?$/,
+    categoryBadgePattern: /^[a-zA-Z\s_-]{2,15}$/, 
+
+
     validator: function(fieldName, value, errorMessage){
         const currentPattern = Object.keys(this).find( (pattern,index)=> {
             if(pattern.toString().match(fieldName.toString())) return pattern[index]
@@ -90,6 +96,15 @@ export const handleInputValidation = (fieldName, value, options)=>{
                 return regexPatterns.validator(fieldName, value, "Please enter a valid Brand number!")
             case "description":
                 return regexPatterns.validator(fieldName, value, "Please enter a valid product Description! Must have atleast 30 characters.")
+            
+            case "categoryName":
+                return regexPatterns.validator(fieldName, value, "Please enter a valid Category name! Must be under 50 characters.")
+            case "categoryDescription":
+                return regexPatterns.validator(fieldName, value, "Please enter a valid Category description! Must be under 200 words.")
+            case "categoryDiscount":
+                return regexPatterns.validator(fieldName, value, "Please enter a valid Discount rate!")
+            case "categoryBadge":
+                return regexPatterns.validator(fieldName, value, "Please enter a valid Category badge! Must be under 30 characters.")
         }
     }
 }

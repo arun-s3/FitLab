@@ -97,7 +97,7 @@ export default function SelectCategoryForAdmin({category, setCategory, editCateg
     )
 }
 
-export function SelectSubCategoryForAdmin({category, setCategory}){
+export function SelectSubCategoryForAdmin({category, setCategory, setSubcategory}){
 
     const cardioRef = useRef(null)
     const strengthRef = useRef(null)
@@ -145,6 +145,16 @@ export function SelectSubCategoryForAdmin({category, setCategory}){
 
     useEffect(()=>{
         console.log("CheckedCategories-->",JSON.stringify(checkedCategories))
+        const subcategory = Object.values(checkedCategories).map(categoryValue=> {
+            console.log("Inside subcategory find")
+            if(typeof categoryValue == 'object'){
+                console.log("Subcategory Found-->", JSON.stringify(categoryValue))
+                const subcategoryKey = Object.keys(categoryValue)[0]
+                console.log("subcategoryKey-->", subcategoryKey)
+                return subcategoryKey
+            }
+        })
+        setSubcategory(subcategory.find(value=> value))
     },[checkedCategories])
 
     useEffect(()=>{

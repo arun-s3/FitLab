@@ -3,7 +3,6 @@ import './AdminAddAndEditProductPage.css'
 import {useLocation, useNavigate} from 'react-router-dom'
 import {useSelector, useDispatch} from 'react-redux'
 
-import imageCompression from 'browser-image-compression';
 import {ProductIcon, ProductIcon2} from '../../../Components/Icons/Icons'
 import {IoArrowBackSharp} from "react-icons/io5";
 import {IoIosArrowRoundBack} from "react-icons/io";
@@ -17,19 +16,15 @@ import {toast} from 'react-toastify';
 
 import FileUpload from '../../../Components/FileUpload/FileUpload';
 import TagGenerator from '../../../Components/TagGenerator/TagGenerator';
+import PlaceholderIcon from '../../../Components/PlaceholderIcon/PlaceholderIcon'
 import SelectCategoryForAdmin,{SelectSubCategoryForAdmin} from '../../../Components/SelectCategoryForAdmin/SelectCategoryForAdmin';
 import {createProduct, updateProduct, resetStates} from '../../../Slices/productSlice'
 import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons';
 import {CustomHashLoader} from '../../../Components/Loader/Loader'
+import {handleImageCompression} from '../../../Utils/compressImages'
 import {handleInputValidation, displaySuccess, displayErrorAndReturnNewFormData, cancelErrorState} from '../../../Utils/fieldValidator'
 
-function PlaceholderIcon({icon, fromTop}){
-    return(
-        <span className='absolute top-[25%] left-[8px] text-[#6b7280] text-[11px]' style={fromTop? {top: `${fromTop}%`}: null}>
-             {icon} 
-        </span>
-    )
-}
+
 export default function AdminAddAndEditProductPage({ editProduct }){
 
     const [tag, setTags] = useState([])
@@ -37,6 +32,7 @@ export default function AdminAddAndEditProductPage({ editProduct }){
     const [thumbnailIndexOnEditProduct, setThumbnailIndexOnEditProduct] = useState(0)
     const [images, setImages] = useState([])
     const [category, setCategory] = useState([])
+    const [subcategory, setSubcategory] = useState('')
     const [productData, setProductData] = useState({})
 
     const editProductItem = useRef(null)
@@ -52,8 +48,8 @@ export default function AdminAddAndEditProductPage({ editProduct }){
     useEffect(() => {
         console.log("Images-->", JSON.stringify(images))
         console.log("Thumbnail-->", JSON.stringify(thumbnail))
-        setProductData({ ...productData, category: category, images: images, thumbnail: thumbnail });
-    }, [category, images, thumbnail]);
+        setProductData({ ...productData, category: category, subcategory, images: images, thumbnail: thumbnail });
+    }, [category, subcategory, images, thumbnail]);
 
     useEffect(()=>{
         // console.log("tag-->", JSON.stringify(tag))
@@ -160,20 +156,20 @@ export default function AdminAddAndEditProductPage({ editProduct }){
          }
     }
 
-    const handleImageCompression = async (file) => {
-        console.log("Inside imageCompressor")
-        const options = {
-            maxSizeMB: 2,         
-            maxWidthOrHeight: 1024, 
-        }
-        try {
-            console.log("Compressing..")
-            const compressedFile = await imageCompression(file, options);
-            return compressedFile
-        } catch (error) {
-            console.error('Error during compression:', error)
-        }
-    }
+    // const handleImageCompression = async (file) => {
+    //     console.log("Inside imageCompressor")
+    //     const options = {
+    //         maxSizeMB: 2,         
+    //         maxWidthOrHeight: 1024, 
+    //     }
+    //     try {
+    //         console.log("Compressing..")
+    //         const compressedFile = await imageCompression(file, options);
+    //         return compressedFile
+    //     } catch (error) {
+    //         console.error('Error during compression:', error)
+    //     }
+    // }
 
     const submitHandler = async (e)=>{
         console.log("Inside submitData()--")
@@ -317,7 +313,7 @@ export default function AdminAddAndEditProductPage({ editProduct }){
                     </div>
                     <div className='flex justify-center items-center product-input-wrapper'>
                         <div className='input-wrapper categories'>
-                            <SelectSubCategoryForAdmin category={category} setCategory={setCategory}/>                    
+                            <SelectSubCategoryForAdmin category={category} setCategory={setCategory} setSubcategory={setSubcategory}/>                    
                         </div>
                     </div>
                     <div className='flex justify-center items-center product-input-wrapper'>
@@ -336,7 +332,7 @@ export default function AdminAddAndEditProductPage({ editProduct }){
                 </div>
                 <div className='w-full h-screen basis-[37%]'>
  
-                     <FileUpload images={images} setImages={setImages} thumbnail={thumbnail} setThumbnail={setThumbnail} thumbnailIndexOnEditProduct={thumbnailIndexOnEditProduct} handleImageCompression={handleImageCompression} />
+                     <FileUpload images={images} setImages={setImages} imageLimit={6} needThumbnail={true}  thumbnail={thumbnail} setThumbnail={setThumbnail} thumbnailIndexOnEditProduct={thumbnailIndexOnEditProduct} />
 
                 </div>
             </main>

@@ -1,5 +1,7 @@
 
 #fileupload #thumbnail-setter .arrows span{
+    width: 100%;
+    text-align: center;
     padding: 7px;
     background: var(--PRIMARY);
     border-radius: 5px;
@@ -14,6 +16,10 @@
     animation-duration: 0.5s;
     animation-timing-function: ease-in-out;
     animation-iteration-count: infinite;
+}
+#fileupload #category-preview .category-name{
+    background: linear-gradient(to right, rgba(255,255,255,0.7), rgba(255,255,255,0.7));
+    word-spacing: 1px;
 }
 @keyframes ping{
     0% {

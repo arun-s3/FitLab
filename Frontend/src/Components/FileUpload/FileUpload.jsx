@@ -5,13 +5,14 @@ import './FileUpload.css'
 import {SiteButtonSquare} from '../SiteButtons/SiteButtons'
 import ImageEditor from '../ImageEditor/ImageEditor'
 import PopupWindow from '../PopupWindow/PopupWindow'
+import {handleImageCompression} from '../../Utils/compressImages'
 
 import {IoCloseSharp} from "react-icons/io5";
 import {RiImageEditLine} from "react-icons/ri";
 import {FaArrowUp, FaArrowDown} from "react-icons/fa";
 // import { uploadImages } from 'Frontend/src/Slices/productSlice'
 
-export default function FileUpload({images, setImages, thumbnail, setThumbnail, thumbnailIndexOnEditProduct, handleImageCompression}){
+export default function FileUpload({images, setImages, imageLimit, needThumbnail, thumbnail, setThumbnail, thumbnailIndexOnEditProduct, categoryImgPreview}){
 
     const [error, setError] = useState(null)
     const [imageMessage, setImageMessage] = useState('')
@@ -29,7 +30,12 @@ export default function FileUpload({images, setImages, thumbnail, setThumbnail, 
             setImageMessage('Please upload images smaller than 3MB. Images between 3MB and 5MB can be compressed or deleted.')
             setDisplayCompressButton(true)
         }
-    },[error])
+        if(!images.length){
+            setError('')
+            setImageMessage('')
+            setDisplayCompressButton(false)
+        }
+    },[error, images])
 
     useEffect(()=>{
         console.log("Images array-->" + JSON.stringify(images))
@@ -114,8 +120,10 @@ export default function FileUpload({images, setImages, thumbnail, setThumbnail, 
     const validateAndSetImage = (files)=>{
         console.log("Got files! -->", JSON.stringify(files));
         const newImages = [];
-        if(files.length > 10){
-            setError("Only 10 images are allowed to upload!")
+        console.log("IMAGES>LENGTH INSIDE validateAndSetImage-->", images.length)
+        if(images.length+1 > imageLimit){
+            const imageLabel = (imageLimit > 1)? 'images are' : 'image is'
+            setError(`Only ${imageLimit} ${imageLabel} allowed to upload!`)
             return;
         }
         for (let i = 0; i < files.length; i++) {
@@ -286,7 +294,7 @@ export default function FileUpload({images, setImages, thumbnail, setThumbnail, 
                                         style={images.length>0? {height:'17%'} : {height:'33%'}}>
                 <h3 className= { `text-center align-middle my-auto text-[13px] ${checkDragging ? 'text-[#5997f0]' : 'text-secondary'}` }> 
                         <span ref={imageDropHeaderRef}> 
-                            { checkDragging? 'Drop Images Here' : 'Drag and Drop Product Images Here or'}
+                            { checkDragging? 'Drop Images Here' : `Drag and Drop  ${(imageLimit==1)? 'Category Image' : 'Product Images'} Here or`}
                         </span>
                         <span>
                             <label for='file' className={`px-[8px] py-[2px] rounded-[5px] ml-[5px] text-black bg-primary 
@@ -306,20 +314,16 @@ export default function FileUpload({images, setImages, thumbnail, setThumbnail, 
                                     <span className=' rounded-[4px] text-secondary'>
                                         <IoCloseSharp onClick={(e)=> closeHandler(image.url, index)}/> 
                                     </span>
+                                    { !categoryImgPreview &&
                                     <span className=' rounded-[4px] text-secondary absolute cursor-pointer
-                                            bottom-[40px] text-[15px]' onClick={()=> openImageEditor(image.url, image.name, image.blob)} >
+                                            bottom-[40px] text-[15px]' onClick={()=> openImageEditor(image.url, image.name, image.blob)}>
                                         <RiImageEditLine/>
 
-                                        {/* <PopupWindow path={`../image-editor?image=${editorPath.current}`} ref={windowRef}/> */}
-
-                                    </span>
+                                    </span> 
+                                    }
                                 </span>
                             </figure>
                             <span className='text-[11px] text-secondary mt-[5px]'> { findImageSize(image.size) } </span>
-                            {/* <button type='button' className='px-[3px] py-[2px] border border-[#dde7a8] rounded-[4px] text-[9px] 
-                                    mt-[2px] bg-primary text-secondary font-[550] flex items-center justify-center gap-[3px]'>
-                                 Edit <RiImageEditLine/>
-                            </button> */}
                         </div>)
                     )
                 }
@@ -334,7 +338,7 @@ export default function FileUpload({images, setImages, thumbnail, setThumbnail, 
                     </button>
                 }
             </h5>
-            {
+            { needThumbnail &&
             images.length ?
                 <div id='thumbnail-setter' className='mt-[2rem]'>
                 <h4 className='text-[13.5px] font-[500] text-black capitalize mb-[6px] ml-[2px]'> <span className='text-[14px]'>P</span>roduct Thumbnail </h4>
@@ -345,16 +349,37 @@ export default function FileUpload({images, setImages, thumbnail, setThumbnail, 
                     </figure>
                     <div className='flex flex-col justify-between h-full arrows'>
                         <span onClick={()=> arrowHandler('prev')}> <FaArrowUp/> </span>
+                        <button className='text-[12px] font-[500] tracking-[0.2px] py-[6px] w-[32px] h-[113px] rounded-[5px] bg-primary' 
+                                style={{writingMode:'vertical-rl'}} onClick={()=> openImageEditor(images[currentImageIndex].url, images[currentImageIndex].name, images[currentImageIndex].blob)}> 
+                            Edit Image
+                        </button>
                         <span onClick={()=> arrowHandler('next')}> <FaArrowDown/> </span>
                     </div>
                 </div>
-                <div className='w-[46%] mt-[7px]'>
+                <div className='w-[46%] mt-[7px] flex flex-col gap-[10px]'>
                     <SiteButtonSquare customStyle={{paddingBlock:'6px', width:'12.5rem', fontSize:'12px'}} clickHandler={(e)=> thumbnailSetter(e)}> 
                         Set as thumbnail 
                     </SiteButtonSquare>
+    
                 </div>
                 </div>
                 : ''
+            }
+            {categoryImgPreview && images.length &&
+                <div className='h-[auto] w-full rounded-[10px] flex flex-col gap-[10px] justify-center mt-[2rem] relative' id='category-preview'>
+                    <figure className='h-[175px]  w-[175px] rounded-[10px] outline outline-secondary outline-1 outline-offset-[2px]'>
+                        <img src={images[0].url} alt={images[0].name} 
+                                className='h-[175px]  w-[175px] rounded-[10px] object-cover'/>
+                    </figure>
+                    <span className='absolute bottom-[52px] left-[10px] text-[10px] font-[550] text-secondary px-[10px] 
+                            rounded-[5px] tracking-[0.3px] category-name'> 
+                        {categoryImgPreview.categoryName}
+                     </span>
+                    <SiteButtonSquare customStyle={{paddingBlock:'6px', width:'11rem', borderRadius:'7px', fontSize:'12px'}} 
+                                                clickHandler={(e)=> openImageEditor(images[0].url, images[0].name, images[0].blob)} > 
+                        Edit Category Image 
+                    </SiteButtonSquare>
+                </div>
             }
         </main>
     )

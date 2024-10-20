@@ -1,3 +1,62 @@
 #AdminAddAndEditCategoryPage > header i:first-child >svg{
     color: #666363;
 }
+#AdminAddAndEditCategoryPage main #category-content .category-content-wrapper{
+    display:flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding-block: 15px;
+    padding-inline: 3px;
+    border-bottom: 1px dashed rgba(132, 120, 138, 0.52); 
+}
+#AdminAddAndEditCategoryPage main #category-content .category-content-wrapper .error{
+    visibility: visible;
+    font-size: 10px;
+    color: red;
+    letter-spacing: 0.2px;
+    height: 17px;
+    margin-top: 3px;
+}
+#AdminAddAndEditCategoryPage main #category-content .category-content-wrapper .category-labels{
+    margin-bottom: 17px;
+}
+#AdminAddAndEditCategoryPage main #category-content .category-content-wrapper .calender input{
+    width: 9.8rem; 
+}
+#AdminAddAndEditCategoryPage main #category-content .category-content-wrapper .calender svg{
+    color: #6b7280;
+    font-size: 11px;
+    top: 14px;
+}
+#AdminAddAndEditCategoryPage main #category-content label, #AdminAddAndEditCategoryPage main #category-content h5{
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    word-spacing: 1px;
+    color: var(--SECONDARY);
+    margin-bottom: 2px;
+}
+#AdminAddAndEditCategoryPage main #category-content label + p, #AdminAddAndEditCategoryPage main #category-content h5 + p{
+    font-size: 10px;
+    color: #8f8989;
+    margin-top: 5px;
+}
+#AdminAddAndEditCategoryPage main #category-content .category-content-wrapper input{
+    width: 20rem;
+    height: 2.4rem;
+    border: 1px solid var(--PRIMARY);
+    border-radius: 5px;
+    padding-right: 0;
+    font-size: 12px;
+}
+#AdminAddAndEditCategoryPage main #category-content .category-content-wrapper input::placeholder{
+    color: #6b7280;
+    opacity: 1;
+    font-size: 9px;
+}
+#AdminAddAndEditCategoryPage main #category-content .category-content-wrapper input[id='category-badge']:focus{
+    border: 0px !important;
+    outline: 0px !important;
+    --tw-ring-shadow: 0;
+}

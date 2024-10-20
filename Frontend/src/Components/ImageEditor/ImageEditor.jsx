@@ -289,7 +289,7 @@ const panelHandler = (e, panel)=>{
                             </SiteButtonSquare>
                             <SiteButtonSquare customStyle={{width:'6rem', paddingBlock:'6px'}} clickHandler={()=> applyEffects()}>
                                  <span className={ (loadStart || loading) ? 'text-secondary' : '' }> 
-                                    { loadStart? loadStart: loading? loading+'%' : 'Apply'}
+                                    { loadStart? loadStart+'%': loading? loading+'%' : 'Apply'}
                                  </span>
                             </SiteButtonSquare>
                         </div>

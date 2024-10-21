@@ -32,11 +32,13 @@ const userRoutes = require('./Routes/userRoutes.js')
 const adminRoutes = require('./Routes/adminRoutes.js')
 const adminProductRoutes = require('./Routes/adminProductRoutes.js')
 const userProductRoutes = require('./Routes/userProductRoutes.js')
+const adminCategoryRoutes = require('./Routes/adminCategoryRoutes.js')
 
 app.use('/', userRoutes)
 app.use('/admin', adminRoutes)
 app.use('/products', userProductRoutes)
 app.use('/admin/products', adminProductRoutes)
+app.use('/admin/products/category', adminCategoryRoutes)
 // app.use('/product', productRoutes)
 
 app.use((error,req,res,next)=>{

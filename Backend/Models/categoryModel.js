@@ -7,15 +7,15 @@ const categorySchema = mongoose.Schema({
     },
     description: {
         type: String,
-        required: false
+        required: true
     },
     discount: {
         type: Number,
-        required: false
+        default: 0
     },
     badge: {
         type: String,
-        required: false
+        default: null
     },
     parentCategory: {
         type: mongoose.Schema.Types.ObjectId,
@@ -36,7 +36,29 @@ const categorySchema = mongoose.Schema({
             type: Date,
             default: null
         }
-    }
+    },
+    image:{
+        name: {
+          type: String,
+          required: true
+        },
+        size: {
+          type: Number,
+          required: true
+        },
+        url: {
+          type: String,
+          required: true
+        },
+        public_id:{
+          type: String,
+          required: true
+        }
+      },
+   isBlocked:{
+      type: Boolean,
+      default: false
+   },
 })
 
 const category = mongoose.model('Category', categorySchema)

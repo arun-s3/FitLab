@@ -1,6 +1,7 @@
 import React,{useState, useEffect, useRef} from 'react'
 import './AdminAddAndEditCategoryPage.css'
 import {useDispatch, useSelector} from 'react-redux'
+import {useNavigate} from 'react-router-dom'
 
 import {IoArrowBackSharp} from "react-icons/io5";
 import {BiCategory} from "react-icons/bi";
@@ -14,7 +15,9 @@ import {toast} from 'react-toastify';
 
 import FileUpload from '../../../Components/FileUpload/FileUpload';
 import { SiteButtonSquare } from '../../../Components/SiteButtons/SiteButtons';
+import {createCatgeory, resetStates} from '../../../Slices/categorySlice'
 import {SearchInput} from '../../../Components/FromComponents/FormComponents'
+import {CustomHashLoader} from '../../../Components/Loader/Loader'
 import PlaceholderIcon from '../../../Components/PlaceholderIcon/PlaceholderIcon';
 import {DateSelector} from '../../../Components/Calender/Calender'
 import {handleImageCompression} from '../../../Utils/compressImages'
@@ -29,6 +32,11 @@ export default function AdminAddAndEditCategoryPage(){
 
     const [categoryData, setCategoryData] = useState({})
 
+    const dispatch = useDispatch()
+    const {success, loading, error} = useSelector((state)=> state.categoryStore)
+
+    const navigate = useNavigate()
+
     const primaryColor = useRef('rgba(215, 241, 72, 1)')
 
     const hiddenInputRef = useRef(null)
@@ -41,6 +49,16 @@ export default function AdminAddAndEditCategoryPage(){
         console.log("Images-->", JSON.stringify(images))
         setCategoryData({...categoryData, images})
     },[images])
+
+    useEffect(()=>{
+        console.log(`Inside useEffect for success-${success}`)
+        if(success){
+            success && toast.success('Created Category succesfully!')
+            // productUpdated && toast.success('Updated product succesfully!')
+            dispatch(resetStates())
+            // setTimeout(()=> {navigate('/admin/products/category/list', {replace: true})}, 1000)
+        }
+    },[success])
 
     const changeHandler = (e, fieldName)=>{
         console.log(" inside Changehandler")
@@ -89,7 +107,7 @@ export default function AdminAddAndEditCategoryPage(){
         if(!images.length) delete categoryData['images']
         console.log("Inside submitData()--", JSON.stringify(categoryData))
         const requiredFields = ["categoryName","categoryDescription","images"]
-        
+
         if( (Object.keys(categoryData).length <= 7 && requiredFields.every(field=> Object.keys(categoryData).includes(field) )) || Object.values(categoryData).find(inputValues=>inputValues==='undefined')){
             console.log("Inside else(no errors) of submitData() ")
             console.log("categoryData now-->"+JSON.stringify(categoryData))
@@ -115,9 +133,10 @@ export default function AdminAddAndEditCategoryPage(){
                 }
             } 
             const newBlob = await compressedImageBlobs(images[0])
-            formData.append('images', newBlob, 'categoryImg')
+            formData.append('image', newBlob, 'categoryImg')
 
             console.log("CATEGORYDATA BEFORE DISPATCHING-->", JSON.stringify(categoryData))
+            dispatch( createCatgeory({formData}) )
             // editProduct?  dispatch( updateProduct({formData, id: editProductItem.current._id}) ) : dispatch( createProduct({formData}) )
             console.log("DISPATCHED SUCCESSFULLY--")
         } 
@@ -264,7 +283,7 @@ export default function AdminAddAndEditCategoryPage(){
                     <div className='w-[20%] mt-[2rem]'>
                         <SiteButtonSquare customStyle={{paddingInline:'50px', paddingBlock:'9px', borderRadius:'7px'}}
                                                 clickHandler={(e)=>{ submitHandler(e)}}>
-                                 {/* {loading? <CustomHashLoader loading={loading}/> : 'Submit'}   */} Submit
+                                 {loading? <CustomHashLoader loading={loading}/> : 'Submit'}   
                         </SiteButtonSquare>
                     </div>
                 </div>

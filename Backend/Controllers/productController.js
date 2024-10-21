@@ -1,6 +1,6 @@
 const Product = require('../Models/productModel')
 const cloudinary = require('../Utils/cloudinary')
-const {errorHandler} = require('../Utils/errorHandler')
+const {errorHandler} = require('../Utils/errorHandler') 
 
 const packProductData = async (req)=>{
     try{

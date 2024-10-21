@@ -1,5 +1,6 @@
 import React,{useState, useEffect, useRef} from 'react'
 import './AdminAddAndEditCategoryPage.css'
+import {useDispatch, useSelector} from 'react-redux'
 
 import {IoArrowBackSharp} from "react-icons/io5";
 import {BiCategory} from "react-icons/bi";
@@ -9,12 +10,14 @@ import {CiCalendarDate} from "react-icons/ci";
 import {TbCirclesRelation} from "react-icons/tb";
 import {RiDiscountPercentLine} from "react-icons/ri";
 import {SlBadge} from "react-icons/sl";
+import {toast} from 'react-toastify';
 
 import FileUpload from '../../../Components/FileUpload/FileUpload';
 import { SiteButtonSquare } from '../../../Components/SiteButtons/SiteButtons';
 import {SearchInput} from '../../../Components/FromComponents/FormComponents'
 import PlaceholderIcon from '../../../Components/PlaceholderIcon/PlaceholderIcon';
 import {DateSelector} from '../../../Components/Calender/Calender'
+import {handleImageCompression} from '../../../Utils/compressImages'
 import {handleInputValidation, displaySuccess, displayErrorAndReturnNewFormData, cancelErrorState} from '../../../Utils/fieldValidator'
 
 
@@ -33,6 +36,11 @@ export default function AdminAddAndEditCategoryPage(){
     useEffect(()=>{
         console.log("CATEGORYDATA-->", JSON.stringify(categoryData))
     },[categoryData])
+
+    useEffect(()=>{
+        console.log("Images-->", JSON.stringify(images))
+        setCategoryData({...categoryData, images})
+    },[images])
 
     const changeHandler = (e, fieldName)=>{
         console.log(" inside Changehandler")
@@ -75,6 +83,56 @@ export default function AdminAddAndEditCategoryPage(){
             }
          }
     }
+
+    const submitHandler = async (e)=>{
+
+        if(!images.length) delete categoryData['images']
+        console.log("Inside submitData()--", JSON.stringify(categoryData))
+        const requiredFields = ["categoryName","categoryDescription","images"]
+        
+        if( (Object.keys(categoryData).length <= 7 && requiredFields.every(field=> Object.keys(categoryData).includes(field) )) || Object.values(categoryData).find(inputValues=>inputValues==='undefined')){
+            console.log("Inside else(no errors) of submitData() ")
+            console.log("categoryData now-->"+JSON.stringify(categoryData))
+            const formData = new FormData()
+            const {images, ...rest} = categoryData
+            console.log("Image-->", JSON.stringify(images))
+            console.log("rest-->", JSON.stringify(rest))
+            for (let field in rest){
+                if( Array.isArray(rest[field]) ){
+                    rest[field].forEach((item) => {
+                        formData.append(`${field}[]`, item); 
+                    });
+                }else{
+                    formData.append(field, rest[field])
+                }
+            }
+            const compressedImageBlobs = async(image)=>{
+                if(image.size > (5*1024*1024)){
+                    const newBlob = await handleImageCompression(image.blob)
+                    return newBlob
+                }else{
+                    return image.blob
+                }
+            } 
+            const newBlob = await compressedImageBlobs(images[0])
+            formData.append('images', newBlob, 'categoryImg')
+
+            console.log("CATEGORYDATA BEFORE DISPATCHING-->", JSON.stringify(categoryData))
+            // editProduct?  dispatch( updateProduct({formData, id: editProductItem.current._id}) ) : dispatch( createProduct({formData}) )
+            console.log("DISPATCHED SUCCESSFULLY--")
+        } 
+        else{
+            if(!categoryData.size){
+                console.log("No Fields entered!")
+                toast.error("Please enter all the fields!")
+            }
+            else{
+                console.log("Check errors"+JSON.stringify(categoryData))
+                toast.error("Please check the fields and submit again!")
+            }
+        }
+    }
+
 
     return(
         <section id='AdminAddAndEditCategoryPage'>
@@ -212,7 +270,7 @@ export default function AdminAddAndEditCategoryPage(){
                 </div>
                 <div className='w-full h-screen basis-[35%] mt-[15px]'>
 
-                <FileUpload images={images} setImages={setImages} imageLimit={1} needThumbnail={false} categoryImgPreview={{categoryName:'Category Name'}}/>
+                <FileUpload images={images} setImages={setImages} imageLimit={1} needThumbnail={false} categoryImgPreview={{categoryName: `${categoryData?.categoryName ? categoryData?.categoryName : 'Category Name'}`}}/>
 
                 </div>
             </main>

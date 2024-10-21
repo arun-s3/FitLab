@@ -373,7 +373,7 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
                     </figure>
                     <span className='absolute bottom-[52px] left-[10px] text-[10px] font-[550] text-secondary px-[10px] 
                             rounded-[5px] tracking-[0.3px] category-name'> 
-                        {categoryImgPreview.categoryName}
+                        {(categoryImgPreview.categoryName.length > 20)? `${categoryImgPreview.categoryName.slice(0,20)}...` : categoryImgPreview.categoryName}
                      </span>
                     <SiteButtonSquare customStyle={{paddingBlock:'6px', width:'11rem', borderRadius:'7px', fontSize:'12px'}} 
                                                 clickHandler={(e)=> openImageEditor(images[0].url, images[0].name, images[0].blob)} > 

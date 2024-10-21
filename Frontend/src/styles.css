@@ -2181,6 +2181,10 @@ select{
   padding-left: 21px;
 }
 
+.pl-\[23px\]{
+  padding-left: 23px;
+}
+
 .pl-\[3rem\]{
   padding-left: 3rem;
 }
@@ -2219,14 +2223,6 @@ select{
 
 .pt-\[5px\]{
   padding-top: 5px;
-}
-
-.pl-\[2px\]{
-  padding-left: 2px;
-}
-
-.pl-\[23px\]{
-  padding-left: 23px;
 }
 
 .text-left{

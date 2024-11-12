@@ -1,0 +1,147 @@
+#AdminCategoryListPage .tab > h4{
+    font-size: 14px;
+    color: var(--SECONDARY);
+}
+#AdminCategoryListPage > .container > input{
+    border-color: rgb(212, 176, 236);
+    box-shadow: 2px 2px 12px rgb(233, 222, 242);
+}
+#AdminCategoryListPage table thead .table-header{
+    border-width: 1px;
+    border-color: rgb(220, 230, 166);
+}
+#AdminCategoryListPage table thead .table-header .table-label{
+    margin-left: 20px;
+    font-size: 15px;
+}
+#AdminCategoryListPage table thead .table-header i{
+    margin-top: 6px;
+    margin-left: 4px;
+}
+#AdminCategoryListPage table thead .table-header i > svg{
+    height: 10px;
+    width: 8px;
+    margin-top: -7px;
+    cursor: pointer;
+}
+#AdminCategoryListPage table>tbody td{
+    text-align: center;
+} 
+
+#AdminCategoryListPage table>tbody #open-subcategory > svg{
+   height: 17px;
+   width: 17px;
+   fill: rgb(119, 123, 99);
+}
+#AdminCategoryListPage table>tbody #open-subcategory:hover::before{
+    content: attr(data-label);
+    height: 1rem;
+    width: 7rem;
+    position: absolute;
+    top: 19px;
+    left: -63px;
+    border: 1px solid var(--SECONDARYLIGHT2);
+    border-radius: 4px;
+    font-size: 10px;
+    font-style: normal;
+    letter-spacing: 0.3px;
+    z-index: 3;
+    padding-inline: 3px;
+    background: white;
+    color: var(--SECONDARY);
+}
+
+/* #AdminCategoryListPage table>tbody .action-buttons button{
+  padding-block: 2px;
+  padding-inline: 28px;
+  border: 1px solid rgb(190, 200, 138);
+  border-radius: 4px;
+  color: black;
+  background: var(--PRIMARY);
+  box-shadow: -1px 1px 8px #babaa5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+#AdminCategoryListPage table>tbody .action-buttons button:first-child >svg{
+  color: var(--SECONDARY);
+  background: var(--PRIMARY);
+  font-size: 12px;
+} */
+#AdminCategoryListPage table>tbody .action-buttons button:last-child >svg{
+  color: var(--SECONDARY);
+  font-size: 15px;
+}
+#AdminCategoryListPage table>tbody #category-content figcaption{
+    background: linear-gradient(to right, rgba(255,255,255,0.7), rgba(255,255,255,0.7));
+    word-spacing: 1px;
+}
+#AdminCategoryListPage table>tbody .admin-control:hover::before{
+  content: attr(data-label);
+  width: 2.3rem;
+  height: 25px;
+  position: absolute;
+  right: -1px;
+  bottom: -1px;
+  /* top: 0.5px; */
+  padding: 2px;
+  padding-inline: 55px;
+  /* padding-right: 20px; */
+  border: 1px solid var(--SECONDARY); 
+  /* border-left: transparent; */
+  border-radius: 7px;
+  font-size: 13px;
+  color: transparent;
+  background: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: -1;
+  opacity: 0;
+  animation-name: fadeIn-caption;
+  animation-duration: 0.4s;
+  animation-delay: 0.1s;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: forwards;
+}      
+#AdminCategoryListPage table>tbody .admin-control > i > svg {
+  transform: rotate(0deg); 
+}
+#AdminCategoryListPage table>tbody .admin-control:hover > i > svg {
+  animation-name: rotate-icon;
+  animation-duration: 0.5s;
+  animation-timing-function: ease-in-out;
+  animation-fill-mode: forwards;
+  animation-delay: 0.1s;
+}
+
+@keyframes rotate-icon {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn-caption {
+  from{
+      width:0rem;
+      padding-inline: 0px;
+  }
+  to {
+    opacity: 1;
+    color: var(--SECONDARY);
+    width: 3.3rem;
+    padding-inline: 55px;
+  }
+}
+#AdminCategoryListPage #Layer_1 .svg-upsort{
+  fill: none;
+  stroke: #000;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 66.67px;
+}
+

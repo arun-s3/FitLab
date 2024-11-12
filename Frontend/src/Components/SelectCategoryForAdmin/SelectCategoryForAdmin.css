@@ -1,3 +1,15 @@
+#SelectSubCategoryForAdmin::before{
+    height: 104%;
+    width: 102%;
+    position: absolute;
+    top: -7px;
+    left: -9px;
+    background: rgba(255, 255, 255, 0.6);
+    filter: blur(2px);
+    z-index: -1;
+    border-radius: 13px;
+    box-shadow: 2px 2px 39px #00000091;
+}
 #SelectSubCategoryForAdmin .subcategory-body > div h5{
     margin-bottom: 5px;
     font-weight: bold;
@@ -30,6 +42,10 @@
     border-radius: 5px;
     color: inherit;
 } */
+#SelectSubCategoryForAdmin .subcategory-body ul li .disabled-label{
+    color: #919191 !important;
+}
 #SelectSubCategoryForAdmin .subcategory-body ul li label{
     color:inherit !important;
 }
+  

@@ -35,6 +35,13 @@ export default function AdminAddAndEditProductPage({ editProduct }){
     const [subcategory, setSubcategory] = useState('')
     const [productData, setProductData] = useState({})
 
+    const [categoryImgPreview, setCategoryImgPreview] = useState('')
+    const categoryBgImage = {
+        backgroundImage: `linear-gradient(to right, rgba(243, 230, 251, 0.85), rgba(243, 230, 251, 0.85)), url('${categoryImgPreview}')`,
+        backgroundPosition:'center',
+        backgroundSize:'cover'
+    }
+
     const editProductItem = useRef(null)
 
     const primaryColor = useRef('rgba(215, 241, 72, 1)')
@@ -48,6 +55,9 @@ export default function AdminAddAndEditProductPage({ editProduct }){
     useEffect(() => {
         console.log("Images-->", JSON.stringify(images))
         console.log("Thumbnail-->", JSON.stringify(thumbnail))
+        console.log("SubCategory---->", subcategory)
+        if(category.length == 0) setCategoryImgPreview('')
+
         setProductData({ ...productData, category: category, subcategory, images: images, thumbnail: thumbnail });
     }, [category, subcategory, images, thumbnail]);
 
@@ -58,10 +68,13 @@ export default function AdminAddAndEditProductPage({ editProduct }){
         console.log("tagStrings-->", tagStrings)
         setProductData({...productData, tags: tagStrings})
     },[tag])
-
+    
     useEffect(()=>{
         console.log("PRODUCTDATA-->", JSON.stringify(productData))
-    },[productData])
+        if(categoryImgPreview){
+            console.log("categoryImgPreview-->", categoryImgPreview)
+        }
+    },[productData, categoryImgPreview])
 
     useEffect(() => {
         console.log("Inside useEffect() for editProduct----")
@@ -311,9 +324,10 @@ export default function AdminAddAndEditProductPage({ editProduct }){
                             
                         </div>
                     </div>
-                    <div className='flex justify-center items-center product-input-wrapper'>
+                    <div className='flex justify-center items-center product-input-wrapper' 
+                        style={ categoryImgPreview? categoryBgImage : {}}>
                         <div className='input-wrapper categories'>
-                            <SelectSubCategoryForAdmin category={category} setCategory={setCategory} setSubcategory={setSubcategory}/>                    
+                            <SelectSubCategoryForAdmin category={category} setCategory={setCategory} setSubcategory={setSubcategory} categoryImgPreview={categoryImgPreview} setCategoryImgPreview={setCategoryImgPreview}/>                    
                         </div>
                     </div>
                     <div className='flex justify-center items-center product-input-wrapper'>

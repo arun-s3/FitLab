@@ -7,6 +7,7 @@ import PriceSliderAndFilter from '../../../Components/PriceSliderAndFilter/Price
 import TestPriceFilter from '../../../Components/PriceSliderAndFilter/TestPriceSliderAndFilter' // For Enhancing Original PriceFiter feature
 import ProductsDisplay from '../../../Components/ProductsDisplay/ProductsDisplay'
 import ProductListingTools from '../../../Components/ProductListingTools/ProductListingTools'
+import CategoryDisplay from '../../../Components/CategoryDisplay/CategoryDisplay'
 
 import {VscSettings} from "react-icons/vsc";
 import {RiArrowDropUpLine} from "react-icons/ri";
@@ -22,6 +23,9 @@ export default function ProductList({admin}){
     const [minPrice, setMinPrice] = useState(0)
     const [maxPrice, setMaxPrice] = useState(3750)
     let firstSlideRef = useRef(false)
+
+    const [category, setCategory] = useState([])
+    const [subcategory, setSubcategory] = useState('')
 
     const [showCategory, setShowCategory ] = useState(true)
     const [showProductsFilter, setShowProductsFilter] = useState(true)
@@ -102,6 +106,7 @@ export default function ProductList({admin}){
                             <li> <span className='bullet'></span> <span to='' onClick={(e)=>{categoryClickHandler(e)}}> Supplements </span> </li>
                         </ul>
                         <span className='mt-[5px] text-secondary text-[13px]'>See all</span>
+                        {/* CategoryList here--- */ }
                         </>
                         }
                     </div>

@@ -9,10 +9,10 @@ const regexPatterns = {
     stockPattern: /^\d{1,}$/,
     weightsPattern: /^\d+(\.\d{1,3})?$/,
     brandPattern: /^(?!^\d+$)[a-zA-Z0-9\s,'-]{1,50}$/,     
-    descriptionPattern: /^[\w\s.,"'!-]{30,2000}$/,
+    descriptionPattern: /^[\w\s.,!'"-]{30,2000}$/,
 
     categoryNamePattern: /^[a-zA-Z0-9\s,'-]{2,50}$/,
-    categoryDescriptionPattern: /^[a-zA-Z0-9\s.,'!?&()-]{2,200}$/,
+    categoryDescriptionPattern: /^[a-zA-Z0-9\s.,'!?&()\n-]{2,160}$/, 
     categoryDiscountPattern: /^(100|[1-9]?[0-9])(\.\d{1,2})?$/,
     categoryBadgePattern: /^[a-zA-Z\s_-]{2,15}$/, 
 

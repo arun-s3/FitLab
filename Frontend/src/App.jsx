@@ -16,6 +16,7 @@ import AdminAddAndEditProductPage from './Pages/Admin/AdminAddAndEditProductPage
 import ImageEditor from './Components/ImageEditor/ImageEditor'
 import AdminProductListPage from './Pages/Admin/AdminProductListPage/AdminProductListPage'
 import AdminAddAndEditCategoryPage from './Pages/Admin/AdminAddAndEditCategoryPage/AdminAddAndEditCategoryPage'
+import AdminCategoryListPage from './Pages/Admin/AdminCategoryListPage/AdminCategoryListPage'
 
 import {ToastContainer} from 'react-toastify'
 import "react-toastify/dist/ReactToastify.css";
@@ -27,7 +28,7 @@ export default function App(){
         <BrowserRouter>
             <ToastContainer theme='dark' autoClose={1500} style={{fontSize:'12px'}} hideProgressBar />
             <Routes path="/">
-
+                {/* <Route path='test' element={AdminCategoryListPage} /> */}
                 <Route element={<PrivateUserRoutes/>}>
                 </Route>
                 <Route index element={<HomePage/>}/>
@@ -47,7 +48,11 @@ export default function App(){
                                 <Route path='list' element={<AdminProductListPage/>} />
                                 <Route path='add' element={<AdminAddAndEditProductPage/>} />
                                 <Route path='edit' element={<AdminAddAndEditProductPage editProduct={true}/>} />
-                                <Route path='category' element={<AdminAddAndEditCategoryPage/>} />
+                                <Route path='category'> 
+                                    <Route index element={<AdminCategoryListPage/>} />
+                                    <Route path='add' element={<AdminAddAndEditCategoryPage/>} />
+                                    <Route path='edit' element={<AdminAddAndEditCategoryPage editCategory={true}/>} />
+                                </Route>
                             </Route>
                         </Route>
                     </Route>

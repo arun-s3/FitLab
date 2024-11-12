@@ -17,10 +17,15 @@ const categorySchema = mongoose.Schema({
         type: String,
         default: null
     },
-    parentCategory: {
+    parentCategory:{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Category',
         default: null
+    },
+    subCategory: {
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: 'Category',
+        default: []
     },
     relatedCategory: {
         type: [mongoose.Schema.Types.ObjectId],

@@ -1,9 +1,24 @@
 import React,{useEffect, useState, useRef} from 'react'
 import './SelectCategoryForAdmin.css'
+import {useSelector, useDispatch} from 'react-redux'
+import {getAllCategories, getSingleCategory, getCategoriesOfType, getFirstLevelCategories, resetSubcategories} from '../../Slices/categorySlice'
+import {convertToCamelCase, camelToCapitalizedWords} from '../../Utils/helperFunctions'
 
 export default function SelectCategoryForAdmin({category, setCategory, editCategory}){
 
     const [categoryStatus, setCategoryStatus] = useState({strength:false, cardio:false, supplements:false, accessories:false})
+
+    const {categories} = useSelector(state=> state.categoryStore)
+    const dispatch = useDispatch()
+
+    useEffect(()=>{
+        dispatch(getAllCategories())
+        dispatch(resetSubcategories())
+    },[])
+
+    useEffect(()=>{
+        console.log("Categories-->", JSON.stringify(categories))
+    },[categories])
 
     useEffect(() => {
         if (editCategory) {
@@ -16,7 +31,7 @@ export default function SelectCategoryForAdmin({category, setCategory, editCateg
             setCategoryStatus(updatedStatus);
         }
         console.log("editCategory-->",JSON.stringify(editCategory))
-    }, [editCategory]);
+    }, [editCategory])
 
     // useEffect(() => {
     //     editCategory.forEach(category => {
@@ -63,99 +78,143 @@ export default function SelectCategoryForAdmin({category, setCategory, editCateg
         }
     }
 
-    const categoryBlurHandler = ()=>{
-        
-    }
-
     return(
 
         <>
             <h4 className='text-[11.6px] text-secondary'> Select category / categories </h4> 
             <div className='flex justify-between items-center mt-[10px] text-black' onBlur={()=> categoryBlurHandler()}>
-                <div>
-                    <label for= 'strength'>Strength</label>
-                    <input type='checkbox' id='strength' value='strength' checked={editCategory && categoryStatus.strength}
-                         onChange={(e)=> categorySelectHandler(e)}/>
-                </div>
-                <div>
-                    <label for= 'cardio'>Cardio</label>
-                    <input type='checkbox' id='cardio' value='cardio' checked={editCategory && categoryStatus.cardio}
-                         onChange={(e)=> categorySelectHandler(e)}/>
-                </div>
-                <div>
-                    <label for= 'supplements'>Supplements</label>
-                    <input type='checkbox' id='supplements' value='supplements' checked={editCategory && categoryStatus.supplements}
-                         onChange={(e)=> categorySelectHandler(e)}/>
-                </div>
-                <div>
-                    <label for= 'accessories'>Accessories</label>
-                    <input type='checkbox' id='accessories' value='accessories' checked={editCategory && categoryStatus.accessories} 
-                        onChange={(e)=> categorySelectHandler(e)}/>
-                </div>
+                {
+                 categories && categories.length > 0 &&
+                 categories.map((category) => (
+                    <div key={category.name}>
+                        <label htmlFor={category.name}> {category.name[0].toUpperCase() + category.name.slice(1)} </label>
+                        <input type='checkbox' id={category.name} value={category.name} checked={editCategory && categoryStatus[category.name]}
+                            onChange={(e) => categorySelectHandler(e)} />
+                    </div>
+                 ))
+                }
             </div>
         </>
     )
 }
 
-export function SelectSubCategoryForAdmin({category, setCategory, setSubcategory}){
-
-    const cardioRef = useRef(null)
-    const strengthRef = useRef(null)
-    const supplementsRef = useRef(null)
-    const accessoriesRef = useRef(null)
+export function SelectSubCategoryForAdmin({category, setCategory, setSubcategory, categoryImgPreview, setCategoryImgPreview}){
 
     const [error, setError] = useState('')
+    const [levelOneCategories, setLevelOneCategories] = useState([])
+
+    const [nestedSubcategories, setNestedSubcategories] = useState([])
+    const [checkNestedSubcategories, setCheckNestedSubcategories] = useState({})
+
     const [checkedCategories, setCheckedCategories] = useState({});
 
-    useEffect(() => {
-        const categoryListRefs = [cardioRef, strengthRef, supplementsRef, accessoriesRef]
-        if (category && category.length) {
+    const [subcategoryLabel, setsubcategoryLabel] = useState('')
 
-            categoryListRefs.forEach(catListRef => {
-                if (catListRef.current) {
-                    const isActive = category.some(cat => catListRef.current.id.includes(cat))
-    
+    const [defaultDisabled, setDefaultDisabled] = useState(true)
+
+    const {categories, populatedSubCategories, firstLevelCategories} = useSelector(state=> state.categoryStore)
+    const dispatch = useDispatch()
+
+    const categoryRefs = useRef({})
+
+    useEffect(()=>{
+        dispatch(getFirstLevelCategories())
+        dispatch(resetSubcategories())
+        if(nestedSubcategories) setNestedSubcategories([])
+    },[])
+
+    useEffect(()=>{
+        console.log("category.length------>", category.length)
+        if(category.length == 0){
+            setDefaultDisabled(true)
+            setCheckedCategories({})
+            setNestedSubcategories([])
+            setCheckNestedSubcategories({})
+        }else{
+            setDefaultDisabled(false)
+        }
+    },[category])
+
+    useEffect(()=>{
+        console.log("defaultDisabled---->", defaultDisabled)
+    },[defaultDisabled])
+
+    useEffect(() => {
+        console.log("firstLevelCategories from SelectSubCategoryForAdmin --->", JSON.stringify(firstLevelCategories))
+        if (firstLevelCategories && firstLevelCategories.length) {
+            firstLevelCategories.forEach(category => {
+                if (!categoryRefs.current[category.name]) {
+                    categoryRefs.current[category.name] = React.createRef();
+                }
+            })
+            Object.values(categoryRefs.current).forEach(refs => {
+                if (refs?.current) {
+                    console.log("category-->",category)
+                    const isActive = category.some(cat => refs.current.id.includes(cat));
+                    console.log(`isActive is ${isActive} for ${refs.current.id}`)
                     if (!isActive) {
-                        catListRef.current.style.color = '#919191'
-                        catListRef.current.previousElementSibling.style.color = '#919191'
-                        catListRef.current.inactivate = true                        
-                        console.log("Inactivated and unchecked: ", catListRef.current.id)
+                        refs.current.style.color = '#919191';
+                        refs.current.previousElementSibling.style.color = '#919191';
+                        refs.current.inactivate = true;
                         setCheckedCategories(prev => ({
                             ...prev,
-                            [catListRef.current.id]: false,
-                        }))
+                            [refs.current.id]: false,
+                        }));
                     } else {
-                        catListRef.current.style.color = 'initial'
-                        catListRef.current.previousElementSibling.style.color = '#757575'
-                        catListRef.current.inactivate = false
-                        console.log("Activated: ", catListRef.current.id)
+                        refs.current.style.color = 'initial';
+                        refs.current.previousElementSibling.style.color = '#757575';
+                        refs.current.inactivate = false;
                     }
                 }
             });
-        }
-        if (category && !category.length){
-            categoryListRefs.forEach(catListRef=>{
-                catListRef.current.style.color = '#757575'
-                catListRef.current.previousElementSibling.style.color = '#757575'
-                catListRef.current.inactivate = true
-                console.log("Every subcategories activated")
-            })
+        } else if (!firstLevelCategories.length) {
+            Object.values(categoryRefs.current).forEach(ref => {
+                if (ref?.current) {
+                    ref.current.style.color = '#757575';
+                    ref.current.previousElementSibling.style.color = '#757575';
+                    ref.current.inactivate = true;
+                    console.log("Activated: ", ref.current.id)
+                }
+            });
         }
     }, [category]);
 
+    useEffect(() => {
+        console.log("checkedCategories-->", JSON.stringify(checkedCategories))
+        const subcategory = Object.values(checkedCategories)
+            .map(categoryValue => {
+                if (typeof categoryValue === 'object') {
+                    const subcategoryKey = Object.keys(categoryValue)[0];
+                    return subcategoryKey;
+                }
+                return null;
+            })
+            .filter(Boolean);
+
+        setSubcategory(subcategory.find(value => value));
+        makeSubCategoryLabel(checkedCategories)
+    }, [checkedCategories]);
+
+    useEffect(()=> {
+        if(populatedSubCategories && populatedSubCategories.parentName && category.length > 0 && Object.keys(checkedCategories).length > 0){
+            console.log("populatedSubCategories from useEffect of SelectCategoryForAdmin-->", JSON.stringify(populatedSubCategories))
+            console.log("populatedSubCategories from useEffect of SelectCategoryForAdmin-->", JSON.stringify(populatedSubCategories.subcategories))
+            setNestedSubcategories([{parentName: [populatedSubCategories['parentName']], subcategories: populatedSubCategories.subCategories}])
+        }
+    },[populatedSubCategories])
+
     useEffect(()=>{
-        console.log("CheckedCategories-->",JSON.stringify(checkedCategories))
-        const subcategory = Object.values(checkedCategories).map(categoryValue=> {
-            console.log("Inside subcategory find")
-            if(typeof categoryValue == 'object'){
-                console.log("Subcategory Found-->", JSON.stringify(categoryValue))
-                const subcategoryKey = Object.keys(categoryValue)[0]
-                console.log("subcategoryKey-->", subcategoryKey)
-                return subcategoryKey
+        if(checkNestedSubcategories){
+            console.log("---checkNestedSubcategories------>", JSON.stringify(checkNestedSubcategories))
+            const nestedSubCat = Object.values(checkNestedSubcategories).find(cat=> typeof cat == 'object')
+            if(nestedSubCat){
+                console.log("Object.values(nestedSubCat)[0]-->",Object.values(nestedSubCat)[0])
+                if( !Object.keys(nestedSubCat).find(key=> key==='subCategory') && Object.values(nestedSubCat)[0] === true ){
+                    makeSubCategoryLabel(checkNestedSubcategories)
+                }
             }
-        })
-        setSubcategory(subcategory.find(value=> value))
-    },[checkedCategories])
+        }
+    },[checkNestedSubcategories])
 
     useEffect(()=>{
         if(error){
@@ -171,6 +230,9 @@ export function SelectSubCategoryForAdmin({category, setCategory, setSubcategory
         if(checkStatus){
             console.log("Inisde if checkStatus")
             setCheckedCategories({ ...checkedCategories, [e.target.parentElement.parentElement.id]: false})
+            setNestedSubcategories([])
+            setCheckNestedSubcategories({})
+            setCategoryImgPreview('')
             return
         }else{
             const changeEvent = new Event('change', {bubbles:true})
@@ -178,145 +240,137 @@ export function SelectSubCategoryForAdmin({category, setCategory, setSubcategory
         }
     }
 
-    const radioChangeHandler = (e)=>{
+    const radioChangeHandler = (e, subcat)=>{
         console.log("Object.values(checkedCategories)-->",Object.values(checkedCategories))
-        if(!Object.values(checkedCategories).every(status=> status == false)){
+        if(!Object.values(checkedCategories).every(status=> status === false)){
             e.target.checked = false
             setError('Cannot select more than 1 subcategory!')
             console.log("Cannot select more than 1 subcategory!")
             return
+        }else{
+            if(subcat.subCategory){
+                dispatch(getSingleCategory({id: subcat._id}))
+            }
+            setCheckedCategories({ ...checkedCategories, [e.target.parentElement.parentElement.id]: {...checkedCategories[e.target.parentElement.parentElement.id], [e.target.id]: e.target.checked} })
+            setCategoryImgPreview(subcat.image.url)
         }
-        setCheckedCategories({ ...checkedCategories, [e.target.parentElement.parentElement.id]: {...checkedCategories[e.target.parentElement.parentElement.id], [e.target.id]: e.target.checked} })
+    }
+
+    const nestedRadioClickHandler = (e, cat, subcat)=>{
+        console.log("cat---->", subcat.parentCategory)
+        const checkStatus = checkNestedSubcategories?.[subcat.parentCategory]?.[subcat.name]
+        console.log("checkStatus-->", checkStatus)
+        if(checkStatus){
+            console.log("Inisde if checkStatus")
+            setCheckNestedSubcategories({...checkNestedSubcategories, [subcat.parentCategory]: {[subcat.name]: false, } })
+            return
+        }else{
+            const changeEvent = new Event('change', {bubbles:true})
+            e.target.dispatchEvent(changeEvent)
+        }
+    }
+
+    const nestedRadioChangeHandler = (e, cat, subcat)=> {
+        if( Object.keys(checkNestedSubcategories).find(nestedParentCat=> nestedParentCat === cat.name) ){
+            e.target.checked = false
+            setError('Cannot select more than 1 subcategory!')
+            console.log("Cannot select more than 1 subcategory!")
+            return
+        }else{
+            if(subcat?.subCategory.length > 0){
+                console.log("subcat has subCategory")
+                dispatch(getSingleCategory({id: subcat._id}))
+                setCheckNestedSubcategories({...checkNestedSubcategories, [subcat.parentCategory]: {[subcat.name]: true} })
+            }else{
+                setCheckNestedSubcategories({...checkNestedSubcategories, [subcat.parentCategory]: {[subcat.name]: true, subCategory: false} })
+            }            
+            setCategoryImgPreview(subcat.image.url)
+            console.log("subcat.subCategory.length--->", subcat.subCategory.length)
+        }
+        if(subcat.subCategory.length == 0){
+            console.log("Setting subcategory...")
+            setSubcategory(subcat.name)
+        }
     }
 
     const subCategoryBlockClickHandler = ()=>{
         if(!category.length){
             setError('Please choose a category first!')
         }
+        console.log("defaultDisabled-->", defaultDisabled)
+    }
+
+    const makeSubCategoryLabel = (subcategoryObj)=> {
+        let label;
+        const labeObj = Object.values(subcategoryObj).find(cat=> typeof cat == 'object')
+        if(labeObj){
+            label = camelToCapitalizedWords( Object.keys(labeObj)[0] )
+        }
+        console.log("SubCategoryLabel---->", label)
+        setsubcategoryLabel(label)
     }
 
     return(
-        <main id='SelectSubCategoryForAdmin' onClick={()=> subCategoryBlockClickHandler()}>
-            <h4 className='text-[11.6px] text-secondary'> Select a subcategory</h4> 
-            <div className='flex justify-between items-center mt-[8px] subcategory-body'>
-                <div>
-                    <h5> Strength </h5>
-                    <ul className='list-none' id='strengthList' ref={strengthRef}>
-                        <li>
-                            <label for='freeWeight'> Free Weight </label>
-                            <input type='radio' value='freeWeight' id='freeWeight' disabled={strengthRef?.current?.inactivate} checked={checkedCategories['strengthList']?.freeWeight || false} style={strengthRef?.current?.inactivate ? {color:'#919191'} : {color:'rgba(215, 241, 72, 1)'}} onChange={(e)=> radioChangeHandler(e)} onClick={(e)=> radioClickHandler(e)}/>
-                        </li>
-                        <li>
-                            <label for='weightMachine'> Weight Machine </label>
-                            <input type='radio' value='weightMachine' id='weightMachine' disabled={strengthRef?.current?.inactivate} checked={checkedCategories['strengthList']?.weightMachine || false} style={strengthRef?.current?.inactivate ? {color:'#919191'} : {color:'rgba(215, 241, 72, 1)'}} onChange={(e)=> radioChangeHandler(e)} onClick={(e)=> radioClickHandler(e)}/>
-                        </li>
-                        <li>
-                            <label for='weightBench'> Weight Bench </label> 
-                            <input type='radio' value='weightBench' id='weightBench' disabled={strengthRef?.current?.inactivate} checked={checkedCategories['strengthList']?.weightBench || false}  style={strengthRef?.current?.inactivate ? {color:'#919191'} : {color:'rgba(215, 241, 72, 1)'}} onChange={(e)=> radioChangeHandler(e)} onClick={(e)=> radioClickHandler(e)}/>
-                        </li>
-                        <li>
-                            <label for='pullUpbar'> Pull Up Bar </label>
-                            <input type='radio' value='pullUpbar' id='pullUpbar' disabled={strengthRef?.current?.inactivate} checked={checkedCategories['strengthList']?.pullUpbar || false}  style={strengthRef?.current?.inactivate ? {color:'#919191'} : {color:'rgba(215, 241, 72, 1)'}} onChange={(e)=> radioChangeHandler(e)} onClick={(e)=> radioClickHandler(e)}/>
-                        </li>
-                        <li>
-                            <label for='powerRack'> Power Rack </label>
-                            <input type='radio' value='powerRack' id='powerRack' disabled={strengthRef?.current?.inactivate} checked={checkedCategories['strengthList']?.powerRack || false}  style={strengthRef?.current?.inactivate ? {color:'#919191'} : {color:'rgba(215, 241, 72, 1)'}} onChange={(e)=> radioChangeHandler(e)} onClick={(e)=> radioClickHandler(e)}/>                                                                                                                                                                                        
-                        </li>
-                        <li>
-                            <label for='platesAndBars'> Plates & Bars </label>
-                            <input type='radio' value='platesAndBars' id='platesAndBars' disabled={strengthRef?.current?.inactivate} checked={checkedCategories['strengthList']?.platesAndBars || false}  style={strengthRef?.current?.inactivate ? {color:'#919191'} : {color:'rgba(215, 241, 72, 1)'}} onChange={(e)=> radioChangeHandler(e)} onClick={(e)=> radioClickHandler(e)}/>
-                        </li>
-                    </ul>
-                </div>
-                <div>
-                    <h5> Cardio </h5> 
-                    <ul className='list-none' id='cardioList' ref={cardioRef}>
-                        <li>
-                            <label for='treadmill'> Treadmill </label>
-                            <input type='radio' value='treadmill' id='treadmill' disabled={cardioRef?.current?.inactivate} checked={checkedCategories['cardioList']?.treadmill || false} style={cardioRef?.current?.inactivate ? {color:'#919191'} : {color:'rgba(215, 241, 72, 1)'}} onChange={(e)=> radioChangeHandler(e)} onClick={(e)=> radioClickHandler(e)}/>
-                        </li>
-                        <li>
-                            <label for='elliptical'> Elliptical </label>
-                            <input type='radio' value='elliptical' id='elliptical' disabled={cardioRef?.current?.inactivate} checked={checkedCategories['cardioList']?.elliptical || false} style={cardioRef?.current?.inactivate ? {color:'#919191'} : {color:'rgba(215, 241, 72, 1)'}} onChange={(e)=> radioChangeHandler(e)} onClick={(e)=> radioClickHandler(e)}/>
-                        </li>
-                        <li>
-                            <label for='exerciseBike'> Exercise Bike </label> 
-                            <input type='radio' value='exerciseBike' id='exerciseBike' disabled={cardioRef?.current?.inactivate} checked={checkedCategories['cardioList']?.exerciseBike || false} style={cardioRef?.current?.inactivate ? {color:'#919191'} : {color:'rgba(215, 241, 72, 1)'}} onChange={(e)=> radioChangeHandler(e)} onClick={(e)=> radioClickHandler(e)}/>
-                        </li>
-                        <li>
-                            <label for='rowingMachine'> Rowing Machine </label>
-                            <input type='radio' value='rowingMachine' id='rowingMachine' disabled={cardioRef?.current?.inactivate} checked={checkedCategories['cardioList']?.rowingMachine || false} style={cardioRef?.current?.inactivate ? {color:'#919191'} : {color:'rgba(215, 241, 72, 1)'}} onChange={(e)=> radioChangeHandler(e)} onClick={(e)=> radioClickHandler(e)}/>
-                        </li>
-                        <li>
-                            <label for='jumpRope'> Jump Rope </label>
-                            <input type='radio' value='jumpRope' id='jumpRope' disabled={cardioRef?.current?.inactivate} checked={checkedCategories['cardioList']?.jumpRope || false} style={cardioRef?.current?.inactivate ? {color:'#919191'} : {color:'rgba(215, 241, 72, 1)'}} onChange={(e)=> radioChangeHandler(e)} onClick={(e)=> radioClickHandler(e)}/>                                                                                                                                                                                        
-                        </li>
-                        <li>
-                            <label for='stepper'> Stepper </label>
-                            <input type='radio' value='stepper' id='stepper' disabled={cardioRef?.current?.inactivate} checked={checkedCategories['cardioList']?.stepper || false} style={cardioRef?.current?.inactivate ? {color:'#919191'} : {color:'rgba(215, 241, 72, 1)'}} onChange={(e)=> radioChangeHandler(e)} onClick={(e)=> radioClickHandler(e)}/>
-                        </li>
-                    </ul>
-                </div>
-                <div>
-                    <h5> Supplements </h5>
-                    <ul className='list-none' id='supplementsList' ref={supplementsRef}>
-                        <li>
-                            <label for='protein'> Protein </label>
-                            <input type='radio' value='protein' id='protein' disabled={supplementsRef?.current?.inactivate} checked={checkedCategories['supplementsList']?.protein || false}  style={supplementsRef?.current?.inactivate ? {color:'#919191'} : {color:'rgba(215, 241, 72, 1)'}} onChange={(e)=> radioChangeHandler(e)} onClick={(e)=> radioClickHandler(e)}/>
-                        </li>
-                        <li>
-                            <label for='preWorkout'> Pre-Workout </label>
-                            <input type='radio' value='preWorkout' id='preWorkout' disabled={supplementsRef?.current?.inactivate} checked={checkedCategories['supplementsList']?.preWorkout || false} style={supplementsRef?.current?.inactivate ? {color:'#919191'} : {color:'rgba(215, 241, 72, 1)'}} onChange={(e)=> radioChangeHandler(e)} onClick={(e)=> radioClickHandler(e)}/>
-                        </li>
-                        <li>
-                            <label for='postWorkout'> Post-Workout </label> 
-                            <input type='radio' value='postWorkout' id='postWorkout' disabled={supplementsRef?.current?.inactivate} checked={checkedCategories['supplementsList']?.postWorkout || false} style={supplementsRef?.current?.inactivate ? {color:'#919191'} : {color:'rgba(215, 241, 72, 1)'}} onChange={(e)=> radioChangeHandler(e)} onClick={(e)=> radioClickHandler(e)}/>
-                        </li>
-                        <li>
-                            <label for='vitamins'> Vitamins </label>
-                            <input type='radio' value='vitamins' id='vitamins' disabled={supplementsRef?.current?.inactivate} checked={checkedCategories['supplementsList']?.vitamins || false} style={supplementsRef?.current?.inactivate ? {color:'#919191'} : {color:'rgba(215, 241, 72, 1)'}} onChange={(e)=> radioChangeHandler(e)} onClick={(e)=> radioClickHandler(e)}/>
-                        </li>
-                        <li>
-                            <label for='fatBurner'> Fat Burner </label>
-                            <input type='radio' value='fatBurner' id='fatBurner' disabled={supplementsRef?.current?.inactivate} checked={checkedCategories['supplementsList']?.fatBurner || false} style={supplementsRef?.current?.inactivate ? {color:'#919191'} : {color:'rgba(215, 241, 72, 1)'}} onChange={(e)=> radioChangeHandler(e)} onClick={(e)=> radioClickHandler(e)}/>                                                                                                                                                                                        
-                        </li>
-                        <li>
-                            <label for='creatine'> Creatine </label>
-                            <input type='radio' value='creatine' id='creatine' disabled={supplementsRef?.current?.inactivate} checked={checkedCategories['supplementsList']?.creatine || false} style={supplementsRef?.current?.inactivate ? {color:'#919191'} : {color:'rgba(215, 241, 72, 1)'}} onChange={(e)=> radioChangeHandler(e)} onClick={(e)=> radioClickHandler(e)}/>
-                        </li>
-                    </ul>
-                </div>
-                <div>
-                    <h5> Accessories </h5>
-                    <ul className='list-none' id='accessoriesList' ref={accessoriesRef}>
-                        <li>
-                            <label for='yogaMat'> Yoga Mat </label>
-                            <input type='radio' value='yogaMat' id='yogaMat' disabled={accessoriesRef?.current?.inactivate} checked={checkedCategories['accessoriesList']?.yogaMat || false} style={accessoriesRef?.current?.inactivate ? {color:'#919191'} : {color:'rgba(215, 241, 72, 1)'}} onChange={(e)=> radioChangeHandler(e)} onClick={(e)=> radioClickHandler(e)}/>
-                        </li>
-                        <li>
-                            <label for='foamRoller'> Foam Roller </label>
-                            <input type='radio' value='foamRoller' id='foamRoller' disabled={accessoriesRef?.current?.inactivate} checked={checkedCategories['accessoriesList']?.foamRoller || false} style={accessoriesRef?.current?.inactivate ? {color:'#919191'} : {color:'rgba(215, 241, 72, 1)'}} onChange={(e)=> radioChangeHandler(e)} onClick={(e)=> radioClickHandler(e)}/>
-                        </li>
-                        <li>
-                            <label for='glovesAndStraps'> Gloves And Straps </label> 
-                            <input type='radio' value='glovesAndStraps' id='glovesAndStraps' disabled={accessoriesRef?.current?.inactivate} checked={checkedCategories['accessoriesList']?.glovesAndStraps || false} style={accessoriesRef?.current?.inactivate ? {color:'#919191'} : {color:'rgba(215, 241, 72, 1)'}} onChange={(e)=> radioChangeHandler(e)} onClick={(e)=> radioClickHandler(e)}/>
-                        </li>
-                        <li>
-                            <label for='gymBag'> Gym Bag </label>
-                            <input type='radio' value='gymBag' id='gymBag' disabled={accessoriesRef?.current?.inactivate} checked={checkedCategories['accessoriesList']?.gymBag || false} style={accessoriesRef?.current?.inactivate ? {color:'#919191'} : {color:'rgba(215, 241, 72, 1)'}} onChange={(e)=> radioChangeHandler(e)} onClick={(e)=> radioClickHandler(e)}/>
-                        </li>
-                        <li>
-                            <label for='shakersAndBottles'> Shakers And Bottles </label>
-                            <input type='radio' value='shakersAndBottles' id='shakersAndBottles' disabled={accessoriesRef?.current?.inactivate} checked={checkedCategories['accessoriesList']?.shakersAndBottle || false} style={accessoriesRef?.current?.inactivate ? {color:'#919191'} : {color:'rgba(215, 241, 72, 1)'}} onChange={(e)=> radioChangeHandler(e)} onClick={(e)=> radioClickHandler(e)}/>                                                                                                                                                                                        
-                        </li>
-                        <li>
-                            <label for='beltAndSupport'> Belt And Support </label>
-                            <input type='radio' value='beltAndSupport' id='beltAndSupport' disabled={accessoriesRef?.current?.inactivate} checked={checkedCategories['accessoriesList']?.beltAndSupport || false} style={accessoriesRef?.current?.inactivate ? {color:'#919191'} : {color:'rgba(215, 241, 72, 1)'}} onChange={(e)=> radioChangeHandler(e)} onClick={(e)=> radioClickHandler(e)}/>
-                        </li>
-                    </ul>
-                </div>
+        <main id='SelectSubCategoryForAdmin' className={` ${categoryImgPreview && 'before:content-[""]' } relative z-[10] `} 
+                    onClick={()=> subCategoryBlockClickHandler()}>
+            <h4 className={`text-[11.6px] text-secondary ${categoryImgPreview && 'mt-[5px]'}`}> Select a subcategory</h4> 
+            <div className='flex justify-between items-start mt-[8px] subcategory-body'>
+                {firstLevelCategories &&
+                    firstLevelCategories.map(category => (
+                        <div key={category._id}>
+                            <h5 className='capitalize'>{category.name}</h5>
+                            <ul className="list-none" id={`${category.name}List`} ref={categoryRefs.current[category.name]}>
+                                {category.subCategory &&
+                                    category.subCategory.map(subcat => (
+                                        <li key={subcat._id} onClick={()=> subCategoryBlockClickHandler()}>
+                                            <label htmlFor={subcat.name} className={`capitalize ${defaultDisabled ? 'disabled-label' : ''}`}>
+                                                {subcat.name}
+                                            </label>
+                                            <input type="radio" value={subcat.name} id={subcat.name} 
+                                                    disabled={categoryRefs.current[category.name]?.current?.inactivate || defaultDisabled}
+                                                    checked={checkedCategories[`${category.name}List`]?.[`${subcat.name}`] || false}
+                                                    style={categoryRefs.current[category.name]?.current?.inactivate ? {color: '#919191'}: {color: 'rgba(215, 241, 72, 1)'}}
+                                                        onChange={(e)=> radioChangeHandler(e, subcat)} onClick={(e)=> radioClickHandler(e)} 
+                                                            onMouseOver={()=> subCategoryBlockClickHandler()}/>
+                                        </li>
+                                    ))}
+                            </ul>
+                        </div>
+                    ))}
             </div>
-            <p className='h-[15px] w-full text-[11px] text-red-500 tracking-[0.1px] mt-[5px]'> {error} </p>
+            <div className='mt-[15px]'>
+                {
+                    nestedSubcategories && ( Array.isArray(nestedSubcategories) && nestedSubcategories.some(cat=> cat?.subcategories?.length > 0) )&&
+                    nestedSubcategories.map(cat=> (
+                        <div key={cat.parentName}>
+                            <h4 className='text-[10px] text-secondary pl-[1px] pb-[7px] tracking-[0.3px] border-b border-dashed border-[#f1c40f]'> 
+                                Choose a subcategory {subcategoryLabel && 'for'}
+                                <span className='capitalize font-[550] tracking-[0.6px] text-[#f1c40f] ml-[3px]'> 
+                                    {subcategoryLabel && `${subcategoryLabel}`}
+                                </span>
+                            </h4>
+                            <ul className='mt-[10px] flex items-center gap-[1rem] list-none' id={cat.parentName}>                              
+                                {
+                                    cat.subcategories && cat.subcategories.length > 0 &&
+                                    cat.subcategories.map(subcat=> (
+                                        <li  key={subcat._id} className='list-none flex items-center gap-[5px]'>
+                                            <input type='radio' id={subcat.name} style={{height:'15px', width:'15px', borderColor:'#f1c40f'}}
+                                                onChange={(e)=> nestedRadioChangeHandler(e, cat, subcat)} onClick={(e)=> nestedRadioClickHandler(e, cat, subcat)}
+                                                    checked={ checkNestedSubcategories[subcat.parentCategory]?.[subcat.name] || false} />
+                                            <label htmlFor={subcat.name} className='capitalize tracking-[0.5px]' style={{wordSpacing:'1px'}}> 
+                                                {subcat.name} 
+                                            </label>
+                                        </li>
+                                    ))
+                                }
+                            </ul>
+                        </div>
+                    ))
+                }
+            </div>
+            <p className={`h-[15px] w-full text-[11px] text-red-500 tracking-[0.1px] mt-[5px] ${categoryImgPreview && 'mb-[1rem] ml-[5px]'} `}> 
+                {error} 
+            </p>
         </main>
     )
 }

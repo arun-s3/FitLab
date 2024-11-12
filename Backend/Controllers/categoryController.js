@@ -1,3 +1,4 @@
+const category = require('../Models/categoryModel')
 const Category = require('../Models/categoryModel')
 const cloudinary = require('../Utils/cloudinary')
 const {errorHandler} = require('../Utils/errorHandler')
@@ -7,23 +8,6 @@ const packCategoryData = async (req)=>{
         console.log("req.body-->", JSON.stringify(req.body))
         console.log("req.file-->", JSON.stringify(req.file))
         console.log("Image path:", req.file.path);
-        
-        // const uploadedImages = []
-        // for (let i=0; i<req.files['images'].length; i++) {
-        //     const result = await cloudinary.uploader.upload(req.files['images'][i].path, {
-        //       folder: 'products/images', 
-        //       resource_type: 'image' 
-        //     });
-        //     uploadedImages.push({
-        //         public_id: result.public_id,
-        //         name: req.files['images'][i].originalname,
-        //         url: result.secure_url, 
-        //         size: result.bytes,
-        //         isThumbnail: i == req.body.thumbnailImageIndex? true : false
-        //     });
-        //   }
-        
-            
         const result = await cloudinary.uploader.upload(req.file.path, {
             folder: 'category/image',
             resource_type: 'image',
@@ -41,10 +25,25 @@ const packCategoryData = async (req)=>{
             description: req.body.categoryDescription, 
             discount: req.body?.categoryDiscount, 
             badge: req.body?.categoryBadge,   
-            parentCategory: req.body?.parentCategory, 
-            relatedCategory: req.body?.relatedCategory|| [],
+            // parentCategory: req.body?.parentCategory, 
+            // relatedCategory: req.body?.relatedCategory|| [],
             image: uploadedImage,
         } 
+
+        if(req.body?.relatedCategory){
+            const relatedCategoryList = req.body.relatedCategory
+            let relatedCategory = []
+            for (const cat of relatedCategoryList) {
+                const categoryDoc = await Category.findOne({name: cat}, {_id: 1})
+                if (categoryDoc) {
+                    relatedCategory.push(categoryDoc._id)
+                }
+            }
+            console.log("relatedCategory[]-->", relatedCategory)
+            categoryDatas.relatedCategory = relatedCategory
+            console.log("categoryDatas.relatedCategory-->", JSON.stringify(categoryDatas.relatedCategory))
+        }
+
         for(field in categoryDatas){
             !categoryDatas[field] && delete categoryDatas[field]
         }
@@ -66,12 +65,264 @@ const createCategory = async(req,res,next)=>{
         const categoryDatas = await packCategoryData(req)
         const newCategory = new Category(categoryDatas)
         const savedCategory = await newCategory.save();
+        if(savedCategory){
+            if(req.body.parentCategory !== 'null' && req.body.parentCategory !== null && req.body.parentCategory !== '' && req.body.parentCategory !== undefined){
+                const parentCategoryDoc = await Category.findOne({name: req.body.parentCategory})
+                if(parentCategoryDoc){
+                    console.log("Putting up Subcategory field")
+                    const updatedCategory = await Category.updateOne({_id: savedCategory._id},{$set: {parentCategory: parentCategoryDoc._id}})
+                    let updatedParentCategoryDoc
+                    if(updatedCategory){
+                        updatedParentCategoryDoc = await Category.updateOne({_id: parentCategoryDoc._id}, {$push: {subCategory: savedCategory._id}})
+                    }
+                    if(!updatedParentCategoryDoc){
+                        await Category.deleteOne({_id: savedCategory._id})
+                        next(errorHandler(500, "Internal Server Error!"))
+                    }
+                }else{
+                    next(errorHandler(500, "No such parent category found!"))
+                }
+            }
+        }
         res.status(201).json({createCategory:'true', category:savedCategory});  
     } 
     catch (error) { 
-        console.log("Error in productController-createUser-->"+error.message);
+        console.log("Error in categoryController-createCategory-->"+error.message);
         next(error)
     }
 }
 
-module.exports = {createCategory}
+const findCategoryById = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        console.log("id-->", id);
+
+        const category = await Category.findOne({ _id: id }).populate('subCategory').exec();
+        if (!category) {
+            return res.status(404).json({ success: false, message: 'Category not found' });
+        }
+        const subCategories = category.subCategory;
+
+        let parentLevelCount = await findParentLevelCount(subCategories[0]?._id);
+
+        async function findParentLevelCount(subCategoryId, level = 0) {
+            if (!subCategoryId) return level;
+            const subCategory = await Category.findOne({ _id: subCategoryId }).populate('parentCategory').exec();
+            return subCategory.parentCategory ? findParentLevelCount(subCategory.parentCategory._id, level + 1) : level;
+        }
+        console.log("Sending populatedSubcategories-->", JSON.stringify({ success: true, populatedSubCategories: subCategories, parentName: category.name, parentLevelCount }));
+        res.status(200).json({ success: true, parentName: category.name, populatedSubCategories: subCategories, parentLevelCount });
+    } catch (error) {
+        console.error('Error in categoryController findCategoryById--->', error.message);
+        res.status(500).json({ success: false, message: 'An error occurred' });
+    }
+}
+
+const getAllCategories = async(req,res,next)=>{
+    try{
+        if(Object.keys(req.query).length > 0){
+            console.log("Inside if of getAllCategories")
+            console.log("req.query-->", JSON.stringify(req.query))
+            let {status} = req.query
+            let categoriesData, categoriesCount
+            console.log("Status found-->", status)
+
+            if (status == 'blocked' || 'active') {
+                status = status === 'active' ? false : true
+                console.log("Status later-->", status)
+                categoriesData = await Category.find({isBlocked: status})
+                categoriesCount = categoriesData.length
+                console.log("categoriesCount-->", categoriesCount)
+            }
+            if (categoriesData.length > 0) {
+                console.log("categoriesData to frontend-->", JSON.stringify(categoriesData))
+                res.status(200).json({ success: true, categoriesData, categoriesCount })
+            } else {
+                res.status(404).json({ success: false, categoriesData, categoriesCount, message: "No categories found" })
+            }
+        }else{
+            console.log("Inside else of getAllCategories")
+            const categoriesData = await Category.find({parentCategory: null})
+            const categoriesCount = await Category.countDocuments()
+            if(categoriesData){
+                console.log("categoriesData to frontend-->", JSON.stringify(categoriesData))
+                res.status(200).json({success: true, categoriesData, categoriesCount})
+            }
+        }
+    }
+    catch(error){
+        console.log("Error in categoryController getAllCategories-->"+ error.message)
+        next(error)
+    }
+}
+
+const getFirstLevelCategories = async(req,res,next)=> {
+    try{
+        console.log("Inside getFirstLevelCategories of categoryController")
+        const categories = await Category.find({parentCategory: null})
+        console.log("categories found---->", JSON.stringify(categories))
+        let firstLevelCategories = []
+        if(categories.length){
+            firstLevelCategories = await Promise.all(
+                categories.map( async (cat)=> {
+                    if(cat.subCategory){
+                        return await Category.findOne({_id: cat._id}).populate('subCategory').exec()
+                    }else{
+                        return cat
+                    }
+                })
+            )
+        }
+        if(firstLevelCategories.length){
+            console.log("firstLevelCategories from getFirstLevelCategories--->", JSON.stringify(firstLevelCategories))
+            res.status(200).json({firstLevelCategories})
+        }else{
+            next(errorHandler(404, "No categories found!"))
+        }
+    }
+    catch(error){
+        console.log("Error in categoryController getFirstLevelCategories-->"+ error.message)
+        next(error)
+    }
+}
+// const getCategoriesOfType = async (req, res, next) => {
+//     try {
+//         let {status} = req.query;
+//         let categoriesData, categoriesCount
+
+//         if (status !== 'all') {
+//             status = status === 'active' ? false : true
+//             categoriesData = await Category.find({isBlocked: status})
+//         } else {
+//             categoriesData = await Category.find({})
+//         }
+//         categoriesCount = categoriesData.length
+//         if (categoriesData.length > 0) {
+//             res.status(200).json({ success: true, categoriesData, categoriesCount })
+//         } else {
+//             res.status(404).json({ success: false, categoriesData, categoriesCount, message: "No categories found" })
+//         }
+//     } catch (error) {
+//         console.log("Error in categoryController getCategoriesOfType --> " + error.message)
+//         next(error)
+//     }
+// }
+
+const getCategoryNames = async (req, res, next) => {
+    try {
+        const {id} = req.params    
+        if (!category) {
+            return next(errorHandler(404, "No such category available!"))
+        }
+        const parentCategoryName = category.parentCategory?.name || null
+        const relatedCategoryNames = category.relatedCategory?.map(cat => cat?.name || null) || []
+        res.status(200).json({categoryDatas:{parentCategoryName, relatedCategoryNames}})
+    } catch (error) {
+        console.error("Error in categoryController getCategoryNames -->", error.message)
+        next(error)
+    }
+}
+
+// const findCategoryTreeById = async (req,res,next) => {      // --IMPLEMENT THIS--
+//     try {
+//         const {id} = req.query;
+//         const categoryTree = await buildCategoryTree(id)
+//         res.status(200).json({ success: true, categoryTree })
+//     } catch (error) {
+//         console.log('Error fetching category hierarchy:', error.message)
+//         next(error)
+//     }
+// }
+
+// async function buildCategoryTree(id) {
+//     const category = await Category.findById(id).populate('subCategory').exec()
+    
+//     if (!category) return null
+//     const categoryNode = {
+//         _id: category._id,
+//         name: category.name,
+//         subCategory: []
+//     }
+//     for (const subcat of category.subCategory) {
+//         const subCategoryTree = await buildCategoryTree(subcat._id)
+//         categoryNode.subCategory.push(subCategoryTree || subcat)
+//     }
+
+//     return categoryNode
+// }
+
+const toggleCategoryStatus = async(req,res,next)=>{
+    try{
+        console.log("Inside toggleCategoryStatus controller--")
+        const {id} = req.params
+        console.log("ID-->", id)
+        const category = await Category.findOne({_id:id},{password:0})
+        if (!category) {
+            return next(errorHandler(404, "No such category found!"));
+        }
+        const status = category.isBlocked
+        console.log("Blocked status before-->", status)
+        const returnedCategory = await Category.findOneAndUpdate({_id:id},{$set: {isBlocked: !status}}, {new: true})
+        if(returnedCategory){
+            const status = returnedCategory.isBlocked? 'Blocked' : 'Unblocked'
+            console.log("Blocked status now-->", status)
+            res.status(200).json({categoryBlocked: status, categoryId:id})
+        }
+        else{
+            next(errorHandler(400, "No such category available to update status!"))
+        }
+    }
+    catch(error){
+        console.log("Error in toggleCategoryStatus controller-->", error.message)
+    }
+}
+
+const updateCategory = async (req, res, next) => {    
+    try {
+        console.log("Inside updateCategory of categoryController--")
+        const {id} = req.params;
+        console.log("Id from params-->",id)
+        const category = await Category.findOne({_id: id})
+        let parentCategoryDoc
+        if(category){
+            const categoryDatas = await packCategoryData(req)
+            console.log("req.body.parentCategory before If condn-->", req.body.parentCategory)
+            // const parentCategory = req.body?.parentCategory ?? false
+            if(req.body.parentCategory !== 'null' && req.body.parentCategory !== null && req.body.parentCategory !== '' && req.body.parentCategory !== undefined){
+                console.log("req.body.parentCategory-->", req.body.parentCategory)
+                parentCategoryDoc = await Category.findOne({name: req.body.parentCategory})
+                if(parentCategoryDoc){
+                    console.log("Putting up Subcategory field")
+                    const updatedCategory = await Category.updateOne({_id: id},{$set: {...categoryDatas, parentCategory: parentCategoryDoc._id}})
+                    let updatedParentCategoryDoc
+                    if(updatedCategory){
+                        updatedParentCategoryDoc = await Category.updateOne({_id: parentCategoryDoc._id}, {$push: {subCategory: savedCategory._id}})
+                    }
+                    if(!updatedParentCategoryDoc){
+                        await Category.deleteOne({_id: updatedCategory._id})
+                        next(errorHandler(500, "Internal Server Error!"))
+                    }
+                }else{
+                    next(errorHandler(500, "No such parent category found!"))
+                }
+            }else{
+                console.log("Updating without parentCategory")
+                const updatedCategory = await Category.updateOne({_id: id},{$set: categoryDatas})
+            }
+            res.status(200).json({
+                updatedCategory: true,
+                category: {...categoryDatas, ...(parentCategoryDoc ? { parentCategory: parentCategoryDoc._id } : {})
+                }})
+        }
+       else{
+        next(errorHandler(400, "No such category available to update"))
+       }       
+    } catch (error) {
+        console.log("Error in categoryController-updateCategory-->"+error.message);
+        next(error)
+    }
+  }
+
+
+module.exports = {createCategory, getAllCategories, getFirstLevelCategories, findCategoryById, getCategoryNames, 
+                    toggleCategoryStatus, updateCategory}

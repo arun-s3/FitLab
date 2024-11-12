@@ -21,10 +21,10 @@
 #AdminAddAndEditCategoryPage main #category-content .category-content-wrapper .category-labels{
     margin-bottom: 17px;
 }
-#AdminAddAndEditCategoryPage main #category-content .category-content-wrapper .calender input{
-    width: 9.8rem; 
+#AdminAddAndEditCategoryPage main #category-content .category-content-wrapper #calender input{
+    width: 9.8rem !important; 
 }
-#AdminAddAndEditCategoryPage main #category-content .category-content-wrapper .calender svg{
+#AdminAddAndEditCategoryPage main #category-content .category-content-wrapper #calender svg{
     color: #6b7280;
     font-size: 11px;
     top: 14px;
@@ -42,7 +42,7 @@
     color: #8f8989;
     margin-top: 5px;
 }
-#AdminAddAndEditCategoryPage main #category-content .category-content-wrapper input{
+#AdminAddAndEditCategoryPage main #category-content .category-content-wrapper input:not([type='checkbox']){
     width: 20rem;
     height: 2.4rem;
     border: 1px solid var(--PRIMARY);
@@ -55,7 +55,11 @@
     opacity: 1;
     font-size: 9px;
 }
-#AdminAddAndEditCategoryPage main #category-content .category-content-wrapper input[id='category-badge']:focus{
+#AdminAddAndEditCategoryPage main #category-content .category-content-wrapper input:focus[id='category-badge'], 
+#AdminAddAndEditCategoryPage main #category-content .category-content-wrapper input:focus-visible[id='category-badge'],
+#AdminAddAndEditCategoryPage main #category-content .category-content-wrapper input:focus[type='checkbox'], 
+#AdminAddAndEditCategoryPage main #category-content .category-content-wrapper input:focus-visible[type='checkbox']
+{
     border: 0px !important;
     outline: 0px !important;
     --tw-ring-shadow: 0;

@@ -83,6 +83,23 @@ export const getCategoryNames = createAsyncThunk('getCategoryNames', async({id},
     }
 })
 
+export const getNestedSubcategoryNames = createAsyncThunk('getNestedSubcategoryNames', async({id}, thunkAPI)=>{
+    try{
+        console.log("Inside getNestedSubcategoryNames createAsyncThunk")
+        console.log("id from categorySlice -->", id)
+        const response = await axios.get(`/admin/products/category/getNestedSubcategoryNames/${id}`, {withCredentials: true})
+        console.log("returning success response from getCategoryNames createAsyncThunk..."+JSON.stringify(response.data))
+        return response.data
+    }
+    catch(error){
+        console.log("inside catch of getNestedSubcategoryNames from categorySlice")
+        const errorMessage = error.response?.data?.message
+        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
+        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
+        return thunkAPI.rejectWithValue(errorMessage)
+    }
+})
+
 export const getFirstLevelCategories = createAsyncThunk('getFirstLevelCategories', async(thunkAPI)=>{
     try{
         console.log("Inside getFirstLevelCategories createAsyncThunk")
@@ -137,6 +154,7 @@ const initialState = {
     categoryCounts: null,
     populatedSubCategories: {},
     firstLevelCategories: [],
+    nestedSubcategoryNames: {},
     tempDatas: {},
     categoryCreated: false,
     categoryUpdated: false,
@@ -242,16 +260,40 @@ const categorySlice = createSlice({
             state.error = true
         })
         .addCase(getCategoryNames.fulfilled, (state,action)=>{
-            console.log("action.payload.categoryDatas-->", JSON.stringify(action.payload.categoryDatas))
+            console.log("action.payload.nestedSubcategoryNames-->", JSON.stringify(action.payload.nestedSubcategoryNames))
             state.error = false
             state.loading = false
-            state.tempDatas = action.payload.categoryDatas
+            state.nestedSubcategoryNames = {nestedSubcategoryNames: action.payload.nestedSubcategoryNames, parentId: action.payload.id}
         })
         .addCase(getCategoryNames.pending, (state,action)=>{
             state.loading = true
             state.error = false
         })
         .addCase(getCategoryNames.rejected, (state,action)=>{
+            state.loading = false
+            state.error = true
+        })
+        .addCase(getNestedSubcategoryNames.fulfilled, (state,action)=>{
+            console.log("action.payload.nestedSubcategoryNames-->", JSON.stringify(action.payload.nestedSubcategoryNames))
+            const parentNameObj = action.payload.nestedSubcategoryNames[0]
+            const nestedSubcategoryNames = action.payload.nestedSubcategoryNames.slice(1)
+            console.log("parentNameObj from slice--->", JSON.stringify(parentNameObj))
+            console.log("nestedSubcategoryNamesObj from slice--->",JSON.stringify(nestedSubcategoryNames))
+            // console.log("parentLevelCounts from slice--->", parentLevelCounts)
+            state.error = false
+            state.loading = false
+            state.nestedSubcategoryNames = {
+                parentNameObj,
+                subCategoryNamesObj: nestedSubcategoryNames.filter(
+                  (subCat) => subCat.parentLevelCount === 1
+                ),
+              };
+        })
+        .addCase(getNestedSubcategoryNames.pending, (state,action)=>{
+            state.loading = true
+            state.error = false
+        })
+        .addCase(getNestedSubcategoryNames.rejected, (state,action)=>{
             state.loading = false
             state.error = true
         })

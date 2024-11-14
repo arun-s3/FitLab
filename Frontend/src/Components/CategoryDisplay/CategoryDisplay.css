@@ -1,0 +1,14 @@
+
+#categoryDisplay #category-content .category-name input[type='checkbox']{
+    height: 13px;
+    width: 13px;
+    border-radius: 3px;
+    color: var(--PRIMARY);
+    border-color: var(--PRIMARY);
+}
+#categoryDisplay #category-content .category-name input[type='checkbox']:focus{
+    background-color: var(--PRIMARY);
+}
+#categoryDisplay #category-content .category-name input[type='checkbox']:focus-visible{
+    background-color: var(--PRIMARY);
+}

@@ -98,6 +98,7 @@ const findCategoryById = async (req, res, next) => {
         console.log("id-->", id);
 
         const category = await Category.findOne({ _id: id }).populate('subCategory').exec();
+        console.log("\n\n" + "CATEGORY NAME FROM BACKEND---->", category.name)
         if (!category) {
             return res.status(404).json({ success: false, message: 'Category not found' });
         }
@@ -223,6 +224,78 @@ const getCategoryNames = async (req, res, next) => {
     }
 }
 
+const getNestedSubcategoryNames = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        let subcategoryNames = []  
+        let parentLevelCounts = []
+
+        async function findParentLevelCount(subCategoryId, level = 0) {
+            if (!subCategoryId) return level;
+            const subCategory = await Category.findOne({ _id: subCategoryId }).populate('parentCategory').exec();
+            return subCategory.parentCategory ? findParentLevelCount(subCategory.parentCategory._id, level + 1) : level;
+        }
+
+        const findSubcategoryNames = async (id) => {
+            const category = await Category.findOne({_id: id},{_id:1, name:1, badge:1, parentCategory:1, subCategory:1});
+            if (category) {
+                let parentLevelCount = await findParentLevelCount(category._id);
+                subcategoryNames.push({_id:category._id, name: category.name, badge: category.badge, parentCategory: category.parentCategory, subCategory: category.subCategory, parentLevelCount})
+                // parentLevelCounts.push(parentLevelCount)
+                if (category.subCategory && category.subCategory.length) {
+                    await Promise.all(category.subCategory.map(async (cat) => {
+                        await findSubcategoryNames(cat._id);
+                    }))
+                }
+            }
+        }
+        await findSubcategoryNames(id)
+        console.log("nestedSubcategoryNames from backend-->", JSON.stringify(subcategoryNames))
+        res.status(200).json({nestedSubcategoryNames: subcategoryNames})
+    } catch (error) {
+        console.error("Error in categoryController getNestedSubcategoryNames -->", error.message)
+        next(error)
+    }
+}
+
+// const getNestedSubcategoryNames = async (req, res, next) => {
+//     try {
+//       const { id } = req.params;
+//       const subcategoryNames = [];
+  
+//       const findParentLevelCount = async (subCategoryId, level = 0) => {
+//         if (!subCategoryId) return level;
+//         const subCategory = await Category.findOne({ _id: subCategoryId }).populate('parentCategory');
+//         return subCategory.parentCategory ? findParentLevelCount(subCategory.parentCategory._id, level + 1) : level;
+//       };
+  
+//       const findSubcategoryNames = async (id) => {
+//         const category = await Category.findOne({ _id: id }).populate('subCategory');
+//         if (category) {
+//           const parentLevelCount = await findParentLevelCount(category._id);
+//           subcategoryNames.push({
+//             _id: category._id,
+//             name: category.name,
+//             badge: category.badge,
+//             parentCategory: category.parentCategory,
+//             subCategory: category.subCategory,
+//             parentLevelCount,
+//           });
+  
+//           for (const sub of category.subCategory) {
+//             await findSubcategoryNames(sub._id);
+//           }
+//         }
+//       };
+  
+//       await findSubcategoryNames(id);
+//       res.status(200).json({ nestedSubcategoryNames: subcategoryNames });
+//     } catch (error) {
+//       next(error);
+//     }
+//   };
+  
+
 // const findCategoryTreeById = async (req,res,next) => {      // --IMPLEMENT THIS--
 //     try {
 //         const {id} = req.query;
@@ -324,5 +397,5 @@ const updateCategory = async (req, res, next) => {
   }
 
 
-module.exports = {createCategory, getAllCategories, getFirstLevelCategories, findCategoryById, getCategoryNames, 
+module.exports = {createCategory, getAllCategories, getFirstLevelCategories, findCategoryById, getCategoryNames, getNestedSubcategoryNames,
                     toggleCategoryStatus, updateCategory}

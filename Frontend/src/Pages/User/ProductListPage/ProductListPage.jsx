@@ -24,8 +24,8 @@ export default function ProductList({admin}){
     const [maxPrice, setMaxPrice] = useState(3750)
     let firstSlideRef = useRef(false)
 
-    const [category, setCategory] = useState([])
-    const [subcategory, setSubcategory] = useState('')
+    // const [category, setCategory] = useState([])
+    // const [subcategory, setSubcategory] = useState('')
 
     const [showCategory, setShowCategory ] = useState(true)
     const [showProductsFilter, setShowProductsFilter] = useState(true)
@@ -58,16 +58,16 @@ export default function ProductList({admin}){
         }
     },[minPrice, maxPrice])
 
-    const categoryClickHandler = (e)=>{
-        const value = e.target.innerText.toLowerCase()
-        if( filter.categories.includes(e.target.innerText.toLowerCase()) ){
-            e.target.previousElementSibling.style.visibility = 'hidden'
-            setFilter({...filter, categories: filter.categories.filter(category=> category !== value)})
-        }else{
-            e.target.previousElementSibling.style.visibility = 'visible'
-            setFilter({...filter, categories: [...filter.categories, value]})
-        }
-    }
+    // const categoryClickHandler = (e)=>{
+    //     const value = e.target.innerText.toLowerCase()
+    //     if( filter.categories.includes(e.target.innerText.toLowerCase()) ){
+    //         e.target.previousElementSibling.style.visibility = 'hidden'
+    //         setFilter({...filter, categories: filter.categories.filter(category=> category !== value)})
+    //     }else{
+    //         e.target.previousElementSibling.style.visibility = 'visible'
+    //         setFilter({...filter, categories: [...filter.categories, value]})
+    //     }
+    // }
 
    const checkHandler = (e)=>{
         const value = e.target.value.trim().split(',')
@@ -99,14 +99,11 @@ export default function ProductList({admin}){
                             <span className='cursor-pointer' onClick={()=> setShowCategory(status=> !status)}> <RiArrowDropUpLine/> </span>
                         </div>
                         {showCategory && <>
-                        <ul className='list-none cursor-pointer' id='filter-body'>
-                            <li> <span className='bullet'></span> <span to='' onClick={(e)=>{categoryClickHandler(e)}}> Strength </span> </li>
-                            <li> <span className='bullet'></span> <span to='' onClick={(e)=>{categoryClickHandler(e)}}> Cardio </span> </li>
-                            <li> <span className='bullet'></span> <span to='' onClick={(e)=>{categoryClickHandler(e)}}> Accessories </span> </li>
-                            <li> <span className='bullet'></span> <span to='' onClick={(e)=>{categoryClickHandler(e)}}> Supplements </span> </li>
+                        <ul className='list-none cursor-pointer pr-[7px]' id='filter-body'>
+
+                            <CategoryDisplay filter={filter} setFilter={setFilter}/>
+
                         </ul>
-                        <span className='mt-[5px] text-secondary text-[13px]'>See all</span>
-                        {/* CategoryList here--- */ }
                         </>
                         }
                     </div>

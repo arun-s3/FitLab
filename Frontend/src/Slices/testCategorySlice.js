@@ -117,21 +117,39 @@ export const getFirstLevelCategories = createAsyncThunk('getFirstLevelCategories
 })
 
 
-export const toggleCategoryStatus = createAsyncThunk('toggleCategoryStatus', async(id, thunkAPI)=>{
-    try{
-        console.log("Inside toggleCategoryStatus createAsyncThunk")
-        const response = await axios.get(`/admin/products/category/status/${id}`,{withCredentials:true})
-        console.log("returning success response from toggleCategoryStatus createAsyncThunk..."+JSON.stringify(response.data))
-        return response.data
+// export const toggleCategoryStatus = createAsyncThunk('toggleCategoryStatus', async(id, thunkAPI)=>{
+//     try{
+//         console.log("Inside toggleCategoryStatus createAsyncThunk")
+//         await axios.get(`/admin/products/category/status/${id}`,{withCredentials:true}); 
+//         const response = await axios.get('/admin/products/category')
+//         console.log("returning success response from toggleCategoryStatus createAsyncThunk..."+JSON.stringify(response.data))
+//         thunkAPI.dispatch(getSingleCategory.fulfilled(response.data))
+//         return response.data
+//     }
+//     catch(error){
+//         console.log("inside catch of toggleCategoryStatus from productSlice")
+//         const errorMessage = error.response?.data?.message
+//         console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
+//         console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
+//         return thunkAPI.rejectWithValue(errorMessage)
+//     }
+// })
+
+export const toggleCategoryStatus = createAsyncThunk('toggleCategoryStatus', async (id, thunkAPI) => {
+        // 1. Toggle the category's status and get the updated response
+        const toggleResponse = await axios.get(`/admin/products/category/status/${id}`,{withCredentials: true});
+        // console.log("Toggle status response:", toggleResponse.data);
+        // 2. Dispatch the toggle response directly to the reducer
+        thunkAPI.dispatch(toggleCategoryStatus.fulfilled(toggleResponse.data));
+        // 3. Optionally, fetch the entire category structure to ensure the UI is fully synchronized
+        const fetchResponse = await axios.get("/admin/products/category",{ withCredentials: true });
+        // console.log("Updated categories:", fetchResponse.data);
+        // 4. Return the updated data for the reducer
+        return fetchResponse.data;
     }
-    catch(error){
-        console.log("inside catch of toggleCategoryStatus from productSlice")
-        const errorMessage = error.response?.data?.message
-        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
-        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
-        return thunkAPI.rejectWithValue(errorMessage)
-    }
-})
+);
+
+
 
 export const updateCategory = createAsyncThunk('updateCategory', async({formData, id}, thunkAPI)=>{
     try{
@@ -156,7 +174,6 @@ const initialState = {
     populatedSubCategories: {},
     firstLevelCategories: [],
     nestedSubcategoryNames: {},
-    blockedCategoryList: [],
     tempDatas: {},
     categoryCreated: false,
     categoryUpdated: false,
@@ -267,31 +284,23 @@ const categorySlice = createSlice({
         //     console.log("state.populatedSubCategories------>", JSON.stringify(state.populatedSubCategories))
         // })
         .addCase(getSingleCategory.fulfilled, (state, action) => {
-            console.log("action.payload.categoriesData-->", JSON.stringify(action.payload.populatedCategory));
-            state.error = false;
-            state.loading = false;
+            const updatedSubCategories = action.payload.populatedSubCategories;
+            updatedSubCategories.forEach(subcategory => {
+                const existingIndex = state.allSubCategories.findIndex(subcat => subcat._id === subcategory._id);
+                if (existingIndex !== -1) {
+                    state.allSubCategories[existingIndex] = subcategory
+                } else {
+                    state.allSubCategories.push(subcategory)
+                }
+            });
+        
             state.populatedSubCategories = {
-                subCategories: action.payload.populatedSubCategories,
+                subCategories: updatedSubCategories,
                 parentId: action.payload.id,
                 parentName: action.payload.parentName,
                 parentLevelCount: action.payload.parentLevelCount,
             };
-        
-            if (!state.allSubCategories) {
-                state.allSubCategories = []; // Ensure allSubCategories is an array
-            }
-        
-            state.populatedSubCategories.subCategories.forEach(subcategory => {
-                const existingIndex = state.allSubCategories.findIndex(subcat => subcat._id === subcategory._id);
-                if (existingIndex !== -1) {
-                    state.allSubCategories[existingIndex] = subcategory;
-                } else {
-                    state.allSubCategories.push(subcategory);
-                }
-            });
-            console.log("STATE.ALLSUBCATEGORIES---->", JSON.stringify(state.allSubCategories))
-            console.log("state.populatedSubCategories------>", JSON.stringify(state.populatedSubCategories));
-        })      
+        })
         .addCase(getSingleCategory.pending, (state,action)=>{
             state.loading = true
             state.error = false
@@ -373,66 +382,32 @@ const categorySlice = createSlice({
         //     }
         // })
         
-        // .addCase(toggleCategoryStatus.fulfilled, (state, action) => {
-        //     state.success = true;
-        //     // state.message = categoryBlocked;
-        //     state.loading = false;
-        //     state.error = false;
-        
-        //     const categoryStatusToggler = (categories, blockStatusIdList) => 
-        //         categories.map(cat => {
-        //             const matchedStatus = blockStatusIdList.find(list => list.id === cat._id);
-        //             if (matchedStatus) {
-        //                 console.log("INSIDE categories.map, if (matchedStatus)--->", JSON.stringify({ ...cat, isBlocked: matchedStatus.status === 'Blocked' }))
-        //                 return { ...cat, isBlocked: matchedStatus.status === 'Blocked' };
-        //             }
-        //             console.log("INSIDE categories.map, else (matchedStatus)--->", JSON.stringify(cat))
-        //             return cat;
-        //         });
-        
-        //     const matchFound = state.categories.some(cat =>
-        //         action.payload.blockStatusIdList.some(list => cat._id === list.id)
-        //     );
-        
-        //     if (matchFound) {
-        //         state.allSubCategories = categoryStatusToggler(state.allSubCategories, action.payload.blockStatusIdList);
-        //         state.categories = categoryStatusToggler(state.categories, action.payload.blockStatusIdList);
-        //     } else {
-        //         state.allSubCategories = categoryStatusToggler(state.allSubCategories, action.payload.blockStatusIdList);
-
-        //     } 
-        // })
         .addCase(toggleCategoryStatus.fulfilled, (state, action) => {
             state.success = true;
+            // state.message = categoryBlocked;
             state.loading = false;
             state.error = false;
-            state.blockedCategoryList = JSON.parse(JSON.stringify(action.payload.blockStatusIdList))
         
-            // const { blockStatusIdList } = action.payload || {};
-            // if (!blockStatusIdList || blockStatusIdList.length === 0) {
-            //     console.error("blockStatusIdList is empty or undefined");
-            //     return;
-            // }
+            const categoryStatusToggler = (categories, blockStatusIdList) => 
+                categories.map(cat => {
+                    const matchedStatus = blockStatusIdList.find(list => list.id === cat._id);
+                    if (matchedStatus) {
+                        return { ...cat, isBlocked: (matchedStatus.status === 'Blocked') };
+                    }
+                    return cat;
+                });
         
-            // // Recursive function to update categories and nested subcategories
-            // const categoryStatusToggler = (categories, blockStatusIdList) =>
-            //     categories.map(cat => {
-            //         const matchedStatus = blockStatusIdList.find(list => list.id === cat._id);
-            //         const isBlocked = matchedStatus ? matchedStatus.status === 'Blocked' : cat.isBlocked;
+            const matchFound = state.categories.some(cat =>
+                action.payload.blockStatusIdList.some(list => cat._id === list.id)
+            );
         
-            //         return {
-            //             ...cat,
-            //             isBlocked,
-            //         };
-            //     });
-        
-            // state.allSubCategories = categoryStatusToggler(state.allSubCategories, blockStatusIdList);
-            // state.categories = categoryStatusToggler(state.categories, blockStatusIdList);
-            // state.allSubCategories = JSON.parse(JSON.stringify(categoryStatusToggler([...state.allSubCategories], blockStatusIdList)));
-            // state.categories = JSON.parse(JSON.stringify(categoryStatusToggler([...state.categories], blockStatusIdList)));
-
+            if (matchFound) {
+                state.allSubCategories = categoryStatusToggler(state.allSubCategories, action.payload.blockStatusIdList);
+                state.categories = categoryStatusToggler(state.categories, action.payload.blockStatusIdList);
+            } else {
+                state.allSubCategories = categoryStatusToggler(state.allSubCategories, action.payload.blockStatusIdList);
+            }
         })
-
         .addCase(toggleCategoryStatus.pending, (state,action)=>{
             state.loading = true
             state.error = false

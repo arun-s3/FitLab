@@ -324,26 +324,68 @@ const getNestedSubcategoryNames = async (req, res, next) => {
 //     return categoryNode
 // }
 
+// const toggleCategoryStatus = async(req,res,next)=>{
+//     try{
+//         console.log("Inside toggleCategoryStatus controller--")
+//         const {id} = req.params
+//         console.log("ID-->", id)
+//         const category = await Category.findOne({_id:id},{password:0})
+//         if (!category) {
+//             return next(errorHandler(404, "No such category found!"));
+//         }
+//         const status = category.isBlocked
+//         console.log("Blocked status before-->", status)
+//         const returnedCategory = await Category.findOneAndUpdate({_id:id},{$set: {isBlocked: !status}}, {new: true})
+//         if(returnedCategory){
+//             const status = returnedCategory.isBlocked? 'Blocked' : 'Unblocked'
+//             console.log("Blocked status now-->", status)
+//             res.status(200).json({categoryBlocked: status, categoryId:id})
+//         }
+//         else{
+//             next(errorHandler(400, "No such category available to update status!"))
+//         }
+//     }
+//     catch(error){
+//         console.log("Error in toggleCategoryStatus controller-->", error.message)
+//     }
+// }
+
 const toggleCategoryStatus = async(req,res,next)=>{
     try{
         console.log("Inside toggleCategoryStatus controller--")
         const {id} = req.params
         console.log("ID-->", id)
-        const category = await Category.findOne({_id:id},{password:0})
-        if (!category) {
-            return next(errorHandler(404, "No such category found!"));
-        }
-        const status = category.isBlocked
+        let status
+        const blockStatusIdList = []
+
+        const category = await Category.findOne({_id:id})
+        status = category.isBlocked
         console.log("Blocked status before-->", status)
-        const returnedCategory = await Category.findOneAndUpdate({_id:id},{$set: {isBlocked: !status}}, {new: true})
-        if(returnedCategory){
-            const status = returnedCategory.isBlocked? 'Blocked' : 'Unblocked'
-            console.log("Blocked status now-->", status)
-            res.status(200).json({categoryBlocked: status, categoryId:id})
+
+        const statusToggler = async (id)=> {
+            const category = await Category.findOne({_id:id})
+            // if (!category) {
+            //     return next(errorHandler(404, "No such category found!"));
+            // }
+            const returnedCategory = await Category.findOneAndUpdate({_id:id},{$set: {isBlocked: !status}}, {new: true})
+            if(returnedCategory){
+                const newStatus = returnedCategory.isBlocked
+                console.log("Blocked status now-->", newStatus)
+                blockStatusIdList.push({id: returnedCategory._id, name: returnedCategory.name, status: newStatus, parentCategory:returnedCategory.parentCategory})
+                if(returnedCategory.subCategory  && returnedCategory.subCategory.length > 0){
+                    for (const id of returnedCategory.subCategory) {
+                        await statusToggler(id);
+                      }
+                }
+            }
+            // else{
+            //     next(errorHandler(400, "No such category available to update status!"))
+            // }
         }
-        else{
-            next(errorHandler(400, "No such category available to update status!"))
-        }
+
+        await statusToggler(id)
+        console.log("BLOCKSTATUSLIST-------->",JSON.stringify(blockStatusIdList))
+        res.status(200).json({blockStatusIdList})
     }
     catch(error){
         console.log("Error in toggleCategoryStatus controller-->", error.message)

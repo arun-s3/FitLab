@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
-import { unwrapResult } from '@reduxjs/toolkit';
+import {unwrapResult} from '@reduxjs/toolkit';
 import {getAllCategories, getSingleCategory, resetSubcategories} from '../../Slices/categorySlice';
 import './CategoryDisplay.css';
 import {MdOutlineArrowDropDownCircle} from 'react-icons/md';

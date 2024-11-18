@@ -3,7 +3,7 @@ import './AdminCategoryListPage.css'
 import {useNavigate} from 'react-router-dom'
 import {useDispatch, useSelector} from 'react-redux'
 
-import {getAllCategories, getCategoriesOfType, getSingleCategory, toggleCategoryStatus, resetSubcategories,} from '../../../Slices/categorySlice'
+import {getAllCategories, getCategoriesOfType, getSingleCategory, toggleCategoryStatus, resetSubcategories} from '../../../Slices/categorySlice'
 import {SearchInput} from '../../../Components/FromComponents/FormComponents'
 
 import {toast} from 'react-toastify'
@@ -19,7 +19,7 @@ import {RiDropdownList} from "react-icons/ri";
 export default function AdminCategoryListPage(){
 
   const dispatch = useDispatch()
-  const {categories, message, populatedSubCategories} = useSelector(state=> state.categoryStore)
+  const {categories, message, populatedSubCategories, allSubCategories, blockedCategoryList} = useSelector(state=> state.categoryStore)
 
   const [subCategories, setSubCategories] = useState({})
   const [openSubcategories, setOpenSubcategories] = useState({})
@@ -36,7 +36,8 @@ export default function AdminCategoryListPage(){
     }                  
     getFitlabCategories()
     console.log("CATGEORIES----",JSON.stringify(categories))
-    dispatch(resetSubcategories())
+    console.log("ALLSUBCATEGORIES---------------->", allSubCategories)
+    // dispatch(resetSubcategories())
   }, []);
 
 //   useEffect(()=>{
@@ -63,21 +64,100 @@ export default function AdminCategoryListPage(){
     }
   },[message])
 
-  useEffect(()=>{
-    if(populatedSubCategories){
-        setSubCategories({...subCategories, [populatedSubCategories.parentId]: populatedSubCategories.subCategories})
-        setOpenSubcategories({...openSubcategories, [populatedSubCategories.parentId]: {...openSubcategories[populatedSubCategories.parentId], parentLevelCount: populatedSubCategories.parentLevelCount}})
-        console.log("subCategories-->", JSON.stringify(subCategories))
-    }
-  },[populatedSubCategories])
+//   useEffect(()=>{
+//     if(populatedSubCategories){
+//         setSubCategories({...subCategories, [populatedSubCategories.parentId]: populatedSubCategories.subCategories})
+//         setOpenSubcategories({...openSubcategories, [populatedSubCategories.parentId]: {...openSubcategories[populatedSubCategories.parentId], parentLevelCount: populatedSubCategories.parentLevelCount}})
+//         console.log("subCategories-->", JSON.stringify(subCategories))
+//     }
+//   },[populatedSubCategories])
+
+//   useEffect(()=>{
+//     if(populatedSubCategories && allSubCategories){
+//         console.log("allSubCategories from AdminCategoryListPage--->", JSON.stringify(allSubCategories))
+//         setSubCategories({...subCategories, [populatedSubCategories.parentId]: allSubCategories.map(scat=> scat.parentCategory===populatedSubCategories.parentId)})
+//         setOpenSubcategories({...openSubcategories, [populatedSubCategories.parentId]: {...openSubcategories[populatedSubCategories.parentId], parentLevelCount: populatedSubCategories.parentLevelCount}})
+//     }
+//   },[populatedSubCategories, allSubCategories])
 
   useEffect(()=>{
-    console.log("Subcategories now-->", JSON.stringify(subCategories))
-    console.log("Subcategory of 1st Id-->", JSON.stringify(subCategories['67165c5c19a2809d4c87ae1b']))
+    if(categories.length){
+        console.log("categories from AdminCategoryList--->", JSON.stringify(categories))
+    }
+    console.log("subCategories from AdminCategoryList--->", subCategories)
+    // console.log("Subcategories now-->", JSON.stringify(subCategories))
+    // console.log("Subcategory of 1st Id-->", JSON.stringify(subCategories['67165c5c19a2809d4c87ae1b']))
     if(openSubcategories){
         console.log("openSubcategories-->", JSON.stringify(openSubcategories))
     }
-  },[subCategories, openSubcategories])
+  },[categories, subCategories, openSubcategories])
+
+  useEffect(() => {
+    if (populatedSubCategories && allSubCategories) {
+      console.log("allSubCategories from AdminCategoryListPage--->", JSON.stringify(allSubCategories));
+      
+      // Filter subcategories for the current parentId
+      const filteredSubCategories = allSubCategories.filter(
+        (scat) => scat.parentCategory === populatedSubCategories.parentId
+      );
+      
+      setSubCategories((prevSubCategories) => ({
+        ...prevSubCategories,
+        [populatedSubCategories.parentId]: filteredSubCategories,
+      }));
+  
+      setOpenSubcategories((prevOpenSubcategories) => ({
+        ...prevOpenSubcategories,
+        [populatedSubCategories.parentId]: {
+          ...prevOpenSubcategories[populatedSubCategories.parentId],
+          parentLevelCount: populatedSubCategories.parentLevelCount,
+        },
+      }));
+    }
+  }, [populatedSubCategories, allSubCategories]);
+
+//   useEffect(()=>{
+//     if(blockedCategoryList && blockedCategoryList.length){
+//         parentCategoryList = Object.keys(subCategories)
+//         parentCategoryList.forEach(parentCat=> {
+//             if(blockedCategoryList.forEach(blockedCat=> {
+//                 if(blockedCat.parentCategory === parentCat){
+//                     setSubCategories(subcat=> ({...subcat, {subcat[parentCat]: {subcat[parentCat].map(cat=> {...cat, isBlocked: blockedCat.status}})}} }))
+//             }
+         
+//   },[blockedCategoryList])
+
+useEffect(() => {
+    if (blockedCategoryList && blockedCategoryList.length) {
+        setSubCategories((prevSubCategories) => {
+            const updatedSubCategories = { ...prevSubCategories };
+
+            Object.keys(prevSubCategories).forEach((parentCat) => {
+                // Check if the parent category has blocked categories
+                const blockedForParent = blockedCategoryList.filter(
+                    (blockedCat) => blockedCat.parentCategory === parentCat
+                );
+
+                if (blockedForParent.length) {
+                    // Map through the subcategories of the current parent
+                    updatedSubCategories[parentCat] = updatedSubCategories[parentCat].map((cat) => {
+                        const matchedBlockedCat = blockedForParent.find(
+                            (blockedCat) => blockedCat.id === cat._id
+                        );
+
+                        return matchedBlockedCat
+                            ? { ...cat, isBlocked: matchedBlockedCat.status }
+                            : cat;
+                    });
+                }
+            });
+
+            return updatedSubCategories;
+        });
+    }
+}, [blockedCategoryList]);
+
+  
 
    const [activeSorter, setActiveSorter] = useState({field:'',order:''})
    const sortHandler = (e,type,order)=>{
@@ -119,7 +199,9 @@ const closeNestedSubcategories = (id) => {
 }
 
 const showSubcategories = (id) => {
-    dispatch(getSingleCategory({id}))
+    if(!openSubcategories[id]){
+        dispatch(getSingleCategory({id}))
+    }
     const isOpening = !openSubcategories[id]?.status
     if (!isOpening) {
         closeNestedSubcategories(id)
@@ -154,7 +236,7 @@ const tableBodyGenerator = (categories, isSubcategory, parentLevelCount)=> {
                                         </i> : null
                                        }
                                     <figure className='w-[150px] h-[150px] rounded-[8px] border-primary bg-[#f3f5f7] relative'>
-                                        <img src={category.image.url} alt='category-image' className='w-[150px] h-[150px] object-cover rounded-[5px]'/>
+                                        <img src={category?.image?.url} alt='category-image' className='w-[150px] h-[150px] object-cover rounded-[5px]'/>
                                         <figcaption className='absolute bottom-[10px] left-[10px] mt-[5px] text-[12px] font-[550] capitalize
                                                  text-secondary rounded-[5px] tracking-[0.3px] px-[10px]'> 
                                             {category.name} 
@@ -173,7 +255,8 @@ const tableBodyGenerator = (categories, isSubcategory, parentLevelCount)=> {
                                                 {category?.badge} 
                                             </span> 
                                             <span className={`border border-[#eae0f0] px-[10px] rounded-[7px] flex items-center gap-[2px]
-                                                        font-[500] text-[10px] text-secondary ${ category.isBlocked ? 'bg-red-500' : 'bg-green-500'}`}
+                                                font-[500] text-[10px] text-secondary
+                                                ${(category.isBlocked || (blockedCategoryList?.length && blockedCategoryList?.find(cat=> cat.id == category._id)?.status) ) ? 'bg-red-500' : 'bg-green-500'}`}
                                                     style={!category.badge ? {marginLeft:'auto', marginRight:'20px'}: {}}>
                                                 <span className='text-primary mr-[2px]'> &bull; </span> 
                                                 <span className='text-[10px] text-white'> 10 Products   </span>

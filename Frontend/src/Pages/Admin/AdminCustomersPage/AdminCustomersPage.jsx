@@ -2,7 +2,8 @@ import React, {useEffect, useState, useRef} from 'react';
 import './AdminCustomersPage.css';
 import axios from '../../../Utils/axiosConfig';
 import {useSelector, useDispatch} from 'react-redux';
-import {showUsers, toggleBlockUser, deleteUser, deleteUsersList, resetStates} from '../../../Slices/adminSlice';
+import Modal from '../../../Components/Modal/Modal';
+import {showUsers, showUsersofStatus, toggleBlockUser, deleteUser, deleteUsersList, resetStates} from '../../../Slices/adminSlice';
 
 import {RiArrowDropDownLine} from 'react-icons/ri';
 import {MdBlock, MdDeleteOutline} from 'react-icons/md';
@@ -17,10 +18,13 @@ export default function AdminCustomersPageV1() {
     const { adminLoading, adminError, adminSuccess, adminMessage, allUsers } = useSelector(state => state.admin);
 
     const [localUsers, setLocalUsers] = useState([]);
+    const [tempUsers, setTempUsers] = useState([])
 
     const [trashUserList, setTrashUserList] = useState(false)
 
     const [deleteDelay, setDeleteDelay ] = useState(null)
+    const [deleteThisId, setDeleteThisId] = useState(null)
+    const [initiateDeleteHandler, setInitiateDeleteHandler] = useState(false)
     let timerId = useRef(null)
 
     const [matchCase, setMatchCase] = useState(false)
@@ -30,6 +34,8 @@ export default function AdminCustomersPageV1() {
     const statusDropdownRef = useRef(null)
     const statusButtonRef = useRef(null)
     const [showStatusDropdown, setShowStatusDropdown] = useState(false)
+
+    const [openModel, setOpenModel] = useState(false)
 
     const mainBgImg = {
         colorImage : "linear-gradient(to right,rgba(255,255,255),rgba(255,255,255))"
@@ -43,20 +49,29 @@ export default function AdminCustomersPageV1() {
     useEffect(() => {
         console.log("Setting localUsers to allUsers--- ")
         if (allUsers) {
-            setLocalUsers(allUsers);
-        }
-        if(statusButtonRef.current){
-            console.log("Inside useEffet, statusButtonRef.current")
-            if(statusButtonRef.current.textContent == "Blocked"){
-                console.log("Inside useEffect, statusButtonRef.current.textContent == Blocked ")
-                setLocalUsers(currentUsers=>currentUsers.filter(user=>user.isBlocked))
-            }
-            if(statusButtonRef.current.textContent == "Active"){
-                console.log("Inside useEffect, statusButtonRef.current.textContent == Active ")
-                setLocalUsers(currentUsers=>currentUsers.filter(user=>!user.isBlocked))
-            }
+            setTempUsers(allUsers);
         }
     }, [allUsers]);
+
+    useEffect(() => {
+        console.log("Inside useEffect for tempUsers");
+        let tempUserList = [...tempUsers];
+
+        if (activeSorter.field && activeSorter.order) {
+            console.log("Sorting users based on activeSorter...");
+            console.log(`Field: ${activeSorter.field}, Order: ${activeSorter.order}`);
+            tempUserList = sortUsers(activeSorter.field, activeSorter.order, true);
+        }
+        const status = statusButtonRef.current?.textContent?.trim().toLowerCase();
+        if (status && status !== 'status' && status !== 'all') {
+            const isBlocked = status === 'blocked';
+            tempUserList = tempUserList.filter(user => user.isBlocked === isBlocked);
+        }
+    
+        setLocalUsers(tempUserList);
+
+    }, [tempUsers, activeSorter.field, activeSorter.order, statusButtonRef.current?.textContent]);
+    
 
     useEffect(() => {
         if (adminMessage) {
@@ -76,39 +91,43 @@ export default function AdminCustomersPageV1() {
         );
         console.log("Dispatching toggleBlockUser()-- ")
         dispatch(toggleBlockUser(id));
-    };
+    }
 
-    const deleteHandler = (id,clearTimer=false) => {
-        setDeleteDelay(10);
-        console.log("Set delete delay to 10 seconds");
-        
-        timerId.current = setInterval(() => {
-            setDeleteDelay(prevCount => {
-                if (prevCount <= 1) {
-                    clearInterval(timerId.current); 
-                    dispatch(deleteUser(id)); 
-                    setLocalUsers(prevUsers => prevUsers.filter(user => user._id !== id));
-                    console.log("User deletion dispatched");
-                    return null;
-                } else {
-                    console.log(`Countdown: ${prevCount - 1} seconds remaining`);
-                    return prevCount - 1;
-                }
-            });
-        }, 1000);
-    };
+    const preDeleteHandler = (id)=> {
+        setOpenModel(true)
+        setDeleteThisId(id)
+    }
+
+    const deleteHandler = (clearTimer=false) => {
+        if(deleteThisId){
+            setDeleteDelay(15);
+            const id = deleteThisId
+            console.log("Set delete delay to 10 seconds");
+            
+            timerId.current = setInterval(() => {
+                setDeleteDelay(prevCount => {
+                    if (prevCount <= 1) {
+                        clearInterval(timerId.current); 
+                        dispatch(deleteUser(id)); 
+                        setLocalUsers(prevUsers => prevUsers.filter(user => user._id !== id));
+                        console.log("User deletion dispatched");
+                        return null;
+                    } else {
+                        console.log(`Countdown: ${prevCount - 1} seconds remaining`);
+                        return prevCount - 1;
+                    }
+                });
+            }, 1000);
+        }
+    }
 
     const undoDeleteHandler = ()=>{
         if(timerId.current){
             clearInterval(timerId.current)
             setDeleteDelay(0)
             timerId.current = null
+            setDeleteThisId(null)
         }
-    }
-
-    const trashHandler = (userIdList)=>{
-        setLocalUsers(prevUsers => prevUsers.filter(user => userIdList.userList.every(userId=> user._id !== userId)));
-        dispatch(deleteUsersList(userIdList))
     }
 
     const searchHandler = (e)=>{
@@ -143,21 +162,32 @@ export default function AdminCustomersPageV1() {
             }
             else {
                 setActiveSorter({field:type, order})
-                const sortedNames = order==1? localUsers.map(user=>user[type]).sort() 
-                                        : typeof localUsers[0][type] == "string"? localUsers.map(user=>user[type]).sort((a,b)=>b.localeCompare(a))
-                                                                         : localUsers.map(user=>user[type]).sort((a,b)=>b-a)
-                const sortedUsers = []
-                for(let i=0; i<sortedNames.length; i++){
-                    for(let user in localUsers){
-                        if(localUsers[user][type] == sortedNames[i])
-                            sortedUsers.push(localUsers[user])
-                    }
-                }
-                setLocalUsers(sortedUsers)
-                console.log("SortedNames-->"+sortedNames)
-                console.log("sortedUsers-->"+JSON.stringify(sortedUsers)) 
+                sortUsers(type, order, false)
             }
             
+    }
+
+    const sortUsers = (type, order, returnData)=> {
+        console.log("Sorting.....")
+        console.log(`type-->${type}, order-->${order}`)
+        console.log("tempUsers now inside sortUsers-->", tempUsers)
+        const sortedNames = order==1? tempUsers.map(user=>user[type]).sort() 
+                                        : typeof tempUsers[0][type] == "string"? tempUsers.map(user=>user[type]).sort((a,b)=>b.localeCompare(a))
+                                                                         : tempUsers.map(user=>user[type]).sort((a,b)=>b-a)
+        const sortedUsers = []
+        for(let i=0; i<sortedNames.length; i++){
+            for(let user in tempUsers){ 
+                if(tempUsers[user][type] == sortedNames[i])
+                    sortedUsers.push(tempUsers[user])
+            }
+        }
+        console.log("SortedNames-->"+sortedNames)
+        console.log("sortedUsers-->"+JSON.stringify(sortedUsers)) 
+        if(returnData){
+            return sortedUsers
+        }else{
+            setLocalUsers(sortedUsers)
+        }
     }
 
     const statusDropdownToggle = (e)=>{
@@ -168,28 +198,30 @@ export default function AdminCustomersPageV1() {
         setShowStatusDropdown(!showStatusDropdown)
     }
 
+    const statusSelector = (status)=> {
+        console.log("Inside statusSelector--")
+        statusButtonRef.current.textContent = status
+        console.log("dispatching-- showUsersofStatus({status})")
+        dispatch(showUsersofStatus({status}))
+    }
+
     return (
         <section className='h-screen z-[-1]' id='AdminCustomersPage'>
-            <h1 className='text-h3Semibold'>Customers</h1>
-
-            <p className='mt-[2rem] h-[30px] '>{showUsers && adminLoading?"LOADING...":""}</p>
-            <p className='h-[27px] ml-[4px]'><span className='text-[12px]'>{deleteDelay? (<span className='text-red-500 ml-[6px] whitespace-nowrap align-[1px]'>
-                                                                <span className='text-secondary font-bold mr-[4px] cursor-pointer' onClick={(e)=>{
-                                                                                undoDeleteHandler(); 
-                                                                                // e.target.parentElement.style.display = 'none'
-                                                                             }}>
-                                                                    Undo?
-                                                                </span> Deleting in {deleteDelay} seconds...`
-                                                            </span>): null}</span></p>
+            <h1 className='text-h3Semibold mb-[2rem]'>Customers</h1>
             <main className='p-[1rem] border border-secondary flex items-center justify-center w-[80%] 
                                     rounded-[9px] gap-[5px]' style={mainBgImg}>
+                { openModel &&
+                    <Modal openModel={openModel} setOpenModel={setOpenModel} title='Important' content='You are about to delete a customer. Do this only if he/she is a recognized spammer.
+                        Also confirm as many times as possible' instruction="If you are sure, write 'sure' and press 'Ok', else click 'Close' button"
+                            buttonText1='Ok' buttonText2='Cancel' deleteHandler={deleteHandler}/>
+                }
                 <table cellSpacing={10} cellPadding={10} className='border-spacing-[24px]'>
                     <thead>
                         <tr>
                             <td colSpan='2'>
                                 <div className='flex gap-[8px]' id='searcher'>
-                                    <input type='search' placeholder='Search..' className='secondaryLight-box text-[13px] 
-                                                    w-full h-[35px] pl-[10px]' onChange={(e)=>searchHandler(e)}/>
+                                    <input type='search' placeholder='Search..' className='secondaryLight-box text-[13px] border-primary
+                                                   rounded-[8px] text-secondary w-full h-[35px] pl-[10px]' onChange={(e)=>searchHandler(e)}/>
                                     <span className='self-end px-[3px] mb-[3px] bg-primary rounded-[4px] cursor-pointer relative case-tooltip' 
                                             style={matchCase? {outlineWidth:'1.5px', outlineColor:'#9f2af0', outlineOffset:'2px', outlineStyle:'solid'}:null}
                                                     onClick={()=>{console.log("clicked Matchase-->"+matchCase); setMatchCase(!matchCase)}}>
@@ -208,32 +240,23 @@ export default function AdminCustomersPageV1() {
                                        secondaryLight-box cursor-pointer border border-secondary border-t-0 pb-[10px] hidden' ref={statusDropdownRef}
                                                                 style={showStatusDropdown? {display:'inline-block', background:'rgb(227, 219, 232)', boxShadow:'2px 5px 6px rgba(72, 69, 75, 0.2)'}: null}>
                                         <ul className='list-none text-[11px] text-secondary font-[450]'>
-                                            <li className='text-right flex items-center justify-center' onClick={()=>{
-                                                setLocalUsers(allUsers)
-                                                statusButtonRef.current.textContent = "Active"
-                                                console.log("Indide onClick of Blocked users, AllUsers-->"+JSON.stringify(allUsers))
-                                                setLocalUsers(currentUsers=>currentUsers.filter(user=>!user.isBlocked))
-                                            }}>
-                                                 <hr/>Active<hr/> </li>
+                                            <li className='text-right flex items-center justify-center' onClick={()=> statusSelector('active')}>
+                                                <hr/>Active<hr/> 
+                                            </li>
 
-                                            <li className='text-right flex items-center justify-center'onClick={()=>{
-                                                setLocalUsers(allUsers)
-                                                statusButtonRef.current.textContent = "Blocked"
-                                                setLocalUsers(currentUsers=>currentUsers.filter(user=>user.isBlocked))
-                                            }}> 
-                                                <hr/>Blocked<hr/> </li>
+                                            <li className='text-right flex items-center justify-center' onClick={()=> statusSelector('blocked')}> 
+                                                <hr/>Blocked<hr/>
+                                            </li>
                                             
-                                                <li className='text-right flex items-center justify-center'onClick={()=>{
-                                                setLocalUsers(allUsers)
-                                                statusButtonRef.current.textContent = "Status"
-                                            }}> 
-                                                <hr/>Status<hr/> </li>
+                                            <li className='text-right flex items-center justify-center' onClick={()=> statusSelector('all')}> 
+                                                <hr/>All<hr/> 
+                                            </li>
                                         </ul>
                                     </div>
-                                    <button className='ml-[15px]' ref={statusButtonRef} >Status</button>
+                                    <button className='ml-[15px] capitalize' ref={statusButtonRef} >Status</button>
                                     <RiArrowDropDownLine/>
                                 </div>
-                            </td>
+                            </td>  
                             <td>
                                 <div className='inline-flex items-center justify-between secondaryLight-box cursor-pointer
                                                                                             text-[13px] px-[11px] w-[75%] h-[35px] customer-dropdown'> 
@@ -308,25 +331,33 @@ export default function AdminCustomersPageV1() {
                                     </i>
                                 </div>
                             </td>
-                            <td></td>
-                            <td>
-                                 <div className='flex gap-[5px] items-center'>
-                                     <input type='checkbox' name='trashAllItems'/>
-                                     <FaTrashAlt onClick={()=>{
-                                        const userIdList = {userList:trashUserList}
-                                        console.log('userList from AdmnCustomerPage.jsx-->'+JSON.stringify())
-                                        trashHandler(userIdList)
-                                        }} /> 
-                                </div>
+                            <td className='text-left'>
+                                <p className=''>{showUsers && adminLoading?"LOADING...":""}</p>
+                                <p className=''>
+                                    <span className='text-[12px]'>
+                                    {deleteDelay?
+                                        (<span className='text-red-500 ml-[6px] tracking-[0.3px] whitespace-nowrap align-[1px]'>
+                                            <span className='text-green-500 font-bold mr-[4px] cursor-pointer'
+                                                         onClick={(e)=> undoDeleteHandler()}>
+                                                Undo?
+                                            </span> Deleting in {deleteDelay} seconds...`
+                                        </span>
+                                        ) : null
+                                    }
+                                    </span>
+                                </p>
                             </td>
                         </tr> 
                     </thead>
-                    <tr><td colSpan='5'></td></tr>
+                    <tr>
+                        <td colSpan='5'>
+                        </td>
+                    </tr>
                     
                     <tbody className='text-[14px]'>
                         {   
-                            localUsers.length > 0 ? localUsers.map(user =>
-                                <tr key={user._id}>
+                            localUsers.length > 0 ? localUsers.map((user,index) =>
+                                <tr key={user._id} className={`${(index % 2 == 0)? 'bg-[#eee]': 'bg-transparent'} cursor-pointer hover:bg-[#f3f7df]`}>
                                     <td>{user.username}</td>
                                     <td>{user.email}</td>
                                     <td>{user.mobile}</td>
@@ -334,15 +365,11 @@ export default function AdminCustomersPageV1() {
                                     <td>
                                         <div className='flex items-center gap-[10px] action-buttons'>
                                             <button type='button' className='basis-[103px]' onClick={() => toggleBlockHandler(user._id)}>
-                                                 {user.isBlocked ? "Unblock" : "Block"} <MdBlock/>
+                                                 {user.isBlocked ? "Unblock" : "Block"} <MdBlock style={user.isBlocked? {color:'green'}:{color:'red'}}/>
                                             </button>
-                                            <button type='button' onClick={() => deleteHandler(user._id)} 
-                                                    className='text-red-500'> Delete <MdDeleteOutline/></button>
+                                            <button type='button' onClick={() => preDeleteHandler(user._id)} style={{paddingBlock: '5px'}}
+                                                    className='text-red-500 '> <MdDeleteOutline/></button>
                                         </div>
-                                    </td>
-                                    <td className='text-left'>
-                                        <input type='checkbox' name='trashItem' value={user._id} 
-                                                    onClick={()=>setTrashUserList([...trashUserList, user._id])}/> 
                                     </td>
                                 </tr>
                             ) :<tr><td>No Records!</td></tr>

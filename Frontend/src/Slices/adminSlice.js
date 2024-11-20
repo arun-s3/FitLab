@@ -49,6 +49,22 @@ export const showUsers = createAsyncThunk('showUsers', async(thunkAPI)=>{
     }
 })
 
+export const showUsersofStatus = createAsyncThunk('showUsersofStatus', async({status}, thunkAPI)=>{
+    try{
+        console.log("Inside createAsyncThunk for showUsersofStatus")
+        const response = await axios.get(`/admin/customersOfStatus/?status=${status}`,{withCredentials:true})
+        console.log("Response from createAsyncThunk for showUsersofStatus-->"+JSON.stringify(response.data))
+        return response.data
+    }
+    catch(error){
+        console.log("inside catch of createAsyncThunk for showUsersofStatus")
+        const errorMessage = error.response?.data?.message
+        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
+        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
+        return thunkAPI.rejectWithValue(errorMessage)
+    }
+})
+
 export const toggleBlockUser = createAsyncThunk('toggleBlockUser', async(id,thunkAPI)=>{
     try{
         console.log("Inside createAsyncThunk for toggleBlockUser")
@@ -169,6 +185,26 @@ const adminSlice = createSlice({
             console.log("allUsers from showUsers.fulfilled"+JSON.stringify(action.payload))
         })
         .addCase(showUsers.rejected, (state,action)=>{
+            console.log("Inside showUsers.rejected")
+            state.adminLoading = false
+            state.success = false
+            state.adminError = true
+        })
+        .addCase(showUsersofStatus.pending, (state,action)=>{
+            console.log("Inside showUsersofStatus.pending")
+            state.adminLoading = true
+            state.success = false
+            state.adminError = false
+        })
+        .addCase(showUsersofStatus.fulfilled, (state,action)=>{
+            console.log("Inside showUsersofStatus.fulfilled")
+            state.adminLoading = false
+            state.success = true
+            state.adminError = false
+            state.allUsers = action.payload.users
+            console.log("allUsers from showUsersofStatus.fulfilled"+JSON.stringify(action.payload))
+        })
+        .addCase(showUsersofStatus.rejected, (state,action)=>{
             console.log("Inside showUsers.rejected")
             state.adminLoading = false
             state.success = false

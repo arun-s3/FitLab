@@ -102,6 +102,28 @@ const showUsers = async(req,res,next)=>{
     }
 }
 
+const showUsersofStatus = async(req,res,next)=> {
+    try{
+        const {status} = req.query
+        let users = []
+        console.log("Status from query-->", status)
+        if(status !== 'all'){
+            const blockedStatus = status == 'blocked'? true : false
+            console.log("blockedStatus-->", blockedStatus)
+            users = await User.find({isBlocked: blockedStatus, isAdmin: false}, {password: 0})
+        }else{
+            users = await User.find({isAdmin: false},{password: 0})
+        }
+        if(users){
+            res.status(200).json({users})
+        }
+    }
+    catch(error){
+        console.log("Inside catch of showUserTypes controller")
+        next(error)
+    }
+}
+
 const deleteUser = async(req,res,next)=>{
     try{
         console.log("Inside deleteUser controller")
@@ -191,4 +213,4 @@ const toggleBlockUser = async(req,res,next)=>{
     }
 }
 
-module.exports = {tester, signinAdmin, signoutAdmin, showUsers, deleteUser, deleteUserList, toggleBlockUser}
+module.exports = {tester, signinAdmin, signoutAdmin, showUsers, showUsersofStatus, deleteUser, deleteUserList, toggleBlockUser}

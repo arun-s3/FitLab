@@ -22,7 +22,7 @@ const generateToken = (res,userId)=>{
 
 const verifyToken = (token)=>{
     try{
-        const tokenVerified = jwt.verify(token,process.env.JWTSECRET,(err,decoded)=>{
+        const tokenVerified = jwt.verify(token, process.env.JWTSECRET, (err,decoded)=>{
             if(err){
                 console.log("error inside verifyToken in jwt"+err.message)
                 return false

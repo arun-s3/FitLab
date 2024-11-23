@@ -7,11 +7,11 @@ import {toast} from 'react-toastify'
 import {useGoogleLogin} from '@react-oauth/google';
 import axios from 'axios'
 
-import {SiteButtonSquare, GoogleButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
+import {SiteButtonSquare, SiteSecondaryBorderButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
 import Header from '../../../Components/Header/Header'
 import Footer from '../../../Components/Footer/Footer'
 import {signup, signin, googleSignin, resetStates} from '../../../Slices/userSlice'
-import {CustomHashLoader} from '../../../Components/Loader/Loader'
+import {CustomHashLoader, CustomScaleLoader} from '../../../Components/Loader/Loader'
 
 
 export default function SignUpAndInPage({type}){
@@ -26,18 +26,33 @@ export default function SignUpAndInPage({type}){
     const navigate = useNavigate()
     const identifierRef = useRef(null)
     const passwordRef = useRef(null)
+
+    const [otpPageLoading, setOtpPageLoading] = useState(false)
  
     const dispatch = useDispatch()
     const {error, loading, success, userToken, googleSuccess} = useSelector((state)=>state.user)
      
     useEffect(()=>{
         console.log("Inside useEffect()")
+        const checkSuccessAndSendOtp = async()=> {
+                console.log("success state now-->"+success)
+                toast.success("Registered succesfully!")
+                console.log("Just after success toast!")
+                // const response = await axios.post('/sendOtp', formData.email)
+                const response = await axios.post('http://localhost:3000/sendOtp', { email: formData.email }, {withCredentials:true});
+                if(response){
+                    console.log("Redirecting to OTP Verification page...")
+                    navigate('/signup/otp-verify', {
+                        replace:true, 
+                        state:{email: formData.email}
+                    }) 
+                    setOtpPageLoading(false)
+                }
+                // navigate('/signin',{replace:true})
+        }
         if(type=='signup' && success && (!googleSuccess||googleSuccess)){
-            console.log("success state now-->"+success)
-            toast.success("Registered succesfully!")
-            console.log("Just after success toast!")
-            navigate('/signin',{replace:true})
-            dispatch(resetStates())
+            setOtpPageLoading(true)
+            checkSuccessAndSendOtp();
         }
         if(type=='signin' && success){
             navigate('/',{replace:true})
@@ -53,6 +68,7 @@ export default function SignUpAndInPage({type}){
             // console.log("Cannot go coz u got token")
             // navigate('/',{replace:true})
         } 
+        dispatch(resetStates())
     })
     useLayoutEffect(()=>{
         console.log("inside typecheck useEffect--,formData-->"+JSON.stringify(formData))
@@ -275,11 +291,21 @@ export default function SignUpAndInPage({type}){
                         }
                     
                     </div>   
-                    <SiteButtonSquare shouldSubmit={true} customStyle={ type=='signup'?{width:'31.5rem'}:{width:'31.5rem',marginBottom:'60px'} } >
-                        { loading? <CustomHashLoader loading={loading}/>: 'Sign'+' '+type.slice(4,5).toUpperCase()+type.slice(5) }
+                    <SiteButtonSquare shouldSubmit={true}
+                         customStyle={ type=='signup'?{width:'31.5rem', display: 'flex', justifyContent:'center', alignItems:'center'}:{width:'31.5rem',marginBottom:'60px'} } >
+                        { 
+                            loading? <CustomHashLoader loading={loading}/> : otpPageLoading? 
+                                        <span className='flex justify-center items-center gap-[5px]'>  
+                                            <span className='text-secondary text-[11px] tracking-[0.3px] mb-[3px]'> 
+                                                Redirecting to OTP Verification Page 
+                                            </span>
+                                            <CustomScaleLoader loading={true}/>
+                                        </span>
+                                    : 'Sign'+' '+type.slice(4,5).toUpperCase()+type.slice(5) 
+                        }
                     </SiteButtonSquare>
                     {
-                        type=="signup"? <GoogleButtonSquare customStyle={{marginBottom:'60px', width:'31.5rem', display:'flex',
+                        type=="signup"? <SiteSecondaryBorderButtonSquare customStyle={{marginBottom:'60px', width:'31.5rem', display:'flex',
                                                                          justifyContent:'center', alignItems:'center'}}
                                                             clickHandler={()=>{
                                                                 setGooglePromptLoading(true)
@@ -287,7 +313,7 @@ export default function SignUpAndInPage({type}){
                                                             }}>
                                              <img src="/google.png" alt="" className='mr-[15px] inline-block'/> 
                                              { (loading||googlePromptLoading)? <CustomHashLoader loading={googlePromptLoading||loading}/>: "Continue with Google" }
-                                        </GoogleButtonSquare>: <></>
+                                        </SiteSecondaryBorderButtonSquare>: <></>
                     }
                 </form>
             </main>

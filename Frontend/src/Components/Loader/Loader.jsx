@@ -1,5 +1,6 @@
 import React from 'react'
-import HashLoader from 'react-spinners/HashLoader'
+import {HashLoader, PropagateLoader, PacmanLoader, ScaleLoader} from 'react-spinners'
+
 
 export function CustomHashLoader({loading}){
 
@@ -11,6 +12,48 @@ export function CustomHashLoader({loading}){
 
     return(
         <HashLoader loading={loading} cssOverride={loaderCssOverride} size={20} aria-label="Loading HashLoader" 
+                                                     color="rgba(159, 42, 240, 1)" data-testid="loader"/> 
+    )
+}
+
+export function CustomPacmanLoader({loading, size}){
+
+    const loaderCssOverride= {
+        display: "block",
+        margin: "0 auto",
+        borderColor: "red",
+    };
+
+    return(
+        <PacmanLoader loading={loading} cssOverride={loaderCssOverride} size={size} aria-label="Loading PacmanLoader" 
+                                                     color="rgba(159, 42, 240, 1)" data-testid="loader"/> 
+    )
+}
+
+export function CustomPropagateLoader({loading, size}){
+
+    const loaderCssOverride= {
+        display: "block",
+        margin: "0 auto",
+        borderColor: "red",
+    };
+
+    return(
+        <PropagateLoader loading={loading} cssOverride={loaderCssOverride} size={size} aria-label="Loading PropagateLoader" 
+                                                     color="rgba(159, 42, 240, 1)" data-testid="loader"/> 
+    )
+}
+
+export function CustomScaleLoader({loading, size}){
+
+    const loaderCssOverride= {
+        display: "block",
+        margin: "0 auto",
+        borderColor: "red",
+    };
+
+    return(
+        <ScaleLoader loading={loading} cssOverride={loaderCssOverride} size={size} aria-label="Loading ScaleLoader" 
                                                      color="rgba(159, 42, 240, 1)" data-testid="loader"/> 
     )
 }

@@ -11,6 +11,7 @@ import {FaSortUp,FaSortDown} from "react-icons/fa6";
 import {FaTrashAlt} from "react-icons/fa";
 import {LuCaseSensitive} from "react-icons/lu";
 import {VscCaseSensitive} from "react-icons/vsc";
+import {CiSquareChevRight} from "react-icons/ci";
 import {toast} from 'react-toastify';
 
 export default function AdminCustomersPageV1() {
@@ -117,7 +118,7 @@ export default function AdminCustomersPageV1() {
                         return prevCount - 1;
                     }
                 });
-            }, 1000);
+            }, 1000)
         }
     }
 
@@ -224,44 +225,44 @@ export default function AdminCustomersPageV1() {
                                                    rounded-[8px] text-secondary w-full h-[35px] pl-[10px]' onChange={(e)=>searchHandler(e)}/>
                                     <span className='self-end px-[3px] mb-[3px] bg-primary rounded-[4px] cursor-pointer relative case-tooltip' 
                                             style={matchCase? {outlineWidth:'1.5px', outlineColor:'#9f2af0', outlineOffset:'2px', outlineStyle:'solid'}:null}
-                                                    onClick={()=>{console.log("clicked Matchase-->"+matchCase); setMatchCase(!matchCase)}}>
+                                                    onClick={()=>{console.log("clicked Matchcase-->"+matchCase); setMatchCase(!matchCase)}}>
                                         <VscCaseSensitive/>
                                     </span>
                                 </div>
                             </td>
                             <td></td>
                             <td>
-                                <div className='inline-flex relative items-center justify-between secondaryLight-box cursor-pointer
+                                <div className='inline-flex relative items-center justify-between secondaryLight-box cursor-pointer 
                                      text-[13px] px-[11px] w-[75%] h-[35px] border-solid bottom-0 border-secondary customer-dropdown' 
-                                                 style={showStatusDropdown? {borderWidth:'1px', borderBottom:'0', borderBottomLeftRadius:'0px', borderBottomRightRadius:'0px', background:'rgb(227, 219, 232)', boxShadow:'2px -5px 6px rgba(72, 69, 75, 0.2)'}:{border:0, borderBottomLeftRadius:'8px', borderBottomRightRadius:'8px'}}
+                                                 style={showStatusDropdown? {borderWidth:'1px', borderBottom:'0', borderBottomLeftRadius:'0px', borderBottomRightRadius:'0px', background:'white', boxShadow:'2px -5px 6px rgba(72, 69, 75, 0.2)'}:{border:0, borderBottomLeftRadius:'8px', borderBottomRightRadius:'8px'}}
                                                  onClick={(e)=>{statusDropdownToggle(e)}}>
                                     
-                                    <div className='absolute top-full left-[-1px] w-[102%] rounded-none rounded-bl-[8px] rounded-br-[8px]
+                                    <div className='absolute top-full left-[-1px] w-[101.5%] rounded-none rounded-bl-[8px] rounded-br-[8px] 
                                        secondaryLight-box cursor-pointer border border-secondary border-t-0 pb-[10px] hidden' ref={statusDropdownRef}
-                                                                style={showStatusDropdown? {display:'inline-block', background:'rgb(227, 219, 232)', boxShadow:'2px 5px 6px rgba(72, 69, 75, 0.2)'}: null}>
+                                                                style={showStatusDropdown? {display:'inline-block', background:'white', boxShadow:'2px 5px 6px rgba(72, 69, 75, 0.2)'}: null}>
                                         <ul className='list-none text-[11px] text-secondary font-[450]'>
-                                            <li className='text-right flex items-center justify-center' onClick={()=> statusSelector('active')}>
-                                                <hr/>Active<hr/> 
+                                            <li className='text-right flex items-center pl-[20px] hover:bg-primary' onClick={()=> statusSelector('active')}>
+                                               <span className='flex items-center gap-[10px]'> <CiSquareChevRight/> <span>Active</span> </span> 
                                             </li>
 
-                                            <li className='text-right flex items-center justify-center' onClick={()=> statusSelector('blocked')}> 
-                                                <hr/>Blocked<hr/>
+                                            <li className='text-right flex items-center pl-[20px] hover:bg-primary' onClick={()=> statusSelector('blocked')}> 
+                                                <span className='flex items-center gap-[10px]'> <CiSquareChevRight/> <span>Blocked</span> </span> 
                                             </li>
                                             
-                                            <li className='text-right flex items-center justify-center' onClick={()=> statusSelector('all')}> 
-                                                <hr/>All<hr/> 
+                                            <li className='text-right flex items-center pl-[20px] hover:bg-primary' onClick={()=> statusSelector('all')}> 
+                                            <span className='flex items-center gap-[10px]'> <CiSquareChevRight/> <span>All</span> </span> 
                                             </li>
                                         </ul>
                                     </div>
                                     <button className='ml-[15px] capitalize' ref={statusButtonRef} >Status</button>
-                                    <RiArrowDropDownLine/>
+                                    <RiArrowDropDownLine style={{color:'rgba(159, 42, 240, 1)'}}/>
                                 </div>
                             </td>  
                             <td>
                                 <div className='inline-flex items-center justify-between secondaryLight-box cursor-pointer
                                                                                             text-[13px] px-[11px] w-[75%] h-[35px] customer-dropdown'> 
                                     <button className='ml-[15px]'>Show Entries: </button>
-                                    <RiArrowDropDownLine />
+                                    <RiArrowDropDownLine style={{color:'rgba(159, 42, 240, 1) '}}/>
                                 </div>
                             </td>
                         </tr>
@@ -354,7 +355,7 @@ export default function AdminCustomersPageV1() {
                         </td>
                     </tr>
                     
-                    <tbody className='text-[14px]'>
+                    <tbody className='text-[13px]'>
                         {   
                             localUsers.length > 0 ? localUsers.map((user,index) =>
                                 <tr key={user._id} className={`${(index % 2 == 0)? 'bg-[#eee]': 'bg-transparent'} cursor-pointer hover:bg-[#f3f7df]`}>
@@ -363,9 +364,9 @@ export default function AdminCustomersPageV1() {
                                     <td>{user.mobile}</td>
                                     <td>--</td>
                                     <td>
-                                        <div className='flex items-center gap-[10px] action-buttons'>
+                                        <div className='flex items-center gap-[10px] text-[14px] action-buttons'>
                                             <button type='button' className='basis-[103px]' onClick={() => toggleBlockHandler(user._id)}>
-                                                 {user.isBlocked ? "Unblock" : "Block"} <MdBlock style={user.isBlocked? {color:'green'}:{color:'red'}}/>
+                                                 {user.isBlocked ? "Unblock" : "Block"} <MdBlock style={user.isBlocked? {color:'#22c55e'}:{color:'#e74c3c'}}/>
                                             </button>
                                             <button type='button' onClick={() => preDeleteHandler(user._id)} style={{paddingBlock: '5px'}}
                                                     className='text-red-500 '> <MdDeleteOutline/></button>

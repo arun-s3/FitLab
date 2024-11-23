@@ -16,6 +16,16 @@ app.use(nocache())
 const path = require('node:path')
 app.use('/Public',express.static(path.join(__dirname,'/Public')))
 
+const session = require("express-session")
+app.use(
+    session({
+      secret: "your_secret_key", 
+      resave: false,
+      saveUninitialized: true,
+      cookie: { maxAge: 300000 }
+    })
+)
+
 app.use(express.json({limit: '10mb'}))
 app.use(express.urlencoded({extended: true, limit:'10mb'}))
 const cookieParser = require('cookie-parser')

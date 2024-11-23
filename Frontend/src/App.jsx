@@ -3,6 +3,7 @@ import {BrowserRouter, Route, Routes} from 'react-router-dom'
 
 import HomePage from './Pages/User/HomePage/HomePage'
 import SignUpAndInPage from './Pages/User/SignUpAndInPage/SignUpAndInPage'
+import OtpVerificationPage from './Pages/User/OtpVerificationPage/OtpVerificationPage'
 import ProductListPage from './Pages/User/ProductListPage/ProductListPage'
 import PrivateUserRoutes from './Components/PrivateUserRoutes/PrivateUserRoutes'
 
@@ -32,7 +33,10 @@ export default function App(){
                 <Route element={<PrivateUserRoutes/>}>
                 </Route>
                 <Route index element={<HomePage/>}/>
-                <Route path='signup' element={<SignUpAndInPage type='signup' />}/>
+                <Route path='signup'>
+                    <Route index element={<SignUpAndInPage type='signup' />} />
+                    <Route path='otp-verify' element={<OtpVerificationPage/>}/>
+                </Route>
                 <Route path='signin' element={<SignUpAndInPage type='signin' />}/>
                 <Route path='products'>
                     <Route index element={<ProductListPage/>}/>

@@ -2,7 +2,7 @@ const User = require('../Models/userModel')
 const bcryptjs = require('bcryptjs')
 const {errorHandler} = require('../Utils/errorHandler')
 const {generateToken, verifyToken} = require('../Utils/jwt')
-const user = require('../Models/userModel')
+const user = require('../Models/userModel') // CHECK IF THIS IS NEEDED(MAYBE THE REASON OF OTHER RANDOM ERRORS
 
 const tester = async(req,res)=>{ res.send("AdminTest-- Success")}
 

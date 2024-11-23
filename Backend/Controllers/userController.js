@@ -1,5 +1,7 @@
 const User = require('../Models/userModel')
 const bcryptjs = require('bcryptjs')
+const nodemailer = require("nodemailer");
+// const crypto = require("crypto");
 const {errorHandler} = require('../Utils/errorHandler')
 const {generateToken, verifyToken} = require('../Utils/jwt')
 
@@ -13,6 +15,81 @@ const securePassword = async(password)=>{
         console.log(error)
     }
 }
+
+const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: "fitlab0101@gmail.com", 
+      pass: process.env.FITLABPASS, 
+    },
+  })
+  
+  const sendOtp = async (req, res, next) => {
+    const {email} = req.body
+    console.log("Email frm the body--->", email)
+    console.log("process.env.FITLABPASS--->", process.env.FITLABPASS)
+    if (!email) {
+      return res.status(400).json({message: "Email is required!"});
+    }
+  
+    const otp = Math.floor(10000 + Math.random() * 90000);
+    req.session.otp = otp;
+    req.session.email = email; 
+    req.session.otpExpiresAt = Date.now() + 5 * 60 * 1000; 
+    console.log("req.session.otpExpiresAt mae at sendOtp--->",req.session.otpExpiresAt)
+    try {
+      await transporter.sendMail({
+        from: "arunsudhakaran01@gmail.com",
+        to: email,
+        subject: "OTP Code Verification",
+        text: `Your OTP code is ${otp}. It would be expired in 5 minutes.`,
+      })
+      return res.status(200).json({ message: "OTP sent successfully" });
+    } catch (error) { 
+      console.error("Error sending email:", error);
+      return res.status(500).json({ message: "Error sending OTP email" });
+    }
+  }
+
+  const verifyOtp = async(req, res, next) => {
+    try{
+        const {otp, email} = req.body;
+        console.log("OTP to verify---->", otp)
+        console.log("req.session.otpExpiresAt now in verifyOtp--->",req.session.otpExpiresAt)
+        console.log("Date.now()----->", Date.now())
+        console.log("Date.now() > req.session.otpExpiresAt----->", Date.now() > req.session.otpExpiresAt)
+
+        if (!otp) {
+        //   return res.status(400).json({ message: "OTP is required!" })
+          next(errorHandler(400, "OTP is required!"))
+        }
+        if (!req.session.otp || !req.session.email) {
+        //   return res.status(400).json({ message: "No OTP found to verify!" })
+          next(errorHandler(400, "No OTP found to verify!"))
+        }
+        if (Date.now() > req.session.otpExpiresAt) {
+        //   return res.status(400).json({ message: "OTP has expired!" });
+            next(errorHandler(400, "OTP has expired!"))
+        }
+    
+        if (parseInt(otp, 10) === req.session.otp) {
+          req.session.otp = null;
+          req.session.email = null;
+          req.session.otpExpiresAt = null;
+
+          const user = await User.updateOne({email}, {$set: {isVerified: true}})
+          return res.status(200).json({ message: "OTP verified successfully!" });
+        } else {
+          console.log("INAVLID OTP!")
+        //   return res.status(200).json({ message: "Invalid OTP!" });
+          (errorHandler(400, "Invalid OTP!"))
+        }
+     }
+     catch(error){
+        next(error)
+        console.log("error-verifyOtp--", error.message)
+     }
+  }
 
 const createUser = async(req,res,next)=>{
     try{
@@ -67,6 +144,29 @@ const createUser = async(req,res,next)=>{
         console.log("error-signup--", error.message)
     }
 }
+
+
+// function generateOTP(length = 6) {
+//     return crypto.randomInt(10 ** (length - 1), 10 ** length).toString()
+// }
+
+// async function sendOTPEmail(email, otp) {
+//     const transporter = nodemailer.createTransport({
+//         service: "gmail", 
+//         auth: {
+//             user: "fitlab0101@gmail.com",
+//             pass: process.env.FITLABPASS, 
+//         },
+//     })
+//     const mailOptions = {
+//         from: "fitlab0101@gmail.com",
+//         to: email,
+//         subject: "OTP Verification",
+//         text: `Your OTP is ${otp}. It will get expired within 5 minutes.`,
+//     }
+
+//     await transporter.sendMail(mailOptions);
+// }
 
 const loginUser = async(req,res,next)=>{
     try{
@@ -164,4 +264,4 @@ const signout = (req,res,next)=>{
 }
 
 
-module.exports = {tester, createUser, loginUser, googleSignin, signout}
+module.exports = {tester, createUser, sendOtp, verifyOtp, loginUser, googleSignin, signout}

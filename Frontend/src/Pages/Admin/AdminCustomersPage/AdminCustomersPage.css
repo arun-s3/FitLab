@@ -1,4 +1,7 @@
 
+#AdminCustomersPage > header i:first-child >svg{
+    color: #666363;
+}
 #AdminCustomersPage table td{
     width:20vw;
     padding:10px;

@@ -1,6 +1,4 @@
-#AdminAddAndEditCategoryPage > header i:first-child >svg{
-    color: #666363;
-}
+
 #AdminAddAndEditCategoryPage main #category-content .category-content-wrapper{
     display:flex;
     justify-content: space-between;

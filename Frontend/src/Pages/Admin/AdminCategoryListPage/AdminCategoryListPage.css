@@ -1,39 +1,40 @@
-#AdminCategoryListPage .tab > h4{
+
+#AdminCategoryListPage main .tab > h4{
     font-size: 14px;
     color: var(--SECONDARY);
 }
-#AdminCategoryListPage > .container > input{
+#AdminCategoryListPage main > .container > input{
     border-color: rgb(212, 176, 236);
     box-shadow: 2px 2px 12px rgb(233, 222, 242);
 }
-#AdminCategoryListPage table thead .table-header{
+#AdminCategoryListPage main table thead .table-header{
     border-width: 1px;
     border-color: rgb(220, 230, 166);
 }
-#AdminCategoryListPage table thead .table-header .table-label{
+#AdminCategoryListPage main table thead .table-header .table-label{
     margin-left: 20px;
     font-size: 15px;
 }
-#AdminCategoryListPage table thead .table-header i{
+#AdminCategoryListPage main table thead .table-header i{
     margin-top: 6px;
     margin-left: 4px;
 }
-#AdminCategoryListPage table thead .table-header i > svg{
+#AdminCategoryListPage main table thead .table-header i > svg{
     height: 10px;
     width: 8px;
     margin-top: -7px;
     cursor: pointer;
 }
-#AdminCategoryListPage table>tbody td{
+#AdminCategoryListPage main table>tbody td{
     text-align: center;
 } 
 
-#AdminCategoryListPage table>tbody #open-subcategory > svg{
+#AdminCategoryListPage main table>tbody #open-subcategory > svg{
    height: 17px;
    width: 17px;
    fill: rgb(119, 123, 99);
 }
-#AdminCategoryListPage table>tbody #open-subcategory:hover::before{
+#AdminCategoryListPage main table>tbody #open-subcategory:hover::before{
     content: attr(data-label);
     height: 1rem;
     width: 7rem;
@@ -51,7 +52,7 @@
     color: var(--SECONDARY);
 }
 
-/* #AdminCategoryListPage table>tbody .action-buttons button{
+/* #AdminCategoryListPage main table>tbody .action-buttons button{
   padding-block: 2px;
   padding-inline: 28px;
   border: 1px solid rgb(190, 200, 138);
@@ -64,20 +65,20 @@
   justify-content: center;
   gap: 3px;
 }
-#AdminCategoryListPage table>tbody .action-buttons button:first-child >svg{
+#AdminCategoryListPage main table>tbody .action-buttons button:first-child >svg{
   color: var(--SECONDARY);
   background: var(--PRIMARY);
   font-size: 12px;
 } */
-#AdminCategoryListPage table>tbody .action-buttons button:last-child >svg{
+#AdminCategoryListPage main table>tbody .action-buttons button:last-child >svg{
   color: var(--SECONDARY);
   font-size: 15px;
 }
-#AdminCategoryListPage table>tbody #category-content figcaption{
+#AdminCategoryListPage main table>tbody #category-content figcaption{
     background: linear-gradient(to right, rgba(255,255,255,0.7), rgba(255,255,255,0.7));
     word-spacing: 1px;
 }
-#AdminCategoryListPage table>tbody .admin-control:hover::before{
+#AdminCategoryListPage main table>tbody .admin-control:hover::before{
   content: attr(data-label);
   width: 2.3rem;
   height: 25px;
@@ -105,10 +106,10 @@
   animation-timing-function: ease-in-out;
   animation-fill-mode: forwards;
 }      
-#AdminCategoryListPage table>tbody .admin-control > i > svg {
+#AdminCategoryListPage main table>tbody .admin-control > i > svg {
   transform: rotate(0deg); 
 }
-#AdminCategoryListPage table>tbody .admin-control:hover > i > svg {
+#AdminCategoryListPage main table>tbody .admin-control:hover > i > svg {
   animation-name: rotate-icon;
   animation-duration: 0.5s;
   animation-timing-function: ease-in-out;
@@ -137,7 +138,7 @@
     padding-inline: 55px;
   }
 }
-#AdminCategoryListPage #Layer_1 .svg-upsort{
+#AdminCategoryListPage main #Layer_1 .svg-upsort{
   fill: none;
   stroke: #000;
   stroke-linecap: round;

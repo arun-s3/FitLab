@@ -5,8 +5,10 @@ import {useDispatch, useSelector} from 'react-redux'
 
 import {getAllCategories, getCategoriesOfType, getSingleCategory, toggleCategoryStatus, resetSubcategories} from '../../../Slices/categorySlice'
 import {SearchInput} from '../../../Components/FromComponents/FormComponents'
+import AdminHeader from '../../../Components/AdminHeader/AdminHeader'
 
 import {toast} from 'react-toastify'
+import {IoArrowBackSharp} from "react-icons/io5";
 import {FaSortUp,FaSortDown} from "react-icons/fa6";
 import {MdBlock, MdDeleteOutline} from 'react-icons/md';
 import {CgUnblock} from "react-icons/cg";
@@ -311,7 +313,12 @@ const tableBodyGenerator = (categories, isSubcategory, parentLevelCount)=> {
    }
 
   return(
-    <div className='relative mt-[4.3rem]' id='AdminCategoryListPage'>
+   <section id='AdminCategoryListPage'>
+    <header>
+        <AdminHeader heading='Category List' subHeading='View, Edit and Organize all Categories seamlessly'/>
+    </header>
+    <main>
+        <div className='relative mt-[4.3rem]'>
         <div className='h-[40px] w-[150px] bg-white border border-b-[#e5e7eb] rounded-tl-[10px] cursor-pointer
                                  flex justify-center items-center absolute top-[-39px] tab' onClick={()=> showCategories('all')} 
                         style={toggleTab.goTo == 'all'? {borderBottomColor:'transparent'}:{}}>
@@ -407,5 +414,7 @@ const tableBodyGenerator = (categories, isSubcategory, parentLevelCount)=> {
   </div>
   <div className='h-[5rem]'></div>
  </div>
+</main>
+</section>
   )
 }

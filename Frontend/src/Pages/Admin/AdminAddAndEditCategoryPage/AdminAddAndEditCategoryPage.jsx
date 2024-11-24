@@ -14,6 +14,7 @@ import {SlBadge} from "react-icons/sl";
 import {IoIosClose} from "react-icons/io";
 import {toast} from 'react-toastify';
 
+import AdminHeader from '../../../Components/AdminHeader/AdminHeader';
 import FileUpload from '../../../Components/FileUpload/FileUpload';
 import { SiteButtonSquare } from '../../../Components/SiteButtons/SiteButtons';
 import {createCategory, getAllCategories, getCategoryNames, updateCategory, resetStates} from '../../../Slices/categorySlice'
@@ -279,17 +280,10 @@ export default function AdminAddAndEditCategoryPage({editCategory}){
     return(
         <section id='AdminAddAndEditCategoryPage'>
             <header>
-                <div className='flex justify-between items-center'>
-                    <div className='flex gap-[10px]'>
-                        <i className='p-[7px] h-[33px] border border-[#c4c6ca] mt-[-6px] rounded-[4px] self-center'> <IoArrowBackSharp/> </i>
-                        <div className='flex flex-col'>
-                            <h1> Categories </h1>
-                            <h5 className='text-[12px] font-[500] text-secondary tracking-[0.2px] mt-[-2px]'> Add, Edit or Block categories</h5>
-                        </div>
-                    </div>
                     {/* <input type='search' placeholder='Search Categories' className='w-[12rem] h-[35px] border-dotted bg-[#fefff8]
                              rounded-[7px] placeholder:text-[11px]' /> */}
-                </div>
+                <AdminHeader heading={ editCategory ? 'Edit Category' : 'Add Category'} 
+                        subHeading={ editCategory ? "Update the Category information" : "Create and organize categories here"}/>
             </header>
             <main className='flex gap-[10px]'>
                 <div className='flex flex-col gap-[15px] basis-[65%] w-[65%]' id='category-content'>

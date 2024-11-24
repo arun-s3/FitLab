@@ -1244,6 +1244,10 @@ select{
   margin-top: 8px;
 }
 
+.mt-\[-px\]{
+  margin-top: -px;
+}
+
 .block{
   display: block;
 }
@@ -2640,6 +2644,10 @@ select{
   line-height: 1.75rem;
 }
 
+.text-\[1px\]{
+  font-size: 1px;
+}
+
 .font-\[450\]{
   font-weight: 450;
 }
@@ -2714,6 +2722,14 @@ select{
 
 .tracking-\[1px\]{
   letter-spacing: 1px;
+}
+
+.tracking-\[0\.px\]{
+  letter-spacing: 0.px;
+}
+
+.tracking-\[0\.4px\]{
+  letter-spacing: 0.4px;
 }
 
 .text-\[\#07bc0c\]{

@@ -14,6 +14,7 @@ import {AiOutlineSafetyCertificate} from "react-icons/ai";
 import {CgDetailsMore} from "react-icons/cg";
 import {toast} from 'react-toastify';
 
+import AdminHeader from '../../../Components/AdminHeader/AdminHeader'
 import FileUpload from '../../../Components/FileUpload/FileUpload';
 import TagGenerator from '../../../Components/TagGenerator/TagGenerator';
 import PlaceholderIcon from '../../../Components/PlaceholderIcon/PlaceholderIcon'
@@ -245,10 +246,11 @@ export default function AdminAddAndEditProductPage({ editProduct }){
 
     return(
         <section id='AdminAddProduct'> 
-            <header className='flex gap-[10px] items-center'>
-                <i className='p-[7px] border border-[#c4c6ca] rounded-[4px]'> <IoArrowBackSharp/> </i>
-                <h1>{ editProduct ? 'Edit Product' : 'Add Product'}</h1>
-                {/* <i className='p-[7px] border border-transparent rounded-[4px]'>  <ProductIcon2/> </i>    <LuPackage/> <ProductIcon/> */}
+            <header>
+                {/* <i className='p-[7px] border border-[#c4c6ca] rounded-[4px]'> <IoArrowBackSharp/> </i>
+                <h1>{ editProduct ? 'Edit Product' : 'Add Product'}</h1> */}
+                <AdminHeader heading={ editProduct ? 'Edit Product' : 'Add Product'} 
+                        subHeading={ editProduct ? "Update the product information" : "Fill in the details to add a new product"}/>
             </header>
             <main className='flex gap-[10px]'>
                 <div className='flex flex-col gap-[15px] basis[60%] w-[60%]'>

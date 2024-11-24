@@ -2,9 +2,12 @@ import React, {useEffect, useState, useRef} from 'react';
 import './AdminCustomersPage.css';
 import axios from '../../../Utils/axiosConfig';
 import {useSelector, useDispatch} from 'react-redux';
+
+import AdminHeader from '../../../Components/AdminHeader/AdminHeader';
 import Modal from '../../../Components/Modal/Modal';
 import {showUsers, showUsersofStatus, toggleBlockUser, deleteUser, deleteUsersList, resetStates} from '../../../Slices/adminSlice';
 
+import {IoArrowBackSharp} from "react-icons/io5";
 import {RiArrowDropDownLine} from 'react-icons/ri';
 import {MdBlock, MdDeleteOutline} from 'react-icons/md';
 import {FaSortUp,FaSortDown} from "react-icons/fa6";
@@ -208,7 +211,10 @@ export default function AdminCustomersPageV1() {
 
     return (
         <section className='h-screen z-[-1]' id='AdminCustomersPage'>
-            <h1 className='text-h3Semibold mb-[2rem]'>Customers</h1>
+            {/* <h1 className='text-h3Semibold mb-[2rem]'>Customers</h1> */}
+            <header>
+                <AdminHeader heading='Customers' subHeading='View, Update, and Oversee Customer accounts'/>
+            </header>
             <main className='p-[1rem] border border-secondary flex items-center justify-center w-[80%] 
                                     rounded-[9px] gap-[5px]' style={mainBgImg}>
                 { openModel &&

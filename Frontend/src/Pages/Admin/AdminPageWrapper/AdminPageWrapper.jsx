@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, {useEffect, useState} from 'react'
 import  './AdminPageWrapper.css'
 import {FaRegBell} from "react-icons/fa";
 import {Link, useNavigate, Outlet} from 'react-router-dom'
@@ -16,6 +16,11 @@ import {TbTruckDelivery} from "react-icons/tb";
 import {RiDiscountPercentLine} from "react-icons/ri";
 import {RiSignpostLine} from "react-icons/ri";
 import {GrGallery} from "react-icons/gr";
+import {MdOutlineArrowDropDownCircle} from "react-icons/md";
+import {IoIosArrowDropdown} from "react-icons/io";
+import {RiArrowDropDownLine} from "react-icons/ri";
+import {FaRegCaretSquareRight} from "react-icons/fa";
+import {CiSquareChevRight} from "react-icons/ci";
 
 
 export default function AdminWrapperPage(){
@@ -35,6 +40,25 @@ export default function AdminWrapperPage(){
     const {adminToken, admin} = useSelector(state=>state.admin)
     const dispatch = useDispatch()
     const navigate = useNavigate()
+
+    const [showSublist, setShowSublist] = useState({
+        dashboard:false, customers:false, product: false, category: false, couponGenerator:false, orders:false, salesReport:false, offers:false, banners:false, settings:false
+    })
+
+    const toggleSublist = (type) => {
+        setShowSublist((prevState) => {
+            const updatedState = Object.keys(prevState).reduce((acc, key) => {
+                acc[key] = key === type ? !prevState[key] : false
+                return acc
+            }, {})
+            return updatedState
+        })
+    }
+    
+    const logoutAdmin = ()=> {
+        dispatch(adminSignout())
+        console.log("Dispatching adminSignout()....")
+    }
 
     return(
         <div id='admin-wrapper'>
@@ -62,47 +86,137 @@ export default function AdminWrapperPage(){
             
                 <aside className='inline-flex gap-0 z-[10]' id='admin-wrapper-aside'>
                     <div className='h-screen w-[14rem] bg-black' style={asideBgImg}id='aside-content' >
-                        <nav className='flex justify-center items-center mt-[4rem]'>
-                            <ul className='list-none flex flex-col gap-[2rem] justify-center items-start text-white text-descReg1'>
-                                <li> 
-                                    <Link> <MdOutlineDashboardCustomize className='inline-block'/> Dashboard</Link> 
+                        <nav className='flex justify-center items-center mt-[3.3rem]'>
+                            <ul className='w-full ml-[3rem] list-none flex flex-col gap-[1.5rem] justify-center items-start text-white text-[13.5px]'>
+                                <li onClick={()=>toggleSublist('dashboard')}> 
+                                    <div className={`${ showSublist.dashboard && 'toggleSublist-custom-after'} option`}> 
+                                        <Link> 
+                                            <MdOutlineDashboardCustomize className='inline-block'/> 
+                                            <span className={`${ showSublist.dashboard && 'text-primaryDark'}`}> Dashboard </span>
+                                        </Link>
+                                    </div> 
+                                </li>
+                                <li onClick={()=>toggleSublist('customers')}> 
+                                    <div className={`${ showSublist.customers && 'toggleSublist-custom-after'} option`}>
+                                        <Link to='/admin/customers'> 
+                                            <HiOutlineUsers/> 
+                                            <span className={`${ showSublist.customers && 'text-primaryDark'}`}>  Customers </span> 
+                                        </Link> 
+                                    </div> 
                                 </li>
                                 <li> 
-                                    <Link> <HiOutlineUsers/> Customers</Link> 
+                                    <div className={`${ showSublist.product && 'toggleSublist-custom-after'} flex items-center gap-[1.5rem] option list-dropdown`}>
+                                        <span className='flex justify-center items-center gap-[5px] cursor-pointer list-name'>
+                                            <BsCart3/> 
+                                            <span className={`${ showSublist.product && 'text-primaryDark'}`}>  Products </span> 
+                                        </span>
+                                        {/* <MdOutlineArrowDropDownCircle/> */}
+                                        {/* <IoIosArrowDropdown/> */}
+                                        <RiArrowDropDownLine onClick={()=>toggleSublist('product')}/>
+                                     </div> 
+                                     {
+                                        showSublist.product &&
+                                        <ul className='pt-[1rem] pl-[1rem] list-none flex flex-col gap-[10px] justify-center items-start
+                                             text-white text-[12.5px] sublist'>
+                                            <li>
+                                               <div className='flex items-center'> 
+                                                    <Link to='/admin/products/add'> <CiSquareChevRight/> Add Product </Link>
+                                               </div> 
+                                            </li>
+                                            <li>
+                                               <div className='flex items-center'>
+                                                    <Link to='/admin/products/list'> <CiSquareChevRight/> List/Edit Products </Link>
+                                               </div> 
+                                            </li>
+                                     </ul>
+                                     }
                                 </li>
                                 <li> 
-                                    <Link> <BsCart3/> Products</Link> 
+                                    <div className={`${ showSublist.category && 'toggleSublist-custom-after'} flex items-center gap-[1.5rem] option list-dropdown`}>
+                                        <span className='flex justify-center items-center gap-[5px] cursor-pointer list-name'>
+                                            <LuLayoutList/> 
+                                            <span>Category</span> 
+                                        </span>
+                                        {/* <MdOutlineArrowDropDownCircle/> */}
+                                        {/* <IoIosArrowDropdown/> */}
+                                        <RiArrowDropDownLine onClick={()=>toggleSublist('category')}/>
+                                     </div> 
+                                     {
+                                        showSublist.category &&
+                                        <ul className='pt-[1rem] pl-[1rem] list-none flex flex-col gap-[10px] justify-center items-start
+                                             text-white text-[12.5px] sublist'>
+                                            <li>
+                                               <div className='flex items-center'>
+                                                    <Link to='/admin/products/category/add'> <CiSquareChevRight/> Add Category </Link>
+                                               </div> 
+                                            </li>
+                                            <li>
+                                               <div className='flex items-center'>
+                                                    <Link to='/admin/products/category'> <CiSquareChevRight/> List/Edit Categories </Link>
+                                               </div> 
+                                            </li>
+                                     </ul>
+                                     }
                                 </li>
-                                <li>
-                                     <Link> <LuLayoutList/> Category</Link> 
+                                <li onClick={()=>toggleSublist('couponGenerator')}> 
+                                    <div className={`${ showSublist.couponGenerator && 'toggleSublist-custom-after'} option`}> 
+                                        <Link> 
+                                            <IoPricetagOutline/>
+                                            <span className={`${ showSublist.couponGenerator && 'text-primaryDark'}`}>  Coupon Generator </span> 
+                                        </Link> 
+                                    </div> 
                                 </li>
-                                <li> 
-                                    <Link> <IoPricetagOutline/> Coupon Generator</Link> 
-                                </li>
-                                <li> 
-                                    <Link> <TbTruckDelivery/> Orders</Link>
+                                <li onClick={()=>toggleSublist('orders')}> 
+                                    <div className={`${ showSublist.orders && 'toggleSublist-custom-after'} option`}>
+                                        <Link>
+                                            <TbTruckDelivery/> 
+                                            <span className={`${ showSublist.orders && 'text-primaryDark'}`}> Orders </span> 
+                                        </Link> 
+                                    </div>
                                  </li>
-                                <li>
-                                     <Link> <FaChartLine/> Sales Report</Link> 
+                                <li onClick={()=>toggleSublist('salesReport')}>
+                                     <div className={`${ showSublist.salesReport && 'toggleSublist-custom-after'} option`}>
+                                        <Link>
+                                            <FaChartLine/> 
+                                            <span className={`${ showSublist.salesReport && 'text-primaryDark'} option`}> Sales Report </span> 
+                                        </Link> 
+                                    </div> 
                                 </li>
-                                <li> 
-                                    <Link> <RiDiscountPercentLine/> Offers</Link> 
+                                <li onClick={()=>toggleSublist('offers')}> 
+                                    <div className={`${ showSublist.offers && 'toggleSublist-custom-after'} option`}>
+                                        <Link> 
+                                            <RiDiscountPercentLine/> 
+                                            <span className={`${ showSublist.offers && 'text-primaryDark'}`}> Offers </span>
+                                        </Link> 
+                                    </div> 
                                 </li>
-                                <li> 
-                                    <Link> <GrGallery/> Banners</Link>
+                                <li onClick={()=>toggleSublist('banners')}> 
+                                    <div className={`${ showSublist.banners && 'toggleSublist-custom-after'} option`}>
+                                        <Link>
+                                            <GrGallery/>
+                                            <span className={`${ showSublist.banners && 'text-primaryDark'}`}> Banners </span> 
+                                        </Link> 
+                                    </div>
                                  </li>
-                                <hr className='bg-gray-600 text-gray-600 w-[70%] mt-[5px]'></hr>
-                                <ul className='list-none flex flex-col gap-[1rem] justify-center items-start
-                                                 text-white text-descReg1 mt-[-10px] '>
-                                    <li>
-                                        <Link> <IoSettingsOutline/> Settings</Link>
+                                <div className='bg-[#5c5858] w-[85%] h-[1.3px] mt-[5px]'></div>
+                                {/* <ul className='list-none flex flex-col gap-[1rem] justify-center items-start
+                                                 text-white text-descReg1 mt-[-10px] '> */}
+                                    <li className='mt-[-10px] text-[14px] tracking-[0.5px]' onClick={()=>toggleSublist('settings')}>
+                                        <div className={`${ showSublist.settings && 'toggleSublist-custom-after'} option`}> 
+                                            <Link>
+                                                <IoSettingsOutline className='h-[15px] w-[15px]'/>  
+                                                <span className={`${ showSublist.settings && 'text-primaryDark'}`}> Settings </span> 
+                                            </Link> 
+                                        </div>
                                     </li>
-                                    <li>
-                                        <Link onClick={()=>{
-                                            dispatch(adminSignout())
-                                            console.log("Dispatching adminSignout()....")}}> <MdLogout/> Logout</Link>
+                                    <li className='mt-[-10px] text-[14px] tracking-[0.5px]'> 
+                                        <div className='option'>
+                                            <Link onClick={()=> logoutAdmin()}> 
+                                                <MdLogout className='h-[15px] w-[15px]'/> Logout
+                                            </Link>
+                                        </div>
                                     </li>
-                                </ul>
+                                {/* </ul> */}
                             </ul>
                         </nav> 
                     </div>

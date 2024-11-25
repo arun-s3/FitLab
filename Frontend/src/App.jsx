@@ -10,6 +10,7 @@ import PrivateUserRoutes from './Components/PrivateUserRoutes/PrivateUserRoutes'
 import AdminSignInPage from './Pages/Admin/AdminSignInPage/AdminSignInPage'
 import AdminPageWrapper from './Pages/Admin/AdminPageWrapper/AdminPageWrapper'
 import PrivateAdminRoutes from './Components/PrivateAdminRoutes/PrivateAdminRoutes'
+import UserPresenceErrorPage from './Pages/Admin/AdminErrorPages/UserPresenceErrorPage'
 import AdminCustomersPage from './Pages/Admin/AdminCustomersPage/AdminCustomersPage'
 // import AdminCustomersPageV2 from './Pages/Admin/TesterPages/TesterV2AdminCustomersPage' //For Testing Purpose
 // import AdminCustomersPageV3 from './Pages/Admin/TesterPages/TesterV3AdminCustomersPage'  //For Testing Purpose
@@ -18,6 +19,7 @@ import ImageEditor from './Components/ImageEditor/ImageEditor'
 import AdminProductListPage from './Pages/Admin/AdminProductListPage/AdminProductListPage'
 import AdminAddAndEditCategoryPage from './Pages/Admin/AdminAddAndEditCategoryPage/AdminAddAndEditCategoryPage'
 import AdminCategoryListPage from './Pages/Admin/AdminCategoryListPage/AdminCategoryListPage'
+import AdminDashboardPage from './Pages/Admin/AdminDashboardPage/AdminDashboardPage'
 
 import {ToastContainer} from 'react-toastify'
 import "react-toastify/dist/ReactToastify.css";
@@ -33,6 +35,9 @@ export default function App(){
                 <Route element={<PrivateUserRoutes/>}>
                 </Route>
                 <Route index element={<HomePage/>}/>
+                <Route path='error'>
+                    <Route path='userPresent' element={<UserPresenceErrorPage/>}/>
+                 </Route>
                 <Route path='signup'>
                     <Route index element={<SignUpAndInPage type='signup' />} />
                     <Route path='otp-verify' element={<OtpVerificationPage/>}/>
@@ -47,6 +52,7 @@ export default function App(){
                     <Route element={<PrivateAdminRoutes/>}>
                         <Route path='image-editor' element={<ImageEditor/>} />
                         <Route element={<AdminPageWrapper/>}>
+                            <Route path="dashboard" element={<AdminDashboardPage/>} />
                             <Route path="customers" element={<AdminCustomersPage/>} />
                             <Route path='products'>
                                 <Route path='list' element={<AdminProductListPage/>} />

@@ -1,12 +1,16 @@
 import React,{useState, useEffect} from 'react'
 import './AdminSignInPage.css'
+
 import {Link,useNavigate} from 'react-router-dom'
 import Logo from '../../../Components/Logo/Logo'
 import {useSelector,useDispatch} from 'react-redux'
 import {resetStates, adminSignin} from '../../../Slices/adminSlice'
+
+import {toast} from 'react-toastify'
+import {RiAdminLine} from "react-icons/ri";
+
 import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
 import {CustomHashLoader} from '../../../Components/Loader/Loader'
-import {RiAdminLine} from "react-icons/ri";
 
 export default function AdminSignInPage(){
 
@@ -22,24 +26,22 @@ export default function AdminSignInPage(){
     const dispatch = useDispatch()
     const {adminError, adminLoading, adminSuccess, adminToken,admin} = useSelector((state)=>state.admin)
 
-    useEffect(()=>{
+    useEffect(() => {
         console.log("Inside useEffect()")
-        if(adminSuccess){
+        console.log("adminSuccess--->", adminSuccess)
+        if (adminSuccess) {
             console.log("ADMIN TOKEN-->"+adminToken)
             console.log("ADMIN DATA-->"+JSON.stringify(admin))
-            navigate('/admin',{replace:true})
+            navigate('/admin/dashboard', { replace: true });
             dispatch(resetStates())
-        }
-        if(adminError){
-            console.log("Just after before toast!-->"+adminError)
-            console.log("Just after error toast!")
+        } else if (adminError) {
+            toast.error(adminError)
             dispatch(resetStates())
+        } else if (!adminSuccess && adminToken) {
+            navigate('/admin/dashboard', {replace: true })
         }
-        if(adminToken){
-            console.log("Cannot go coz u got token")
-            navigate('/admin',{replace:true})
-        } 
-    })
+    }, [adminSuccess, adminError, adminToken, dispatch, navigate])
+    
 
     const handleChange = (e)=>{
         setFormData({...formData, [e.target.id.toString()]:e.target.value})
@@ -91,7 +93,7 @@ export default function AdminSignInPage(){
         e.preventDefault()
         console.log("Inside submitData()--")
         if((Object.keys(formData).length<2) || Object.values(formData).find(inputValues=>inputValues==='undefined')){
-            if(!formData.size){
+            if(!Object.keys(formData).length){
                 console.log("No Fields entered!")
                 toast.error("Please enter all the fields!")
             }

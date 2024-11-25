@@ -48,7 +48,7 @@ export default function AdminWrapperPage(){
     const toggleSublist = (type) => {
         setShowSublist((prevState) => {
             const updatedState = Object.keys(prevState).reduce((acc, key) => {
-                acc[key] = key === type ? !prevState[key] : false
+                acc[key] = (key === type)? !prevState[key] : false
                 return acc
             }, {})
             return updatedState
@@ -119,13 +119,19 @@ export default function AdminWrapperPage(){
                                         <ul className='pt-[1rem] pl-[1rem] list-none flex flex-col gap-[10px] justify-center items-start
                                              text-white text-[12.5px] sublist'>
                                             <li>
-                                               <div className='flex items-center'> 
-                                                    <Link to='/admin/products/add'> <CiSquareChevRight/> Add Product </Link>
+                                               <div> 
+                                                    <Link to='/admin/products/add' className='flex items-center'> 
+                                                        <CiSquareChevRight/> 
+                                                        <span> Add Product </span> 
+                                                    </Link>
                                                </div> 
                                             </li>
                                             <li>
-                                               <div className='flex items-center'>
-                                                    <Link to='/admin/products/list'> <CiSquareChevRight/> List/Edit Products </Link>
+                                               <div>
+                                                    <Link to='/admin/products/list' className='flex items-center'> 
+                                                        <CiSquareChevRight/>
+                                                        <span> List/Edit Products </span> 
+                                                    </Link>
                                                </div> 
                                             </li>
                                      </ul>
@@ -146,13 +152,19 @@ export default function AdminWrapperPage(){
                                         <ul className='pt-[1rem] pl-[1rem] list-none flex flex-col gap-[10px] justify-center items-start
                                              text-white text-[12.5px] sublist'>
                                             <li>
-                                               <div className='flex items-center'>
-                                                    <Link to='/admin/products/category/add'> <CiSquareChevRight/> Add Category </Link>
+                                               <div>
+                                                    <Link to='/admin/products/category/add'  className='flex items-center'> 
+                                                        <CiSquareChevRight/> 
+                                                        <span> Add Category </span> 
+                                                    </Link>
                                                </div> 
                                             </li>
                                             <li>
                                                <div className='flex items-center'>
-                                                    <Link to='/admin/products/category'> <CiSquareChevRight/> List/Edit Categories </Link>
+                                                    <Link to='/admin/products/category'  className='flex items-center'> 
+                                                        <CiSquareChevRight/>
+                                                        <span> List/Edit Categories </span> 
+                                                    </Link>
                                                </div> 
                                             </li>
                                      </ul>
@@ -211,7 +223,7 @@ export default function AdminWrapperPage(){
                                     </li>
                                     <li className='mt-[-10px] text-[14px] tracking-[0.5px]'> 
                                         <div className='option'>
-                                            <Link onClick={()=> logoutAdmin()}> 
+                                            <Link className='hover:text-red-500' onClick={()=> logoutAdmin()}> 
                                                 <MdLogout className='h-[15px] w-[15px]'/> Logout
                                             </Link>
                                         </div>

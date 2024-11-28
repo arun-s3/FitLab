@@ -305,15 +305,14 @@ export default function SignUpAndInPage({type}){
                         }
                     </SiteButtonSquare>
                     {
-                        type=="signup"? <SiteSecondaryBorderButtonSquare customStyle={{marginBottom:'60px', width:'31.5rem', display:'flex',
-                                                                         justifyContent:'center', alignItems:'center'}}
-                                                            clickHandler={()=>{
-                                                                setGooglePromptLoading(true)
-                                                                googleLogin()
-                                                            }}>
-                                             <img src="/google.png" alt="" className='mr-[15px] inline-block'/> 
-                                             { (loading||googlePromptLoading)? <CustomHashLoader loading={googlePromptLoading||loading}/>: "Continue with Google" }
-                                        </SiteSecondaryBorderButtonSquare>: <></>
+                        type=="signup"? 
+                        <SiteSecondaryBorderButtonSquare customStyle={{marginBottom:'60px', width:'31.5rem', display:'flex',
+                                justifyContent:'center', alignItems:'center'}} clickHandler={()=>{ setGooglePromptLoading(true); googleLogin()}}>
+                            <img src="/google.png" alt="" className='mr-[15px] inline-block'/> 
+                            { 
+                                (loading||googlePromptLoading)? <CustomHashLoader loading={googlePromptLoading||loading}/>: "Continue with Google" 
+                            }
+                        </SiteSecondaryBorderButtonSquare>: <></>
                     }
                 </form>
             </main>

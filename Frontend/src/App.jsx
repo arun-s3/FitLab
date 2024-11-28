@@ -6,6 +6,7 @@ import SignUpAndInPage from './Pages/User/SignUpAndInPage/SignUpAndInPage'
 import OtpVerificationPage from './Pages/User/OtpVerificationPage/OtpVerificationPage'
 import ProductListPage from './Pages/User/ProductListPage/ProductListPage'
 import PrivateUserRoutes from './Components/PrivateUserRoutes/PrivateUserRoutes'
+import TestImageCropper from './Pages/User/TesterPages/TestImageCropper'
 
 import AdminSignInPage from './Pages/Admin/AdminSignInPage/AdminSignInPage'
 import AdminPageWrapper from './Pages/Admin/AdminPageWrapper/AdminPageWrapper'
@@ -32,6 +33,7 @@ export default function App(){
             <ToastContainer theme='dark' autoClose={1500} style={{fontSize:'12px'}} hideProgressBar />
             <Routes path="/">
                 {/* <Route path='test' element={AdminCategoryListPage} /> */}
+                <Route path='test-cropper' element={<TestImageCropper/>}/>
                 <Route element={<PrivateUserRoutes/>}>
                 </Route>
                 <Route index element={<HomePage/>}/>

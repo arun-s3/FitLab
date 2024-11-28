@@ -33,6 +33,22 @@ export const getAllCategories = createAsyncThunk('getAllCategories', async(thunk
     }
 })
 
+// export const getEveryCategoryNames = createAsyncThunk('getEveryCategoryNames', async(thunkAPI)=>{
+//     try{
+//         console.log("Inside getEveryCategoryNames createAsyncThunk")
+//         const response = await axios.get('/admin/products/category/everyCategoryNames', {withCredentials: true})
+//         console.log("returning success response from getEveryCategoryNames createAsyncThunk..."+JSON.stringify(response.data))
+//         return response.data
+//     }
+//     catch(error){
+//         console.log("inside catch of getEveryCategoryNames from categorySlice")
+//         const errorMessage = error.response?.data?.message
+//         console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
+//         console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
+//         return thunkAPI.rejectWithValue(errorMessage)
+//     }
+// })
+
 export const getCategoriesOfType = createAsyncThunk('getCategoriesOfType', async({status}, thunkAPI)=>{
     try{
         console.log("Inside getCategoriesOfType createAsyncThunk")
@@ -152,6 +168,7 @@ export const updateCategory = createAsyncThunk('updateCategory', async({formData
 const initialState = {
     categories: [],
     allSubCategories: [],
+    everyCategoryNames: [],
     categoryCounts: null,
     populatedSubCategories: {},
     firstLevelCategories: [],
@@ -221,6 +238,23 @@ const categorySlice = createSlice({
             state.error = true
             state.success = true
         })
+        // .addCase(getEveryCategoryNames.fulfilled, (state,action)=>{
+        //     console.log("action.payload.categoriesData-->", JSON.stringify(action.payload.categoriesData))
+        //     state.error = false
+        //     state.loading = false
+        //     state.success = true
+        //     state.everyCategoryNames = action.payload.everyCategoryNames
+        // })
+        // .addCase(getEveryCategoryNames.pending, (state,action)=>{
+        //     state.loading = true
+        //     state.error = false
+        //     state.success = false
+        // })
+        // .addCase(getEveryCategoryNames.rejected, (state,action)=>{
+        //     state.loading = false
+        //     state.error = true
+        //     state.success = true
+        // })
         .addCase(getCategoriesOfType.fulfilled, (state,action)=>{
             console.log("action.payload.categoriesData-->", JSON.stringify(action.payload.categoriesData))
             state.error = false
@@ -339,7 +373,7 @@ const categorySlice = createSlice({
             state.error = true
         })
         .addCase(getFirstLevelCategories.fulfilled, (state,action)=>{
-            console.log("action.payload.getFirstLevelCategories-->", JSON.stringify(action.payload.firstLevelCategories))
+            console.log("action.payload.FirstLevelCategories-->", JSON.stringify(action.payload.firstLevelCategories))
             state.error = false
             state.loading = false
             state.firstLevelCategories = action.payload.firstLevelCategories
@@ -406,6 +440,7 @@ const categorySlice = createSlice({
             state.success = true;
             state.loading = false;
             state.error = false;
+            state.message = action.payload.message
             state.blockedCategoryList = JSON.parse(JSON.stringify(action.payload.blockStatusIdList))
         
             // const { blockStatusIdList } = action.payload || {};

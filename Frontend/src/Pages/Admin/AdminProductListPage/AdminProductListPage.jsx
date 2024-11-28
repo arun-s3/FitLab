@@ -67,7 +67,7 @@ export default function AdminProductListPage(){
     },[])
 
     useEffect(()=> {
-        if(message.includes('block')){
+        if(message && message?.includes('block')){
           console.log("message arrived-->", message)
           toast.success(`${message} successfully`)
         }

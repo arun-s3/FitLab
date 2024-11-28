@@ -6,8 +6,8 @@ const {tester, createUser, sendOtp, verifyOtp, loginUser, googleSignin, signout,
 userRouter.get('/test', tester)
 
 userRouter.post('/signup', isLogout, createUser)
-userRouter.post('/sendOtp', sendOtp) //isLogout, 
-userRouter.post('/verifyOtp', verifyOtp) //isLogout,
+userRouter.post('/sendOtp', sendOtp)                                                                                                         //isLogout, 
+userRouter.post('/verifyOtp', verifyOtp)                                                                                                     //isLogout,
 userRouter.post('/signin', isLogout, loginUser)
 userRouter.get('/signout', isLogin, signout)
 userRouter.post('/googleSignin', googleSignin)

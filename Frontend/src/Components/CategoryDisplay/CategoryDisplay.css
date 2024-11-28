@@ -12,3 +12,8 @@
 #categoryDisplay #category-content .category-name input[type='checkbox']:focus-visible{
     background-color: var(--PRIMARY);
 }
+#categoryDisplay #category-content .category-name #radioType-input{
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+}

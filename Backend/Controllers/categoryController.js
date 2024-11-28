@@ -157,11 +157,29 @@ const getAllCategories = async(req,res,next)=>{
     }
 }
 
+// const getEveryCategoryNames = async(req,res,next)=> {
+//     try{
+//         console.log("Inside getEveryCategories of categoryController")
+//         const everyCategoryNames = await Category.find({},{name:1})
+//         if (!everyCategoryNames.length) {
+//             next(errorHandler(404, "No categories found!"))
+//         }
+//         if(everyCategoryNames){
+//             console.log("Every category names---->", JSON.stringify(everyCategoryNames))
+//             res.status(200).json({everyCategoryNames})
+//         }
+//     }
+//     catch(error){
+//         console.log("Error in categoryController getEveryCategories-->"+ error.message)
+//         next(error)
+//     }
+// }
+
 const getFirstLevelCategories = async(req,res,next)=> {
     try{
         console.log("Inside getFirstLevelCategories of categoryController")
         const categories = await Category.find({parentCategory: null})
-        console.log("categories found---->", JSON.stringify(categories))
+        console.log("Toppest level categories found in getFirstLevelCategories---->", JSON.stringify(categories))
         let firstLevelCategories = []
         if(categories.length){
             firstLevelCategories = await Promise.all(
@@ -355,7 +373,7 @@ const toggleCategoryStatus = async(req,res,next)=>{
         console.log("Inside toggleCategoryStatus controller--")
         const {id} = req.params
         console.log("ID-->", id)
-        let status
+        let status, newStatus
         const blockStatusIdList = []
 
         const category = await Category.findOne({_id:id})
@@ -369,7 +387,7 @@ const toggleCategoryStatus = async(req,res,next)=>{
             // }
             const returnedCategory = await Category.findOneAndUpdate({_id:id},{$set: {isBlocked: !status}}, {new: true})
             if(returnedCategory){
-                const newStatus = returnedCategory.isBlocked
+                newStatus = returnedCategory.isBlocked
                 console.log("Blocked status now-->", newStatus)
                 blockStatusIdList.push({id: returnedCategory._id, name: returnedCategory.name, status: newStatus, parentCategory:returnedCategory.parentCategory})
                 if(returnedCategory.subCategory  && returnedCategory.subCategory.length > 0){
@@ -385,7 +403,7 @@ const toggleCategoryStatus = async(req,res,next)=>{
 
         await statusToggler(id)
         console.log("BLOCKSTATUSLIST-------->",JSON.stringify(blockStatusIdList))
-        res.status(200).json({blockStatusIdList})
+        res.status(200).json({blockStatusIdList, message: newStatus? 'Blocked successfully!' : 'Unblocked successfully!'})
     }
     catch(error){
         console.log("Error in toggleCategoryStatus controller-->", error.message)
@@ -439,5 +457,5 @@ const updateCategory = async (req, res, next) => {
   }
 
 
-module.exports = {createCategory, getAllCategories, getFirstLevelCategories, findCategoryById, getCategoryNames, getNestedSubcategoryNames,
-                    toggleCategoryStatus, updateCategory}
+module.exports = {createCategory, getAllCategories, getFirstLevelCategories, findCategoryById, 
+            getCategoryNames, getNestedSubcategoryNames, toggleCategoryStatus, updateCategory}

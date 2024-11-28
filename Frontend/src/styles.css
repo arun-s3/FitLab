@@ -808,6 +808,10 @@ select{
   bottom: -66px;
 }
 
+.bottom-\[-7rem\]{
+  bottom: -7rem;
+}
+
 .bottom-\[10px\]{
   bottom: 10px;
 }
@@ -846,6 +850,10 @@ select{
 
 .left-\[10px\]{
   left: 10px;
+}
+
+.left-\[13\%\]{
+  left: 13%;
 }
 
 .left-\[150px\]{
@@ -962,6 +970,10 @@ select{
 
 .top-\[38px\]{
   top: 38px;
+}
+
+.top-\[47px\]{
+  top: 47px;
 }
 
 .top-\[50\%\]{
@@ -1423,6 +1435,10 @@ select{
 
 .h-\[3px\]{
   height: 3px;
+}
+
+.h-\[3rem\]{
+  height: 3rem;
 }
 
 .h-\[40px\]{
@@ -1919,6 +1935,10 @@ select{
   gap: 3px;
 }
 
+.gap-\[3rem\]{
+  gap: 3rem;
+}
+
 .gap-\[4rem\]{
   gap: 4rem;
 }
@@ -2410,6 +2430,11 @@ select{
 .px-\[1\.5rem\]{
   padding-left: 1.5rem;
   padding-right: 1.5rem;
+}
+
+.px-\[10\%\]{
+  padding-left: 10%;
+  padding-right: 10%;
 }
 
 .px-\[10px\]{

@@ -101,7 +101,7 @@ export default function ProductList({admin}){
                         {showCategory && <>
                         <ul className='list-none cursor-pointer pr-[7px]' id='filter-body'>
 
-                            <CategoryDisplay filter={filter} setFilter={setFilter}/>
+                            <CategoryDisplay type='checkboxType' filter={filter} setFilter={setFilter}/>
 
                         </ul>
                         </>

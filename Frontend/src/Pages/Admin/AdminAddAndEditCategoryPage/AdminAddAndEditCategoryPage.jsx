@@ -16,6 +16,7 @@ import {toast} from 'react-toastify';
 
 import AdminHeader from '../../../Components/AdminHeader/AdminHeader';
 import FileUpload from '../../../Components/FileUpload/FileUpload';
+import CategoryDisplay from '../../../Components/CategoryDisplay/CategoryDisplay';
 import { SiteButtonSquare } from '../../../Components/SiteButtons/SiteButtons';
 import {createCategory, getAllCategories, getCategoryNames, updateCategory, resetStates} from '../../../Slices/categorySlice'
 import {SearchInput} from '../../../Components/FromComponents/FormComponents'
@@ -34,12 +35,16 @@ export default function AdminAddAndEditCategoryPage({editCategory}){
 
     const [parentCategory, setParentCategory] = useState()
     const [relatedCategory, setRelatedCategory] = useState([])
+    const [relatedCategoryError, setRelatedCategoryError] = useState(false)
 
     const commonBadges = useRef(["New", "Bestseller", "Top-rated"])
     const badgeListRef = useRef(null)
 
     const [categoryData, setCategoryData] = useState({})
     const [allCategoryNames, setAllCategoryNames] = useState([])
+
+    const [radioCheckedCategory, setRadioCheckedCategory] = useState('')
+    const [manualCheckCategory, setManualCheckCategory] = useState({})
 
     const dispatch = useDispatch()
     const {success, loading, error, tempDatas, categories, categoryCreated, categoryUpdated} = useSelector((state)=> state.categoryStore)
@@ -58,6 +63,7 @@ export default function AdminAddAndEditCategoryPage({editCategory}){
 
     useEffect(()=>{
         console.log("Images-->", JSON.stringify(images))
+        console.log("Related category--->", JSON.stringify(relatedCategory))
         const seasonalActivation = (startDate || endDate) ? { startDate: startDate || null, endDate: endDate || null } : undefined
         setCategoryData({...categoryData, images, parentCategory, relatedCategory, ...(seasonalActivation && {seasonalActivation})})
     },[images, parentCategory, relatedCategory, startDate, endDate])
@@ -76,6 +82,18 @@ export default function AdminAddAndEditCategoryPage({editCategory}){
         dispatch(getAllCategories)
         setAllCategoryNames(categories.map(cat=> cat.name))
     },[categories])
+
+    useEffect(()=> {
+        if(radioCheckedCategory){
+            setParentCategory(radioCheckedCategory)
+        }else setParentCategory(null)
+    },[radioCheckedCategory])
+
+    useEffect(()=> {
+        console.log("manualCheckCategory--->", JSON.stringify(manualCheckCategory))
+        const relatedCategories = Object.keys(manualCheckCategory).filter(cat=> manualCheckCategory[cat] == true)
+        setRelatedCategory(relatedCategories)
+    },[manualCheckCategory])
 
     useEffect(() => {
         if(location?.state?.category){
@@ -183,6 +201,7 @@ export default function AdminAddAndEditCategoryPage({editCategory}){
             e.currentTarget.style.borderBottomLeftRadius = '0px'
             e.currentTarget.style.borderBottomRightRadius = '0px'
         }
+        relatedCategoryError && setRelatedCategoryError('')
     }
 
     const selectListHandler = (name, categoryType, e)=>{
@@ -318,13 +337,15 @@ export default function AdminAddAndEditCategoryPage({editCategory}){
                                 <i className='w-full h-full flex items-center justify-end pr-[5px] cursor-pointer'> <MdArrowDropDown/> </i>
                             </div>
                             <div className='absolute top-[38px] flex flex-col justify-center items-center gap-[3px] w-full h-fit py-[10px]
-                                    rounded-[5px] bg-white border border-primary rounded-tl-none rounded-tr-none z-[5] invisible'>
-                                {allCategoryNames.map(name=>
+                                    px-[10%] rounded-[5px] bg-white border border-primary rounded-tl-none rounded-tr-none z-[5] invisible'>
+                                {/* {allCategoryNames.map(name=>
                                      <span className='text-[11px] text-secondary capitalize w-full text-left pl-[20px] hover:bg-primary cursor-pointer' 
                                                 onClick={(e)=> selectListHandler(name,'parentCategory',e)} > 
                                             {name}
                                      </span>
-                                )}
+                                )} */}
+                                <CategoryDisplay type='radioType' radioCheckedCategory={radioCheckedCategory} 
+                                        setRadioCheckedCategory={setRadioCheckedCategory} styler={{borderBottomNone:true}}/>
                             </div>      
                         </div>
                     </div>
@@ -359,7 +380,7 @@ export default function AdminAddAndEditCategoryPage({editCategory}){
                         </div>
                     </div>
                     <div className='category-content-wrapper'>
-                        <div className='category-labels'>
+                        <div className='category-labels' id='relative-category'>
                         <h5> Related Categories </h5>
                             <p> 
                                 Select related categories to link this category with others. This will help improve product discovery
@@ -368,30 +389,38 @@ export default function AdminAddAndEditCategoryPage({editCategory}){
                         </div>
                         <div className='relative'>
                             <PlaceholderIcon icon={<TbCirclesRelation/>} fromTop={35}/>
-                            <div className='w-[20rem] h-[2.4rem] border border-primary rounded-[5px] flex justify-center items-center pr-0 text-[12px] bg-white cursor-pointer'
+                            <div className='w-[20rem] h-[3rem] border border-primary rounded-[5px] flex justify-center items-center pr-0 text-[12px] bg-white cursor-pointer'
                                         onClick={(e)=> showList(e)} >
                                 {relatedCategory &&
                                  <div className='flex items-center gap-[5px] ml-[10%]'>
                                  { relatedCategory.map(cat=> (
                                      <span className=' flex items-center gap-[2px] border border-secondary rounded-[10px] px-[9px] py-[1px] text-[10px] text-secondary'> 
                                          <span> {cat} </span>
-                                         <IoIosClose onClick={(e)=> setRelatedCategory(relatedCat=> relatedCat.filter(rcat=> rcat !== cat))}/>
+                                         <IoIosClose className='w-[15px] h-[15px]' onClick={(e)=> {
+                                            setRelatedCategory(relatedCat=> relatedCat.filter(rcat=> rcat !== cat))
+                                            setManualCheckCategory(catObj=> {
+                                                return {...catObj, [cat]:false}
+                                            })
+                                         }}/>
                                      </span>
                                  )) }
                                  </div>
                                 }
                                 <i className='w-full h-full flex items-center justify-end pr-[5px] cursor-pointer'> <MdArrowDropDown/> </i>
                             </div>
-                            <div className='absolute top-[38px] flex flex-col justify-center items-center gap-[3px] w-full h-fit py-[10px]
-                                    rounded-[5px] bg-white border border-primary rounded-tl-none rounded-tr-none z-[5] invisible'>
-                                {allCategoryNames.map(name=>(
+                            <div className='absolute top-[47px] flex flex-col justify-center items-center gap-[3px] w-full h-fit py-[10px]
+                                    px-[10%] rounded-[5px] bg-white border border-primary rounded-tl-none rounded-tr-none z-[5] invisible'>
+                                {/* {allCategoryNames.map(name=>(
                                     <div key={name} className='flex items-center justify-start gap-[5px] w-full pl-[20px]'>
                                         <input type='checkbox' className='text-[11px] border border-primary w-[15px] h-[15px] rounded-[2px] hover:bg-primary cursor-pointer' 
                                                 onChange={(e)=> selectListHandler(name,'relatedCategory',e)} value={name} checked={relatedCategory.some(cat=> cat==name) || false} />
                                         <span className='text-[11px] text-secondary capitalize'> {name} </span>
                                     </div>
                                     )
-                                )}
+                                )} */}
+                                <CategoryDisplay type='manualCheckboxType' manualCheckCategory={manualCheckCategory} 
+                                        setManualCheckCategory={setManualCheckCategory} setRelatedCategoryError={setRelatedCategoryError} styler={{borderBottomNone:true}}/>
+                                {relatedCategoryError && <p className='error mb-[1rem]'> {relatedCategoryError} </p>}
                             </div>  
                         </div>
                     </div>

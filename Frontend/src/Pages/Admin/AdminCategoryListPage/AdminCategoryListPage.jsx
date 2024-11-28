@@ -3,7 +3,8 @@ import './AdminCategoryListPage.css'
 import {useNavigate} from 'react-router-dom'
 import {useDispatch, useSelector} from 'react-redux'
 
-import {getAllCategories, getCategoriesOfType, getSingleCategory, toggleCategoryStatus, resetSubcategories} from '../../../Slices/categorySlice'
+import {getAllCategories, getCategoriesOfType, getSingleCategory, toggleCategoryStatus, resetSubcategories, resetStates} 
+                from '../../../Slices/categorySlice'
 import {SearchInput} from '../../../Components/FromComponents/FormComponents'
 import AdminHeader from '../../../Components/AdminHeader/AdminHeader'
 
@@ -60,10 +61,11 @@ export default function AdminCategoryListPage(){
     },[categories])
 
   useEffect(()=> {
-    if(message.includes('block')){
+    if(message){
       console.log("message arrived-->", message)
-      toast.success(`${message} successfully`)
+      toast.success(message)
     }
+    dispatch(resetStates())
   },[message])
 
 //   useEffect(()=>{

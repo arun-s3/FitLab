@@ -5,6 +5,7 @@ import {useSelector, useDispatch} from 'react-redux';
 
 import AdminHeader from '../../../Components/AdminHeader/AdminHeader';
 import Modal from '../../../Components/Modal/Modal';
+import {SitePrimaryMinimalButtonWithShadow} from '../../../Components/SiteButtons/SiteButtons';
 import {showUsers, showUsersofStatus, toggleBlockUser, deleteUser, deleteUsersList, resetStates} from '../../../Slices/adminSlice';
 
 import {IoArrowBackSharp} from "react-icons/io5";
@@ -371,11 +372,14 @@ export default function AdminCustomersPageV1() {
                                     <td>--</td>
                                     <td>
                                         <div className='flex items-center gap-[10px] text-[14px] action-buttons'>
-                                            <button type='button' className='basis-[103px]' onClick={() => toggleBlockHandler(user._id)}>
-                                                 {user.isBlocked ? "Unblock" : "Block"} <MdBlock style={user.isBlocked? {color:'#22c55e'}:{color:'#e74c3c'}}/>
-                                            </button>
-                                            <button type='button' onClick={() => preDeleteHandler(user._id)} style={{paddingBlock: '5px'}}
-                                                    className='text-red-500 '> <MdDeleteOutline/></button>
+                                            <SitePrimaryMinimalButtonWithShadow type='button' tailwindClasses='basis-[103px]' 
+                                                            clickHandler={() => toggleBlockHandler(user._id)}>
+                                                {user.isBlocked ? "Unblock" : "Block"} <MdBlock style={user.isBlocked? {color:'#22c55e'}:{color:'#e74c3c'}}/>
+                                            </SitePrimaryMinimalButtonWithShadow>
+                                            <SitePrimaryMinimalButtonWithShadow type='button' clickHandler={() => preDeleteHandler(user._id)} 
+                                                    customStyle={{paddingBlock: '5px'}} tailwindClasses='text-red-500 '>
+                                                <MdDeleteOutline/>
+                                            </SitePrimaryMinimalButtonWithShadow>
                                         </div>
                                     </td>
                                 </tr>

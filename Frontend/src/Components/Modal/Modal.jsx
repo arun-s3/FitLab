@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import './Modal.css'
 
+import {SitePrimaryWhiteTextButton} from "../SiteButtons/SiteButtons";
+
 export default function Modal({openModel, setOpenModel, title, content, instruction, buttonText1, buttonText2, deleteHandler}) {
 
   const [modelIsOpen, setModelIsOpen] = useState(false)
@@ -50,11 +52,8 @@ export default function Modal({openModel, setOpenModel, title, content, instruct
             <input type='text' className="border border-gray-300 rounded p-2 mb-4 w-full h-[30px] text-[11px]"
                  placeholder="Type here..." value={message} onChange={(e)=> inputHandler(e)} />
             <div className="flex items-center justify-center gap-[2rem]">
-                <button type='button' className="bg-primary text-white font-500 px-[2rem] py-[3px] tracking-[0.3px] rounded hover:bg-red-500" 
-                            onClick={buttonHandler} > {buttonText1} </button>
-                <button onClick={closeModal} className="bg-primary text-white font-500 px-[2rem] py-[3px] tracking-[0.3px] rounded hover:bg-green-500">
-                  {buttonText2}
-                </button>
+                <SitePrimaryWhiteTextButton clickHandler={buttonHandler} tailwindClasses='hover:bg-red-500'> {buttonText1} </SitePrimaryWhiteTextButton>
+                <SitePrimaryWhiteTextButton clickHandler={closeModal} tailwindClasses='hover:bg-green-500'> {buttonText2} </SitePrimaryWhiteTextButton>
             </div>
           </div>
         </div>

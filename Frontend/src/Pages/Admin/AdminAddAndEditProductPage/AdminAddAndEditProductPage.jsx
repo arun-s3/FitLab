@@ -16,7 +16,6 @@ import {toast} from 'react-toastify';
 
 import AdminHeader from '../../../Components/AdminHeader/AdminHeader'
 import FileUpload from '../../../Components/FileUpload/FileUpload';
-import FileUploadTest from '../../../Components/FileUpload/FileUploadTest';
 import TagGenerator from '../../../Components/TagGenerator/TagGenerator';
 import PlaceholderIcon from '../../../Components/PlaceholderIcon/PlaceholderIcon'
 import SelectCategoryForAdmin,{SelectSubCategoryForAdmin} from '../../../Components/SelectCategoryForAdmin/SelectCategoryForAdmin';
@@ -349,8 +348,7 @@ export default function AdminAddAndEditProductPage({ editProduct }){
                 </div>
                 <div className='w-full h-screen basis-[37%]'>
  
-                     {/* <FileUpload images={images} setImages={setImages} imageLimit={6} needThumbnail={true}  thumbnail={thumbnail} setThumbnail={setThumbnail} thumbnailIndexOnEditProduct={thumbnailIndexOnEditProduct} /> */}
-                     <FileUploadTest images={images} setImages={setImages} imageLimit={6} needThumbnail={true}  thumbnail={thumbnail} setThumbnail={setThumbnail} thumbnailIndexOnEditProduct={thumbnailIndexOnEditProduct} />
+                     <FileUpload images={images} setImages={setImages} imageLimit={6} needThumbnail={true}  thumbnail={thumbnail} setThumbnail={setThumbnail} thumbnailIndexOnEditProduct={thumbnailIndexOnEditProduct} />
 
                 </div>
             </main>

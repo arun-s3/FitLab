@@ -44,3 +44,12 @@
     letter-spacing: 0.2px;
     border:1px solid var(--SECONDARY)
 }
+
+#SitePrimaryButtonWithShadow{
+    box-shadow: 2px 2px 7px rgb(201, 204, 183);
+    border: 1px solid rgb(214, 201, 223);
+}
+#SitePrimaryButtonWithShadow i{
+    color: var(--SECONDARY);
+    font-size: 15px;
+}

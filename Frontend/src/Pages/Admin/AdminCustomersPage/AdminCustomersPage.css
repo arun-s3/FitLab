@@ -62,20 +62,8 @@
     /* border-bottom: 1px dashed rgba(132, 120, 138, 0.52); */
 }
 #AdminCustomersPage table>tbody .action-buttons button{
-    padding-block: 2px;
-    padding-inline: 16px;
     border: 1px solid rgb(190, 200, 138);
-    border-radius: 4px;
-    color: black;
-    background: rgba(215, 241, 72, 0.34);
-    background: var(--PRIMARY);
     box-shadow: -1px 1px 8px #babaa5;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 3px;
-    /* border: 1px solid var(--SECONDARY); */
-    /* box-shadow: 1px 1px 2px #b7b2b2; */
 }
 #AdminCustomersPage table>tbody .action-buttons button>svg:first-child{
     /* color:red; */

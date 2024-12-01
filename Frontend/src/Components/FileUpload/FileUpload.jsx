@@ -5,11 +5,13 @@ import './FileUpload.css'
 import {SiteButtonSquare} from '../SiteButtons/SiteButtons'
 import ImageEditor from '../ImageEditor/ImageEditor'
 import PopupWindow from '../PopupWindow/PopupWindow'
+import ImageCropper from '../ImageCropper/ImageCropper'
 import {handleImageCompression} from '../../Utils/compressImages'
 
 import {IoCloseSharp} from "react-icons/io5";
 import {RiImageEditLine} from "react-icons/ri";
 import {FaArrowUp, FaArrowDown} from "react-icons/fa";
+import {toast} from 'react-toastify'
 // import { uploadImages } from 'Frontend/src/Slices/productSlice'
 
 export default function FileUpload({images, setImages, imageLimit, needThumbnail, thumbnail, setThumbnail, thumbnailIndexOnEditProduct, categoryImgPreview}){
@@ -18,6 +20,13 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
     const [imageMessage, setImageMessage] = useState('')
     const imageMessageDisplay = useRef(null)
     const [displayCompressButton, setDisplayCompressButton] = useState(false)
+
+    const [imageCropperState, setImageCropperState] = useState(false)
+    const [imageCropperDefaultIndex, setImageCropperDefaultIndex] = useState(0)
+    // const [readyToCropImages, setReadyToCropImages] = useState([])
+    const [croppedImages, setCroppedImages] = useState([]);
+    const [imageCropperError, setImageCropperError] = useState('')
+
 
     useEffect(()=>{
         if(error){
@@ -107,6 +116,20 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
             compressAndPutToImages()
         }
     }, [editedImage]); 
+
+    useEffect(()=> {
+        const newImages = images.map(image=> {
+            let newImage = image
+            croppedImages.forEach(cImg=> {
+                if(cImg.name === image.name){
+                    newImage = cImg
+                }
+            })
+            return newImage
+        })
+        setImages(newImages)
+        setImageCropperError('')
+    },[croppedImages])
       
 
     const [checkDragging, setCheckDragging] = useState(false)
@@ -147,14 +170,16 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
                     continue;
                 }
 
-                newImages.push({ name: files[i].name, size: files[i].size, url: URL.createObjectURL(files[i]), blob: files[i] });
+                newImages.push({ name: files[i].name, size: files[i].size, url: URL.createObjectURL(files[i]), blob: files[i], isCropped: false});
             } else {
                 console.log("Not an image -->", JSON.stringify(files[i]));
                 setError("Only images will be added!");
                 continue;
             }
         }
-        setImages([...images, ...newImages]);
+        // setReadyToCropImages(newImages)
+        setImages([...newImages, ...images])
+        setImageCropperState(true)
     }
 
     const imageBrowseHandler = (e)=>{
@@ -286,6 +311,40 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
         };
     }
 
+    const openImageCropper = (index)=> {
+        setImageCropperState(true)
+        setImageCropperDefaultIndex(index)
+    }
+
+    const handleCropComplete = (croppedImg, image, index, mustSkip) => {
+        let newCroppedImages 
+        if(!mustSkip){
+            setCroppedImages((croppedImages) => {
+                newCroppedImages = [...croppedImages, { ...image, url: croppedImg, isCropped: true}]
+                return newCroppedImages
+            })
+        }else{
+            setCroppedImages((croppedImages) => {
+                newCroppedImages = [...croppedImages, { ...image, url: croppedImg, isCropped: false}]
+                return newCroppedImages
+            })
+        }
+        if (index === images.length - 1){
+            if(newCroppedImages.some(img=> !img.isCropped)){
+                imageMessageDisplay.current.parentElement.style.visibility = 'visible'
+                imageMessageDisplay.current.style.display = 'none'
+                setImageMessage("Make sure you crop every image later before submitting")
+                // setTimeout(()=>{
+                //     imageMessageDisplay.current.parentElement.style.visibility = 'visible'
+                //     imageMessageDisplay.current.style.display = 'none'
+                //     setImageMessage("Make sure you crop every image later before submitting")
+                // })
+                setError("Make sure you crop every image later before submitting")
+                toast.warn("Make sure you crop every image later before submitting")
+            }
+        } 
+    }
+    
     return(
         <main className='w-full h-screen' id='fileupload'>
             <div className={ `rounded-[5px] border border-dashed h-[17%] w-full flex justify-center
@@ -305,6 +364,11 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
                 </h3>
             </div>
             <p className='text-red-500 text-[10px] h-[20px] mt-[5px]'> {error} </p>
+            {   imageCropperState &&
+                <ImageCropper images={images} onCropComplete={handleCropComplete} imageCropperState={imageCropperState}
+                     setImageCropperState={setImageCropperState} imageCropperDefaultIndex={imageCropperDefaultIndex} imageCloseHandler={closeHandler}
+                         imageCropperError={imageCropperError} setImageCropperError={setImageCropperError}/>
+            }
             <div className='flex gap-[27px] flex-wrap mt-[20px]' id='image-section'>
                 {
                     images.map((image,index)=> 
@@ -322,6 +386,13 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
                                     </span> 
                                     }
                                 </span>
+                                {
+                                  !image?.isCropped &&
+                                  <span className="absolute bottom-[2px] left-[25%] px-[5px] py-[2px] rounded-[4px] bg-white text-[9px]
+                                         font-[650] tracking-[0.6px] text-secondary cursor-pointer" onClick={()=> openImageCropper(index)}>
+                                    Crop
+                                  </span>
+                                }
                             </figure>
                             <span className='text-[11px] text-secondary mt-[5px]'> { findImageSize(image.size) } </span>
                         </div>)

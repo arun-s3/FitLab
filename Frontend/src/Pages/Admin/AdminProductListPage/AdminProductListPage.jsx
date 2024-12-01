@@ -15,6 +15,7 @@ import {VscTable} from "react-icons/vsc";
 
 import {resetStates} from '../../../Slices/productSlice'
 import ProductListingTools from '../../../Components/ProductListingTools/ProductListingTools'
+import {SitePrimaryButtonWithShadow} from '../../../Components/SiteButtons/SiteButtons'
 import ProductsDisplay from '../../../Components/ProductsDisplay/ProductsDisplay';
 import ProductFilterForAdmin from '../../../Components/ProductFilterForAdmin/ProductFilterForAdmin';
 
@@ -127,7 +128,7 @@ export default function AdminProductListPage(){
             <header className='flex justify-between items-center'>
                 <h1> Products </h1>
                 <div className='flex items-center gap-[1.5rem]'>
-                    <div className='chip relative' onClick={(e)=> displayFilter(e)}>
+                    <SitePrimaryButtonWithShadow className='chip relative' clickHandler={(e)=> displayFilter(e)}>
                         <i>
                             <LiaSlidersHSolid/>
                         </i>
@@ -139,8 +140,8 @@ export default function AdminProductListPage(){
                                      dateGetter={{startDate, endDate}} dateSetter={{setStartDate, setEndDate}}/>
                         </div>
                         }
-                    </div>
-                    <div className='chip'>
+                    </SitePrimaryButtonWithShadow>
+                    <SitePrimaryButtonWithShadow className='chip' >
                         <i>
                             <FiDownload/>
                         </i>
@@ -148,13 +149,13 @@ export default function AdminProductListPage(){
                         <i>
                             <RiArrowDropDownLine/>
                         </i>
-                    </div>
-                    <div className='chip' onClick={()=> navigate('/admin/products/add')}>
+                    </SitePrimaryButtonWithShadow>
+                    <SitePrimaryButtonWithShadow clickHandler={()=> navigate('/admin/products/add')}>
                         <i>
                             <IoMdAdd/>
                         </i>
                         <span> Add new Product </span>
-                    </div>
+                    </SitePrimaryButtonWithShadow>
                 </div>
             </header>
             <main className='relative mt-[4.3rem]'>

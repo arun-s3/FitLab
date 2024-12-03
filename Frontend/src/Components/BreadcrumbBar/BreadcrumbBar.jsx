@@ -3,7 +3,7 @@ import './BreadcrumbBar.css'
 import {useLocation, Link} from 'react-router-dom'
 import {RiArrowDropRightLine} from "react-icons/ri";
 
-export default function BreadcrumbBar(){
+export default function BreadcrumbBar({heading}){
 
     const barBg = {
         backgroundImage: "url('/breadcrumb-bg.png')",
@@ -33,7 +33,9 @@ export default function BreadcrumbBar(){
             <nav className='text-[13px] z-[5]'>
                 {breadcrumbPath}
             </nav>
-            <h1 className='text-breadcrumbTitle text-white z-[5]'>Products</h1>
+            <h1 className='text-breadcrumbTitle capitalize trackig-[0.5px] text-white z-[5]' style={{wordSpacing: '1px'}}> 
+                {heading}
+            </h1>
         </div>
     )
 }

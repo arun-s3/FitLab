@@ -6,7 +6,7 @@
     gap: 10px;
     padding-block: 15px;
     padding-inline: 3px;
-    border-bottom: 1px dashed rgba(132, 120, 138, 0.52); 
+    border-bottom: 1px dashed var(--MUTEDDASHEDSEPERATION); 
 }
 #AdminAddAndEditCategoryPage main #category-content .category-content-wrapper .error{
     visibility: visible;

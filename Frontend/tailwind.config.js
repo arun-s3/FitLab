@@ -10,7 +10,10 @@ module.exports = {
         secondaryLight: "rgba(113, 34, 168, 0.09)",
         secondaryLight2: "rgb(216, 174, 245)",
         secondaryLighter: "rgba(243, 230, 251, 0.52)",
+        inputBorderSecondary: "rgb(218, 179, 246)",
+        inputBgSecondary: "rgb(244, 236, 250)",
         muted:"rgb(125, 124, 140)",    //rgb(111, 110, 127)
+        mutedDashedSeperation: "rgba(132, 120, 138, 0.52)",
         home:"#EBEAEC",
         borderLight: "rgb(222 226 231)",
         borderLight2: "rgb(223, 195, 242)",

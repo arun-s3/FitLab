@@ -43,7 +43,24 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
         if(!images.length){
             setError('')
             setImageMessage('')
-            setDisplayCompressButton(false)
+            setDisplayCompressButton(false) 
+        }
+        if(!imageCropperState){
+            if(images.some(img=> !img.isCropped)){
+                // imageMessageDisplay.current.parentElement.style.visibility = 'visible'
+                // imageMessageDisplay.current.style.display = 'none'
+                // setImageMessage("Make sure you crop every image later before submitting")
+                setError("Make sure you crop every image later before submitting")
+                toast.warn("Make sure you crop every image later before submitting")
+
+                // setTimeout(()=>{
+                //     // imageMessageDisplay.current.parentElement.style.visibility = 'invisible'
+                //     // imageMessageDisplay.current.style.display = 'none'
+                //     // setImageMessage("")
+                //     // setError("")
+                // }, 5000)
+                
+            }
         }
     },[error, images])
 
@@ -334,11 +351,11 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
                 imageMessageDisplay.current.parentElement.style.visibility = 'visible'
                 imageMessageDisplay.current.style.display = 'none'
                 setImageMessage("Make sure you crop every image later before submitting")
-                // setTimeout(()=>{
-                //     imageMessageDisplay.current.parentElement.style.visibility = 'visible'
-                //     imageMessageDisplay.current.style.display = 'none'
-                //     setImageMessage("Make sure you crop every image later before submitting")
-                // })
+                setTimeout(()=>{
+                    imageMessageDisplay.current.parentElement.style.visibility = 'visible'
+                    imageMessageDisplay.current.style.display = 'none'
+                    setImageMessage("Make sure you crop every image later before submitting")
+                }, 5000)
                 setError("Make sure you crop every image later before submitting")
                 toast.warn("Make sure you crop every image later before submitting")
             }

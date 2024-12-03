@@ -7,6 +7,9 @@ import OtpVerificationPage from './Pages/User/OtpVerificationPage/OtpVerificatio
 import ProductListPage from './Pages/User/ProductListPage/ProductListPage'
 import PrivateUserRoutes from './Components/PrivateUserRoutes/PrivateUserRoutes'
 import TestImageCropper from './Pages/User/TesterPages/TestImageCropper'
+import TestAddressPage from './Pages/User/TesterPages/TestAddressPage'
+import AddressManagementPage from './Pages/User/AddressManagementPage/AddressManagementPage'
+
 
 import AdminSignInPage from './Pages/Admin/AdminSignInPage/AdminSignInPage'
 import AdminPageWrapper from './Pages/Admin/AdminPageWrapper/AdminPageWrapper'
@@ -34,6 +37,7 @@ export default function App(){
             <Routes path="/">
                 {/* <Route path='test' element={AdminCategoryListPage} /> */}
                 <Route path='test-cropper' element={<TestImageCropper/>}/>
+                <Route path='test-address' element={<TestAddressPage/>}/>
                 <Route element={<PrivateUserRoutes/>}>
                 </Route>
                 <Route index element={<HomePage/>}/>
@@ -47,6 +51,11 @@ export default function App(){
                 <Route path='signin' element={<SignUpAndInPage type='signin' />}/>
                 <Route path='products'>
                     <Route index element={<ProductListPage/>}/>
+                </Route>
+                <Route path='profile'>
+                    <Route path='addresses'>
+                        <Route path='add' element={<AddressManagementPage/>}/>
+                    </Route>    
                 </Route>
 
                 <Route path="admin/">

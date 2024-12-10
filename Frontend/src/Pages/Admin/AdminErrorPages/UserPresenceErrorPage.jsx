@@ -14,7 +14,7 @@ export default function UserPresenceErrorPage(){
                     </figure>
                 </div>
                 <div className=''>
-                    <h1 className='text-[80px] font-600 tracking-[0.5px]'> 403 </h1>
+                    <h1 className='text-[80px] font-600 tracking-[0.5px] bg-red-500'> 403 </h1>
                     <div className='mt-[-20px] w-[11%] h-[3px] bg-[#9a8585]'></div>
                     <h2 className='text-[22px] font-550 mb-[15px]'> Forbidden Error </h2>
                     <h3 className='w-[30rem] text-[18px]'> An admin cannot log in while a non-admin user is logged in. Please log out the current user first. </h3>

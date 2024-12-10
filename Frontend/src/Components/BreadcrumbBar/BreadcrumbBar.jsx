@@ -34,7 +34,7 @@ export default function BreadcrumbBar({heading}){
                 {breadcrumbPath}
             </nav>
             <h1 className='text-breadcrumbTitle capitalize trackig-[0.5px] text-white z-[5]' style={{wordSpacing: '1px'}}> 
-                {heading}
+                {heading? heading : 'No Heading'}
             </h1>
         </div>
     )

@@ -5,22 +5,25 @@ import { PAUSE,PERSIST,REGISTER,REHYDRATE,PURGE,FLUSH } from 'redux-persist';
 
 import userReducer from '../Slices/userSlice'
 import adminReducer from '../Slices/adminSlice'
+import addressReducer from '../Slices/addressSlice'
 import productReducer from '../Slices/productSlice'
 import categoryReducer from '../Slices/categorySlice'
 
 const rootReducer = combineReducers({
     user: userReducer,
     admin: adminReducer,
+    address: addressReducer,
     productStore: productReducer,
     categoryStore: categoryReducer
 })
 
 const persistConfig = {
     key: 'root',
-    storage
+    storage,
+    // blacklist: ["success", "error"]
 }
 
-const persistedReducer = persistReducer(persistConfig,rootReducer);
+const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 const store = configureStore({
     reducer:persistedReducer,

@@ -15,7 +15,8 @@
     --PRIMARYDARK: #f1c40f;
     --SECONDARY:rgba(159, 42, 240, 1);
     --SECONDARYLIGHT2: rgb(203, 142, 245);
-    --MUTED:"rgb(125, 124, 140)";
+    --MUTED: rgb(125, 124, 140);
+    --ERRORCOLOR: "rgb(239,68,68)";
     --INPUT-BORDER-SECONDARY: rgb(218, 179, 246);
     --INPUT-BG-SECONDARY: rgb(244, 236, 250);
     --MUTEDDASHEDSEPERATION: rgba(132, 120, 138, 0.52);

@@ -300,7 +300,7 @@ const tableBodyGenerator = (categories, isSubcategory, parentLevelCount)=> {
                                             relative cursor-pointer admin-control'  onClick={()=> dispatch(toggleCategoryStatus(category._id))}>  
                                          <i> <MdBlock/> </i>
                                        </span>
-                            </div>
+                                </div>
                         </td>
                     </tr>
                         { openSubcategories[category._id]?.['status']? subCategories && Object.keys(subCategories).length > 1 &&

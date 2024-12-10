@@ -5,6 +5,11 @@ const addressSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         required: true
     },
+    defaultAddress: {
+        type: Boolean,
+        required: true,
+        default: false
+    },
     firstName: {
         type: String,
         required: true
@@ -13,8 +18,8 @@ const addressSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    dob: {
-        type:Date,
+    nickName: {
+        type: String,
         required: true
     },
     district: {
@@ -35,7 +40,6 @@ const addressSchema = mongoose.Schema({
     },
     landmark: {
         type: String,
-        required: true
     },
     mobile: {
         type: Number,
@@ -43,18 +47,19 @@ const addressSchema = mongoose.Schema({
     },
     alternateMobile: {
         type: Number,
-        required: true
     },
     email: {
         type: String,
         required: true
     },
+    deliveryInstructions: {
+        type: String,
+    },
     type: {
         type: String,
         enum: ["home", "work", "temporary", "gift"],
-        default: "Home",
-    }
-      
+        default: "home",
+    } 
 })
 
 const address = mongoose.model('Address', addressSchema)

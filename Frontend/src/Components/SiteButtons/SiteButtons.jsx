@@ -50,7 +50,7 @@ export function SitePrimaryWhiteTextButton({customStyle, tailwindClasses, light,
 export function SitePrimaryButtonWithShadow({customStyle, tailwindClasses, light, lowFont, children, clickHandler, shouldSubmit=false}){
     return(
         <button type={shouldSubmit?"submit":"button"} className={`inline-flex justify-center items-center gap-[5px] py-[4px] px-[15px] rounded-[8px]
-            text-[14px] text-[#332929] tracking-[0.2px] bg-primary cursor-pointer ${tailwindClasses} ${light ? 'font-[480]' : ''}`} 
+            text-[14px] text-[#332929] tracking-[0.2px] bg-primary cursor-pointer ${tailwindClasses? tailwindClasses:''} ${light ? 'font-[480]' : ''}`} 
                 style={lowFont? {...customStyle, fontSize:'14px'} : customStyle} onClick={()=> clickHandler()}
                     id='SitePrimaryButtonWithShadow'> {children} </button>
     )

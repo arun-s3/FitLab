@@ -1,0 +1,29 @@
+#InputAndLabelGenerator input, #AddressManagementPage textarea{
+    caret-color: var(--PRIMARYDARK);
+}
+#InputAndLabelGenerator input:focus{
+    --tw-ring-shadow: 0;
+    border: 2px solid var(--SECONDARYLIGHT2);
+    background-color: white;
+}
+#InputAndLabelGenerator input:focus-visible{
+    border: 2px solid var(--SECONDARYLIGHT2);
+    background-color: white;
+}
+#InputAndLabelGenerator textarea:focus{
+    --tw-ring-shadow: 0;
+    border: 2px solid var(--SECONDARYLIGHT2);
+    background-color: white;
+}
+#InputAndLabelGenerator textarea:focus-visible{
+    border: 2px solid var(--SECONDARYLIGHT2);
+    background-color: white;
+}
+#InputAndLabelGenerator input ~ .error, #InputAndLabelGenerator textarea ~ .error{
+    visibility: visible;
+    font-size: 10px;
+    color: var(--MUTED);
+    letter-spacing: 0.2px;
+    height: 17px;
+    margin-top: 2px;
+}

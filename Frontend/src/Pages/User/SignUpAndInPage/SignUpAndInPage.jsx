@@ -70,6 +70,7 @@ export default function SignUpAndInPage({type}){
         } 
         dispatch(resetStates())
     })
+    
     useLayoutEffect(()=>{
         console.log("inside typecheck useEffect--,formData-->"+JSON.stringify(formData))
         setFormData({})

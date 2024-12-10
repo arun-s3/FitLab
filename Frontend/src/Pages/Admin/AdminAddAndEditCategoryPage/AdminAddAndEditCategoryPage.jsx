@@ -27,7 +27,7 @@ import {handleImageCompression} from '../../../Utils/compressImages'
 import {handleInputValidation, displaySuccess, displayErrorAndReturnNewFormData, cancelErrorState} from '../../../Utils/fieldValidator'
 
 
-export default function AdminAddAndEditCategoryPage({editCategory}){
+export default function AdminAddAndEditCategoryPage(  {editCategory}){
 
     const [startDate, setStartDate] = useState(null)
     const [endDate, setEndDate] = useState(null)

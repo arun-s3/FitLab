@@ -36,7 +36,7 @@ export default function UserSidebar(){
                 <div className='relative w-[75px] h-[75px] rounded-[45px] profilePic'>
                     {
                         user?.profilePic ? 
-                        <img src={user.profilePic} alt='ProfilePic' /> :
+                        <img src={user.profilePic} alt='ProfilePic' className='rounded-[35px]'/> :
                         <img src='/DefaultDp.png' alt='ProfilePic' className='rounded-[35px]'/>
                     }
                     <div className='absolute bottom-[2px] right-[3px] p-[5px] rounded-[25px]  bg-white border border-white'>

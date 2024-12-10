@@ -9,6 +9,8 @@ import PrivateUserRoutes from './Components/PrivateUserRoutes/PrivateUserRoutes'
 import TestImageCropper from './Pages/User/TesterPages/TestImageCropper'
 import TestAddressPage from './Pages/User/TesterPages/TestAddressPage'
 import AddressManagementPage from './Pages/User/AddressManagementPage/AddressManagementPage'
+import AddressListingPage from './Pages/User/AddressListingPage/AddressListingPage'
+import UserPageWapper from './Pages/User/UserPageWapper/UserPageWapper'
 
 
 import AdminSignInPage from './Pages/Admin/AdminSignInPage/AdminSignInPage'
@@ -52,11 +54,15 @@ export default function App(){
                 <Route path='products'>
                     <Route index element={<ProductListPage/>}/>
                 </Route>
+                {/* <Route element={<UserPageWapper/>} > */}
                 <Route path='profile'>
                     <Route path='addresses'>
+                        <Route index element={<AddressListingPage/>}/>
                         <Route path='add' element={<AddressManagementPage/>}/>
+                        <Route path='edit' element={<AddressManagementPage editAddresses={true}/>}/>
                     </Route>    
                 </Route>
+                {/* </Route> */}
 
                 <Route path="admin/">
                     <Route path="signin" element={<AdminSignInPage/>}/>

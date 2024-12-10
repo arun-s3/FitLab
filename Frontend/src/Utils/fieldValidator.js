@@ -11,24 +11,44 @@ const regexPatterns = {
     brandPattern: /^(?!^\d+$)[a-zA-Z0-9\s,'-]{1,50}$/,     
     descriptionPattern: /^[\w\s.,!'"-]{30,2000}$/,
 
-    categoryNamePattern: /^[a-zA-Z0-9\s,'-]{2,50}$/,
+    categoryNamePattern: /^[a-zA-Z\s,'-]{2,50}$/,
     categoryDescriptionPattern: /^[a-zA-Z0-9\s.,'!?&()\n-]{2,160}$/, 
     categoryDiscountPattern: /^(100|[1-9]?[0-9])(\.\d{1,2})?$/,
     categoryBadgePattern: /^[a-zA-Z\s_-]{2,15}$/, 
 
+    addressFirstNamePattern: /^[A-Za-z]{1,49}$/,
+    addressLastNamePattern: /^[A-Za-z]{1,49}$/,
+    addressNickNamePattern: /^(?=.*[A-Za-z]{3,})[A-Za-z0-9]{3,20}( [A-Za-z0-9]{3,20})?$/,
+    addressDistrictPattern: /^[a-zA-Z\s]{1,49}$/,
+    addressStatePattern: /^[a-zA-Z\s]{1,49}$/,
+    addressStreetPattern: /^[a-zA-Z0-9\s,.-]{3,100}$/,
+    addressPincodePattern: /^[1-9][0-9]{5}$/,
+    addressLandmarkPattern: /^[a-zA-Z0-9\s,.-]{3,100}$/,
+    addressDeliveryInstructionsPattern: /^[a-zA-Z0-9.,'()\-:!?@#$%&+_\[\]"/\\ ]{5,200}$/,
+    addressMobileNumberPattern: /^\d{10}$/,
+    addressAlternateMobileNumberPattern: /^\d{10}$/,
+    addressEmailPattern: /^([a-z\d\.-]+)@([a-z\d-]+)\.([a-z]{2,10})([\.a-z]?)$/,
+    
 
     validator: function(fieldName, value, errorMessage){
-        const currentPattern = Object.keys(this).find( (pattern,index)=> {
-            if(pattern.toString().match(fieldName.toString())) return pattern[index]
-        } )
+        console.log("Inside main validator function, with fieldname-->", fieldName)
+        // const currentPattern = Object.keys(this).find( (pattern,index)=> {
+        //     if(pattern.toLowerCase().toString().match(fieldName.toLowerCase().toString())) return pattern[index]
+        // } )
+        const currentPattern = Object.keys(this).find((pattern) => {
+            if( pattern.toLowerCase().includes(fieldName.toLowerCase()) ) return pattern 
+        }
+        )
         if(currentPattern){
             if(!Array.isArray(value) && this[currentPattern].test(value)){
+                 console.log("Passed the test")
                  return {error: false, message:"success"}
             }
             if(Array.isArray(value) && value.every(item=> this[currentPattern].test(item))){
                 return {error: false, message:"success"}
             }
             else{
+                console.log("Didn't pass the test")
                 console.log("validation failed errorMessage before return from regexPatterns.validator", JSON.stringify({error: true, message:errorMessage.toString() }))
                 return {
                     error: true,
@@ -46,6 +66,7 @@ export const handleInputValidation = (fieldName, value, options)=>{
     console.log("fieldName-->",fieldName)
     console.log("value-->",value)
     console.log("isArray?-->", Array.isArray(value))
+    console.log("Options-->", options)
     if (Array.isArray(value) && (!value.length || value.some(val => !val.trim()))){
         if( value.some(val=> val.trim()) ){
             return{
@@ -83,6 +104,7 @@ export const handleInputValidation = (fieldName, value, options)=>{
         }
     }
     else{
+        console.log("Going to switch---")
         switch(fieldName){
             case "title":
                 return regexPatterns.validator(fieldName, value, "Please enter a valid product name!.")
@@ -105,32 +127,77 @@ export const handleInputValidation = (fieldName, value, options)=>{
                 return regexPatterns.validator(fieldName, value, "Please enter a valid Discount rate!")
             case "categoryBadge":
                 return regexPatterns.validator(fieldName, value, "Please enter a valid Category badge! Must be under 30 characters.")
+
+            case "firstName":
+                return regexPatterns.validator(fieldName, value, "Please enter a valid First name!.")
+            case "lastName":
+                return regexPatterns.validator(fieldName, value, "Please enter a valid price!.")
+            case "nickName":
+                return regexPatterns.validator(fieldName, value, "Please enter a valid Nickname! The nickname must be under 20 characters (letters or digits) and must have atleast 3 characters.")
+            case "district":
+                return regexPatterns.validator(fieldName, value, "Please enter a valid district!.")
+            case "state":
+                return regexPatterns.validator(fieldName, value, "Please enter a valid state!")
+            case "street":
+                return regexPatterns.validator(fieldName, value, "Please enter a valid street! Must be under 100 words.")
+            case "pincode":
+                return regexPatterns.validator(fieldName, value, "Please enter a valid 6 digit pincode!.")
+            case "landmark":
+                return regexPatterns.validator(fieldName, value, "Please enter a valid landmark! Must be under 100 words..")
+            case "mobile":
+            case "alternateMobile":
+                return regexPatterns.validator(fieldName, value, "Please enter a valid 10 digit mobile number!.")
+            case "email":
+                return regexPatterns.validator(fieldName, value, "Please enter a valid email address!")
+            case "deliveryInstructions":
+                return regexPatterns.validator(fieldName, value, "Please enter a valid instructions! Must have atleast 30 characters and under 200 words. Also ;^*+=~`{}|<> are not allowed")
+            
+            default: {console.log(`Validation failed: Unrecognized field '${fieldName}'`)}
         }
     }
 }
 
-export const displaySuccess = (e)=>{
+export const displaySuccess = (e, options)=>{
     console.log("Success!")
-    e.target.nextElementSibling.style.visibility = 'hidden'
+    options && options.optionalMsg ? null : e.target.nextElementSibling.style.visibility = 'hidden'
     e.target.style.borderColor = 'green'
 }
 export const displayErrorAndReturnNewFormData = (e, message, formData, fieldName)=>{
     e.target.style.borderColor = 'red'
-    e.target.nextElementSibling.style.visibility = 'visible'
+    let errorDisplayer;
+    if (e.target.nextElementSibling.classList.contains('error')){
+        errorDisplayer = e.target.nextElementSibling
+    }else errorDisplayer = e.target.nextElementSibling.nextElementSibling
+    errorDisplayer.style.visibility = 'visible'
+    errorDisplayer.style.color = 'rgb(239,68,68)'
     console.log("msg from displayError-->"+message)
     delete formData[fieldName]
-    e.target.nextElementSibling.innerText = message.toString()
-    e.target.nextElementSibling.click()
+    errorDisplayer.innerText = message.toString()
+    errorDisplayer.click()
     return formData
 }
 
-export const cancelErrorState = (e, borderColor = 'transparent', options )=>{
+export const cancelErrorState = (e, borderColor = 'transparent', options)=>{
     console.log("Inside errorHandler")
-    console.log("e.target.previousElementSibling.value()"+ e.target.previousElementSibling.value)
-    if(e.target.innerText.endsWith('empty') || (options?.optionalField && !e.target.previousElementSibling.value.trim())){
+    // console.log("e.target.previousElementSibling.value()"+ e.target.previousElementSibling.value)
+    let inputElement = e.target.previousElementSibling;
+    while (inputElement.tagName !== 'INPUT' && inputElement.tagName !== 'TEXTAREA'){
+        inputElement = inputElement.previousElementSibling
+    } 
+    if (inputElement) {
+        console.log("Found input element:", inputElement);
+    } else {
+        console.log("No input element found.");
+    }
+    console.log("e.target-->", e.target)
+    console.log("e.target.innerText-->",e.target.innerText)
+    if(e.target.innerText.endsWith('empty')){
+        console.log("Inside cancelErrorState if e.target.innerText.endsWith('empty')")
+        console.log("Optional Message-->", options.optionalMsg)
         setTimeout(()=>{
-            e.target.innerText = '' 
-            e.target.previousElementSibling.style.borderColor = borderColor    
+            e.target.innerText = options.optionalMsg ? options.optionalMsg : ''
+            if(options.optionalMsg) e.target.style.color = 'rgb(125, 124, 140)'
+            inputElement.style.borderColor = borderColor    
         }, 2000)
     }
 }

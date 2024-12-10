@@ -1,33 +1,11 @@
-#AddressManagementPage main input, #AddressManagementPage main textarea{
-    caret-color: var(--PRIMARYDARK);
-}
-#AddressManagementPage main input:focus{
-    --tw-ring-shadow: 0;
-    border: 2px solid var(--SECONDARYLIGHT2);
-    background-color: white;
-}
-#AddressManagementPage main input:focus-visible{
-    border: 2px solid var(--SECONDARYLIGHT2);
-    background-color: white;
-}
-#AddressManagementPage main textarea:focus{
-    --tw-ring-shadow: 0;
-    border: 2px solid var(--SECONDARYLIGHT2);
-    background-color: white;
-}
-#AddressManagementPage main textarea:focus-visible{
-    border: 2px solid var(--SECONDARYLIGHT2);
-    background-color: white;
-}
 #AddressManagementPage main #address-content{
-    margin-top: 1rem;
+    margin-top: 3rem;
     flex-basis: 75%;
     display: flex;
     flex-direction: column;
     justify-content: center;
     gap: 2rem;
 }
-
 #AddressManagementPage main #address-content>.address-fields{
     display: flex;
     justify-content: space-between;
@@ -38,11 +16,14 @@
     align-items: center;
     gap: 5px;
 }
-#AddressManagementPage main #address-content .address-types>div input{
+#AddressManagementPage main #address-content .address-types>div input[type= 'radio']{
     width: 10px;
     height: 10px;
     border-radius: 5px;
     border: 1px solid var(--PRIMARYDARK);
+}
+#AddressManagementPage main #address-content .address-types>div input[type= 'radio']:checked{
+    background-color: var(--PRIMARYDARK);
 }
 #AddressManagementPage main #address-content .address-types>div label{
     font-size: 12.5px;

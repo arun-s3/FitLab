@@ -36,6 +36,8 @@ export default function AdminAddAndEditProductPage({ editProduct }){
     const [subcategory, setSubcategory] = useState('')
     const [productData, setProductData] = useState({})
 
+    const [startedSubmission, setStartedSubmission] = useState(false)
+
     const [categoryImgPreview, setCategoryImgPreview] = useState('')
     const categoryBgImage = {
         backgroundImage: `linear-gradient(to right, rgba(243, 230, 251, 0.85), rgba(243, 230, 251, 0.85)), url('${categoryImgPreview}')`,
@@ -97,7 +99,9 @@ export default function AdminAddAndEditProductPage({ editProduct }){
                     "stock": editProductItem.current.stock,
                     "weights": editProductItem.current.weights || [],
                     "brand": editProductItem.current.brand,
+                    "subtitle": editProductItem.current.subtitle || '',
                     "description": editProductItem.current.description || '',
+                    "additionalInformation": editProductItem.current.additionalInformation || []
                 });
                 setCategory(editProductItem.current.category);
                 images.forEach((img,index)=> console.log(`image[${index}]from state of location on Edit-->`, JSON.stringify(img)))
@@ -137,22 +141,35 @@ export default function AdminAddAndEditProductPage({ editProduct }){
         console.log(" inside Changehandler")
         setProductData({...productData, [fieldName]: e.target.value})
     }
+
+    const additionalInfoChangeHandler = (e)=> {
+        const value = e.target.value
+        const lines = value.split(/\r?\n/)
+        setProductData({...productData, additionalInformation: lines})
+    }
+
+    const additionalInfoBlurHandler = (e)=> {
+            console.log("if(fieldName == 'additionalInformation')")
+            const infoArr = productData?.additionalInformation.filter(info=> info !== null && info.trim() !== "")
+            console.log("infoArr---->", JSON.stringify(infoArr))
+            setProductData({...productData, additionalInformation: [...infoArr] })
+    }
     
     const inputFocusHandler = (e)=>{ e.target.previousElementSibling.style.display = 'none' }
 
-    const inputBlurHandler = (e, fieldName, options)=>{
+    const inputBlurHandler = (e, fieldName, options, limits)=>{
          console.log("inside inputBlurHandler, fieldname", fieldName)
          e.target.value.trim()? null : e.target.previousElementSibling.style.display = 'inline-block'
          if(fieldName){
             let uniqueWeights
-            if(fieldName=='weights'){
+            if(fieldName == 'weights'){
                 let weightArr = e.target.value.trim().split(',')
                 weightArr = weightArr.map(wt=> wt.trim())
                 uniqueWeights = new Set([...weightArr])
                 setProductData({...productData, weights: [...uniqueWeights]})
             }
-            const value = (fieldName == 'weights') ? Array.from(uniqueWeights) : e.target.value
-            const statusObj = (options?.optionalField) ? handleInputValidation(fieldName, value, {optionalField: true}) : handleInputValidation(fieldName, value)
+            const value = (fieldName == 'weights') ? Array.from(uniqueWeights) : productData[fieldName]
+            const statusObj = (options?.optionalField) ? handleInputValidation(fieldName, value, {optionalField: true}, limits) : handleInputValidation(fieldName, value, limits)
             console.log("statusObj from inputBlurHandler--> ", JSON.stringify(statusObj))
             if(!statusObj.error && statusObj.message.startsWith("Optional")){
                 console.log("Inside here----")
@@ -187,9 +204,18 @@ export default function AdminAddAndEditProductPage({ editProduct }){
 
     const submitHandler = async (e)=>{
         console.log("Inside submitData()--")
-        const optionalFields = ["description","tags","weights"]
-        if( (Object.keys(productData).length <= 7 && optionalFields.some(field=> Object.keys(productData).includes(field) )) || Object.values(productData).find(inputValues=>inputValues==='undefined')){
-            if(!productData.size){
+        setStartedSubmission(true)
+        const optionalFields = ["description", "additionalInformation", "tags","weights"]
+        const requiredFields = Object.keys(productData).filter(field=> !optionalFields.includes(field))
+        const isRequiredFieldsMissing = requiredFields.some(field=> productData[field] === undefined || productData[field].toString().trim() === '')
+        console.log("productData---->", productData)
+        console.log("Object.keys(productData).length----->", Object.keys(productData).length)
+        console.log("Object.keys(productData).find(field=> !optionalFields.includes(field)---->", Object.keys(productData).find(field=> !optionalFields.includes(field)))
+        console.log("Required fields---->", requiredFields)
+        // if( (Object.keys(productData).length <= 9 && optionalFields.some(field=> !Object.keys(productData).includes(field) )) || 
+        //         Object.keys(productData).find(field=> !optionalFields.includes(field) && (productData[field] === undefined || productData[field].toString().trim() === ''))){
+        if(isRequiredFieldsMissing){
+            if(!Object.keys(productData).length){
                 console.log("No Fields entered!")
                 toast.error("Please enter all the fields!")
             }
@@ -241,8 +267,10 @@ export default function AdminAddAndEditProductPage({ editProduct }){
             console.log("PRODUCTDATA BEFORE DISPATCHING-->", JSON.stringify(productData))
             editProduct?  dispatch( updateProduct({formData, id: editProductItem.current._id}) ) : dispatch( createProduct({formData}) )
             console.log("Dispatched successfully--")
+            setStartedSubmission(false)
         }
     }
+    
 
     return(
         <section id='AdminAddProduct'> 
@@ -309,7 +337,22 @@ export default function AdminAddAndEditProductPage({ editProduct }){
                     </div>
                     <div className='flex justify-center items-center product-input-wrapper'>
                         <div className='input-wrapper'>
-                            <label for='product-description'> Description (optional) </label>
+                            <label for='product-subtitle' className='flex items-center gap-[10px]'>
+                                 <span> Subtitle </span>
+                                 <span className=' text-[10px] text-secondary'> (The subtitle should contain the primary information about the product.)  </span>
+                            </label>
+                            <div className='relative'>
+                                <PlaceholderIcon icon={<CgDetailsMore/>} fromTop={14} />
+                                <textarea placeholder='Type subtitles here' rows='3' cols='70' maxlength='2000' id='product-subtitle'
+                                    required className='pl-[21px]' onFocus={(e)=> inputFocusHandler(e)} onBlur={(e)=> inputBlurHandler(e, "subtitle")}
+                                     onChange={(e)=> changeHandler(e, "subtitle")} value={productData.subtitle}/>
+                                <p className='error' onClick={(e)=> cancelErrorState(e, primaryColor.current)}></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className='flex justify-center items-center product-input-wrapper'>
+                        <div className='input-wrapper'>
+                            <label for='product-description'> Description (optional)</label>
                             <div className='relative'>
                                 <PlaceholderIcon icon={<CgDetailsMore/>} fromTop={8} />
                                 <textarea placeholder='Type description here' rows='7' cols='70' maxlength='2000' id='product-description'
@@ -334,21 +377,38 @@ export default function AdminAddAndEditProductPage({ editProduct }){
                     </div>
                     <div className='flex justify-center items-center product-input-wrapper'>
                         <div className='input-wrapper'>
+                            <label for='product-additionalInfo'> Additional Information (optional) </label>
+                            <div className='relative'>
+                                <PlaceholderIcon icon={<CgDetailsMore/>} fromTop={7} />
+                                <textarea placeholder='Type the additional informations and parameters of the product here line by line' rows='8' cols='70' maxlength='2000' id='product-additionalInformation'
+                                    required className='pl-[21px]' onFocus={(e)=> inputFocusHandler(e)} onBlur={(e)=> additionalInfoBlurHandler(e)}
+                                     onChange={(e)=> additionalInfoChangeHandler(e)} value={productData?.additionalInformation && productData.additionalInformation.join('\n')} />
+                                <p className='error' onClick={(e)=> cancelErrorState(e, primaryColor.current, {optionalField: true})}></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className='flex justify-center items-center product-input-wrapper'>
+                        <div className='input-wrapper'>
                             
                             <TagGenerator tag={tag} setTags={setTags} SetPlaceholderIcon={PlaceholderIcon} {...(editProduct && {editTags: editProductItem?.current?.tags} )}/> 
 
                         </div>
                     </div>
-                    <div className='mt-[1rem]'>
+                    <div className='mt-[1rem] flex items-center gap-[1rem]'>
                         <SiteButtonSquare customStyle={{paddingInline:'50px', paddingBlock:'9px', borderRadius:'7px'}}
                                             clickHandler={(e)=>{ submitHandler(e)}}>
                              {loading? <CustomHashLoader loading={loading}/> : 'Submit'}  
                         </SiteButtonSquare>
+                        <p className='text-[11.5px] text-red-500 tracking-[0.5px]'> 
+                            {(startedSubmission && !productData.subcategory) ? '*Please select a subcategory!' : '' } 
+                        </p>
                     </div>
                 </div>
                 <div className='w-full h-screen basis-[37%]'>
  
-                     <FileUpload images={images} setImages={setImages} imageLimit={6} needThumbnail={true}  thumbnail={thumbnail} setThumbnail={setThumbnail} thumbnailIndexOnEditProduct={thumbnailIndexOnEditProduct} />
+                     <FileUpload images={images} setImages={setImages} imageLimit={6} needThumbnail={true} 
+                         thumbnail={thumbnail} setThumbnail={setThumbnail} thumbnailIndexOnEditProduct={thumbnailIndexOnEditProduct} 
+                            editingMode={editProduct}/>
 
                 </div>
             </main>

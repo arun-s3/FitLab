@@ -5,9 +5,17 @@ const productSchema = mongoose.Schema({
        type: String,
        required: true,
      },
-     description: {
+     subtitle: {
        type: String,
-       required: false
+       required: true
+     },
+     description: {
+      type: String,
+      required: false
+     },
+     additionalInformation: {
+      type: [String],
+      required: false
      },
      weights: {
         type: [Number],

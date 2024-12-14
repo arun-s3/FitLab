@@ -14,7 +14,8 @@ import {FaArrowUp, FaArrowDown} from "react-icons/fa";
 import {toast} from 'react-toastify'
 // import { uploadImages } from 'Frontend/src/Slices/productSlice'
 
-export default function FileUpload({images, setImages, imageLimit, needThumbnail, thumbnail, setThumbnail, thumbnailIndexOnEditProduct, categoryImgPreview}){
+export default function FileUpload({images, setImages, imageLimit, needThumbnail, thumbnail, setThumbnail, thumbnailIndexOnEditProduct,
+         categoryImgPreview, editingMode}){
 
     const [error, setError] = useState(null)
     const [imageMessage, setImageMessage] = useState('')
@@ -45,7 +46,7 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
             setImageMessage('')
             setDisplayCompressButton(false) 
         }
-        if(!imageCropperState){
+        if(!imageCropperState && !editingMode){
             if(images.some(img=> !img.isCropped)){
                 // imageMessageDisplay.current.parentElement.style.visibility = 'visible'
                 // imageMessageDisplay.current.style.display = 'none'

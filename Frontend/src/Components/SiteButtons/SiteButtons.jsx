@@ -63,3 +63,13 @@ export function SitePrimaryMinimalButtonWithShadow({customStyle, tailwindClasses
                 style={lowFont? {...customStyle, fontSize:'14px'} : customStyle} onClick={()=> clickHandler()}> {children} </button>
     )
 }
+
+export function SiteSecondaryFillButton({className, variant, size, clickHandler, customStyle, children}) {
+    return(
+        <button className={`px-[16px] py-[8px] rounded
+            ${variant === 'outline' ? 'border border-gray-300' : 'bg-purple-600 text-white'} 
+               ${size === 'icon' ? 'p-[8px]' : ''} ${className}`}  onClick={()=> clickHandler()} style={customStyle}>
+           {children}
+         </button>
+    )
+}

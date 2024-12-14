@@ -8,8 +8,10 @@ const regexPatterns = {
     pricePattern: /^\d+(\.\d{1,2})?$/,
     stockPattern: /^\d{1,}$/,
     weightsPattern: /^\d+(\.\d{1,3})?$/,
-    brandPattern: /^(?!^\d+$)[a-zA-Z0-9\s,'-]{1,50}$/,     
+    brandPattern: /^(?!^\d+$)[a-zA-Z0-9\s,'-]{1,50}$/, 
+    subtitlePattern: /^[\w\s.,!'"-]{20,300}$/,   
     descriptionPattern: /^[\w\s.,!'"-]{30,2000}$/,
+    // additionalInformation: /^([A-Za-z\s]+)\s*[\s:\-=]?\s*([A-Za-z0-9.,%\-()\s]+)(?:\n([A-Za-z\s]+)\s*[\s:\-=]?\s*([A-Za-z0-9.,%\-()\s]+))*$/,
 
     categoryNamePattern: /^[a-zA-Z\s,'-]{2,50}$/,
     categoryDescriptionPattern: /^[a-zA-Z0-9\s.,'!?&()\n-]{2,160}$/, 
@@ -62,16 +64,19 @@ const regexPatterns = {
     }
 }
 
-export const handleInputValidation = (fieldName, value, options)=>{
+export const handleInputValidation = (fieldName, value, options, limits)=>{
     console.log("fieldName-->",fieldName)
     console.log("value-->",value)
     console.log("isArray?-->", Array.isArray(value))
     console.log("Options-->", options)
+    console.log("Limits--->", JSON.stringify(limits))
     if (Array.isArray(value) && (!value.length || value.some(val => !val.trim()))){
         if( value.some(val=> val.trim()) ){
-            return{
-                error: true,
-                message: "Please make sure that there are no consecutive commas without any number between them"
+            if(fieldName==='weights'){
+                return{
+                    error: true,
+                    message: 'Please make sure that there are no consecutive commas without any number between them' 
+                }
             }
         }
         if( value.every(val=> !val.trim()) ){
@@ -88,6 +93,22 @@ export const handleInputValidation = (fieldName, value, options)=>{
             }
         }
        
+    }
+    if(Array.isArray(value) && limits){
+        if(value.join('').length < limits.minChar){
+            console.log("Inside array limits validation")
+            return{
+                error: true,
+                message: `There must be atleast ${limits.minChar} characters!`
+            }
+        }
+        if(value.join('').length > limits.maxChar){
+            console.log("Inside array limits validation")
+            return{
+                error: true,
+                message: `Only ${limits.maxChar} characters are allowed!`
+            }
+        }
     }
     if(!Array.isArray(value) && !value.trim().length){
         if(options?.optionalField){ 
@@ -116,8 +137,12 @@ export const handleInputValidation = (fieldName, value, options)=>{
                 return regexPatterns.validator(fieldName, value, "Please enter a valid Weight!")
             case "brand":
                 return regexPatterns.validator(fieldName, value, "Please enter a valid Brand number!")
+            case "subtitle":
+                return regexPatterns.validator(fieldName, value, "Please enter a valid product Subtitle! Must have atleast 20 characters and shouldn't cross 300 characters.")
             case "description":
-                return regexPatterns.validator(fieldName, value, "Please enter a valid product Description! Must have atleast 30 characters.")
+                return regexPatterns.validator(fieldName, value, "Please enter a valid product Description! Must have atleast 30 characters.(Max 2000 characters only allowed)")
+            // case "additionalInformation":
+                // return regexPatterns.validator(fieldName, value, "Please enter a valid product information! Must have atleast 30 characters.(Max 2000 characters only allowed)")
             
             case "categoryName":
                 return regexPatterns.validator(fieldName, value, "Please enter a valid Category name! Must be under 50 characters.")

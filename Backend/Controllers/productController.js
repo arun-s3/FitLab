@@ -56,12 +56,14 @@ const packProductData = async (req)=>{
 
         const productDatas = {
             title: req.body.title, 
+            subtitle: req.body.subtitle,
             price: req.body.price,
             stock: req.body.stock,
             weights: req.body?.weights|| [],
             brand: req.body.brand,
             category: req.body.category,
             description: req.body?.description || '',
+            additionalInformation: req.body?.additionalInformation || [],
             tags: req.body?.tags|| [],
             images: uploadedImages,
             thumbnail: thumbnailImage
@@ -85,8 +87,11 @@ const createProduct = async(req,res,next)=>{
     try {
         console.log("Inside createProduct controller, received productForm-->", JSON.stringify(req.body.title))
         const productDatas = await packProductData(req)
+        console.log("productData's description--->", productDatas.description)
         const newProduct = new Product(productDatas)
+        console.log("newProduct's description--->", newProduct.description)
         const savedProduct = await newProduct.save();
+        console.log("saved Product's title--->", savedProduct.title)
         res.status(201).json({createdProduct:'true', product:savedProduct});  
     } 
     catch (error) { 

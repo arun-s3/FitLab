@@ -82,7 +82,7 @@ const editAddress = async(req,res,next)=> {
         next(error)
         console.log("Error in editAddress--", error.message)
     }
-}
+}  
 
 const deleteAddress = async(req,res,next)=> {
     try{
@@ -147,3 +147,4 @@ const setAsDefaultAddress = async (req, res, next) => {
 
 
 module.exports = {createNewAddress, editAddress, deleteAddress, getAllAddress, setAsDefaultAddress}
+

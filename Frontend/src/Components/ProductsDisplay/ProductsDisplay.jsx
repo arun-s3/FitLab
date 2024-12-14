@@ -6,12 +6,12 @@ import {useDispatch, useSelector} from 'react-redux'
 import axios from 'axios';
 import {toast} from 'react-toastify'
 import {MdFavoriteBorder} from "react-icons/md";
-import {IoStarOutline,IoStarHalfSharp,IoStarSharp} from "react-icons/io5";
 import {RiFileEditLine} from "react-icons/ri";
 import {MdBlock} from "react-icons/md";
 
 import {getAllProducts, toggleProductStatus} from '../../Slices/productSlice'
 import Pagination from '../Pagination/Pagination'
+import StarGenerator from '../StarGenerator/StarGenerator';
 import {SiteButtonSquare} from '../SiteButtons/SiteButtons';
 import ProductsTableView from './ProductsTableView';
 
@@ -56,26 +56,6 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
     admin && setProducts(showTheseProducts)
   },[showTheseProducts])
 
-  const produceStarRating = (product)=>{
-    let avgRating = (product.reviews.map(review=> Number.parseInt(review.rating)).reduce((total,rating)=> total+=rating,0) / product.reviews.length).toFixed(1)
-    let stars = [];
-    const averageRating = avgRating
-    for(let i=0; i<5; i++){
-        if(avgRating>0){
-            avgRating<1 ? stars.push(<IoStarHalfSharp key={i}/>): stars.push(<IoStarSharp key={i}/>)
-        }else{
-            stars.push(<span className='emptystar'> <IoStarOutline key={i} /> </span>)
-        }
-        avgRating--;
-    }
-    return{
-        stars: <span className='inline-flex items-center'> {stars} </span>,
-        avgRating: averageRating
-    }
-        
-    
-  }
-
   const currentPageChanger = (page)=>{
     setCurrentPage(page)
   }
@@ -87,8 +67,9 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
 
       { !showByTable && 
         products.map((product) => (
-          <div key={product._id} className= {gridView ? 'w-[275px]' : 'flex gap-[1rem] w-full'}>
-            <figure className='relative h-auto rounded-[10px] thumbnail'>
+          <div key={product._id} className= {gridView ? 'w-[275px]' : 'flex gap-[1rem] w-full'} 
+                    onClick={()=> !admin && navigate('/shop/product',{state: {product}})}>
+            <figure className='relative h-auto rounded-[10px] thumbnail cursor-pointer'>
               <img src={product.thumbnail.url || product.thumbnail} alt={product.title} className='rounded-[10px] h-[275px] w-[275px] object-cover'/>
               <figcaption className={`${admin ? 'top-[2px] left-[-40px]' : 'bottom-[12px]'} absolute w-full text-center`}>
                 {
@@ -117,10 +98,12 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
               </div>
               }
             </figure>
-            <div className= {gridView? 'mt-[10px] flex flex-col gap-[5px] pl-[10px] py-[8px] rounded-[10px] product-infos' 
-                                 : 'inline-flex flex-col gap-[10px] justify-center pl-[1rem] py-[8px] rounded-[10px] ml-[1rem] product-infos w-full'}>
+            <div className={` ${gridView? 'mt-[10px] flex flex-col gap-[5px] pl-[10px] py-[8px] rounded-[10px] product-infos' 
+                                 : 'inline-flex flex-col gap-[10px] justify-center pl-[1rem] py-[8px] rounded-[10px] ml-[1rem] product-infos w-full'} cursor-pointer`}>
               {product?.reviews ? ( <p className='text-secondary flex items-center gap-[10px]'> 
-                                        { produceStarRating(product).stars } 
+
+                                         <StarGenerator product={product} />
+
                                         <span className='text-[13px]'> ({ product.reviews.length }) </span> 
                                     </p>)
                                  : ( <p className='text-secondary'>No rating available!</p> )
@@ -129,9 +112,9 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
               <p className= {(gridView ? 'text-[13px]' : (admin && !gridView)? 'text-[14px]' :'text-[16px]')  + ' capitalize font-[500]'}>{product.title}</p>
               {
                 !gridView && 
-                  <p className={(admin && !gridView)? 'text-[12px]' : 'text-[14px]'}> {product.description} </p>
+                  <p className={(admin && !gridView)? 'text-[12px]' : 'text-[14px]'}> {product.subtitle} </p>
               }
-              <p className={(admin && !gridView)? 'text-[13px]' : 'text-[15px]'}> &#8377; {Math.ceil(product.price*84)}</p>
+              <p className={(admin && !gridView)? 'text-[13px]' : 'text-[15px]'}> &#8377; {product.price}</p>
               {
                 !gridView && 
                 <div>

@@ -11,6 +11,7 @@ import TestAddressPage from './Pages/User/TesterPages/TestAddressPage'
 import AddressManagementPage from './Pages/User/AddressManagementPage/AddressManagementPage'
 import AddressListingPage from './Pages/User/AddressListingPage/AddressListingPage'
 import UserPageWapper from './Pages/User/UserPageWapper/UserPageWapper'
+import ProductDetailPage from './Pages/User/ProductDetailPage/ProductDetailPage'
 
 
 import AdminSignInPage from './Pages/Admin/AdminSignInPage/AdminSignInPage'
@@ -53,6 +54,9 @@ export default function App(){
                 <Route path='signin' element={<SignUpAndInPage type='signin' />}/>
                 <Route path='products'>
                     <Route index element={<ProductListPage/>}/>
+                </Route>
+                <Route path='shop'>
+                    <Route path='product' element={<ProductDetailPage/>} />
                 </Route>
                 {/* <Route element={<UserPageWapper/>} > */}
                 <Route path='profile'>

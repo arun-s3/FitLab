@@ -7,6 +7,7 @@ import Header from '../../../Components/Header/Header'
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
 import {SiteSecondaryFillButton} from '../../../Components/SiteButtons/SiteButtons'
 import StarGenerator from '../../../Components/StarGenerator/StarGenerator'
+import CartSidebar from '../../../Components/CartSidebar/CartSidebar'
 import Footer from '../../../Components/Footer/Footer'
 
 
@@ -15,12 +16,15 @@ const Card = ({children, className})=> (
 )
 
 export default function ProductDetailPage(){
-  const [quantity, setQuantity] = useState(1);
-  const [selectedWeight, setSelectedWeight] = useState(null);
-  const [activeTab, setActiveTab] = useState("description");
-  const [reviewSort, setReviewSort] = useState("newest");
-  const [showAllReviews, setShowAllReviews] = useState(false);
-  const [currentProductIndex, setCurrentProductIndex] = useState(0);
+  const [quantity, setQuantity] = useState(1)
+  const [selectedWeight, setSelectedWeight] = useState(null)
+  const [activeTab, setActiveTab] = useState("description")
+  const [reviewSort, setReviewSort] = useState("newest")
+  const [showAllReviews, setShowAllReviews] = useState(false)
+  const [currentProductIndex, setCurrentProductIndex] = useState(0)
+
+  const [isCartOpen, setIsCartOpen] = useState(false)
+  const [cartItems, setCartItems] = useState([])
 
   const [productDetails, setProductDetails] = useState({})
 
@@ -73,7 +77,7 @@ export default function ProductDetailPage(){
     },
     {
       id: 2,
-      name: "PowerKettle Pro 30kg",
+      name: "PowerKettle Pro 35kg",
       price: "Rs 10,799",
       image: "https://via.placeholder.com/200",
       rating: 5
@@ -126,7 +130,31 @@ export default function ProductDetailPage(){
     thumbnailRef.current.src = productDetails.images[index].url
     setCurrentImageIndex(index)
   }
-    
+  
+  const handleAddToCart = (product) => {
+    console.log("Inside handleAddToCart()--")
+    const newItem = {
+      product,
+      id: Date.now(),
+      quantity: quantity,
+      weight: selectedWeight
+    }
+    setCartItems([...cartItems, newItem])
+    setIsCartOpen(true)
+  }
+
+  const updateQuantity = (id, newQuantity) => {
+    setCartItems(
+      cartItems.map((item) =>
+        item.id === id ? { ...item, quantity: newQuantity } : item
+      )
+    );
+  };
+  
+
+  const removeFromCart = (id) => {
+    setCartItems(cartItems.filter(item => item.id !== id))
+  }
 
   return (
     <section id='ProductDetailPage'>
@@ -158,7 +186,7 @@ export default function ProductDetailPage(){
                   </div>
                 </div>
                 
-                <div className="space-y-[24px]">
+                <div className="space-y-[24px]"> 
                   <div className="space-y-[8px]">
                     <div className="flex items-center gap-[8px]">
 
@@ -204,7 +232,8 @@ export default function ProductDetailPage(){
                     </SiteSecondaryFillButton>
                   </div>
                   
-                  <SiteSecondaryFillButton className="w-full bg-[#CCFF00] hover:bg-primary text-black">
+                  <SiteSecondaryFillButton className="w-full bg-[#CCFF00] hover:bg-primary text-black" 
+                      clickHandler={()=> handleAddToCart(productDetails)}>
                     Add to Cart
                   </SiteSecondaryFillButton>
                 </div>
@@ -260,7 +289,7 @@ export default function ProductDetailPage(){
                       <div className="flex justify-between items-center mb-[16px]">
                         <p>{reviews.length} reviews</p>
                         <select value={reviewSort} className="text-[13px] py-[1px] border border-secondary rounded-md p-[8px]"
-                             onChange={(e) => setReviewSort(e.target.value)}>
+                             onChange={(e)=> setReviewSort(e.target.value)}>
                           <option value="newest">Newest</option>
                           <option value="highest">Highest Rated</option>
                           <option value="lowest">Lowest Rated</option>
@@ -282,7 +311,7 @@ export default function ProductDetailPage(){
                           </div>
                         ))}
                       </div>
-                      {!showAllReviews && reviews.length > 2 && (
+                      {!showAllReviews && reviews.length > 2 && ( 
                         <SiteSecondaryFillButton className="mt-[16px] text-[14px]" onClick={() => setShowAllReviews(true)}>
                           Load more
                         </SiteSecondaryFillButton>
@@ -319,7 +348,6 @@ export default function ProductDetailPage(){
                 </div>
               </div>
               
-              {/* Similar Products */}
               <div className="mt-[64px] relative">
                 <h2 className="text-[24px] font-bold mb-[32px]">Similar Products</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-[24px]">
@@ -337,7 +365,7 @@ export default function ProductDetailPage(){
                           className="w-full h-auto mb-[16px]"
                         />
                         <div className="flex items-center gap-[4px] mb-[8px]">
-                          {Array.from({ length: product.rating }).map((_, i) => (
+                          {Array.from({length: product.rating}).map((_, i) => (
                             <Star key={i} className="w-[16px] h-[16px] fill-yellow-400 text-yellow-400" />
                           ))}
                         </div>
@@ -356,7 +384,12 @@ export default function ProductDetailPage(){
                   <ChevronRight className="w-[24px] h-[24px]" />
                 </button>
               </div>
+
+              <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} cartItems={cartItems} 
+                  updateQuantity={updateQuantity} removeFromCart={removeFromCart} />
+
             </div>
+
         </main>
         
         <Footer/>

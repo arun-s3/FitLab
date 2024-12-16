@@ -8,13 +8,15 @@ import adminReducer from '../Slices/adminSlice'
 import addressReducer from '../Slices/addressSlice'
 import productReducer from '../Slices/productSlice'
 import categoryReducer from '../Slices/categorySlice'
+import cartReducer from '../Slices/cartSlice'
 
 const rootReducer = combineReducers({
     user: userReducer,
     admin: adminReducer,
     address: addressReducer,
     productStore: productReducer,
-    categoryStore: categoryReducer
+    categoryStore: categoryReducer,
+    cart: cartReducer
 })
 
 const persistConfig = {

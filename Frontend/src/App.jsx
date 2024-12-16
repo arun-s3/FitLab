@@ -12,6 +12,7 @@ import AddressManagementPage from './Pages/User/AddressManagementPage/AddressMan
 import AddressListingPage from './Pages/User/AddressListingPage/AddressListingPage'
 import UserPageWapper from './Pages/User/UserPageWapper/UserPageWapper'
 import ProductDetailPage from './Pages/User/ProductDetailPage/ProductDetailPage'
+import CartPage from './Pages/User/CartPage/CartPage'
 
 
 import AdminSignInPage from './Pages/Admin/AdminSignInPage/AdminSignInPage'
@@ -58,6 +59,7 @@ export default function App(){
                 <Route path='shop'>
                     <Route path='product' element={<ProductDetailPage/>} />
                 </Route>
+                <Route path='cart' element={<CartPage/>} />
                 {/* <Route element={<UserPageWapper/>} > */}
                 <Route path='profile'>
                     <Route path='addresses'>

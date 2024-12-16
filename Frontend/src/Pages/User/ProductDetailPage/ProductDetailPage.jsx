@@ -1,11 +1,15 @@
 import React, {useEffect, useState, useRef} from 'react'
 import {useLocation} from 'react-router-dom'
+import {useDispatch, useSelector} from 'react-redux'
 
 import {Star, Minus, Plus, Heart, ChevronLeft, ChevronRight} from 'lucide-react'
+import {toast} from 'react-toastify'
 
 import Header from '../../../Components/Header/Header'
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
 import {SiteSecondaryFillButton} from '../../../Components/SiteButtons/SiteButtons'
+import {addToCart, removeFromCart, resetCartStates} from '../../../Slices/cartSlice'
+import {CustomHashLoader, CustomScaleLoader} from '../../../Components/Loader//Loader'
 import StarGenerator from '../../../Components/StarGenerator/StarGenerator'
 import CartSidebar from '../../../Components/CartSidebar/CartSidebar'
 import Footer from '../../../Components/Footer/Footer'
@@ -24,7 +28,7 @@ export default function ProductDetailPage(){
   const [currentProductIndex, setCurrentProductIndex] = useState(0)
 
   const [isCartOpen, setIsCartOpen] = useState(false)
-  const [cartItems, setCartItems] = useState([])
+  const [packedupCart, setPackedupCart] = useState({})
 
   const [productDetails, setProductDetails] = useState({})
 
@@ -32,6 +36,10 @@ export default function ProductDetailPage(){
   const thumbnailRef = useRef(null)
 
   const location = useLocation()
+
+  const {cart, productAdded, productRemoved, loading, error, message} = useSelector(state=> state.cart)
+  const dispatch = useDispatch()
+
   useEffect(()=> {
     if(location?.state?.product){
         console.log("location.state.product-->", location.state.product)
@@ -41,6 +49,30 @@ export default function ProductDetailPage(){
         setCurrentImageIndex(thumbnailIndex)
     }
   },[location])
+
+  useEffect(()=> {
+    if(error && error.toLowerCase().includes('product')){
+      console.log("Error from ProductDetailPage-->", error)
+      toast.error(error)
+      dispatch(resetCartStates())
+    }
+    if(productAdded){
+      console.log("Product added to cart successfully!")
+      // const newItem = {
+      //   product,
+      //   id: Date.now(),
+      //   quantity: quantity,
+      //   weight: selectedWeight
+      // }
+      setPackedupCart(cart)
+      setIsCartOpen(true)
+      dispatch(resetCartStates())
+    }
+    if(productRemoved){
+      setPackedupCart(cart)
+      dispatch(resetCartStates())
+    }
+  },[error, productAdded, productRemoved])
 
   const reviews = [
     {
@@ -133,27 +165,31 @@ export default function ProductDetailPage(){
   
   const handleAddToCart = (product) => {
     console.log("Inside handleAddToCart()--")
-    const newItem = {
-      product,
-      id: Date.now(),
-      quantity: quantity,
-      weight: selectedWeight
-    }
-    setCartItems([...cartItems, newItem])
-    setIsCartOpen(true)
+    dispatch( addToCart({productId: product._id, quantity}) )
+    console.log("Dispatched successfully")
+    // const newItem = {
+    //   product,
+    //   id: Date.now(),
+    //   quantity: quantity,
+    //   weight: selectedWeight
+    // }
+    // setCartItems([...cartItems, newItem])
+    // setIsCartOpen(true)
   }
 
   const updateQuantity = (id, newQuantity) => {
-    setCartItems(
-      cartItems.map((item) =>
-        item.id === id ? { ...item, quantity: newQuantity } : item
-      )
-    );
+    // setCartItems(
+    //   cartItems.map((item) =>
+    //     item.id === id ? { ...item, quantity: newQuantity } : item
+    //   )
+    // );
+    dispatch( addToCart({productId: id, quantity: newQuantity}) )
   };
   
 
-  const removeFromCart = (id) => {
-    setCartItems(cartItems.filter(item => item.id !== id))
+  const removeFromTheCart = (id) => {
+    // setCartItems(cartItems.filter(item => item.id !== id)) 
+    dispatch(removeFromCart({productId: id}))
   }
 
   return (
@@ -234,7 +270,7 @@ export default function ProductDetailPage(){
                   
                   <SiteSecondaryFillButton className="w-full bg-[#CCFF00] hover:bg-primary text-black" 
                       clickHandler={()=> handleAddToCart(productDetails)}>
-                    Add to Cart
+                    { loading? <CustomHashLoader loading={loading}/> : 'Add to Cart' }
                   </SiteSecondaryFillButton>
                 </div>
               </div>
@@ -385,8 +421,8 @@ export default function ProductDetailPage(){
                 </button>
               </div>
 
-              <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} cartItems={cartItems} 
-                  updateQuantity={updateQuantity} removeFromCart={removeFromCart} />
+              <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} packedupCart={packedupCart} 
+                  updateQuantity={updateQuantity} removeFromTheCart={removeFromTheCart} />
 
             </div>
 

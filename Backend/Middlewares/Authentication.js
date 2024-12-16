@@ -10,12 +10,13 @@ const isLogin = async(req,res,next)=>{
             const decoded = verifyToken(token)
             console.log("Inside isLogin Verifying token inside isLogin-->"+decoded)
             if(decoded){
-                const currentUser = await User.findOne({_id:decoded.userId})
+                const currentUser = await User.findOne({_id: decoded.userId},{password: 0})
                 if(currentUser.isBlocked){ 
                     res.status(401).json({message:"You are Blocked! For more info, contact us"})
                 }
                 else{
                     req.user = currentUser
+                    console.log("req.user from isLogin Authentication--->", req.user)
                     next()
                 }
             }

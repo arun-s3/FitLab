@@ -45,11 +45,13 @@ const userProductRoutes = require('./Routes/userProductRoutes.js')
 const adminRoutes = require('./Routes/adminRoutes.js')
 const adminProductRoutes = require('./Routes/adminProductRoutes.js')
 const adminCategoryRoutes = require('./Routes/adminCategoryRoutes.js')
+const cartRoutes = require('./Routes/cartRoutes.js')
 
 
 app.use('/', userRoutes)
 app.use('/products', userProductRoutes)
 app.use('/addresses', addressRoutes)
+app.use('/cart', cartRoutes)
 
 app.use('/admin', adminRoutes)
 app.use('/admin/products', adminProductRoutes)
@@ -60,7 +62,7 @@ app.use((error,req,res,next)=>{
     const message = error.message||'Internal Server Error'
     const statusCode = error.statusCode||500
     console.log(`From index.js errorHandling middleware message is---> ${message} and statusCode is- ${statusCode}`)
-    res.status(statusCode).json({message:message})
+    res.status(statusCode).json({message})
 })
 
 const port = process.env.PORT||3000

@@ -1,4 +1,5 @@
 const mongoose=require('mongoose')
+const category = require('./categoryModel')
 
 const cartSchema=new mongoose.Schema({
       userId: {
@@ -13,11 +14,15 @@ const cartSchema=new mongoose.Schema({
                 ref: 'Product',
                 required: true
             },  
-            title:{
+            title: {
                 type: String,
                 required: true
             },
-            thumbnail:{
+            category:{
+                type: [String],
+                required: true
+            },
+            thumbnail: {
                 type: String,
                 required: true
             },
@@ -25,7 +30,7 @@ const cartSchema=new mongoose.Schema({
                 type: Number,
                 required: true,
             },
-            price:{
+            price: {
                 type: Number,
                 required: true
             },

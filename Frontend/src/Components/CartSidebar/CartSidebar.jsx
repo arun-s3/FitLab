@@ -33,7 +33,7 @@ export default function CartSidebar({ isOpen, onClose, packedupCart, removeFromT
               <div key={product.productId} id='cart-product' className="flex items-center justify-between bg-gray-50 p-3 rounded-lg shadow-sm">
                   <img src={product.thumbnail} alt={product.title} className="w-[50px] h-[50px] rounded-lg object-cover"/>
                   <div className="flex-1 ml-3">
-                    <h3 className="font-medium text-gray-800">{product.title}</h3>
+                    <h3 className="font-medium text-gray-800">{ !product.title.length > 22 ? product.title : product.title.slice(0,22) + '...' }</h3>
                     <p className="text-[11px] text-secondary"> 
                       &#8377;{product.price} x {product.quantity} = &#8377;{product.total.toFixed(2)}
                     </p>

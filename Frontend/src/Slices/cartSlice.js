@@ -31,6 +31,21 @@ export const removeFromCart = createAsyncThunk('cart/removeFromCart', async ({pr
   }
 })
 
+export const getTheCart = createAsyncThunk('cart/getTheCart', async (thunkAPI) => {
+  try {
+    console.log('Inside getTheCart createAsyncThunk');
+    const response = await axios.get('/cart', {withCredentials: true})
+    console.log('Returning success response from getTheCart...', JSON.stringify(response.data))
+    return response.data
+  }catch(error){
+    console.log('Inside catch of getTheCart')
+    const errorMessage = error.response?.data?.message
+    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
+    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
+    return thunkAPI.rejectWithValue(errorMessage)
+  }
+})
+
 const initialState = {
   cart: null, 
   productAdded: false,
@@ -98,6 +113,25 @@ const cartSlice = createSlice({
       })
       .addCase(removeFromCart.rejected, (state, action) => {
         console.log('removeFromCart rejected:', action.payload)
+        state.loading = false
+        state.error = action.payload
+        state.message = action.payload.message
+        state.success = false
+      })
+      .addCase(getTheCart.fulfilled, (state, action) => {
+        console.log('getTheCart fulfilled:', action.payload)
+        state.error = null
+        state.loading = false
+        state.success = true
+        state.message = action.payload.message
+        state.cart = action.payload.cart
+      })
+      .addCase(getTheCart.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(getTheCart.rejected, (state, action) => {
+        console.log('getTheCart rejected:', action.payload)
         state.loading = false
         state.error = action.payload
         state.message = action.payload.message

@@ -1,0 +1,14 @@
+#ShoppingCartPage > main #cart-main #order-summary{
+    /* box-shadow: 2px 2px 15px rgba(0,0,0,0.1); */
+    box-shadow: 2px 2px 15px rgb(242, 246, 220);
+}
+#ShoppingCartPage > main #cart-main #order-summary .order-title{
+    font-size: 14px;
+    color: var(--SECONDARY);
+    font-weight: 440;
+    letter-spacing: 0.2px;
+}  
+#ShoppingCartPage > main #cart-main #order-summary .order-value{ 
+    font-size: 15px;
+    /* color: var(--PRIMARYDARK); */
+}

@@ -1,0 +1,10 @@
+#CouponCodeInput #input-box input:focus{
+    border: 0;
+    outline: 0;
+    --tw-ring-shadow: 0;
+}
+#CouponCodeInput #input-box input:focus-visible{
+    border: 0;
+    outline: 0;
+    --tw-ring-shadow: 0;
+}

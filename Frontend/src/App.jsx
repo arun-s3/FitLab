@@ -13,7 +13,8 @@ import AddressListingPage from './Pages/User/AddressListingPage/AddressListingPa
 import UserPageWapper from './Pages/User/UserPageWapper/UserPageWapper'
 import ProductDetailPage from './Pages/User/ProductDetailPage/ProductDetailPage'
 import CartPage from './Pages/User/CartPage/CartPage'
-
+import CheckoutPage from './Pages/User/CheckoutPage/CheckoutPage'
+import OrderConfirmationPage from './Pages/User/OrderConfirmationPage/OrderConfirmationPage'
 
 import AdminSignInPage from './Pages/Admin/AdminSignInPage/AdminSignInPage'
 import AdminPageWrapper from './Pages/Admin/AdminPageWrapper/AdminPageWrapper'
@@ -60,6 +61,9 @@ export default function App(){
                     <Route path='product' element={<ProductDetailPage/>} />
                 </Route>
                 <Route path='cart' element={<CartPage/>} />
+                <Route path='checkout' element={<CheckoutPage/>} />
+                <Route path='order-confirm' element={<OrderConfirmationPage/>} />
+                {/* <Route path='order-completed' element={<OrderCompletedPage/>}  /> */}
                 {/* <Route element={<UserPageWapper/>} > */}
                 <Route path='profile'>
                     <Route path='addresses'>

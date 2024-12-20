@@ -14,7 +14,7 @@ export default function PaymentSummary({heading, absoluteTotal, absoluteTotalWit
                 <span className='order-value tracking-[0.5px]'> ₹{absoluteTotal.toFixed(2).toLocaleString()} </span>
               </div>
               <div className="flex justify-between">
-                <span className='order-title'>Shipping</span>
+                <span className='order-title'>Shipping Cost</span>
                 <span className='order-value'> ₹{shipping} </span>
               </div>
               <div className="flex justify-between">

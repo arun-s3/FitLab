@@ -1,0 +1,44 @@
+#CheckoutPage > main #checkout-step{
+    padding-bottom: 2rem;
+    display: flex;
+    gap: 5rem;
+    border-bottom: 1px dashed var(--MUTEDDASHEDSEPERATION);
+}
+#CheckoutPage > main #checkout-step .checkout-step-header{
+    flex-basis: 28%;
+}
+#CheckoutPage > main #checkout-step .checkout-step-header h4{
+    color: var(--MUTED);
+}
+#CheckoutPage > main #checkout-step .checkout-step-header h2{
+    font-size: 17px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.2px; 
+    white-space: nowrap;
+    color: #535353;
+}
+#CheckoutPage > main #checkout-step input[type= 'radio']:focus{
+    --tw-ring-shadow: 0;
+}
+#CheckoutPage > main #checkout-step #checkout-address input[type= 'radio']{    
+    margin-top: 5px;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    border: 1px solid var(--PRIMARYDARK);
+    cursor: pointer;
+}
+#CheckoutPage > main #checkout-step input[type= 'radio']:checked{
+    background-color: var(--PRIMARYDARK);   
+}
+#CheckoutPage > main #checkout-payment{
+    box-shadow: 2px 2px 25px rgba(0,0,0,0.1);
+}
+#CheckoutPage > main #checkout-payment #discountCode::placeholder{
+    font-size: 12px;
+}
+#CheckoutPage > main #checkout-payment #discountCode::placeholder{
+    font-size: 12px;
+}
+/* checkout-payment-methods */

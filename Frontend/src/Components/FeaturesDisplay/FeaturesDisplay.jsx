@@ -3,7 +3,7 @@ import React from 'react'
 export default function FeaturesDisplay(){
     
     return(
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-[2rem] mt-[4rem] bg-[#F8F1FF] p-[2rem] rounded-[8px]">
+        <div className="mb-[1rem] grid grid-cols-1 md:grid-cols-3 gap-[2rem] mt-[4rem] bg-[#F8F1FF] p-[2rem] rounded-[8px]">
           <div className="text-center">
             <div className="w-[4rem] h-[4rem] bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-[1rem]">
               <svg className="w-[2rem] h-[2rem] text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">

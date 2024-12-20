@@ -2,11 +2,10 @@ import React, {useEffect, useState} from 'react';
 import './CartPage.css'
 import {useNavigate} from 'react-router-dom'
 import {useDispatch, useSelector} from 'react-redux'
-import axios from 'axios'
 
 import {Trash2, Plus, Minus, Star, ChevronLeft, ChevronRight, ShoppingCart} from 'lucide-react';
 import {toast} from 'react-toastify'
-
+import axios from 'axios'
 
 import Header from '../../../Components/Header/Header'
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
@@ -23,7 +22,7 @@ import Footer from '../../../Components/Footer/Footer'
 export default function ShoppingCartPage(){
 
   const [couponCode, setCouponCode] = useState('')
-  const [currentProductIndex, setCurrentProductIndex] = useState(0);
+  const [currentProductIndex, setCurrentProductIndex] = useState(0)
 
   const [shipping, setShipping] = useState(0)
   const [gst, setGst] = useState(0)
@@ -111,11 +110,11 @@ export default function ShoppingCartPage(){
 
   const updateQuantity = (id, newQuantity) => {
       dispatch( addToCart({productId: id, quantity: newQuantity}) )
-    }
+  }
     
   const removeFromTheCart = (id) => {
       dispatch(removeFromCart({productId: id}))
-    }
+  }
 
 
   return (
@@ -131,7 +130,7 @@ export default function ShoppingCartPage(){
       <main>
         <div className="max-w-[87.5rem] mx-auto px-[1rem] py-[3rem]">
           {cart?.products && cart.products.length > 0 ?
-            <OrderStepper stepNumber={0}/>
+            <OrderStepper stepNumber={1}/>
           : null
           }
 
@@ -204,10 +203,10 @@ export default function ShoppingCartPage(){
           </div>
         }
 
-       <FeaturesDisplay />
-
       </div>
     </main>
+
+    <FeaturesDisplay />
 
     <Footer/>
 

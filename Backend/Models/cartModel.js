@@ -2,7 +2,7 @@ const mongoose=require('mongoose')
 const category = require('./categoryModel')
 
 const cartSchema=new mongoose.Schema({
-      userId: {
+    userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User', 
         required: true,
@@ -47,7 +47,22 @@ const cartSchema=new mongoose.Schema({
     discount: {
         type:Number,
         default:0
-    }
+    },
+    gst: {
+        type: Number,
+        required: true,
+        default: 0,
+    },
+    deliveryCharge: {
+        type: Number,
+        required: true,
+        default: 0,
+    },
+    absoluteTotalWithTaxes: {
+        type: Number,
+        required: true,
+        default: 0,
+    },
 })
 
 

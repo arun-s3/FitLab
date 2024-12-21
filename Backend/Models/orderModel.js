@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 
 const orderSchema = new mongoose.Schema({
-    user: {
+    userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true,
@@ -49,7 +49,7 @@ const orderSchema = new mongoose.Schema({
         paymentMethod: {
             type: String,
             required: true,
-            enum: ['cod', 'razorpay', 'wallet'] 
+            enum: ['cashOnDelivery', 'razorpay', 'wallet'] 
         },
         transactionId: {
             type: String 
@@ -63,10 +63,10 @@ const orderSchema = new mongoose.Schema({
     },
     orderStatus: {
         type: String,
-        enum: ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'refunded'],
+        enum: ['processing', 'pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'refunded'],
         default: 'pending'
     },
-    absoluteTotal: {
+    orderTotal: {
         type: Number,
         required: true
     },
@@ -74,12 +74,19 @@ const orderSchema = new mongoose.Schema({
         type: Number,
         default: 0, 
     },
-    shippingCost: {
-        type: Number,
-        default: 0,
-    },
     gst: {
         type: Number,
+        required: true,
+        default: 0,
+    },
+    deliveryCharge: {
+        type: Number,
+        required: true,
+        default: 0,
+    },
+    absoluteTotalWithTaxes: {
+        type: Number,
+        required: true,
         default: 0,
     },
     orderDate: {

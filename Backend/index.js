@@ -46,12 +46,14 @@ const adminRoutes = require('./Routes/adminRoutes.js')
 const adminProductRoutes = require('./Routes/adminProductRoutes.js')
 const adminCategoryRoutes = require('./Routes/adminCategoryRoutes.js')
 const cartRoutes = require('./Routes/cartRoutes.js')
+const orderRoutes = require('./Routes/orderRoutes.js')
 
 
 app.use('/', userRoutes)
 app.use('/products', userProductRoutes)
 app.use('/addresses', addressRoutes)
 app.use('/cart', cartRoutes)
+app.use('/order', orderRoutes)
 
 app.use('/admin', adminRoutes)
 app.use('/admin/products', adminProductRoutes)

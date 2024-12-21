@@ -9,6 +9,7 @@ import addressReducer from '../Slices/addressSlice'
 import productReducer from '../Slices/productSlice'
 import categoryReducer from '../Slices/categorySlice'
 import cartReducer from '../Slices/cartSlice'
+import orderReducer from '../Slices/orderSlice'
 
 const rootReducer = combineReducers({
     user: userReducer,
@@ -16,7 +17,8 @@ const rootReducer = combineReducers({
     address: addressReducer,
     productStore: productReducer,
     categoryStore: categoryReducer,
-    cart: cartReducer
+    cart: cartReducer,
+    order: orderReducer
 })
 
 const persistConfig = {

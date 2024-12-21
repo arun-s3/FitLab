@@ -8,6 +8,7 @@ import {BsFillCreditCard2BackFill} from "react-icons/bs"
 import {SiRazorpay} from "react-icons/si"
 import {IoWallet} from "react-icons/io5"
 import {GiTakeMyMoney} from "react-icons/gi"
+import {toast} from 'react-toastify'
 import axios from 'axios'
 
 import Header from '../../../Components/Header/Header'
@@ -16,6 +17,7 @@ import OrderStepper from '../../../Components/OrderStepper/OrderStepper'
 import FeaturesDisplay from '../../../Components/FeaturesDisplay/FeaturesDisplay'
 import Footer from '../../../Components/Footer/Footer'
 import {addToCart, removeFromCart, getTheCart, resetCartStates} from '../../../Slices/cartSlice'
+import {createOrder, resetOrderStates} from '../../../Slices/orderSlice'
 import {getAllAddress} from '../../../Slices/addressSlice'
 import {SiteButtonSquare, SiteSecondaryFillImpButton} from '../../../Components/SiteButtons/SiteButtons'
 import {camelToCapitalizedWords, capitalizeFirstLetter, convertToCamelCase} from '../../../Utils/helperFunctions'
@@ -26,11 +28,11 @@ export default function CheckoutPage(){
     const [couponCode, setCouponCode] = useState('')
     const [currentProductIndex, setCurrentProductIndex] = useState(0)
   
-    const [shipping, setShipping] = useState(0)
-    const [gst, setGst] = useState(0)
-    const [absoluteTotalWithTaxes, setAbsoluteTotalWithTaxes] = useState(0)
+    // const [shipping, setShipping] = useState(0)
+    // const [gst, setGst] = useState(0)
+    // const [absoluteTotalWithTaxes, setAbsoluteTotalWithTaxes] = useState(0)
 
-    const [selectAddress, setSelectAddress] = useState({})
+    const [shippingAddress, setShippingAddress] = useState({})
 
     const [paymentMethod, setPaymentMethod] = useState('')
 
@@ -39,8 +41,11 @@ export default function CheckoutPage(){
     const [discountAmount, setDiscountAmount] = useState(0);
     const [isDiscountFocused, setIsDiscountFocused] = useState(false);
 
+    const [orderDetails, setOrderDetails] = useState({})
+
     const {cart, productAdded, productRemoved, loading, error, message} = useSelector(state=> state.cart)
     const {addresses} = useSelector(state=> state.address)
+    const {orders, orderCreated, orderMessage, orderError} = useSelector(state=> state.order)
     const dispatch = useDispatch()
 
     const navigate = useNavigate()
@@ -52,31 +57,60 @@ export default function CheckoutPage(){
 
     useEffect(()=> {
       const defaultAddress = addresses.find(address=> address.defaultAddress)
-      setSelectAddress(defaultAddress)
+      setShippingAddress(defaultAddress)
     },[addresses])
   
-    useEffect(() => {
-      async function loadCharges() {
-        try {
-          const response = await axios.post("http://localhost:3000/cart/calculate-charges", {absoluteTotal: cart.absoluteTotal, products: cart.products},
-            { withCredentials: true }
-          )
-          console.log("Response from calculate-charges", response.data)
-          const {deliveryCharges, gstCharge, absoluteTotalWithTaxes} = response.data.rates
-  
-          setShipping(deliveryCharges)
-          setGst(gstCharge)
-          setAbsoluteTotalWithTaxes(absoluteTotalWithTaxes)
-        }catch(error){
-          console.error("Error in loadCharges -->", error.message);
+    useEffect(()=> {
+      if(paymentMethod){
+        let paymentDetails = {paymentMethod, paymentStatus: 'pending'}
+        if(paymentMethod === 'cashOnDelivery'){
+          paymentDetails = {...paymentDetails, transactionId: 'cod-payment' }
         }
+        setOrderDetails(orderDetails=> {
+          return {...orderDetails, paymentDetails}
+        })
       }
+      if(shippingAddress){
+        setOrderDetails(orderDetails=> {
+          return {...orderDetails, shippingAddressId: shippingAddress._id}
+        })
+      }
+    },[shippingAddress, paymentMethod])
+
+    useEffect(()=> {
+      console.log("orderDetails------->", JSON.stringify(orderDetails))
+    },[orderDetails])
+
+    useEffect(()=> {
+      if(orderCreated){
+        toast.success(orderMessage)
+        navigate('/order-confirm')
+        dispatch(resetOrderStates())
+      }
+    },[orderCreated, orderMessage, orderError])
+
+    // useEffect(() => {
+    //   async function loadCharges() {
+    //     try {
+    //       const response = await axios.post("http://localhost:3000/cart/calculate-charges", {absoluteTotal: cart.absoluteTotal, products: cart.products},
+    //         { withCredentials: true }
+    //       )
+    //       console.log("Response from calculate-charges", response.data)
+    //       const {deliveryCharges, gstCharge, absoluteTotalWithTaxes} = response.data.rates
   
-      if (cart.products.length > 0) {
-        setAbsoluteTotalWithTaxes(cart.absoluteTotal)
-        loadCharges()
-      }
-    }, [cart])
+    //       setShipping(deliveryCharges)
+    //       setGst(gstCharge)
+    //       setAbsoluteTotalWithTaxes(absoluteTotalWithTaxes)
+    //     }catch(error){
+    //       console.error("Error in loadCharges -->", error.message);
+    //     }
+    //   }
+  
+    //   if (cart.products.length > 0) {
+    //     setAbsoluteTotalWithTaxes(cart.absoluteTotal)
+    //     loadCharges()
+    //   }
+    // }, [cart])
 
     const headerBg = {
         backgroundImage: "url('/header-bg.png')",
@@ -120,14 +154,14 @@ export default function CheckoutPage(){
     }
 
     const radioClickHandler = (e, type, value)=>{
-      const checkStatus = type==='address' ? (selectAddress === value) : (paymentMethod === value)
+      const checkStatus = type==='address' ? (shippingAddress === value) : (paymentMethod === value)
       console.log("checkStatus-->", checkStatus)
       if(checkStatus){
-          if(type === 'address') setSelectAddress('')
+          if(type === 'address') setShippingAddress('')
           else setPaymentMethod('')
           return
       }else{
-          if(type === 'address') setSelectAddress(value)
+          if(type === 'address') setShippingAddress(value)
           else setPaymentMethod(value)
           const changeEvent = new Event('change', {bubbles:true})
           e.target.dispatchEvent(changeEvent)
@@ -135,19 +169,24 @@ export default function CheckoutPage(){
     }
 
     const radioChangeHandler = (e, type, value)=>{
-      e.target.checked = type==='address' ? (selectAddress === value) : (paymentMethod === value)
+      e.target.checked = type==='address' ? (shippingAddress === value) : (paymentMethod === value)
     }
 
     
-  const handleApplyDiscount = () => {
-    if (discountCode === 'SPRING2021') {
-      setAppliedDiscount(discountCode)
-      setDiscountAmount(20.95)
-    } else {
-      setAppliedDiscount('')
-      setDiscountAmount(0)
-    }
+    const handleApplyDiscount = () => {
+      if (discountCode === 'SPRING2021') {
+        setAppliedDiscount(discountCode)
+        setDiscountAmount(20.95)
+      } else {
+        setAppliedDiscount('')
+        setDiscountAmount(0)
+      }
   }
+
+  const checkoutHandler= ()=> {
+    dispatch( createOrder({orderDetails}) ) 
+  }
+
 
     return(
         <section id='CheckoutPage'>
@@ -188,14 +227,15 @@ export default function CheckoutPage(){
                                         <h5 className='self-end ml-[10px]'> &#8377;50000 </h5>
                                     </div> */}
                                     {/* <div className="space-y-4 mb-6"> */}
-                                  {cart.products.map((product) => (
-                                    <div key={product.productId} className="flex cursor-pointer"
-                                         onClick={()=> goToProductDetailPage(product.productId)}>
-                                      <img src={product.thumbnail} alt={product.title} className="w-20 h-20 object-cover rounded"/>
+                                  {cart.products &&
+                                  cart.products.map((product) => (
+                                    <div key={product.productId} className="flex cursor-pointer">
+                                      <img src={product.thumbnail} alt={product.title} className="w-20 h-20 object-cover rounded"
+                                        onClick={()=> goToProductDetailPage(product.productId)}/>
                                       <div className="flex-1 flex flex-col justify-between ml-4">
                                         <div className="flex justify-between">
                                           <div>
-                                            <h3 className="text-[15px] font-[450] uppercase"> {/* text-[#505057]  */}
+                                            <h3 className="text-[15px] font-[450] uppercase" onClick={()=> goToProductDetailPage(product.productId)}> 
                                               {!product.title.length > 22 ? product.title : product.title.slice(0,15) + '...'}
                                             </h3>
                                             {
@@ -250,11 +290,11 @@ export default function CheckoutPage(){
                                     return 0
                                   }).map(address=> (
                                             <div key={address._id} id='checkout-address' className={`flex justify-between pl-[10px] py-[5px] rounded-[6px] 
-                                                ${selectAddress._id === address._id ? 'outline outline-[2px] outline-primary outline-offset-2' : ''}`}
-                                                    onClick={()=> setSelectAddress(address)}>
+                                                ${shippingAddress._id === address._id ? 'outline outline-[2px] outline-primary outline-offset-2' : ''}`}
+                                                    onClick={()=> setShippingAddress(address)}>
                                               <div className='flex gap-[5px]'>
                                                 <input type='radio' onClick={(e)=> radioClickHandler(e, "address", address)}
-                                                   onChange={(e)=> radioChangeHandler(e, "address", address)} checked={selectAddress._id === address._id}/>
+                                                   onChange={(e)=> radioChangeHandler(e, "address", address)} checked={shippingAddress._id === address._id}/>
                                                 <address className='not-italic flex flex-col justify-center text-[12px] text-[#3C3D37] capitalize cursor-pointer'>
                                                       <span className='mb-[5px] flex items-center justify-between'>
                                                           <span className='px-[6px] w-fit text-[11px] text-white capitalize bg-secondary
@@ -372,6 +412,8 @@ export default function CheckoutPage(){
                             </div>
                         </div>
                     </div>
+                   {
+                    cart?.products &&
                     <div className='self-baseline mt-[-20px]'>
                     <div id='checkout-payment' className="w-[400px] bg-white rounded-lg shadow-lg p-6" style={{boxShadow: '2px 2px 25px rgba(0,0,0,0.1)'}}>
                         <h2 className="text-[20px ] text-secondary font-[650] tracking-[0.5px] mb-6">ORDER SUMMARY</h2>
@@ -382,11 +424,11 @@ export default function CheckoutPage(){
                             <h3 className="font-semibold text-[16px]">Delivery Address</h3>
                           </div>
                           <div className="text-[14px] text-gray-700 capitalize">
-                            <p>{selectAddress.firstName + ' ' + selectAddress.lastName}</p>
-                            <p>{selectAddress.street}</p>
-                            <p>{selectAddress.district}, {selectAddress.state}</p>
-                            <p>{selectAddress.pincode}</p>
-                            <p>{selectAddress?.landmark ? selectAddress.landmark : null}</p>
+                            <p>{shippingAddress.firstName + ' ' + shippingAddress.lastName}</p>
+                            <p>{shippingAddress.street}</p>
+                            <p>{shippingAddress.district}, {shippingAddress.state}</p>
+                            <p>{shippingAddress.pincode}</p>
+                            <p>{shippingAddress?.landmark ? shippingAddress.landmark : null}</p>
                           </div>
                         </div>
 
@@ -426,24 +468,25 @@ export default function CheckoutPage(){
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600"> Shipping Cost </span>
-                            <span> {shipping === 0 ? 'Free' : `₹${shipping}`} </span>
+                            <span> {cart.deliveryCharge === 0 ? 'Free' : `₹${cart.deliveryCharge}`} </span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-600"> GST </span>
-                            <span> {shipping === 0 ? 'Free' : `₹${gst}`} </span>
+                            <span> {cart.deliveryCharge === 0 ? 'Free' : `₹${cart.gst}`} </span>
                           </div>
                           <div className="flex justify-between text-lg font-bold pt-2">
                             <span> Total </span>
-                            <span> ₹{absoluteTotalWithTaxes} </span>
+                            <span> ₹{cart.absoluteTotalWithTaxes} </span>
                           </div>
                         </div>
                       
-                        <SiteSecondaryFillImpButton className='px-[50px] py-[9px] rounded-[7px]' clickHandler={(e)=>{}}>
+                        <SiteSecondaryFillImpButton className='px-[50px] py-[9px] rounded-[7px]' clickHandler={()=> checkoutHandler()}>
                           Checkout
                         </SiteSecondaryFillImpButton>
                     </div>
 
                     </div>
+                   }
                 </div>
 
             </main>

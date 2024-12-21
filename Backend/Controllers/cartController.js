@@ -9,10 +9,10 @@ const GST_SUPPLEMENTS_PERCENTAGE = 0.12
 const FREE_DELIVERY_THRESHOLD = 20000
 const STANDARD_DELIVERY_CHARGE = 500
 
-const calculateCharges = async (req, res, next) => {
+const calculateCharges = (absoluteTotal, products) => {
   try {
     console.log("Inside calculateCharges of cartController")
-    const {absoluteTotal, products} = req.body
+    // const {absoluteTotal, products} = req.body
 
     if (!absoluteTotal || absoluteTotal <= 0) {
       return next(errorHandler(400, "Invalid total amount provided"))
@@ -38,15 +38,11 @@ const calculateCharges = async (req, res, next) => {
 
     console.log(`deliveryCharges--${deliveryCharges}, gst--${totalGST}, absoluteTotalWithTaxes--${absoluteTotalWithTaxes}`)
 
-    return res.status(200).json({
-      message: "Charges calculated successfully.",
-      rates: {
-        absoluteTotal: absoluteTotal.toFixed(2),
+    return {
         deliveryCharges: deliveryCharges.toFixed(2),
         gstCharge: totalGST.toFixed(2),
         absoluteTotalWithTaxes: absoluteTotalWithTaxes.toFixed(2),
-      }
-    })
+    }
   }catch(error){
     console.error("Error calculating charges:", error.message)
     next(error)
@@ -124,6 +120,11 @@ const addToCart = async (req, res, next) => {
       }
       cart.absoluteTotal += productTotal
     }
+
+    const {deliveryCharges, gstCharge, absoluteTotalWithTaxes} = calculateCharges(cart.absoluteTotal, cart.products)
+    cart.gst = gstCharge
+    cart.deliveryCharge = deliveryCharges
+    cart.absoluteTotalWithTaxes = absoluteTotalWithTaxes
 
     await cart.save()
 

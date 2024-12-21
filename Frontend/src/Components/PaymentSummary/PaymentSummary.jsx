@@ -3,7 +3,7 @@ import React from 'react'
 import {SiteSecondaryFillButton, SiteButtonSquare} from '../../Components/SiteButtons/SiteButtons'
 
 
-export default function PaymentSummary({heading, absoluteTotal, absoluteTotalWithTaxes, shipping, gst}){
+export default function PaymentSummary({heading, absoluteTotal, absoluteTotalWithTaxes, deliveryCharge, gst}){
 
     return(
         <div className="h-[22rem] bg-[#F7EEFD] rounded-[8px] p-[1.5rem] border border-primary" id='order-summary'>
@@ -15,7 +15,7 @@ export default function PaymentSummary({heading, absoluteTotal, absoluteTotalWit
               </div>
               <div className="flex justify-between">
                 <span className='order-title'>Shipping Cost</span>
-                <span className='order-value'> ₹{shipping} </span>
+                <span className='order-value'> ₹{deliveryCharge} </span>
               </div>
               <div className="flex justify-between">
                 <span className='order-title'> GST (10%) </span>

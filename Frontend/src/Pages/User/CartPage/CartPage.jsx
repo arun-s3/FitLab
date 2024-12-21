@@ -24,9 +24,9 @@ export default function ShoppingCartPage(){
   const [couponCode, setCouponCode] = useState('')
   const [currentProductIndex, setCurrentProductIndex] = useState(0)
 
-  const [shipping, setShipping] = useState(0)
-  const [gst, setGst] = useState(0)
-  const [absoluteTotalWithTaxes, setAbsoluteTotalWithTaxes] = useState(0)
+  // const [shipping, setShipping] = useState(0)
+  // const [gst, setGst] = useState(0)
+  // const [absoluteTotalWithTaxes, setAbsoluteTotalWithTaxes] = useState(0)
 
   const {cart, productAdded, productRemoved, loading, error, message} = useSelector(state=> state.cart)
   const dispatch = useDispatch()
@@ -40,33 +40,34 @@ export default function ShoppingCartPage(){
     dispatch(getTheCart())
   },[])
 
-  useEffect(() => {
-    async function loadCharges() {
-      try {
-        const response = await axios.post("http://localhost:3000/cart/calculate-charges", {absoluteTotal: cart.absoluteTotal, products: cart.products},
-          { withCredentials: true }
-        )
-        console.log("Response from calculate-charges", response.data)
-        const {deliveryCharges, gstCharge, absoluteTotalWithTaxes} = response.data.rates
+  // useEffect(() => {
+  //   async function loadCharges() {
+  //     try {
+  //       const response = await axios.post("http://localhost:3000/cart/calculate-charges", {absoluteTotal: cart.absoluteTotal, products: cart.products},
+  //         { withCredentials: true }
+  //       )
+  //       console.log("Response from calculate-charges", response.data)
+  //       const {deliveryCharges, gstCharge, absoluteTotalWithTaxes} = response.data.rates
 
-        setShipping(deliveryCharges)
-        setGst(gstCharge)
-        setAbsoluteTotalWithTaxes(absoluteTotalWithTaxes)
-      }catch(error){
-        console.error("Error in loadCharges -->", error.message);
-      }
-    }
+  //       setShipping(deliveryCharges)
+  //       setGst(gstCharge)
+  //       setAbsoluteTotalWithTaxes(absoluteTotalWithTaxes)
+  //     }catch(error){
+  //       console.error("Error in loadCharges -->", error.message);
+  //     }
+  //   }
 
-    if (cart.products.length > 0) {
-      setAbsoluteTotalWithTaxes(cart.absoluteTotal)
-      loadCharges()
-    }
-  }, [cart])
+  //   if (cart.products.length > 0) {
+  //     setAbsoluteTotalWithTaxes(cart.absoluteTotal)
+  //     loadCharges()
+  //   }
+  // }, [cart])
 
   useEffect(()=> {
     if(error){
       console.log("Error-->", error)
       toast.error(error)
+      dispatch(resetCartStates())
     }
   },[error])
 
@@ -197,8 +198,8 @@ export default function ShoppingCartPage(){
             
           </div>
 
-          <PaymentSummary heading='Order Summary' absoluteTotal={cart.absoluteTotal} absoluteTotalWithTaxes={absoluteTotalWithTaxes}
-               shipping={shipping} gst={gst}  />
+          <PaymentSummary heading='Order Summary' absoluteTotal={cart.absoluteTotal} absoluteTotalWithTaxes={cart.absoluteTotalWithTaxes}
+               deliveryCharge={cart.deliveryCharge} gst={cart.gst}  />
 
         </div>
         : <div className='flex flex-col justify-center items-center gap-[1rem]'>

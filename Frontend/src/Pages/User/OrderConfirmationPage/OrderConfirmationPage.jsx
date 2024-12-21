@@ -42,7 +42,7 @@ export default function OrderConfirmationPage(){
               <div className="bg-green-600 rounded-lg p-[1.5rem] flex justify-between items-center">
                 <div>
                   <h2 className="text-2xl text-white font-bold mb-[8px]">Order Completed</h2>
-                  <p className="text-green-200">Arriving By 15 Mon 2024</p>
+                  <p className="text-green-200">Arriving By 23 Mon 2024</p>
                 </div>
                   <SiteButton customStyle={{filter: 'none'}} onClick={()=> navigate('/orders')}>
                     View order

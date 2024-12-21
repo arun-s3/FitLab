@@ -21,7 +21,7 @@ export default function PaymentSummary({heading, absoluteTotal, absoluteTotalWit
                 <span className='order-title'> GST (10%) </span>
                 <span className='order-value'> ₹{gst} </span>
               </div>
-              <div className="flex justify-between font-bold pt-[1rem] border-t border-dashed border-mutedDashedSeperation">
+              <div className="!mt-[2rem] flex justify-between font-bold pt-[1rem] border-t border-dashed border-mutedDashedSeperation">
                 <span> Order Total </span>
                 <span> ₹{absoluteTotalWithTaxes} </span>
               </div>

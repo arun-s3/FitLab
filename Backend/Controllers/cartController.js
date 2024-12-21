@@ -2,6 +2,8 @@ const Cart = require('../Models/cartModel')
 const Product = require('../Models/productModel')
 const {errorHandler} = require('../Utils/errorHandler') 
 
+const QTY_PER_PERSON = 5
+
 const GST_GYM_PERCENTAGE = 0.18
 const GST_SUPPLEMENTS_PERCENTAGE = 0.12
 const FREE_DELIVERY_THRESHOLD = 20000
@@ -54,9 +56,10 @@ const calculateCharges = async (req, res, next) => {
 
 const addToCart = async (req, res, next) => {
   try {
-    console.log("Inside addToCart  of cartControler")
+    console.log("Inside addToCart of cartController")
     const userId = req.user._id
-    const {productId, quantity} = req.body
+    const { productId, quantity } = req.body
+
     console.log("req.user._id--->", userId)
     console.log("quantity--->", quantity)
 
@@ -66,12 +69,22 @@ const addToCart = async (req, res, next) => {
 
     const product = await Product.findById(productId)
     console.log("Product found-->", JSON.stringify(product))
+
     if (!product) {
       return next(errorHandler(404, "Product not found!"))
     }
-    const productTotal = product.price * quantity
-    console.log("productTOtal now-->", productTotal)
+    if (product.blocked) {
+      return next(errorHandler(403, "This product is currently blocked and cannot be added to the cart."))
+    }
+    if (quantity > product.stock) {
+      return next(errorHandler(400, `Insufficient stock! Only ${product.stock} items available.`))
+    }
+    if (quantity > QTY_PER_PERSON) {
+      return next(errorHandler(400, `You cannot add more than ${QTY_PER_PERSON} items of this product to your cart.`))
+    }
 
+    const productTotal = product.price * quantity
+    console.log("productTotal now-->", productTotal)
     const productDetails = {
       productId,
       title: product.title,
@@ -81,38 +94,46 @@ const addToCart = async (req, res, next) => {
       price: product.price,
       total: productTotal,
     }
+
     let cart = await Cart.findOne({userId})
     if (!cart) {
       console.log("Creating new cart...")
-      cart = new Cart({
-        userId,
-        products: [productDetails],
-        absoluteTotal: productTotal,
-      })
+      cart = new Cart({userId, products: [productDetails], absoluteTotal: productTotal})
     }else{
-      console.log("Manipulating existing Cart...")
-      const existingProductIndex = cart.products.findIndex( (item)=> item.productId.toString() === productId )
+      console.log("Manipulating existing cart...")
+      const existingProductIndex = cart.products.findIndex( (item) => item.productId.toString() === productId )
       if (existingProductIndex >= 0) {
         console.log("Updating existing product in the cart...")
-        cart.products[existingProductIndex].quantity += quantity
-        cart.products[existingProductIndex].total += productTotal
-      } else {
+        const existingProduct = cart.products[existingProductIndex]
+        console.log("existingProduct.quantity---->", existingProduct.quantity)
+
+        if (existingProduct.quantity + quantity > product.stock) {
+          return next(errorHandler(400, `Adding this quantity exceeds available stock! Only ${product.stock - existingProduct.quantity} 
+              more items can be added.`))
+        }
+
+        if (existingProduct.quantity + quantity > QTY_PER_PERSON) {
+          return next( errorHandler(400, `You cannot add more than ${QTY_PER_PERSON} items of this product to your cart.`))
+        }
+
+        existingProduct.quantity += quantity;
+        existingProduct.total += productTotal;
+      }else{
         console.log("Creating new product in the cart...")
         cart.products.push(productDetails)
       }
-
       cart.absoluteTotal += productTotal
     }
 
-    await cart.save();
+    await cart.save()
 
-    res.status(200).json({message: 'Product added to cart successfully', cart})
-  } 
-  catch (error){
-    console.log("Error in cartController-addToCart-->"+error.message)
+    res.status(200).json({ message: "Product added to cart successfully", cart })
+  }catch (error){
+    console.log("Error in cartController-addToCart-->" + error.message)
     next(error)
   }
-}
+};
+
 
 const removeFromCart = async (req, res, next) => {
   try {

@@ -63,6 +63,13 @@ export default function ShoppingCartPage(){
     }
   }, [cart])
 
+  useEffect(()=> {
+    if(error){
+      console.log("Error-->", error)
+      toast.error(error)
+    }
+  },[error])
+
   const similarProducts = [
     {
       id: 1,

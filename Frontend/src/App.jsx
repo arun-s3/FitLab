@@ -8,6 +8,7 @@ import ProductListPage from './Pages/User/ProductListPage/ProductListPage'
 import PrivateUserRoutes from './Components/PrivateUserRoutes/PrivateUserRoutes'
 import TestImageCropper from './Pages/User/TesterPages/TestImageCropper'
 import TestAddressPage from './Pages/User/TesterPages/TestAddressPage'
+import TestRandomPage from './Pages/User/TesterPages/TestRandomPage'
 import AddressManagementPage from './Pages/User/AddressManagementPage/AddressManagementPage'
 import AddressListingPage from './Pages/User/AddressListingPage/AddressListingPage'
 import UserPageWapper from './Pages/User/UserPageWapper/UserPageWapper'
@@ -15,6 +16,7 @@ import ProductDetailPage from './Pages/User/ProductDetailPage/ProductDetailPage'
 import CartPage from './Pages/User/CartPage/CartPage'
 import CheckoutPage from './Pages/User/CheckoutPage/CheckoutPage'
 import OrderConfirmationPage from './Pages/User/OrderConfirmationPage/OrderConfirmationPage'
+import OrderHistoryPage from './Pages/User/OrderHistoryPage/OrderHistoryPage'
 
 import AdminSignInPage from './Pages/Admin/AdminSignInPage/AdminSignInPage'
 import AdminPageWrapper from './Pages/Admin/AdminPageWrapper/AdminPageWrapper'
@@ -43,6 +45,7 @@ export default function App(){
                 {/* <Route path='test' element={AdminCategoryListPage} /> */}
                 <Route path='test-cropper' element={<TestImageCropper/>}/>
                 <Route path='test-address' element={<TestAddressPage/>}/>
+                <Route path='test' element={<TestRandomPage/>}/>
                 <Route element={<PrivateUserRoutes/>}>
                 </Route>
                 <Route index element={<HomePage/>}/>
@@ -65,6 +68,7 @@ export default function App(){
                 <Route path='order-confirm' element={<OrderConfirmationPage/>} />
                 {/* <Route path='order-completed' element={<OrderCompletedPage/>}  /> */}
                 {/* <Route element={<UserPageWapper/>} > */}
+                <Route path='orders' element={<OrderHistoryPage/>} />
                 <Route path='profile'>
                     <Route path='addresses'>
                         <Route index element={<AddressListingPage/>}/>

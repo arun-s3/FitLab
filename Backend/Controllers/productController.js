@@ -105,6 +105,7 @@ const getSingleProduct = async (req, res, next) => {
         console.log("Inside getSingleProduct of productController")
         const {id} = req.params;
         const product = await Product.find({_id:id});
+        console.log("Product-->", product)
         if(!product) next(errorHandler(400,"No such product available!"))
         res.status(200).json(product);
     }

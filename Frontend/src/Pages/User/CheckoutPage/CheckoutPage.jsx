@@ -290,7 +290,7 @@ export default function CheckoutPage(){
                                     return 0
                                   }).map(address=> (
                                             <div key={address._id} id='checkout-address' className={`flex justify-between pl-[10px] py-[5px] rounded-[6px] 
-                                                ${shippingAddress._id === address._id ? 'outline outline-[2px] outline-primary outline-offset-2' : ''}`}
+                                                ${shippingAddress && (shippingAddress._id === address._id) ? 'outline outline-[2px] outline-primary outline-offset-2' : ''}`}
                                                     onClick={()=> setShippingAddress(address)}>
                                               <div className='flex gap-[5px]'>
                                                 <input type='radio' onClick={(e)=> radioClickHandler(e, "address", address)}
@@ -423,13 +423,16 @@ export default function CheckoutPage(){
                             <MapPin className="w-5 h-5 text-gray-500 mr-2" />
                             <h3 className="font-semibold text-[16px]">Delivery Address</h3>
                           </div>
-                          <div className="text-[14px] text-gray-700 capitalize">
+                          {
+                            shippingAddress &&
+                            <div className="text-[14px] text-gray-700 capitalize">
                             <p>{shippingAddress.firstName + ' ' + shippingAddress.lastName}</p>
                             <p>{shippingAddress.street}</p>
                             <p>{shippingAddress.district}, {shippingAddress.state}</p>
                             <p>{shippingAddress.pincode}</p>
                             <p>{shippingAddress?.landmark ? shippingAddress.landmark : null}</p>
                           </div>
+                          }
                         </div>
 
                         <div className="mb-4 relative">

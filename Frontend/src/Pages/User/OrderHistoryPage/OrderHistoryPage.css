@@ -1,0 +1,94 @@
+
+#OrderHistoryPage > main #orderHistory-header #calender{
+    gap: 15px;
+}
+#OrderHistoryPage > main #orderHistory-header #calender input{
+    border-color: var(--INPUT-BG-SECONDARY);
+}
+#OrderHistoryPage > main #orderHistory-header #calender input::placeholder{
+    color: var(--MUTED);
+    letter-spacing: 0.4px;
+}
+#OrderHistoryPage > main #orderHistory-header #calender svg{
+    color: var(--MUTED);
+}
+#OrderHistoryPage > main #orders-table-header .label{
+    font-size: 13px;
+    color: rgb(107, 114, 128)
+}
+#OrderHistoryPage > main #orders-table-header .name{
+    font-size: 15px;
+}
+#OrderHistoryPage > main #orders-table-header .order-details a{
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    color: var(--SECONDARY);
+}
+#OrderHistoryPage > main #orders-table-header .order-details a > svg{
+    width: 1rem;
+    height: 1rem; 
+}
+#OrderHistoryPage > main #item-details .item-buttons > button:not(:first-child){
+    padding-inline: 16px;
+    padding-block: 7px;
+    font-size: 14px;
+    background: white;
+    border: 1px solid rgb(229,231,235);
+    border-radius: 7px;
+}
+#OrderHistoryPage > main .optionDropdown .options{
+    position: absolute;
+    top: 120%;
+    width: 110%;
+    left: -2px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: white;
+    border-radius: 8px;
+    padding-block: 10px;
+    padding-left: 22px;
+    font-size: 13px;
+    border: 1px solid var(--DROPDOWNBORDER);
+}
+#OrderHistoryPage > main .optionDropdown .options span{
+    cursor: pointer;
+}
+#OrderHistoryPage > main .optionDropdown .options span:hover{
+    color: var(--SECONDARY);
+    font-weight: 500;
+}
+
+#OrderHistoryPage > main #order-menu .sort-dropdown > ul{
+    background: white;
+    color: #121212;
+    border: 1px solid var(--DROPDOWNBORDER);
+}
+#OrderHistoryPage > main #order-menu .sort-dropdown > ul li{
+    margin-inline: 6px;
+    width: 100%;
+}
+#OrderHistoryPage > main #order-menu .sort-dropdown > ul li>span{
+    font-size: 11px;
+    color: var(--MUTED);
+    letter-spacing: 0.2px;
+}
+#OrderHistoryPage > main #order-menu .sort-dropdown > ul li>span:hover{
+    color: var(--SECONDARY);
+}
+#OrderHistoryPage > main #order-menu .sort-dropdown > ul li>span input{
+    height: 10px;
+    width: 10px;
+    color: var(--SECONDARY);
+    border-radius: 5px;
+    border-color: var(--SECONDARY);
+    margin-right: 5px; 
+}
+#OrderHistoryPage > main #order-menu .sort-dropdown > ul li>span input:focus{
+    --tw-ring-shadow: none;
+}
+#OrderHistoryPage > main #order-menu .sort-dropdown > ul li > svg{
+    color: var(--SECONDARY);
+}

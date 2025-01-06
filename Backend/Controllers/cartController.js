@@ -84,6 +84,7 @@ const addToCart = async (req, res, next) => {
     const productDetails = {
       productId,
       title: product.title,
+      subtitle: product.subtitle,
       category: product.category,
       thumbnail: product.thumbnail.url,
       quantity,

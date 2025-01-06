@@ -18,6 +18,10 @@ const cartSchema=new mongoose.Schema({
                 type: String,
                 required: true
             },
+            subtitle: {
+                type: String,
+                required: true
+            },
             category:{
                 type: [String],
                 required: true

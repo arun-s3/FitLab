@@ -16,6 +16,7 @@ module.exports = {
         muted:"rgb(125, 124, 140)",    //rgb(111, 110, 127)
         mutedLight: "rgb(151, 154, 160)",
         mutedDashedSeperation: "rgba(132, 120, 138, 0.52)",
+        dropdownBorder: "rgba(210, 199, 215, 0.52)",
         home:"#EBEAEC",
         borderLight: "rgb(222 226 231)",
         borderLight2: "rgb(223, 195, 242)",

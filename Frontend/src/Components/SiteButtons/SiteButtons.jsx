@@ -17,11 +17,16 @@ export function SiteButtonDark({customStyle, children, shouldSubmit=false}){
     )
 }
 
-export function SiteButtonSquare({customStyle, tailwindClasses, light, lowFont, children, clickHandler, shouldSubmit=false}){
+export function SiteButtonSquare({customStyle, tailwindClasses, light, lighter, lowFont, lowerFont, lowShadow, children, clickHandler, shouldSubmit=false}){
+    const computedStyle = {
+        ...customStyle,
+        fontSize: lowFont ? '14px' : lowerFont ? '13px' : undefined,
+        boxShadow: lowShadow ? '0px 0px 5px rgb(215, 241, 72)' : undefined,
+    }
     return(
-        <button type={shouldSubmit?"submit":"button"} className={`site-button-square bg-primary text-black 
-                    text-descReg1 ${tailwindClasses} ${light ? 'font-[480]' : ''}`}
-                style={lowFont? {...customStyle, fontSize:'14px'} : customStyle} onClick={()=> clickHandler()}> {children} </button>
+        <button type={shouldSubmit?"submit":"button"} className={` ${tailwindClasses} site-button-square bg-primary text-black 
+            text-descReg1 ${light ? 'font-[480]' : lighter ? 'font-[450]' : ''}`} style={computedStyle}
+                 onClick={()=> clickHandler()}> {children} </button>
     )
 }
 

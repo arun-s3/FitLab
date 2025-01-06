@@ -1,18 +1,19 @@
 import React from 'react'
-import {HashLoader, PropagateLoader, PacmanLoader, ScaleLoader} from 'react-spinners'
+import {HashLoader, PropagateLoader, PacmanLoader, ScaleLoader, PuffLoader} from 'react-spinners'
 
 
-export function CustomHashLoader({loading}){
+export function CustomHashLoader({loading, color, customStyle}){
 
     const loaderCssOverride= {
         display: "block",
         margin: "0 auto",
         borderColor: "red",
+        ...customStyle
     };
 
     return(
         <HashLoader loading={loading} cssOverride={loaderCssOverride} size={20} aria-label="Loading HashLoader" 
-                                                     color="rgba(159, 42, 240, 1)" data-testid="loader"/> 
+                                                     color={color? color : "rgba(159, 42, 240, 1)"} data-testid="loader"/> 
     )
 }
 
@@ -55,5 +56,20 @@ export function CustomScaleLoader({loading, size}){
     return(
         <ScaleLoader loading={loading} cssOverride={loaderCssOverride} size={size} aria-label="Loading ScaleLoader" 
                                                      color="rgba(159, 42, 240, 1)" data-testid="loader"/> 
+    )
+}
+
+export function CustomPuffLoader({loading, color, customStyle}){
+
+    const loaderCssOverride= {
+        display: "block",
+        margin: "0 auto",
+        borderColor: "red",
+        ...customStyle
+    };
+
+    return(
+        <PuffLoader loading={loading} cssOverride={loaderCssOverride} size={20} aria-label="Loading HashLoader" 
+                                                     color={color? color : "rgba(159, 42, 240, 1)"} data-testid="loader"/> 
     )
 }

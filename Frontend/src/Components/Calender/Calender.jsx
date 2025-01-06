@@ -20,20 +20,12 @@ const MyContainer = ({ className, children }) => {
 
 const CalenderIcon = ()=>{
     return(
-        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 48 48">
-          <mask id="ipSApplication0">
-            <g fill="none" stroke="#fff" strokeLinejoin="round" strokeWidth="4">
-              <path strokeLinecap="round" d="M40.04 22v20h-32V22"></path>
-              <path fill="#fff" d="M5.842 13.777C4.312 17.737 7.263 22 11.51 22c3.314 0 6.019-2.686 6.019-6a6 6 0 0 0 6 6h1.018a6 6 0 0 0 6-6c0 3.314 2.706 6 6.02 6c4.248 0 7.201-4.265 5.67-8.228L39.234 6H8.845l-3.003 7.777Z">
-              </path>
-            </g>
-          </mask>
-          <path fill="currentColor" d="M0 0h48v48H0z" mask="url(#ipSApplication0)"></path>
-        </svg>
+      // <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-days"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-search"><path d="M16 2v4"/><path d="M21 11.75V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7.25"/><path d="m22 22-1.875-1.875"/><path d="M3 10h18"/><path d="M8 2v4"/><circle cx="18" cy="18" r="3"/></svg>
     )
 }
 
-export function DateSelector({dateGetter, dateSetter}){
+export function DateSelector({dateGetter, dateSetter, labelNeeded}){
 
     const {startDate, endDate} = dateGetter
     const {setStartDate, setEndDate} = dateSetter
@@ -43,6 +35,8 @@ export function DateSelector({dateGetter, dateSetter}){
                     <DatePicker selected={startDate} onChange={(date) => setStartDate(date)} selectsStart startDate={startDate} endDate={endDate}
                         placeholderText="Select start date" dateFormat="yyyy/MM/dd" showIcon icon={<CalenderIcon/>} />
                 </div>
+                
+                { labelNeeded && <span className='text-[13px] text-secondary font-[450]'> To </span> }
 
                 <div className="date-picker">
                     <DatePicker selected={endDate} onChange={(date) => setEndDate(date)} selectsEnd startDate={startDate} endDate={endDate}

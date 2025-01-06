@@ -17,6 +17,10 @@ const orderSchema = new mongoose.Schema({
                 type: String,
                 required: true
             },
+            subtitle:{
+                type: String,
+                required: true
+            },
             category: {
                 type: [String],
                 required: true
@@ -37,6 +41,11 @@ const orderSchema = new mongoose.Schema({
             total: {
                 type: Number,
                 require: true
+            },
+            productStatus: {
+                type: String,   // As of now in use --> ['pending', 'confirmed', 'delivered', 'cancelled', 'returning', 'refunded']
+                enum: ['processing', 'pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'returning', 'refunded'],
+                default: 'pending'
             }
         },
     ],
@@ -62,8 +71,8 @@ const orderSchema = new mongoose.Schema({
         }
     },
     orderStatus: {
-        type: String,
-        enum: ['processing', 'pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'refunded'],
+        type: String,   // As of now in use --> ['pending', 'confirmed', 'delivered', 'cancelled', 'returning', 'refunded']
+        enum: ['processing', 'pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'returning', 'refunded'],
         default: 'pending'
     },
     orderTotal: {
@@ -92,6 +101,14 @@ const orderSchema = new mongoose.Schema({
     orderDate: {
         type: Date,
         default: Date.now,
+        required: true
+    }, 
+    deliveryDate: {
+        type: Date,
+        required: true
+    }, 
+    deliveryNote: {
+        type: String
     }
 }, {timestamps: true})
 

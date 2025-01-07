@@ -81,8 +81,8 @@ export function SiteSecondaryFillButton({className, variant, size, clickHandler,
 
 export function SiteSecondaryFillImpButton({className, clickHandler, customStyle, children}){
     return(
-        <button className={`${className} w-full mt-4 bg-purple-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-purple-700 
-              transition duration-300`} onClick={()=> clickHandler()} style={customStyle}>
+        <button className={`w-full mt-4 bg-purple-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-purple-700 
+              transition duration-300 ${className}`} onClick={()=> clickHandler()} style={customStyle}>
             {children}
         </button>
     )

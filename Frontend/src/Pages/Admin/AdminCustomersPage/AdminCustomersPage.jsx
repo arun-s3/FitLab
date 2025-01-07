@@ -1,22 +1,22 @@
-import React, {useEffect, useState, useRef} from 'react';
-import './AdminCustomersPage.css';
-import axios from '../../../Utils/axiosConfig';
-import {useSelector, useDispatch} from 'react-redux';
+import React, {useEffect, useState, useRef} from 'react'
+import './AdminCustomersPage.css'
+import axios from '../../../Utils/axiosConfig'
+import {useSelector, useDispatch} from 'react-redux'
 
-import AdminHeader from '../../../Components/AdminHeader/AdminHeader';
-import Modal from '../../../Components/Modal/Modal';
-import {SitePrimaryMinimalButtonWithShadow} from '../../../Components/SiteButtons/SiteButtons';
-import {showUsers, showUsersofStatus, toggleBlockUser, deleteUser, deleteUsersList, resetStates} from '../../../Slices/adminSlice';
+import AdminHeader from '../../../Components/AdminHeader/AdminHeader'
+import Modal from '../../../Components/Modal/Modal'
+import {SitePrimaryMinimalButtonWithShadow} from '../../../Components/SiteButtons/SiteButtons'
+import {showUsers, showUsersofStatus, toggleBlockUser, deleteUser, deleteUsersList, resetStates} from '../../../Slices/adminSlice'
 
-import {IoArrowBackSharp} from "react-icons/io5";
-import {RiArrowDropDownLine} from 'react-icons/ri';
-import {MdBlock, MdDeleteOutline} from 'react-icons/md';
-import {FaSortUp,FaSortDown} from "react-icons/fa6";
-import {FaTrashAlt} from "react-icons/fa";
-import {LuCaseSensitive} from "react-icons/lu";
-import {VscCaseSensitive} from "react-icons/vsc";
-import {CiSquareChevRight} from "react-icons/ci";
-import {toast} from 'react-toastify';
+import {IoArrowBackSharp} from "react-icons/io5"
+import {RiArrowDropDownLine} from 'react-icons/ri'
+import {MdBlock, MdDeleteOutline} from 'react-icons/md'
+import {FaSortUp,FaSortDown} from "react-icons/fa6"
+import {FaTrashAlt} from "react-icons/fa"
+import {LuCaseSensitive} from "react-icons/lu"
+import {VscCaseSensitive} from "react-icons/vsc"
+import {CiSquareChevRight} from "react-icons/ci"
+import {toast} from 'react-toastify'
 
 export default function AdminCustomersPageV1() {
     const dispatch = useDispatch();
@@ -40,7 +40,7 @@ export default function AdminCustomersPageV1() {
     const statusButtonRef = useRef(null)
     const [showStatusDropdown, setShowStatusDropdown] = useState(false)
 
-    const [openModel, setOpenModel] = useState(false)
+    const [openModal, setOpenModal] = useState(false)
 
     const mainBgImg = {
         colorImage : "linear-gradient(to right,rgba(255,255,255),rgba(255,255,255))"
@@ -99,7 +99,7 @@ export default function AdminCustomersPageV1() {
     }
 
     const preDeleteHandler = (id)=> {
-        setOpenModel(true)
+        setOpenModal(true)
         setDeleteThisId(id)
     }
 
@@ -218,10 +218,11 @@ export default function AdminCustomersPageV1() {
             </header>
             <main className='p-[1rem] border border-secondary flex items-center justify-center w-[80%] 
                                     rounded-[9px] gap-[5px]' style={mainBgImg}>
-                { openModel &&
-                    <Modal openModel={openModel} setOpenModel={setOpenModel} title='Important' content='You are about to delete a customer. Do this only if he/she is a recognized spammer.
+                { openModal &&
+                    <Modal openModal={openModal} setOpenModal={setOpenModal} title='Important' content='You are about to delete a customer. Do this only if he/she is a recognized spammer.
                         Also confirm as many times as possible' instruction="If you are sure, write 'sure' and press 'Ok', else click 'Close' button"
-                            buttonText1='Ok' buttonText2='Cancel' deleteHandler={deleteHandler}/>
+                            okButtonText='Ok' closeButtonText='Cancel' typeTest={true} typeValue='sure' contentCapitalize={true}
+                                activateProcess={deleteHandler}/>
                 }
                 <table cellSpacing={10} cellPadding={10} className='border-spacing-[24px]'>
                     <thead>

@@ -33,11 +33,11 @@ export const getOrders = createAsyncThunk('order/getOrders', async ({queryDetail
   }
 })
 
-export const cancelOrder = createAsyncThunk('order/cancelOrder', async ({orderId}, thunkAPI)=> {
+export const cancelOrder = createAsyncThunk('order/cancelOrder', async ({orderId, orderCancelReason}, thunkAPI)=> {
   try {
     console.log('Inside cancelOrder createAsyncThunk');
     console.log("orderId from orderSlice---->", orderId)
-    const response = await axios.patch(`/order/cancel/${orderId}`, {withCredentials: true})
+    const response = await axios.patch(`/order/cancel/${orderId}`,{orderCancelReason}, {withCredentials: true})
     console.log('Returning success response from cancelOrder...', JSON.stringify(response.data))
     return {orderId, cart: response.data.order}
   }catch(error){
@@ -49,11 +49,11 @@ export const cancelOrder = createAsyncThunk('order/cancelOrder', async ({orderId
   }
 })
 
-export const cancelOrderProduct = createAsyncThunk('order/cancelOrderProduct', async ({orderId, productId}, thunkAPI)=> {
+export const cancelOrderProduct = createAsyncThunk('order/cancelOrderProduct', async ({orderId, productId, productCancelReason}, thunkAPI)=> {
     try {
       console.log('Inside cancelOrderProduct createAsyncThunk');
       console.log(`orderId and productId from orderSlice----> ${orderId} and ${productId}}`)
-      const response = await axios.patch(`/order/cancel`, {orderId, productId}, {withCredentials: true})
+      const response = await axios.patch(`/order/cancel`, {orderId, productId, productCancelReason}, {withCredentials: true})
       console.log('Returning success response from cancelOrderProduct...', JSON.stringify(response.data))
       return {orderId, productId, updatedOrder: response.data.order, message: response.data.message}
     }catch(error) {
@@ -64,6 +64,23 @@ export const cancelOrderProduct = createAsyncThunk('order/cancelOrderProduct', a
       return thunkAPI.rejectWithValue(errorMessage)
     }
   }
+)
+
+export const deleteProductFromOrderHistory = createAsyncThunk('order/deleteProductFromOrderHistory', async ({orderId, productId}, thunkAPI)=> {
+  try {
+    console.log('Inside deleteProductFromOrderHistory createAsyncThunk');
+    console.log(`orderId and productId from orderSlice----> ${orderId} and ${productId}}`)
+    const response = await axios.post(`/order/delete/${orderId}`, {productId}, {withCredentials: true})
+    console.log('Returning success response from deleteProductFromOrderHistory...', JSON.stringify(response.data))
+    return {orderId, productId, updatedOrder: response.data.order, message: response.data.message}
+  }catch(error) {
+    console.log('Inside catch of deleteProductFromOrderHistory')
+    const errorMessage = error.response?.data?.message
+    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
+    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
+    return thunkAPI.rejectWithValue(errorMessage)
+  }
+}
 )
 
 
@@ -138,11 +155,16 @@ const orderSlice = createSlice({
         state.loading = false
         state.orderCancelled = true
         state.orderMessage = action.payload.message
+
         state.orders = state.orders.map(order=> {
           if(order._id === action.payload.orderId){
             order.orderStatus = "cancelled"
-            return order
-          } else return order
+            order.products = order.products.map(product=> {
+              product.productStatus = "cancelled"
+              return product
+            })
+          } 
+          return order
         })
       })
       .addCase(cancelOrder.pending, (state) => {
@@ -165,8 +187,13 @@ const orderSlice = createSlice({
 
         state.orders = state.orders.map((order)=> {
           if (order._id === action.payload.orderId){
-            order.products = order.products.filter( (product)=> product.productId !== action.payload.productId )
-            if (order.products.length === 0){
+            order.products = order.products.map(product=> {
+              if(product.productId === action.payload.productId){
+                product.productStatus = 'cancelled'
+              }
+              return product
+            })
+            if ( order.products.every(product=> product.productStatus === 'cancelled') ){
               order.orderStatus = 'cancelled'
             }else{
               order.orderTotal = action.payload.updatedOrder.orderTotal
@@ -185,6 +212,36 @@ const orderSlice = createSlice({
         state.loading = false
         state.orderError = action.payload
         state.productCancelled = false
+      })
+      .addCase(deleteProductFromOrderHistory.fulfilled, (state, action) => {
+        console.log('cancelOrder fulfilled:', action.payload)
+        state.orderError = null
+        state.loading = false
+        state.productDeleted = true
+        state.orderMessage = action.payload.message
+
+        state.orders = state.orders.map(order=> {
+          if(order._id === action.payload.orderId){
+            order.products = order.products.map(product=> {
+              if(product.productId === action.payload.productId){
+                product.isDeleted = true
+              }
+              return product
+            })
+          }
+          return order
+        })
+      })
+      .addCase(deleteProductFromOrderHistory.pending, (state) => {
+        state.loading = true
+        state.orderError = null
+      })
+      .addCase(deleteProductFromOrderHistory.rejected, (state, action) => {
+        console.log('cancelOrder rejected:', action.payload)
+        state.loading = false
+        state.orderError = true
+        state.orderMessage = action.payload.message
+        state.productDeleted  = false
       })
     }
 })

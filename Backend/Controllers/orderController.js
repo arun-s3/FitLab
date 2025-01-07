@@ -165,7 +165,7 @@ const getOrders = async (req, res, next)=> {
 const cancelOrderProduct = async (req, res, next) => {
   try {
     console.log("Inside cancelOrderProduct of orderController")
-    const {orderId, productId} = req.body
+    const {orderId, productId, productCancelReason} = req.body
 
     const order = await Order.findById(orderId)
     if(!order){
@@ -182,14 +182,18 @@ const cancelOrderProduct = async (req, res, next) => {
       return next(errorHandler(404, "Product not found!"))
     }
     product.stock += canceledProduct.quantity
+    if(productCancelReason.trim()){
+      product.productCancelReason = productCancelReason
+    }
     await product.save()
 
-    order.products.splice(productIndex, 1);
+    // order.products.splice(productIndex, 1);
 
     order.orderTotal -= canceledProduct.total
     order.absoluteTotalWithTaxes = order.orderTotal + order.gst + order.deliveryCharge
 
-    if (order.products.length === 0){
+    order.products[productIndex].productStatus = "cancelled"
+    if ( order.products.every(product=> product.productStatus === 'cancelled') ){
       order.orderStatus = "cancelled"
     }
 
@@ -212,7 +216,8 @@ const cancelOrder = async (req, res, next) => {
   try {
     console.log("Inside cancelOrder of orderController")
     const {orderId} = req.params
-    console.log(`orderId---> ${orderId}`)
+    const {orderCancelReason} = req.body
+    // console.log(`orderId---> ${orderId} and orderCancelReason---> ${orderCancelReason}`)
 
     const order = await Order.findOne({ _id: orderId}).populate("products.productId")
     if (!order){
@@ -231,8 +236,12 @@ const cancelOrder = async (req, res, next) => {
         product.stock += item.quantity
         await product.save()
       }
+      item.productStatus = 'cancelled'
     }
     
+    if(orderCancelReason.trim()){
+      order.orderCancelReason = orderCancelReason 
+    }
     order.orderStatus = "cancelled"
     await order.save()
     console.log("Order cancelled successfully:", order)
@@ -250,5 +259,39 @@ const cancelOrder = async (req, res, next) => {
 }
 
 
+const deleteProductFromOrderHistory = async (req, res, next)=> {
+  try {
+    console.log("Inside deleteProductFromOrderHistory of orderController")
+    const {orderId} = req.params
+    const {productId} = req.body
+    console.log(`orderId-->${orderId} and productId--->${productId}`)
 
-module.exports = {createOrder, getOrders, cancelOrderProduct, cancelOrder }
+    const order = await Order.findById(orderId)
+    if(!order){
+      return next(errorHandler(404, "Order not found!"))
+    }
+
+    const productIndex = order.products.findIndex( (item) => item.productId.toString() === productId )
+    if(productIndex === -1){
+      return next(errorHandler(404, "Product not found in the order!"))
+    }
+    const product = order.products[productIndex]
+    if (product.productStatus !== "cancelled" && product.productStatus !== "refunded") {
+      return next(errorHandler( 400, ' Only cancelled or refunded products can be deleted!' ))
+    }
+    product.isDeleted = true
+
+    await order.save()
+
+    console.log("Product marked as deleted successfully in the order history.")
+    res.status(200).json({ message: "Product successfully marked as deleted in the order history.", order})
+  }catch (error){
+    console.log("Error in deleteProductFromOrderHistory:", error.message)
+    next(error)
+  }
+}
+
+
+
+
+module.exports = {createOrder, getOrders, cancelOrderProduct, cancelOrder, deleteProductFromOrderHistory }

@@ -37,15 +37,26 @@ const orderSchema = new mongoose.Schema({
             price: {
                 type: Number,
                 required: true,
+                min: 0
             },
             total: {
                 type: Number,
-                require: true
+                required: true,
+                min: 0
             },
             productStatus: {
                 type: String,   // As of now in use --> ['pending', 'confirmed', 'delivered', 'cancelled', 'returning', 'refunded']
                 enum: ['processing', 'pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'returning', 'refunded'],
                 default: 'pending'
+            },
+            productCancelReason: {
+                type: String,
+                default: null,
+                maxLength: 500
+            },
+            isDeleted: {
+                type: Boolean,
+                default: false
             }
         },
     ],
@@ -77,26 +88,31 @@ const orderSchema = new mongoose.Schema({
     },
     orderTotal: {
         type: Number,
-        required: true
+        required: true,
+        min: 0
     },
     discount: {
         type: Number,
         default: 0, 
+        min: 0,
     },
     gst: {
         type: Number,
         required: true,
         default: 0,
+        min: 0,
     },
     deliveryCharge: {
         type: Number,
         required: true,
         default: 0,
+        min: 0,
     },
     absoluteTotalWithTaxes: {
         type: Number,
         required: true,
         default: 0,
+        min: 0
     },
     orderDate: {
         type: Date,
@@ -105,10 +121,17 @@ const orderSchema = new mongoose.Schema({
     }, 
     deliveryDate: {
         type: Date,
-        required: true
+        default: null
     }, 
     deliveryNote: {
-        type: String
+        type: String,
+        default: null,
+        maxLength: 500
+    },
+    orderCancelReason: {
+        type: String,
+        default: null,
+        maxLength: 500 
     }
 }, {timestamps: true})
 

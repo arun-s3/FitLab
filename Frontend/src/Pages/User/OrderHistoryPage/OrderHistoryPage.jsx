@@ -18,12 +18,14 @@ import FeaturesDisplay from '../../../Components/FeaturesDisplay/FeaturesDisplay
 import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
 import Footer from '../../../Components/Footer/Footer'
 import CartSidebar from '../../../Components/CartSidebar/CartSidebar'
-import {CustomHashLoader, CustomScaleLoader, CustomPuffLoader} from '../../../Components/Loader//Loader'
+import Modal from '../../../Components/Modal/Modal'
+import CancelForm from './CancelForm'
+import {CustomPuffLoader} from '../../../Components/Loader//Loader'
 import {DateSelector} from '../../../Components/Calender/Calender'
 import {addToCart, removeFromCart, getTheCart, resetCartStates} from '../../../Slices/cartSlice'
-import {getOrders, cancelOrder, cancelOrderProduct, resetOrderStates} from '../../../Slices/orderSlice'
-import {getAllAddress} from '../../../Slices/addressSlice'
-import {SiteButtonSquare, SiteSecondaryFillImpButton, SiteSecondaryFillButton, SitePrimaryButtonWithShadow, SitePrimaryWhiteTextButton} from '../../../Components/SiteButtons/SiteButtons'
+import {getOrders, cancelOrder, cancelOrderProduct, deleteProductFromOrderHistory, resetOrderStates} from '../../../Slices/orderSlice'
+import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
+
 
 export default function OrderHistoryPage(){
 
@@ -31,17 +33,12 @@ export default function OrderHistoryPage(){
     const [showRating, setShowRating] = useState(true)
     const [showChat, setShowChat] = useState(false)
 
-    // const [openOptions, setOpenOptions] = useState(false)
     const [orderDuration, setOrderDuration] = useState('All Orders')
 
     const [currentPage, setCurrentPage] = useState(1)
     const totalPages = 20
     const [limit, setLimit] = useState(10) 
-    // const [showLimit, setShowLimit] = useState(false)
 
-    // const [sorts, setSorts] = useState({})
-    // const [showSortBy, setShowSortBy] = useState(false)
-    
     const mouseInSort = useRef(true)
     
     const [startDate, setStartDate] = useState(null)
@@ -55,20 +52,19 @@ export default function OrderHistoryPage(){
     const [currentProductId, setCurrentProductId] = useState(null)
     const [showLoader, setShowLoader] = useState(false)
 
+    const [openOrderCancelModal, setOpenOrderCancelModal] = useState(false)
+    const [cancelThisOrderId, setCancelThisOrderId] = useState(null)
+
+    const [openCancelForm, setOpenCancelForm] = useState({type:'', status:false, options:{}})
+    const [openSelectReasons, setOpenSelectReasons] = useState({status:false, reasonTitle:'', reason:''})
+    const productCancelFormRef = useRef(null)
+    const orderCancelFormRef = useRef(null)
+
     const {orders, orderCreated, orderMessage, orderError} = useSelector(state=> state.order)
     const {cart, productAdded, productRemoved, loading, error, message} = useSelector(state=> state.cart)
     const dispatch = useDispatch()
     
     const navigate = useNavigate()
-    // useEffect(()=> {
-    //   dispatch( getOrders({queryDetails: {orderStatus: 'orders', page: 1}}) )
-    // },[])
-
-    // useEffect(() => {
-    //   setQueryDetails((query) => {
-    //     return {...query, page: currentPage}
-    //   })
-    // },[currentPage])
 
   const [openDropdowns, setOpenDropdowns] = useState({durationDropdown: false, limitDropdown: false, sortDropdown: false})
   const dropdownRefs = {
@@ -144,36 +140,6 @@ export default function OrderHistoryPage(){
       }else setShowLoader(true)
     },[loading, error, productAdded, productRemoved])
     
-  const allOrders = [
-      {
-        // orderDate: 'December 23, 2024',
-        orderDate: '2024-12-23T06:24:47.774+00:00',
-        total: '₹57,300',
-        shipTo: 'Jacob Sunny',
-        orderNumber: '112-0822160-5390023',
-        deliveryDate: 'December 26',
-        items: [
-          {
-            id: 1,
-            name: 'Cosco Biceps Curler',
-            description: 'A specialized machine designed to isolate and strengthen the biceps for more defined and powerful arms',
-            image: '/placeholder.svg?height=120&width=120',
-            returnDate: 'December 26, 2024',
-            orderDate: '2024-12-23T06:24:47.774+00:00'
-          },
-          {
-            id: 2,
-            name: 'Inclined Chest Presser',
-            description: 'A versatile machine that targets the upper chest muscles, enhancing strength and definition in the pectoral region',
-            image: '/placeholder.svg?height=120&width=120',
-            returnDate: 'December 26, 2024',
-            orderDate: '2024-12-23T06:24:47.774+00:00',
-            deliveryNote: 'Your package was delivered. It was handed directly to a resident.'
-          }
-        ]
-      }
-    ]
-
     const orderTabs = [
       {name: 'Orders', subtitle:'All Orders', icon: ShoppingBag},
       {name: 'Shipped', subtitle:'On Delivery', icon: Truck},
@@ -182,12 +148,12 @@ export default function OrderHistoryPage(){
     ]
 
     const orderStatusStyles = [
-      {status:'pending', textColor:'text-orange-500', bg:'bg-orange-500', lightBg:'bg-orange-50', border:'border-orange-300'},
-      {status:'confirmed', textColor:'text-yellow-500', bg:'bg-yellow-500', lightBg:'bg-yellow-50', border:'border-yellow-300'},
-      {status:'delivered', textColor:'text-green-500', bg:'bg-green-500', lightBg:'bg-green-50', border:'border-green-300'},
-      {status:'cancelled', textColor:'text-red-500', bg:'bg-red-500', lightBg:'bg-red-50', border:'border-red-300'},
-      {status:'returning', textColor:'text-red-500', bg:'bg-red-500', lightBg:'bg-red-50', border:'border-red-300'},
-      {status:'refunded', textColor:'text-green-500', bg:'bg-green-500', lightBg:'bg-green-50', border:'border-green-300'},
+      {status:'pending', textColor:'text-orange-500', bg:'bg-orange-500', lightBg:'bg-orange-50', border:'border-orange-300', shadow: '#fdba74'},
+      {status:'confirmed', textColor:'text-yellow-500', bg:'bg-yellow-500', lightBg:'bg-yellow-50', border:'border-yellow-300', shadow: '#fde047'}, 
+      {status:'delivered', textColor:'text-green-500', bg:'bg-green-500', lightBg:'bg-green-50', border:'border-green-300', shadow: '#86efac'}, 
+      {status:'cancelled', textColor:'text-red-500', bg:'bg-red-500', lightBg:'bg-red-50', border:'border-red-300', shadow: '#fca5a5'},
+      {status:'returning', textColor:'text-red-500', bg:'bg-red-500', lightBg:'bg-red-50', border:'border-red-300', shadow: '#fca5a5'},
+      {status:'refunded', textColor:'text-green-500', bg:'bg-green-500', lightBg:'bg-green-50', border:'border-green-300', shadow: '#86efac'},
     ]
 
     const findStyle = (status, styler)=> {
@@ -273,19 +239,79 @@ export default function OrderHistoryPage(){
       }
     }
 
-    const cancelOrReturnProduct = (e, orderId, productId)=> {
+    const cancelOrReturnProduct = (e, productId)=> {
       if(e.target.textContent.toLowerCase().includes('cancel')){
-        console.log("Cancelling the Product..")
-        dispatch(cancelOrderProduct({orderId, productId}))
+        console.log("Opening the CancelForm..")
+        setOpenCancelForm({type:'product', status:true, options: {productId}})
+        window.scrollTo( {top: productCancelFormRef.current.getBoundingClientRect().top, scrollBehavior: 'smooth'} )
       }else{
 
       }
     }
 
-    const cancelTheOrder = (orderId)=> {
-      console.log("Cancelling the order...")
-      dispatch(cancelOrder({orderId}))
+    const preCancelTheOrder = (e, orderId)=> {
+      console.log("Opening the modal for cancelOrder...")
+      setOpenCancelForm({type:'order', status:true, options: {orderId}})
+      window.scrollTo( {top: orderCancelFormRef.current.getBoundingClientRect().top, scrollBehavior: 'smooth'} )
     }
+
+    const cancelThisOrder = ()=> {
+      if(cancelThisOrderId){
+        let orderCancelReason = '';
+        if(openSelectReasons.reasonTitle.trim()){
+          orderCancelReason = openSelectReasons.reasonTitle.trim() + '.'
+        }
+        if(openSelectReasons.reason.trim()){
+          orderCancelReason = orderCancelReason + openSelectReasons.reason.trim()
+        }
+        console.log("orderCancelReason----->", orderCancelReason)
+        setOpenSelectReasons(({status:false, reasonTitle:'', reason:''}))
+        dispatch( cancelOrder({orderId: cancelThisOrderId, orderCancelReason}) )
+        setCancelThisOrderId(null)
+      }
+    }
+
+    const clearProduct = (orderId, productId)=> {
+      console.log("Clearing the product...")
+      dispatch(deleteProductFromOrderHistory({orderId, productId}))
+    }
+
+    const cancelReasonHandler = (e, options)=> {
+      if(options.title){
+        setOpenSelectReasons(selectReason=> (
+          {...selectReason, reasonTitle: e.target.textContent}
+        ))
+      }
+      if(options.content){
+        setOpenSelectReasons(selectReason=> (
+          {...selectReason, reason: e.target.value}
+        ))
+      }
+    }
+
+    const submitReason = (formFor)=> {
+
+      if(formFor === 'product'){
+        setOpenCancelForm({type:'', status:false, options:{}})
+        console.log("Cancelling the Product..")
+        let productCancelReason = '';
+        if(openSelectReasons.reasonTitle.trim()){
+          productCancelReason = openSelectReasons.reasonTitle.trim() + '.'
+        }
+        if(openSelectReasons.reason.trim()){
+          productCancelReason = productCancelReason + openSelectReasons.reason.trim()
+        }
+        setOpenSelectReasons(({status:false, reasonTitle:'', reason:''}))
+        dispatch(cancelOrderProduct({orderId, productId, productCancelReason}))
+      }
+      if(formFor === 'order'){
+        console.log("Cancelling the Order..")
+        setOpenOrderCancelModal(true)
+        setCancelThisOrderId(openCancelForm.options.orderId)
+        setOpenCancelForm({type:'', status:false, options:{}})
+      }
+    }
+
 
     return(
         <section id='OrderHistoryPage'>
@@ -321,7 +347,7 @@ export default function OrderHistoryPage(){
                       <button key={tab.name} className={`px-[1.5rem] py-[8px] flex items-center gap-[5px] rounded-[7px] transition-all
                            duration-200 
                           ${activeTab === tab.name ? 
-                            'text-black border border-[#EFF8BC] shadow-md transform scale-105'
+                            'text-black shadow-md transform scale-105'
                             : 'text-gray-600 hover:bg-gray-50' }`} onClick={()=> activateTab(tab.name)}>
                         <tab.icon className='w-[35px] h-[35px] p-[8px] text-white bg-primaryDark rounded-[5px]'/>
                         <div className='flex flex-col justify-between items-start'>
@@ -403,9 +429,10 @@ export default function OrderHistoryPage(){
                 </div>
               </div>
                   
-                <div className="space-y-6" id='orders-table-header'>
-                  { orders.map((order) => ( order?.products.length > 0 &&
-                    <div key={order._id} className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200">
+                <div className="space-y-6" id='orders-table'>
+                  { orders.map((order) => ( order?.products.length > 0 && !order?.products.every(product=> product.isDeleted) &&
+                    <div key={order._id} className="pb-[1rem] bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow
+                       duration-200">
                       <div className={`p-[1.5rem] grid grid-cols-4 gap-4 border-b border-dashed
                          ${order.orderStatus === 'cancelled' || order.orderStatus === 'returning'? 'border-red-300':'border-mutedDashedSeperation'}`}>
                         <div className="space-y-1">
@@ -451,54 +478,79 @@ export default function OrderHistoryPage(){
                         </div>
                       )}
 
-                      <div className="p-[1.5rem] pb-0">
-                        {
-                          order.orderStatus !== 'cancelled' && order.orderStatus !== 'returning' && order.orderStatus !== 'refunded' ?
-                            <div className='flex justify-between'>
-                            <h3 className="text-[16px] font-[450] text-secondary">
-                              <span>
-                                {
-                                  order.orderStatus === 'delivered' ? 'Delivered:' :
-                                    order.orderStatus === 'confirmed' ? 'Estimated Delivery Date:' : null
-                                }
-                              </span>
-                              <span className='ml-[5px] font-[550] tracking-[0.5px]'>
-                                { format(new Date(order.deliveryDate), "MMMM dd, yyyy" ) } 
-                              </span>
-                            </h3>
-                            <SiteButtonSquare lowerFont={true} lighter={true} lowShadow={true} clickHandler={()=> cancelTheOrder(order._id)}
+                      <div className="p-[1.5rem] pb-0 flex items-center justify-between">
+                            <div className='flex items-center gap-[3rem] basis-[40%]'>
+
+                              { order.orderStatus !== 'cancelled' && order.orderStatus !== 'returning' && order.orderStatus !== 'refunded' &&
+                                <h3 className="text-[16px] font-[450] text-secondary">
+                                <span>
+                                  {
+                                    order.orderStatus === 'delivered' ? 'Delivered:' :
+                                      order.orderStatus === 'confirmed' ? 'Estimated Delivery Date:' : null
+                                  }
+                                </span>
+                                <span className='ml-[5px] font-[550] tracking-[0.5px]'>
+                                  { format(new Date(order.deliveryDate), "MMMM dd, yyyy" ) } 
+                                </span>
+                              </h3>
+                              }
+                              <h3 className={`px-[5px] py-[3px] w-[23%] flex gap-[15px] justify-center items-center
+                                ${ findStyle(order.orderStatus, 'lightBg') } border ${ findStyle(order.orderStatus, 'border') } rounded-[5px]`}>
+                                 <span className={`w-[8px] h-[8px] ${ findStyle(order.orderStatus, 'bg') } rounded-[5px]`} 
+                                     style={{boxShadow: `0px 0px 6px 3px ${findStyle(order.orderStatus, 'shadow')}`}}>
+                                 </span>
+                                 <span className={`capitalize ${ findStyle(order.orderStatus, 'textColor') } text-[14px]`}>
+                                    {order.orderStatus}
+                                 </span>
+                              </h3>
+                            </div>
+
+                        {order.orderStatus !== 'cancelled' && order.orderStatus !== 'returning' && order.orderStatus !== 'refunded' &&
+                            <SiteButtonSquare lowerFont={true} lighter={true} lowShadow={true} clickHandler={(e)=> preCancelTheOrder(e, order._id)}
                                  customStyle={{paddingBlock:'7px', paddingInline:'18px', borderRadius:'7px'}}>
                                Cancel Order
                             </SiteButtonSquare>
-                            </div>
-                          : <h3 className={`px-[5px] py-[3px] w-[10%] flex gap-[15px] justify-center items-center
-                               ${ findStyle(order.orderStatus, 'lightBg') } border ${ findStyle(order.orderStatus, 'border') } rounded-[5px]`}>
-                                <span className={`w-[10px] h-[10px] ${ findStyle(order.orderStatus, 'bg') } rounded-[5px]`} 
-                                    style={{boxShadow: '0px 0px 6px 3px #fca5a5'}}></span>
-                                <span className={`capitalize ${ findStyle(order.orderStatus, 'textColor') } text-[15px]`}> {order.orderStatus}  </span>
-                            </h3>
                         }
+
+                        { openOrderCancelModal &&
+                          <Modal openModal={openOrderCancelModal} setOpenModal={setOpenOrderCancelModal} title='Important' 
+                              content={`You are about to cancel an order. Do you want to continue?`} okButtonText='Continue'
+                                closeButtonText='Cancel' contentCapitalize={false} clickTest={true} activateProcess={cancelThisOrder}/>
+                        }                            
                       </div>
                     
-                      {order.products.map((product, index) => (
+                      {order.products.map((product, index) => ( !product.isDeleted &&
                         <div key={product._id} className={`p-[1.5rem] ${index != order.products.length -1 ? 'border-b': ''} border-gray-100`}
                            id='item-details'>
                           <div className="flex gap-[2rem]">
                             <figure className="w-[120px] h-[120px] bg-gray-50 rounded-xl overflow-hidden">
                               <img src={product.thumbnail} alt={product.title} className={`w-full h-full object-cover transform
                                    hover:scale-105 transition-transform duration-200
-                                     ${order.orderStatus === 'cancelled' || order.orderStatus === 'returning' ? 'filter grayscale' : ''} `}/>
+                                     ${product.productStatus === 'cancelled' || product.productStatus === 'returning' ? 'filter grayscale' : ''} `}/>
                             </figure>
                             <div className="flex-1">
-                              <h4 className="mb-[8px] text-gray-800 font-bold hover:text-secondary transition-colors cursor-pointer">
-                                {product.title}
+                              <h4 className="mb-[8px] flex items-center gap-[4rem]">
+                                <span className='text-gray-800 font-bold hover:text-secondary transition-colors cursor-pointer'>
+                                   {product.title}
+                               </span>
+                                {
+                                  order.products.some(item=> product.productStatus !== item.productStatus) &&  
+                                  <span className='px-[5px] py-[3px] w-[10%] flex gap-[10px] items-center'>
+                                     <span className={`w-[7px] h-[7px] ${ findStyle(product.productStatus, 'bg') } rounded-[5px]`} 
+                                         style={{boxShadow: `0px 0px 6px 3px  ${findStyle(product.productStatus, 'shadow')}`}}>
+                                     </span>
+                                     <span className={`capitalize ${ findStyle(product.productStatus, 'textColor') } text-[13px] font-[500]`}>
+                                       {product.productStatus}
+                                     </span>
+                                  </span>
+                                } 
                               </h4>
                               <p className="mb-[8px] text-[13px] text-gray-600">{product.subtitle}</p>
                               <p className="text-[13px] text-gray-500 tracking-[0.3px] flex items-center gap-[4px]">
-                                { order.orderStatus === 'cancelled'||order.orderStatus === 'returning' ?
+                                { product.productStatus === 'cancelled'||product.productStatus === 'returning' ?
                                      <CircleOff className="w-[1rem] h-[1rem]"/> : <RefreshCcw className="w-[1rem] h-[1rem]" /> 
                                 }
-                                { order.orderStatus === 'cancelled'||order.orderStatus === 'returning' ? 'This product is cancelled'
+                                { product.productStatus === 'cancelled'||product.productStatus=== 'returning' ? 'This product is cancelled'
                                     :Date.now() <= new Date(order.orderDate).getTime() + 15 * 24 * 60 * 60 * 1000 ?
                                       'Return or replace items: Eligible through ' + 
                                         format( new Date(order.orderDate).getTime() + 15 * 24 * 60 * 60 * 1000, "MMMM dd, yyyy" )
@@ -517,27 +569,34 @@ export default function OrderHistoryPage(){
                                         transform hover:translate-y-px"
                                          onClick={()=> {handleAddToCart(product.productId); setCurrentProductId(product.productId)}}>
                                   {
-                                    order.orderStatus === 'cancelled'||order.orderStatus === 'returning' ?
+                                    product.productStatus === 'cancelled'||product.productStatus === 'returning' ?
                                         <> <ShoppingCart className="w-[1rem] h-[1rem]" /> Buy </>
                                       : <> <BiCartAdd className="w-[1rem] h-[1rem]" /> Buy it again </>
                                   }
                                 </button>
                                 <button className="hover:bg-gray-50 hover:border-gray-300 transition-all duration-200"
                                     onClick={()=> viewProduct(product.productId)}> 
-                                   {order.orderStatus === 'cancelled'||order.orderStatus === 'returning' ? 'View this item' : 'View your item'}
+                                   {product.productStatus === 'cancelled'||product.productStatus === 'returning' ? 'View this item' : 'View your item'}
                                 </button>
-                                  {(order.orderStatus != 'cancelled' && order.orderStatus != 'delivered' && 
-                                          order.orderStatus != 'returning' && order.orderStatus != 'refunded') &&
+                                  {(product.productStatus != 'cancelled' && product.productStatus != 'delivered' && 
+                                          product.productStatus != 'returning' && product.productStatus != 'refunded') &&
                                     <button className="hover:bg-gray-50 hover:border-gray-300 transition-all duration-200"
-                                          onClick={(e)=> cancelOrReturnProduct(e, order._id, product.productId)}> 
-                                      {order.orderStatus === 'delivered' ? 'Cancel Product' : 'Return Product'}
+                                          onClick={(e)=> cancelOrReturnProduct(e, product.productId)}> 
+                                      {product.productStatus === 'delivered' ? 'Return Product' : 'Cancel Product'}
                                     </button>
                                   }
+                                  { (product.productStatus === 'cancelled' || product.productStatus === 'refunded') && 
+                                    <button className="hover:bg-gray-50 hover:border-gray-300 transition-all duration-200"
+                                          onClick={(e)=> clearProduct(order._id, product.productId)}> 
+                                      Clear this item
+                                    </button>
+                                  }
+
                                 <button className="border !border-primary hover:border-gray-300 transition-all duration-200">      
                                   <MoreHorizontal className="w-[20px] h-[20px] text-primaryDark" />
                                 </button>
-                                                                                              {/*color= "#f1c40f"*/}
-                                { showLoader && currentProductId===product.productId &&    
+                                                                                              
+                                { showLoader && currentProductId === product.productId &&    
                                    <CustomPuffLoader loading={showLoader} 
                                        customStyle={{marginLeft: '5px', alignSelf: 'center'}}/>
                                 }
@@ -545,8 +604,26 @@ export default function OrderHistoryPage(){
                               </div>
                             </div>
                           </div>
+                          
+                          <div ref={productCancelFormRef} className='flex justify-center items-center'>
+                          {
+                            openCancelForm.type === 'product' && openCancelForm.options.productId === product.productId && openCancelForm.status &&
+                            <CancelForm openSelectReasons={openSelectReasons} setOpenSelectReasons={setOpenSelectReasons} 
+                              cancelReasonHandler={cancelReasonHandler} setOpenCancelForm={setOpenCancelForm} submitReason={submitReason}
+                                 formFor='product'/>
+                          }
+                          </div>
+                          
                         </div>
                       ))}
+                        <div ref={orderCancelFormRef}>
+                          {
+                            openCancelForm.type === 'order' && openCancelForm.options.orderId === order._id && openCancelForm.status &&
+                            <CancelForm openSelectReasons={openSelectReasons} setOpenSelectReasons={setOpenSelectReasons} 
+                              cancelReasonHandler={cancelReasonHandler} setOpenCancelForm={setOpenCancelForm} submitReason={submitReason}
+                                formFor='order'/>
+                          }
+                        </div>
                     </div>
                   ))}
                 </div>

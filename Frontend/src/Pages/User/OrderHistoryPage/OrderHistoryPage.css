@@ -12,21 +12,21 @@
 #OrderHistoryPage > main #orderHistory-header #calender svg{
     color: var(--MUTED);
 }
-#OrderHistoryPage > main #orders-table-header .label{
+#OrderHistoryPage > main #orders-table .label{
     font-size: 13px;
     color: rgb(107, 114, 128)
 }
-#OrderHistoryPage > main #orders-table-header .name{
+#OrderHistoryPage > main #orders-table .name{
     font-size: 15px;
 }
-#OrderHistoryPage > main #orders-table-header .order-details a{
+#OrderHistoryPage > main #orders-table .order-details a{
     display: inline-flex;
     align-items: center;
     gap: 4px;
     font-size: 13px;
     color: var(--SECONDARY);
 }
-#OrderHistoryPage > main #orders-table-header .order-details a > svg{
+#OrderHistoryPage > main #orders-table .order-details a > svg{
     width: 1rem;
     height: 1rem; 
 }

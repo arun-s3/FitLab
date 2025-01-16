@@ -31,6 +31,7 @@ import AdminProductListPage from './Pages/Admin/AdminProductListPage/AdminProduc
 import AdminAddAndEditCategoryPage from './Pages/Admin/AdminAddAndEditCategoryPage/AdminAddAndEditCategoryPage'
 import AdminCategoryListPage from './Pages/Admin/AdminCategoryListPage/AdminCategoryListPage'
 import AdminDashboardPage from './Pages/Admin/AdminDashboardPage/AdminDashboardPage'
+import AdminOrderHistory from './Pages/Admin/AdminOrderHistroyPage/AdminOrderHistroyPage'
 
 import {ToastContainer} from 'react-toastify'
 import "react-toastify/dist/ReactToastify.css";
@@ -95,6 +96,7 @@ export default function App(){
                                     <Route path='edit' element={<AdminAddAndEditCategoryPage editCategory={true}/>} />
                                 </Route>
                             </Route>
+                            <Route path='orders' element={<AdminOrderHistory/>} />
                         </Route>
                     </Route>
                 </Route>

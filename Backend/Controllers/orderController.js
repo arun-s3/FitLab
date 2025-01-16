@@ -13,7 +13,7 @@ const createOrder = async (req, res, next)=> {
       console.log("orderDetails---->", JSON.stringify(req.body))
 
       const {paymentDetails, shippingAddressId} = req.body.orderDetails
-      let orderStatus = 'pending'
+      let orderStatus = 'processing'
       let deliveryDate;
       if(paymentDetails.paymentMethod === 'cashOnDelivery'){
         orderStatus = 'confirmed'
@@ -98,7 +98,7 @@ const getOrders = async (req, res, next)=> {
     }
 
     const filter = {userId}
-    if (orderStatus && orderStatus != 'orders') {
+    if (orderStatus && orderStatus != 'orders' && orderStatus != 'all') {
       console.log("Inside if (orderStatus && orderStatus != 'orders'")
       filter.orderStatus = orderStatus
     }
@@ -124,21 +124,22 @@ const getOrders = async (req, res, next)=> {
     }
 
     if (startDate || endDate){
-      filter.createdAt = {};
+      filter.createdAt = {}
       if (startDate){
         if (isNaN(new Date(startDate))){
-          throw new Error("Invalid Date format")
+          next(errorHandler(400, "Invalid Date format!"))
         }
         filter.createdAt.$gte = new Date(startDate)
       }
       if (endDate){
         if (isNaN(new Date(endDate))){
-          throw new Error("Invalid endDate format")
+          next(errorHandler(400, "Invalid Date format!"))
         }
         filter.createdAt.$lte = new Date(endDate)
       }
     }
 
+    console.log("filter--->", JSON.stringify(filter))
     const orders = await Order.find(filter)
       .populate('shippingAddress') 
       .sort({createdAt: sort}) 
@@ -161,6 +162,83 @@ const getOrders = async (req, res, next)=> {
     next(error)
   }
 }
+
+const getAllUsersOrders = async (req, res, next)=> {
+  try {
+    console.log("Inside getAllOrders of orderController")
+
+    const { page = 1, limit = 10, orderStatus, sort = 'createdAt', month, startDate, endDate } = req.body.queryDetails || {}
+
+    if (month && (startDate || endDate)){
+      return next(errorHandler(409, "Invalid query--Cannot specify both 'month' and 'startDate'/'endDate'."))
+    }
+
+    const filter = {}
+    if (orderStatus && orderStatus !== 'orders' && orderStatus !== 'all') {
+      console.log("Filtering by orderStatus:", orderStatus)
+      filter.orderStatus = orderStatus
+    }
+
+    const skip = (page - 1) * limit;
+
+    if (month) {
+      let requiredYear, requiredMonth
+      const currentDate = new Date()
+      const currentMonth = currentDate.getMonth()
+      if(month <= currentMonth + 1){
+        requiredMonth = currentMonth - month + 1
+        requiredYear = currentDate.getFullYear()
+      } else {
+        requiredMonth = 12 - (month - (currentMonth + 1))
+        requiredYear = currentDate.getFullYear() - 1
+      }
+
+      filter.createdAt = { $gte: new Date(requiredYear, requiredMonth, 1) }
+    }
+
+    if(startDate || endDate){
+      filter.createdAt = {}
+      if (startDate){
+        if (isNaN(new Date(startDate))) {
+          throw new Error("Invalid startDate format")
+        }
+        filter.createdAt.$gte = new Date(startDate)
+      }
+      if (endDate){
+        if (isNaN(new Date(endDate))) {
+          throw new Error("Invalid endDate format")
+        }
+        filter.createdAt.$lte = new Date(endDate)
+      }
+    }
+
+    console.log("Filter applied:", JSON.stringify(filter))
+
+    const orders = await Order.find(filter)
+      .populate('userId', 'username email profilePic') 
+      .populate('shippingAddress') 
+      .sort({createdAt: sort})
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    const totalOrders = await Order.countDocuments(filter)
+    console.log("Orders retrieved:", JSON.stringify(orders));
+
+    res.status(200).json({
+      message: "All orders retrieved successfully",
+      orders,
+      pagination: {
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(totalOrders / limit),
+        totalOrders
+      }
+    })
+  } catch (error){
+    console.error("Error in getAllOrders:", error.message)
+    next(error)
+  }
+}
+
 
 const cancelOrderProduct = async (req, res, next) => {
   try {
@@ -294,4 +372,4 @@ const deleteProductFromOrderHistory = async (req, res, next)=> {
 
 
 
-module.exports = {createOrder, getOrders, cancelOrderProduct, cancelOrder, deleteProductFromOrderHistory }
+module.exports = {createOrder, getOrders, getAllUsersOrders, cancelOrderProduct, cancelOrder, deleteProductFromOrderHistory }

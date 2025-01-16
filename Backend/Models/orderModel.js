@@ -45,9 +45,9 @@ const orderSchema = new mongoose.Schema({
                 min: 0
             },
             productStatus: {
-                type: String,   // As of now in use --> ['pending', 'confirmed', 'delivered', 'cancelled', 'returning', 'refunded']
-                enum: ['processing', 'pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'returning', 'refunded'],
-                default: 'pending'
+                type: String,   // As of now in use --> ['processing', 'confirmed', 'delivered', 'cancelled', 'returning', 'refunded']
+                enum: ['processing', 'confirmed', 'shipped', 'delivered', 'cancelled', 'returning', 'refunded'],
+                default: 'processing'
             },
             productCancelReason: {
                 type: String,
@@ -82,9 +82,9 @@ const orderSchema = new mongoose.Schema({
         }
     },
     orderStatus: {
-        type: String,   // As of now in use --> ['pending', 'confirmed', 'delivered', 'cancelled', 'returning', 'refunded']
-        enum: ['processing', 'pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'returning', 'refunded'],
-        default: 'pending'
+        type: String,   // As of now in use --> ['processing', 'confirmed', 'delivered', 'cancelled', 'returning', 'refunded']
+        enum: ['processing', 'confirmed', 'shipped', 'delivered', 'cancelled', 'returning', 'refunded'],
+        default: 'processing'
     },
     orderTotal: {
         type: Number,

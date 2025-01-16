@@ -6,7 +6,7 @@ const {createProduct} = require('../Controllers/productController')
 
 adminRouter.get('/test', tester)
 
-adminRouter.post('/signin', isLogout, signinAdmin)
+adminRouter.post('/signin', signinAdmin) //isLogout
 adminRouter.get('/signout', isLogin, signoutAdmin)
 adminRouter.get('/customers', isLogin, authorizeAdmin, showUsers) 
 adminRouter.get('/customersOfStatus', isLogin, authorizeAdmin, showUsersofStatus) 

@@ -14,13 +14,13 @@ export default function PrivateAdminRoutes(){
     useEffect(()=>{
         console.log("Inside PrivateAdminRoutes")
     })
-    useEffect(()=> {
-        console.log("Inside useEffect of PrivateAdminRoutes")
-        if(userToken && !user.isAdmin){
-            console.log("Inside useEffect of PrivateAdminRoutes, userToken && !user.isAdmin")
-            navigate(<UserPresenceErrorPage/>, {replace: true})
-        }
-    },[userToken, user, adminToken, admin])
+    // useEffect(()=> {
+    //     console.log("Inside useEffect of PrivateAdminRoutes")
+    //     if(userToken && !user.isAdmin){
+    //         console.log("Inside useEffect of PrivateAdminRoutes, userToken && !user.isAdmin")
+    //         navigate(<UserPresenceErrorPage/>, {replace: true})
+    //     }
+    // },[userToken, user, adminToken, admin])
     console.log("UserToken available?-->", userToken)
     console.log("adminToken inside PrivateAdminRoutes-->"+adminToken)
 

@@ -19,9 +19,25 @@ export const createOrder = createAsyncThunk('order/createOrder', async ({orderDe
 
 export const getOrders = createAsyncThunk('order/getOrders', async ({queryDetails}, thunkAPI)=> {
   try {
-    console.log('Inside createOrder createAsyncThunk');
+    console.log('Inside getOrders createAsyncThunk');
     console.log("orderDetails from ordrSlice---->", queryDetails)
     const response = await axios.post('/order', {queryDetails}, {withCredentials: true})
+    console.log('Returning success response from getOrders...', JSON.stringify(response.data))
+    return response.data
+  }catch(error){
+    console.log('Inside catch of getOrders')
+    const errorMessage = error.response?.data?.message
+    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
+    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
+    return thunkAPI.rejectWithValue(errorMessage)
+  }
+})
+
+export const getAllUsersOrders = createAsyncThunk('order/getAllUsersOrders', async ({queryDetails}, thunkAPI)=> {
+  try {
+    console.log('Inside getAllUsersOrders createAsyncThunk');
+    console.log("orderDetails from ordrSlice---->", queryDetails)
+    const response = await axios.post('/order/all', {queryDetails}, {withCredentials: true})
     console.log('Returning success response from getOrders...', JSON.stringify(response.data))
     return response.data
   }catch(error){
@@ -147,9 +163,28 @@ const orderSlice = createSlice({
         state.loading = false
         state.orderError = action.payload
         state.orderMessage = action.payload.message
-        state.orderSuccess = false
+        state.orderSuccess = false 
       })
-      .addCase(cancelOrder.fulfilled, (state, action) => {
+      .addCase(getAllUsersOrders.fulfilled, (state, action) => {
+        console.log('getAllUsersOrders fulfilled:', action.payload)
+        state.orderError = null
+        state.loading = false
+        state.orderSuccess = true
+        state.orderMessage = action.payload.message
+        state.orders = action.payload.orders
+      })
+      .addCase(getAllUsersOrders.pending, (state) => {
+        state.loading = true
+        state.orderError = null
+      })
+      .addCase(getAllUsersOrders.rejected, (state, action) => {
+        console.log('getOrders rejected:', action.payload)
+        state.loading = false
+        state.orderError = action.payload
+        state.orderMessage = action.payload.message
+        state.orderSuccess = false 
+      })
+      .addCase(cancelOrder.fulfilled, (state, action) => { 
         console.log('cancelOrder fulfilled:', action.payload)
         state.orderError = null
         state.loading = false

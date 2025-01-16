@@ -19,7 +19,7 @@ import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
 import Footer from '../../../Components/Footer/Footer'
 import CartSidebar from '../../../Components/CartSidebar/CartSidebar'
 import Modal from '../../../Components/Modal/Modal'
-import CancelForm from './CancelForm'
+import CancelForm from '../../../Components/CancelForm/CancelForm'
 import {CustomPuffLoader} from '../../../Components/Loader//Loader'
 import {DateSelector} from '../../../Components/Calender/Calender'
 import {addToCart, removeFromCart, getTheCart, resetCartStates} from '../../../Slices/cartSlice'
@@ -148,10 +148,10 @@ export default function OrderHistoryPage(){
     ]
 
     const orderStatusStyles = [
-      {status:'pending', textColor:'text-orange-500', bg:'bg-orange-500', lightBg:'bg-orange-50', border:'border-orange-300', shadow: '#fdba74'},
+      {status:'processing', textColor:'text-orange-500', bg:'bg-orange-500', lightBg:'bg-orange-50', border:'border-orange-300', shadow: '#fdba74'},
       {status:'confirmed', textColor:'text-yellow-500', bg:'bg-yellow-500', lightBg:'bg-yellow-50', border:'border-yellow-300', shadow: '#fde047'}, 
       {status:'delivered', textColor:'text-green-500', bg:'bg-green-500', lightBg:'bg-green-50', border:'border-green-300', shadow: '#86efac'}, 
-      {status:'cancelled', textColor:'text-red-500', bg:'bg-red-500', lightBg:'bg-red-50', border:'border-red-300', shadow: '#fca5a5'},
+      {status:'cancelled', textColor:'text-red-700', bg:'bg-red-700', lightBg:'bg-red-50', border:'border-red-300', shadow: '#fca5a5'},
       {status:'returning', textColor:'text-red-500', bg:'bg-red-500', lightBg:'bg-red-50', border:'border-red-300', shadow: '#fca5a5'},
       {status:'refunded', textColor:'text-green-500', bg:'bg-green-500', lightBg:'bg-green-50', border:'border-green-300', shadow: '#86efac'},
     ]

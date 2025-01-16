@@ -1,0 +1,67 @@
+#AdminOrderHistoryPage > main #order-menu #calender{
+    gap: 15px;
+}
+#AdminOrderHistoryPage > main #order-menu #calender input{
+    height: 35px;
+    border-color: var(--DROPDOWNBORDER);
+}
+#AdminOrderHistoryPage > main #order-menu #calender input::placeholder{
+    color: var(--MUTED);
+    letter-spacing: 0.4px;
+}
+#AdminOrderHistoryPage > main #order-menu #calender svg{
+    color: var(--MUTED);
+}
+#AdminOrderHistoryPage > main #order-menu .optionDropdown .options{
+    position: absolute;
+    top: 120%;
+    width: 110%;
+    left: -2px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: white;
+    border-radius: 8px;
+    padding-block: 10px;
+    padding-left: 22px;
+    font-size: 13px;
+    border: 1px solid var(--DROPDOWNBORDER);
+}
+#AdminOrderHistoryPage > main #order-menu .optionDropdown .options span{
+    cursor: pointer;
+}
+#AdminOrderHistoryPage > main #order-menu .optionDropdown .options span:hover{
+    color: var(--SECONDARY);
+    font-weight: 500;
+}
+#AdminOrderHistoryPage > main #order-menu .sort-dropdown > ul{
+    background: white;
+    color: #121212;
+    border: 1px solid var(--DROPDOWNBORDER);
+}
+#AdminOrderHistoryPage > main #order-menu .sort-dropdown > ul li{
+    margin-inline: 6px;
+    width: 100%;
+}
+#AdminOrderHistoryPage > main #order-menu .sort-dropdown > ul li>span{
+    font-size: 11px;
+    color: var(--MUTED);
+    letter-spacing: 0.2px;
+}
+#AdminOrderHistoryPage > main #order-menu .sort-dropdown > ul li>span:hover{
+    color: var(--SECONDARY);
+}
+#AdminOrderHistoryPage > main #order-menu .sort-dropdown > ul li>span input{
+    height: 10px;
+    width: 10px;
+    color: var(--SECONDARY);
+    border-radius: 5px;
+    border-color: var(--SECONDARY);
+    margin-right: 5px; 
+}
+#AdminOrderHistoryPage > main #order-menu .sort-dropdown > ul li>span input:focus{
+    --tw-ring-shadow: none;
+}
+#AdminOrderHistoryPage > main #order-menu .sort-dropdown > ul li > svg{
+    color: var(--SECONDARY);
+}

@@ -3,10 +3,11 @@ import './CancelForm.css'
 
 import {RiArrowDropDownLine} from "react-icons/ri"
 
-import {SiteSecondaryFillImpButton} from '../../../Components/SiteButtons/SiteButtons'
+import {SiteSecondaryFillImpButton} from '../SiteButtons/SiteButtons'
 
 
-export default function CancelForm({openSelectReasons, setOpenSelectReasons, cancelReasonHandler, setOpenCancelForm, submitReason, formFor}){
+export default function CancelForm({openSelectReasons, setOpenSelectReasons, cancelReasonHandler, setOpenCancelForm, submitReason, canceledByAdmin,
+   formFor}){
 
   
   const commonReasonTitles = [
@@ -31,8 +32,12 @@ export default function CancelForm({openSelectReasons, setOpenSelectReasons, can
       return(
         <div id='CancelForm' className='flex flex-col items-center'>
             <h2 className='mt-[2rem] flex items-center gap-[1rem]'> 
-              <span className='text-[15px] tracking-[0.2px] capitalize'> {`Reason for Cancellation of the ${formFor} (Optional):`} </span>
-              <span className='relative px-[15px] py-[5px] w-[17rem] flex items-center justify-between border
+              <span className='text-[15px] tracking-[0.2px] capitalize'>
+                {`Reason for Cancellation of the ${formFor} (Optional ${canceledByAdmin? ', for Records' : ''}):`} 
+              </span>
+              {
+                !canceledByAdmin  &&
+                <span className='relative px-[15px] py-[5px] w-[17rem] flex items-center justify-between border
                  border-dropdownBorder rounded-[6px] cursor-pointer' ref={dropdownBoxRef} id='dropdownBox'
                    onClick={()=> setOpenSelectReasons(selectReason=> ( {...selectReason, status: !selectReason.status} ))}>
                 <span className='text-[14px] font-[450] text-secondary'>
@@ -52,12 +57,13 @@ export default function CancelForm({openSelectReasons, setOpenSelectReasons, can
                 </ul>
                 }
               </span>
+              }
             </h2>
             <textarea row='6' cols='50' maxLength='500' placeholder='Please write your explanation (optional)' 
                 className='mt-[1rem] mb-[1.5rem] resize-none h-[7rem] text-[13px] placeholder:text-[10px] border
                    border-mutedDashedSeperation rounded-[5px] focus:ring-secondary focus:ring-[1.5px]
                       focus:outline-none focus-within:border-none focus-within:outline-none' value={openSelectReasons.reason}
-                        onChange={(e)=> cancelReasonHandler(e, {content: true})}/>
+                        onChange={(e)=> !canceledByAdmin ? cancelReasonHandler(e, {content: true}) : cancelReasonHandler(e, {content: true, admin:true})}/>
             <div className='flex items-center justify-center gap-[1rem]'>
               <SiteSecondaryFillImpButton className='py-[5px] px-[10px] w-[6rem] capitalize' clickHandler={()=> submitReason(formFor)}
                  customStyle={{marginTop:'0', paddingBlock:'5px', paddingInline:'25px', width:'fit-content'}}>

@@ -99,12 +99,45 @@ export const deleteProductFromOrderHistory = createAsyncThunk('order/deleteProdu
 }
 )
 
+export const changeOrderStatus = createAsyncThunk('order/changeOrderStatus', async ({orderId, newStatus}, thunkAPI)=> {
+  try {
+    console.log('Inside changeOrderStatus createAsyncThunk');
+    console.log("orderId from orderSlice---->", orderId)
+    const response = await axios.patch(`/order/status/${orderId}`,{newStatus}, {withCredentials: true})
+    console.log('Returning success response from changeOrderStatus...', JSON.stringify(response.data))
+    return {orderId, updatedOrder: response.data.updatedOrder}
+  }catch(error){
+    console.log('Inside catch of cancelOrder')
+    const errorMessage = error.response?.data?.message
+    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
+    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
+    return thunkAPI.rejectWithValue(errorMessage)
+  }
+})
+
+export const changeProductStatus = createAsyncThunk('order/changeProductStatus', async ({orderId, productId, newProductStatus}, thunkAPI)=> {
+  try {
+    console.log('Inside changeProductStatus createAsyncThunk');
+    console.log("orderId from orderSlice---->", orderId)
+    const response = await axios.patch(`/order/status/${orderId}/products/${productId}`,{newProductStatus}, {withCredentials: true})
+    console.log('Returning success response from changeProductStatus...', JSON.stringify(response.data))
+    return {orderId, productId, updatedProduct: response.data.updatedProduct}
+  }catch(error){
+    console.log('Inside catch of changeProductStatus')
+    const errorMessage = error.response?.data?.message
+    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
+    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
+    return thunkAPI.rejectWithValue(errorMessage)
+  }
+})
+
 
 const initialState = {
   orders: [], 
   orderCreated: false,
   OrderRemoved: false,
   orderCancelled: false,
+  orderUpdated: false,
   loading: false,
   orderError: null,
   orderSuccess: false,
@@ -122,12 +155,13 @@ const orderSlice = createSlice({
       state.orderSuccess = false
       state.orderCreated = false
       state.orderCancelled = false
-    },
+      state.orderUpdated = false
+    }
   },
   extraReducers: (builder) => {
     builder
       .addCase(createOrder.fulfilled, (state, action) => {
-        console.log('addToCart fulfilled:', action.payload)
+        console.log('createOrder fulfilled:', action.payload)
         state.orderError = null
         state.loading = false
         state.orderSuccess = true
@@ -140,7 +174,7 @@ const orderSlice = createSlice({
         state.orderError = null
       })
       .addCase(createOrder.rejected, (state, action) => {
-        console.log('addToCart rejected:', action.payload)
+        console.log('createOrder rejected:', action.payload)
         state.loading = false
         state.orderError = action.payload
         state.orderMessage = action.payload.message
@@ -178,7 +212,7 @@ const orderSlice = createSlice({
         state.orderError = null
       })
       .addCase(getAllUsersOrders.rejected, (state, action) => {
-        console.log('getOrders rejected:', action.payload)
+        console.log('getAllUsersOrders rejected:', action.payload)
         state.loading = false
         state.orderError = action.payload
         state.orderMessage = action.payload.message
@@ -249,7 +283,7 @@ const orderSlice = createSlice({
         state.productCancelled = false
       })
       .addCase(deleteProductFromOrderHistory.fulfilled, (state, action) => {
-        console.log('cancelOrder fulfilled:', action.payload)
+        console.log('deleteProductFromOrderHistory fulfilled:', action.payload)
         state.orderError = null
         state.loading = false
         state.productDeleted = true
@@ -272,11 +306,74 @@ const orderSlice = createSlice({
         state.orderError = null
       })
       .addCase(deleteProductFromOrderHistory.rejected, (state, action) => {
-        console.log('cancelOrder rejected:', action.payload)
+        console.log('deleteProductFromOrderHistory rejected:', action.payload)
         state.loading = false
         state.orderError = true
         state.orderMessage = action.payload.message
         state.productDeleted  = false
+      })
+      .addCase(changeOrderStatus.fulfilled, (state, action)=> { 
+        console.log('changeOrderStatus fulfilled:', action.payload)
+        state.orderError = null
+        state.loading = false
+        state.orderUpdated = true
+        state.orderMessage = action.payload.message
+
+        state.orders = state.orders.map(order=> {
+          if(order._id === action.payload.orderId){
+            order.orderStatus = action.payload.updatedOrder.orderStatus
+            order.products = order.products.map(product=> {
+              product.productStatus = action.payload.updatedOrder.orderStatus
+              return product
+            })
+          } 
+          return order
+        })
+      })
+      .addCase(changeOrderStatus.pending, (state)=> {
+        state.loading = true
+        state.orderError = null
+      })
+      .addCase(changeOrderStatus.rejected, (state, action)=> {
+        console.log('changeProductStatus rejected:', action.payload)
+        state.loading = false
+        state.orderError = true
+        state.orderMessage = action.payload.message
+        state.orderUpdated = false
+      })
+      .addCase(changeProductStatus.fulfilled, (state, action)=> { 
+        console.log('changeProductStatus fulfilled:', action.payload)
+        state.orderError = null
+        state.loading = false
+        state.orderUpdated = true
+        state.orderMessage = action.payload.message
+
+        state.orders = state.orders.map(order=> {
+          if(order._id === action.payload.orderId){
+            const requiredStatus = action.payload.updatedProduct.productStatus
+            order.products = order.products.map(product=> {
+              if(product.productId === action.payload.productId){
+                product.productStatus = requiredStatus
+              }
+              return product
+            })
+            if(order.products.every(product=> product.productStatus === requiredStatus)){
+              order.orderStatus = requiredStatus
+            }
+          } 
+          return order
+        })
+      })
+      .addCase(changeProductStatus.pending, (state)=> {
+        state.loading = true
+        state.orderError = null
+      })
+      .addCase(changeProductStatus.rejected, (state, action)=> {
+        console.log('changeProductStatus rejected:', action.payload)
+        state.loading = false
+        state.orderError = true
+        state.orderMessage = action.payload.message
+        state.orderUpdated = false
       })
     }
 })

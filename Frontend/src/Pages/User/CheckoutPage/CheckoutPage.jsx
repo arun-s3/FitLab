@@ -62,7 +62,7 @@ export default function CheckoutPage(){
   
     useEffect(()=> {
       if(paymentMethod){
-        let paymentDetails = {paymentMethod, paymentStatus: 'processing'}
+        let paymentDetails = {paymentMethod, paymentStatus: 'pending'}
         if(paymentMethod === 'cashOnDelivery'){
           paymentDetails = {...paymentDetails, transactionId: 'cod-payment' }
         }

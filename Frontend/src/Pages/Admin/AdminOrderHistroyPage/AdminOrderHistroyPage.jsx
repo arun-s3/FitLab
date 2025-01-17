@@ -2,13 +2,14 @@ import React, {useState, useEffect, useRef} from 'react'
 import './AdminOrderHistroyPage.css'
 import {useDispatch, useSelector} from 'react-redux'
 
-import {ShoppingBag, Package, RefreshCcw, CircleOff, Box, Download, Search, MoreHorizontal, MessageSquare,
-   Filter, Plus, CalendarArrowDown, CircleCheckBig, SquareCheckBig, Truck, PackageCheck } from 'lucide-react'
+import {ShoppingBag, Package, RefreshCcw, CircleOff, Box, Download, Search, MoreHorizontal, MessageSquare, 
+   Filter, Plus, CalendarArrowDown, CircleCheckBig, SquareCheckBig, Truck, PackageCheck, ChevronDown, ShoppingCart } from 'lucide-react'
 import {RiArrowDropDownLine} from "react-icons/ri"
 import {BiCartAdd} from "react-icons/bi"
 import {TbCreditCardRefund} from "react-icons/tb"
 import {MdSort} from "react-icons/md"
 import {format} from "date-fns"
+import axios from 'axios'
 
 import AdminHeader from '../../../Components/AdminHeader/AdminHeader'
 import {DateSelector} from '../../../Components/Calender/Calender'
@@ -16,10 +17,13 @@ import Modal from '../../../Components/Modal/Modal'
 import CancelForm from '../../../Components/CancelForm/CancelForm'
 import {SitePrimaryButtonWithShadow, SiteSecondaryFillImpButton} from '../../../Components/SiteButtons/SiteButtons' 
 import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
-import {getOrders, getAllUsersOrders, cancelOrder, cancelOrderProduct, deleteProductFromOrderHistory, resetOrderStates} from '../../../Slices/orderSlice'
+import {getOrders, getAllUsersOrders, cancelOrder, cancelOrderProduct, changeOrderStatus,
+          changeProductStatus, resetOrderStates} from '../../../Slices/orderSlice'
 
 
 export default function AdminOrderHistoryPage(){
+
+  const [statusCounts, setStatusCounts] = useState({})
     
   const [activeTab, setActiveTab] = useState('All')
   const [orderDuration, setOrderDuration] = useState('All Orders')
@@ -41,6 +45,9 @@ export default function AdminOrderHistoryPage(){
   const [openSelectReasons, setOpenSelectReasons] = useState({status:false, reasonTitle:'', reason:''})
   const productCancelFormRef = useRef(null)
   const orderCancelFormRef = useRef(null)
+
+  const [isHovered, setIsHovered] = useState({})
+  const [showProducts, setShowProducts] = useState({})
 
   const {orders, orderCreated, orderMessage, orderError} = useSelector(state=> state.order)
   const dispatch = useDispatch()
@@ -84,6 +91,15 @@ export default function AdminOrderHistoryPage(){
     }, [])
 
     useEffect(()=> {
+      async function findStatus(){
+        const response = await axios.get('http://localhost:3000/order/statusCounts', {withCredentials: true})
+        console.log("Response from statusCounts", response.data)
+        setStatusCounts(response.data.statusCounts) 
+      }
+      findStatus()
+    },[])
+
+    useEffect(()=> {
         setQueryDetails(query=> {
           return {...query, startDate, endDate}
         })
@@ -100,39 +116,23 @@ export default function AdminOrderHistoryPage(){
   const metrics = [
     {
       title: 'Total orders',
-      value: '200',
-      trend: '+21.2% last week',
+      value: statusCounts.totalOrders,
       icon: <ShoppingBag className="w-6 h-6 text-white" />,
-      bgColor: 'bg-emerald-400',
-      trendColor: 'text-emerald-600',
-      chartColor: 'text-emerald-500'
     },
     {
       title: 'Delivered Orders',
-      value: '43',
-      trend: '+20.1% last week',
+      value: statusCounts.deliveredOrders,
       icon: <Package className="w-6 h-6 text-white" />,
-      bgColor: 'bg-violet-400',
-      trendColor: 'text-violet-600',
-      chartColor: 'text-violet-500'
     },
     {
       title: 'Returned Orders',
-      value: '4',
-      trend: '-2.1% last week',
+      value: statusCounts.returningOrders,
       icon: <RefreshCcw className="w-6 h-6 text-white" />,
-      bgColor: 'bg-pink-400',
-      trendColor: 'text-pink-600',
-      chartColor: 'text-pink-500'
     },
     {
       title: 'Cancelled Orders',
-      value: '30',
-      trend: '+16.1% last week',
+      value: statusCounts.cancelledOrders,
       icon: <CircleOff className="w-6 h-6 text-white" />,
-      bgColor: 'bg-amber-400',
-      trendColor: 'text-amber-600',
-      chartColor: 'text-amber-500'
     }
   ]
 
@@ -154,44 +154,13 @@ export default function AdminOrderHistoryPage(){
   ]
 
   const findStyle = (statusType, status, styler)=> {
-    if(statusType === 'order'){
+    if(statusType === 'order' || statusType === 'product'){
       return orderStatusStyles.find(orderStatus=> orderStatus.status === status)[styler]
     }
     if(statusType === 'payment'){
       return paymentStatusStyles.find(paymentStatus=> paymentStatus.status === status)[styler]
     }
   }
-
-  // const orders = [
-  //   {
-  //     id: '#430011564329',
-  //     customer: {
-  //       name: 'George Anderson',
-  //       avatar: '/placeholder.svg?height=32&width=32'
-  //     },
-  //     date: '12 Jun, 2024',
-  //     status: 'processing',
-  //     total: '$40,000',
-  //     items: '500 items',
-  //     delivery: 'Free',
-  //     fulfillment: 'Unfulfilled'
-  //   },
-  //   {
-  //     id: '#238765346758',
-  //     customer: {
-  //       name: 'Lawrence Hughes',
-  //       avatar: '/placeholder.svg?height=32&width=32'
-  //     },
-  //     date: '23 July, 2024',
-  //     status: 'Active',
-  //     total: '$20,000',
-  //     items: '100 items',
-  //     delivery: 'N/A',
-  //     fulfillment: 'Fulfilled'
-  //   },
-  //   // Add more orders as shown in the image...
-  // ]
-  // const orders = []
 
   const handlePageChange = (page) => {
     setCurrentPage(page)
@@ -251,7 +220,7 @@ export default function AdminOrderHistoryPage(){
       case 'confirmed':
         return {status:'ship', icon:Truck}
       case 'shipped':
-        return {status:'deliver', icon:PackageCheck}
+        return {status:'delivered', icon:PackageCheck}
       case 'returning':
         return {status:'refund', icon:TbCreditCardRefund}
       default:
@@ -296,7 +265,6 @@ export default function AdminOrderHistoryPage(){
 
   const submitReason = (formFor)=> {
     if(formFor === 'product'){
-      setOpenCancelForm({type:'', status:false, options:{}})
       console.log("Cancelling the Product..")
       let productCancelReason = '';
       if(openSelectReasons.reasonTitle.trim()){
@@ -306,7 +274,8 @@ export default function AdminOrderHistoryPage(){
         productCancelReason = productCancelReason + openSelectReasons.reason.trim()
       }
       setOpenSelectReasons(({status:false, reasonTitle:'', reason:''}))
-      dispatch(cancelOrderProduct({orderId, productId, productCancelReason}))
+      dispatch(cancelOrderProduct({orderId: openCancelForm.options.orderId, productId: openCancelForm.options.productId, productCancelReason}))
+      setOpenCancelForm({type:'', status:false, options:{}})
     }
     if(formFor === 'order'){
       console.log("Cancelling the Order..")
@@ -316,7 +285,24 @@ export default function AdminOrderHistoryPage(){
     }
   }
 
+  const changeTheOrderStatus = (orderId, newStatus)=> {
+    console.log("Inside changeTheOrderStatus..")
+    console.log("newStatus---->", newStatus)
+    dispatch(changeOrderStatus({orderId, newStatus}))
+  }
 
+  const changeTheProductStatus = (orderId, productId, newProductStatus)=> {
+    console.log("Inside changeTheProductStatus..")
+    console.log(`productId--->${productId} and orderId---> ${orderId} and newStatus---> ${newProductStatus}`)
+    dispatch(changeProductStatus({orderId, productId, newProductStatus}))
+  }
+
+  const cancelTheOrderProduct = (productId, orderId)=> {
+    console.log("Inside cancelTheOrderProduct..")
+    console.log(`productId--->${productId} and orderId---> ${orderId}`)
+    setOpenCancelForm({type:'product', status:true, options: {productId, orderId}})
+    window.scrollTo( {top: productCancelFormRef.current.getBoundingClientRect().top, scrollBehavior: 'smooth'} )
+  }
 
   return (
     <section id='AdminOrderHistoryPage'>
@@ -327,10 +313,7 @@ export default function AdminOrderHistoryPage(){
                history seamlessly."/>
 
           </div>
-          {/* <div className='flex items-center gap-[10px]'> */}
           
-            {/* <DateSelector dateGetter={{startDate, endDate}} dateSetter={{setStartDate, setEndDate}} labelNeeded={true}/> */}
-
             <SitePrimaryButtonWithShadow tailwindClasses='h-[30px] self-end'>
               <i>
                   <Download className='h-[15px] w-[15px]'/>
@@ -341,7 +324,6 @@ export default function AdminOrderHistoryPage(){
               </i>
             </SitePrimaryButtonWithShadow>
             
-          {/* </div> */}
       </header>
       <main>
 
@@ -354,14 +336,9 @@ export default function AdminOrderHistoryPage(){
                   <div className='p-3 bg-primaryDark rounded-lg'>
                     {metric.icon}
                   </div>
-                  {/* <svg className="w-24 h-12" viewBox="0 0 96 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M0 47L4 41L8 43L12 36L16 38L20 32L24 36L28 38L32 27L36 36L40 35L44 37L48 29L52 37L56 32L60 28L64 39L68 35L72 30L76 32L80 24L84 37L88 29L92 35L96 24" 
-                      stroke={metric.chartColor} strokeWidth="2" />
-                  </svg> */}
                   <div className="flex flex-col items-baseline">
                     <h3 className="text-sm text-gray-500 mb-1">{metric.title}</h3>
                     <span className="text-[15px] font-semibold text-gray-900">{metric.value}</span>
-                    {/* <span className={`text-sm ${metric.trendColor}`}>{metric.trend}</span> */}
                   </div>
                   
               </div>
@@ -442,7 +419,7 @@ export default function AdminOrderHistoryPage(){
 
           
           {/* Filters and Table */}
-          <div className="bg-white rounded-xl shadow-lg">
+          <div className="bg-white rounded-xl shadow-lg" id='order-list-table'>
             <div className="p-6 border border-dropdownBorder">
               <div className="flex items-center justify-between">
                 <div className="p-[5px] flex gap-2 bg-gray-100 rounded-[9px]">
@@ -511,12 +488,20 @@ export default function AdminOrderHistoryPage(){
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-500">{order.shippingAddress.district}</td>
                       <td className="px-6 py-4 text-sm text-gray-500">{ format(new Date(order.orderDate), "MMMM dd, yyyy" ) }</td>
-                      <td className="px-6 py-4 text-sm text-gray-500">{order.products.length}</td>
+                      <td className="px-6 py-4 text-sm text-gray-500 flex items-center gap-[15px]">
+                        <span> {order.products.length} </span>
+                        <button className="relative overflow-hidden rounded-[8px] p-[2px]"
+                              onMouseEnter={()=> setIsHovered({orderId: order._id})}  onMouseLeave={()=> setIsHovered({})}
+                                onClick={()=> setShowProducts(showProducts=> showProducts.orderId ? {} : {orderId: order._id})}>
+                          <div className="relative flex items-center gap-[2px] rounded-2xl  transition-all duration-300">
+                            <ShoppingBag  className={`h-[15px] w-[15px] text-muted transition-all duration-300 
+                              ${(isHovered.orderId === order._id) ?'rotate-[-5deg] scale-110' : '' }`}/>
+                            <ChevronDown className={`h-[10px] w-[10px] text-secondary self-end transition-all duration-300
+                               ${(isHovered.orderId === order._id) ? 'translate-y-[5px]' : ''}`}/>
+                          </div>
+                        </button>
+                      </td>
                       <td className="px-6 py-4">
-                        {/* <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                            order.status === 'Active' ? 'bg-green-50 text-green-700' : 'bg-orange-50 text-orange-700'}`}>
-                          {order.orderStatus}
-                        </span> */}
                         {
                           <span className='px-[5px] py-[3px] w-[10%] flex gap-[10px] items-center'>
                              <span className={`w-[3px] h-[3px] p-[3px] ${findStyle("order", order.orderStatus, 'bg')} rounded-[5px]`} 
@@ -540,32 +525,26 @@ export default function AdminOrderHistoryPage(){
                           ${order.orderStatus !== 'cancelled'? findStyle("payment", order.paymentDetails.paymentStatus, 'textColor') : ''} `}>
                         {order.orderStatus === 'cancelled'? '---' : order.paymentDetails.paymentStatus}
                       </td>
-                      {/* <td className="px-6 py-4 text-sm text-gray-500">{order.products.length}</td> */}
-                      {/* <td className="px-6 py-4">
-                        <span className={`inline-flex items-center gap-1 text-sm ${order.orderStatus === 'delivered'
-                              ? 'text-green-700' : 'text-red-700'}`}>
-                          <span className="w-1.5 h-1.5 rounded-full bg-current" />
-                          {order.orderStatus}
-                        </span>
-                      </td> */}
                       <td className="px-6 py-4">
                         <div className="flex justify-center items-center gap-2">
                           {
-                             ['processing', 'confirmed', 'shipped',].includes(order.orderStatus) &&
-                             <button className='py-[4px] px-4 text-secondary bg-white border border-secondary rounded-[6px]
-                                 hover:bg-secondary hover:text-white transition duration-300' onClick={(e)=> preCancelTheOrder(e, order._id)}>
+                             ['delivered', 'cancelled', 'refunded'].every(status=> status !== order.orderStatus) &&
+                             <button className='relative py-[4px] px-4 text-secondary bg-white border border-secondary rounded-[6px]
+                                 hover:bg-secondary hover:text-white transition duration-300 cancel-button' data-label='Order'
+                                    onClick={(e)=> preCancelTheOrder(e, order._id)}>
                                <CircleOff className="w-4 h-4" />
                              </button>
                           }
                           { 
-                            !['delivered', 'cancelled', 'refunded'].includes(order.orderStatus) &&
-                            <SiteSecondaryFillImpButton className="text-[11px] capitalize"
-                               customStyle={{marginTop:'0', paddingBlock:'4px', borderRadius:'6px'}}>
+                            ['delivered', 'cancelled', 'refunded'].every(status=> status !== order.orderStatus) &&
+                            <SiteSecondaryFillImpButton className="text-[11px] capitalize" 
+                                clickHandler={(e)=> changeTheOrderStatus(order._id, changeStatus(order.orderStatus).status)}
+                                  customStyle={{width:'auto', marginTop:'0', paddingBlock:'4px', borderRadius:'6px'}}>
                             {
                               (()=> {
                                 const {status, icon:Icon} = changeStatus(order.orderStatus)
                                 return(
-                                  <span className='flex items-center gap-[3px]'>
+                                  <span className='flex items-center gap-[7px]'>
                                       <span> {status} </span>
                                       {Icon && <Icon className="w-4 h-4"/>} 
                                   </span>
@@ -582,6 +561,91 @@ export default function AdminOrderHistoryPage(){
                           } 
                         </div>
                       </td>
+                    </tr>
+                    <tr>
+
+                    <td colSpan='9' className='pl-[4rem]'>
+                    {showProducts.orderId === order._id  && order.products.map((product, index) => ( 
+                        <div key={product._id} className={`p-[1.5rem] ${index != order.products.length -1 ? 'border-b': ''} border-gray-100`}
+                           id='item-details'>
+                          <div className="flex items-center gap-[2rem]">
+                            <figure className="w-[60px] h-[60px] bg-gray-50 rounded-xl overflow-hidden">
+                              <img src={product.thumbnail} alt={product.title} className={`w-full h-full object-cover transform
+                                   hover:scale-105 transition-transform duration-200
+                                     ${product.productStatus === 'cancelled' || product.productStatus === 'returning' ? 'filter grayscale' : ''} `}/>
+                            </figure>
+                            <div className="flex-1">
+                              <h4 className="mb-[8px] flex items-center gap-[4rem]">
+                                <span className='text-gray-800 text-[14px] font-[600] hover:text-secondary transition-colors cursor-pointer'>
+                                   {product.title}
+                               </span>
+                                { 
+                                  <span className='px-[5px] py-[3px] w-[10%] flex gap-[10px] items-center'>
+                                     <span className={`w-[4px] h-[4px] ${ findStyle('product', product.productStatus, 'bg') } rounded-[5px]`} 
+                                         style={{boxShadow: `0px 0px 6px 3px  ${findStyle('product', product.productStatus, 'shadow')}`}}>
+                                     </span>
+                                     <span className={`capitalize ${ findStyle('product', product.productStatus, 'textColor') } text-[11px] font-[500]`}>
+                                       {product.productStatus}
+                                     </span>
+                                  </span>
+                                } 
+                              </h4>
+                              <p className="mb-[8px] text-[11px] text-gray-600">{product.subtitle}</p>
+                              {product.deliveryNote && (
+                                <p className="mt-[8px] text-[13px] leading-[20px] text-gray-500 flex items-center gap-[4px]">
+                                  <Package className="w-[1rem] h-[1rem]" />
+                                  {'Delivery Note:' + product.deliveryNote}
+                                </p>
+                              )}
+                              
+                              <div className="flex items-center gap-[20px]">
+                          {
+                             ['processing', 'confirmed', 'shipped',].includes(product.productStatus) &&
+                             <button className='relative py-[4px] px-4 text-secondary bg-white border border-secondary rounded-[6px]
+                                 hover:bg-secondary hover:text-white transition duration-300  before:bg-white cancel-button'
+                                     data-label='Product' data-bottom='50'
+                                        onClick={(e)=> cancelTheOrderProduct(product.productId, order._id)} >  
+                               <CircleOff className="w-4 h-4" />
+                             </button>
+                          }
+                          { 
+                            !['delivered', 'cancelled', 'refunded'].includes(product.productStatus) &&
+                            <SiteSecondaryFillImpButton className="text-[11px] capitalize" 
+                                clickHandler={(e)=> changeTheProductStatus(order._id, product.productId, changeStatus(product.productStatus).status)}
+                                  customStyle={{width:'auto',marginTop:'0', paddingBlock:'4px', borderRadius:'6px'}}> 
+                            {
+                              (()=> {
+                                const {status, icon:Icon} = changeStatus(product.productStatus)
+                                return(
+                                  <span className='flex items-center gap-[10px]'>
+                                      <span className='capitalize'> 
+                                        {status !== 'delivered' ? status + '  Product' : 'Product  ' + status} 
+                                      </span>
+                                      {Icon && <Icon className="w-4 h-4"/>} 
+                                  </span>
+                                )
+                              })()
+                            }
+                            </SiteSecondaryFillImpButton>
+                          }
+                        </div>
+
+                            </div>
+                          </div>
+                          
+                          <div ref={productCancelFormRef} className='flex justify-center items-center'>
+                          {openCancelForm.type === 'product' && openCancelForm.options.productId === product.productId &&
+                              openCancelForm.options.orderId === order._id && openCancelForm.status &&
+                            <CancelForm openSelectReasons={openSelectReasons} setOpenSelectReasons={setOpenSelectReasons} 
+                              cancelReasonHandler={cancelReasonHandler} setOpenCancelForm={setOpenCancelForm} submitReason={submitReason}
+                                 formFor='product' canceledByAdmin={true}/>
+                          }
+                          </div>
+                          
+                        </div>
+                      ))} 
+                    </td>
+
                     </tr>
                     <tr ref={orderCancelFormRef}>
                       <td colSpan='9'>

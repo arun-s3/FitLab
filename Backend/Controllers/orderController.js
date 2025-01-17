@@ -261,7 +261,7 @@ const cancelOrderProduct = async (req, res, next) => {
     }
     product.stock += canceledProduct.quantity
     if(productCancelReason.trim()){
-      product.productCancelReason = productCancelReason
+      order.products[productIndex].productCancelReason = productCancelReason
     }
     await product.save()
 
@@ -273,6 +273,7 @@ const cancelOrderProduct = async (req, res, next) => {
     order.products[productIndex].productStatus = "cancelled"
     if ( order.products.every(product=> product.productStatus === 'cancelled') ){
       order.orderStatus = "cancelled"
+      order.orderCancelReason = productCancelReason
     }
 
     await order.save()
@@ -370,6 +371,96 @@ const deleteProductFromOrderHistory = async (req, res, next)=> {
 }
 
 
+const changeOrderStatus = async (req, res, next)=> {
+  try {
+    console.log("Inside changeOrderStatus of orderController")
+    const {orderId} = req.params
+    const {newStatus} = req.body
+    console.log(`orderId-->${orderId} and newStatus--->${newStatus}`)
+    const order = await Order.findById(orderId)
+    if (!order){
+      return next(errorHandler(404, 'Order not found!'))
+    }
+    const validStatuses = ['processing', 'confirmed', 'shipped', 'delivered', 'returning', 'cancelled', 'refunded']
+    const requiredStatus = validStatuses.find(status=> status.includes(newStatus.toLowerCase()))
+    if (!requiredStatus){
+      return next(errorHandler(400, 'Invalid order status!'))
+    }
+    order.orderStatus = requiredStatus
+
+    order.products = order.products.map((product)=> ({ ...product, productStatus: requiredStatus}))
+
+    await order.save();
+
+    console.log("Updated the order and all the products of that order")
+    return res.status(200).json({success: true, message: 'Order and product statuses updated successfully', updatedOrder: order})
+  }catch (error){
+    console.error('Error updating order status:', error.message)
+    next(error)
+  }
+}
 
 
-module.exports = {createOrder, getOrders, getAllUsersOrders, cancelOrderProduct, cancelOrder, deleteProductFromOrderHistory }
+const changeProductStatus = async (req, res, next)=> {
+  try {
+    console.log("Inside changeOrderStatus of orderController")
+    const {orderId, productId} = req.params
+    const {newProductStatus} = req.body
+    console.log(`orderId-->${orderId}, productId-->${productId} and newProductStatus--->${newProductStatus}`)
+
+    const order = await Order.findById(orderId)
+    if (!order){
+      return next(errorHandler(404, 'Order not found!'))
+    }
+
+    const productIndex = order.products.findIndex( (product) => product.productId.toString() === productId )
+
+    if (productIndex === -1){
+      return next(errorHandler(404, 'Product not found in the order'))
+    }
+    const validStatuses = ['processing', 'confirmed', 'shipped', 'delivered', 'returning', 'cancelled', 'refunded']
+    const requiredStatus = validStatuses.find(status=> status.includes(newProductStatus.toLowerCase()))
+    if (!requiredStatus){
+      return next(errorHandler(400, 'Invalid order status!'))
+    }
+
+    order.products[productIndex].productStatus = requiredStatus
+    if(order.products.every(product=> product.productStatus === requiredStatus)){
+      order.orderStatus = requiredStatus
+    }
+
+    await order.save();
+    console.log("Updated the order and all the products of that order")
+    return res.status(200).json({success: true, message: 'Product status updated successfully', updatedProduct: order.products[productIndex]})
+  }catch(error){
+    console.error('Error updating product status:', error.message)
+    next(error)
+  }
+}
+
+
+const getOrderCounts = async (req, res, next)=> {
+  try {
+    console.log("Inside getOrderCounts of orderController")
+    const orderCounts = await Order.aggregate( [ { $group: {_id: '$orderStatus', count: { $sum: 1 }}} ])
+
+    const statusCounts = {totalOrders: 0, cancelledOrders: 0, deliveredOrders: 0, returningOrders: 0}
+
+    orderCounts.forEach(({ _id, count })=> {
+      if (_id === 'cancelled') statusCounts.cancelledOrders = count;
+      else if (_id === 'delivered') statusCounts.deliveredOrders = count;
+      else if (_id === 'returning') statusCounts.returningOrders = count;
+      statusCounts.totalOrders += count;
+    })
+
+    res.status(200).json({success: true, message: 'Order counts retrieved successfully', statusCounts});
+  }catch(error){
+    console.error('Error fetching order counts:', error.message)
+    next(error)
+  }
+}
+
+
+
+module.exports = {createOrder, getOrders, getAllUsersOrders, cancelOrderProduct, cancelOrder, deleteProductFromOrderHistory, 
+        changeOrderStatus, changeProductStatus, getOrderCounts}

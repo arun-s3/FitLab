@@ -239,10 +239,10 @@ export default function OrderHistoryPage(){
       }
     }
 
-    const cancelOrReturnProduct = (e, productId)=> {
+    const cancelOrReturnProduct = (e, productId, orderId)=> {
       if(e.target.textContent.toLowerCase().includes('cancel')){
         console.log("Opening the CancelForm..")
-        setOpenCancelForm({type:'product', status:true, options: {productId}})
+        setOpenCancelForm({type:'product', status:true, options: {productId, orderId}})
         window.scrollTo( {top: productCancelFormRef.current.getBoundingClientRect().top, scrollBehavior: 'smooth'} )
       }else{
 
@@ -292,7 +292,6 @@ export default function OrderHistoryPage(){
     const submitReason = (formFor)=> {
 
       if(formFor === 'product'){
-        setOpenCancelForm({type:'', status:false, options:{}})
         console.log("Cancelling the Product..")
         let productCancelReason = '';
         if(openSelectReasons.reasonTitle.trim()){
@@ -302,7 +301,8 @@ export default function OrderHistoryPage(){
           productCancelReason = productCancelReason + openSelectReasons.reason.trim()
         }
         setOpenSelectReasons(({status:false, reasonTitle:'', reason:''}))
-        dispatch(cancelOrderProduct({orderId, productId, productCancelReason}))
+        dispatch(cancelOrderProduct({orderId: openCancelForm.options.orderId, productId: openCancelForm.options.productId, productCancelReason}))
+        setOpenCancelForm({type:'', status:false, options:{}})
       }
       if(formFor === 'order'){
         console.log("Cancelling the Order..")
@@ -581,7 +581,7 @@ export default function OrderHistoryPage(){
                                   {(product.productStatus != 'cancelled' && product.productStatus != 'delivered' && 
                                           product.productStatus != 'returning' && product.productStatus != 'refunded') &&
                                     <button className="hover:bg-gray-50 hover:border-gray-300 transition-all duration-200"
-                                          onClick={(e)=> cancelOrReturnProduct(e, product.productId)}> 
+                                          onClick={(e)=> cancelOrReturnProduct(e, product.productId, order._id)}> 
                                       {product.productStatus === 'delivered' ? 'Return Product' : 'Cancel Product'}
                                     </button>
                                   }
@@ -607,7 +607,8 @@ export default function OrderHistoryPage(){
                           
                           <div ref={productCancelFormRef} className='flex justify-center items-center'>
                           {
-                            openCancelForm.type === 'product' && openCancelForm.options.productId === product.productId && openCancelForm.status &&
+                            openCancelForm.type === 'product' && openCancelForm.options.productId === product.productId &&
+                              openCancelForm.options.orderId === order._id && openCancelForm.status &&
                             <CancelForm openSelectReasons={openSelectReasons} setOpenSelectReasons={setOpenSelectReasons} 
                               cancelReasonHandler={cancelReasonHandler} setOpenCancelForm={setOpenCancelForm} submitReason={submitReason}
                                  formFor='product'/>

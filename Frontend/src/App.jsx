@@ -4,6 +4,7 @@ import {BrowserRouter, Route, Routes} from 'react-router-dom'
 import HomePage from './Pages/User/HomePage/HomePage'
 import SignUpAndInPage from './Pages/User/SignUpAndInPage/SignUpAndInPage'
 import OtpVerificationPage from './Pages/User/OtpVerificationPage/OtpVerificationPage'
+import ForgotAndResetPasswordPage from './Pages/User/ForgotAndResetPasswordPage/ForgotAndResetPasswordPage'
 import ProductListPage from './Pages/User/ProductListPage/ProductListPage'
 import PrivateUserRoutes from './Components/PrivateUserRoutes/PrivateUserRoutes'
 import TestImageCropper from './Pages/User/TesterPages/TestImageCropper'
@@ -58,6 +59,7 @@ export default function App(){
                     <Route path='otp-verify' element={<OtpVerificationPage/>}/>
                 </Route>
                 <Route path='signin' element={<SignUpAndInPage type='signin' />}/>
+                <Route path='forgot-password' element={<ForgotAndResetPasswordPage/>}/>
                 <Route path='products'>
                     <Route index element={<ProductListPage/>}/>
                 </Route>

@@ -53,7 +53,8 @@ const transporter = nodemailer.createTransport({
 
   const verifyOtp = async(req, res, next) => {
     try{
-        const {otp, email} = req.body;
+        console.log("Inside verifyOtp")
+        const {otp, email, updateUser} = req.body
         console.log("OTP to verify---->", otp)
         console.log("req.session.otpExpiresAt now in verifyOtp--->",req.session.otpExpiresAt)
         console.log("Date.now()----->", Date.now())
@@ -76,13 +77,15 @@ const transporter = nodemailer.createTransport({
           req.session.otp = null;
           req.session.email = null;
           req.session.otpExpiresAt = null;
-
-          const user = await User.updateOne({email}, {$set: {isVerified: true}})
+          
+          if(updateUser){
+            console.log("Updateding user...")
+            const user = await User.updateOne({email}, {$set: {isVerified: true}})
+          }
           return res.status(200).json({ message: "OTP verified successfully!" });
-        } else {
+        }else{
           console.log("INAVLID OTP!")
-        //   return res.status(200).json({ message: "Invalid OTP!" });
-          (errorHandler(400, "Invalid OTP!"))
+          next(errorHandler(400, "Invalid OTP!"))
         }
      }
      catch(error){
@@ -223,6 +226,35 @@ const loginUser = async(req,res,next)=>{
  } 
 
 }
+
+const updateForgotPassword = async (req, res, next)=> {
+    try {
+        console.log("Inside updateForgotPassword")
+        const {newPassword} = req.body
+        const userId = req.user._id
+        console.log(`userId---> ${userId}`)
+
+        if (!newPassword) {
+            console.log("New password is required")
+            return next(errorHandler(400, "New password is required"))
+        }
+        const user = await User.findById(userId)
+        if (!user) {
+            console.log("User not found")
+            return next(errorHandler(404, "User not found"))
+        }
+
+        const spassword = await securePassword(newPassword)
+        await User.updateOne({_id: userId}, {password: spassword})
+
+        res.status(200).json({message: "Password updated successfully"})
+    } catch (error) {
+        console.error("updatePassword error -->", error)
+        next(error)
+    }
+}
+
+
 const googleSignin = async(req,res,next)=>{
     try{
         const {username, email, sub:googleId, picture:profilePic} = req.body
@@ -264,4 +296,4 @@ const signout = (req,res,next)=>{
 }
 
 
-module.exports = {tester, createUser, sendOtp, verifyOtp, loginUser, googleSignin, signout}
+module.exports = {tester, createUser, sendOtp, verifyOtp, loginUser, updateForgotPassword, googleSignin, signout}

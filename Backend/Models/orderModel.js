@@ -45,7 +45,7 @@ const orderSchema = new mongoose.Schema({
                 min: 0
             },
             productStatus: {
-                type: String,   // As of now in use --> ['processing', 'confirmed', 'delivered', 'cancelled', 'returning', 'refunded']
+                type: String,   
                 enum: ['processing', 'confirmed', 'shipped', 'delivered', 'cancelled', 'returning', 'refunded'],
                 default: 'processing'
             },
@@ -82,7 +82,7 @@ const orderSchema = new mongoose.Schema({
         }
     },
     orderStatus: {
-        type: String,   // As of now in use --> ['processing', 'confirmed', 'delivered', 'cancelled', 'returning', 'refunded']
+        type: String,   
         enum: ['processing', 'confirmed', 'shipped', 'delivered', 'cancelled', 'returning', 'refunded'],
         default: 'processing'
     },

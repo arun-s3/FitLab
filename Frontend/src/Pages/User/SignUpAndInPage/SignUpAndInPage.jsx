@@ -97,7 +97,7 @@ export default function SignUpAndInPage({type}){
     } 
     const regexPatterns = {
         emailPattern: /^([a-z\d\.-]+)@([a-z\d-]+)\.([a-z]{2,10})([\.a-z]?)$/,
-        usernamePattern: /^[\w-]{5,15}$/,
+        usernamePattern: /^[\w-]{5,15}(?!@)$/,
         mobilePattern: /^\d{10}$/,
         passwordPattern: /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[`~@#$%^&*()\-+={}\\/;:"'|,.?<>])[a-zA-Z\d`~@#$%^&*()\-+={}\\/;:"'|,.\?<>]{5,}/,
         // identifierPattern: new RegExp(`^(${this.emailPattern.toString().slice(2,-2).trim()})|(${this.usernamePattern.toString().slice(2,-2).trim()})$`),
@@ -133,7 +133,7 @@ export default function SignUpAndInPage({type}){
                 case "email":
                     return regexPatterns.validator(e,"Please enter a valid email-id!")
                 case "username":
-                    return regexPatterns.validator(e,"Username can be alphanumeric. Must have atleast 5 letters! ")
+                    return regexPatterns.validator(e,"Username can be alphanumeric. Avoid special characters and must have atleast 5 letters! ")
                 case "identifier":
                     return regexPatterns.validator(e,"Enter a valid username or email address!")
                 case "mobile":

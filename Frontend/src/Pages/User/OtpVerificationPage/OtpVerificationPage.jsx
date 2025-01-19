@@ -68,7 +68,7 @@ export default function OtpVerificationPage(){
     },[otp])
 
     const startTimer = ()=> {
-        setTimer(5 * 60 * 1000)
+        // setTimer(500 * 60 * 1000)
         timerId.current = setInterval(() => {
             setTimer(prevCount => {
                 if (prevCount <= 1000) {
@@ -162,7 +162,7 @@ export default function OtpVerificationPage(){
         }else{
             console.log("Submitting Otp.....")
             try{
-                const response = await axios.post('http://localhost:3000/verifyOtp', {otp, email: userEmail}, {withCredentials: true})
+                const response = await axios.post('http://localhost:3000/verifyOtp', {otp, email: userEmail, updateUser: true}, {withCredentials: true})
                 console.log("RESPONSE from verifyOtp---->", response)
                 console.log("RESPONSE from verifyOtp in JSON---->", JSON.stringify(response))
                 if(response.data.message.includes('success')){

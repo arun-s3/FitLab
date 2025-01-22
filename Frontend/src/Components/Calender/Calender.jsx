@@ -3,7 +3,7 @@ import './Calender.css'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css';
 
-import { format } from 'date-fns'; 
+import {format} from 'date-fns'; 
 
 const MyContainer = ({ className, children }) => {
     return (
@@ -44,4 +44,21 @@ export function DateSelector({dateGetter, dateSetter, labelNeeded}){
                 </div>
             </div>
     )
+}
+
+export function SingleDateSelector({ setDate, date, placeholderText, isDisabled }) {
+
+  const CustomDateInput = React.forwardRef(({ value, onClick, onChange }, ref) => (
+    <input ref={ref} value={value} onClick={onClick} onChange={onChange} placeholder={placeholderText} disabled={isDisabled}
+      style={{ cursor: isDisabled ? "not-allowed" : "pointer", color: isDisabled ? "rgb(125, 124, 140)" : "rgb(159, 42, 240)"}} />
+  ))
+
+  return (
+    <div id="calendar">
+      <div className="date-picker">
+        <DatePicker selected={date} onChange={(selectedDate) => setDate(selectedDate)} selectsStart startDate={date}
+          dateFormat="yyyy/MM/dd" showIcon icon={<CalenderIcon/>} customInput={<CustomDateInput />} />
+      </div>
+    </div>
+  )
 }

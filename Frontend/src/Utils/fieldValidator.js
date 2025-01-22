@@ -4,6 +4,8 @@ let optionalField = ''
 
 const regexPatterns = {
 
+    usernamePattern: /^[\w-]{5,15}(?!@)$/,
+
     titlePattern: /^([a-zA-Z]){3,}[a-zA-Z0-9\s,'-]{0,100}$/,
     pricePattern: /^\d+(\.\d{1,2})?$/,
     stockPattern: /^\d{1,}$/,
@@ -127,6 +129,9 @@ export const handleInputValidation = (fieldName, value, options, limits)=>{
     else{
         console.log("Going to switch---")
         switch(fieldName){
+            case "username":
+                return regexPatterns.validator(fieldName, value,"Username can be alphanumeric. Avoid special characters and must have atleast 5 letters!")
+
             case "title":
                 return regexPatterns.validator(fieldName, value, "Please enter a valid product name!.")
             case "price":
@@ -152,7 +157,7 @@ export const handleInputValidation = (fieldName, value, options, limits)=>{
                 return regexPatterns.validator(fieldName, value, "Please enter a valid Discount rate!")
             case "categoryBadge":
                 return regexPatterns.validator(fieldName, value, "Please enter a valid Category badge! Must be under 30 characters.")
-
+        
             case "firstName":
                 return regexPatterns.validator(fieldName, value, "Please enter a valid First name!.")
             case "lastName":
@@ -182,17 +187,41 @@ export const handleInputValidation = (fieldName, value, options, limits)=>{
     }
 }
 
-export const displaySuccess = (e, options)=>{
+// export const displaySuccess = (e, options)=>{
+//     console.log("Success!")
+//     e.target.style.borderColor = 'green'
+//     if(!options?.optionalMsg){
+//         if(e.target.nextElementSibling.classList.contains('error')){
+//              e.target.nextElementSibling.style.visibility = 'hidden'
+//         }else{
+//             e.target.closest('.error').style.visibility = 'hidden'
+//         }
+//     }
+// }
+export const displaySuccess = (e, options = {}) => {
     console.log("Success!")
-    options && options.optionalMsg ? null : e.target.nextElementSibling.style.visibility = 'hidden'
     e.target.style.borderColor = 'green'
+    if(options.optionalMsg){
+      console.log(options.optionalMsg)
+    }else{
+      let errorElement = e.target.nextElementSibling
+        while(!errorElement.classList.contains('error')){
+            errorElement = errorElement.nextElementSibling
+        }
+      console.log("errorElement-->", errorElement)
+      if(errorElement){
+        errorElement.style.visibility = 'hidden'
+      }
+    }
 }
+  
 export const displayErrorAndReturnNewFormData = (e, message, formData, fieldName)=>{
     e.target.style.borderColor = 'red'
     let errorDisplayer;
     if (e.target.nextElementSibling.classList.contains('error')){
         errorDisplayer = e.target.nextElementSibling
     }else errorDisplayer = e.target.nextElementSibling.nextElementSibling
+    console.log('errorDisplayer--->', errorDisplayer)
     errorDisplayer.style.visibility = 'visible'
     errorDisplayer.style.color = 'rgb(239,68,68)'
     console.log("msg from displayError-->"+message)
@@ -203,7 +232,7 @@ export const displayErrorAndReturnNewFormData = (e, message, formData, fieldName
 }
 
 export const cancelErrorState = (e, borderColor = 'transparent', options)=>{
-    console.log("Inside errorHandler")
+    console.log("Inside errorHandler cancelErrorState")
     // console.log("e.target.previousElementSibling.value()"+ e.target.previousElementSibling.value)
     let inputElement = e.target.previousElementSibling;
     while (inputElement.tagName !== 'INPUT' && inputElement.tagName !== 'TEXTAREA'){
@@ -218,9 +247,10 @@ export const cancelErrorState = (e, borderColor = 'transparent', options)=>{
     console.log("e.target.innerText-->",e.target.innerText)
     if(e.target.innerText.endsWith('empty')){
         console.log("Inside cancelErrorState if e.target.innerText.endsWith('empty')")
-        console.log("Optional Message-->", options.optionalMsg)
+        console.log("Optional Message-->", options?.optionalMsg)
         setTimeout(()=>{
             e.target.innerText = options.optionalMsg ? options.optionalMsg : ''
+            conosle.log('ErrorMsg cleared..')
             if(options.optionalMsg) e.target.style.color = 'rgb(125, 124, 140)'
             inputElement.style.borderColor = borderColor    
         }, 2000)

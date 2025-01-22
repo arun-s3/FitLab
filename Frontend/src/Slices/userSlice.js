@@ -67,9 +67,26 @@ export const signout = createAsyncThunk('signout', async(googleId,thunkAPI)=>{
     }
 })
 
+export const updateUserDetails = createAsyncThunk('updateUserDetails', async({userDetails},thunkAPI)=>{
+    try{
+        console.log("inside updateUserDetails of createAsyncThunk")
+        const response = await axios.post('/update', {userDetails}, {withCredentials:true})
+        console.log("returning success response from updateUserDetails createAsyncThunk..."+JSON.stringify(response)) 
+        console.log("userDetails from updateUserDetails createAsyncThunk--"+JSON.stringify(userDetails))
+        return response.data
+    }
+    catch(error){
+        console.log("inside catch of updateUserDetails from userSlice")
+        const errorMessage = error.response?.data?.message
+        console.log("error object inside createAsyncThunk error.response of updateUserDetails-->"+JSON.stringify(error.response))
+        return thunkAPI.rejectWithValue(errorMessage)
+    }
+} )
+
 const initialState = {
     userToken: null,
     user: null,
+    userUpdated: false,
     error:null,
     loading:false,
     success:false,
@@ -132,13 +149,31 @@ const userSlice = createSlice({
                 state.success = false
                 console.log("error from userSlice- signin.rejected after assignment-->"+ state.error)
          })
+         .addCase(updateUserDetails.pending, (state,action)=>{
+                state.loading = true
+                state.success = false
+                console.log("loading from userSlice updateUserDetails.pending--"+state.loading)
+        })
+        .addCase(updateUserDetails.fulfilled, (state,action)=>{
+                state.loading = false
+                state.error = null
+                state.success = true
+                state.user = action.payload.user
+                state.userUpdated =  true
+                console.log("userData from userSlice-updateUserDetails.fulfilled-user-->"+JSON.stringify(state.user))
+        })
+        .addCase(updateUserDetails.rejected, (state,action)=>{
+                state.error = action.payload
+                state.loading = false
+                state.success = false
+                console.log("error from userSlice- updateUserDetails.rejected after assignment-->"+ state.error)
+        })
         .addCase(signout.fulfilled, (state,action)=>{
                 console.log("inside signout.fulfilled, action.payload"+JSON.stringify(action.payload))
                 state.userToken = null
                 state.user = null
                 console.log("state.userToken now-->"+state.userToken )
         })
-       
         .addCase(googleSignin.pending, (state,action)=>{
                 state.loading = true
                 state.success = false

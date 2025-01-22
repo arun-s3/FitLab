@@ -227,6 +227,34 @@ const loginUser = async(req,res,next)=>{
 
 }
 
+const updateUserDetails = async (req, res, next) => {
+  try {
+    const userId = req.user._id
+    const {userDetails} = req.body
+
+    if (!userDetails.username || !userDetails.email){
+      next(errorHandler(404, "Username and email are required!"))
+    }
+
+    const existingUser = await User.findOne({
+      $or: [{ email: userDetails.email }, { mobile: userDetails.mobile }], 
+      _id: { $ne: userId }
+    })
+    if(existingUser){
+        next(errorHandler(409, "Email or mobile number already exists for another user!"))
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(userId, { $set: userDetails },{ new: true, runValidators: true })
+    if (!updatedUser) {
+      next(errorHandler(404, "User not found!"))
+    }
+    res.status(200).json({ message: "User details updated successfully.", user: updatedUser})
+  }catch(error){
+    console.error("Error updating user details:", error.message)
+    next(error)
+  }
+}
+
 const updateForgotPassword = async (req, res, next)=> {
     try {
         console.log("Inside updateForgotPassword")
@@ -234,12 +262,12 @@ const updateForgotPassword = async (req, res, next)=> {
         const userId = req.user._id
         console.log(`userId---> ${userId}`)
 
-        if (!newPassword) {
+        if (!newPassword){
             console.log("New password is required")
             return next(errorHandler(400, "New password is required"))
         }
         const user = await User.findById(userId)
-        if (!user) {
+        if (!user){
             console.log("User not found")
             return next(errorHandler(404, "User not found"))
         }
@@ -248,8 +276,8 @@ const updateForgotPassword = async (req, res, next)=> {
         await User.updateOne({_id: userId}, {password: spassword})
 
         res.status(200).json({message: "Password updated successfully"})
-    } catch (error) {
-        console.error("updatePassword error -->", error)
+    }catch (error){
+        console.error("updatePassword error -->", error.message)
         next(error)
     }
 }
@@ -296,4 +324,4 @@ const signout = (req,res,next)=>{
 }
 
 
-module.exports = {tester, createUser, sendOtp, verifyOtp, loginUser, updateForgotPassword, googleSignin, signout}
+module.exports = {tester, createUser, sendOtp, verifyOtp, loginUser, updateUserDetails, updateForgotPassword, googleSignin, signout}

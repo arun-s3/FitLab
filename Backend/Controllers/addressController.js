@@ -63,8 +63,6 @@ const editAddress = async(req,res,next)=> {
         if(!requiredFieldsExists || Object.values(addressData).some((value) => value === undefined)){
             next(errorHandler(400, "Please enter all the required fields"))
         }else{
-            const adressAlreadyExists = await Address.findOne({street: addressData.street})
-            if(!adressAlreadyExists){
                 console.log("Inside if !adressAlreadyExists")
                 const updatedAddress = await Address.findOneAndUpdate({_id: addressId}, {$set: {...addressData}}, {new: true})
                 if(updatedAddress){
@@ -73,9 +71,6 @@ const editAddress = async(req,res,next)=> {
                 }else{
                     next(errorHandler(500, "Internal Server error"))
                 }
-            }else{
-                next(errorHandler(409, "Address already exists"))
-            } 
         }
     }
     catch(error){
@@ -118,6 +113,24 @@ const getAllAddress = async(req,res,next)=> {
     }
 }
 
+const getDefaultAddress = async (req, res, next) => {
+    try {
+      console.log("Inside getDefaultAddress of addressController")
+      const {id} = req.params
+      console.log("id---->", id)
+      const defaultAddress = await Address.findOne({userId: id, defaultAddress: true})
+  
+      if (!defaultAddress) {
+        next(errorHandler(404, "Default address not found for you!"))
+      }
+  
+      res.status(200).json({ message: 'Default address retrieved successfully', address: defaultAddress})
+    }catch(error) {
+      console.error('Error fetching default address:', error.message)
+      next(error)
+    }
+  }
+
 const setAsDefaultAddress = async (req, res, next) => {
     try {
         console.log("Inside setAsDefaultAddress")
@@ -146,5 +159,5 @@ const setAsDefaultAddress = async (req, res, next) => {
 }
 
 
-module.exports = {createNewAddress, editAddress, deleteAddress, getAllAddress, setAsDefaultAddress}
+module.exports = {createNewAddress, editAddress, deleteAddress, getAllAddress, getDefaultAddress, setAsDefaultAddress}
 

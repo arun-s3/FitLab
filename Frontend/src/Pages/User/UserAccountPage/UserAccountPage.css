@@ -1,0 +1,36 @@
+#UserAccountPage > main input[id = 'email']{
+    text-transform: none;
+}
+#UserAccountPage > main .content-tile > div #personal-details .dob input {
+    width: 100%;
+    padding-left: 30px;
+    padding-block: 0.5rem;
+    font-size: 13px;
+    color: var(--SECONDARY);
+    border-radius: 0.5rem;
+    border: 1px solid rgb(203,213,219);
+}
+#UserAccountPage > main .content-tile > div #personal-details .dob input::placeholder{
+    color: #4f5359;
+    letter-spacing: 0.2px;
+    word-spacing: 1px;
+    font-size: 11px;
+}
+#UserAccountPage > main .content-tile > div #personal-details .dob input:focus{
+    border: 2px solid var(--SECONDARY);
+}
+#UserAccountPage > main .content-tile > div #personal-details .dob input:disabled{
+    background: rgb(249,250,251);
+}
+#UserAccountPage > main .content-tile > div #personal-details .dob svg{
+    position: absolute;
+    top: 12px;
+    left: 10px;
+    width: 15px;
+    height: 15px;
+    color: rgb(156 163 175);
+} 
+#UserAccountPage > main .content-tile > div #personal-details .dob .react-datepicker-wrapper{
+    width: 100%;
+}
+

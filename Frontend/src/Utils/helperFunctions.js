@@ -12,8 +12,7 @@ export const convertToCamelCase = (name) => {
   
 
 export const camelToCapitalizedWords = (str) => {
-    return str
-      .replace(/([A-Z])/g, ' $1') 
+    return str.replace(/([A-Z])/g, ' $1') 
       .replace(/^./, (char) => char.toUpperCase()) 
       .trim()
   }

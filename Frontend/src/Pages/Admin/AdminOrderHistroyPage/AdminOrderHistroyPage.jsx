@@ -417,8 +417,6 @@ export default function AdminOrderHistoryPage(){
              </div>
           </div>
 
-          
-          {/* Filters and Table */}
           <div className="bg-white rounded-xl shadow-lg" id='order-list-table'>
             <div className="p-6 border border-dropdownBorder">
               <div className="flex items-center justify-between">
@@ -461,7 +459,6 @@ export default function AdminOrderHistoryPage(){
               </div>
             </div>
                 
-            {/* Table */}
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>

@@ -31,7 +31,7 @@ export default function UserSidebar(){
     }
 
     return(
-        <section id='userSidebar' className='mt-[6rem] w-[13.5rem]'>
+        <section id='userSidebar' className='mt-[4rem] w-[13.5rem]'>
             <div className='user flex flex-col justify-center items-center'>
                 <div className='relative w-[75px] h-[75px] rounded-[45px] profilePic'>
                     {

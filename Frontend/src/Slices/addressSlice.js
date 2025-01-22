@@ -66,6 +66,22 @@ export const getAllAddress = createAsyncThunk('getAllAddress', async(thunkAPI)=>
     }
 })
 
+export const getDefaultAddress = createAsyncThunk('getDefaultAddress', async({id}, thunkAPI)=>{
+    try{
+        console.log("Inside getDefaultAddress createAsyncThunk")
+        const response = await axios.get(`addresses/${id}/default`, {withCredentials:true})
+        console.log("returning success response from getDefaultAddress createAsyncThunk..."+JSON.stringify(response.data))
+        return response.data
+    }
+    catch(error){
+        console.log("inside catch of getDefaultAddress from addressSlice")
+        const errorMessage = error.response?.data?.message
+        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
+        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
+        return thunkAPI.rejectWithValue(errorMessage)
+    }
+})
+
 export const setAsDefaultAddress = createAsyncThunk('setAsDefaultAddress', async({addressId}, thunkAPI)=>{
     try{
         console.log("Inside setAsDefaultAddress createAsyncThunk")
@@ -83,8 +99,10 @@ export const setAsDefaultAddress = createAsyncThunk('setAsDefaultAddress', async
     }
 })
 
+
 const initialState = {
     addresses: [],
+    currentDefaultAddress: {},
     addressCreated: false,
     addressUpdated: false,
     loading: false,
@@ -165,6 +183,21 @@ const addressSlice = createSlice({
             state.error = null
         })
         .addCase(getAllAddress.rejected, (state,action)=>{
+            state.loading = false
+            state.error = action.payload
+        })
+        .addCase(getDefaultAddress.fulfilled, (state, action)=>{
+            console.log("action.payload.address-->",action.payload.address)
+            state.error = null
+            state.success = true
+            state.loading = false
+            state.currentDefaultAddress = action.payload.address
+        })
+        .addCase(getDefaultAddress.pending, (state,action)=>{
+            state.loading = true
+            state.error = null
+        })
+        .addCase(getDefaultAddress.rejected, (state,action)=>{
             state.loading = false
             state.error = action.payload
         })

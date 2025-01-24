@@ -84,10 +84,12 @@ export function SiteSecondaryFillButton({className, variant, size, clickHandler,
     )
 }
 
-export function SiteSecondaryFillImpButton({className, clickHandler, customStyle, children}){
+export function SiteSecondaryFillImpButton({className, variant, clickHandler, isDisabled, customStyle, children}){
     return(
-        <button className={`w-full mt-4 bg-purple-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-purple-700 
-              transition duration-300 ${className}`} onClick={clickHandler ? ()=> clickHandler() : undefined} style={customStyle}>
+        <button className={`w-full mt-4 py-3 px-4 rounded-lg font-semibold transition duration-300
+             ${variant === 'outline' ? 'bg-white border-[2px] text-secondary border-secondaryLight2 hover:text-white hover:bg-purple-500 hover:border-purple-500'
+                    : 'text-white bg-purple-600 hover:bg-purple-700 '} ${className}`} disabled={isDisabled} 
+                onClick={clickHandler ? ()=> clickHandler() : undefined} style={customStyle}>
             {children}
         </button>
     )

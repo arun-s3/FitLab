@@ -282,6 +282,43 @@ const updateForgotPassword = async (req, res, next)=> {
     }
 }
 
+const resetPassword = async (req, res, next)=> {
+  try {
+      console.log("Inside resetPassword controller")
+      const {currentPassword, newPassword, confirmPassword} = req.body
+      const userId = req.user._id
+
+      if (!currentPassword || !newPassword || !confirmPassword) {
+          console.log("All fields are required!")
+          return next(errorHandler(400, "Please provide all the fields."))
+      }
+
+      const user = await User.findOne({ _id: userId })
+      if(!user){
+          console.log("User not found!")
+          return next(errorHandler(404, "User not found."))
+      }
+      const isMatch = await bcryptjs.compare(currentPassword, user.password)
+      if (!isMatch) {
+          console.log("Current password is incorrect!")
+          return next(errorHandler(401, "Current password is incorrect."))
+      }
+
+      if (newPassword !== confirmPassword) {
+          console.log("New password and confirmed password do not match!")
+          return next(errorHandler(400, "New password and confirmed password do not match."))
+      }
+
+      const hashedNewPassword = await securePassword(newPassword)
+      user.password = hashedNewPassword
+      await user.save()
+      console.log("Password updated successfully!");
+      res.status(200).json({ message: "Password updated successfully!" })
+  }catch(error){
+      console.error("Error in resetPassword", error.message);
+      next(error)
+  }
+}
 
 const googleSignin = async(req,res,next)=>{
     try{
@@ -324,4 +361,5 @@ const signout = (req,res,next)=>{
 }
 
 
-module.exports = {tester, createUser, sendOtp, verifyOtp, loginUser, updateUserDetails, updateForgotPassword, googleSignin, signout}
+module.exports = {tester, createUser, sendOtp, verifyOtp, loginUser, updateUserDetails, updateForgotPassword, resetPassword,
+     googleSignin, signout}

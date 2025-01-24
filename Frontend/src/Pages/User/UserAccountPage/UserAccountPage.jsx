@@ -2,23 +2,22 @@ import React, {useState, useEffect, useRef} from 'react'
 import './UserAccountPage.css'
 import {useSelector, useDispatch} from 'react-redux'
 
-import {User, Mail, Phone, MapPin, MapPinHouse, Lock, Camera, Edit2, Check, X} from 'lucide-react'
+import {User, Mail, Phone, MapPin, MapPinHouse, Lock, SquareChevronRight, ArrowRight, Camera, Edit2, Check, X} from 'lucide-react'
 import {RiArrowDropDownLine} from "react-icons/ri"
-import {format} from "date-fns"
+import {toast} from 'react-toastify'
 
 import Header from '../../../Components/Header/Header'
 import Footer from '../../../Components/Footer/Footer'
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
 import UserSidebar from '../../../Components/UserSidebar/UserSidebar'
+import ChangePasswordBox from './ChangePasswordBox'
 import {SingleDateSelector} from '../../../Components/Calender/Calender' 
 import {updateUserDetails, resetStates as resetUserStates} from '../../../Slices/userSlice'
 import {getDefaultAddress, editAddress, resetStates as resetAddressStates} from '../../../Slices/addressSlice'
-import {InputAndLabelGenerator} from '../../../Components/InputAndLabelGenerator/InputAndLabelGenerator'
 import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
 import {camelToCapitalizedWords} from '../../../Utils/helperFunctions'
 import {handleInputValidation, displaySuccess, displayErrorAndReturnNewFormData, cancelErrorState} from '../../../Utils/fieldValidator'
 import {CustomHashLoader} from '../../../Components/Loader/Loader'
-import { toast } from 'react-toastify'
 
 
 export default function UserAccountPage(){
@@ -31,6 +30,10 @@ export default function UserAccountPage(){
   const [addressType, setAddressType] = useState('')
   const allAddressTypes = ["home", "work", "temporary", "gift"]
 
+  const [openSecurityMenu, setOpenSecurityMenu] = useState(false)
+  const securityMenuRef = useRef(null)
+
+
   const [openDropdowns, setOpenDropdowns] = useState({genderDropdown: false, addressDropdown: false})
   const dropdownRefs = {
     genderDropdown: useRef(null),
@@ -41,8 +44,8 @@ export default function UserAccountPage(){
   const errorRef = useRef(null)
 
   const dispatch = useDispatch()
-  const {user, userUpdated} = useSelector(state=> state.user)
-  const {currentDefaultAddress, addressUpdated} = useSelector(state=> state.address)
+  const {user, userUpdated, loading: userLoading} = useSelector(state=> state.user)
+  const {currentDefaultAddress, addressUpdated, loading: addressLoading} = useSelector(state=> state.address)
 
   useEffect(()=> {
     const handleClickOutside = (e)=> {
@@ -67,7 +70,6 @@ export default function UserAccountPage(){
     const getUserDefaultAddress = async()=>{
       if(user){
         console.log('user----->', JSON.stringify(user))
-        // const userDatas = Object.create(user, {configurable: true, writable: true})
         setUserDetails({...user})
         setDob(new Date(user.dob))
         dispatch( getDefaultAddress({id: user._id}) )
@@ -162,14 +164,65 @@ export default function UserAccountPage(){
     }
   }
 
-  const handleSave = () => {
+  const handleSubmit = () =>{
+    console.log("Inside submitAddress()--");
     setEditing(false)
+
+    const requiredAddressFieldNames = addressInfoTypes.filter(infoType=> !infoType.hasOwnProperty('optionalField'))
+                                                      .map(infoType=> infoType.type)
+
+    const requiredUserFieldNames = personalnfoTypes.filter(infoType=> !infoType.hasOwnProperty('optionalField'))
+                                                   .map(infoType=> infoType.type)
+
+    const checkErrors = (detailsArray, requiredfieldNamesArray)=> {
+      const requiredFields = Object.keys(detailsArray).filter(
+          (field) => requiredfieldNamesArray.includes(field) 
+      )
+      const missingRequiredFields = requiredfieldNamesArray.filter(
+          (field) => !detailsArray[field] || detailsArray[field] === "" || detailsArray[field] === undefined
+        )
+      
+      console.log(`Required Fields Length----> ${requiredFields.length} Required Fields--->, ${requiredFields}`)
+      if (requiredFields.length < requiredfieldNamesArray.length) {
+          console.log("Missing required fields!")
+          toast.error("Please enter all required fields!")
+          return 'error';
+      }
+       if (missingRequiredFields.length > 0) {
+          console.log("Undefined values found in required fields!")
+          toast.error("Please check the fields and submit again!")
+          return 'error';
+      }
+    }
+      
     if(user){
+      console.log("Checking errors in userDetails......")
+      console.log(`requiredUserFieldNames--->${requiredUserFieldNames}`)
+      const status = checkErrors(userDetails, requiredUserFieldNames)
+      console.log("status-->", status)
+      if( status === 'error') return
+
       dispatch( updateUserDetails({userDetails}) )
+      console.log("userDetails now -->", userDetails)
+      console.log("Dispatched userDetails successfully!")
     }
-    if(user && currentDefaultAddress){
+    if(currentDefaultAddress){
+      console.log("Checking errors in addressDetails......")
+      console.log(`requiredAddressFieldNames--->${requiredAddressFieldNames}`)
+      const status = checkErrors(addressDetails, requiredAddressFieldNames)
+      console.log("status-->", status)
+      if( status === 'error') return 
+
       dispatch( editAddress({id: user._id, addressId: addressDetails._id, addressData: addressDetails}) )
+      console.log("addressDetails now -->", addressDetails)
+      console.log("Dispatched addressDetails successfully!")
     }
+    console.log("Dispatched all successfully!")
+  }
+
+  const openSecurity = ()=> {
+    window.scrollTo( {top: securityMenuRef.current.getBoundingClientRect().bottom, scrollBehavior: 'smooth'} )
+    setOpenSecurityMenu(status=> !status)
   }
   
   const InputFieldsGenerator = (infoTypes, detailType)=> {
@@ -198,9 +251,7 @@ export default function UserAccountPage(){
       )
     ))
   }
-
-
-  
+    
 
     return(
         <section id='UserAccountPage'>
@@ -223,11 +274,11 @@ export default function UserAccountPage(){
 
                   <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
 
-                    <div className="pt-[2rem] px-8 pb-8">
-                      <div className="flex justify-between items-center mb-8">
+                    <div className="pt-[2rem] px-[2rem] pb-[2rem]">
+                      <div className="flex justify-between items-center mb-[2rem]">
                         <h1 className="text-[30px] text-secondary font-bold tracking-[0.5px]">Account Details</h1>
                         {!editing ? (
-                          <button className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-[15px] text-white font-[500] rounded-lg
+                          <button className="flex items-center gap-2 px-[1rem] py-2 bg-purple-600 text-[15px] text-white font-[500] rounded-lg
                            hover:bg-purple-700 transition-colors" onClick={()=> setEditing(true)}>
                                 <Edit2 className="w-4 h-4" />
                                 Edit Profile
@@ -235,9 +286,9 @@ export default function UserAccountPage(){
                         ) : (
                           <div className="flex gap-2">
                             <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-[15px] text-white rounded-lg
-                              hover:bg-green-700 transition-colors"  onClick={handleSave}>
+                              hover:bg-green-700 transition-colors"  onClick={handleSubmit}>
                                   <Check className="w-[15px] h-[15px]" />
-                                  Save
+                                  { userLoading || addressLoading ? <CustomHashLoader loading={loading}/> : 'Save' }   
                             </button>
                             <button className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-[15px] text-white rounded-lg
                                hover:bg-gray-700 transition-colors"  onClick={() => setEditing(false)}>
@@ -262,7 +313,7 @@ export default function UserAccountPage(){
                             }
                             <div className="grid grid-cols-2 gap-4">
                               <div className='w-full dob'>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-sm font-medium text-gray-700 mb-[4px]">
                                   Date Of Birth
                                 </label>
                                 <div className={`relative ${!editing ? 'bg-gray-50' : ''}`}>
@@ -304,18 +355,18 @@ export default function UserAccountPage(){
                           {
                             InputFieldsGenerator(addressInfoTypes.slice(0,1), 'address')
                           }
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-2 gap-[1rem]">
                               {
                                 InputFieldsGenerator(addressInfoTypes.slice(1,3), 'address')
                               }
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-2 gap-[1rem]">
                               {
                                 InputFieldsGenerator(addressInfoTypes.slice(3,5), 'address')
                               }
                             </div>
                             <div className='h-[100%]'>
-                                <span className="block text-sm font-medium text-gray-700 mb-1"> Address Type </span>
+                                <span className="block text-sm font-medium text-gray-700 mb-[4px]"> Address Type </span>
                                 <div className={`relative w-full h-full mb-[21px] px-4 py-[12px] flex justify-between items-center rounded-lg border 
                                   border-gray-300 ${!editing ? 'bg-gray-50' : ''} cursor-pointer`}
                                       onClick={()=> editing && toggleDropdown('addressDropdown')} ref={dropdownRefs.addressDropdown}>
@@ -351,12 +402,21 @@ export default function UserAccountPage(){
                             <h2 className="text-[20px] font-semibold text-gray-900">Security</h2>
                             <p className="text-sm text-gray-500 mt-1">Change your password </p>
                           </div>
-                          <button className="flex items-center gap-2 px-4 py-2 border border-secondaryLight2 rounded-lg
-                             hover:bg-secondary hover:text-white transition-colors">
+                          <button className={`flex items-center gap-2 px-[1rem] py-[8px] text-[15px] border border-secondaryLight2 rounded-lg
+                             hover:bg-secondary hover:text-white transition-colors ${openSecurityMenu && 'bg-secondary text-white'}`} onClick={openSecurity}>
                             <Lock className="w-4 h-4" />
                             Change Password
+                            <ArrowRight  className="ml-[5px] w-4 h-4" />
                           </button>
                         </div>
+
+                        <div ref={securityMenuRef}>
+                            { 
+                            openSecurityMenu &&
+                              <ChangePasswordBox setOpenSecurityMenu={setOpenSecurityMenu} />
+                            }
+                        </div>
+
                       </div>
                     </div>
                   </div>

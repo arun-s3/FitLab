@@ -83,6 +83,22 @@ export const updateUserDetails = createAsyncThunk('updateUserDetails', async({us
     }
 } )
 
+// export const resetPassword = resetPasswords('updateUserDetails', async({currentPassword, newPassword, confirmPassword}, thunkAPI)=>{
+//     try{
+//         console.log("inside updateUserDetails of createAsyncThunk")
+//         const response = await axios.post('/update', {currentPassword, newPassword, confirmPassword}, {withCredentials:true})
+//         console.log("returning success response from updateUserDetails createAsyncThunk..."+JSON.stringify(response)) 
+//         console.log("userDetails from updateUserDetails createAsyncThunk--"+JSON.stringify(userDetails))
+//         return response.data
+//     }
+//     catch(error){
+//         console.log("inside catch of updateUserDetails from userSlice")
+//         const errorMessage = error.response?.data?.message
+//         console.log("error object inside createAsyncThunk error.response of updateUserDetails-->"+JSON.stringify(error.response))
+//         return thunkAPI.rejectWithValue(errorMessage)
+//     }
+// } )
+
 const initialState = {
     userToken: null,
     user: null,

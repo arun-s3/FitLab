@@ -818,6 +818,10 @@ select{
   top: -0.5rem;
 }
 
+.-top-3{
+  top: -0.75rem;
+}
+
 .bottom-0{
   bottom: 0px;
 }
@@ -868,6 +872,10 @@ select{
 
 .left-3{
   left: 0.75rem;
+}
+
+.left-4{
+  left: 1rem;
 }
 
 .left-\[-1px\]{
@@ -932,6 +940,10 @@ select{
 
 .right-0{
   right: 0px;
+}
+
+.right-12{
+  right: 3rem;
 }
 
 .right-3{
@@ -1052,6 +1064,10 @@ select{
 
 .top-\[3rem\]{
   top: 3rem;
+}
+
+.top-\[43\%\]{
+  top: 43%;
 }
 
 .top-\[43px\]{
@@ -1247,6 +1263,10 @@ select{
   margin-bottom: 40px;
 }
 
+.mb-\[4px\]{
+  margin-bottom: 4px;
+}
+
 .mb-\[50px\]{
   margin-bottom: 50px;
 }
@@ -1427,6 +1447,10 @@ select{
   margin-top: -20px;
 }
 
+.mt-\[-22px\]{
+  margin-top: -22px;
+}
+
 .mt-\[-2px\]{
   margin-top: -2px;
 }
@@ -1533,6 +1557,10 @@ select{
 
 .mt-\[8px\]{
   margin-top: 8px;
+}
+
+.ml-\[\]{
+  margin-left: ;
 }
 
 .block{
@@ -2367,6 +2395,10 @@ select{
   cursor: pointer;
 }
 
+.cursor-text{
+  cursor: text;
+}
+
 .resize-none{
   resize: none;
 }
@@ -2713,6 +2745,10 @@ select{
 
 .rounded-2xl{
   border-radius: 1rem;
+}
+
+.rounded-3xl{
+  border-radius: 1.5rem;
 }
 
 .rounded-\[10px\]{
@@ -3067,6 +3103,11 @@ select{
   border-color: rgb(134 239 172 / var(--tw-border-opacity));
 }
 
+.border-green-500{
+  --tw-border-opacity: 1;
+  border-color: rgb(34 197 94 / var(--tw-border-opacity));
+}
+
 .border-inputBorderSecondary{
   --tw-border-opacity: 1;
   border-color: rgb(218 179 246 / var(--tw-border-opacity));
@@ -3133,6 +3174,16 @@ select{
   border-color: rgb(253 224 71 / var(--tw-border-opacity));
 }
 
+.border-purple-600{
+  --tw-border-opacity: 1;
+  border-color: rgb(147 51 234 / var(--tw-border-opacity));
+}
+
+.border-purple-700{
+  --tw-border-opacity: 1;
+  border-color: rgb(126 34 206 / var(--tw-border-opacity));
+}
+
 .border-b-\[\#e5e7eb\]{
   --tw-border-opacity: 1;
   border-bottom-color: rgb(229 231 235 / var(--tw-border-opacity));
@@ -3151,6 +3202,11 @@ select{
 .bg-\[\#2D2D2D\]{
   --tw-bg-opacity: 1;
   background-color: rgb(45 45 45 / var(--tw-bg-opacity));
+}
+
+.bg-\[\#2d1b69\]{
+  --tw-bg-opacity: 1;
+  background-color: rgb(45 27 105 / var(--tw-bg-opacity));
 }
 
 .bg-\[\#333\]{
@@ -3566,11 +3622,6 @@ select{
   padding-right: 1.5rem;
 }
 
-.px-8{
-  padding-left: 2rem;
-  padding-right: 2rem;
-}
-
 .px-\[1\.5rem\]{
   padding-left: 1.5rem;
   padding-right: 1.5rem;
@@ -3825,10 +3876,6 @@ select{
   padding-bottom: 0px;
 }
 
-.pb-8{
-  padding-bottom: 2rem;
-}
-
 .pb-\[10px\]{
   padding-bottom: 10px;
 }
@@ -3839,6 +3886,10 @@ select{
 
 .pb-\[25px\]{
   padding-bottom: 25px;
+}
+
+.pb-\[2rem\]{
+  padding-bottom: 2rem;
 }
 
 .pb-\[5px\]{
@@ -4278,6 +4329,11 @@ select{
   color: rgb(7 188 12 / var(--tw-text-opacity));
 }
 
+.text-\[\#2d1b69\]{
+  --tw-text-opacity: 1;
+  color: rgb(45 27 105 / var(--tw-text-opacity));
+}
+
 .text-\[\#332929\]{
   --tw-text-opacity: 1;
   color: rgb(51 41 41 / var(--tw-text-opacity));
@@ -4468,6 +4524,10 @@ select{
 .text-yellow-500{
   --tw-text-opacity: 1;
   color: rgb(234 179 8 / var(--tw-text-opacity));
+}
+
+.line-through{
+  text-decoration-line: line-through;
 }
 
 .placeholder-\[13px\]::-moz-placeholder{
@@ -4750,6 +4810,14 @@ select{
   font-size: 14px;
 }
 
+.placeholder\:text-\[15px\]::-moz-placeholder{
+  font-size: 15px;
+}
+
+.placeholder\:text-\[15px\]::placeholder{
+  font-size: 15px;
+}
+
 .placeholder\:text-\[9px\]::-moz-placeholder{
   font-size: 9px;
 }
@@ -4849,6 +4917,16 @@ select{
   border-color: rgb(241 196 15 / var(--tw-border-opacity));
 }
 
+.hover\:border-purple-500:hover{
+  --tw-border-opacity: 1;
+  border-color: rgb(168 85 247 / var(--tw-border-opacity));
+}
+
+.hover\:bg-\[\#231553\]:hover{
+  --tw-bg-opacity: 1;
+  background-color: rgb(35 21 83 / var(--tw-bg-opacity));
+}
+
 .hover\:bg-\[\#E6FF00\]\/90:hover{
   background-color: rgb(230 255 0 / 0.9);
 }
@@ -4897,6 +4975,11 @@ select{
   background-color: rgb(248 253 224 / var(--tw-bg-opacity));
 }
 
+.hover\:bg-purple-600:hover{
+  --tw-bg-opacity: 1;
+  background-color: rgb(147 51 234 / var(--tw-bg-opacity));
+}
+
 .hover\:bg-purple-700:hover{
   --tw-bg-opacity: 1;
   background-color: rgb(126 34 206 / var(--tw-bg-opacity));
@@ -4909,6 +4992,21 @@ select{
 
 .hover\:bg-secondary:hover{
   background-color: rgba(159, 42, 240, 1);
+}
+
+.hover\:bg-secondaryLight2:hover{
+  --tw-bg-opacity: 1;
+  background-color: rgb(216 174 245 / var(--tw-bg-opacity));
+}
+
+.hover\:bg-purple-50:hover{
+  --tw-bg-opacity: 1;
+  background-color: rgb(250 245 255 / var(--tw-bg-opacity));
+}
+
+.hover\:bg-purple-500:hover{
+  --tw-bg-opacity: 1;
+  background-color: rgb(168 85 247 / var(--tw-bg-opacity));
 }
 
 .hover\:font-\[500\]:hover{
@@ -4995,6 +5093,14 @@ select{
   border-color: transparent;
 }
 
+.focus\:placeholder-transparent:focus::-moz-placeholder{
+  color: transparent;
+}
+
+.focus\:placeholder-transparent:focus::placeholder{
+  color: transparent;
+}
+
 .focus\:outline-none:focus{
   outline: 2px solid transparent;
   outline-offset: 2px;
@@ -5028,6 +5134,11 @@ select{
   box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
 }
 
+.focus\:ring-green-200:focus{
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(187 247 208 / var(--tw-ring-opacity));
+}
+
 .focus\:ring-primary:focus{
   --tw-ring-color: rgba(215, 241, 72, 1);
 }
@@ -5040,6 +5151,11 @@ select{
 .focus\:ring-purple-600:focus{
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(147 51 234 / var(--tw-ring-opacity));
+}
+
+.focus\:ring-red-200:focus{
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(254 202 202 / var(--tw-ring-opacity));
 }
 
 .focus\:ring-secondary:focus{
@@ -5057,6 +5173,51 @@ select{
 
 .disabled\:opacity-50:disabled{
   opacity: 0.5;
+}
+
+.disabled\:opacity-80:disabled{
+  opacity: 0.8;
+}
+
+.peer:-moz-placeholder-shown ~ .peer-placeholder-shown\:top-3{
+  top: 0.75rem;
+}
+
+.peer:placeholder-shown ~ .peer-placeholder-shown\:top-3{
+  top: 0.75rem;
+}
+
+.peer:-moz-placeholder-shown ~ .peer-placeholder-shown\:text-base{
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+
+.peer:placeholder-shown ~ .peer-placeholder-shown\:text-base{
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+
+.peer:focus ~ .peer-focus\:-top-3{
+  top: -0.75rem;
+}
+
+.peer:focus ~ .peer-focus\:bg-white{
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity));
+}
+
+.peer:focus ~ .peer-focus\:px-1{
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
+
+.peer:focus ~ .peer-focus\:text-xs{
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.peer:focus ~ .peer-focus\:text-secondary{
+  color: rgba(159, 42, 240, 1);
 }
 
 @media (min-width: 640px){

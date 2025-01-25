@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from "react"
+import {Link} from 'react-router-dom'
 
 import {Check, AlertCircle, Eye, EyeOff} from "lucide-react"
 import {toast} from 'react-toastify'
@@ -35,10 +36,6 @@ export default function ChangePasswordBox({setOpenSecurityMenu}){
     setPasswordsMatch(passwords.new === passwords.confirm || passwords.confirm === "")
   }, [passwords])
 
-  const togglePasswordVisibility = (field)=> {
-    setShowPasswords((prev) => ({ ...prev, [field]: !prev[field] }))
-  }
-
   useEffect(()=> {
     if(error.value && error.value.toLowerCase().includes('current')){
       setTimeout(()=> setError(error=> (
@@ -46,6 +43,10 @@ export default function ChangePasswordBox({setOpenSecurityMenu}){
       )), 6500)
     }
   },[error])
+
+  const togglePasswordVisibility = (field)=> {
+    setShowPasswords((prev) => ({ ...prev, [field]: !prev[field] }))
+  }
 
   const checkError = (e, type)=> {
     const value = e.target.value.trim()
@@ -184,15 +185,20 @@ export default function ChangePasswordBox({setOpenSecurityMenu}){
              {error.confirm && error.value} 
             </p>
           </div>
-          
+
+          <div>
+          <Link to='/forgot-password' className='ml-[3xp] text-[12px] text-secondary tracking-[0.2x] hover:underline cursor-pointer'>
+            Forgot Password? 
+          </Link>
           <SiteSecondaryFillImpButton isDisabled={!passwordsMatch || !Object.values(requirements).every(Boolean)} 
-                className='disabled:opacity-80 disabled:cursor-not-allowed' customStyle={{marginTop: '0px'}}>
+                className='mt-[5xp] disabled:opacity-80 disabled:cursor-not-allowed' customStyle={{marginTop: '5px'}}>
             { loading? <CustomHashLoader loading={loading}/> : 'Change my Password' }  
           </SiteSecondaryFillImpButton>
 
-          <SiteSecondaryFillImpButton variant='outline' customStyle={{marginTop: '-10px'}} clickHandler={()=> setOpenSecurityMenu(false)}>
+          <SiteSecondaryFillImpButton variant='outline' clickHandler={()=> setOpenSecurityMenu(false)}>
               Cancel
           </SiteSecondaryFillImpButton>
+          </div>
 
           {
             !passwordsMatch && passwords.confirm && 

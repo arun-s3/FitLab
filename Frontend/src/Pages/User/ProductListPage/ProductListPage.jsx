@@ -30,7 +30,6 @@ export default function ProductList({admin}){
     const [showCategory, setShowCategory ] = useState(true)
     const [showProductsFilter, setShowProductsFilter] = useState(true)
     const [showPriceFilter, setShowPriceFilter] = useState(true)
-    const [showSortBy, setShowSortBy] = useState(false)
     const [showByGrid, setShowByGrid] = useState(true)
 
     const [filter, setFilter] = useState({categories: [], products: []})
@@ -188,8 +187,8 @@ export default function ProductList({admin}){
 
                 <section className='basis-full flex-grow'>
                     <div>
-                        <ProductListingTools showSortBy={showSortBy} setShowSortBy={setShowSortBy} showByGrid={showByGrid}
-                                 setShowByGrid={setShowByGrid} sortHandlers={{sorts, setSorts}} limiter={{limit, setLimit}}/>
+                        <ProductListingTools showByGrid={showByGrid} setShowByGrid={setShowByGrid} sortHandlers={{sorts, setSorts}}
+                             limiter={{limit, setLimit}}/>
                     </div>
                     <div className='mt-[2rem]'>
 

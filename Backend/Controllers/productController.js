@@ -115,89 +115,165 @@ const getSingleProduct = async (req, res, next) => {
     }
   };
 
-const getAllProducts = async(req,res,next)=>{
-    try{
-        console.log("Inside getAllProducts controller--")
-        const productList = Product.find({})
-        console.log("req.body-->", JSON.stringify(req.body))
-        const {queryOptions} = req?.body
-        let resultList = {}
+// const getAllProducts = async(req,res,next)=>{
+//     try{
+//         console.log("Inside getAllProducts controller--")
+//         const productList = Product.find({})
+//         console.log("req.body-->", JSON.stringify(req.body))
+//         const {queryOptions} = req?.body
+//         let resultList = {}
 
-        if (Object.keys(queryOptions).length>0){
-            if(queryOptions?.brands){
-                const brands = queryOptions.brands
-                resultList = productList.find({brand:{$in:brands}})
-            }
-            if(queryOptions?.categories){
-                const categories = queryOptions.categories
-                resultList = productList.find({category:{$in:categories}})
-            }
-            if(queryOptions?.products){
-                const products = queryOptions.products
-                resultList = productList.find({title:{$in:products}})
-            }
-            if(queryOptions?.minPrice && queryOptions?.maxPrice){``
-                const minPrice = queryOptions.minPrice
-                const maxPrice = queryOptions.maxPrice
-                resultList = productList.find({ $and: [{price: {$gte:minPrice}}, {price: {$lte:maxPrice}}]})
-            }
-            if(queryOptions?.maxPrice){
-                const minPrice = queryOptions.minPrice
-                resultList = productList.find({price:{$gte:minPrice}})
-            }
-            if(queryOptions?.status && queryOptions?.status !== 'all'){
-                const status = queryOptions.status 
-                const isBlocked = status == 'blocked'? true : false
-                resultList = productList.find({isBlocked})
-            }
-            if(queryOptions?.startDate || queryOptions?.endDate){
-                const startDate = queryOptions.startDate
-                const endDate = queryOptions.endDate
-                if(!queryOptions.startDate){
-                    resultList = productList.find({createdAt: {$lte: endDate}})
-                }
-                else if(!queryOptions.endDate){
-                    resultList = productList.find({createdAt: {$gte: startDate}})
-                }
-                else{
-                    resultList = productList.find({createdAt: {$gte: startDate, $lte: endDate}})
-                }
-            }
-            if(queryOptions?.sort){
-                const sorts = queryOptions.sort
-                for(sortKey in sorts){
-                    if(sortKey !== ('featured' || 'bestSellers' || 'newestArrivals')){
-                        resultList = productList.sort({[sortKey]: sorts[sortKey] })
-                    }
-                    if(sortKey == 'featured'){
+//         if (Object.keys(queryOptions).length>0){
+//             if(queryOptions?.brands){
+//                 const brands = queryOptions.brands
+//                 resultList = productList.find({brand:{$in:brands}})
+//             }
+//             if(queryOptions?.categories){
+//                 const categories = queryOptions.categories
+//                 resultList = productList.find({category:{$in:categories}})
+//             }
+//             if(queryOptions?.products){
+//                 const products = queryOptions.products
+//                 resultList = productList.find({title:{$in:products}})
+//             }
+//             if(queryOptions?.minPrice && queryOptions?.maxPrice){
+//                 const minPrice = queryOptions.minPrice
+//                 const maxPrice = queryOptions.maxPrice
+//                 resultList = productList.find({ $and: [{price: {$gte:minPrice}}, {price: {$lte:maxPrice}}]})
+//             }
+//             if(queryOptions?.maxPrice){
+//                 const minPrice = queryOptions.minPrice
+//                 resultList = productList.find({price:{$gte:minPrice}})
+//             }
+//             if(queryOptions?.status && queryOptions?.status !== 'all'){
+//                 const status = queryOptions.status 
+//                 const isBlocked = status == 'blocked'? true : false
+//                 resultList = productList.find({isBlocked})
+//             }
+//             if(queryOptions?.startDate || queryOptions?.endDate){
+//                 const startDate = queryOptions.startDate
+//                 const endDate = queryOptions.endDate
+//                 if(!queryOptions.startDate){
+//                     resultList = productList.find({createdAt: {$lte: endDate}})
+//                 }
+//                 else if(!queryOptions.endDate){
+//                     resultList = productList.find({createdAt: {$gte: startDate}})
+//                 }
+//                 else{
+//                     resultList = productList.find({createdAt: {$gte: startDate, $lte: endDate}})
+//                 }
+//             }
+//             if(queryOptions?.sort){
+//                 const sorts = queryOptions.sort
+//                 for(sortKey in sorts){
+//                     if(sortKey !== ('featured' || 'bestSellers' || 'newestArrivals')){
+//                         resultList = productList.sort({[sortKey]: sorts[sortKey] })
+//                     }
+//                     if(sortKey == 'featured'){
     
-                    }
-                    if(sortKey == 'bestSellers'){
+//                     }
+//                     if(sortKey == 'bestSellers'){
                         
-                    }
-                    if(sortKey == 'newestArrivals'){
+//                     }
+//                     if(sortKey == 'newestArrivals'){
                         
-                    }
-                }
-            }
-            if(queryOptions?.limit && queryOptions?.page){
-                const skipables = (queryOptions.page - 1) * queryOptions.limit
-                resultList = productList.skip(skipables).limit(queryOptions.limit)
-            }
-        }
-        else{
-            resultList = productList
-        }
+//                     }
+//                 }
+//             }
+//             if(queryOptions?.limit && queryOptions?.page){
+//                 const skipables = (queryOptions.page - 1) * queryOptions.limit
+//                 resultList = productList.skip(skipables).limit(queryOptions.limit)
+//             }
+//         }
+//         else{
+//             resultList = productList
+//         }
 
-        const productCounts = await Product.countDocuments(resultList)
-        const productBundle = await resultList.exec()
-        res.status(200).json({productBundle, productCounts})
-    }
-    catch(error){
-        console.log("Error in productController-getProducts-->"+error.message);
-        next(error)
+//         const productCounts = await Product.countDocuments(resultList)
+//         const productBundle = await resultList.exec()
+//         res.status(200).json({productBundle, productCounts})
+//     }
+//     catch(error){
+//         console.log("Error in productController-getProducts-->"+error.message);
+//         next(error)
+//     }
+// }
+
+const getAllProducts = async (req, res, next)=> {
+    try {
+      console.log("Inside getAllProducts controller--")
+  
+      const { queryOptions = {} } = req.body
+      console.log("queryOptions-->", JSON.stringify(queryOptions))
+  
+      let filters = {}
+      let sortCriteria = {}
+      let skipables = 0
+      let limit = 0
+  
+      if (queryOptions?.brands) {
+        filters.brand = { $in: queryOptions.brands }
+      }
+      if (queryOptions?.categories) {
+        filters.category = { $in: queryOptions.categories }
+      }
+      if (queryOptions?.products) {
+        filters.title = { $in: queryOptions.products }
+      }
+      if (queryOptions?.minPrice && queryOptions?.maxPrice){
+        filters.price = { $gte: queryOptions.minPrice, $lte: queryOptions.maxPrice }
+      } else if(queryOptions?.minPrice){
+        filters.price = { $gte: queryOptions.minPrice }
+      } else if(queryOptions?.maxPrice){
+        filters.price = { $lte: queryOptions.maxPrice }
+      }
+      if (queryOptions?.status && queryOptions?.status !== 'all') {
+        filters.isBlocked = queryOptions.status === 'blocked'
+      }
+      if (queryOptions?.startDate || queryOptions?.endDate) {
+        filters.createdAt = {}
+        if (queryOptions.startDate) {
+          filters.createdAt.$gte = new Date(queryOptions.startDate)
+        }
+        if (queryOptions.endDate) {
+          filters.createdAt.$lte = new Date(queryOptions.endDate)
+        }
+      }
+  
+      if (queryOptions?.sort) {
+        for (const sortKey in queryOptions.sort){
+          const sortOrder = queryOptions.sort[sortKey]
+          if(sortKey === 'featured') {
+            sortCriteria = { ratings: -1 }
+          } else if(sortKey === 'bestSellers'){
+            sortCriteria = { totalReviews: -1 }
+          } else if(sortKey === 'newestArrivals'){
+            sortCriteria = { createdAt: -1 }
+          } else{
+            sortCriteria[sortKey] = sortOrder;
+          }
+        }
+      }
+  
+      if (queryOptions?.limit) {
+        limit = parseInt(queryOptions.limit)
+      }
+      if (queryOptions?.page) {
+        skipables = (parseInt(queryOptions.page) - 1) * limit
+      }
+  
+      const productListQuery = Product.find(filters).sort(sortCriteria).skip(skipables).limit(limit);
+  
+      const productBundle = await productListQuery.exec()
+      const productCounts = await Product.countDocuments(filters)
+  
+      res.status(200).json({ productBundle, productCounts })
+    }catch (error){
+      console.log("Error in productController-getProducts -->", error.message)
+      next(error)
     }
 }
+  
 
 const updateProduct = async (req, res, next) => {    
     try {

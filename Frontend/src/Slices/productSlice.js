@@ -50,9 +50,10 @@ export const toggleProductStatus = createAsyncThunk('toggleProductStatus', async
     }
 })
 
-export const getAllProducts = createAsyncThunk('getAllProducts', async(queryOptions, thunkAPI)=>{
+export const getAllProducts = createAsyncThunk('getAllProducts', async({queryOptions}, thunkAPI)=>{
     try{
         console.log("Inside getAllProducts createAsyncThunk")
+        console.log("queryOptions from productSlice-getAllProducts--->", JSON.stringify(queryOptions))
         const response = await axios.post('/products',{queryOptions},{withCredentials:true})
         console.log("returning success response from getAllProducts createAsyncThunk..."+JSON.stringify(response.data))
         return response.data
@@ -66,10 +67,27 @@ export const getAllProducts = createAsyncThunk('getAllProducts', async(queryOpti
     }
 })
 
+export const searchProduct = createAsyncThunk('searchProduct', async({find}, thunkAPI)=>{
+    try{
+        console.log("Inside searchProduct createAsyncThunk")
+        const response = await axios.get(`/products/search?find=${find}`, {withCredentials:true})
+        console.log("returning success response from searchProduct createAsyncThunk..."+JSON.stringify(response.data))
+        return response.data
+    }
+    catch(error){
+        console.log("inside catch of searchProduct from productSlice")
+        const errorMessage = error.response?.data?.message
+        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
+        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
+        return thunkAPI.rejectWithValue(errorMessage)
+    }
+})
+
 
 const initialState = {
     products: [],
     productCounts: null,
+    maxPriceAvailable: 100000,
     loading: false,
     error: false,
     success:false,
@@ -134,6 +152,7 @@ const productSlice = createSlice({
             // state.productSuccess = true
             state.products = action.payload.productBundle
             state.productCounts = action.payload.productCounts
+            state.maxPriceAvailable = action.payload.maxPriceAvailable
         })
         .addCase(getAllProducts.pending, (state,action)=>{
             state.loading = true
@@ -141,6 +160,25 @@ const productSlice = createSlice({
             // state.productSuccess = false
         })
         .addCase(getAllProducts.rejected, (state,action)=>{
+            state.loading = false
+            state.error = true
+            // state.productSuccess = false
+        })
+        .addCase(searchProduct.fulfilled, (state,action)=>{
+            console.log("Inside getAllProducts.fulfilled")
+            state.loading = false
+            state.error = false
+            // state.productSuccess = true
+            state.products = action.payload.products
+            state.productCounts = action.payload.productCounts
+            state.maxPriceAvailable = action.payload.maxPriceAvailable
+        })
+        .addCase(searchProduct.pending, (state,action)=>{
+            state.loading = true
+            state.error = false
+            // state.productSuccess = false
+        })
+        .addCase(searchProduct.rejected, (state,action)=>{
             state.loading = false
             state.error = true
             // state.productSuccess = false

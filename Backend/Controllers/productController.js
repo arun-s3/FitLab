@@ -1,6 +1,8 @@
 const Product = require('../Models/productModel')
 const cloudinary = require('../Utils/cloudinary')
-const {errorHandler} = require('../Utils/errorHandler') 
+const {errorHandler} = require('../Utils/errorHandler')
+
+const MAXPRICE = 500000
 
 const packProductData = async (req)=>{
     try{
@@ -83,6 +85,7 @@ const packProductData = async (req)=>{
     }
 }
 
+
 const createProduct = async(req,res,next)=>{
     try {
         console.log("Inside createProduct controller, received productForm-->", JSON.stringify(req.body.title))
@@ -100,6 +103,7 @@ const createProduct = async(req,res,next)=>{
     }
 }
 
+
 const getSingleProduct = async (req, res, next) => {
     try {
         console.log("Inside getSingleProduct of productController")
@@ -113,120 +117,54 @@ const getSingleProduct = async (req, res, next) => {
         console.log("Error in productController-getSingleProduct-->"+error.message);
         next(error)
     }
-  };
+  }
 
-// const getAllProducts = async(req,res,next)=>{
-//     try{
-//         console.log("Inside getAllProducts controller--")
-//         const productList = Product.find({})
-//         console.log("req.body-->", JSON.stringify(req.body))
-//         const {queryOptions} = req?.body
-//         let resultList = {}
-
-//         if (Object.keys(queryOptions).length>0){
-//             if(queryOptions?.brands){
-//                 const brands = queryOptions.brands
-//                 resultList = productList.find({brand:{$in:brands}})
-//             }
-//             if(queryOptions?.categories){
-//                 const categories = queryOptions.categories
-//                 resultList = productList.find({category:{$in:categories}})
-//             }
-//             if(queryOptions?.products){
-//                 const products = queryOptions.products
-//                 resultList = productList.find({title:{$in:products}})
-//             }
-//             if(queryOptions?.minPrice && queryOptions?.maxPrice){
-//                 const minPrice = queryOptions.minPrice
-//                 const maxPrice = queryOptions.maxPrice
-//                 resultList = productList.find({ $and: [{price: {$gte:minPrice}}, {price: {$lte:maxPrice}}]})
-//             }
-//             if(queryOptions?.maxPrice){
-//                 const minPrice = queryOptions.minPrice
-//                 resultList = productList.find({price:{$gte:minPrice}})
-//             }
-//             if(queryOptions?.status && queryOptions?.status !== 'all'){
-//                 const status = queryOptions.status 
-//                 const isBlocked = status == 'blocked'? true : false
-//                 resultList = productList.find({isBlocked})
-//             }
-//             if(queryOptions?.startDate || queryOptions?.endDate){
-//                 const startDate = queryOptions.startDate
-//                 const endDate = queryOptions.endDate
-//                 if(!queryOptions.startDate){
-//                     resultList = productList.find({createdAt: {$lte: endDate}})
-//                 }
-//                 else if(!queryOptions.endDate){
-//                     resultList = productList.find({createdAt: {$gte: startDate}})
-//                 }
-//                 else{
-//                     resultList = productList.find({createdAt: {$gte: startDate, $lte: endDate}})
-//                 }
-//             }
-//             if(queryOptions?.sort){
-//                 const sorts = queryOptions.sort
-//                 for(sortKey in sorts){
-//                     if(sortKey !== ('featured' || 'bestSellers' || 'newestArrivals')){
-//                         resultList = productList.sort({[sortKey]: sorts[sortKey] })
-//                     }
-//                     if(sortKey == 'featured'){
-    
-//                     }
-//                     if(sortKey == 'bestSellers'){
-                        
-//                     }
-//                     if(sortKey == 'newestArrivals'){
-                        
-//                     }
-//                 }
-//             }
-//             if(queryOptions?.limit && queryOptions?.page){
-//                 const skipables = (queryOptions.page - 1) * queryOptions.limit
-//                 resultList = productList.skip(skipables).limit(queryOptions.limit)
-//             }
-//         }
-//         else{
-//             resultList = productList
-//         }
-
-//         const productCounts = await Product.countDocuments(resultList)
-//         const productBundle = await resultList.exec()
-//         res.status(200).json({productBundle, productCounts})
-//     }
-//     catch(error){
-//         console.log("Error in productController-getProducts-->"+error.message);
-//         next(error)
-//     }
-// }
 
 const getAllProducts = async (req, res, next)=> {
     try {
       console.log("Inside getAllProducts controller--")
   
-      const { queryOptions = {} } = req.body
+      const {queryOptions} = req.body
       console.log("queryOptions-->", JSON.stringify(queryOptions))
+      console.log("queryOptions.filter-->", JSON.stringify(queryOptions.filter))
+      console.log("queryOptions.searchData-->", JSON.stringify(queryOptions.searchData))
   
       let filters = {}
       let sortCriteria = {}
       let skipables = 0
       let limit = 0
+
+      if (queryOptions?.searchData && queryOptions.searchData.trim() !== '') {
+        console.log("Inside queryOptions.searchData")
+        filters.$or = [
+          { title: { $regex: queryOptions.searchData, $options: "i" } },
+          { subtitle: { $regex: queryOptions.searchData, $options: "i" } },
+        ]
+      }
   
       if (queryOptions?.brands) {
         filters.brand = { $in: queryOptions.brands }
       }
-      if (queryOptions?.categories) {
-        filters.category = { $in: queryOptions.categories }
+      if (queryOptions?.filter?.categories && queryOptions?.filter?.categories.length > 0) {
+        filters.category = { $in: queryOptions.filter.categories }
       }
-      if (queryOptions?.products) {
-        filters.title = { $in: queryOptions.products }
+      if (queryOptions?.filter?.products && queryOptions?.filter?.products.length > 0) {
+        filters.title = { $in: queryOptions.filter.products }
       }
-      if (queryOptions?.minPrice && queryOptions?.maxPrice){
-        filters.price = { $gte: queryOptions.minPrice, $lte: queryOptions.maxPrice }
-      } else if(queryOptions?.minPrice){
-        filters.price = { $gte: queryOptions.minPrice }
-      } else if(queryOptions?.maxPrice){
-        filters.price = { $lte: queryOptions.maxPrice }
+      
+      if (queryOptions?.filter?.maxPrice){
+        if(queryOptions.filter.maxPrice !== MAXPRICE){
+          console.log("Inside queryOptions.filter.maxPrice !== MAXPRICE")
+          filters.price = { $gte: queryOptions.filter.minPrice, $lte: queryOptions.filter.maxPrice }
+        }else{
+          console.log("Inside queryOptions.filter.maxPrice == MAXPRICE")
+          filters.price = { $gte: queryOptions.filter.minPrice }
+        }
       }
+      if(!queryOptions?.filter?.maxPrice && queryOptions?.filter?.minPrice){
+        filters.price = { $gte: queryOptions.filter.minPrice }
+      }
+
       if (queryOptions?.status && queryOptions?.status !== 'all') {
         filters.isBlocked = queryOptions.status === 'blocked'
       }
@@ -250,9 +188,10 @@ const getAllProducts = async (req, res, next)=> {
           } else if(sortKey === 'newestArrivals'){
             sortCriteria = { createdAt: -1 }
           } else{
-            sortCriteria[sortKey] = sortOrder;
+            sortCriteria[sortKey] = Number.parseInt(sortOrder);
           }
         }
+        console.log("sortCriteria---->", JSON.stringify(sortCriteria))
       }
   
       if (queryOptions?.limit) {
@@ -266,14 +205,55 @@ const getAllProducts = async (req, res, next)=> {
   
       const productBundle = await productListQuery.exec()
       const productCounts = await Product.countDocuments(filters)
+
+      const maxPriceAggregation = await Product.aggregate([
+        { $match: filters }, 
+        { $group: { _id: null, maxPrice: { $max: "$price" } } },
+      ])
+
+    const maxPriceAvailable = maxPriceAggregation[0]?.maxPrice || 100000;
   
-      res.status(200).json({ productBundle, productCounts })
+      res.status(200).json({ productBundle, productCounts, maxPriceAvailable })
     }catch (error){
       console.log("Error in productController-getProducts -->", error.message)
       next(error)
     }
 }
-  
+
+
+const searchProduct = async (req, res, next)=> {
+  try {
+    console.log("Inside searchProduct of productController")
+    const {find} = req.query
+    console.log("find---->",find)
+    if (!find) {
+      return next(errorHandler(400, "No search query provided"))
+    }
+
+    const filter = { $or: [
+      { title: { $regex: find, $options: "i" } },
+      { subtitle: { $regex: find, $options: "i" } }
+    ]}
+
+    const products = await Product.find(filter)
+
+    const maxPriceAggregation = await Product.aggregate([
+      { $match: filter }, 
+      { $group: { _id: null, maxPrice: { $max: "$price" } } },
+    ])
+    const maxPriceAvailable = maxPriceAggregation[0]?.maxPrice || 100000
+
+    if (!products.length) {
+      return next(errorHandler(404, "No products match your search!"))
+    }
+
+    res.status(200).json({products, productCounts: products.length, maxPriceAvailable})
+  } catch (error) {
+    console.log("Error in productController-searchProduct --> " + error.message)
+    next(error)
+  }
+}
+
 
 const updateProduct = async (req, res, next) => {    
     try {
@@ -292,6 +272,7 @@ const updateProduct = async (req, res, next) => {
         next(error)
     }
   }
+
 
   const toggleProductStatus = async(req,res,next)=>{
     try{
@@ -319,4 +300,4 @@ const updateProduct = async (req, res, next) => {
     } 
   }
 
-module.exports = {createProduct, getSingleProduct, getAllProducts, updateProduct, toggleProductStatus}
+module.exports = {createProduct, getSingleProduct, getAllProducts, searchProduct, updateProduct, toggleProductStatus}

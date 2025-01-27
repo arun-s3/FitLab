@@ -46,9 +46,14 @@ export default function CategoryDisplay({type, filter, setFilter, radioCheckedCa
   
 
   useEffect(()=>{
-    filter && setFilter({...filter, categories: [...checkedCategories]})
+    const categoryArray = checkedCategories.map(category=> category.name)
+    filter && setFilter({...filter, categories: [...categoryArray]})
     console.log("checkedCategories", JSON.stringify(checkedCategories))
   },[checkedCategories])
+  // useEffect(()=>{
+  //   filter && setFilter({...filter, categories: [...checkedCategories]})
+  //   console.log("checkedCategories", JSON.stringify(checkedCategories))
+  // },[checkedCategories])
 
   useEffect(()=>{
     console.log("openSubcategories--->", JSON.stringify(openSubcategories))

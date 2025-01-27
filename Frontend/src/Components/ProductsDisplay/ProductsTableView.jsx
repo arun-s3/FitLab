@@ -128,14 +128,34 @@ export default function ProductsTableView({products}){
                                 <figure className='w-[50px] h-[50px] rounded-[8px] border-primary bg-[#f3f5f7]'>
                                     <img src={product.thumbnail.url} alt='product-thumbnail' className='w-[50px] h-[50px] object-cover rounded-[5px]'/>
                                 </figure>
-                                <span> {product.title} </span>
+                                <span className='text-[15px] font-[480] capitalize'> 
+                                    { product.title.length > 25 ? product.title.slice(0,25) + '...' : product.title } 
+                                </span> {/*20 */}
                             </div>
                         </td>
-                        <td>{product.price}</td>
-                        <td>{product.brand}</td>
-                        <td>{product.stock}</td>
-                        <td>{product.category}</td>
-                        <td>{product.weights ? 'Available' : 'Not available'}</td>
+                        <td className='capitalize'>{ product.price }</td>
+                        <td className='capitalize'>{ product.brand.length > 20 ? product.brand.slice(0,20) + '...' : product.brand } </td>  {/*15 */}
+                        <td className='capitalize'>{ product.stock }</td>
+                        <td className='capitalize'>
+                            {
+                                (()=> {
+                                        if (!product.category || product.category.length === 0) return "";
+                                        const totalLength = product.category.reduce((sum, item) => sum + item.length, 0)
+
+                                        if (totalLength > 20) {
+                                          if (product.category.length === 2) {
+                                            return product.category[0].slice(0, 15) + " .., " + product.category[1].slice(0, 10) + ".."
+                                          }
+                                          return product.category[0].slice(0, 20) + "..."
+                                        }
+                                        return product.category.join(", ").toString()
+                                    }
+                                )()
+                            }
+                        </td>
+                        <td className={`${product.weights ? 'text-green-500' : 'text-red-500'}`}>
+                            {product.weights ? 'Available' : 'Not available'}
+                        </td>
                         <td>
                             <div className='flex items-center gap-[10px] action-buttons'>
                                 <button type='button' onClick={() => deleteHandler(product._id)} 

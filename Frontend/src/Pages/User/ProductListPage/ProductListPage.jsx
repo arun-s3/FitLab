@@ -1,16 +1,23 @@
 import React,{useState, useEffect, useRef} from 'react'
-import {Link} from 'react-router-dom'
 import './ProductListPage.css'
+import {useDispatch, useSelector} from 'react-redux'
+import {Link} from 'react-router-dom'
+import {debounce} from 'lodash'
+
+import {VscSettings} from "react-icons/vsc";
+import {RiArrowDropUpLine} from "react-icons/ri";
+
 import Header from '../../../Components/Header/Header'
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
 import PriceSliderAndFilter from '../../../Components/PriceSliderAndFilter/PriceSliderAndFilter'
+import RatingSlider from '../../../Components/RatingSlider/RatingSlider'
 import TestPriceFilter from '../../../Components/PriceSliderAndFilter/TestPriceSliderAndFilter' // For Enhancing Original PriceFiter feature
 import ProductsDisplay from '../../../Components/ProductsDisplay/ProductsDisplay'
 import ProductListingTools from '../../../Components/ProductListingTools/ProductListingTools'
 import CategoryDisplay from '../../../Components/CategoryDisplay/CategoryDisplay'
+import {getAllProducts, toggleProductStatus} from '../../../Slices/productSlice'
+import {capitalizeFirstLetter} from '../../../Utils/helperFunctions'
 
-import {VscSettings} from "react-icons/vsc";
-import {RiArrowDropUpLine} from "react-icons/ri";
 
 
 export default function ProductList({admin}){
@@ -24,12 +31,15 @@ export default function ProductList({admin}){
     const [maxPrice, setMaxPrice] = useState(3750)
     let firstSlideRef = useRef(false)
 
+    const [rating, setRating] = useState(4.5)
+    
     // const [category, setCategory] = useState([])
     // const [subcategory, setSubcategory] = useState('')
 
     const [showCategory, setShowCategory ] = useState(true)
     const [showProductsFilter, setShowProductsFilter] = useState(true)
     const [showPriceFilter, setShowPriceFilter] = useState(true)
+    const [showRatingSlider, setShowRatingSlider] = useState(true)
     const [showByGrid, setShowByGrid] = useState(true)
 
     const [filter, setFilter] = useState({categories: [], products: []})
@@ -38,17 +48,38 @@ export default function ProductList({admin}){
     const [currentPage, setCurrentPage] = useState(1)
     const [limit, setLimit] = useState(12)  
 
+    const [popularProductsShowLabel, setPopularProductsShowLabel] = useState('See more')
+
     const [queryOptions, setQueryOptions] = useState({})
 
+    const popularProducts = [
+        'benches', 'gymbell', 'treadmill', 'Ellipticals', 'bikes', 'proteinPowders', 'mutistationMachines', 'resistanceBands', 'yogaMats'
+    ]
+    const [morePopularProducts, setMorePopularProducts] = useState(0)
+
+    const dispatch = useDispatch()
+
+    const debouncedProducts = useRef(
+        debounce(()=> {
+            dispatch( getAllProducts({queryOptions}) )
+        }, 1000) 
+    ).current
 
     useEffect(()=>{
         console.log("FILTER-->", JSON.stringify(filter))
         console.log("SORTS-->", JSON.stringify(sorts))
-        setQueryOptions( {filter: {...queryOptions.filter, ...filter}, sort: {...queryOptions.sort, ...sorts}, page: currentPage, limit} )
-    },[filter, sorts, currentPage, limit])
+        setQueryOptions(queryOptions=> (
+            {...queryOptions, filter: {...queryOptions.filter, ...filter}, sort: sorts, page: currentPage, limit,
+                 averageRating: rating}
+        ))
+    },[filter, sorts, currentPage, limit, rating])
 
     useEffect(()=>{
-        console.log("QUERYOPTIONS-->", JSON.stringify(queryOptions))
+        console.log('OUERYOPTIONS--------->', JSON.stringify(queryOptions))
+        if(Object.keys(queryOptions).length){
+            // debouncedProducts()
+            dispatch( getAllProducts({queryOptions}))
+        }
     },[queryOptions])
 
     useEffect(()=>{
@@ -68,13 +99,35 @@ export default function ProductList({admin}){
     //     }
     // }
 
-   const checkHandler = (e)=>{
-        const value = e.target.value.trim().split(',')
-        console.log("Value of checks-->", [...filter.products, ...value])
+   const popularProductsHandler = (e, product)=>{
+        console.log(`Product ${e.target.checked ? 'checked' : 'unchecked'}--->`, product)
         if(e.target.checked){
-            setFilter({...filter, products: [...filter.products, ...value]})
+            console.log("Inside e.target.checked")
+            setFilter({...filter, products: [...filter.products, product]})
+        }
+        if(!e.target.checked){
+            console.log("Inside e.target.unchecked")
+            const updatedProducts = filter.products.filter(item=> item !== product)
+            setFilter(filter=> (
+                {...filter, products: updatedProducts}
+            ))
         }
    } 
+
+   const showMoreProducts = ()=> {
+    setMorePopularProducts(count=> {
+        if( popularProducts.length - (count * 2) < 0 ){
+            return count-=5
+        }else{
+            if(count + 10 >= popularProducts.length){
+                setPopularProductsShowLabel('See less')
+            }else{
+                setPopularProductsShowLabel('See more')
+            }
+            return count+=5
+        }
+    })
+   }
 
     return(
         <>  
@@ -108,93 +161,71 @@ export default function ProductList({admin}){
                     </div>
                     <div className='pb-[10px] border-b border-[#DEE2E7]' > 
                         <div id='filter-header'>
-                            <h4>By Product</h4>
+                            <h4>By Popular Products</h4>
                             <span className='cursor-pointer' onClick={()=> setShowProductsFilter(status=> !status)}> <RiArrowDropUpLine/> </span>
                         </div>
                         {showProductsFilter && 
                         <ul className='list-none' id='filter-body' >
-                            <li>
-                                <div>
-                                    <input type='checkbox' className='' id='benchesAndRacks' value='benches,racks' onChange={(e)=> checkHandler(e)}/>
-                                    <label HTMLfor='benchesAndRacks'>Benches and Racks</label>
-                                </div>
-                            </li>
-                            <li>
-                                <div>
-                                    <input type='checkbox' className='' id='gymbell' value='gymbell' onChange={(e)=> checkHandler(e)}/>
-                                    <label HTMLfor='gymbell'>Gymbell</label>
-                                </div>
-                            </li>
-                            <li>
-                                <div>
-                                    <input type='checkbox' className='' id='treadmills' value='treadmill'  onChange={(e)=> checkHandler(e)}/>
-                                    <label HTMLfor='treadmills'>Treadmills</label>
-                                </div>
-                            </li>
-                            <li>
-                                <div>
-                                    <input type='checkbox' className='' id='plates' value='plates'  onChange={(e)=> checkHandler(e)}/>
-                                    <label HTMLfor='plates'>Plates</label>
-                                </div>
-                            </li>
-                            <li>
-                                <div>
-                                    <input type='checkbox' className='' id='bikesAndEllipticals' value='bikes,ellipticals'  onChange={(e)=> checkHandler(e)}/>
-                                    <label HTMLfor='bikesAndEllipticals'>Bikes and Ellipticals</label>
-                                </div>
-                            </li>
-                            <li>
-                                <div>
-                                    <input type='checkbox' className='' id='proteinPowders' value='protein powder'  onChange={(e)=> checkHandler(e)}/>
-                                    <label HTMLfor='proteinPowders'>Protein Powders</label>
-                                </div>
-                            </li>
-                            <li>
-                                <div>
-                                    <input type='checkbox' className='' id='multistationMachines' value='multistation machines'  onChange={(e)=> checkHandler(e)}/>
-                                    <label HTMLfor='multistationMachine'>MultistationMachine</label>
-                                </div>
-                            </li>
-                            <li>
-                                <div>
-                                    <input type='checkbox' className='' id='resistanceBands' value='resistance bands'  onChange={(e)=> checkHandler(e)}/>
-                                    <label HTMLfor='resistanceBands'>Resistance Bands</label>
-                                </div>
-                            </li>
-                            <li>
-                                <div>
-                                    <input type='checkbox' className='' id='yogaMats' value='yoga mats'  onChange={(e)=> checkHandler(e)}/>
-                                    <label HTMLfor='yogaMats'>Yoga Mats</label>
-                                </div>
-                            </li>
-                            <span className='mt-[5px] text-secondary text-[13px]'>See all</span>
+                            {
+                                popularProducts.slice(0, 5 + morePopularProducts).map(product=> (
+                                    <li>
+                                        <div>
+                                            <input type='checkbox' className='' id={product} value={product}
+                                                 onChange={(e)=> popularProductsHandler(e, product)}/>
+                                            <label HTMLfor='gymbell'> { capitalizeFirstLetter(product) } </label>
+                                        </div>
+                                    </li>
+                                ))
+                            }
+                            <span className='mt-[5px] text-secondary text-[13px] cursor-pointer hover:underline transition duration-500' 
+                                onClick={()=> showMoreProducts()}>
+                              {popularProductsShowLabel}
+                            </span>
                         </ul>
                         }
                     </div>
-                    <div className='pb-[10px] border-gray-500'>
+                    <div className='pb-[10px] border-b border-[#DEE2E7]'>
                         <div id='filter-header'>
                             <h4>Price Range</h4>
                             <span className='cursor-pointer' onClick={()=> setShowPriceFilter(status=> !status)}> <RiArrowDropUpLine/> </span>
                         </div>
-                    <div id='filter-body'>
-                        {
-                            showPriceFilter && < PriceSliderAndFilter priceGetter={{minPrice, maxPrice}} priceSetter={{setMinPrice, setMaxPrice}}  firstSlide={firstSlideRef} />
-                            // showPriceFilter && <TestPriceFilter/>
-                        }
+                        <div id='filter-body'>
+                            {
+                            showPriceFilter && 
+                                < PriceSliderAndFilter priceGetter={{minPrice, maxPrice}} priceSetter={{setMinPrice, setMaxPrice}} 
+                                     firstSlide={firstSlideRef} />
+                                // showPriceFilter && <TestPriceFilter/>
+                            }
+                        </div>
                     </div>
+                    <div className='pb-[10px] border-gray-500'>
+                        <div id='filter-header'>
+                            <h4>Ratings Range</h4>
+                            <span className='cursor-pointer' onClick={()=> setShowRatingSlider(status=> !status)}> <RiArrowDropUpLine/> </span>
+                        </div>
+                        <div id='filter-body' className='mt-[1.5rem]'>
+                             {
+                                showRatingSlider &&
+                                    <RatingSlider rating={rating} setRating={setRating}/>
+                             }   
+                        </div>
                     </div>
                 </aside>
 
                 <section className='basis-full flex-grow'>
                     <div>
+
                         <ProductListingTools showByGrid={showByGrid} setShowByGrid={setShowByGrid} sortHandlers={{sorts, setSorts}}
-                             limiter={{limit, setLimit}}/>
+                             limiter={{limit, setLimit}} queryOptions={queryOptions} setQueryOptions={setQueryOptions}/>
+                             
                     </div>
                     <div className='mt-[2rem]'>
 
-                        <ProductsDisplay gridView={showByGrid} pageReader={{currentPage, setCurrentPage}} limiter={{limit, setLimit}} queryOptions={queryOptions}/>
+                        <ProductsDisplay gridView={showByGrid} pageReader={{currentPage, setCurrentPage}} limiter={{limit, setLimit}}
+                             queryOptions={queryOptions}/>
 
                     </div>
+
                 </section>
             </main>
         </>

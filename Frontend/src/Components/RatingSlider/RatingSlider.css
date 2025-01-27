@@ -1,0 +1,25 @@
+  
+#ratingSlider .custom-range-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 1rem; 
+  height: 1rem; 
+  border-radius: 50%; 
+  background-color: var(--SECONDARY); 
+}
+
+#ratingSlider .custom-range-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1); 
+}
+
+#ratingSlider .custom-range-slider::-moz-range-thumb {
+  appearance: none; 
+  width: 1rem; 
+  height: 1rem; 
+  border-radius: 50%; 
+  background-color: var(--SECONDARY); 
+  border: 0; 
+}
+
+#ratingSlider .custom-range-slider::-moz-range-thumb:hover {
+  transform: scale(1.1); 
+}

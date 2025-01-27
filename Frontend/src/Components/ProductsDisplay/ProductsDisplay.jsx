@@ -13,6 +13,7 @@ import {getAllProducts, toggleProductStatus} from '../../Slices/productSlice'
 import Pagination from '../Pagination/Pagination'
 import StarGenerator from '../StarGenerator/StarGenerator';
 import {SiteButtonSquare} from '../SiteButtons/SiteButtons';
+import {capitalizeFirstLetter} from '../../Utils/helperFunctions'
 import ProductsTableView from './ProductsTableView';
 
 export default function ProductsDisplay({gridView, showByTable, pageReader, limiter, queryOptions, showTheseProducts, admin}) {
@@ -27,26 +28,32 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
 
   const navigate = useNavigate()
 
-  useEffect(() => {
-    // const getDummyProducts = async () => {
-    //   try {
-    //     const response = await axios.get('https://dummyjson.com/products');
-    //     setProducts(response.data.products); 
-    //     setProductCounts(response.data.total)
-    //     console.log("PRODUCTS-->", JSON.stringify(response.data.products));
-    //     console.log("TOTAL COUNTS-->"+ response.data.total)
-    //     console.log("TAGS-->"+ response.data.products[0].tags[0])
-    //   } catch (error) {
-    //     console.log("ERROR IN PRODUCTLISTING-->", error.message);
-    //   }
-    // };
-    const getFitlabProducts =  async ()=>{
-      dispatch( getAllProducts({}) )
-    }
-    getFitlabProducts()
-    console.log("PRODUCTS----",JSON.stringify(products))
-    // getDummyProducts();
-  }, []);
+  // useEffect(() => {
+  //   // const getDummyProducts = async () => {
+  //   //   try {
+  //   //     const response = await axios.get('https://dummyjson.com/products');
+  //   //     setProducts(response.data.products); 
+  //   //     setProductCounts(response.data.total)
+  //   //     console.log("PRODUCTS-->", JSON.stringify(response.data.products));
+  //   //     console.log("TOTAL COUNTS-->"+ response.data.total)
+  //   //     console.log("TAGS-->"+ response.data.products[0].tags[0])
+  //   //   } catch (error) {
+  //   //     console.log("ERROR IN PRODUCTLISTING-->", error.message);
+  //   //   }
+  //   // };
+  //   const getFitlabProducts =  async ()=>{
+  //     dispatch( getAllProducts({}) )
+  //   }
+  //   getFitlabProducts()
+  //   console.log("PRODUCTS----",JSON.stringify(products))
+  //   // getDummyProducts();
+  // }, []);
+
+  // useEffect(()=> {
+  //   if(Object.keys(queryOptions).length){
+  //     dispatch( getAllProducts({queryOptions}) )
+  //   }
+  // },[queryOptions])
 
   useEffect(()=>{
     !admin && setProducts(items)
@@ -68,9 +75,9 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
       { !showByTable && 
         products.map((product) => (
           <div key={product._id} className= {gridView ? 'w-[275px]' : 'flex gap-[1rem] w-full'} 
-                    onClick={()=> !admin && navigate('/shop/product',{state: {product}})}>
+                    onClick={()=> !admin && navigate('/shop/product', {state: {product}})}>
             <figure className='relative h-auto rounded-[10px] thumbnail cursor-pointer'>
-              <img src={product.thumbnail.url || product.thumbnail} alt={product.title} className='rounded-[10px] h-[275px] w-[275px] object-cover'/>
+              <img src={product.thumbnail.url || product.thumbnail} alt={product.title} className='rounded-[10px] h-[275px] object-cover'/> {/*w-[275px]  */}
               <figcaption className={`${admin ? 'top-[2px] left-[-40px]' : 'bottom-[12px]'} absolute w-full text-center`}>
                 {
                  admin ?
@@ -98,33 +105,48 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
               </div>
               }
             </figure>
-            <div className={` ${gridView? 'mt-[10px] flex flex-col gap-[5px] pl-[10px] py-[8px] rounded-[10px] product-infos' 
-                                 : 'inline-flex flex-col gap-[10px] justify-center pl-[1rem] py-[8px] rounded-[10px] ml-[1rem] product-infos w-full'} cursor-pointer`}>
-              {product?.reviews ? ( <p className='text-secondary flex items-center gap-[10px]'> 
+            <div className={` ${gridView? 'mt-[10px] flex flex-col gap-[5px] pl-[10px] py-[15px] rounded-[10px] product-infos' 
+                                 : 'inline-flex flex-col gap-[10px] justify-between px-[1rem] py-[2rem] rounded-[10px] ml-[1rem] product-infos w-full'} cursor-pointer`}>
+              <div>
+              {product?.reviews ? 
+                ( <p className='text-secondary flex items-center gap-[10px]'> 
 
-                                         <StarGenerator product={product} />
+                    <StarGenerator product={product} />
 
-                                        <span className='text-[13px]'> ({ product.reviews.length }) </span> 
-                                    </p>)
-                                 : ( <p className='text-secondary'>No rating available!</p> )
+                    <span className='text-[13px]'> ({ product.reviews.length }) </span> 
+                  </p>)
+                : ( <p className='text-secondary'>No rating available!</p> )
 
-              }
-              <p className= {(gridView ? 'text-[13px]' : (admin && !gridView)? 'text-[14px]' :'text-[16px]')  + ' capitalize font-[500]'}>{product.title}</p>
+                }
+                <p className= {(gridView ? 'text-[15px]' : (admin && !gridView)? 'text-[15px]' :'text-[18px]')  
+                      + ' mt-[10px] capitalize font-[450] line-clamp-2'} style={{wordBreak: 'break-word'}}>
+                {product.title}
+                </p>
+              </div>
               {
                 !gridView && 
-                  <p className={(admin && !gridView)? 'text-[12px]' : 'text-[14px]'}> {product.subtitle} </p>
+                  <p className={`${(admin && !gridView)? 'text-[12px]' : 'text-[14px]'} text-wrap break-words line-clamp-3`} 
+                    style={{wordBreak: 'break-word'}}>
+                       { capitalizeFirstLetter(product.subtitle) } 
+                  </p>
               }
-              <p className={(admin && !gridView)? 'text-[13px]' : 'text-[15px]'}> &#8377; {product.price}</p>
-              {
-                !gridView && 
-                <div>
-                  {product.tags.map(tag=> 
-                    <span className={`${admin? 'text-[12px]' :'text-[13px]'} px-[14px] py-[1px] border-[1.5px]  border-[#eae0f0] rounded-[7px] text-secondary mr-[1rem]`}> 
-                      {tag} 
-                    </span>
-                )}
+              <div>
+
+                <p className={`${(admin && !gridView)? 'text-[16px]' : (gridView) 
+                    ? 'text-[16px]' : 'text-[18px]'} font-[500] tracking-[0.5px]`}> &#8377; {product.price}</p>
+                {
+                  !gridView && 
+                  <div className='mt-[10px]'>
+                    {product.tags.map(tag=> 
+                      <span className={`${admin? 'text-[12px]' :'text-[13px]'} px-[14px] py-[1px] border-[1.5px]  border-[#eae0f0]
+                         rounded-[7px] text-secondary mr-[1rem]`}> 
+                        {tag} 
+                      </span>
+                  )}
                 </div>
               }
+
+              </div>
             </div>
            
           </div>

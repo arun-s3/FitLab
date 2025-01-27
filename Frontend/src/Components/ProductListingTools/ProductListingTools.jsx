@@ -1,15 +1,19 @@
 import React,{useState, useEffect, useRef} from 'react'
 import './ProductListingTools.css'
+import {useSelector, useDispatch} from 'react-redux'
+import {debounce} from 'lodash'
 
-import useFlexiDropdown from '../../Hooks/FlexiDropdown'
-import useStickyDropdown from '../../Hooks/StickyDropdown'
-import {SearchInput} from '../FromComponents/FormComponents'
 import {RiArrowDropDownLine} from "react-icons/ri"
 import {BsFillGrid3X3GapFill} from "react-icons/bs"
 import {FaList} from "react-icons/fa"
 
+import useFlexiDropdown from '../../Hooks/FlexiDropdown'
+import useStickyDropdown from '../../Hooks/StickyDropdown'
+import {searchProduct, getAllProducts} from '../../Slices/productSlice'
+import {SearchInput} from '../FromComponents/FormComponents'
 
-export default function ProductListingTools({admin, showByGrid, setShowByGrid, showByTable, sortHandlers, limiter}){
+
+export default function ProductListingTools({admin, showByGrid, setShowByGrid, showByTable, sortHandlers, limiter, queryOptions, setQueryOptions}){
 
     const {sorts, setSorts} = sortHandlers
     const {limit, setLimit} = limiter
@@ -18,15 +22,54 @@ export default function ProductListingTools({admin, showByGrid, setShowByGrid, s
 
     const {openStickyDropdowns, stickyDropdownRefs, toggleStickyDropdown} = useStickyDropdown(['sortDropdown'])
 
+    const {products, productCounts} = useSelector(state=> state.productStore)
+    const dispatch = useDispatch()
+
     const sortMenu = [
-        {name: 'Price: High to Low', value:'price', order:'1', invisibleOnTable: true},
-        {name: 'Price: Low to High', value:'price', order:'-1', invisibleOnTable: true},
+        {name: 'Price: High to Low', value:'price', order:'-1', invisibleOnTable: true},
+        {name: 'Price: Low to High', value:'price', order:'1', invisibleOnTable: true},
         {name: 'Ratings: High to Low', value:'averageRating', order:'1'}, {name: 'Ratings: Low to High', value:'averageRating', order:'-1'},
         {name: 'Featured', value:'featured'},
         {name: 'Best Sellers', value:'bestSellers'}, {name: 'Newest Arrivals', value:'newestArrivals'}
     ]
 
     const limitValues = [9, 12, 15, 18]
+
+    const debouncedSearch = useRef(
+        debounce((searchData)=> {
+        //   dispatch(searchProduct({find: searchData}))
+            setQueryOptions(queryOptions=> (
+                {...queryOptions, searchData: searchData}
+            ))
+        }, 1000) 
+    ).current;
+
+    // const debouncedProducts = useRef(
+    //     debounce(()=> {
+    //         dispatch( getAllProducts({queryOptions}) )
+    //     }, 1000) 
+    // ).current;
+
+    const searchHandler = (e)=> {
+        const searchData = e.target.value
+        console.log('searchData--->', searchData)
+        if(searchData.trim() !== ''){
+            console.log("Getting searched products--")
+            debouncedSearch(searchData)
+        } 
+        else{
+            console.log("Getting all products--")
+            console.log('QUERYOOPTIONS FROM productListingTool--->', JSON.stringify(queryOptions))
+            // debouncedProducts()
+            debouncedSearch.cancel()
+            if(queryOptions.searchData){
+                setQueryOptions(queryOptions=> {
+                    const { searchData, ...rest } = queryOptions
+                    return rest
+                })
+            }
+        } 
+    }
 
     const sortCheckHandler = (e, order) => {
         const sortKey = e.target.value
@@ -35,38 +78,20 @@ export default function ProductListingTools({admin, showByGrid, setShowByGrid, s
       
         if (e.target.checked){
             if(Object.keys(sorts).some((key) => key === sortKey)){
-                console.log("sortKey already exists")
+               console.log("sortKey already exists")
                e.target.checked = false
-               setSorts((prevSorts) => {
-                 const updatedSorts = { ...prevSorts }
-                 delete updatedSorts[sortKey]
-                 return updatedSorts
-               })
+               setSorts({})
                return
              }
-             if(!["featured", "bestSellers", "newestArrivals"].includes(sortKey)){
+             else{
                console.log("Setting sort...")
-               e.target.nextElementSibling.style.color = "rgba(159, 42, 240, 1)"
-               setSorts((prevSorts)=> ({...prevSorts, [sortKey]: sortValue}))
+               setSorts({[sortKey]: sortValue})
                return
-             }
-             else {
-               if( !Object.keys(sorts).some((key)=> ["featured", "bestSellers", "newestArrivals"].includes(key) )) {
-                 e.target.nextElementSibling.style.color = "rgba(159, 42, 240, 1)"
-                 setSorts((prevSorts)=> ({...prevSorts, [sortKey]: 1}))
-               }else{
-                 console.log("Only one such sort is allowed!")
-                 e.target.checked = false
-                 return
-               }
              }
         } else {
-          e.target.nextElementSibling.style.color = "initial"
-          setSorts((prevSorts)=> {
-            const updatedSorts = { ...prevSorts }
-            delete updatedSorts[sortKey]
-            return updatedSorts
-          })
+          console.log("Unchecked....")
+            setSorts({})
+            return
         }
       }
       
@@ -76,10 +101,11 @@ export default function ProductListingTools({admin, showByGrid, setShowByGrid, s
 
         <div className='flex justify-between' id='ProductListingTools'>
 
-            <SearchInput/>
+            <input type='search' placeholder='Search Fitlab..' className='h-[34px] w-[34rem] text-secondary rounded-[7px] placeholder:text-[11px]'
+                 onChange={(e)=> searchHandler(e)} />
 
             <div className='flex gap-[2rem] items-center'>
-                
+
             <div className='flex items-center gap-[10px]'>
                 <span className='text-[13px] font-[500]'> Showing </span>
                 <div className='flex items-center justify-center bg-secondaryLighter rounded-[4px] text-[12px] text-secondary
@@ -117,7 +143,11 @@ export default function ProductListingTools({admin, showByGrid, setShowByGrid, s
                                         <input type='checkbox' value={menuItem.value} onChange={(e)=> sortCheckHandler(e, menuItem?.order)}
                                             checked={ Object.keys(sorts).find(key=> key === menuItem.value) 
                                                         && (menuItem?.order ? sorts[menuItem.value] === menuItem.order : true) || false } />
-                                        <span> {menuItem.name} </span>
+                                        <span className={`${Object.keys(sorts).find(key=> key === menuItem.value) 
+                                                            && (menuItem?.order ? sorts[menuItem.value] === menuItem.order : true) 
+                                                            ? 'text-secondary' : 'text-[rgb(18,18,18)]'}`}>
+                                            {menuItem.name}
+                                        </span>
                                     </span>
                                 </li>
                             ))

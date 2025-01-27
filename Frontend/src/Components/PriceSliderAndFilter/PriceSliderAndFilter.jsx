@@ -1,5 +1,7 @@
 import React,{useState, useEffect, useRef} from 'react'
 import './PriceSliderAndFilter.css'
+import {useSelector, useDispatch} from 'react-redux'
+
 import {SiteSecondaryButtonSquare} from '../SiteButtons/SiteButtons'
 import {RiArrowDropUpLine, RiArrowDropDownLine} from "react-icons/ri";
 
@@ -23,12 +25,20 @@ export default function PriceSliderAndFilter({priceGetter, priceSetter, firstSli
     const minPriceRef = useRef(null)
     const maxPriceRef = useRef(null)
     const priceRangeWrapperRef = useRef(null)
-    const maxPriceRupee = useRef(100000)
+    const maxPriceRupee = useRef(500000)
 
     const priceErrorRef = useRef(null)
 
     const [minInputPrice, setMinInputPrice] = useState(0)
     const [maxInputPrice, setMaxInputPrice] = useState(null)
+
+    // const {maxPriceAvailable} = useSelector(state=> state.productStore)
+
+    // useEffect(()=> {
+    //     if(maxPriceAvailable){
+    //         maxPriceRupee.current = maxPriceAvailable
+    //     }
+    // },[maxPriceAvailable])
 
     useEffect(()=>{
         setMinInputPrice(minPrice)
@@ -47,7 +57,8 @@ export default function PriceSliderAndFilter({priceGetter, priceSetter, firstSli
      }
      const setPriceUnit = (e)=>{
          let minPriceUnit,maxPriceUnit;
-         if(minPriceRef.current.getBoundingClientRect().right <= maxPriceRef.current.getBoundingClientRect().left || minPriceRef.current.getBoundingClientRect().right <= maxPriceRef.current.getBoundingClientRect().right){
+         if(minPriceRef.current.getBoundingClientRect().right <= maxPriceRef.current.getBoundingClientRect().left
+                 || minPriceRef.current.getBoundingClientRect().right <= maxPriceRef.current.getBoundingClientRect().right){
              console.log("Inside IF-minPriceRef.current.getBoundingClientRect.right <= maxPriceRef.current.getBoundingRectClient.left")
              minPriceUnit = firstRange.current
              maxPriceUnit = secondRange.current
@@ -268,7 +279,12 @@ export default function PriceSliderAndFilter({priceGetter, priceSetter, firstSli
             }
         }}>
             <p className={`${(mountingComponent=='AdminProductListPage'? 'text-[13px] ':'text-[15px] ') + 'text-secondary text-center'}`}>
-                {minPrice} - {maxPrice ? maxPrice+"+":"-"}
+                {minPrice} - { maxPrice 
+    ? (maxPrice !== maxPriceRupee.current 
+        ? maxPrice 
+        : maxPrice + "+") 
+    : "-"
+}
             </p>
             <div id='pricerange-wrapper' className='relative mt-[1rem]' onDragOver={(e)=>dragOverHandler(e)} 
                                                 onDrop={(e)=>dropHandler(e)} ref={priceRangeWrapperRef}>

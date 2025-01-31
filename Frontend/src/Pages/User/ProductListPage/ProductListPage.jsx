@@ -57,6 +57,14 @@ export default function ProductList({admin}){
     ]
     const [morePopularProducts, setMorePopularProducts] = useState(0)
 
+    const sortMenu = [
+        {name: 'Price: High to Low', value:'price', order:'-1', invisibleOnTable: true},
+        {name: 'Price: Low to High', value:'price', order:'1', invisibleOnTable: true},
+        {name: 'Ratings: High to Low', value:'averageRating', order:'1'}, {name: 'Ratings: Low to High', value:'averageRating', order:'-1'},
+        {name: 'Featured', value:'featured'},
+        {name: 'Best Sellers', value:'bestSellers'}, {name: 'Newest Arrivals', value:'newestArrivals'}
+    ]
+
     const dispatch = useDispatch()
 
     const debouncedProducts = useRef(
@@ -215,8 +223,8 @@ export default function ProductList({admin}){
                 <section className='basis-full flex-grow'>
                     <div>
 
-                        <ProductListingTools showByGrid={showByGrid} setShowByGrid={setShowByGrid} sortHandlers={{sorts, setSorts}}
-                             limiter={{limit, setLimit}} queryOptions={queryOptions} setQueryOptions={setQueryOptions}/>
+                        <ProductListingTools showByGrid={showByGrid} setShowByGrid={setShowByGrid} sortHandlers={{sorts, setSorts}} 
+                             sortMenu={sortMenu} limiter={{limit, setLimit}} queryOptions={queryOptions} setQueryOptions={setQueryOptions}/>
                              
                     </div>
                     <div className='mt-[2rem]'>

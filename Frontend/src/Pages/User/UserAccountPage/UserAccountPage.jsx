@@ -1,15 +1,13 @@
-import React, {useState, useEffect, useRef} from 'react'
+import React, {useState, useEffect, useRef, useContext} from 'react'
 import './UserAccountPage.css'
+import {useLocation} from 'react-router-dom'
 import {useSelector, useDispatch} from 'react-redux'
 
 import {User, Mail, Phone, MapPin, MapPinHouse, Lock, SquareChevronRight, ArrowRight, Camera, Edit2, Check, X} from 'lucide-react'
 import {RiArrowDropDownLine} from "react-icons/ri"
 import {toast} from 'react-toastify'
 
-import Header from '../../../Components/Header/Header'
-import Footer from '../../../Components/Footer/Footer'
-import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
-import UserSidebar from '../../../Components/UserSidebar/UserSidebar'
+import {UserPageLayoutContext} from '../UserPageLayout/UserPageLayout'
 import ChangePasswordBox from './ChangePasswordBox'
 import {SingleDateSelector} from '../../../Components/Calender/Calender' 
 import {updateUserDetails, resetStates as resetUserStates} from '../../../Slices/userSlice'
@@ -21,6 +19,12 @@ import {CustomHashLoader} from '../../../Components/Loader/Loader'
 
 
 export default function UserAccountPage(){
+
+  const {setBreadcrumbHeading, setPageLocation} = useContext(UserPageLayoutContext)
+  setBreadcrumbHeading('Account')
+  
+  const location = useLocation()
+  setPageLocation(location.pathname)
 
   const [editing, setEditing] = useState(false)
   const [userDetails, setUserDetails] = useState({})
@@ -254,179 +258,154 @@ export default function UserAccountPage(){
     
 
     return(
-        <section id='UserAccountPage'>
-            <header style={headerBg}>
-        
-                <Header />
-        
-            </header>
-        
-            <BreadcrumbBar heading='Account'/>
-        
-            <main className='flex gap-[2rem] px-[4rem] mb-[10rem]'>
 
-                <div className='basis-[15%]'>
-                            
-                    <UserSidebar />
-        
-                </div>
-                <div className='basis-[75%] mt-[2rem] content-tile'>
+        <section id='UserAccountPage' className="bg-white rounded-2xl shadow-lg overflow-hidden">
 
-                  <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-
-                    <div className="pt-[2rem] px-[2rem] pb-[2rem]">
-                      <div className="flex justify-between items-center mb-[2rem]">
-                        <h1 className="text-[30px] text-secondary font-bold tracking-[0.5px]">Account Details</h1>
-                        {!editing ? (
-                          <button className="flex items-center gap-2 px-[1rem] py-2 bg-purple-600 text-[15px] text-white font-[500] rounded-lg
-                           hover:bg-purple-700 transition-colors" onClick={()=> setEditing(true)}>
-                                <Edit2 className="w-4 h-4" />
-                                Edit Profile
-                          </button>
-                        ) : (
-                          <div className="flex gap-2">
-                            <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-[15px] text-white rounded-lg
-                              hover:bg-green-700 transition-colors"  onClick={handleSubmit}>
-                                  <Check className="w-[15px] h-[15px]" />
-                                  { userLoading || addressLoading ? <CustomHashLoader loading={loading}/> : 'Save' }   
-                            </button>
-                            <button className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-[15px] text-white rounded-lg
-                               hover:bg-gray-700 transition-colors"  onClick={() => setEditing(false)}>
-                                  <X className="w-[15px] h-[15px]" />
-                                  Cancel
-                            </button>
-                          </div>
-                        )}
-                      </div>
+            <div className="pt-[2rem] px-[2rem] pb-[2rem]">
+              <div className="flex justify-between items-center mb-[2rem]">
+                <h1 className="text-[30px] text-secondary font-bold tracking-[0.5px]">Account Details</h1>
+                {!editing ? (
+                  <button className="flex items-center gap-2 px-[1rem] py-2 bg-purple-600 text-[15px] text-white font-[500] rounded-lg
+                   hover:bg-purple-700 transition-colors" onClick={()=> setEditing(true)}>
+                        <Edit2 className="w-4 h-4" />
+                        Edit Profile
+                  </button>
+                ) : (
+                  <div className="flex gap-2">
+                    <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-[15px] text-white rounded-lg
+                      hover:bg-green-700 transition-colors"  onClick={handleSubmit}>
+                          <Check className="w-[15px] h-[15px]" />
+                          { userLoading || addressLoading ? <CustomHashLoader loading={loading}/> : 'Save' }   
+                    </button>
+                    <button className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-[15px] text-white rounded-lg
+                       hover:bg-gray-700 transition-colors"  onClick={() => setEditing(false)}>
+                          <X className="w-[15px] h-[15px]" />
+                          Cancel
+                    </button>
+                  </div>
+                )}
+              </div>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8" id='personal-details'>
-                        <div className="space-y-6">
-                          <h2 className="text-[20px] font-semibold text-gray-900">Personal Information</h2>
-                          <div className="space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                              {
-                                InputFieldsGenerator(personalnfoTypes.slice(0,2), 'personal')
-                              }
-                            </div>
-                            {
-                              InputFieldsGenerator(personalnfoTypes.slice(2), 'personal')
-                            }
-                            <div className="grid grid-cols-2 gap-4">
-                              <div className='w-full dob'>
-                                <label className="block text-sm font-medium text-gray-700 mb-[4px]">
-                                  Date Of Birth
-                                </label>
-                                <div className={`relative ${!editing ? 'bg-gray-50' : ''}`}>
-                                  <SingleDateSelector date={dob} setDate={setDob} placeholderText={`${editing ? 'Select your DOB' : ''}`} isDisabled={!editing}
-                                      value={ (userDetails.dob ) || dob}/>
-                                  { !editing && (<div className='absolute top-0 left-0 w-full h-full bg-transparent'></div>) }
-                                </div>
-                              </div>
-                              <div className='h-[63%]'>
-                                <span className="block text-sm font-medium text-gray-700 mb-1"> Gender </span>
-                                <div className={`relative w-full h-full px-4 py-2 flex justify-between items-center rounded-lg border 
-                                  border-gray-300 ${!editing ? 'bg-gray-50' : ''} cursor-pointer`} 
-                                      onClick={()=> editing && toggleDropdown('genderDropdown')} ref={dropdownRefs.genderDropdown} >
-                                    <span className={`text-[13px]  ${editing ? 'text-secondary' : 'text-muted'}`}>
-                                      { (gender && camelToCapitalizedWords(gender)) || userDetails?.gender && camelToCapitalizedWords(userDetails.gender)} 
-                                    </span>
-                                    <i className=''> <RiArrowDropDownLine/> </i>
-                                    {
-                                      openDropdowns.genderDropdown &&
-                                      <ul className='absolute top-[43px] left-0 list-none w-full h-fit bg-white border border-dropdownBorder
-                                       rounded-[6px] py-[8px] pl-[10px] pr-[2px] text-[14px] cursor-pointer'>
-                                        <li className='hover:text-secondary' onClick={()=> setGender('male')}> 
-                                          Male 
-                                        </li>
-                                        <li className='hover:text-secondary' onClick={()=> setGender('female')}> 
-                                          Female
-                                        </li>
-                                      </ul>
-                                    }
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                                  
-                        <div className="space-y-6">
-                          <h2 className="text-[20px] font-semibold text-gray-900">Default Address Information</h2>
-                          <div className="space-y-4">
-                          {
-                            InputFieldsGenerator(addressInfoTypes.slice(0,1), 'address')
-                          }
-                            <div className="grid grid-cols-2 gap-[1rem]">
-                              {
-                                InputFieldsGenerator(addressInfoTypes.slice(1,3), 'address')
-                              }
-                            </div>
-                            <div className="grid grid-cols-2 gap-[1rem]">
-                              {
-                                InputFieldsGenerator(addressInfoTypes.slice(3,5), 'address')
-                              }
-                            </div>
-                            <div className='h-[100%]'>
-                                <span className="block text-sm font-medium text-gray-700 mb-[4px]"> Address Type </span>
-                                <div className={`relative w-full h-full mb-[21px] px-4 py-[12px] flex justify-between items-center rounded-lg border 
-                                  border-gray-300 ${!editing ? 'bg-gray-50' : ''} cursor-pointer`}
-                                      onClick={()=> editing && toggleDropdown('addressDropdown')} ref={dropdownRefs.addressDropdown}>
-                                    <span className={`text-[13px]  ${editing ? 'text-secondary' : 'text-muted'}`}>
-                                      { (addressType && camelToCapitalizedWords(addressType)) || addressDetails?.type && camelToCapitalizedWords(addressDetails.type) } 
-                                    </span>
-                                    <i className=''> <RiArrowDropDownLine/> </i>
-                                    {
-                                      openDropdowns.addressDropdown &&
-                                      <ul className='absolute top-[47px] left-0 list-none w-full h-fit bg-white border border-dropdownBorder
-                                       rounded-[6px] py-[8px] pl-[10px] pr-[2px] text-[14px] z-[5] cursor-pointer'>
-                                        {
-                                          allAddressTypes.map(type=> (
-                                            <li className='hover:text-secondary' onClick={()=> setAddressType(type)}> 
-                                              { (type && camelToCapitalizedWords(type)) } 
-                                            </li>
-                                          ))
-                                        }
-                                      </ul>
-                                    }
-                                </div>
-                              </div>
-                              {
-                                InputFieldsGenerator(addressInfoTypes.slice(5), 'address')
-                              }
-                          </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8" id='personal-details'>
+                <div className="space-y-6">
+                  <h2 className="text-[20px] font-semibold text-gray-900">Personal Information</h2>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      {
+                        InputFieldsGenerator(personalnfoTypes.slice(0,2), 'personal')
+                      }
+                    </div>
+                    {
+                      InputFieldsGenerator(personalnfoTypes.slice(2), 'personal')
+                    }
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className='w-full dob'>
+                        <label className="block text-sm font-medium text-gray-700 mb-[4px]">
+                          Date Of Birth
+                        </label>
+                        <div className={`relative ${!editing ? 'bg-gray-50' : ''}`}>
+                          <SingleDateSelector date={dob} setDate={setDob} placeholderText={`${editing ? 'Select your DOB' : ''}`} isDisabled={!editing}
+                              value={ (userDetails.dob ) || dob}/>
+                          { !editing && (<div className='absolute top-0 left-0 w-full h-full bg-transparent'></div>) }
                         </div>
                       </div>
-                            
-                      <div className="mt-8 pt-8 border-t border-gray-200">
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <h2 className="text-[20px] font-semibold text-gray-900">Security</h2>
-                            <p className="text-sm text-gray-500 mt-1">Change your password </p>
-                          </div>
-                          <button className={`flex items-center gap-2 px-[1rem] py-[8px] text-[15px] border border-secondaryLight2 rounded-lg
-                             hover:bg-secondary hover:text-white transition-colors ${openSecurityMenu && 'bg-secondary text-white'}`} onClick={openSecurity}>
-                            <Lock className="w-4 h-4" />
-                            Change Password
-                            <ArrowRight  className="ml-[5px] w-4 h-4" />
-                          </button>
-                        </div>
-
-                        <div ref={securityMenuRef}>
-                            { 
-                            openSecurityMenu &&
-                              <ChangePasswordBox setOpenSecurityMenu={setOpenSecurityMenu} />
+                      <div className='h-[63%]'>
+                        <span className="block text-sm font-medium text-gray-700 mb-1"> Gender </span>
+                        <div className={`relative w-full h-full px-4 py-2 flex justify-between items-center rounded-lg border 
+                          border-gray-300 ${!editing ? 'bg-gray-50' : ''} cursor-pointer`} 
+                              onClick={()=> editing && toggleDropdown('genderDropdown')} ref={dropdownRefs.genderDropdown} >
+                            <span className={`text-[13px]  ${editing ? 'text-secondary' : 'text-muted'}`}>
+                              { (gender && camelToCapitalizedWords(gender)) || userDetails?.gender && camelToCapitalizedWords(userDetails.gender)} 
+                            </span>
+                            <i className=''> <RiArrowDropDownLine/> </i>
+                            {
+                              openDropdowns.genderDropdown &&
+                              <ul className='absolute top-[43px] left-0 list-none w-full h-fit bg-white border border-dropdownBorder
+                               rounded-[6px] py-[8px] pl-[10px] pr-[2px] text-[14px] cursor-pointer'>
+                                <li className='hover:text-secondary' onClick={()=> setGender('male')}> 
+                                  Male 
+                                </li>
+                                <li className='hover:text-secondary' onClick={()=> setGender('female')}> 
+                                  Female
+                                </li>
+                              </ul>
                             }
                         </div>
-
                       </div>
                     </div>
                   </div>
-
+                </div>
+                                  
+                <div className="space-y-6">
+                  <h2 className="text-[20px] font-semibold text-gray-900">Default Address Information</h2>
+                  <div className="space-y-4">
+                  {
+                    InputFieldsGenerator(addressInfoTypes.slice(0,1), 'address')
+                  }
+                    <div className="grid grid-cols-2 gap-[1rem]">
+                      {
+                        InputFieldsGenerator(addressInfoTypes.slice(1,3), 'address')
+                      }
+                    </div>
+                    <div className="grid grid-cols-2 gap-[1rem]">
+                      {
+                        InputFieldsGenerator(addressInfoTypes.slice(3,5), 'address')
+                      }
+                    </div>
+                    <div className='h-[100%]'>
+                        <span className="block text-sm font-medium text-gray-700 mb-[4px]"> Address Type </span>
+                        <div className={`relative w-full h-full mb-[21px] px-4 py-[12px] flex justify-between items-center rounded-lg border 
+                          border-gray-300 ${!editing ? 'bg-gray-50' : ''} cursor-pointer`}
+                              onClick={()=> editing && toggleDropdown('addressDropdown')} ref={dropdownRefs.addressDropdown}>
+                            <span className={`text-[13px]  ${editing ? 'text-secondary' : 'text-muted'}`}>
+                              { (addressType && camelToCapitalizedWords(addressType)) || addressDetails?.type && camelToCapitalizedWords(addressDetails.type) } 
+                            </span>
+                            <i className=''> <RiArrowDropDownLine/> </i>
+                            {
+                              openDropdowns.addressDropdown &&
+                              <ul className='absolute top-[47px] left-0 list-none w-full h-fit bg-white border border-dropdownBorder
+                               rounded-[6px] py-[8px] pl-[10px] pr-[2px] text-[14px] z-[5] cursor-pointer'>
+                                {
+                                  allAddressTypes.map(type=> (
+                                    <li className='hover:text-secondary' onClick={()=> setAddressType(type)}> 
+                                      { (type && camelToCapitalizedWords(type)) } 
+                                    </li>
+                                  ))
+                                }
+                              </ul>
+                            }
+                        </div>
+                      </div>
+                      {
+                        InputFieldsGenerator(addressInfoTypes.slice(5), 'address')
+                      }
+                  </div>
+                </div>
+              </div>
+                            
+              <div className="mt-8 pt-8 border-t border-gray-200">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h2 className="text-[20px] font-semibold text-gray-900">Security</h2>
+                    <p className="text-sm text-gray-500 mt-1">Change your password </p>
+                  </div>
+                  <button className={`flex items-center gap-2 px-[1rem] py-[8px] text-[15px] border border-secondaryLight2 rounded-lg
+                     hover:bg-secondary hover:text-white transition-colors ${openSecurityMenu && 'bg-secondary text-white'}`} onClick={openSecurity}>
+                    <Lock className="w-4 h-4" />
+                    Change Password
+                    <ArrowRight  className="ml-[5px] w-4 h-4" />
+                  </button>
                 </div>
 
-            </main>
+                <div ref={securityMenuRef}>
+                    { 
+                    openSecurityMenu &&
+                      <ChangePasswordBox setOpenSecurityMenu={setOpenSecurityMenu} />
+                    }
+                </div>
 
-            <Footer />
-
-        </section>
+              </div>
+          </div>
+      </section>
     )
 }

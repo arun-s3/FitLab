@@ -1,5 +1,5 @@
 
-#ProductListingTools > input:first-child{
+#ProductListingTools > input[class ~= "search-fitlab"]{
     border-color: rgb(212, 176, 236);
     box-shadow: 2px 2px 12px rgb(233, 222, 242);
 }

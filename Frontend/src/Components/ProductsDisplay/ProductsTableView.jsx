@@ -133,7 +133,7 @@ export default function ProductsTableView({products}){
                                 </span> {/*20 */}
                             </div>
                         </td>
-                        <td className='capitalize'>{ product.price }</td>
+                        <td className='capitalize'> &#8377; { product.price }</td>
                         <td className='capitalize'>{ product.brand.length > 20 ? product.brand.slice(0,20) + '...' : product.brand } </td>  {/*15 */}
                         <td className='capitalize'>{ product.stock }</td>
                         <td className='capitalize'>

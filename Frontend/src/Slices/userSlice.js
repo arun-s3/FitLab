@@ -103,6 +103,7 @@ const initialState = {
     userToken: null,
     user: null,
     userUpdated: false,
+    currentPath: '',
     error:null,
     loading:false,
     success:false,
@@ -119,6 +120,10 @@ const userSlice = createSlice({
             state.loading = false
             state.success = false
             console.log("state(success) after reset-->"+state.success)
+        },
+        changePath: (state, action)=> {
+            console.log("changePage reducer")
+            state.currentPath = action.payload.path
         }
     },
     extraReducers:(builder)=>{

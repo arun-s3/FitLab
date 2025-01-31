@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react'
-import  './AdminPageWrapper.css'
+import  './AdminPageLayout.css'
 import {FaRegBell} from "react-icons/fa";
 import {Link, useNavigate, Outlet} from 'react-router-dom'
 import {useSelector, useDispatch} from 'react-redux'
@@ -23,7 +23,7 @@ import {FaRegCaretSquareRight} from "react-icons/fa";
 import {CiSquareChevRight} from "react-icons/ci";
 
 
-export default function AdminWrapperPage(){
+export default function AdminPageLayout(){
 
     const asideBgImg={
         // backgroundImage:"url('/mask-bg.png')",
@@ -90,7 +90,7 @@ export default function AdminWrapperPage(){
                             <ul className='w-full ml-[3rem] list-none flex flex-col gap-[1.5rem] justify-center items-start text-white text-[13.5px]'>
                                 <li onClick={()=>toggleSublist('dashboard')}> 
                                     <div className={`${ showSublist.dashboard && 'toggleSublist-custom-after'} option`}> 
-                                        <Link> 
+                                        <Link to='/admin/dashboard'> 
                                             <MdOutlineDashboardCustomize className='inline-block'/> 
                                             <span className={`${ showSublist.dashboard && 'text-primaryDark'}`}> Dashboard </span>
                                         </Link>
@@ -180,7 +180,7 @@ export default function AdminWrapperPage(){
                                 </li>
                                 <li onClick={()=>toggleSublist('orders')}> 
                                     <div className={`${ showSublist.orders && 'toggleSublist-custom-after'} option`}>
-                                        <Link>
+                                        <Link to='/admin/orders'>
                                             <TbTruckDelivery/> 
                                             <span className={`${ showSublist.orders && 'text-primaryDark'}`}> Orders </span> 
                                         </Link> 

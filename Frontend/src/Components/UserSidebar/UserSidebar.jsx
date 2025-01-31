@@ -1,4 +1,5 @@
 import React,{useState, useEffect} from 'react'
+import {Link, useLocation, useNavigate} from 'react-router-dom'
 import {useSelector} from 'react-redux';
 
 import './UserSidebar.css'
@@ -6,29 +7,36 @@ import './UserSidebar.css'
 import {Camera, Clock, CreditCard, Heart, Home, Key, LogOut, MapPin, RefreshCw, ShoppingCart} from 'lucide-react'
 import {IoMdPerson} from "react-icons/io";
 
-export default function UserSidebar(){
+export default function UserSidebar({currentPath}){
 
     const {user} = useSelector(state=> state.user)
 
+    const navigate = useNavigate()
+
     const menuItems = [
-        { icon: Home, label: 'Profile'},
-        { icon: Clock, label: 'Order History' },
-        { icon: CreditCard, label: 'Wallet' },
-        { icon: ShoppingCart, label: 'Shopping Cart' },
-        { icon: Heart, label: 'Wishlist' },
-        { icon: RefreshCw, label: 'Compare' },
-        { icon: MapPin, label: 'Manage Address' },
-        { icon: Key, label: 'Change Password' },
-        { icon: LogOut, label: 'Log-out' },
+        { icon: Home, label: 'Account', path: '/account'},
+        { icon: Clock, label: 'Order History', path: '/orders' },
+        { icon: CreditCard, label: 'Wallet', path: '' },
+        { icon: ShoppingCart, label: 'Shopping Cart', path: '/cart' },
+        { icon: Heart, label: 'Wishlist', path: '/wishlist' },
+        { icon: RefreshCw, label: 'Compare', path: '/' },
+        { icon: MapPin, label: 'Manage Address', path: '/account/addresses' },
+        { icon: Key, label: 'Change Password', path: '' },
+        { icon: LogOut, label: 'Log-out', path: '/orders' },
       ]
 
     const listMouseOverHandler = (e)=> {
-        e.currentTarget.firstElementChild.style.color = '#f1c40f'
+        e.currentTarget.firstElementChild.style.color = '#f1c40f' // primaryDark
     }
 
     const listMouseLeaveHandler = (e)=> {
-         e.currentTarget.firstElementChild.style.color = 'rgba(215, 241, 72, 1)'
+         e.currentTarget.firstElementChild.style.color = 'rgba(215, 241, 72, 1)' // muted-kind
     }
+
+    useEffect(()=> {
+        console.log("Path now--->", location.path)
+        console.log("currentPath--->", currentPath)
+    },[])
 
     return(
         <section id='userSidebar' className='mt-[4rem] w-[13.5rem]'>
@@ -49,12 +57,19 @@ export default function UserSidebar(){
                 <ul className='w-full list-none flex flex-col justify-center gap-[1rem]'>
                     {
                         menuItems.map((item, index)=> (
-                            <li key={item.label} className='relative w-full flex items-center gap-[10px] cursor-pointer z-[1]'
-                                    onMouseOver={(e)=> listMouseOverHandler(e)} onMouseLeave={(e)=> listMouseLeaveHandler(e)}>
-                                <item.icon className='h-[16px] w-[16px] text-primary'/>   {/* text-[#5F6C72] */}
-                                <span className='text-[13px] text-[#5F6C72] capitalize tracking-[0.3px] hover:text-secondary hover:font-[500]'>
+                            <li key={item.label} className={`relative w-full flex items-center gap-[10px] cursor-pointer z-[1] 
+                                ${currentPath === item.path &&
+                                 'text-secondary font-[500] before:content-[""] before:absolute before:top-[-24%] before:left-[-11%] before:w-[121%] before:h-[149%] before:bg-primary before:z-[-1]'}`}
+                                    onMouseOver={(e)=> listMouseOverHandler(e)} 
+                                        onMouseLeave={(e)=> currentPath !== item.path && listMouseLeaveHandler(e)}
+                                            onClick={()=> navigate(item.path)} >
+                                <item.icon className={`h-[16px] w-[16px] 
+                                    ${currentPath === item.path ? 'text-primaryDark' : 'text-primary' }`}/>   {/* text-[#5F6C72] */}
+                                <Link className={`text-[13px] text-[#5F6C72] capitalize tracking-[0.3px] hover:text-secondary
+                                     hover:font-[500] ${currentPath === item.path && 'text-secondary font-[500]'}`} 
+                                        to={item.path} >
                                     {item.label}
-                                </span>
+                                </Link>
                             </li>
                         ))
                     }

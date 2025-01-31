@@ -5,7 +5,7 @@ import {useDispatch, useSelector} from 'react-redux'
 
 import axios from 'axios';
 import {toast} from 'react-toastify'
-import {MdFavoriteBorder} from "react-icons/md";
+import {MdFavorite, MdFavoriteBorder} from "react-icons/md";
 import {RiFileEditLine} from "react-icons/ri";
 import {MdBlock} from "react-icons/md";
 
@@ -16,7 +16,7 @@ import {SiteButtonSquare} from '../SiteButtons/SiteButtons';
 import {capitalizeFirstLetter} from '../../Utils/helperFunctions'
 import ProductsTableView from './ProductsTableView';
 
-export default function ProductsDisplay({gridView, showByTable, pageReader, limiter, queryOptions, showTheseProducts, admin}) {
+export default function ProductsDisplay({gridView, showByTable, pageReader, limiter, queryOptions, showTheseProducts, admin, wishlistDisplay}) {
 
   const {currentPage, setCurrentPage} = pageReader
 
@@ -69,15 +69,16 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
 
   return (
     <>
-     <div className={`${gridView ? 'grid grid-cols-3 gap-y-[2rem]' : showByTable ? '' : 'flex flex-col gap-[2rem]'}`} id="products-display"
-            style={admin ? { justifyItems: 'center' } : {}}>
+     <div className={`${gridView ? 'grid grid-cols-3 gap-y-[2rem]' : showByTable ? '' : 'flex flex-col gap-[2rem]'}
+       ${wishlistDisplay && 'ml-[1.5rem]'}`} id="products-display" style={admin ? { justifyItems: 'center' } : {}}>
 
       { !showByTable && 
         products.map((product) => (
           <div key={product._id} className= {gridView ? 'w-[275px]' : 'flex gap-[1rem] w-full'} 
                     onClick={()=> !admin && navigate('/shop/product', {state: {product}})}>
             <figure className='relative h-auto rounded-[10px] thumbnail cursor-pointer'>
-              <img src={product.thumbnail.url || product.thumbnail} alt={product.title} className='rounded-[10px] h-[275px] object-cover'/> {/*w-[275px]  */}
+              <img src={product.thumbnail.url || product.thumbnail} alt={product.title} 
+                className={`rounded-[10px] ${wishlistDisplay ? 'h-[250px]' : 'h-[275px]'} object-cover`}/> 
               <figcaption className={`${admin ? 'top-[2px] left-[-40px]' : 'bottom-[12px]'} absolute w-full text-center`}>
                 {
                  admin ?
@@ -101,12 +102,15 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
               </figcaption>
               { !admin &&
               <div className='absolute top-[15px] right-[15px] p-[5px] rounded-[15px] bg-white favourite'>
-                <i className='cursor-pointer'> <MdFavoriteBorder /> </i>
+                <i className='cursor-pointer'> 
+                  {wishlistDisplay ? <MdFavorite /> : <MdFavoriteBorder />} 
+                </i>
               </div>
               }
             </figure>
             <div className={` ${gridView? 'mt-[10px] flex flex-col gap-[5px] pl-[10px] py-[15px] rounded-[10px] product-infos' 
-                                 : 'inline-flex flex-col gap-[10px] justify-between px-[1rem] py-[2rem] rounded-[10px] ml-[1rem] product-infos w-full'} cursor-pointer`}>
+                                 : 'inline-flex flex-col gap-[10px] justify-between px-[1rem] py-[2rem] rounded-[10px] ml-[1rem] product-infos w-full'} 
+                                      ${ wishlistDisplay && 'mr-[1rem]' } cursor-pointer`}>
               <div>
               {product?.reviews ? 
                 ( <p className='text-secondary flex items-center gap-[10px]'> 
@@ -118,28 +122,38 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
                 : ( <p className='text-secondary'>No rating available!</p> )
 
                 }
-                <p className= {(gridView ? 'text-[15px]' : (admin && !gridView)? 'text-[15px]' :'text-[18px]')  
+                <p className= {(gridView ? 'text-[15px]' : (admin && !gridView)? 'text-[15px]' 
+                    : wishlistDisplay ? 'text-[16px] font-[500]' : 'text-[18px]')  
                       + ' mt-[10px] capitalize font-[450] line-clamp-2'} style={{wordBreak: 'break-word'}}>
                 {product.title}
                 </p>
               </div>
               {
                 !gridView && 
-                  <p className={`${(admin && !gridView)? 'text-[12px]' : 'text-[14px]'} text-wrap break-words line-clamp-3`} 
-                    style={{wordBreak: 'break-word'}}>
+                  <p className={`${( (admin && !gridView) || wishlistDisplay)? 'text-[12px]' : 'text-[14px]'} text-wrap 
+                    break-words line-clamp-3`} style={{wordBreak: 'break-word'}}>
                        { capitalizeFirstLetter(product.subtitle) } 
                   </p>
               }
               <div>
 
+                {
+                  product.stock <= 5 &&
+                  <p className='text-[13px] text-red-500 mb-[5px]'>
+                     { product.stock <= 0 ? 'Out of Stock' :  `Only ${product.stock} items in Stock!`}
+                  </p>
+                }
+
                 <p className={`${(admin && !gridView)? 'text-[16px]' : (gridView) 
-                    ? 'text-[16px]' : 'text-[18px]'} font-[500] tracking-[0.5px]`}> &#8377; {product.price}</p>
+                    ? 'text-[16px]' : wishlistDisplay ? 'text-[17px]' : 'text-[18px]'} font-[500] tracking-[0.5px]`}> 
+                      &#8377; {product.price}
+                </p>
                 {
                   !gridView && 
                   <div className='mt-[10px]'>
                     {product.tags.map(tag=> 
-                      <span className={`${admin? 'text-[12px]' :'text-[13px]'} px-[14px] py-[1px] border-[1.5px]  border-[#eae0f0]
-                         rounded-[7px] text-secondary mr-[1rem]`}> 
+                      <span className={`px-[14px] py-[1px] ${admin? 'text-[12px]' : wishlistDisplay? 'text-[11px]' : 'text-[13px]'} 
+                        border-[1.5px]  border-[#eae0f0] rounded-[7px] text-secondary mr-[1rem]`}> 
                         {tag} 
                       </span>
                   )}
@@ -160,7 +174,7 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
           
       </div>
     }
-    <div>
+    <div className={` ${wishlistDisplay && 'ml-[1.5rem]'} `}>
 
       <Pagination productCounts={productCounts} currentPage={currentPage} currentPageChanger={currentPageChanger} limiter={limiter} />
 

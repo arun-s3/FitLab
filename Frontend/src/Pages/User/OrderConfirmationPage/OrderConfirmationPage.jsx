@@ -59,7 +59,7 @@ export default function OrderConfirmationPage(){
                 {`We sent an email to ${user.email} with your order confirmation and receipt. If the email hasn't arrived within two
                 minutes, please do check your spam folder for the mail`}
               </p>
-                <SiteButtonSquare onClick={()=> navigate('/shop/products')}>
+                <SiteButtonSquare clickHandler={()=> navigate('/products')}>
                   Continue Shopping
                 </SiteButtonSquare>
             </div>

@@ -13,7 +13,8 @@ import {searchProduct, getAllProducts} from '../../Slices/productSlice'
 import {SearchInput} from '../FromComponents/FormComponents'
 
 
-export default function ProductListingTools({admin, showByGrid, setShowByGrid, showByTable, sortHandlers, limiter, queryOptions, setQueryOptions}){
+export default function ProductListingTools({admin, showByGrid, setShowByGrid, showByTable, sortHandlers, sortMenu, limiter, queryOptions, 
+    setQueryOptions, wishlistDisplay = false}){
 
     const {sorts, setSorts} = sortHandlers
     const {limit, setLimit} = limiter
@@ -24,14 +25,6 @@ export default function ProductListingTools({admin, showByGrid, setShowByGrid, s
 
     const {products, productCounts} = useSelector(state=> state.productStore)
     const dispatch = useDispatch()
-
-    const sortMenu = [
-        {name: 'Price: High to Low', value:'price', order:'-1', invisibleOnTable: true},
-        {name: 'Price: Low to High', value:'price', order:'1', invisibleOnTable: true},
-        {name: 'Ratings: High to Low', value:'averageRating', order:'1'}, {name: 'Ratings: Low to High', value:'averageRating', order:'-1'},
-        {name: 'Featured', value:'featured'},
-        {name: 'Best Sellers', value:'bestSellers'}, {name: 'Newest Arrivals', value:'newestArrivals'}
-    ]
 
     const limitValues = [9, 12, 15, 18]
 
@@ -101,11 +94,16 @@ export default function ProductListingTools({admin, showByGrid, setShowByGrid, s
 
         <div className='flex justify-between' id='ProductListingTools'>
 
-            <input type='search' placeholder='Search Fitlab..' className='h-[34px] w-[34rem] text-secondary rounded-[7px] placeholder:text-[11px]'
+            <input type='search' placeholder={wishlistDisplay ? 'Search Wishlist...' : 'Search Fitlab..'} 
+              className={`h-[34px] w-[34rem] text-secondary rounded-[7px] placeholder:text-[11px] 
+                 ${ wishlistDisplay ? 'border-2 border-dropdownBorder shadow-sm focus:ring-2 focus:ring-secondary focus:border-0 focus:shadow-lg' 
+                    : 'search-fitlab focus:shadow-lg'} `}
                  onChange={(e)=> searchHandler(e)} />
+
 
             <div className='flex gap-[2rem] items-center'>
 
+            { !wishlistDisplay &&
             <div className='flex items-center gap-[10px]'>
                 <span className='text-[13px] font-[500]'> Showing </span>
                 <div className='flex items-center justify-center bg-secondaryLighter rounded-[4px] text-[12px] text-secondary
@@ -126,6 +124,7 @@ export default function ProductListingTools({admin, showByGrid, setShowByGrid, s
                     }
                 </div>
             </div>
+            }
 
             <div className='flex items-center sort-by relative sort-dropdown cursor-pointer'
                  onClick={(e)=> toggleStickyDropdown(e, 'sortDropdown')}>

@@ -13,15 +13,16 @@ import TestAddressPage from './Pages/User/TesterPages/TestAddressPage'
 import TestRandomPage from './Pages/User/TesterPages/TestRandomPage'
 import AddressManagementPage from './Pages/User/AddressManagementPage/AddressManagementPage'
 import AddressListingPage from './Pages/User/AddressListingPage/AddressListingPage'
-import UserPageWapper from './Pages/User/UserPageWapper/UserPageWapper'
+import UserPageLayout from './Pages/User/UserPageLayout/UserPageLayout'
 import ProductDetailPage from './Pages/User/ProductDetailPage/ProductDetailPage'
+import WishlistPage from './Pages/User/WishlistPage/WishlistPage'
 import CartPage from './Pages/User/CartPage/CartPage'
 import CheckoutPage from './Pages/User/CheckoutPage/CheckoutPage'
 import OrderConfirmationPage from './Pages/User/OrderConfirmationPage/OrderConfirmationPage'
 import OrderHistoryPage from './Pages/User/OrderHistoryPage/OrderHistoryPage'
 
 import AdminSignInPage from './Pages/Admin/AdminSignInPage/AdminSignInPage'
-import AdminPageWrapper from './Pages/Admin/AdminPageWrapper/AdminPageWrapper'
+import AdminPageLayout from './Pages/Admin/AdminPageLayout/AdminPageLayout'
 import PrivateAdminRoutes from './Components/PrivateAdminRoutes/PrivateAdminRoutes'
 import UserPresenceErrorPage from './Pages/Admin/AdminErrorPages/UserPresenceErrorPage'
 import AdminCustomersPage from './Pages/Admin/AdminCustomersPage/AdminCustomersPage'
@@ -61,7 +62,7 @@ export default function App(){
                 </Route>
                 <Route path='signin' element={<SignUpAndInPage type='signin' />}/>
                 <Route path='forgot-password' element={<ForgotAndResetPasswordPage/>}/>
-                <Route path='account' element={<UserAccountPage/>}/>
+                {/* <Route path='account' element={<UserAccountPage/>}/> */}
                 <Route path='products'>
                     <Route index element={<ProductListPage/>}/>
                 </Route>
@@ -72,14 +73,20 @@ export default function App(){
                 <Route path='checkout' element={<CheckoutPage/>} />
                 <Route path='order-confirm' element={<OrderConfirmationPage/>} />
                 {/* <Route path='order-completed' element={<OrderCompletedPage/>}  /> */}
-                {/* <Route element={<UserPageWapper/>} > */}
+                <Route element={<UserPageLayout/>} >
+                    <Route path='account'>
+                        <Route index element={<UserAccountPage/>}/>
+                        <Route path='addresses'>
+                            <Route index element={<AddressListingPage/>}/>
+                            <Route path='add' element={<AddressManagementPage/>}/>
+                            <Route path='edit' element={<AddressManagementPage editAddresses={true}/>}/>
+                        </Route>   
+                    </Route>
+                    <Route path='wishlist' element={<WishlistPage/>} />
+                    {/* <Route path='wishlist-test' element={<WishlistPage/>} /> */}
+                </Route>
                 <Route path='orders' element={<OrderHistoryPage/>} />
-                <Route path='profile'>
-                    <Route path='addresses'>
-                        <Route index element={<AddressListingPage/>}/>
-                        <Route path='add' element={<AddressManagementPage/>}/>
-                        <Route path='edit' element={<AddressManagementPage editAddresses={true}/>}/>
-                    </Route>    
+                <Route path='profile'> 
                 </Route>
                 {/* </Route> */}
 
@@ -87,7 +94,7 @@ export default function App(){
                     <Route path="signin" element={<AdminSignInPage/>}/>
                     <Route element={<PrivateAdminRoutes/>}>
                         <Route path='image-editor' element={<ImageEditor/>} />
-                        <Route element={<AdminPageWrapper/>}>
+                        <Route element={<AdminPageLayout/>}>
                             <Route path="dashboard" element={<AdminDashboardPage/>} />
                             <Route path="customers" element={<AdminCustomersPage/>} />
                             <Route path='products'>

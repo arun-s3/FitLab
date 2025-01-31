@@ -1,5 +1,8 @@
 import React, { useEffect } from 'react'
 import './CartSidebar.css'
+import {useNavigate} from 'react-router-dom'
+import {useSelector} from 'react-redux'
+
 import {X, Minus, Plus, Trash} from 'lucide-react'
 
 import {SiteSecondaryFillImpButton} from '../SiteButtons/SiteButtons'
@@ -8,9 +11,15 @@ export default function CartSidebar({ isOpen, onClose, packedupCart, removeFromT
 
   // const total = cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
 
+  const {cart, productAdded, productRemoved, loading, error, message} = useSelector(state=> state.cart)
+  const navigate = useNavigate()
+
   useEffect(()=> {
     if(packedupCart){
       console.log("packedupCart--->", packedupCart)
+    }
+    if(error){
+      toast.error(error)
     }
   },[packedupCart])
 
@@ -62,7 +71,7 @@ export default function CartSidebar({ isOpen, onClose, packedupCart, removeFromT
                <span>Total:</span>
                <span>&#8377; {packedupCart.absoluteTotal ? packedupCart.absoluteTotal.toFixed(2) : null} </span>
              </div>
-             <SiteSecondaryFillImpButton clickHandler={()=> alert('Proceeding to Checkout')}>
+             <SiteSecondaryFillImpButton clickHandler={()=> navigate('/checkout')}>
                Proceed to Checkout
              </SiteSecondaryFillImpButton>
            </div>

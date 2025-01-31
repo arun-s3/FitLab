@@ -2,6 +2,9 @@
     border: 2px solid rgb(243, 231, 252);
     box-shadow: 2px 2px 20px rgba(0,0,0,0.1);
 }
+/* #userSidebar main li{
+    padding-inline: 40px;
+} */
 #userSidebar main li:hover::before{
     content: '';
     position: absolute;

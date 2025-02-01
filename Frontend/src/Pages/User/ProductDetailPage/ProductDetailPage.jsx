@@ -72,7 +72,7 @@ export default function ProductDetailPage(){
       setPackedupCart(cart)
       dispatch(resetCartStates())
     }
-  },[error, productAdded, productRemoved])
+  },[error, productAdded, productRemoved, cart])
 
   const reviews = [
     {

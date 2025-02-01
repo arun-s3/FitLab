@@ -886,6 +886,10 @@ select{
   left: -34px;
 }
 
+.left-\[-3px\]{
+  left: -3px;
+}
+
 .left-\[-40px\]{
   left: -40px;
 }
@@ -914,8 +918,16 @@ select{
   left: 300px;
 }
 
+.left-\[32\%\]{
+  left: 32%;
+}
+
 .left-\[3px\]{
   left: 3px;
+}
+
+.left-\[45\%\]{
+  left: 45%;
 }
 
 .left-\[4rem\]{
@@ -996,6 +1008,10 @@ select{
 
 .top-\[-39px\]{
   top: -39px;
+}
+
+.top-\[-46\%\]{
+  top: -46%;
 }
 
 .top-\[-8px\]{
@@ -1082,6 +1098,10 @@ select{
   top: 50%;
 }
 
+.top-\[55\%\]{
+  top: 55%;
+}
+
 .top-\[5px\]{
   top: 5px;
 }
@@ -1102,6 +1122,18 @@ select{
   top: 100%;
 }
 
+.left-\[\]{
+  left: ;
+}
+
+.top-\[-\%\]{
+  top: -%;
+}
+
+.top-\[-32\%\]{
+  top: -32%;
+}
+
 .z-10{
   z-index: 10;
 }
@@ -1120,6 +1152,10 @@ select{
 
 .z-\[1\]{
   z-index: 1;
+}
+
+.z-\[20\]{
+  z-index: 20;
 }
 
 .z-\[2\]{
@@ -1726,6 +1762,10 @@ select{
   height: 18px;
 }
 
+.h-\[19px\]{
+  height: 19px;
+}
+
 .h-\[1rem\]{
   height: 1rem;
 }
@@ -1915,6 +1955,14 @@ select{
   height: 100vh;
 }
 
+.h-\[\]{
+  height: ;
+}
+
+.h-\[18\]{
+  height: 18;
+}
+
 .min-h-\[2rem\]{
   min-height: 2rem;
 }
@@ -2007,6 +2055,10 @@ select{
   width: 13px;
 }
 
+.w-\[140px\]{
+  width: 140px;
+}
+
 .w-\[14rem\]{
   width: 14rem;
 }
@@ -2041,6 +2093,10 @@ select{
 
 .w-\[18rem\]{
   width: 18rem;
+}
+
+.w-\[19px\]{
+  width: 19px;
 }
 
 .w-\[1px\]{
@@ -2254,6 +2310,14 @@ select{
 
 .w-full{
   width: 100%;
+}
+
+.w-\[\]{
+  width: ;
+}
+
+.w-\[18\]{
+  width: 18;
 }
 
 .max-w-2xl{
@@ -2776,6 +2840,10 @@ select{
   overflow-y: hidden;
 }
 
+.overflow-y-scroll{
+  overflow-y: scroll;
+}
+
 .whitespace-nowrap{
   white-space: nowrap;
 }
@@ -2878,6 +2946,14 @@ select{
 
 .rounded-xl{
   border-radius: 0.75rem;
+}
+
+.rounded-\[\]{
+  border-radius: ;
+}
+
+.rounded-\[10\]{
+  border-radius: 10;
 }
 
 .rounded-b-\[4px\]{
@@ -3231,6 +3307,11 @@ select{
 .border-l-borderLight{
   --tw-border-opacity: 1;
   border-left-color: rgb(222 226 231 / var(--tw-border-opacity));
+}
+
+.border-l-white{
+  --tw-border-opacity: 1;
+  border-left-color: rgb(255 255 255 / var(--tw-border-opacity));
 }
 
 .border-r-borderLight{
@@ -3920,6 +4001,31 @@ select{
   padding-bottom: 9px;
 }
 
+.px-\[\]{
+  padding-left: ;
+  padding-right: ;
+}
+
+.px-\[1\]{
+  padding-left: 1;
+  padding-right: 1;
+}
+
+.px-\[12x\]{
+  padding-left: 12x;
+  padding-right: 12x;
+}
+
+.py-\[\]{
+  padding-top: ;
+  padding-bottom: ;
+}
+
+.py-\[10\]{
+  padding-top: 10;
+  padding-bottom: 10;
+}
+
 .pb-0{
   padding-bottom: 0px;
 }
@@ -4306,6 +4412,14 @@ select{
 
 .font-semibold{
   font-weight: 600;
+}
+
+.font-\[5\]{
+  font-weight: 5;
+}
+
+.font-\[00\]{
+  font-weight: 00;
 }
 
 .uppercase{

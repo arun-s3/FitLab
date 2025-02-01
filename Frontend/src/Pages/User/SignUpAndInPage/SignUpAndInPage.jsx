@@ -214,7 +214,13 @@ export default function SignUpAndInPage({type}){
     return(
        <>
         <section style={bgImg} className='h-[130vh]' id="signup-and-in">
-            <Header/>
+
+            <header>
+
+                <Header/>
+                
+            </header>
+        
             <main className='transform translate-x-[-50%] translate-y-[-50%] absolute top-[50%] left-[50%] w-[40%]
                              rounded-[22px] px-[50px] ' style={ type=='signup'? {marginBlock:'10%'}:{marginBlock:'2%'} }>
                 <h1 className='text-secondary font-funCity text-[35px] mb-[60px] text-left my-[50px]'>

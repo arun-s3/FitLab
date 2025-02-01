@@ -1,8 +1,12 @@
 
-/* #home{
-    font-weight: 700;
-} */
-
-#icons >*{
+#headerMenu #icons >*{
     cursor:pointer;
+}
+
+#headerMenu i svg:hover{
+    color: var(--PRIMARYDARK);
+    transform: scale(110%);
+    transition-property: transform;
+    transition-delay: 0.1s;
+    transition-duration: 0.2s;
 }

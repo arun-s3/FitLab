@@ -262,8 +262,12 @@ export default function ForgotAndResetPasswordPage(){
         <>
             <section style={bgImg} className='h-[130vh] pt-[1rem]' id="ForgotAndResetPasswordPage">
 
-                <Header/>
-
+                <header>
+                
+                  <Header/>
+                                
+                </header>
+                
                 <main className='transform translate-x-[-50%] translate-y-[-50%] absolute top-[50%] left-[50%] w-[35%]
                                  rounded-[22px] px-[50px] ' style={{marginBlock:'3%'}}>
                     <div className="w-full max-w-md rounded-[22px] p-8 container">

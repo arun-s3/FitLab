@@ -14,6 +14,7 @@ import Pagination from '../Pagination/Pagination'
 import StarGenerator from '../StarGenerator/StarGenerator';
 import {SiteButtonSquare} from '../SiteButtons/SiteButtons';
 import {capitalizeFirstLetter} from '../../Utils/helperFunctions'
+import {addToCart} from '../../Slices/cartSlice'
 import ProductsTableView from './ProductsTableView';
 
 export default function ProductsDisplay({gridView, showByTable, pageReader, limiter, queryOptions, showTheseProducts, admin, wishlistDisplay}) {
@@ -25,6 +26,8 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
   const dispatch = useDispatch()
   const {products:items, productCounts} = useSelector(state=> state.productStore)
   const [products, setProducts] = useState([])
+
+  const [productIsHovered, setProductIsHovered] = useState()
 
   const navigate = useNavigate()
 
@@ -67,6 +70,13 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
     setCurrentPage(page)
   }
 
+  const handleAddToCart = (id) => {
+     console.log("Inside handleAddToCart()--")
+     dispatch( addToCart({productId: id, quantity: 1}) )
+     console.log("Dispatched successfully")
+  }
+
+
   return (
     <>
      <div className={`${gridView ? 'grid grid-cols-3 gap-y-[2rem]' : showByTable ? '' : 'flex flex-col gap-[2rem]'}
@@ -74,9 +84,11 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
 
       { !showByTable && 
         products.map((product) => (
-          <div key={product._id} className= {gridView ? 'w-[275px]' : 'flex gap-[1rem] w-full'} 
-                    onClick={()=> !admin && navigate('/shop/product', {state: {product}})}>
-            <figure className='relative h-auto rounded-[10px] thumbnail cursor-pointer'>
+          <div key={product._id} className={` ${gridView ? 'w-[275px]' : 'flex gap-[1rem] w-full'}`}
+                    onMouseEnter={()=> setProductIsHovered(product._id)} 
+                      onMouseLeave={()=> setProductIsHovered('')}>
+            <figure className={`relative h-auto rounded-[10px] thumbnail cursor-pointer ${productIsHovered === product._id && 'shadow-lg'}`}
+                onClick={()=> !admin && navigate('/shop/product', {state: {product}})}>
               <img src={product.thumbnail.url || product.thumbnail} alt={product.title} 
                 className={`rounded-[10px] ${wishlistDisplay ? 'h-[250px]' : 'h-[275px]'} object-cover`}/> 
               <figcaption className={`${admin ? 'top-[2px] left-[-40px]' : 'bottom-[12px]'} absolute w-full text-center`}>
@@ -97,7 +109,10 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
                   //   <SiteButtonSquare customStyle={{paddingBlock:'6px', paddingInline:'22px', fontWeight:'430', borderRadius:'6px'}}> Block </SiteButtonSquare>
                   // </div> 
                   :
-                  <SiteButtonSquare customStyle={{width:'12rem', paddingBlock:'8px', fontSize:'13px'}}> Add to Cart </SiteButtonSquare>
+                  <SiteButtonSquare clickHandler={()=> handleAddToCart(product._id)} 
+                    customStyle={{width:'12rem', paddingBlock:'8px', fontSize:'13px'}}>
+                       Add to Cart 
+                  </SiteButtonSquare>
                 }
               </figcaption>
               { !admin &&
@@ -110,7 +125,8 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
             </figure>
             <div className={` ${gridView? 'mt-[10px] flex flex-col gap-[5px] pl-[10px] py-[15px] rounded-[10px] product-infos' 
                                  : 'inline-flex flex-col gap-[10px] justify-between px-[1rem] py-[2rem] rounded-[10px] ml-[1rem] product-infos w-full'} 
-                                      ${ wishlistDisplay && 'mr-[1rem]' } cursor-pointer`}>
+                                      ${ wishlistDisplay && 'mr-[1rem]' } ${productIsHovered === product._id && 'shadow-lg'} cursor-pointer`}
+                onClick={()=> !admin && navigate('/shop/product', {state: {product}})}>
               <div>
               {product?.reviews ? 
                 ( <p className='text-secondary flex items-center gap-[10px]'> 
@@ -124,7 +140,7 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
                 }
                 <p className= {(gridView ? 'text-[15px]' : (admin && !gridView)? 'text-[15px]' 
                     : wishlistDisplay ? 'text-[16px] font-[500]' : 'text-[18px]')  
-                      + ' mt-[10px] capitalize font-[450] line-clamp-2'} style={{wordBreak: 'break-word'}}>
+                      + ' mt-[10px] capitalize font-[450] line-clamp-2 hover:text-secondary hover:underline'} style={{wordBreak: 'break-word'}}>
                 {product.title}
                 </p>
               </div>

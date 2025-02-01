@@ -4,8 +4,9 @@ import {useDispatch, useSelector} from 'react-redux'
 import {Link} from 'react-router-dom'
 import {debounce} from 'lodash'
 
-import {VscSettings} from "react-icons/vsc";
-import {RiArrowDropUpLine} from "react-icons/ri";
+import {VscSettings} from "react-icons/vsc"
+import {RiArrowDropUpLine} from "react-icons/ri"
+import {toast} from 'react-toastify'
 
 import Header from '../../../Components/Header/Header'
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
@@ -15,7 +16,9 @@ import TestPriceFilter from '../../../Components/PriceSliderAndFilter/TestPriceS
 import ProductsDisplay from '../../../Components/ProductsDisplay/ProductsDisplay'
 import ProductListingTools from '../../../Components/ProductListingTools/ProductListingTools'
 import CategoryDisplay from '../../../Components/CategoryDisplay/CategoryDisplay'
+import CartSidebar from '../../../Components/CartSidebar/CartSidebar'
 import {getAllProducts, toggleProductStatus} from '../../../Slices/productSlice'
+import {addToCart, removeFromCart, resetCartStates} from '../../../Slices/cartSlice'
 import {capitalizeFirstLetter} from '../../../Utils/helperFunctions'
 
 
@@ -51,6 +54,11 @@ export default function ProductList({admin}){
     const [popularProductsShowLabel, setPopularProductsShowLabel] = useState('See more')
 
     const [queryOptions, setQueryOptions] = useState({})
+
+    const [isCartOpen, setIsCartOpen] = useState(false)
+    const [packedupCart, setPackedupCart] = useState({})
+
+    const {cart, productAdded, productRemoved, loading, error, message} = useSelector(state=> state.cart)    
 
     const popularProducts = [
         'benches', 'gymbell', 'treadmill', 'Ellipticals', 'bikes', 'proteinPowders', 'mutistationMachines', 'resistanceBands', 'yogaMats'
@@ -96,6 +104,28 @@ export default function ProductList({admin}){
         }
     },[minPrice, maxPrice])
 
+    useEffect(()=> {
+        if(cart?.products && cart.products.length > 0){
+            setPackedupCart(cart)
+            setIsCartOpen(true)
+        }
+        if(error && error.toLowerCase().includes('product')){
+          console.log("Error from ProductDetailPage-->", error)
+          toast.error(error)
+          dispatch(resetCartStates())
+        }
+        if(productAdded){
+          console.log("Product added to cart successfully!")
+          setPackedupCart(cart)
+          setIsCartOpen(true)
+          dispatch(resetCartStates())
+        }
+        if(productRemoved){
+          setPackedupCart(cart)
+          dispatch(resetCartStates())
+        }
+    },[error, productAdded, productRemoved])
+
     // const categoryClickHandler = (e)=>{
     //     const value = e.target.innerText.toLowerCase()
     //     if( filter.categories.includes(e.target.innerText.toLowerCase()) ){
@@ -136,6 +166,17 @@ export default function ProductList({admin}){
         }
     })
    }
+
+    const updateQuantity = (id, newQuantity) => {
+       dispatch( addToCart({productId: id, quantity: newQuantity}) )
+    }
+     
+   
+    const removeFromTheCart = (id) => {
+       dispatch(removeFromCart({productId: id}))
+    }
+
+
 
     return(
         <>  
@@ -233,6 +274,10 @@ export default function ProductList({admin}){
                              queryOptions={queryOptions}/>
 
                     </div>
+
+                        <CartSidebar isOpen={isCartOpen} onClose={()=> setIsCartOpen(false)} packedupCart={packedupCart} 
+                            updateQuantity={updateQuantity} removeFromTheCart={removeFromTheCart} retractedView={true} />
+                        
 
                 </section>
             </main>

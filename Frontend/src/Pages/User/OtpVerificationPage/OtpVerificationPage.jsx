@@ -234,7 +234,13 @@ export default function OtpVerificationPage(){
     return(
         <>
         <section style={bgImg} className='h-[130vh]' id="otp-verify">
-            <Header/>
+
+            <header>
+            
+                <Header/>
+                            
+            </header>
+
             <main className='transform translate-x-[-50%] translate-y-[-50%] absolute top-[50%] left-[50%] w-[35%]
                              rounded-[22px] px-[50px] ' style={{marginBlock:'7%'}}>
                 <h1 className='text-secondary font-funCity text-[27px] mb-[40px] text-center my-[50px]'>

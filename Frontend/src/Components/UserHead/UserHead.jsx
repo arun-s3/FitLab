@@ -1,10 +1,14 @@
 import React,{useState, useEffect, useRef} from 'react'
 import './UserHead.css'
-import {IoMdArrowDropdown, IoMdArrowDropup} from "react-icons/io";
-import {useSelector, useDispatch} from 'react-redux'
 import {Link} from 'react-router-dom'
-import {signout} from '../../Slices/userSlice'
+import {useSelector, useDispatch} from 'react-redux'
+
+import {Clock, CreditCard, Home, LogOut, MapPin} from 'lucide-react'
+import {IoMdArrowDropdown, IoMdArrowDropup} from "react-icons/io";
 import axios from 'axios'
+
+import {signout} from '../../Slices/userSlice'
+
 
 export default function UserHead(){
 
@@ -15,6 +19,13 @@ export default function UserHead(){
 
     const listRef = useRef(null)
     const [beVisible, setBeVisible] = useState(false)
+
+    const menuItems = [
+        { icon: Home, label: 'Account', path: '/account'},
+        { icon: CreditCard, label: 'Wallet', path: '' },
+        { icon: Clock, label: 'Order History', path: '/orders' },
+        { icon: MapPin, label: 'Manage Addresses', path: '/account/addresses' },
+    ]
 
     const toggleList = {
         showList: ()=>listRef.current.style.display='inline-block',
@@ -56,8 +67,8 @@ export default function UserHead(){
     },[])
 
     return(
-            <div className='ml-[70px] relative' onMouseEnter={toggleList.showList} onMouseLeave={mouseLeaveHandler} onClick={clickHandler}>
-                <div className='flex' onMouseEnter={toggleList.showList}>
+            <div className='ml-[70px] relative' onMouseEnter={toggleList.showList} onMouseLeave={mouseLeaveHandler} onClick={clickHandler}> 
+                <div className='flex' onMouseEnter={toggleList.showList}>  
                     <div className='w-[33px] h-[33px] rounded-[15px]' id="image">
                         <img src={profilePic} alt="" className='rounded-[15px]' id="image"/>
                     </div>
@@ -65,13 +76,28 @@ export default function UserHead(){
                         { beVisible? <IoMdArrowDropup/>:<IoMdArrowDropdown/>}
                     </div>
                 </div>
-                <div className='absolute right-0 pt-[5px]' onMouseEnter={toggleList.showList}>
-                    <ul className='bg-white text-black pt-[5px] text-[14px] rounded-[8px] hidden'
-                                 id="userhead-list" ref={listRef} >
-                        <li> {user.email.length>15? user.email.slice(0,15)+"...": user.emai} </li>
-                        <li> <Link to={"/"}>Dashboard</Link> </li>
-                        <li> <Link to={"/"}>Profile</Link> </li>
-                        <li> <Link onClick={()=>{user.googleId? dispatch(signout(user.googleId)):dispatch(signout())}}>Sign Out</Link> </li>
+                <div className='absolute w-[200px] right-0 pt-[5px]' onMouseEnter={toggleList.showList}> 
+                    <ul className='py-[1rem] w-[175px] bg-white text-black pt-[5px] text-[14px] border border-dropdownBorder
+                         rounded-[8px] hidden' id="userhead-list" ref={listRef} >
+                        <li className='my-[3px]'> {user.email.length>15? user.email.slice(0,15)+"...": user.email} </li>
+                        {
+                            menuItems.map(item=> (
+                                <li className='hover:text-secondary hover:font-[500]'> 
+                                    <Link to={item.path} className='flex items-center gap-[10px]'> 
+                                        <item.icon className='h-[15px] w-[15px] text-primaryDark hover:text-primary' />  
+                                        <span> {item.label} </span>
+                                    </Link>
+                                </li>
+                            ))
+                        }
+                        <li className='ml-[3px] pt-[12px] text-red-500 hover:text-[15px] hover:font-[500] border-t-[1px] 
+                            border-dotted border-secondary'>
+                            <Link onClick={()=>{ user.googleId ? dispatch(signout(user.googleId)) : dispatch(signout()) }} 
+                               className='flex items-center gap-[10px]'>
+                                <LogOut className='h-[15px] w-[15px]' />  
+                                <span> Sign Out </span>
+                            </Link> 
+                        </li>
                     </ul>
                 </div>
             </div>

@@ -3,7 +3,7 @@ import './CartSidebar.css'
 import {useNavigate} from 'react-router-dom'
 import {useSelector} from 'react-redux'
 
-import {X, Minus, Plus, SquareArrowRight, CircleArrowRight, ArrowRight, ChevronsRight, ChevronRight, ShoppingCart, SquareArrowOutUpLeft, Trash, Trash2} from 'lucide-react'
+import {X, Minus, Plus, ChevronRight, ShoppingCart, SquareArrowOutUpLeft, Trash, Trash2} from 'lucide-react'
 import {toast} from 'react-toastify'
 
 import {SiteSecondaryFillImpButton} from '../SiteButtons/SiteButtons'
@@ -18,6 +18,10 @@ export default function CartSidebar({ isOpen, onClose, packedupCart, removeFromT
   useEffect(()=> {
     if(packedupCart){
       console.log("packedupCart--->", packedupCart)
+    }
+    if(packedupCart?.products && packedupCart.products.length <= 0){
+      console.log("Closing sidebar...")
+      onClose()
     }
     if(error){
       toast.error(error)

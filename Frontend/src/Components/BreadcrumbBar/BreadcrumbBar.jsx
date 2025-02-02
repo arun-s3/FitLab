@@ -1,7 +1,9 @@
 import React from 'react'
 import './BreadcrumbBar.css'
 import {useLocation, Link} from 'react-router-dom'
-import {RiArrowDropRightLine} from "react-icons/ri";
+
+import {RiArrowDropRightLine} from "react-icons/ri"
+
 
 export default function BreadcrumbBar({heading}){
 
@@ -22,7 +24,9 @@ export default function BreadcrumbBar({heading}){
         currentCrumb=='Home'? breadCrumb+='/' : breadCrumb+=currentCrumb
         return(
             <Link to={breadCrumb} key={currentCrumb}> 
-                <h4 className="text-white inline-block capitalize">{currentCrumb}</h4>
+                <h4 className="text-white inline-block capitalize hover:text-primary hover:font-[500] hover:underline">
+                    {currentCrumb}
+                </h4>
                 { pathArray.indexOf(currentCrumb) == pathArray.length-1? null : <RiArrowDropRightLine className='text-white inline-block h-[26px] w-[26px]'/> }
             </Link>
         )

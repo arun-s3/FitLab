@@ -1,13 +1,14 @@
 import React,{useState, useEffect} from 'react'
+import './UserSidebar.css'
 import {Link, useLocation, useNavigate} from 'react-router-dom'
 import {useSelector} from 'react-redux';
 
-import './UserSidebar.css'
-
-import {Camera, Clock, CreditCard, Heart, Home, Key, LogOut, MapPin, RefreshCw, ShoppingCart} from 'lucide-react'
+import {Camera, ChevronsDown, Clock, CreditCard, Heart, Home, Key, LogOut, MapPin, RefreshCw, ShoppingCart} from 'lucide-react'
 import {IoMdPerson} from "react-icons/io";
 
-export default function UserSidebar({currentPath}){
+export default function UserSidebar({currentPath, openMenuByDefault = true, flexiOpen}){
+
+    const [isMenuOpen, setIsMenuOpen] = useState(openMenuByDefault)
 
     const {user} = useSelector(state=> state.user)
 
@@ -20,10 +21,10 @@ export default function UserSidebar({currentPath}){
         { icon: ShoppingCart, label: 'Shopping Cart', path: '/cart' },
         { icon: Heart, label: 'Wishlist', path: '/wishlist' },
         { icon: RefreshCw, label: 'Compare', path: '/' },
-        { icon: MapPin, label: 'Manage Address', path: '/account/addresses' },
+        { icon: MapPin, label: 'Manage Addresses', path: '/account/addresses' },
         { icon: Key, label: 'Change Password', path: '' },
-        { icon: LogOut, label: 'Log-out', path: '/orders' },
-      ]
+        { icon: LogOut, label: 'Sign out', path: '/orders' },
+    ]
 
     const listMouseOverHandler = (e)=> {
         e.currentTarget.firstElementChild.style.color = '#f1c40f' // primaryDark
@@ -39,7 +40,7 @@ export default function UserSidebar({currentPath}){
     },[])
 
     return(
-        <section id='userSidebar' className='mt-[4rem] w-[13.5rem]'>
+        <section id='userSidebar' className='mt-[4rem] w-[13.5rem] z-[20]'>
             <div className='user flex flex-col justify-center items-center'>
                 <div className='relative w-[75px] h-[75px] rounded-[45px] profilePic'>
                     {
@@ -51,9 +52,17 @@ export default function UserSidebar({currentPath}){
                         <Camera className='w-[15px] h-[15px] text-secondaryLight2 z-[1]' />
                     </div>
                 </div>
-                <h1 className='text-[17px] font-[550]'> {user?.username ? user.username : 'User'} </h1>
+                <div className='flex items-center gap-[4px]'>
+                    <h1 className='text-[17px] font-[550]'> {user?.username ? user.username : 'User'} </h1>
+                    <ChevronsDown className='w-[20px] h-[20px] text-muted hover:text-secondary hover:scale-110 cursor-pointer' 
+                        onMouseEnter={()=> setIsMenuOpen(status=> !status)}/>
+                </div>
             </div>
-            <main className='mt-[10px] w-full h-auto px-[18px] py-[20px] bg-white border border-[#E4E7E9] rounded-[7px]'>
+
+            {
+            isMenuOpen &&
+            <main className='mt-[10px] w-full h-auto px-[18px] py-[20px] bg-white border border-[#E4E7E9] rounded-[7px]'
+                onMouseLeave={()=> flexiOpen && setIsMenuOpen(false)}>
                 <ul className='w-full list-none flex flex-col justify-center gap-[1rem]'>
                     {
                         menuItems.map((item, index)=> (
@@ -75,6 +84,8 @@ export default function UserSidebar({currentPath}){
                     }
                 </ul>
             </main>
+            }
+
         </section>
     )
 }

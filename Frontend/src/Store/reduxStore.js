@@ -8,6 +8,7 @@ import adminReducer from '../Slices/adminSlice'
 import addressReducer from '../Slices/addressSlice'
 import productReducer from '../Slices/productSlice'
 import categoryReducer from '../Slices/categorySlice'
+import wishlistReducer from '../Slices/wishlistSlice'
 import cartReducer from '../Slices/cartSlice'
 import orderReducer from '../Slices/orderSlice'
 
@@ -17,6 +18,7 @@ const rootReducer = combineReducers({
     address: addressReducer,
     productStore: productReducer,
     categoryStore: categoryReducer,
+    wishlist: wishlistReducer,
     cart: cartReducer,
     order: orderReducer
 })

@@ -41,6 +41,7 @@ app.use(cors({
 const userRoutes = require('./Routes/userRoutes.js')
 const addressRoutes = require('./Routes/userAddressRoutes.js')
 const userProductRoutes = require('./Routes/userProductRoutes.js')
+const wishlistRoutes = require('./Routes/wishlistRoutes.js')
 
 const adminRoutes = require('./Routes/adminRoutes.js')
 const adminProductRoutes = require('./Routes/adminProductRoutes.js')
@@ -52,6 +53,7 @@ const orderRoutes = require('./Routes/orderRoutes.js')
 app.use('/', userRoutes)
 app.use('/products', userProductRoutes)
 app.use('/addresses', addressRoutes)
+app.use('/wishlist', wishlistRoutes)
 app.use('/cart', cartRoutes)
 app.use('/order', orderRoutes)
 

@@ -63,12 +63,17 @@ export default function App(){
                 <Route path='signin' element={<SignUpAndInPage type='signin' />}/>
                 <Route path='forgot-password' element={<ForgotAndResetPasswordPage/>}/>
                 {/* <Route path='account' element={<UserAccountPage/>}/> */}
-                <Route path='products'>
+                {/* <Route path='products'>
                     <Route index element={<ProductListPage/>}/>
                 </Route>
                 <Route path='shop'>
                     <Route path='product' element={<ProductDetailPage/>} />
+                </Route> */}
+                <Route path='shop'>
+                    <Route index element={<ProductListPage/>}/>
+                    <Route path='product' element={<ProductDetailPage/>} />
                 </Route>
+
                 <Route path='cart' element={<CartPage/>} />
                 <Route path='checkout' element={<CheckoutPage/>} />
                 <Route path='order-confirm' element={<OrderConfirmationPage/>} />

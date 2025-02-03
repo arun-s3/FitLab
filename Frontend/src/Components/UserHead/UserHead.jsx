@@ -76,7 +76,7 @@ export default function UserHead(){
                         { beVisible? <IoMdArrowDropup/>:<IoMdArrowDropdown/>}
                     </div>
                 </div>
-                <div className='absolute w-[200px] right-0 pt-[5px]' onMouseEnter={toggleList.showList}> 
+                <div className='absolute w-[200px] right-[-40px] pt-[5px] z-[20]' onMouseEnter={toggleList.showList}> 
                     <ul className='py-[1rem] w-[175px] bg-white text-black pt-[5px] text-[14px] border border-dropdownBorder
                          rounded-[8px] hidden' id="userhead-list" ref={listRef} >
                         <li className='my-[3px]'> {user.email.length>15? user.email.slice(0,15)+"...": user.email} </li>

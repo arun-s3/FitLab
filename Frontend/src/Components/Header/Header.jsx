@@ -59,7 +59,7 @@ export default function Header({customStyle}){
                         <Link>Shop by Categories</Link>
                     </li>
                     <li>
-                        <Link to='/products'>Products</Link>
+                        <Link to='/shop'>Products</Link>
                     </li>
                     <li>
                         <Link>Blogs</Link>

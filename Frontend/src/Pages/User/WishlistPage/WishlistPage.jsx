@@ -1,23 +1,30 @@
 import React, {useState, useEffect, useRef, useContext} from 'react'
 import './WishlistPage.css'
 import {useLocation} from 'react-router-dom'
+import {useSelector, useDispatch} from 'react-redux'
 
+import {Search, MoreVertical, ChevronRight, Trash, ArrowRight, Plus} from "lucide-react"
+import {toast} from 'react-toastify'
 
-import {Search, MoreVertical, ChevronRight, Trash, ArrowRight} from "lucide-react"
-
-import {UserPageLayoutContext} from '../UserPageLayout/UserPageLayout'
 import ProductsDisplay from '../../../Components/ProductsDisplay/ProductsDisplay'
 import ProductListingTools from '../../../Components/ProductListingTools/ProductListingTools'
+import WishlistModal from './WishlistModal'
+import {createList, addProductToList} from '../../../Slices/wishlistSlice'
+import {addToCart, removeFromCart, resetCartStates} from '../../../Slices/cartSlice'
+import CartSidebar from '../../../Components/CartSidebar/CartSidebar'
+import {UserPageLayoutContext} from '../UserPageLayout/UserPageLayout'
 
 
 
 export default function WishlistPage(){
 
-    const {setBreadcrumbHeading, setPageLocation} = useContext(UserPageLayoutContext)
+    const {setBreadcrumbHeading, setContentTileClasses, setPageLocation} = useContext(UserPageLayoutContext)
     setBreadcrumbHeading('Wishlist')
               
     const location = useLocation()
     setPageLocation(location.pathname)
+
+    setContentTileClasses('basis-[85%] mt-[2rem]')
 
     const [currentList, setCurrentList] = useState('')
 
@@ -27,6 +34,16 @@ export default function WishlistPage(){
     const [sorts, setSorts] = useState({})
     
     const [queryOptions, setQueryOptions] = useState({})
+
+    const [isWishlistModalOpen, setIsWishlistModalOpen] = useState(false)
+
+    const [isCartOpen, setIsCartOpen] = useState(false)
+    const [packedupCart, setPackedupCart] = useState({})
+
+    const {cart, productAdded, productRemoved, error, message} = useSelector(state=> state.cart) 
+    const {wishlist, listCreated, listRemoved, listUpdated, loading, wishlistError, wishlistSuccess} = useSelector(state=> state.wishlist) 
+
+    const dispatch = useDispatch()
     
 
     const listNames = [
@@ -44,13 +61,55 @@ export default function WishlistPage(){
         backgrounSize: 'cover'
     }
 
+    useEffect(()=> {
+        if(listCreated){
+            toast.success("Created wishlist successfully!")
+        }
+    },[listCreated])
 
+    useEffect(()=> {
+        if(cart?.products && cart.products.length > 0){
+            setPackedupCart(cart)
+            setIsCartOpen(true)
+        }
+        if(error && error.toLowerCase().includes('product')){
+          console.log("Error from ProductDetailPage-->", error)
+          toast.error(error)
+          dispatch(resetCartStates())
+        }
+        if(productAdded){
+          console.log("Product added to cart successfully!")
+          setPackedupCart(cart)
+          setIsCartOpen(true)
+          dispatch(resetCartStates())
+        }
+        if(productRemoved){
+          setPackedupCart(cart)
+          dispatch(resetCartStates())
+        }
+    },[error, productAdded, productRemoved])
+
+    const updateQuantity = (id, newQuantity)=> {
+        dispatch( addToCart({productId: id, quantity: newQuantity}) )
+    }
+         
+    const removeFromTheCart = (id)=> {
+        dispatch(removeFromCart({productId: id}))
+    }
+
+    const handleSubmit = (wishlistDetails)=> {
+        console.log("New Wishlist Data:", wishlistDetails)
+        console.log("Dispatching....")
+        dispatch( createList({wishlistDetails}) )
+    }
+
+    
     return(
 
-            <section id='WishlistPage' className='basis-[85%] mt-[2rem] flex gap-[13px]'>
+            <section id='WishlistPage' className='flex gap-[13px]'>
 
-                <div className={`mt-[1rem] p-[12px] h-fit basis-[20%] bg-[rgba(246,239,252)] border border-dashed border-secondary 
-                    rounded-[7px]`}>
+                <div className='mt-[1rem] basis-[20%]'>
+                <div className={`p-[12px] h-fit bg-[rgba(246,239,252)] border border-dashed border-secondary rounded-[7px]`}>
                     <h2 className='mb-[1.3rem] mx-[3px] flex items-center justify-between'>
                         <span className='text-[17px] text-secondary font-[550] uppercase tracking-[0.2px]' style={{wordSpacing: '6px'}}> 
                             All Lists 
@@ -88,6 +147,20 @@ export default function WishlistPage(){
                     </div>
                 </div>
 
+                <div className='mb-[2rem] w-full h-[3rem] pl-[1rem] flex items-center gap-[10px] cursor-pointer'>
+
+                    <Plus className='text-secondary w-[20px] h-[20px]'/>
+                    <span className='text-[14px] text-muted font-[500] tracking-[0.5px] capitalize' 
+                        onClick={()=> setIsWishlistModalOpen(true)}>
+                             Add New List 
+                    </span>
+                    
+                    <WishlistModal isOpen={isWishlistModalOpen} onClose={()=> setIsWishlistModalOpen(false)} onSubmit={handleSubmit} />
+
+                </div>
+
+                </div>
+
                 <div className='mt-[1rem] pt-[2rem] basis-[80%] bg-white border border-dropdownBorder rounded-[7px]' id='wishlist-products'>
                             
                     <ProductListingTools showByGrid={showByGrid} setShowByGrid={setShowByGrid} sortHandlers={{sorts, setSorts}}
@@ -100,6 +173,9 @@ export default function WishlistPage(){
                             queryOptions={queryOptions} wishlistDisplay={true}/>
 
                     </div>
+
+                    <CartSidebar isOpen={isCartOpen} onClose={()=> setIsCartOpen(false)} packedupCart={packedupCart} 
+                        updateQuantity={updateQuantity} removeFromTheCart={removeFromTheCart} retractedView={true} />
                         
                 </div>
 

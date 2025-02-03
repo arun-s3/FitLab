@@ -8,10 +8,13 @@ import Footer from '../../../Components/Footer/Footer'
 
 export const UserPageLayoutContext = createContext()
 
+
 export default function UserPageLayout(){
 
     const [breadcrumbHeading, setBreadcrumbHeading] = useState('')
     const [pageLocation, setPageLocation] = useState('')
+    const [contentTileClasses, setContentTileClasses] = useState('')
+
     // const [mainElementStyles, setMainElementStyles ] = useState('')
     // const [sideBarSectionStyles, setSideBarSectionStyles] = useState('')
     // const [contentSectionStyles, setContentSectionStyles] = useState('')
@@ -22,11 +25,8 @@ export default function UserPageLayout(){
         backgrounSize: 'cover'
     }
 
-    // const location = useLocation()
-    // const breadcrumbHeading = location.pathname.split('/')
-
     return(
-        <UserPageLayoutContext.Provider value={{breadcrumbHeading, setBreadcrumbHeading, setPageLocation}} >
+        <UserPageLayoutContext.Provider value={{breadcrumbHeading, setBreadcrumbHeading, setContentTileClasses, setPageLocation}} >
             <section id='UserPageLayout'>
                 <header style={headerBg}>
 
@@ -44,7 +44,7 @@ export default function UserPageLayout(){
                         
                     </div>
 
-                    <div className='basis-[75%] mt-[2rem] content-tile'>
+                    <div className={` ${contentTileClasses ? contentTileClasses : 'basis-[75%] mt-[2rem] content-tile'} `}>
                         
                         <Outlet/>
 

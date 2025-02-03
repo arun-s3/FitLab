@@ -186,7 +186,7 @@ export default function ProductList({admin}){
 
             </header>
             
-            <BreadcrumbBar heading='products' />
+            <BreadcrumbBar heading='shopping' />
                 
             <main className='px-[60px] mt-[3rem] flex gap-[2.5rem] items-start justify-start' id='productlist'>
                 <aside className='basis-[15rem] flex flex-col gap-[10px]'>

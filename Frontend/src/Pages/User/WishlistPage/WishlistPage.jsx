@@ -29,9 +29,11 @@ export default function WishlistPage(){
     const [currentList, setCurrentList] = useState('')
 
     const [showByGrid, setShowByGrid] = useState(true)
-    const [currentPage, setCurrentPage] = useState(1)
+    
     const [limit, setLimit] = useState(12) 
+    const [currentPage, setCurrentPage] = useState(1)
     const [sorts, setSorts] = useState({})
+    const [currentListName, setCurrentListName] = useState('')
     
     const [queryOptions, setQueryOptions] = useState({})
 
@@ -60,6 +62,22 @@ export default function WishlistPage(){
         backgroundImage: "url('/header-bg.png')",
         backgrounSize: 'cover'
     }
+
+    useEffect(()=>{
+        console.log("currentListName-->", currentListName)
+        console.log("SORTS-->", JSON.stringify(sorts))
+        setQueryOptions(queryOptions=> (
+            {...queryOptions, listName: currentListName, sort: sorts, page: currentPage, limit}
+        ))
+    },[currentListName, sorts, currentPage, limit])
+
+    useEffect(()=>{
+        console.log('OUERYOPTIONS--------->', JSON.stringify(queryOptions))
+        if(Object.keys(queryOptions).length){
+            // debouncedProducts()
+            // dispatch( getAllProducts({queryOptions}))
+        }
+    },[queryOptions])
 
     useEffect(()=> {
         if(listCreated){

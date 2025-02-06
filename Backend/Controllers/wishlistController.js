@@ -48,70 +48,12 @@ const createList = async (req, res, next)=> {
 }
 
 
-// const addProductToList = async (req, res, next)=> {
-//   try {
-//     console.log("Inside addProductToList Controller")
-//     const {listName, productId} = req.body
-//     const userId = req.user.id
-
-//     if (!productId) {
-//       return next(errorHandler(400, "Product ID is required!"))
-//     }
-//     const productExists = await Product.findById(productId)
-//     if (!productExists){
-//       return next(errorHandler(404, "Product not found!"))
-//     }
-    
-//     let wishlist = await Wishlist.findOne({userId})
-//     if (!wishlist){
-//       wishlist = new Wishlist({userId, lists: []})
-//     }
-
-//     if (!listName){
-//       console.log("ListName not given. Creating 'Default Shopping List'...")
-//       if(wishlist.lists.some(list=> list.name === "Default Shopping List")){
-//         wishlist = await Wishlist.findOneAndUpdate(
-//           { user: userId }, 
-//           { $push: { lists: { name: "Default Shopping List", products: [productId] } } }, 
-//           { upsert: true, new: true }
-//         );
-//       }else{
-//         wishlist = await Wishlist.findOneAndUpdate(
-//           { user: userId }, 
-//           { $push: { lists: { name: "Default Shopping List", products: [productId] } } }, 
-//           { upsert: true, new: true }
-//         );
-//       }
-
-//       return res.status(201).json({ message: "Created default list and added product.", wishlist })
-//     }
-
-//     const listIndex = wishlist.lists.findIndex((list)=> list.name === listName)
-//     if (listIndex !== -1) {
-//       const productAlreadyExists = wishlist.lists[listIndex].products.includes(productId)
-//       if (productAlreadyExists) {
-//         return next(errorHandler(400, "Product already exists in this wishlist!"))
-//       }
-//       wishlist.lists[listIndex].products.push(productId);
-//     } else {
-//       wishlist.lists.push({ name: listName, products: [productId] })
-//     }
-
-//     await wishlist.save();
-//     res.status(200).json({ message: "Product added to wishlist.", wishlist })
-
-//   } 
-//   catch(error){
-//     console.error("Error in addProductToList Controller:", error.message)
-//     next(error)
-//   }
-// }
-
 const addProductToList = async (req, res, next)=> {
   try {
     console.log("Inside addProductToList Controller")
-    const { listName, productId } = req.body
+    const { listName, productId, productNote } = req.body
     const userId = req.user.id
+    console.log(`userId--->${userId}, productId----> ${productId}, listName----> ${listName}, productNote----> ${productNote}`)
 
     if (!productId){
       return next(errorHandler(400, "Product ID is required!"))
@@ -123,25 +65,29 @@ const addProductToList = async (req, res, next)=> {
 
     let wishlist = await Wishlist.findOne({userId})
     if (!wishlist) {
-      wishlist = new Wishlist({ user: userId, lists: [] })
+      wishlist = new Wishlist({ userId, lists: [] })
     }
 
     const targetListName = listName || "Default Shopping List"
+    console.log("targetListName--->", targetListName)
 
     const listIndex = wishlist.lists.findIndex((list)=> list.name === targetListName)
+    console.log("listIndex--->", listIndex)
 
     if (listIndex !== -1){
       const productAlreadyExists = wishlist.lists[listIndex].products.includes(productId)
       if(productAlreadyExists){
         return next(errorHandler(400, "Product already exists in this wishlist!"))
       }
-      wishlist.lists[listIndex].products.push(productId)
+      wishlist.lists[listIndex].products.push({ product: productId, notes: productNote })
     }else{
-      wishlist.lists.push({ name: targetListName, products: [productId] })
+      wishlist.lists.push({ name: targetListName, products: [{ product: productId, notes: productNote }] })
     }
 
+    console.log("Wishlist now-->", wishlist)
+
     await wishlist.save()
-    res.status(200).json({ message: "Product added to wishlist.", wishlist })
+    res.status(200).json({message: "Product added to wishlist."})
   } 
   catch(error){
     console.error("Error in addProductToList Controller:", error.message)
@@ -150,5 +96,68 @@ const addProductToList = async (req, res, next)=> {
 }
 
 
+const removeProductFromList = async (req, res, next)=> {
+  try {
+    console.log("Inside removeProductFromList Controller")
+    const {listName, productId} = req.body
+    const userId = req.user.id
+    console.log(`userId--->${userId}, productId----> ${productId}, listName----> ${listName}`)
 
-module.exports = {createList, addProductToList}
+    if (!productId) {
+      return next(errorHandler(400, "Product ID is required!"))
+    }
+
+    let wishlist = await Wishlist.findOne({userId})
+    if (!wishlist){
+      return next(errorHandler(404, "Wishlist not found!"))
+    }
+
+    const targetListName = listName || "Default Shopping List"
+    console.log("targetListName--->", targetListName)
+
+    const listIndex = wishlist.lists.findIndex((list)=> list.name === targetListName)
+    console.log("listIndex--->", listIndex)
+
+    if (listIndex === -1){
+      return next(errorHandler(404, "Wishlist list not found!"))
+    }
+    const productIndex = wishlist.lists[listIndex].products.findIndex((p)=> p.product.toString() === productId)
+    if (productIndex === -1) {
+      return next(errorHandler(404, "Product not found in the specified wishlist!"))
+    }
+
+    wishlist.lists[listIndex].products.splice(productIndex, 1)
+
+    console.log("Wishlist now-->", wishlist)
+
+    await wishlist.save()
+    res.status(200).json({message: "Product removed from wishlist successfully."})
+  } catch (error) {
+    console.error("Error in removeProductFromList Controller:", error.message)
+    next(error)
+  }
+}
+
+
+const getUserWishlist = async(req, res, next)=> {
+  try {
+    console.log("Inside getUserWishlist Controller")
+    const userId = req.user.id
+
+    const wishlist = await Wishlist.findOne({userId})
+
+    if (!wishlist){
+      return res.status(200).json({ message: "No wishlist found for this user.", wishlist: {} })
+    }
+
+    res.status(200).json({ message: "Wishlist retrieved successfully", wishlist})
+  }
+  catch(error){
+    console.error("Error in getUserWishlist Controller:", error.message)
+    next(error)
+  }
+}
+
+
+
+module.exports = {createList, addProductToList, removeProductFromList, getUserWishlist}

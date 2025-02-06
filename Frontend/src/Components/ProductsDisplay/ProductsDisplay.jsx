@@ -10,6 +10,10 @@ import {RiFileEditLine} from "react-icons/ri";
 import {MdBlock} from "react-icons/md";
 
 import {getAllProducts, toggleProductStatus} from '../../Slices/productSlice'
+import {createList, addProductToList, removeProductFromList, getUserWishlist, resetWishlistStates} from '../../Slices/wishlistSlice'
+import WishlistModal from '../../Pages/User/WishlistPage/WishlistModal'
+import WishlistOptionsModal from '../WishlistModals/WishlistOptionsModal'
+import RemoveWishlistItemModal from '../WishlistModals/RemoveWishlistItemModal';
 import Pagination from '../Pagination/Pagination'
 import StarGenerator from '../StarGenerator/StarGenerator';
 import {SiteButtonSquare} from '../SiteButtons/SiteButtons';
@@ -30,6 +34,16 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
   const [productIsHovered, setProductIsHovered] = useState()
 
   const navigate = useNavigate()
+
+  const {wishlist, listCreated, listRemoved, listUpdated, loading, wishlistError, wishlistSuccess} = useSelector(state=> state.wishlist)
+
+  const [isWishlistModalOpen, setIsWishlistModalOpen] = useState(false)
+  const [isWishlistOptionsModalOpen, setIsWishlistOptionsModalOpen] = useState(false)
+  const [selectedProductForWishlist, setSelectedProductForWishlist] = useState(null)
+
+  const [isRemoveModalOpen, setIsRemoveModalOpen] = useState(false)
+  const [selectedList, setSelectedList] = useState(null)
+
 
   // useEffect(() => {
   //   // const getDummyProducts = async () => {
@@ -58,6 +72,10 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
   //   }
   // },[queryOptions])
 
+  useEffect(()=> {
+    dispatch(getUserWishlist())
+  },[])
+
   useEffect(()=>{
     !admin && setProducts(items)
   },[items])
@@ -66,14 +84,75 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
     admin && setProducts(showTheseProducts)
   },[showTheseProducts])
 
+  useEffect(()=> {
+    if(listUpdated){
+      toast.success("The product have been added to the Wishlist!")
+      dispatch(resetWishlistStates())
+    }
+    if(listRemoved){
+      toast.success("The product have been removed from the Wishlist!")
+      dispatch(resetWishlistStates())
+    }
+    if(wishlistError){
+      toast.error(wishlistError)
+      dispatch(resetWishlistStates())
+    }
+    if(wishlist){
+      console.log("Wishlist---->", wishlist)
+    }
+  },[listUpdated, listRemoved, wishlist, wishlistError])
+
   const currentPageChanger = (page)=>{
     setCurrentPage(page)
   }
 
-  const handleAddToCart = (id) => {
+  const handleAddToCart = (id)=> {
      console.log("Inside handleAddToCart()--")
      dispatch( addToCart({productId: id, quantity: 1}) )
      console.log("Dispatched successfully")
+  }
+
+  const openWishlistOptionsModal = (product)=> {
+    setSelectedProductForWishlist(product)
+    setIsWishlistOptionsModalOpen(true)
+  }
+
+  const openWishlistItemRemoveModal = (product) => {
+    setSelectedProductForWishlist(product)
+    const targetList = wishlist.lists.find((list)=> list.products.find(item=> item.product === product._id))
+    setSelectedList(targetList.name)
+    setIsRemoveModalOpen(true)
+  }
+
+  const addToWishlist = (product)=> {
+    const userCreatedListsExists = Object.keys(wishlist).length && wishlist?.lists.some(list=> list.name === 'Default Shopping List') 
+                                    && wishlist?.lists.length > 1
+    if(userCreatedListsExists){
+      console.log("Has lists other than default list")
+      openWishlistOptionsModal(product)
+    }else{
+      dispatch(addProductToList({productId: product._id}))
+    }
+  }
+
+  const deleteFromWishlist = (product)=> {
+    const productOfDefaultList = Object.keys(wishlist).length && wishlist?.lists.some(list=> {
+       list.name === 'Default Shopping List' && list.products.some(item=> item.product === product._id)
+    }) 
+                                    
+    if(productOfDefaultList){
+      console.log("Inside productOfDefaultList ")
+      dispatch(removeProductFromList({productId: product._id}))
+    }else{
+      console.log("Has lists other than default list")
+      openWishlistItemRemoveModal(product)
+    }
+  }
+
+  const createNewWishlist = (wishlistDetails)=> {
+    console.log("New Wishlist Data:", wishlistDetails)
+    console.log("Dispatching....")
+    dispatch( createList({wishlistDetails}) )
   }
 
 
@@ -87,10 +166,10 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
           <div key={product._id} className={` ${gridView ? 'w-[275px]' : 'flex gap-[1rem] w-full'}`}
                     onMouseEnter={()=> setProductIsHovered(product._id)} 
                       onMouseLeave={()=> setProductIsHovered('')}>
-            <figure className={`relative h-auto rounded-[10px] thumbnail cursor-pointer ${productIsHovered === product._id && 'shadow-lg'}`}
-                onClick={()=> !admin && navigate('/shop/product', {state: {product}})}>
+            <figure className={`relative h-auto rounded-[10px] thumbnail cursor-pointer ${productIsHovered === product._id && 'shadow-lg'}`}>
               <img src={product.thumbnail.url || product.thumbnail} alt={product.title} 
-                className={`rounded-[10px] ${wishlistDisplay ? 'h-[250px]' : 'h-[275px]'} object-cover`}/> 
+                className={`rounded-[10px] ${wishlistDisplay ? 'h-[250px]' : 'h-[275px]'} object-cover`}
+                  onClick={()=> !admin && navigate('/shop/product', {state: {product}})}/> 
               <figcaption className={`${admin ? 'top-[2px] left-[-40px]' : 'bottom-[12px]'} absolute w-full text-center`}>
                 {
                  admin ?
@@ -118,7 +197,13 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
               { !admin &&
               <div className='absolute top-[15px] right-[15px] p-[5px] rounded-[15px] bg-white favourite'>
                 <i className='cursor-pointer'> 
-                  {wishlistDisplay ? <MdFavorite /> : <MdFavoriteBorder />} 
+                  { 
+                    Object.keys(wishlist).length > 0 ?
+                      wishlist.lists.some(list=> list.products.some(item=> item.product === product._id)) ? 
+                        <MdFavorite onClick={()=> deleteFromWishlist(product)}/> 
+                        :<MdFavoriteBorder onClick={()=> addToWishlist(product)} /> 
+                        :<MdFavoriteBorder onClick={()=> addToWishlist(product)} /> 
+                  } 
                 </i>
               </div>
               }
@@ -190,6 +275,22 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
           
       </div>
     }
+
+    {
+      selectedProductForWishlist &&
+      <>
+
+        <WishlistOptionsModal isOpen={isWishlistOptionsModalOpen} onClose={()=> setIsWishlistOptionsModalOpen(false)} 
+          product={selectedProductForWishlist} setIsWishlistModalOpen={setIsWishlistModalOpen} wishlist={wishlist}/>
+      
+        <RemoveWishlistItemModal isOpen={isRemoveModalOpen} onClose={()=> setIsRemoveModalOpen(false)} product={selectedProductForWishlist}
+          listName={selectedList} />
+
+      </>
+    }
+
+    <WishlistModal isOpen={isWishlistModalOpen} onClose={()=> setIsWishlistModalOpen(false)} onSubmit={createNewWishlist} />
+
     <div className={` ${wishlistDisplay && 'ml-[1.5rem]'} `}>
 
       <Pagination productCounts={productCounts} currentPage={currentPage} currentPageChanger={currentPageChanger} limiter={limiter} />

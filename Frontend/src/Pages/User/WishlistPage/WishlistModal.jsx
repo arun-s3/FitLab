@@ -1,15 +1,16 @@
 
 import React, {useState, useEffect} from 'react'
-import {useSelector} from 'react-redux'
+import {useSelector, useDispatch} from 'react-redux'
 
 import { X, Calendar, Users, Clock, Flag } from 'lucide-react'
 
+import {createList, updateList, getAllWishlistProducts} from '../../../Slices/wishlistSlice'
 import {SiteSecondaryFillButton} from '../../../Components/SiteButtons/SiteButtons'
 import {CustomHashLoader} from '../../../Components/Loader/Loader'
 
 
 
-export default function WishlistModal ({isOpen, onClose, onSubmit}){
+export default function WishlistModal ({isOpen, onClose, shouldUpdateThisId}){
 
 
   const [wishlistDetails, setWishlistDetails] = useState({
@@ -23,6 +24,8 @@ export default function WishlistModal ({isOpen, onClose, onSubmit}){
   })
 
   const {listCreated, loading} = useSelector(state=> state.wishlist) 
+
+  const dispatch = useDispatch()
 
   const handleChange = (e)=> {
     const { name, value, type, checked } = e.target
@@ -39,7 +42,10 @@ export default function WishlistModal ({isOpen, onClose, onSubmit}){
 
   const handleSubmit = (e)=> {
     e.preventDefault()
-    onSubmit(wishlistDetails)
+    console.log("New Wishlist Data:", wishlistDetails)
+    console.log("Dispatching....")
+    shouldUpdateThisId? dispatch( updateList({updateListDetails: {listId: shouldUpdateThisId, ...wishlistDetails}}) ) 
+      : dispatch( createList({wishlistDetails}) )
     onClose()
   }
 
@@ -49,7 +55,7 @@ export default function WishlistModal ({isOpen, onClose, onSubmit}){
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[100]">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
         <div className="flex justify-between items-center p-6 border-b border-primary">
-          <h2 className="text-xl text-secondary font-semibold">Create New Wishlist</h2>
+          <h2 className="text-xl text-secondary font-semibold"> {shouldUpdateThisId ? 'Update Wishlist' : 'Create New Wishlist'} </h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
             <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -143,7 +149,7 @@ export default function WishlistModal ({isOpen, onClose, onSubmit}){
               Cancel
             </button>
             <SiteSecondaryFillButton shouldSubmit={true} className='text-sm font-medium hover:bg-purple-700 transition-colors'>
-                { loading? <CustomHashLoader loading={loading}/> : 'Create Wishlist' }
+                { loading? <CustomHashLoader loading={loading}/> : shouldUpdateThisId ? 'Update Wishlist' : 'Create Wishlist' }
             </SiteSecondaryFillButton>
           </div>
         </form>

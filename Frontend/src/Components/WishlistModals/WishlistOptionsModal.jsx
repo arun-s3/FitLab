@@ -1,7 +1,7 @@
 import React, {useState} from "react"
 import {useDispatch} from 'react-redux'
 
-import {X, Heart, Plus} from "lucide-react"
+import {X, Heart, Flag, Plus} from "lucide-react"
 
 import {addProductToList, resetWishlistStates} from '../../Slices/wishlistSlice'
 import {SiteSecondaryFillButton} from '../SiteButtons/SiteButtons'
@@ -11,6 +11,7 @@ export default function WishlistOptionsModal({ isOpen, onClose, product, setIsWi
 
   const [selectedList, setSelectedList] = useState("")
   const [productNote, setProductNote] = useState("")
+  const [productPriority, setProductPriority] = useState(2)
   const [isHovered, setIsHovered] = useState(false)
 
   const dispatch = useDispatch()
@@ -21,7 +22,7 @@ export default function WishlistOptionsModal({ isOpen, onClose, product, setIsWi
   const handleSubmit = (e)=> {
     e.preventDefault()
     console.log(`Adding ${product.title} to wishlist: ${selectedList}`)
-    dispatch(addProductToList({listName: selectedList, productId: product._id, productNote}))
+    dispatch(addProductToList({listName: selectedList, productId: product._id, productNote, productPriority}))
     onClose()
   }
 
@@ -62,6 +63,20 @@ export default function WishlistOptionsModal({ isOpen, onClose, product, setIsWi
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div className="relative">
+              <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-1">
+                Priority (optional)
+              </label>
+              <select id="priority" name="priority" value={productPriority} onChange={ (e)=> setProductPriority(Number.parseInt(e.target.value)) }
+                className="w-full pr-3 pl-[45px] py-[4px] text-[13px] text-muted border border-gray-300 rounded-md shadow-sm
+                 focus:outline-none focus:ring-secondary focus:border-secondary transition duration-150 ease-in-out">
+                <option value="3" className="">Low</option>
+                <option value="2" className="">Medium</option>
+                <option value="1" className="">High</option>
+              </select>
+              <Flag className="absolute left-[1rem] top-[2.1rem] h-[1rem] w-[1rem] text-gray-400" />
             </div>
 
             <div>

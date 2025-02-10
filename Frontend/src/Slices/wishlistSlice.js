@@ -17,11 +17,11 @@ export const createList = createAsyncThunk('wishlist/add', async ({wishlistDetai
   }
 })
 
-export const addProductToList = createAsyncThunk('addProductToList', async ({listName, productId, productNote}, thunkAPI)=> {
+export const addProductToList = createAsyncThunk('addProductToList', async ({listName, productId, productNote, productPriority}, thunkAPI)=> {
   try {
     console.log('Inside addProductToList createAsyncThunk')
     console.log(`productId from wishlistSlice----> ${productId} and listName from wishlistSlice---> ${listName}`)
-    const response = await axios.post('/wishlist/product/add', {listName, productId, productNote}, {withCredentials: true})
+    const response = await axios.post('/wishlist/product/add', {listName, productId, productNote, productPriority}, {withCredentials: true})
     console.log('Returning success response from addProductToList...', JSON.stringify(response.data))
     const state = thunkAPI.getState()
     const userId = state.user.user._id
@@ -67,11 +67,81 @@ export const getUserWishlist = createAsyncThunk('getUserWishlist', async (thunkA
   }
 })
 
+export const getAllWishlistProducts = createAsyncThunk('getAllWishlistProducts', async( {queryOptions}, thunkAPI)=> {
+  try {
+    console.log('Inside getAllWishlistProducts createAsyncThunk')
+    const response = await axios.post('/wishlist/products', {queryOptions}, {withCredentials: true})
+    console.log('Returning success response from getAllWishlistProducts...', JSON.stringify(response.data))
+    return response.data
+  }catch(error){
+    console.log('Inside catch of getAllWishlistProducts')
+    const errorMessage = error.response?.data?.message
+    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
+    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
+    return thunkAPI.rejectWithValue(errorMessage)
+  }
+})
+
+export const updateList = createAsyncThunk('updateList', async ({updateListDetails}, thunkAPI)=> {
+  try {
+    console.log('Inside updateList createAsyncThunk')
+    console.log('updateListDetails from updateList---->', updateListDetails)
+    const response = await axios.put('/wishlist/list/update', {updateListDetails}, {withCredentials: true})
+    console.log('Returning success response from updateList...', JSON.stringify(response.data))
+    return {updateListDetails}
+
+  }catch(error){
+    console.log('Inside catch of updateList')
+    const errorMessage = error.response?.data?.message
+    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
+    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
+    return thunkAPI.rejectWithValue(errorMessage)
+  }
+})
+
+export const deleteList = createAsyncThunk('deleteList', async ({listId}, thunkAPI)=> {
+  try {
+    console.log('Inside deleteList createAsyncThunk')
+    console.log('listId from deleteList---->', listId)
+    const response = await axios.post('/wishlist/list/delete', {listId}, {withCredentials: true})
+    console.log('Returning success response from deleteList...', JSON.stringify(response.data))
+    return {listId}
+
+  }catch(error){
+    console.log('Inside catch of deleteList')
+    const errorMessage = error.response?.data?.message
+    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
+    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
+    return thunkAPI.rejectWithValue(errorMessage)
+  }
+})
+
+export const searchList = createAsyncThunk('searchList', async ({find}, thunkAPI)=> {
+  try {
+    console.log('Inside searchList createAsyncThunk')
+    console.log('searched list from searchList---->', find)
+    const response = await axios.get(`/wishlist/list/search?find=${find}`, {withCredentials:true})
+    console.log('Returning success response from searchList...', JSON.stringify(response.data))
+    return response.data
+
+  }catch(error){
+    console.log('Inside catch of searchList')
+    const errorMessage = error.response?.data?.message
+    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
+    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
+    return thunkAPI.rejectWithValue(errorMessage)
+  }
+})
+
+
 const initialState = {
   wishlist: {lists: []}, 
+  wishlistProducts: [],
   listCreated: false,
   listRemoved: false,
   listUpdated: false,
+  listProductAdded: false,
+  listProductRemoved: false,
   loading: false,
   wishlistError: null,
   wishlistSuccess: false,
@@ -88,6 +158,8 @@ const wishlistSlice = createSlice({
       state.listCreated = false
       state.listRemoved = false
       state.listUpdated = false
+      state.listProductAdded = false
+      state.listProductRemoved = false
     }
   },
   extraReducers: (builder)=> {
@@ -114,7 +186,7 @@ const wishlistSlice = createSlice({
         console.log("addProductToList fulfilled:", action.payload)
         state.loading = false
         state.wishlistError = null
-        state.listUpdated = true
+        state.listProductAdded = true
        
         let {listName, productId} = action.payload
         listName = listName || "Default Shopping List"
@@ -154,7 +226,7 @@ const wishlistSlice = createSlice({
         console.log("removeProductFromList fulfilled:", action.payload)
         state.loading = false
         state.wishlistError = null
-        state.listRemoved = true
+        state.listProductRemoved = true
       
         let {listName, productId} = action.payload
         listName = listName || "Default Shopping List"
@@ -193,6 +265,97 @@ const wishlistSlice = createSlice({
         state.wishlistError = action.payload
         state.wishlistSuccess = false
       })
+      .addCase(getAllWishlistProducts.fulfilled, (state, action)=> {
+        console.log('getAllWishlistProducts fulfilled:', action.payload)
+        state.wishlistError = null
+        state.loading = false
+        state.wishlistSuccess = true
+        state.wishlistProducts = action.payload.wishlistProducts
+      })
+      .addCase(getAllWishlistProducts.pending, (state)=> {
+        state.loading = true
+        state.wishlistError = null
+      })
+      .addCase(getAllWishlistProducts.rejected, (state, action)=> {
+        console.log('getAllWishlistProducts rejected:', action.payload)
+        state.loading = false
+        state.wishlistError = action.payload
+        state.wishlistSuccess = false
+      })
+      .addCase(updateList.fulfilled, (state, action)=> {
+        console.log("updateList fulfilled:", action.payload)
+        state.loading = false
+        state.wishlistError = null
+        state.listUpdated = true
+      
+        // const { updateListDetails } = action.payload.updateListDetails
+        const { listId, name, description, isPublic, sharedWith, reminderDate, expiryDate, priority } = action.payload.updateListDetails
+      
+        if (!state.wishlist || !state.wishlist.lists){
+          return
+        }
+        const listIndex = state.wishlist.lists.findIndex(list => list._id === listId)
+        if (listIndex !== -1){
+          const updatedList = state.wishlist.lists[listIndex]
+      
+          if (name) updatedList.name = name
+          if (description) updatedList.description = description
+          if (typeof isPublic !== "undefined") updatedList.isPublic = isPublic
+          if (sharedWith) updatedList.sharedWith = sharedWith
+          if (reminderDate) updatedList.reminderDate = reminderDate
+          if (expiryDate) updatedList.expiryDate = expiryDate
+          if (priority) updatedList.priority = priority
+      
+          state.wishlist.lists[listIndex] = updatedList
+        }
+      })
+      .addCase(updateList.pending, (state)=> {
+        state.loading = true
+        state.wishlistError = null
+      })
+      .addCase(updateList.rejected, (state, action)=> {
+        console.log("updateList rejected:", action.payload)
+        state.loading = false
+        state.wishlistError = action.payload
+        state.listUpdated = false
+      })
+      .addCase(deleteList.fulfilled, (state, action)=> {
+        console.log('deleteList fulfilled:', action.payload)
+        state.loading = false
+        state.wishlistError = null
+        state.listRemoved = true
+  
+        const {listId} = action.payload
+        if (state.wishlist?.lists){
+          state.wishlist.lists = state.wishlist.lists.filter(list => list._id !== listId)
+        }
+      })
+      .addCase(deleteList.pending, (state)=> {
+        state.loading = true
+        state.wishlistError = null
+      })
+      .addCase(deleteList.rejected, (state, action)=> {
+        console.log('deleteList rejected:', action.payload)
+        state.loading = false
+        state.wishlistError = action.payload
+        state.listDeleted = false
+      })
+      .addCase(searchList.fulfilled, (state, action)=> {
+        console.log('searchList fulfilled:', action.payload)
+        state.loading = false
+        state.wishlistError = null
+        state.wishlist.lists = action.payload.matchedLists
+      })
+      .addCase(searchList.pending, (state)=> {
+        state.loading = true
+        state.wishlistError = null
+      })
+      .addCase(searchList.rejected, (state, action)=> {
+        console.log('searchList rejected:', action.payload)
+        state.loading = false
+        state.wishlistError = action.payload
+      })
+      
     }
 })
   

@@ -21,7 +21,8 @@ module.exports = {
         borderLight: "rgb(222 226 231)",
         borderLight2: "rgb(223, 195, 242)",
         grayMuted: "#e7e7e7",
-        grayLightMuted: 'rgb(244, 244, 244)'
+        grayLightMuted: 'rgb(244, 244, 244)',
+        whitesmoke: 'rgb(245,245,245)'
       },
       fontFamily:{
         funCity:['funCity'],

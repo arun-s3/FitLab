@@ -15,6 +15,10 @@ const wishlistSchema = new mongoose.Schema({
       description: {
         type: String 
       },
+      thumbnail: {
+        type: String,
+        required: true
+      },
       priority: { 
         type: Number,
         enum: [1, 2, 3], // 1-High, 2-Medium, 3-Low
@@ -42,6 +46,11 @@ const wishlistSchema = new mongoose.Schema({
           product: {
             type: mongoose.Schema.ObjectId,
             ref: "Product" 
+          },
+          productPriority: {
+            type: Number,
+            enum: [1, 2, 3], // 1-High, 2-Medium, 3-Low
+            default: 2 
           },
           notes: {
             type: String 

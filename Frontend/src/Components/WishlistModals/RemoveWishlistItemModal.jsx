@@ -7,7 +7,7 @@ import {removeProductFromList, resetWishlistStates} from '../../Slices/wishlistS
 
 
 
-export default function RemoveWishlistItemModal({ isOpen, onClose, product, listName }){
+export default function RemoveWishlistItemModal({ isOpen, onClose, product, listName, forWishlistDisplay, removeProductFromWishlist}){
 
   const dispatch = useDispatch()
   
@@ -15,7 +15,13 @@ export default function RemoveWishlistItemModal({ isOpen, onClose, product, list
 
   const handleRemoveListProductConfirm = ()=> {
     console.log(`Removing ${product.title} from ${listName}`)
-    dispatch(removeProductFromList( {listName, productId: product._id } ))
+    if(removeProductFromWishlist){
+      console.log("removeProductFromList--->", removeProductFromWishlist)
+      dispatch(removeProductFromList( {listName, productId: removeProductFromWishlist } ))
+    }else{
+      console.log("Inside else removeProductFromList")
+      dispatch(removeProductFromList( {listName, productId: product._id } ))
+    }
   }
 
   return (

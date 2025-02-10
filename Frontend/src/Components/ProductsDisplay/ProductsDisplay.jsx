@@ -8,9 +8,12 @@ import {toast} from 'react-toastify'
 import {MdFavorite, MdFavoriteBorder} from "react-icons/md";
 import {RiFileEditLine} from "react-icons/ri";
 import {MdBlock} from "react-icons/md";
+import {LuBadgeAlert} from "react-icons/lu";
+import {Calendar, Tag, NotebookPen, ShieldAlert} from 'lucide-react';
+import {format} from "date-fns"
 
 import {getAllProducts, toggleProductStatus} from '../../Slices/productSlice'
-import {createList, addProductToList, removeProductFromList, getUserWishlist, resetWishlistStates} from '../../Slices/wishlistSlice'
+import {addProductToList, removeProductFromList, getUserWishlist, getAllWishlistProducts, resetWishlistStates} from '../../Slices/wishlistSlice'
 import WishlistModal from '../../Pages/User/WishlistPage/WishlistModal'
 import WishlistOptionsModal from '../WishlistModals/WishlistOptionsModal'
 import RemoveWishlistItemModal from '../WishlistModals/RemoveWishlistItemModal';
@@ -21,7 +24,7 @@ import {capitalizeFirstLetter} from '../../Utils/helperFunctions'
 import {addToCart} from '../../Slices/cartSlice'
 import ProductsTableView from './ProductsTableView';
 
-export default function ProductsDisplay({gridView, showByTable, pageReader, limiter, queryOptions, showTheseProducts, admin, wishlistDisplay}) {
+export default function ProductsDisplay({gridView, showByTable, pageReader, limiter, queryOptions, showTheseProducts, admin, wishlistDisplay, currentList}) {
 
   const {currentPage, setCurrentPage} = pageReader
 
@@ -35,17 +38,20 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
 
   const navigate = useNavigate()
 
-  const {wishlist, listCreated, listRemoved, listUpdated, loading, wishlistError, wishlistSuccess} = useSelector(state=> state.wishlist)
+  const {wishlist, wishlistProducts, listCreated, listProductRemoved, listProductAdded, loading, wishlistError, wishlistSuccess} = useSelector(state=> state.wishlist)
 
   const [isWishlistModalOpen, setIsWishlistModalOpen] = useState(false)
   const [isWishlistOptionsModalOpen, setIsWishlistOptionsModalOpen] = useState(false)
   const [selectedProductForWishlist, setSelectedProductForWishlist] = useState(null)
 
   const [isRemoveModalOpen, setIsRemoveModalOpen] = useState(false)
+  const [removeProductFromWishlist, setRemoveProductFromWishlist] = useState('')
+
   const [selectedList, setSelectedList] = useState(null)
 
 
   // useEffect(() => {
+  //     FOR DUMMY PRODUCTS------>
   //   // const getDummyProducts = async () => {
   //   //   try {
   //   //     const response = await axios.get('https://dummyjson.com/products');
@@ -58,40 +64,45 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
   //   //     console.log("ERROR IN PRODUCTLISTING-->", error.message);
   //   //   }
   //   // };
-  //   const getFitlabProducts =  async ()=>{
-  //     dispatch( getAllProducts({}) )
-  //   }
-  //   getFitlabProducts()
   //   console.log("PRODUCTS----",JSON.stringify(products))
   //   // getDummyProducts();
   // }, []);
-
-  // useEffect(()=> {
-  //   if(Object.keys(queryOptions).length){
-  //     dispatch( getAllProducts({queryOptions}) )
-  //   }
-  // },[queryOptions])
 
   useEffect(()=> {
     dispatch(getUserWishlist())
   },[])
 
   useEffect(()=>{
-    !admin && setProducts(items)
-  },[items])
+    if(!admin && !wishlistDisplay){
+      setProducts(items)
+    }
+    if(wishlistDisplay){
+      let allWishlistProducts = wishlistProducts
+      allWishlistProducts = allWishlistProducts.map(list=> {
+        const {product, ...rest} = list
+        const id = {productId: product._id}
+        return {...id, ...product, ...rest}
+      })
+      console.log("allWishlistProducts---->", allWishlistProducts)
+      setProducts(allWishlistProducts)
+    }
+  },[items, wishlistProducts])
 
   useEffect(()=>{
     admin && setProducts(showTheseProducts)
   },[showTheseProducts])
 
   useEffect(()=> {
-    if(listUpdated){
+    if(listProductAdded){
       toast.success("The product have been added to the Wishlist!")
       dispatch(resetWishlistStates())
     }
-    if(listRemoved){
+    if(listProductRemoved){
       toast.success("The product have been removed from the Wishlist!")
       dispatch(resetWishlistStates())
+      if(wishlistDisplay){
+        dispatch( getAllWishlistProducts({queryOptions}) )
+      }
     }
     if(wishlistError){
       toast.error(wishlistError)
@@ -100,7 +111,13 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
     if(wishlist){
       console.log("Wishlist---->", wishlist)
     }
-  },[listUpdated, listRemoved, wishlist, wishlistError])
+  },[listProductAdded, listProductRemoved, wishlist, wishlistError])
+
+  const wishlistPriorityDetails = [
+    {name: 'high', value: 1, color: 'text-red-500', bg: 'bg-red-200'},
+    {name: 'medium', value: 2, color: 'text-yellow-500', bg: 'bg-yellow-100'},
+    {name: 'low', value: 3, color: 'text-green-500', bg: 'bg-green-200'}
+  ]
 
   const currentPageChanger = (page)=>{
     setCurrentPage(page)
@@ -119,7 +136,18 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
 
   const openWishlistItemRemoveModal = (product) => {
     setSelectedProductForWishlist(product)
-    const targetList = wishlist.lists.find((list)=> list.products.find(item=> item.product === product._id))
+    let targetList
+    console.log("product.--->", product)
+    console.log("product._id--->", product._id)
+    wishlistDisplay && console.log("productId--->", product.productId)
+    console.log('wishlist---->', wishlist)
+    if(!wishlistDisplay){
+      targetList = wishlist.lists.find((list)=> list.products.find(item=> item.product === product._id))
+    }
+    else{
+      targetList = wishlist.lists.find((list)=> list.products.find(item=> item.product === product.productId))
+      setRemoveProductFromWishlist(product.productId)
+    } 
     setSelectedList(targetList.name)
     setIsRemoveModalOpen(true)
   }
@@ -149,26 +177,51 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
     }
   }
 
-  const createNewWishlist = (wishlistDetails)=> {
-    console.log("New Wishlist Data:", wishlistDetails)
-    console.log("Dispatching....")
-    dispatch( createList({wishlistDetails}) )
-  }
 
 
   return (
     <>
+      {
+        wishlistDisplay && currentList && wishlist.lists.some(list=> list.name === currentList) &&
+        (()=>{
+          const list = wishlist.lists.find(list=> list.name === currentList)
+          const index = wishlistPriorityDetails.findIndex(status=> status.value === list.priority)
+
+          return(
+          <div className='mx-[1.5rem] mb-[1rem] p-[1rem] flex flex-col gap-[15px] bg-inputBgSecondary rounded-[8px] shadow-sm'>
+           <h2 className='flex justify-between items-center'> 
+            <span className='text-secondary text-[16px] font-[600] tracking-[0.4px]'> {list.name} </span>
+            <span className={`px-[12px] py-[2px] ${wishlistPriorityDetails[index].bg} ${wishlistPriorityDetails[index].color} 
+              text-[11px] font-[500] capitalize tracking-[0.3px] rounded-[3px]`}>
+                {wishlistPriorityDetails[index].name}
+            </span>
+           </h2> 
+           <h4 className='text-[13px] text-muted'> { list.description } </h4>
+           <h5 className='flex items-center gap-[1rem]'>
+              <span className='inline-flex items-center gap-[7px] text-muted'>
+                  <Calendar className='w-[13px] h-[13px]'/>
+                  <span className='text-[11px]'> Created On: {format( new Date(list.createdAt), "MMMM dd, yyyy" )} </span>
+              </span>
+              <span className='inline-flex items-center gap-[7px] text-muted'>
+                  <Tag className='w-[13px] h-[13px]'/>
+                  <span className='text-[11px]'> { ` (${list.products.length} ${list.products.length === 1 ? 'item' : 'items'}) ` } </span>
+              </span>
+           </h5>
+          </div>
+          )
+        }) ()
+      }
      <div className={`${gridView ? 'grid grid-cols-3 gap-y-[2rem]' : showByTable ? '' : 'flex flex-col gap-[2rem]'}
        ${wishlistDisplay && 'ml-[1.5rem]'}`} id="products-display" style={admin ? { justifyItems: 'center' } : {}}>
 
-      { !showByTable && 
-        products.map((product) => (
+      { !showByTable && products.length > 0 ?
+        products.map((product)=> (
           <div key={product._id} className={` ${gridView ? 'w-[275px]' : 'flex gap-[1rem] w-full'}`}
                     onMouseEnter={()=> setProductIsHovered(product._id)} 
                       onMouseLeave={()=> setProductIsHovered('')}>
-            <figure className={`relative h-auto rounded-[10px] thumbnail cursor-pointer ${productIsHovered === product._id && 'shadow-lg'}`}>
-              <img src={product.thumbnail.url || product.thumbnail} alt={product.title} 
-                className={`rounded-[10px] ${wishlistDisplay ? 'h-[250px]' : 'h-[275px]'} object-cover`}
+            <figure className={`relative h-auto rounded-[10px] thumbnail cursor-pointer ${(wishlistDisplay && !gridView) ? 'h-[300px]' : wishlistDisplay ? 'h-[250px]' : 'h-[275px]'} ${productIsHovered === product._id && 'shadow-lg'}`}>
+              <img src={product?.thumbnail.url || product?.thumbnail || "/placeholder.svg" } alt={product.title} 
+                className={`rounded-[10px] ${(wishlistDisplay && !gridView) ? 'h-[300px]' : wishlistDisplay ? 'h-[250px]' : 'h-[275px]'} object-cover`}
                   onClick={()=> !admin && navigate('/shop/product', {state: {product}})}/> 
               <figcaption className={`${admin ? 'top-[2px] left-[-40px]' : 'bottom-[12px]'} absolute w-full text-center`}>
                 {
@@ -197,18 +250,19 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
               { !admin &&
               <div className='absolute top-[15px] right-[15px] p-[5px] rounded-[15px] bg-white favourite'>
                 <i className='cursor-pointer'> 
-                  { 
+                  {!wishlistDisplay ?
                     Object.keys(wishlist).length > 0 ?
                       wishlist.lists.some(list=> list.products.some(item=> item.product === product._id)) ? 
-                        <MdFavorite onClick={()=> deleteFromWishlist(product)}/> 
-                        :<MdFavoriteBorder onClick={()=> addToWishlist(product)} /> 
-                        :<MdFavoriteBorder onClick={()=> addToWishlist(product)} /> 
+                        <MdFavorite className='hover:scale-110 transition-transform duration-100' onClick={()=> deleteFromWishlist(product)}/> 
+                        :<MdFavoriteBorder className='hover:scale-110 transition-transform duration-100' onClick={()=> addToWishlist(product)} /> 
+                        :<MdFavoriteBorder className='hover:scale-110 transition-transform duration-100' onClick={()=> addToWishlist(product)} /> 
+                    : <MdFavorite className='hover:scale-110 transition-transform duration-100' onClick={()=> deleteFromWishlist(product)}/>
                   } 
                 </i>
               </div>
               }
             </figure>
-            <div className={` ${gridView? 'mt-[10px] flex flex-col gap-[5px] pl-[10px] py-[15px] rounded-[10px] product-infos' 
+            <div className={` ${gridView? 'mt-[10px] w-full flex flex-col gap-[5px] pl-[10px] py-[15px] rounded-[10px] product-infos' 
                                  : 'inline-flex flex-col gap-[10px] justify-between px-[1rem] py-[2rem] rounded-[10px] ml-[1rem] product-infos w-full'} 
                                       ${ wishlistDisplay && 'mr-[1rem]' } ${productIsHovered === product._id && 'shadow-lg'} cursor-pointer`}
                 onClick={()=> !admin && navigate('/shop/product', {state: {product}})}>
@@ -250,6 +304,33 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
                       &#8377; {product.price}
                 </p>
                 {
+                  wishlistDisplay && 
+                  <div>
+                    {product?.notes &&
+                      <p className={`mt-[5px] flex items-center gap-[5px]`}> 
+                        <div className='flex items-center gap-[4px] text-muted'>
+                          <NotebookPen className='w-[12px] h-[12px]'/>
+                          <span className='text-[12px] font-[500] tracking-[0.5px]'> Your Note: </span>
+                        </div>
+                        <span className='text-[12px] capitalize rounded-[3px]'> {product.notes} </span>
+                      </p>
+                    }
+                    {product?.productPriority &&
+                      <p className={`mt-[5px] flex items-center gap-[5px] text-[13px] font-[500] tracking-[0.5px]`}> 
+                        <span className='text-[12px] capitalize flex items-center gap-[4px]'>
+                          <ShieldAlert className='w-[14px] h-[14px] text-muted'/>
+                          <div>
+                            <span className='text-muted'> Priority: </span>
+                            <span className={`${wishlistPriorityDetails.find(status=> status.value === product.productPriority).color}`}>
+                              {wishlistPriorityDetails.find(status=> status.value === product.productPriority).name} 
+                            </span>
+                          </div>
+                        </span>
+                      </p>
+                    }
+                  </div>
+                }
+                {  
                   !gridView && 
                   <div className='mt-[10px]'>
                     {product.tags.map(tag=> 
@@ -264,8 +345,9 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
               </div>
             </div>
            
-          </div>
+          </div> 
         ))
+        : <h3 className='text-[17px] text-muted text-center tracking-[0.5px]'> No Products Available! </h3>
       }
     </div>
     { showByTable &&
@@ -284,12 +366,12 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
           product={selectedProductForWishlist} setIsWishlistModalOpen={setIsWishlistModalOpen} wishlist={wishlist}/>
       
         <RemoveWishlistItemModal isOpen={isRemoveModalOpen} onClose={()=> setIsRemoveModalOpen(false)} product={selectedProductForWishlist}
-          listName={selectedList} />
+          listName={selectedList} removeProductFromWishlist={removeProductFromWishlist} />
 
       </>
     }
 
-    <WishlistModal isOpen={isWishlistModalOpen} onClose={()=> setIsWishlistModalOpen(false)} onSubmit={createNewWishlist} />
+    <WishlistModal isOpen={isWishlistModalOpen} onClose={()=> setIsWishlistModalOpen(false)} />
 
     <div className={` ${wishlistDisplay && 'ml-[1.5rem]'} `}>
 

@@ -206,10 +206,10 @@ export default function ShoppingCartPage(){
         </div>
         : <div className='flex flex-col justify-center items-center gap-[1rem]'>
             <ShoppingCart className='h-[30px] w-[30px] text-muted'/>
-            <p className='text-[17px] text-muted tracking-[0.5px]'> Your Cart Is Empty. 
+            <h2 className='text-[17px] text-muted tracking-[0.5px]'> Your Cart Is Empty. 
               <span className='text-secondary cursor-pointer' onClick={()=> navigate('/shop')}> Click here </span> 
               to search for products
-            </p>
+            </h2>
           </div>
         }
 

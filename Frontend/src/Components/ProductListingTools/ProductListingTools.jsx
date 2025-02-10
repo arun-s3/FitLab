@@ -34,7 +34,7 @@ export default function ProductListingTools({admin, showByGrid, setShowByGrid, s
             setQueryOptions(queryOptions=> (
                 {...queryOptions, searchData: searchData}
             ))
-        }, 1000) 
+        }, 600) 
     ).current;
 
     // const debouncedProducts = useRef(

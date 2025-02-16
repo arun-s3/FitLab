@@ -8,7 +8,7 @@ adminRouter.get('/test', tester)
 
 adminRouter.post('/signin', signinAdmin) //isLogout
 adminRouter.get('/signout', isLogin, signoutAdmin)
-adminRouter.get('/customers', isLogin, authorizeAdmin, showUsers) 
+adminRouter.post('/customers', isLogin, authorizeAdmin, showUsers) 
 adminRouter.get('/customersOfStatus', isLogin, authorizeAdmin, showUsersofStatus) 
 adminRouter.get('/deleteuser',isLogin, authorizeAdmin, deleteUser) 
 adminRouter.post('/deleteuserslist',  isLogin, authorizeAdmin, deleteUserList)

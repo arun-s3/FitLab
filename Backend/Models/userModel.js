@@ -30,7 +30,7 @@ const userSchema = mongoose.Schema({
     dob:{
         type:Date
     },
-    gender:{
+    gender:{ 
         type:String
     },
     isAdmin:{

@@ -4,7 +4,6 @@ import {useLocation} from 'react-router-dom'
 import {useSelector, useDispatch} from 'react-redux'
 import {debounce} from 'lodash'
 
-
 import {Search, MoreVertical, ChevronRight, Trash, ArrowRight, Plus} from "lucide-react"
 import {CiEdit} from "react-icons/ci";
 import {toast} from 'react-toastify'

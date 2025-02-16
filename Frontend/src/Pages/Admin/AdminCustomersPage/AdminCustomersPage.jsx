@@ -48,15 +48,15 @@ export default function AdminCustomersPageV1() {
 
     useEffect(() => {
         console.log("Dispatching showUsers()--- ")
-        dispatch(showUsers());
-    }, [dispatch, adminMessage]);
+        dispatch(showUsers({queryOptions: {page: 1, limit: 6}}))
+    }, [dispatch, adminMessage])
 
     useEffect(() => {
         console.log("Setting localUsers to allUsers--- ")
         if (allUsers) {
-            setTempUsers(allUsers);
+            setTempUsers(allUsers)
         }
-    }, [allUsers]);
+    }, [allUsers])
 
     useEffect(() => {
         console.log("Inside useEffect for tempUsers");

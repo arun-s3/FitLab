@@ -33,10 +33,10 @@ export const adminSignout = createAsyncThunk('adminSignout', async(thunkAPI)=>{
     }
 })
 
-export const showUsers = createAsyncThunk('showUsers', async(thunkAPI)=>{
+export const showUsers = createAsyncThunk('showUsers', async({queryOptions}, thunkAPI)=>{
     try{
         console.log("Inside createAsyncThunk for getUsers")
-        const response = await axios.get('/admin/customers',{withCredentials:true})
+        const response = await axios.post('/admin/customers', {queryOptions}, {withCredentials:true})
         console.log("Response from createAsyncThunk for getUsers-->"+JSON.stringify(response.data))
         return response.data
     }
@@ -120,7 +120,8 @@ const initialState = {
     adminLoading:false,
     adminSuccess:false,
     adminMessage:null,
-    allUsers:null
+    allUsers:null,
+    totalUsers: null
 }
 const adminSlice = createSlice({
     name:'admin',
@@ -182,6 +183,7 @@ const adminSlice = createSlice({
             state.success = true
             state.adminError = false
             state.allUsers = action.payload.users
+            state.totalUsers = action.payload.totalUsers
             console.log("allUsers from showUsers.fulfilled"+JSON.stringify(action.payload))
         })
         .addCase(showUsers.rejected, (state,action)=>{

@@ -42,18 +42,21 @@ const userRoutes = require('./Routes/userRoutes.js')
 const addressRoutes = require('./Routes/userAddressRoutes.js')
 const userProductRoutes = require('./Routes/userProductRoutes.js')
 const wishlistRoutes = require('./Routes/wishlistRoutes.js')
+const couponRoutes = require('./Routes/couponRoutes.js')
+const cartRoutes = require('./Routes/cartRoutes.js')
+const orderRoutes = require('./Routes/orderRoutes.js')
 
 const adminRoutes = require('./Routes/adminRoutes.js')
 const adminProductRoutes = require('./Routes/adminProductRoutes.js')
 const adminCategoryRoutes = require('./Routes/adminCategoryRoutes.js')
-const cartRoutes = require('./Routes/cartRoutes.js')
-const orderRoutes = require('./Routes/orderRoutes.js')
+
 
 
 app.use('/', userRoutes)
 app.use('/products', userProductRoutes)
 app.use('/addresses', addressRoutes)
 app.use('/wishlist', wishlistRoutes)
+app.use('/coupons', couponRoutes)
 app.use('/cart', cartRoutes)
 app.use('/order', orderRoutes)
 
@@ -62,7 +65,7 @@ app.use('/admin/products', adminProductRoutes)
 app.use('/admin/products/category', adminCategoryRoutes)
 // app.use('/product', productRoutes)
 
-app.use((error,req,res,next)=>{
+app.use( (error ,req ,res, next)=> {
     const message = error.message||'Internal Server Error'
     const statusCode = error.statusCode||500
     console.log(`From index.js errorHandling middleware message is---> ${message} and statusCode is- ${statusCode}`)

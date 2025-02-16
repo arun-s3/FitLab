@@ -83,24 +83,58 @@ const signoutAdmin = (req,res,next)=>{
     }
 }
 
-const showUsers = async(req,res,next)=>{
-    try{
-        console.log("Inside showUsers controller")
-        const users = await User.find({isAdmin:false},{password:0})
-        if(users){
-            console.log("Users found-->"+JSON.stringify(users))
-            res.status(200).json({users:users})
-        }
-        else{
-            console.log("No records!")
-            res.status(404).json({message:"Users not found!"})
-        }
+// const showUsers = async(req,res,next)=>{
+//     try{
+//         console.log("Inside showUsers controller")
+//         const users = await User.find({isAdmin:false},{password:0})
+//         if(users){
+//             console.log("Users found-->"+JSON.stringify(users))
+//             res.status(200).json({users:users})
+//         }
+//         else{
+//             console.log("No records!")
+//             res.status(404).json({message:"Users not found!"})
+//         }
+//     }
+//     catch(error){
+//         console.log("Inside catch of showUsers controller")
+//         next(error)
+//     }
+// }
+
+const showUsers = async (req, res, next)=> {
+  try {
+    console.log("Inside getAllUsers of userController")
+
+    let {page = 1, limit = 6, searchData} = req.body.queryOptions
+    page = parseInt(page)
+    limit = parseInt(limit)
+
+    const skip = (page - 1) * limit
+
+    const filter = {isAdmin: false}
+    if(searchData){
+        filter.username = { $regex: searchData, $options: "i" }
     }
-    catch(error){
-        console.log("Inside catch of showUsers controller")
-        next(error)
-    }
+    
+    const users = await User.find(filter, {password: 0}).skip(skip).limit(limit)
+
+    const totalUsers = await User.countDocuments()
+
+    return res.status(200).json({
+      success: true,
+      users,
+      currentPage: page,
+      totalPages: Math.ceil(totalUsers / limit),
+      totalUsers,
+    })
+  }
+  catch (error){
+    console.error("Error fetching users:", error.message)
+    next(error)
+  }
 }
+
 
 const showUsersofStatus = async(req,res,next)=> {
     try{

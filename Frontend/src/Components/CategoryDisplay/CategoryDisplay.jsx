@@ -7,7 +7,7 @@ import {MdOutlineArrowDropDownCircle} from 'react-icons/md';
 import {GoPlus} from "react-icons/go";
 
 export default function CategoryDisplay({type, filter, setFilter, radioCheckedCategory, setRadioCheckedCategory, manualCheckCategory, 
-                      setManualCheckCategory, setRelatedCategoryError, styler}) {
+                      setManualCheckCategory, setRelatedCategoryError, storeCheckedCategories, styler}) {
   const [subCategories, setSubCategories] = useState({});
   const [openSubcategories, setOpenSubcategories] = useState({});
 
@@ -47,8 +47,11 @@ export default function CategoryDisplay({type, filter, setFilter, radioCheckedCa
 
   useEffect(()=>{
     const categoryArray = checkedCategories.map(category=> category.name)
-    filter && setFilter({...filter, categories: [...categoryArray]})
-    console.log("checkedCategories", JSON.stringify(checkedCategories))
+    if(!storeCheckedCategories){
+      filter && setFilter({...filter, categories: [...categoryArray]})
+      console.log("checkedCategories", JSON.stringify(checkedCategories))
+    }else{
+    }
   },[checkedCategories])
   // useEffect(()=>{
   //   filter && setFilter({...filter, categories: [...checkedCategories]})

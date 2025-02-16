@@ -1,0 +1,76 @@
+#CouponModal form input:not([id = 'isCustomerSpecific'], [id = 'applicableProductsSearch'], [id = 'selectProducts'], [id = 'customersSearch']),
+#CouponModal form textarea, #CouponModal form select{
+    margin-top: 4px;
+    display: block;
+    width: 100%;
+    padding-block: 5px;
+    padding-inline: 12px;
+    border: 1px solid var(--INPUT-BORDER-LOW);
+    border-radius: 6px;
+    box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+}
+#CouponModal form input:not([id = 'applicableProductsSearch'], [id = 'selectProducts'], [id = 'customersSearch']):focus, 
+#CouponModal form input[type = 'date']:focus, #CouponModal form select:focus, #CouponModal form textarea:focus{
+    outline: 0;
+    border-color: var(--SECONDARY);
+    box-shadow: 0 0 0 1px var(--SECONDARY);
+}
+#CouponModal form input:not([id = 'applicableProductsSearch'], [id = 'selectProducts'], [id = 'customersSearch']):focus-visible,
+#CouponModal form input[type = 'date']:focus, #CouponModal form select:focus-visible, #CouponModal form textarea:focus-visible{
+    outline: 0;
+    border-color: var(--SECONDARY);
+    box-shadow: 0 0 0 1px var(--SECONDARY);
+}
+/* #CouponModal form input[type = 'date']{
+    font-size: 13px;
+    color: var(--SECONDARY);
+} */
+#CouponModal form input{
+    font-size: 13px;
+}
+#CouponModal form select{
+    font-size: 13px;
+    color: var(--SECONDARY);
+}
+#CouponModal form textarea{
+    font-size: 13px;
+}
+#CouponModal form div label + .error{
+    font-size: 10px;
+    color: #e74c3c; 
+}
+#CouponModal form div input ~ .error{
+    position: absolute;
+    margin-left: 2px;
+    margin-top: 3px;
+    font-size: 10px;
+    color: #e74c3c; 
+}
+#CouponModal form div .input-contoller{
+    position: absolute;
+    top: 44%;
+    right: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+#CouponModal form div .input-contoller > svg{
+    width: 20px;
+    height: 15px;
+    padding: 3px;
+    stroke-width: 4px;
+    color: var(--SECONDARY);
+    background: var(--PRIMARY);
+    border-radius: 2px;
+    cursor: pointer;
+}
+#CouponModal form #applicableCategories-section #applicableCategories #category-content > li .category-name{
+    gap: 7px;
+}
+#CouponModal form #applicableCategories-section #applicableCategories #category-content > li .category-name > input{
+    padding: 0px;
+    margin-top: 0px;
+}
+#CouponModal form #applicableCategories-section #applicableCategories #category-content > li .category-name > span{
+    font-size: 12px;
+}

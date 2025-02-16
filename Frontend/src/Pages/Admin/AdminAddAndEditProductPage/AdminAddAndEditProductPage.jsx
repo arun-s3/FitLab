@@ -137,7 +137,7 @@ export default function AdminAddAndEditProductPage({ editProduct }){
         }
     },[productCreated, productUpdated])
 
-    const changeHandler = (e, fieldName)=>{
+    const changeHandler = (e, fieldName)=> {
         console.log(" inside Changehandler")
         setProductData({...productData, [fieldName]: e.target.value})
     }

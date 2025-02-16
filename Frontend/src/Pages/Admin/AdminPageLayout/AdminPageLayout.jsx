@@ -41,6 +41,8 @@ export default function AdminPageLayout(){
     const dispatch = useDispatch()
     const navigate = useNavigate()
 
+    const [headerZIndex, setHeaderZIndex] = useState(10)
+
     const [showSublist, setShowSublist] = useState({
         dashboard:false, customers:false, product: false, category: false, couponGenerator:false, orders:false, salesReport:false, offers:false, banners:false, settings:false
     })
@@ -62,8 +64,8 @@ export default function AdminPageLayout(){
 
     return(
         <div id='admin-wrapper'>
-            <header className='bg-black h-[5rem] w-full flex justify-between items-center px-[33px] fixed top-0 z-[10]' 
-                                    id='admin-wrapper-header' style={headerBgImg}>
+            <header className='bg-black h-[5rem] w-full flex justify-between items-center px-[33px] fixed top-0'
+              id='admin-wrapper-header' style={{...headerBgImg, zIndex: headerZIndex}} >
                 <img src="/Logo_main.png" alt="Fitlab" className="h-[5rem] mt-[15px]"/> 
                 <div className='flex gap-[15px] justify-between items-center'>
                     <i className='relative'>
@@ -254,7 +256,7 @@ export default function AdminPageLayout(){
             
                 <div className='basis-full pt-[2rem] pl-[3rem] flex-grow overflow-scroll h-screen' id='admin-content-outlet' style={adminContentBgImg}>
 
-                        <Outlet/>
+                        <Outlet context={{setHeaderZIndex}}/>
                 </div>  
 
                 {/* <div style={{display:'inline-block'}}>

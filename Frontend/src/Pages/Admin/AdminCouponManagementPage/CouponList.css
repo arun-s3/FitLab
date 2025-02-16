@@ -1,0 +1,7 @@
+
+#CouponList table thead tr th{
+    padding-block: 1.2rem;
+}
+#CouponList table tbody tr td:not(:first-child) > div{
+    font-size: 12px;
+}

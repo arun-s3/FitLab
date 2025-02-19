@@ -6,46 +6,60 @@ import { ArrowUpDown, Edit2, Trash2 } from "lucide-react"
 
 
 export default function CouponList({ coupons, onEdit, onDelete, onSort, sortConfig }){
+
+  const tableHeaders = [
+    {value: 'Code', icon: true}, {value: 'Description', icon: false}, {value: 'Discount Type', icon: false},
+    {value: 'Applicable To', icon: false}, {value: 'Start Date', icon: true}, {value: 'Expiry', icon: true},
+    {value: 'Used/ Usage-limit', icon: true}, {value: 'Status', icon: false}, {value: 'Actions', icon: false}
+  ]
+
   return (
     <div className="mt-[1.5rem] bg-white shadow-md rounded-lg overflow-hidden" id='CouponList'>
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-inputBorderLow">
           <tr>
-            {["Code", "Description", "Discount Type", "Applicable To", "Start Date", "Expiry", "Used/ Usage-limit", "Status", "Actions"]
-              .map((header)=> (
+            { tableHeaders.map( (header)=> (
               <th key={header} className="px-[12px] py-3 text-left text-[13px] font-medium text-gray-500 uppercase tracking-wider
                  cursor-pointer" onClick={()=> onSort(header.toLowerCase().replace(" ", ""))} >
                 <div className="flex items-center">
-                  {header}
-                  <ArrowUpDown className="h-4 w-4 ml-1" />
+                  {header.value}
+                  {header.icon && <ArrowUpDown className="h-4 w-4 ml-1 hover:text-purple-700 hover:scale-110 transition duration-100"/>}
                 </div>
               </th>
             ))}
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {coupons.map((coupon)=> (
-            <tr key={coupon._id} >
+          { coupons && coupons.length > 0 && coupons.map((coupon, index)=> (
+            <tr key={coupon?._id} className={`${(index % 2 == 0) ? 'bg-transparent': 'bg-[#eee]'} hover:bg-[rgb(249, 245, 252)]`}>
               <td className="pl-[1rem] py-4 whitespace-nowrap">
-                <div className="text-sm font-medium text-green-500">{coupon.code}</div>
+                <div className="text-sm font-medium text-green-500">
+                {coupon?.code && coupon?.code.length > 13 ? coupon.code.substring(0,10) + '...' : coupon.code} 
+                </div>
               </td>
               <td className="px-6 py-4">
-                <div className="text-sm text-gray-500">{coupon.description}</div>
+                <div className="text-sm text-gray-500">
+                {coupon?.description && coupon?.description.length > 12 ? coupon?.description.substring(0, 12) + '...' : coupon.description}
+                </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm text-gray-500 capitalize">{coupon.discountType}</div>
+                <div className="text-sm text-gray-500 capitalize">{coupon?.discountType}</div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm text-gray-500">
                   { 
-                  coupon.applicableType === 'allProducts' || coupon.applicableType === 'products' ?
+                  coupon?.applicableType === 'allProducts' || coupon?.applicableType === 'products' ?
                      <span>
-                        <span> Products -</span>
-                        <span> {coupon.applicableType === 'allProducts' ? '[All]' : '[See Products]'} </span>
+                        <span> Products - </span>
+                        <span className='text-[11px] text-secondary hover:underline hover:font-medium transition duration-300 cursor-pointer'>
+                          {coupon?.applicableType === 'allProducts' ? '[all]' : '[see Products]'} 
+                        </span>
                      </span> 
                     :<span>
                       <span> Categories -</span>
-                      <span> [See Categories] </span>
+                      <span className='text-[11px] text-secondary hover:underline hover:font-medium transition duration-300 cursor-pointer'>
+                        [see categories] 
+                      </span>
                     </span> 
                   }
                 </div>
@@ -56,23 +70,23 @@ export default function CouponList({ coupons, onEdit, onDelete, onSort, sortConf
                 </div>
               </td> */}
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm text-gray-500">{new Date(coupon.startDate).toLocaleDateString()}</div>
+                <div className="text-sm text-gray-500">{new Date(coupon?.startDate).toLocaleDateString()}</div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm text-gray-500">{new Date(coupon.endDate).toLocaleDateString()}</div>
+                <div className="text-sm text-gray-500">{new Date(coupon?.endDate).toLocaleDateString()}</div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm text-gray-500">{`${coupon.usedCount} / ${coupon.usageLimit || "∞"}`}</div>
+                <div className="text-sm text-gray-500">{`${coupon?.usedCount} / ${coupon?.usageLimit || "unlimited"}`}</div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm text-gray-500 capitalize">{coupon.status}</div>
+                <div className="text-sm text-gray-500 capitalize">{coupon?.status}</div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <button onClick={()=> onEdit(coupon)} className="text-indigo-600 hover:text-indigo-900 mr-4">
-                  <Edit2 className="h-5 w-5" />
+                <button onClick={()=> onEdit(coupon)} className="mr-4">
+                  <Edit2 className="h-[15x] w-[15px] text-secondary hover:text-purple-900" />
                 </button>
-                <button onClick={()=> onDelete(coupon)} className="text-red-600 hover:text-red-900">
-                  <Trash2 className="h-5 w-5" />
+                <button onClick={()=> onDelete(coupon)} className="text-red-500 hover:text-red-700">
+                  <Trash2 className="h-[15x] w-[15px]" />
                 </button>
               </td>
             </tr>

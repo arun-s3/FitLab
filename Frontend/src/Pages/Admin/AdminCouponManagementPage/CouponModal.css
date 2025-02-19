@@ -1,4 +1,4 @@
-#CouponModal form input:not([id = 'isCustomerSpecific'], [id = 'applicableProductsSearch'], [id = 'selectProducts'], [id = 'customersSearch']),
+#CouponModal form input:not([id = 'customerSpecific'], [id = 'applicableProductsSearch'], [id = 'selectProducts'], [id = 'customersSearch']),
 #CouponModal form textarea, #CouponModal form select{
     margin-top: 4px;
     display: block;

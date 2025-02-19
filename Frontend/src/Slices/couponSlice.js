@@ -33,6 +33,54 @@ export const getAllCoupons = createAsyncThunk('coupon/list', async ({queryOption
   }
 })
 
+export const updateCoupon = createAsyncThunk('coupon/update', async ({couponDetails, couponId}, thunkAPI)=> {
+  try {
+    console.log('Inside updateCoupon createAsyncThunk')
+    console.log("couponDetails from couponSlice---->", couponDetails)
+    const response = await axios.post(`/coupons/update/${couponId}`, {couponDetails}, {withCredentials: true})
+    console.log('Returning success response from updateCoupon...', JSON.stringify(response.data))
+    return response.data
+  }catch(error){
+    console.log('Inside catch of updateCoupon')
+    const errorMessage = error.response?.data?.message
+    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
+    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
+    return thunkAPI.rejectWithValue(errorMessage)
+  }
+})
+
+export const deleteCoupon = createAsyncThunk('coupon/delete', async ({couponId}, thunkAPI)=> {
+  try {
+    console.log('Inside deleteCoupon createAsyncThunk')
+    console.log("couponId from couponSlice---->", couponId)
+    const response = await axios.delete(`/coupons/delete/${couponId}`, {withCredentials: true})
+    console.log('Returning success response from deleteCoupon...', JSON.stringify(response.data))
+    return response.data
+  }catch(error){
+    console.log('Inside catch of deleteCoupon')
+    const errorMessage = error.response?.data?.message
+    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
+    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
+    return thunkAPI.rejectWithValue(errorMessage)
+  }
+})
+
+export const searchCoupons = createAsyncThunk('coupon/search', async ({query}, thunkAPI)=> {
+  try {
+    console.log('Inside searchCoupons createAsyncThunk')
+    console.log("query from couponSlice---->", query)
+    const response = await axios.get(`/coupons/?query=${query}`, {withCredentials: true})
+    console.log('Returning success response from searchCoupons...', JSON.stringify(response.data))
+    return response.data
+  }catch(error){
+    console.log('Inside catch of searchCoupons')
+    const errorMessage = error.response?.data?.message
+    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
+    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
+    return thunkAPI.rejectWithValue(errorMessage)
+  }
+})
+
 
 const initialState = {
     coupons: [], 
@@ -88,7 +136,59 @@ const couponSlice = createSlice({
         state.loading = false
         state.couponError = action.payload
       })
-      
+      .addCase(updateCoupon.fulfilled, (state, action)=> {
+        console.log('updateCoupon fulfilled:', action.payload)
+        state.couponError = null
+        state.loading = false
+        state.couponUpdated = true
+        state.coupons = state.coupons.map(coupon=> {
+          if(coupon._id === action.payload.coupon._id){
+            return action.payload.coupon
+          }else{
+            return coupon
+          } 
+        })
+      })
+      .addCase(updateCoupon.pending, (state)=> {
+        state.loading = true
+        state.couponError = null
+      })
+      .addCase(updateCoupon.rejected, (state, action) => {
+        console.log('updateCoupon rejected:', action.payload)
+        state.loading = false
+        state.couponError = action.payload
+      })
+      .addCase(deleteCoupon.fulfilled, (state, action)=> {
+        console.log('deleteCoupon fulfilled:', action.payload)
+        state.couponError = null
+        state.loading = false
+        state.couponRemoved = true
+        state.coupons = state.coupons.filter(coupon=> coupon._id != action.payload.deletedCoupon._id)
+      })
+      .addCase(deleteCoupon.pending, (state)=> {
+        state.loading = true
+        state.couponError = null
+      })
+      .addCase(deleteCoupon.rejected, (state, action) => {
+        console.log('deleteCoupon rejected:', action.payload)
+        state.loading = false
+        state.couponError = action.payload
+      })
+      .addCase(searchCoupons.fulfilled, (state, action)=> {
+        console.log('searchCoupons fulfilled:', action.payload)
+        state.couponError = null
+        state.loading = false
+        state.coupons = action.payload.coupons
+      })
+      .addCase(searchCoupons.pending, (state)=> {
+        state.loading = true
+        state.couponError = null
+      })
+      .addCase(searchCoupons.rejected, (state, action) => {
+        console.log('searchCoupons rejected:', action.payload)
+        state.loading = false
+        state.couponError = action.payload
+      })
     }
 })
   

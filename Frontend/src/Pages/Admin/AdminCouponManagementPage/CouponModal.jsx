@@ -9,14 +9,14 @@ import {toast} from 'react-toastify';
 
 import CategoryDisplay from "../../../Components/CategoryDisplay/CategoryDisplay"
 import {handleInputValidation, displaySuccess, displayErrorAndReturnNewFormData, cancelErrorState} from '../../../Utils/fieldValidator'
-import {createCoupon, resetCouponStates} from '../../../Slices/couponSlice'
+import {createCoupon, updateCoupon, resetCouponStates} from '../../../Slices/couponSlice'
 import {searchProduct, getAllProducts} from '../../../Slices/productSlice'
 import {showUsers} from '../../../Slices/adminSlice'
 import {camelToCapitalizedWords} from "../../../Utils/helperFunctions"
 
 
 
-export default function CouponModal({ isOpen, onClose, coupon }){
+export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
 
 
   const [formData, setFormData] = useState({
@@ -29,13 +29,14 @@ export default function CouponModal({ isOpen, onClose, coupon }){
     usageLimit: "",
     minimumOrderValue: "",
     usageLimitPerCustomer: "",
-    applicableType: "all",
+    applicableType: "allProducts",
     applicableCategories: [],
     applicableProducts: [],
-    isCustomerSpecific: false,
-    specificCustomers: [],
+    customerSpecific: false,
+    assignedCustomers: [],
   })
 
+  const [showCategories, setShowCategories] = useState(true)
   const [selectedCategories, setSelectedCategories] = useState({})
   const [selectedProducts, setSelectedProducts] = useState([])
   const [selectedCustomers, setSelectedCustomers] = useState([])
@@ -52,7 +53,7 @@ export default function CouponModal({ isOpen, onClose, coupon }){
   const { products, productCounts } = useSelector(state=> state.productStore)
   const { adminLoading, adminError, adminSuccess, adminMessage, allUsers } = useSelector(state => state.admin)
   
-  const {couponCreated} = useSelector(state=> state.coupons)
+  const {couponCreated, couponUpdated} = useSelector(state=> state.coupons)
   const dispatch = useDispatch()
 
   
@@ -60,6 +61,16 @@ export default function CouponModal({ isOpen, onClose, coupon }){
 
   useEffect(() => {
     if (coupon){
+      if(coupon.applicableProducts.length > 0){
+        setSelectedProducts([...coupon.applicableProducts])
+      }
+      if(coupon?.assignedCustomers && coupon.assignedCustomers.length > 0){
+        setSelectedCustomers([...coupon.assignedCustomers])
+      }
+      setShowCategories(false)
+      // if(coupon.applicableCategories.length > 0){
+      //   setSelectedCategories({categories: [...coupon.applicableCategories]})
+      // }
       setFormData({...coupon, startDate: coupon.startDate.split("T")[0], endDate: coupon.endDate.split("T")[0] })
     } else {
       setFormData({
@@ -76,8 +87,8 @@ export default function CouponModal({ isOpen, onClose, coupon }){
         applicableType: "allProducts",
         applicableCategories: [],
         applicableProducts: [],
-        isCustomerSpecific: false,
-        specificCustomers: [],
+        customerSpecific: false,
+        assignedCustomers: [],
       })
     }
 
@@ -111,11 +122,24 @@ export default function CouponModal({ isOpen, onClose, coupon }){
 
   useEffect(()=> {
     if(selectedCategories?.categories && selectedCategories.categories.length > 0){
+      console.log("selectedCategories?.categories--->", selectedCategories.categories)
       setFormData(formData=> (
         { ...formData, applicableCategories: [ ...new Set([...formData.applicableCategories, ...selectedCategories.categories]) ] }
       ))
     }
-  },[selectedCategories])
+    if(selectedProducts){
+      console.log("selectedProducts--->", selectedProducts)
+      setFormData(formData=> (
+        { ...formData, applicableProducts: [...selectedProducts.map(product=> product.title)] }
+      ))
+    }
+    if(selectedCustomers){
+      console.log("selectedCustomers--->", selectedCustomers)
+      setFormData(formData=> (
+        { ...formData, assignedCustomers: [...selectedCustomers.map(customer=> customer.username)] }
+      ))
+    }
+  },[selectedCategories, selectedProducts, selectedCustomers])
 
   useEffect(()=> {
     console.log("formData--->", formData)
@@ -136,7 +160,11 @@ export default function CouponModal({ isOpen, onClose, coupon }){
       toast.success('A coupon is successfully created!')
       dispatch(resetCouponStates())
     }
-  }, [couponCreated])
+    if(couponUpdated){
+      toast.success('A coupon is successfully updated!')
+      dispatch(resetCouponStates())
+    }
+  }, [couponCreated, couponUpdated])
 
   const handleChange = (e)=> {
     console.log("Inside handleChange...")
@@ -242,9 +270,9 @@ export default function CouponModal({ isOpen, onClose, coupon }){
     const checked = e.target.checked
     console.log("checked-->", checked)
     if(checked){
-      setSelectedProducts( products=> [...products, productName] )
+      setSelectedProducts( products=> [...products, {title: productName}] )
     }else{
-      setSelectedProducts( products=> products.filter(product=> product !== productName) )
+      setSelectedProducts( products=> products.filter(product=> product.title !== productName) )
     }
   }
 
@@ -287,13 +315,33 @@ export default function CouponModal({ isOpen, onClose, coupon }){
     const checked = e.target.checked
     console.log("checked-->", checked)
     if(checked){
-      setSelectedCustomers( users=> [...users, username] )
+      setSelectedCustomers( users=> [...users, {username}] )
     }else{
-      setSelectedCustomers( users=> users.filter(user=> user !== username) )
+      setSelectedCustomers( users=> users.filter(user=> user.username !== username) )
     }
   }
 
-  const handleCreateCoupon = ()=> {
+  const applicableTypeHandler = (e)=> {
+    const selectedValue = e.target.value
+    setFormData((prev) => ({ ...prev, applicableType: selectedValue }))
+    if (selectedValue === "categories"){
+      setShowCategories(true)
+      setSelectedProducts([])
+      setFormData((prev) => ({ ...prev, applicableProducts: [] }))
+    } 
+    else if (selectedValue === "products"){
+      setShowCategories(false)
+      setSelectedCategories({})
+      setFormData((prev) => ({ ...prev, applicableCategories: [] }))
+    } 
+    else{
+      setShowCategories(false)
+      setFormData((prev) => ({ ...prev, applicableProducts: [], applicableCategories: [] }))
+    } 
+  }
+
+  const handleSubmit = (e)=> {
+    e.preventDefault()
     const {code, startDate, endDate} =  formData
     if(!code || !startDate || !endDate){
       toast.error("Please fill the required fields!")
@@ -312,17 +360,12 @@ export default function CouponModal({ isOpen, onClose, coupon }){
       return
     }
 
-    dispatch( createCoupon({couponDetails: formData}) ) 
+    let couponId
+    if(isEditing){
+      couponId = coupon._id
+    } 
+    coupon ? dispatch( updateCoupon({couponDetails: formData, couponId}) )  : dispatch( createCoupon({couponDetails: formData}) ) 
     onClose()
-  }
-
-  const handleEditCoupon = ()=> {
-
-  }
-
-  const handleSubmit = (e)=> {
-    e.preventDefault()
-    coupon ? handleEditCoupon() : handleCreateCoupon()
   }
 
   if (!isOpen) return null
@@ -385,7 +428,7 @@ export default function CouponModal({ isOpen, onClose, coupon }){
                 onBlur={(e)=> inputBlurHandler(e, "discountValue")}   className="h-[2.5rem]" style={{paddingLeft: '30px'}}/>
               <BadgePercent className="absolute top-[60%] left-[10px] w-[13px] h-[13px] text-muted"/>
               <div className="input-contoller">
-                <Plus  onClick={()=> incDecHandler('discountValue', 1)}/>
+                <Plus onClick={()=> incDecHandler('discountValue', 1)}/>
                 <Minus onClick={()=> incDecHandler('discountValue', -1)}/>
               </div>
             </div>
@@ -478,7 +521,8 @@ export default function CouponModal({ isOpen, onClose, coupon }){
             <label htmlFor="applicableType" className="block text-sm font-medium text-gray-700">
               Applicable To
             </label>
-            <select id="applicableType" name="applicableType" value={formData.applicableType} onChange={handleChange}>
+            <select id="applicableType" name="applicableType" value={formData.applicableType}  
+                onChange={(e)=> applicableTypeHandler(e)}>
               <option value="allProducts"> All Products </option>
               <option value="categories"> Specific Categories </option>
               <option value="products"> Specific Products </option>
@@ -488,7 +532,7 @@ export default function CouponModal({ isOpen, onClose, coupon }){
           {formData.applicableType === "categories" && (
             <div className="px-[30px]" id='applicableCategories-section'>
               <label htmlFor="applicableCategories" className="block text-[13px] font-[550] text-gray-700 tracking-[0.5px]">
-                Select Categories
+                { !isEditing ? 'Select Categories' : 'Selected Categories' }
               </label>
               <div id="applicableCategories" className="mt-[5px] px-[15px] py-[7px] border border-dropdownBorder rounded-[5px]">
                 {/* {categories.map((category)=> (
@@ -496,9 +540,41 @@ export default function CouponModal({ isOpen, onClose, coupon }){
                     {category.name}
                   </option>
                 ))} */}
+                {
+                  showCategories &&
+                  <CategoryDisplay type='checkboxType' filter={selectedCategories} setFilter={setSelectedCategories} />
+                }
 
-                <CategoryDisplay type='checkboxType' filter={selectedCategories} setFilter={setSelectedCategories} />
-
+                {
+                 isEditing && formData.applicableCategories && formData.applicableCategories?.length > 0 && !showCategories &&
+                // <div className="mt-[5px] px-[10px] py-[5px] border border-dropdownBorder rounded-[4px]">
+                /* <h5 className="mb-[5px] text-[12px] text-muted font-[450]"> Selected Categories </h5> */
+                <div className="mt-[5px] flex gap-[10px]">
+                  {
+                    formData.applicableCategories.map(category=> (
+                      <div key={category._id} className="px-[5px] py-[2px] flex items-center gap-[5px] border border-inputBorderSecondary
+                         rounded-[12px]">
+                        <X className="h-[8px] w-[8px] text-muted cursor-pointer" 
+                          onClick={()=> setFormData(formData=> (
+                            {...formData, applicableCategories: [...formData.applicableCategories.filter(cat=> cat.name !== category.name)]}
+                          ))}/>
+                        <span className="text-[11px] text-secondary capitalize"> {category.name} </span>
+                      </div>
+                    ))
+                  }
+                </div>
+                // </div>
+                }
+                {
+                isEditing && !showCategories &&
+                <h5 className="mt-[10px] mb-[5px] text-[12px] text-muted font-[450] hover:underline transition duration-150 cursor-pointer" 
+                  onClick={()=> { setFormData(formData=> (
+                        {...formData, applicableCategories: []}
+                        ));
+                       setShowCategories(true)}}>
+                Choose different Categories
+                </h5>
+                }
               </div>
             </div>
           )}
@@ -525,7 +601,7 @@ export default function CouponModal({ isOpen, onClose, coupon }){
                               focus:ring-0 focus:outline-none checked:bg-primary checked:border-primary checked:text-white 
                                 appearance-none active:bg-primary active:border-primary active:text-white cursor-pointer"
                                  onChange={(e)=> productCheckHandler(e, product.title)}
-                                 checked={ selectedProducts.includes(product.title) || false }/>
+                                 checked={ selectedProducts.some(item=> item.title === product.title) || false }/>
                             <label htmlFor='selectProducts' className="text-[12px] capitalize cursor-pointer hover:text-secondary hover:font-medium">
                                {product.title} 
                             </label>
@@ -555,11 +631,11 @@ export default function CouponModal({ isOpen, onClose, coupon }){
                 <div className="flex gap-[10px]">
                   {
                     selectedProducts.map(product=> (
-                      <div key={product} className="px-[5px] py-[2px] flex items-center gap-[5px] border border-inputBorderSecondary
+                      <div key={product.title} className="px-[5px] py-[2px] flex items-center gap-[5px] border border-inputBorderSecondary
                          rounded-[12px]">
                         <X className="h-[8px] w-[8px] text-muted cursor-pointer" 
-                          onClick={()=> setSelectedProducts(products=> products.filter(item=> item !== product ))}/>
-                        <span className="text-[11px] text-secondary capitalize"> {product} </span>
+                          onClick={()=> setSelectedProducts(products=> products.filter(item=> item.title !== product.title ))}/>
+                        <span className="text-[11px] text-secondary capitalize"> {product.title} </span>
                       </div>
                     ))
                   }
@@ -570,18 +646,18 @@ export default function CouponModal({ isOpen, onClose, coupon }){
           )}
 
           <div className="flex items-center">
-            <input type="checkbox" id="isCustomerSpecific" name="isCustomerSpecific" checked={formData.isCustomerSpecific}
+            <input type="checkbox" id="customerSpecific" name="customerSpecific" checked={formData.customerSpecific}
               onChange={handleChange} className="mt-[-1px] h-[4px] w-[4px] p-[7px] rounded-[3px] text-secondary focus:ring-secondary border-gray-300"/>
-            <label htmlFor="isCustomerSpecific" className="ml-2 block text-sm text-gray-900">
+            <label htmlFor="customerSpecific" className="ml-2 block text-sm text-gray-900">
               Customer-specific coupon
             </label>
           </div>
-          {/* {formData.isCustomerSpecific && (
+          {/* {formData.customerSpecific && (
             <div>
-              <label htmlFor="specificCustomers" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="assignedCustomers" className="block text-sm font-medium text-gray-700">
                 Select Customers
               </label>
-              <select multiple id="specificCustomers" name="specificCustomers" value={formData.specificCustomers} onChange={handleChange}>
+              <select multiple id="assignedCustomers" name="assignedCustomers" value={formData.assignedCustomers} onChange={handleChange}>
                 {customers.map((customer) => (
                   <option key={customer.id} value={customer.id}>
                     {customer.name}
@@ -590,7 +666,7 @@ export default function CouponModal({ isOpen, onClose, coupon }){
               </select>
             </div>
           )} */}
-          {formData.isCustomerSpecific && (
+          {formData.customerSpecific && (
             <div className="px-[20px]" id='customers'>
               <label htmlFor="customersSearch" className="block text-[13px] font-medium text-gray-700">
                 Select Customers 
@@ -642,11 +718,11 @@ export default function CouponModal({ isOpen, onClose, coupon }){
                 <div className="flex gap-[10px]">
                   {
                     selectedCustomers.map(customer=> (
-                      <div key={customer} className="px-[5px] py-[2px] flex items-center gap-[5px] border border-inputBorderSecondary
+                      <div key={customer.username} className="px-[5px] py-[2px] flex items-center gap-[5px] border border-inputBorderSecondary
                          rounded-[12px]">
                         <X className="h-[8px] w-[8px] text-muted cursor-pointer" 
-                          onClick={()=> setSelectedCustomers(users=> users.filter(user=> user !== customer ))}/>
-                        <span className="text-[11px] text-secondary capitalize"> {customer} </span>
+                          onClick={()=> setSelectedCustomers(users=> users.filter(user=> user.username !== customer.username ))}/>
+                        <span className="text-[11px] text-secondary capitalize"> {customer.username} </span>
                       </div>
                     ))
                   }

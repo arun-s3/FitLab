@@ -4,7 +4,9 @@ import {Link, useLocation, useNavigate} from 'react-router-dom'
 import {useSelector} from 'react-redux';
 
 import {Camera, ChevronsDown, Clock, CreditCard, Heart, Home, Key, LogOut, MapPin, RefreshCw, ShoppingCart} from 'lucide-react'
-import {IoMdPerson} from "react-icons/io";
+import {IoMdPerson} from "react-icons/io"
+import {IoBagCheckOutline} from "react-icons/io5"
+
 
 export default function UserSidebar({currentPath, openMenuByDefault = true, flexiOpen}){
 
@@ -17,6 +19,7 @@ export default function UserSidebar({currentPath, openMenuByDefault = true, flex
     const menuItems = [
         { icon: Home, label: 'Account', path: '/account'},
         { icon: Clock, label: 'Order History', path: '/orders' },
+        { icon: IoBagCheckOutline, label: 'Checkout', path: '/checkout' },
         { icon: CreditCard, label: 'Wallet', path: '' },
         { icon: ShoppingCart, label: 'Shopping Cart', path: '/cart' },
         { icon: Heart, label: 'Wishlist', path: '/wishlist' },

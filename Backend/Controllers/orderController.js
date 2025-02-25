@@ -1,88 +1,236 @@
 const Order = require('../Models/orderModel')
 const Cart = require('../Models/cartModel')
 const Product = require('../Models/productModel')
+const Coupon = require('../Models/couponModel')
 const {errorHandler} = require('../Utils/errorHandler') 
 
 const ESTIMATED_DELIVERY_DATE = 5
 
+// const createOrder = async (req, res, next)=> {
+//     try {
+//       console.log("Inside createOrder of orderController")
+//       const userId = req.user._id
+     
+//       console.log("orderDetails---->", JSON.stringify(req.body))
+
+//       const {paymentDetails, shippingAddressId} = req.body.orderDetails
+//       let orderStatus = 'processing'
+//       let deliveryDate;
+//       if(paymentDetails.paymentMethod === 'cashOnDelivery'){
+//         orderStatus = 'confirmed'
+//         deliveryDate = new Date()
+//         deliveryDate.setDate(deliveryDate.getDate() + ESTIMATED_DELIVERY_DATE)
+//       }
+  
+//       const cart = await Cart.findOne({userId})
+//       if (!cart || cart.products.length === 0){
+//         return next(errorHandler(400, "Your cart is empty!"))
+//       }
+  
+//       console.log("Cart found for checkout:", cart)
+  
+//       let orderTotal = 0
+//       for (const item of cart.products) {
+//         const product = await Product.findById(item.productId)
+  
+//         if (!product){
+//           return next(errorHandler(404, `Product ${item.title} not found!`));
+//         }
+  
+//         if (product.blocked){
+//           return next(errorHandler(403, `Product ${item.title} is blocked and cannot be purchased.
+//              Please remove this product from the cart or search for any alternative product and place Order`))
+//         }
+  
+//         if (item.quantity > product.stock){
+//           return next(errorHandler(400, `Insufficient stock for ${item.title}. Only ${product.stock} items available.
+//              Please lessen the quantity and place Order`));
+//         }
+  
+//         orderTotal += item.quantity * item.price
+//       }
+//       console.log("Order total:", orderTotal)
+      
+//       for (const item of cart.products){
+//         const product = await Product.findById(item.productId)
+//         product.stock -= item.quantity
+//         await product.save()
+//       }
+      
+//       const order = new Order({
+//         userId,
+//         products: cart.products,
+//         orderTotal,
+//         gst: cart.gst,
+//         deliveryCharge: cart.deliveryCharge,
+//         absoluteTotalWithTaxes: cart.absoluteTotalWithTaxes,
+//         paymentDetails,
+//         shippingAddress: shippingAddressId,
+//         orderStatus,
+//         orderDate: new Date(),
+//         deliveryDate
+//       })
+  
+//       await order.save()
+//       console.log("Order created successfully:", order)
+  
+//       cart.products = []
+//       cart.absoluteTotal = 0
+//       await cart.save()
+  
+//       res.status(200).json({message: "Checkout successful! Your order has been placed.", order})
+//     }catch(error){
+//       console.log("Error in orderController-checkout:", error.message)
+//       next(error)
+//     }
+//   }
+
 const createOrder = async (req, res, next)=> {
     try {
-      console.log("Inside createOrder of orderController")
-      const userId = req.user._id
-     
-      console.log("orderDetails---->", JSON.stringify(req.body))
+        console.log("Inside createOrder of orderController")
+        const userId = req.user._id
 
-      const {paymentDetails, shippingAddressId} = req.body.orderDetails
-      let orderStatus = 'processing'
-      let deliveryDate;
-      if(paymentDetails.paymentMethod === 'cashOnDelivery'){
-        orderStatus = 'confirmed'
-        deliveryDate = new Date()
-        deliveryDate.setDate(deliveryDate.getDate() + ESTIMATED_DELIVERY_DATE)
-      }
-  
-      const cart = await Cart.findOne({userId})
-      if (!cart || cart.products.length === 0){
-        return next(errorHandler(400, "Your cart is empty!"))
-      }
-  
-      console.log("Cart found for checkout:", cart)
-  
-      let orderTotal = 0
-      for (const item of cart.products) {
-        const product = await Product.findById(item.productId)
-  
-        if (!product){
-          return next(errorHandler(404, `Product ${item.title} not found!`));
+        console.log("orderDetails---->", JSON.stringify(req.body))
+
+        const { paymentDetails, shippingAddressId, couponCode } = req.body.orderDetails
+        let orderStatus = 'processing'
+        let deliveryDate
+        if (paymentDetails.paymentMethod === 'cashOnDelivery'){
+            orderStatus = 'confirmed'
+            deliveryDate = new Date()
+            deliveryDate.setDate(deliveryDate.getDate() + ESTIMATED_DELIVERY_DATE)
         }
-  
-        if (product.blocked){
-          return next(errorHandler(403, `Product ${item.title} is blocked and cannot be purchased.
-             Please remove this product from the cart or search for any alternative product and place Order`))
+
+        const cart = await Cart.findOne({ userId }).populate('products.productId')
+        if (!cart || cart.products.length === 0){
+            return next(errorHandler(400, "Your cart is empty!"))
         }
-  
-        if (item.quantity > product.stock){
-          return next(errorHandler(400, `Insufficient stock for ${item.title}. Only ${product.stock} items available.
-             Please lessen the quantity and place Order`));
+
+        console.log("Cart found for checkout:", cart)
+
+        let orderTotal = 0
+        let discountAmount = 0
+        let deliveryCharge = cart.deliveryCharge
+
+        const now = new Date()
+
+        let coupon = null
+        if (couponCode || cart.couponUsed){
+            if(couponCode){
+              console.log("Inside if couponCode")
+              coupon = await Coupon.findOne({ code: couponCode.toUpperCase() })
+            }
+            else{
+              console.log("Inside if cart.couponUsed")
+              coupon = await Coupon.findOne({ _id: cart.couponUsed })
+            }
+            
+            if (!coupon || coupon.status !== 'active') {
+                return next(errorHandler(400, "Invalid or expired coupon code!"))
+            }
+            if (now < coupon.startDate || now > coupon.endDate) {
+                return next(errorHandler(400, "Coupon is expired or not yet active!"))
+            }
+            if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
+                return next(errorHandler(400, "Coupon usage limit reached!"))
+            }
+
+            const userOrderCount = await Order.countDocuments({userId, couponUsed: coupon._id})
+            if (coupon.usageLimitPerCustomer !== null && userOrderCount >= coupon.usageLimitPerCustomer){
+                return next(errorHandler(400, "You have already used this coupon the maximum allowed times!"));
+            }
+
+            for (const item of cart.products) {
+                orderTotal += item.quantity * item.price
+            }
+
+            if (orderTotal < coupon.minimumOrderValue) {
+                return next(errorHandler(400, `Your order must be at least $${coupon.minimumOrderValue} to use this coupon!`))
+            }
+
+            let isCouponApplicable = false
+            for (const item of cart.products) {
+                const product = item.productId
+                if (
+                    coupon.applicableType === "allProducts" ||
+                    (coupon.applicableType === "products" && coupon.applicableProducts.includes(product._id)) ||
+                    (coupon.applicableType === "categories" && product.category.some(catId => coupon.applicableCategories.includes(catId)))
+                ) {
+                    isCouponApplicable = true
+                    break
+                }
+            }
+            if (!isCouponApplicable){
+                return next(errorHandler(400, "Coupon is not applicable to selected products."))
+            }
+
+            if (coupon.discountType === "percentage"){
+                discountAmount = Math.min(orderTotal * (coupon.discountValue / 100), coupon.maxDiscount || orderTotal)
+            } else if (coupon.discountType === "fixed"){
+                discountAmount = Math.min(coupon.discountValue, orderTotal)
+            } else if (coupon.discountType === "freeShipping"){
+                deliveryCharge = 0
+            }
         }
-  
-        orderTotal += item.quantity * item.price
-      }
-      console.log("Order total:", orderTotal)
-      
-      for (const item of cart.products){
-        const product = await Product.findById(item.productId)
-        product.stock -= item.quantity
-        await product.save()
-      }
-      
-      const order = new Order({
-        userId,
-        products: cart.products,
-        orderTotal,
-        gst: cart.gst,
-        deliveryCharge: cart.deliveryCharge,
-        absoluteTotalWithTaxes: cart.absoluteTotalWithTaxes,
-        paymentDetails,
-        shippingAddress: shippingAddressId,
-        orderStatus,
-        orderDate: new Date(),
-        deliveryDate
-      })
-  
-      await order.save()
-      console.log("Order created successfully:", order)
-  
-      cart.products = []
-      cart.absoluteTotal = 0
-      await cart.save()
-  
-      res.status(200).json({message: "Checkout successful! Your order has been placed.", order})
-    }catch(error){
-      console.log("Error in orderController-checkout:", error.message)
-      next(error)
+
+        console.log("Order total before discount:", orderTotal)
+        console.log("Discount applied:", discountAmount)
+
+        for (const item of cart.products){
+            const product = await Product.findById(item.productId)
+            if (!product || product.blocked) {
+                return next(errorHandler(403, `Product ${item.title} is not available for purchase.`))
+            }
+            if (item.quantity > product.stock) {
+                return next(errorHandler(400, `Insufficient stock for ${item.title}. Only ${product.stock} items available.`))
+            }
+            product.stock -= item.quantity
+            await product.save()
+        }
+
+        const order = new Order({
+            userId,
+            products: cart.products,
+            orderTotal: orderTotal - discountAmount,
+            couponDiscount: discountAmount,
+            gst: cart.gst,
+            deliveryCharge: deliveryCharge,
+            absoluteTotalWithTaxes: (orderTotal - discountAmount) + cart.gst + deliveryCharge,
+            paymentDetails,
+            shippingAddress: shippingAddressId,
+            orderStatus,
+            orderDate: new Date(),
+            deliveryDate,
+            couponUsed: coupon ? coupon._id : null,
+        });
+
+        await order.save();
+        console.log("Order created successfully:", order)
+
+        if (coupon){
+            coupon.usedCount += 1
+
+            if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
+                coupon.status = "usedUp";
+            }
+            if (now > coupon.endDate) {
+                coupon.status = "expired";
+            }
+
+            await coupon.save();
+        }
+
+        cart.products = []
+        cart.absoluteTotal = 0
+        await cart.save();
+
+        res.status(200).json({ message: "Checkout successful! Your order has been placed.", order })
     }
-  }
+    catch (error) {
+        console.log("Error in orderController-checkout:", error.message)
+        next(error)
+    }
+}
   
 
 const getOrders = async (req, res, next)=> {
@@ -363,7 +511,7 @@ const deleteProductFromOrderHistory = async (req, res, next)=> {
     await order.save()
 
     console.log("Product marked as deleted successfully in the order history.")
-    res.status(200).json({ message: "Product successfully marked as deleted in the order history.", order})
+    res.status(200).json({message: "Product successfully marked as deleted in the order history.", order})
   }catch (error){
     console.log("Error in deleteProductFromOrderHistory:", error.message)
     next(error)

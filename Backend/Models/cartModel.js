@@ -1,5 +1,6 @@
 const mongoose=require('mongoose')
-const category = require('./categoryModel')
+const Coupon = require('./couponModel')
+
 
 const cartSchema=new mongoose.Schema({
     userId: {
@@ -61,6 +62,14 @@ const cartSchema=new mongoose.Schema({
         type: Number,
         required: true,
         default: 0,
+    },
+    couponUsed: {
+        type: mongoose.Schema.ObjectId,
+        ref: "Coupon",
+        default: null
+    },
+    couponDiscount: {
+        type: Number
     },
     absoluteTotalWithTaxes: {
         type: Number,

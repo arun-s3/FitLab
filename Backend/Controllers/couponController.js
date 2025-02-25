@@ -224,8 +224,9 @@ const getAllCoupons = async (req, res, next) => {
     console.log("Inside getAllCoupons of couponController")
 
     const { queryOptions = {} } = req.body
-    const { page = 1, limit = 6, startDate, endDate, sort = -1, sortBy = "createdAt" } = queryOptions
+    const { page = 1, limit = 6, startDate, endDate, sort = -1, sortBy = "createdAt", searchData } = queryOptions
     const skip = (page - 1) * limit
+    console.log("queryOptions--->", JSON.stringify(queryOptions))
 
     let filterConditions = {}
     if (startDate && endDate) {
@@ -233,11 +234,15 @@ const getAllCoupons = async (req, res, next) => {
       filterConditions.endDate = { $lte: new Date(endDate) }
     }
 
-    let sortOptions = {}
-    if (sortBy === "code"){
-      sortOptions.code = sort
-    }else{
+    if (searchData) {
+      filterConditions.code = { $regex: searchData, $options: "i" };
+    }
+
+    let sortOptions = {};
+    if (["code", "startDate", "endDate", "usageLimit"].includes(sortBy)){
       sortOptions[sortBy] = sort
+    } else {
+      sortOptions.createdAt = sort
     }
 
     const coupons = await Coupon.find(filterConditions)
@@ -256,8 +261,7 @@ const getAllCoupons = async (req, res, next) => {
     console.error("Error listing coupons:", error.message)
     next(error)
   }
-};
-
+}
 
 
 const deleteCoupon = async (req, res, next)=> {

@@ -67,7 +67,7 @@ export default function CartSidebar({ isOpen, onClose, packedupCart, removeFromT
                      {/* <button onClick={onClose} className=" text-gray-500 hover:text-gray-700">
                         <X size={15} className='text-red-500'/>
                       </button> */}
-                      <button className="self-start text-red-500 hover:text-red-700" n onClick={()=> removeFromTheCart(product.productId)}>
+                      <button className="self-start text-red-500 hover:text-red-700" onClick={()=> removeFromTheCart(product.productId)}>
                         <Trash2 className='h-[13px] w-[13px]'/>
                       </button>
                    </div>
@@ -87,13 +87,13 @@ export default function CartSidebar({ isOpen, onClose, packedupCart, removeFromT
                   }
                   <div className={`flex items-center space-x-2`}>
                     <button onClick={()=> updateQuantity(product.productId, -1)} 
-                      className={`p-1 bg-gray-100 hover:bg-gray-200 rounded-md`}>
-                      <Minus size={16} className='h-[10px] w-[10px]'/>
+                      className={`p-1 bg-gray-200 hover:bg-gray-200 rounded-[4px]`}>
+                      <Minus size={16} className='h-[10px] w-[10px] text-secondary'/>
                     </button>
                     <span className={` ${retractedView ? 'text-[13px]' : 'text-[12px]'} text-gray-800 font-[500]`}>{product.quantity}</span>
                     <button onClick={()=> updateQuantity(product.productId, 1)}
-                      className="p-1 bg-gray-100 hover:bg-gray-200 rounded-md">
-                      <Plus size={16} className='h-[10px] w-[10px]'/>
+                      className="p-1 bg-gray-200 hover:bg-gray-200 rounded-[4px]">
+                      <Plus size={16} className='h-[10px] w-[10px] text-secondary'/>
                     </button>
                     {
                       !retractedView &&

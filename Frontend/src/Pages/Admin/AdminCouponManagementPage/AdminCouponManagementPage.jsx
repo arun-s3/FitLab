@@ -16,15 +16,12 @@ import CouponDeleteModal from "./CouponDeleteModal"
 import useFlexiDropdown from '../../../Hooks/FlexiDropdown'
 import {DateSelector} from '../../../Components/Calender/Calender'
 import {getAllCoupons, searchCoupons, resetCouponStates} from '../../../Slices/couponSlice'
-
-
+import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
 
 
 export default function AdminCouponManagementPage(){
 
     const [coupons, setCoupons] = useState([])
-    const [searchTerm, setSearchTerm] = useState("")
-    const [sortConfig, setSortConfig] = useState({ key: "createdAt", direction: "desc" })
 
     const [isModalOpen, setIsModalOpen] = useState(false)
 
@@ -36,7 +33,9 @@ export default function AdminCouponManagementPage(){
     const [startDate, setStartDate] = useState(null)
     const [endDate, setEndDate] = useState(null)
 
-    const [limit, setLimit] = useState(10) 
+    const [limit, setLimit] = useState(6) 
+    const [currentPage, setCurrentPage] = useState(1)
+    const totalPages = 20
 
     const {openDropdowns, dropdownRefs, toggleDropdown} = useFlexiDropdown(['limitDropdown', 'sortDropdown'])
     
@@ -57,9 +56,9 @@ export default function AdminCouponManagementPage(){
 
     useEffect(()=> {
       setQueryOptions(query=> {
-        return {...query, startDate, endDate}
+        return {...query, page: currentPage, startDate, endDate}
       })
-    },[startDate, endDate])
+    },[startDate, endDate, currentPage])
 
     useEffect(() => {
       console.log("queryOptions----->", queryOptions)
@@ -67,21 +66,17 @@ export default function AdminCouponManagementPage(){
         dispatch( getAllCoupons({queryOptions}) )
       }
     }, [queryOptions])
-  
-    const handleSort = (key)=> {
-      const direction = sortConfig.key === key && sortConfig.direction === "asc" ? "desc" : "asc"
-      setSortConfig({ key, direction })
-      const sorted = [...coupons].sort((a, b) => {
-        if (a[key] < b[key]) return direction === "asc" ? -1 : 1
-        if (a[key] > b[key]) return direction === "asc" ? 1 : -1
-        return 0
-      })
-      setCoupons(sorted)
-    }
+
+    const sortTypes = [
+      {name: 'Coupons: Recent to Oldest', value: '-1', sortBy: 'createdAt'}, {name: 'Coupons: Oldest to Recent', value: '1', sortBy: 'createdAt'},
+      {name: 'Alphabetical: A to Z', value: '1', sortBy: 'code'}, {name: 'Alphabetical: Z to A', value: '-1', sortBy: 'code'}
+    ]
 
     const debouncedSearch = useRef(
       debounce((searchData)=> {
-        dispatch(searchCoupons({query: searchData}))
+        setQueryOptions(query=> (
+          {...query, searchData}
+        ))
       }, 600) 
     ).current
   
@@ -95,7 +90,10 @@ export default function AdminCouponManagementPage(){
       else{
           console.log("Getting all lists--")
           debouncedSearch.cancel()
-          dispatch( getAllCoupons({queryOptions}) )
+          setQueryOptions(query=> {
+            const {searchData, ...rest} = query
+            return rest
+          })
       } 
     }
 
@@ -106,7 +104,7 @@ export default function AdminCouponManagementPage(){
       setLimit(value)
     }
   
-    const radioClickHandler = (e)=>{
+    const radioClickHandler = (e, sortBy)=>{
       const value = Number.parseInt(e.target.value)
       console.log("value---->", value)
       const checkStatus = queryOptions.sort === value
@@ -117,15 +115,21 @@ export default function AdminCouponManagementPage(){
       }else{
           console.log("Checking radio..")
           setQueryOptions(query=> {
-            return {...query, sort: value}
+            return {...query, sort: value, sortBy}
           })
           const changeEvent = new Event('change', {bubbles:true})
           e.target.dispatchEvent(changeEvent)
       }
     }
   
-    const radioChangeHandler = (e, value)=>{
+    const radioChangeHandler = (e, value, sortBy)=>{
       e.target.checked = (queryOptions.sort === Number.parseInt(value))
+    }
+
+    const handleSort = (sortBy, sort)=> {
+      setQueryOptions(query=> {
+        return {...query, sortBy, sort}
+      })
     }
 
 
@@ -174,12 +178,13 @@ export default function AdminCouponManagementPage(){
                                    <ul className='absolute top-[44px] left-[3px] right-0 py-[10px] w-[101%] rounded-b-[4px] flex 
                                     flex-col items-center gap-[10px] text-[13px] bg-white border border-dropdownBorder rounded-[6px] 
                                       cursor-pointer'>
-                                       <li onClick={()=> limitHandler(10)}> 10 </li>
-                                       <li onClick={()=> limitHandler(20)}> 20 </li>
-                                       <li onClick={()=> limitHandler(30)}> 30 </li>
-                                       <li className='pb-[5px]' onClick={()=> limitHandler(18)}> 40 </li>
+                                        {
+                                          [6, 10, 20, 30, 40].map( limit=> (
+                                            <li onClick={()=> limitHandler(limit)}> {limit} </li>
+                                          ))
+                                        }
                                    </ul>
-                               }
+                                  }
                                </span>
                                <span className='flex items-center py-[8px] pr-[16px]'>
                                  <span className='font-[470]'> Coupons </span> 
@@ -194,20 +199,18 @@ export default function AdminCouponManagementPage(){
                              {openDropdowns.sortDropdown && 
                              <ul className='list-none  px-[10px] py-[1rem] absolute top-[44px] right-0 flex flex-col gap-[10px] justify-center 
                                      w-[12rem] text-[10px] bg-white border border-borderLight2 rounded-[8px] z-[5] cursor-pointer'>
-                                 <li> 
+                                 {
+                                  sortTypes.map(sortType=> (
+                                    <li key={`${sortType.value}-${sortType.sortBy}`}> 
                                      <span>  
-                                         <input type='radio' value='-1' onClick={(e)=> radioClickHandler(e)}
-                                             onChange={(e)=> radioChangeHandler(e, -1)} checked={queryOptions.sort === -1} />
-                                         <span> Orders: Recent to Oldest </span>
+                                         <input type='radio' value={sortType.value} onClick={(e)=> radioClickHandler(e, sortType.sortBy)}
+                                             onChange={(e)=> radioChangeHandler(e, sortType.value, sortType.sortBy)} 
+                                             checked={queryOptions.sort === Number(sortType.value) && queryOptions.sortBy === sortType.sortBy}/>
+                                         <span> {sortType.name} </span>
                                      </span>
-                                 </li>
-                                 <li> 
-                                     <span>  
-                                         <input type='radio' value='1' onClick={(e)=> radioClickHandler(e)}
-                                             onChange={(e)=> radioChangeHandler(e, 1)} checked={queryOptions.sort === 1} />
-                                         <span> Orders: Oldest to Recent  </span>
-                                     </span>
-                                 </li>
+                                    </li>
+                                  ))
+                                 }
                              </ul>
                              }
                            </div>
@@ -217,8 +220,7 @@ export default function AdminCouponManagementPage(){
                       </div>
 
                     <CouponList coupons={coupons} onEdit={(coupon)=> { setEditingCoupon(coupon); setIsModalOpen(true); }}
-                      onDelete={(coupon)=> { setCouponToDelete(coupon); setIsDeleteModalOpen(true); }}
-                        onSort={handleSort} sortConfig={sortConfig} />
+                      onDelete={(coupon)=> { setCouponToDelete(coupon); setIsDeleteModalOpen(true); }} onSort={handleSort}/>
 
                     <CouponModal isOpen={isModalOpen} onClose={()=> { setIsModalOpen(false); setEditingCoupon(null); }}
                         coupon={editingCoupon} isEditing={editingCoupon ? true : false}/>
@@ -226,6 +228,12 @@ export default function AdminCouponManagementPage(){
                     <CouponDeleteModal isOpen={isDeleteModalOpen} onClose={()=> {setIsDeleteModalOpen(false); setCouponToDelete(null)}}
                         coupon={couponToDelete} />
                         
+                </div>
+
+                <div className='mt-[3rem] mb-[5rem]'>
+
+                  <PaginationV2 currentPage={currentPage} totalPages={totalPages} onPageChange={(page)=> setCurrentPage(page)} />
+
                 </div>
 
             </main>

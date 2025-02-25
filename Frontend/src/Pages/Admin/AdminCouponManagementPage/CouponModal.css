@@ -28,6 +28,9 @@
 #CouponModal form input{
     font-size: 13px;
 }
+#CouponModal form input::placeholder{
+    font-size: 11px;
+}
 #CouponModal form select{
     font-size: 13px;
     color: var(--SECONDARY);

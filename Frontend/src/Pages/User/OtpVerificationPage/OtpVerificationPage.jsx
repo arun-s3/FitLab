@@ -68,7 +68,7 @@ export default function OtpVerificationPage(){
     },[otp])
 
     const startTimer = ()=> {
-        // setTimer(500 * 60 * 1000)
+        setTimer(5 * 60 * 1000)
         timerId.current = setInterval(() => {
             setTimer(prevCount => {
                 if (prevCount <= 1000) {

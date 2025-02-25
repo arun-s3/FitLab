@@ -44,7 +44,7 @@ export default function AdminPageLayout(){
     const [headerZIndex, setHeaderZIndex] = useState(10)
 
     const [showSublist, setShowSublist] = useState({
-        dashboard:false, customers:false, product: false, category: false, couponGenerator:false, orders:false, salesReport:false, offers:false, banners:false, settings:false
+        dashboard:false, customers:false, product: false, category: false, couponManager:false, orders:false, salesReport:false, offers:false, banners:false, settings:false
     })
 
     const toggleSublist = (type) => {
@@ -172,11 +172,11 @@ export default function AdminPageLayout(){
                                      </ul>
                                      }
                                 </li>
-                                <li onClick={()=>toggleSublist('couponGenerator')}> 
-                                    <div className={`${ showSublist.couponGenerator && 'toggleSublist-custom-after'} option`}> 
-                                        <Link> 
+                                <li onClick={()=>toggleSublist('couponManager')}> 
+                                    <div className={`${ showSublist.couponManager && 'toggleSublist-custom-after'} option`}> 
+                                        <Link  to='/admin/coupons'  className='flex items-center'> 
                                             <IoPricetagOutline/>
-                                            <span className={`${ showSublist.couponGenerator && 'text-primaryDark'}`}>  Coupon Generator </span> 
+                                            <span className={`${ showSublist.couponManager && 'text-primaryDark'}`}>  Coupon Manager </span> 
                                         </Link> 
                                     </div> 
                                 </li>

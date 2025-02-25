@@ -36,7 +36,7 @@ const couponSchema = new mongoose.Schema(
     },
     usageLimitPerCustomer: {
       type: Number,
-      default: 1, 
+      default: 4, 
     },
     usedCount: {
       type: Number,

@@ -4,7 +4,8 @@ import {Link} from 'react-router-dom'
 import {useSelector, useDispatch} from 'react-redux'
 
 import {Clock, CreditCard, Home, LogOut, MapPin} from 'lucide-react'
-import {IoMdArrowDropdown, IoMdArrowDropup} from "react-icons/io";
+import {IoMdArrowDropdown, IoMdArrowDropup} from "react-icons/io"
+import {IoBagCheckOutline} from "react-icons/io5"
 import axios from 'axios'
 
 import {signout} from '../../Slices/userSlice'
@@ -23,6 +24,7 @@ export default function UserHead(){
     const menuItems = [
         { icon: Home, label: 'Account', path: '/account'},
         { icon: CreditCard, label: 'Wallet', path: '' },
+        { icon: IoBagCheckOutline, label: 'Checkout', path: '/checkout' },
         { icon: Clock, label: 'Order History', path: '/orders' },
         { icon: MapPin, label: 'Manage Addresses', path: '/account/addresses' },
     ]
@@ -84,7 +86,8 @@ export default function UserHead(){
                             menuItems.map(item=> (
                                 <li className='hover:text-secondary hover:font-[500]'> 
                                     <Link to={item.path} className='flex items-center gap-[10px]'> 
-                                        <item.icon className='h-[15px] w-[15px] text-primaryDark hover:text-primary' />  
+                                        <item.icon className={` ${item.label === 'Checkout' ? 'h-[16px] w-[16px]' : 'h-[15px] w-[15px]'}
+                                         text-primaryDark hover:text-primary`} />  
                                         <span> {item.label} </span>
                                     </Link>
                                 </li>

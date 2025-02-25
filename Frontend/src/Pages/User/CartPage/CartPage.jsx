@@ -11,8 +11,8 @@ import Header from '../../../Components/Header/Header'
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
 import OrderStepper from '../../../Components/OrderStepper/OrderStepper'
 import FeaturesDisplay from '../../../Components/FeaturesDisplay/FeaturesDisplay'
-import PaymentSummary from '../../../Components/PaymentSummary/PaymentSummary'
-import CouponCodeInput from '../../../Components/CouponCodeInput/CouponCodeInput';
+import PaymentSummary from './PaymentSummary'
+import CouponCodeInput from './CouponCodeInput'
 import {capitalizeFirstLetter} from '../../../Utils/helperFunctions'
 import {SiteSecondaryFillButton, SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
 import {addToCart, removeFromCart, getTheCart, resetCartStates} from '../../../Slices/cartSlice'
@@ -28,7 +28,7 @@ export default function ShoppingCartPage(){
   // const [gst, setGst] = useState(0)
   // const [absoluteTotalWithTaxes, setAbsoluteTotalWithTaxes] = useState(0)
 
-  const {cart, productAdded, productRemoved, loading, error, message} = useSelector(state=> state.cart)
+  const {cart, productAdded, productRemoved, loading, error, message, couponApplied} = useSelector(state=> state.cart)
   const dispatch = useDispatch()
 
   const navigate = useNavigate()
@@ -41,6 +41,12 @@ export default function ShoppingCartPage(){
   useEffect(()=> {
     dispatch(getTheCart())
   },[])
+
+  useEffect(()=> {
+    if(cart){
+      console.log("Cart---->", cart)
+    }
+  },[cart])
 
   // useEffect(() => {
   //   async function loadCharges() {
@@ -64,6 +70,10 @@ export default function ShoppingCartPage(){
   //     loadCharges()
   //   }
   // }, [cart])
+
+  // useEffect(()=> {
+  //   if(coupon)
+  // },[couponApplied])
 
   useEffect(()=> {
     if(error){
@@ -201,7 +211,7 @@ export default function ShoppingCartPage(){
           </div>
 
           <PaymentSummary heading='Order Summary' absoluteTotal={cart.absoluteTotal} absoluteTotalWithTaxes={cart.absoluteTotalWithTaxes}
-               deliveryCharge={cart.deliveryCharge} gst={cart.gst}  />
+               deliveryCharge={cart.deliveryCharge} couponDiscount={cart?.couponDiscount} gst={cart.gst} couponCode={cart?.couponUsed?.code} />
 
         </div>
         : <div className='flex flex-col justify-center items-center gap-[1rem]'>

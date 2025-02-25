@@ -420,12 +420,13 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
             <div className="relative">
               <div className="flex justify-between items-center">
                 <label htmlFor="discountValue" className="block text-sm font-medium text-gray-700">
-                  Discount Value
+                  { 'Discount Value ' + `( ${formData?.discountType && formData.discountType === 'percentage' ? '%' : "\u20B9"} )`}
                 </label>
                 <span className='error'> { error && error.discountValue && error.discountValue} </span>
               </div>
               <input type="text" id="discountValue" name="discountValue" value={formData.discountValue} onChange={handleChange}
-                onBlur={(e)=> inputBlurHandler(e, "discountValue")}   className="h-[2.5rem]" style={{paddingLeft: '30px'}}/>
+                placeholder={`Enter the discount value in ${formData?.discountType && formData.discountType === 'percentage' ? '%' : "\u20B9"}`}
+                  onBlur={(e)=> inputBlurHandler(e, "discountValue")} className="h-[2.5rem]" style={{paddingLeft: '30px'}}/>
               <BadgePercent className="absolute top-[60%] left-[10px] w-[13px] h-[13px] text-muted"/>
               <div className="input-contoller">
                 <Plus onClick={()=> incDecHandler('discountValue', 1)}/>
@@ -436,10 +437,10 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
             <div className="relative">
               <div className="flex justify-between items-center">
                 <label htmlFor="maxDiscount" className="block text-sm font-medium text-gray-700">
-                  Maximum Discount Value
+                  Maximum Discount Value (optional)
                 </label>
               </div>
-              <input type="text" id="maxDiscount" name="maxDiscount" value={formData.maxDiscount}
+              <input type="text" id="maxDiscount" name="maxDiscount" value={formData.maxDiscount} placeholder='Leave blank for no limit' 
                  className="h-[2.5rem]" onBlur={(e)=> inputBlurHandler(e, "maxDiscount")} onChange={handleChange}/>
               <div className="input-contoller">
                 <Plus onClick={()=> incDecHandler('maxDiscount', 1)}/>
@@ -453,10 +454,11 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
           <div className="relative">
             <div className="flex justify-between items-center">
               <label htmlFor="minimumOrderValue" className="block text-sm font-medium text-gray-700">
-                Minimum Order Value
+                Minimum Order Value (optional)
               </label>
             </div>
             <input type="text" id="minimumOrderValue" name="minimumOrderValue" value={formData.minimumOrderValue}
+              placeholder="Enter the minimum order amount required to apply this coupon"
                className="h-[2.5rem]" onBlur={(e)=> inputBlurHandler(e, "minimumOrderValue")} onChange={handleChange}/>
             <div className="input-contoller">
               <Plus onClick={()=> incDecHandler('minimumOrderValue', 1)}/>

@@ -25,7 +25,6 @@ import {camelToCapitalizedWords, capitalizeFirstLetter, convertToCamelCase} from
 
 export default function CheckoutPage(){
     
-    const [couponCode, setCouponCode] = useState('')
     const [currentProductIndex, setCurrentProductIndex] = useState(0)
   
     // const [shipping, setShipping] = useState(0)
@@ -36,10 +35,10 @@ export default function CheckoutPage(){
 
     const [paymentMethod, setPaymentMethod] = useState('')
 
-    const [discountCode, setDiscountCode] = useState('');
+    const [couponCode, setCouponCode] = useState('');
     const [appliedDiscount, setAppliedDiscount] = useState('');
     const [discountAmount, setDiscountAmount] = useState(0);
-    const [isDiscountFocused, setIsDiscountFocused] = useState(false);
+    const [isCouponFocused, setIsCouponFocused] = useState(false);
 
     const [orderDetails, setOrderDetails] = useState({})
 
@@ -174,13 +173,16 @@ export default function CheckoutPage(){
 
     
     const handleApplyDiscount = () => {
-      if (discountCode === 'SPRING2021') {
-        setAppliedDiscount(discountCode)
-        setDiscountAmount(20.95)
-      } else {
-        setAppliedDiscount('')
-        setDiscountAmount(0)
-      }
+      setOrderDetails(orderDetails=> {
+        return {...orderDetails, couponCode}
+      })
+      // if (couponCode === 'SPRING2021') {
+      //   setAppliedDiscount(couponCode)
+      //   setDiscountAmount(20.95)
+      // } else {
+      //   setAppliedDiscount('')
+      //   setDiscountAmount(0)
+      // }
   }
 
   const checkoutHandler= ()=> {
@@ -435,24 +437,27 @@ export default function CheckoutPage(){
                           }
                         </div>
 
-                        <div className="mb-4 relative">
-                          <label htmlFor="discountCode" 
-                            className={`absolute ${isDiscountFocused || discountCode ? '-top-2 left-2 px-1 bg-white text-xs' : 'top-2 left-2 text-gray-500'} 
+                        {
+                          !cart.couponDiscount &&
+                          <div className="mb-4 relative">
+                          <label htmlFor="couponCode" 
+                            className={`absolute ${isCouponFocused || couponCode ? '-top-2 left-2 px-1 bg-white text-xs' : 'top-2 left-2 text-gray-500'} 
                               transition-all duration-200 pointer-events-none`}>
-                            Discount code
+                            Coupon code
                           </label>
                           <div className="flex items-center">
-                            <input type="text" id="discountCode" value={discountCode} onChange={(e) => setDiscountCode(e.target.value)}
-                                onFocus={(e)=> setIsDiscountFocused(true)} onBlur={() => setIsDiscountFocused(false)}
+                            <input type="text" id="couponCode" value={couponCode} onChange={(e) => setCouponCode(e.target.value)}
+                                onFocus={(e)=> setIsCouponFocused(true)} onBlur={() => setIsCouponFocused(false)}
                                     className="flex-1 p-2 border border-[#e5e7eb] border-r-0 rounded-l-md focus:border-primary focus:outline-none
                                          focus:ring-0 focus:ring-primary caret-primaryDark"/>
-                            <button className={`text-orange-500 px-4 py-[0.55rem] border border-l-0 rounded-r-md ${isDiscountFocused ? 'border-primary' : ''}
+                            <button className={`text-orange-500 px-4 py-[0.55rem] border border-l-0 rounded-r-md ${isCouponFocused ? 'border-primary' : ''}
                                hover:text-orange-600 transition-colors`}
                               onClick={handleApplyDiscount}>
                               Apply
                             </button>
                           </div>
                         </div>
+                        }
 
                         {appliedDiscount && (
                           <div className="flex justify-between items-center mb-4 text-sm">
@@ -477,6 +482,15 @@ export default function CheckoutPage(){
                             <span className="text-gray-600"> GST </span>
                             <span> {cart.deliveryCharge === 0 ? 'Free' : `₹${cart.gst}`} </span>
                           </div>
+                          {
+                            cart?.couponDiscount &&
+                            <div className="flex justify-between !mt-[2rem]">
+                              <span className="text-green-600"> Coupon Discount </span>
+                              <span className='flex items-center gap-[5px]'>
+                                <Minus className='w-[13px]'/> ₹{cart.couponDiscount}
+                              </span>
+                            </div>
+                          }
                           <div className="flex justify-between text-lg font-bold pt-2">
                             <span> Total </span>
                             <span> ₹{cart.absoluteTotalWithTaxes} </span>
@@ -484,7 +498,7 @@ export default function CheckoutPage(){
                         </div>
                       
                         <SiteSecondaryFillImpButton className='px-[50px] py-[9px] rounded-[7px]' clickHandler={()=> checkoutHandler()}>
-                          Checkout
+                          Place Order
                         </SiteSecondaryFillImpButton>
                     </div>
 

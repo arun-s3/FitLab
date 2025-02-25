@@ -1,12 +1,13 @@
 const express = require('express')
 const orderRouter = express.Router()
-const {createOrder, getOrders, getAllUsersOrders, cancelOrderProduct, cancelOrder, deleteProductFromOrderHistory, changeProductStatus,
+const {createOrder, applyCoupon, getOrders, getAllUsersOrders, cancelOrderProduct, cancelOrder, deleteProductFromOrderHistory, changeProductStatus,
      changeOrderStatus, getOrderCounts} = require('../Controllers/orderController')
 const {isLogin, isLogout} = require('../Middlewares/Authentication')
 
 
 orderRouter.post('/', isLogin, getOrders)
 orderRouter.post('/all', isLogin, getAllUsersOrders)
+// orderRouter.post('/apply-coupon', isLogin, applyCoupon)
 orderRouter.post('/add', isLogin, createOrder)
 orderRouter.patch('/status/:orderId', changeOrderStatus)
 orderRouter.patch('/status/:orderId/products/:productId', changeProductStatus)

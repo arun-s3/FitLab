@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import './CouponCodeInput.css'
 import {useDispatch, useSelector} from 'react-redux'
 
@@ -15,8 +15,18 @@ export default function CouponCodeInput({couponCode, setCouponCode}){
   const [isReplaceModalOpen, setIsReplaceModalOpen] = useState(false)
 
   const {cart} = useSelector(state=> state.cart)
+  const {bestCoupon, couponMessage} = useSelector(state=> state.coupons)
+
   const dispatch = useDispatch() 
 
+  useEffect(()=> {
+    console.log("bestCoupon from CouponCodeInput--->", bestCoupon)
+    if(bestCoupon && !couponCode && !cart.couponUsed){
+      setCouponCode(bestCoupon.code)
+      console.log("Dispatching applyCoupon the best coupon...")
+      dispatch( applyCoupon({couponCode: bestCoupon.code}) )
+    }
+  }, [bestCoupon])
 
   const couponInputHandler = (e)=> {
     setCouponCode(e.target.value)
@@ -24,9 +34,10 @@ export default function CouponCodeInput({couponCode, setCouponCode}){
 
   const applyTheCoupon = ()=> {
     if(cart?.couponUsed && cart.couponUsed.code !== couponCode){
+      console.log("No coupon code applied, hence replacing...")
       setIsReplaceModalOpen(true)
     }else{
-      console.log("No coupon code applied, hence replacing...")
+      console.log("dispatching applyCoupon()....")
       dispatch( applyCoupon({couponCode}) )
     }
   }
@@ -34,6 +45,11 @@ export default function CouponCodeInput({couponCode, setCouponCode}){
   const applyNewCoupon = ()=> {
     console.log("Applying new coupon...")
     dispatch( applyCoupon({couponCode}) )
+  }
+
+  const putOldCoupon = ()=> {
+    setCouponCode(cart.couponUsed.code)
+    setIsReplaceModalOpen(false)
   }
 
     return(
@@ -45,13 +61,13 @@ export default function CouponCodeInput({couponCode, setCouponCode}){
                 focus:ring-0 focus:border-0 focus:outline-0'>
               <RiCoupon4Line className='w-[18px] h-[18px] text-muted'/>
               <input type="text" placeholder="Coupon Code" className="ml-[-20px] w-[80%] h-[10px] border-0 outline-0 placeholder:text-[13px]
-                 placeholder:tracking-[0.1px] text-primaryDark caret-primaryDark" value={couponCode.toUpperCase()}
-                   onChange={(e)=> couponInputHandler(e)}/>
+                 placeholder:tracking-[0.1px] text-primaryDark caret-primaryDark" 
+                  value={couponCode.toUpperCase() || cart?.couponUsed?.code} onChange={(e)=> couponInputHandler(e)}/>
               <button className="px-[1.5rem] py-[8px] text-[15px] text-purple-600 font-medium" onClick={()=> applyTheCoupon()}>
                 Apply
-              </button>
+              </button> 
 
-              <ReplaceCouponModal isOpen={isReplaceModalOpen} onClose={() => setIsReplaceModalOpen(false)}
+              <ReplaceCouponModal isOpen={isReplaceModalOpen} onClose={()=> setIsReplaceModalOpen(false)} putOldCoupon={putOldCoupon}
                 currentCoupon={cart?.couponUsed?.code} newCoupon={couponCode} onConfirm={applyNewCoupon} />
 
             </div>

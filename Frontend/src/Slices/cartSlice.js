@@ -99,6 +99,7 @@ const cartSlice = createSlice({
       state.success = false
       state.productAdded = false
       state.productRemoved = false
+      state.couponApplied = false
     },
   },
   extraReducers: (builder) => {
@@ -212,9 +213,12 @@ const cartSlice = createSlice({
         state.success = true
         state.message = action.payload.message
         state.couponApplied = true
-        state.cart.absoluteTotalWithTaxes = action.payload.newTotal
-        state.cart.deliveryCharge = action.payload.deliveryCharge
-        state.cart.couponDiscount = action.payload.couponDiscount
+
+        if( action.payload?.newTotal ){
+          state.cart.absoluteTotalWithTaxes = action.payload.newTotal
+          state.cart.deliveryCharge = action.payload.deliveryCharge
+          state.cart.couponDiscount = action.payload.couponDiscount
+        }
       })
       .addCase(applyCoupon.pending, (state) => {
         state.loading = true

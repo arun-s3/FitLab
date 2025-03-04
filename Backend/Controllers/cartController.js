@@ -2,131 +2,14 @@ const Cart = require('../Models/cartModel')
 const Order = require('../Models/orderModel')
 const Product = require('../Models/productModel')
 const Coupon = require('../Models/couponModel')
+const {calculateCharges, recalculateAndValidateCoupon} = require('../Controllers/controllerUtils/chargesAndCouponsUtils')
 const {errorHandler} = require('../Utils/errorHandler') 
 
 const QTY_PER_PERSON = 5
 
-const GST_GYM_PERCENTAGE = 0.18
-const GST_SUPPLEMENTS_PERCENTAGE = 0.12
-const FREE_DELIVERY_THRESHOLD = 20000
-const STANDARD_DELIVERY_CHARGE = 500
-
-const calculateCharges = (absoluteTotal, products) => {
-  try {
-    console.log("Inside calculateCharges of cartController")
-    // const {absoluteTotal, products} = req.body
-    console.log("absoluteTotal inside calculateCharges of cartController--->", absoluteTotal)
-
-    if (!absoluteTotal || absoluteTotal <= 0) {
-      return next(errorHandler(400, "Invalid total amount provided"))
-    }
-    
-    let totalGST = 0
-    let actualDeliveryCharge = 0
-
-    products.forEach((product) => {
-      let gstRate = GST_GYM_PERCENTAGE
-      if (product.category === "supplements") gstRate = GST_SUPPLEMENTS_PERCENTAGE
-      const productGST = product.price * product.quantity * gstRate 
-      totalGST += productGST
-      if(product?.weight){
-        actualDeliveryCharge += product.weight > 15 ? 200 : 50
-      }
-      console.log(`product--->${product.title} and totalGST---->${totalGST}`)
-    })
-
-    let deliveryCharges = absoluteTotal >= FREE_DELIVERY_THRESHOLD ? 0 : Math.max(actualDeliveryCharge, STANDARD_DELIVERY_CHARGE)
-
-    const absoluteTotalWithTaxes = absoluteTotal + deliveryCharges + totalGST;
-
-    console.log(`deliveryCharges--${deliveryCharges}, gst--${totalGST}, absoluteTotalWithTaxes--${absoluteTotalWithTaxes}`)
-
-    return {
-        deliveryCharges: deliveryCharges?.toFixed(2),
-        gstCharge: totalGST?.toFixed(2),
-        absoluteTotalWithTaxes: absoluteTotalWithTaxes?.toFixed(2),
-    }
-  }catch(error){
-    console.error("Error calculating charges:", error.message)
-  }
-}
-
-
-const recalculateAndValidateCoupon = async(req, res, next, userId, coupon, absoluteTotal, deliveryCharge, gstCharge)=> {
-
-  try{
-    console.log("Inside recalculateAndValidateCoupon--")
-    console.log(`${typeof absoluteTotal}....${typeof deliveryCharge}.....${typeof deliveryCharge}`)
-
-    if (!coupon || coupon.status !== "active"){
-      return next(errorHandler(400, "Invalid or expired coupon code."))
-    }
-    const now = new Date()
-    if (now < coupon.startDate || now > coupon.endDate){
-        return next(errorHandler(400, "Coupon is expired or not yet active."))
-    }
-    if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit){
-        return next(errorHandler(400, "Coupon usage limit reached."))
-    }
-
-    const userOrderCount = await Order.countDocuments({ userId, couponUsed: coupon._id })
-    if (coupon.usageLimitPerCustomer !== null && userOrderCount >= coupon.usageLimitPerCustomer){
-        return next(errorHandler(400, "You have already used this coupon the maximum allowed times."))
-    }
-
-    const cart = await Cart.findOne({ userId }).populate("products.productId")
-    if (!cart || cart.products.length === 0) {
-        return next(errorHandler(400, "Your cart is empty!"))
-    }
-
-    let discountAmount = 0;
-
-    // for (const item of cart.products){
-    //     orderTotal += item.quantity * item.price
-    // }
-    if (absoluteTotal < coupon.minimumOrderValue) {
-        return next(errorHandler(400, `Your order must be at least ₹ ${coupon.minimumOrderValue} to use this coupon.`))
-    }
-
-    let isCouponApplicable = false
-    for (const item of cart.products){
-        const product = item.productId
-        if(coupon.applicableType === "allProducts" ||
-            (coupon.applicableType === "products" && coupon.applicableProducts.includes(product._id)) ||
-            (coupon.applicableType === "categories" && product.category.some(catId=> coupon.applicableCategories.includes(catId)))
-          ){
-            isCouponApplicable = true
-            break;
-        }
-    }
-
-    if (!isCouponApplicable) {
-        return next(errorHandler(400, "Coupon is not applicable to selected products."))
-    }
-
-    if (coupon.discountType === "percentage") {
-        discountAmount = Math.min(absoluteTotal * (coupon.discountValue / 100), coupon.maxDiscount || absoluteTotal)
-    } else if (coupon.discountType === "fixed") {
-        discountAmount = Math.min(coupon.discountValue, absoluteTotal)
-    } else if (coupon.discountType === "freeShipping") {
-        deliveryCharge = 0
-    }
-
-    const finalTotal = (absoluteTotal - discountAmount) + gstCharge + deliveryCharge
-
-    console.log(`finalTotal-----${finalTotal},discountAmount------> ${discountAmount}, deliveryCharge------>${deliveryCharge}`)
-
-    return {absoluteTotalWithTaxes: finalTotal, couponDiscount: discountAmount, deliveryCharge}
-  }
-  catch(error){
-    console.log("Error in cartController-addToCart-->" + error.message)
-    next(error)
-  }
-}
-
 
 const addToCart = async (req, res, next)=> {
-  try {
+  try {  
     console.log("Inside addToCart of cartController")
     const userId = req.user._id
     const { productId, quantity } = req.body
@@ -196,6 +79,7 @@ const addToCart = async (req, res, next)=> {
       }
       cart.absoluteTotal += productTotal
     }
+    await cart.save();
 
     const {deliveryCharges, gstCharge, absoluteTotalWithTaxes} = calculateCharges(cart.absoluteTotal, cart.products)
     cart.gst = gstCharge
@@ -205,6 +89,7 @@ const addToCart = async (req, res, next)=> {
     if(cart.couponUsed){
       console.log("Inside if cart.couponUsed")
       const coupon = await Coupon.findOne({ _id: cart.couponUsed })
+      console.log("couponUsed found inside cart-->", coupon)
       const {absoluteTotalWithTaxes, couponDiscount, deliveryCharge} =
          await recalculateAndValidateCoupon(req, res, next, userId, coupon, cart.absoluteTotal, parseInt(deliveryCharges), parseInt(gstCharge))
 
@@ -219,14 +104,14 @@ const addToCart = async (req, res, next)=> {
       cart.absoluteTotalWithTaxes = parseInt(absoluteTotalWithTaxes)
     }
 
-    await cart.save()
+    await cart.save();
 
     res.status(200).json({ message: "Product added to cart successfully", cart })
   }catch (error){
     console.log("Error in cartController-addToCart-->" + error.message)
     next(error)
   }
-};
+}
 
 
 // const addToCart = async (req, res, next) => {
@@ -422,16 +307,33 @@ const applyCoupon = async (req, res, next)=> {
       }
 
       const coupon = await Coupon.findOne({ code: couponCode.toUpperCase() })
+      const cart = await Cart.findOne({ userId }).populate("products.productId")
 
       if (!coupon || coupon.status !== "active"){
           return next(errorHandler(400, "Invalid or expired coupon code."))
       }
       const now = new Date()
       if (now < coupon.startDate || now > coupon.endDate){
+          coupon.status = "expired"
+          await coupon.save()
           return next(errorHandler(400, "Coupon is expired or not yet active."))
       }
+
+      const userUsage = coupon.usedBy.find((usage) => usage.userId.toString() === userId)
+      if (userUsage && userUsage.count >= coupon.usageLimitPerCustomer) {
+        return next(errorHandler(400, "You have already used this coupon the maximum number of times."))
+      }
+      if (coupon.oneTimeUse && userUsage) {
+        return next(errorHandler(400, "This coupon can only be used once per user."))
+      }
       if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit){
+          coupon.status = "usedUp"
+          await coupon.save()
           return next(errorHandler(400, "Coupon usage limit reached."))
+      }
+
+      if(coupon.customerSpecific && !coupon.assignedCustomers.some(user=> user.equals(new mongoose.Types.ObjectId(userId)))){
+        return next(errorHandler(400, "This is a restricted users' coupon and cannot be applied to your account!"))
       }
 
       const userOrderCount = await Order.countDocuments({ userId, couponUsed: coupon._id })
@@ -439,9 +341,10 @@ const applyCoupon = async (req, res, next)=> {
           return next(errorHandler(400, "You have already used this coupon the maximum allowed times."))
       }
 
-      const cart = await Cart.findOne({ userId }).populate("products.productId")
       if (!cart || cart.products.length === 0) {
-          return next(errorHandler(400, "Your cart is empty!"))
+        console.log("Creating new cart...")
+        cart = new Cart({userId, couponUsed: coupon._id})
+        return res.status(200).json({ message: "Coupon applied successfully!" })
       }
 
       let orderTotal = 0
@@ -477,6 +380,32 @@ const applyCoupon = async (req, res, next)=> {
           discountAmount = Math.min(coupon.discountValue, orderTotal)
       } else if (coupon.discountType === "freeShipping") {
           deliveryCharge = 0
+      } else if (coupon.discountType === "buyOneGetOne") {
+          let eligibleProducts = []
+          for (const item of cart.products) {
+              const product = item.productId
+              if (
+                  coupon.applicableType === "allProducts" ||
+                  (coupon.applicableType === "products" && coupon.applicableProducts.includes(product._id)) ||
+                  (coupon.applicableType === "categories" && product.category.some(catId => coupon.applicableCategories.includes(catId)))
+              ) {
+                  eligibleProducts.push(item)
+              }
+          }
+          if (eligibleProducts.length >= 2) {
+            eligibleProducts.sort((a, b) => a.price - b.price)
+    
+            let freeItemsCount = 0
+            let totalBOGODiscount = 0
+    
+            for (let i = 1; i < eligibleProducts.length; i += 2) {
+                totalBOGODiscount += eligibleProducts[i].price
+                freeItemsCount++
+            }
+            discountAmount = totalBOGODiscount;
+          }else {
+              return next(errorHandler(400, "Buy One Get One coupon requires at least two eligible products!"))
+          }
       }
 
       const finalTotal = (orderTotal - discountAmount) + cart.gst + deliveryCharge

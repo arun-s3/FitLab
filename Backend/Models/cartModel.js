@@ -41,13 +41,14 @@ const cartSchema=new mongoose.Schema({
             },
             total: {
                 type: Number,
-                require: true
+                required: true
             }
         }
     ],
     absoluteTotal: {
         type: Number,
         required: true,
+        default: 0
     },
     discount: {
         type:Number,

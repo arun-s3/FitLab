@@ -2,6 +2,7 @@ const Order = require('../Models/orderModel')
 const Cart = require('../Models/cartModel')
 const Product = require('../Models/productModel')
 const Coupon = require('../Models/couponModel')
+const {calculateCharges, recalculateAndValidateCoupon} = require('../Controllers/controllerUtils/chargesAndCouponsUtils')
 const {errorHandler} = require('../Utils/errorHandler') 
 
 const ESTIMATED_DELIVERY_DATE = 5
@@ -109,8 +110,17 @@ const createOrder = async (req, res, next)=> {
         console.log("Cart found for checkout:", cart)
 
         let orderTotal = 0
-        let discountAmount = 0
-        let deliveryCharge = cart.deliveryCharge
+        let couponDiscounts = 0
+        let deliveryPrice = cart.deliveryCharge
+        let totalAmountWithTax = 0
+
+        for (const item of cart.products){
+          orderTotal += item.quantity * item.price
+        }
+
+        const {deliveryCharges, gstCharge, absoluteTotalWithTaxes} = calculateCharges(orderTotal, cart.products)
+        deliveryPrice = deliveryCharges
+        totalAmountWithTax = absoluteTotalWithTaxes
 
         const now = new Date()
 
@@ -125,56 +135,14 @@ const createOrder = async (req, res, next)=> {
               coupon = await Coupon.findOne({ _id: cart.couponUsed })
             }
             
-            if (!coupon || coupon.status !== 'active') {
-                return next(errorHandler(400, "Invalid or expired coupon code!"))
-            }
-            if (now < coupon.startDate || now > coupon.endDate) {
-                return next(errorHandler(400, "Coupon is expired or not yet active!"))
-            }
-            if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
-                return next(errorHandler(400, "Coupon usage limit reached!"))
-            }
-
-            const userOrderCount = await Order.countDocuments({userId, couponUsed: coupon._id})
-            if (coupon.usageLimitPerCustomer !== null && userOrderCount >= coupon.usageLimitPerCustomer){
-                return next(errorHandler(400, "You have already used this coupon the maximum allowed times!"));
-            }
-
-            for (const item of cart.products) {
-                orderTotal += item.quantity * item.price
-            }
-
-            if (orderTotal < coupon.minimumOrderValue) {
-                return next(errorHandler(400, `Your order must be at least $${coupon.minimumOrderValue} to use this coupon!`))
-            }
-
-            let isCouponApplicable = false
-            for (const item of cart.products) {
-                const product = item.productId
-                if (
-                    coupon.applicableType === "allProducts" ||
-                    (coupon.applicableType === "products" && coupon.applicableProducts.includes(product._id)) ||
-                    (coupon.applicableType === "categories" && product.category.some(catId => coupon.applicableCategories.includes(catId)))
-                ) {
-                    isCouponApplicable = true
-                    break
-                }
-            }
-            if (!isCouponApplicable){
-                return next(errorHandler(400, "Coupon is not applicable to selected products."))
-            }
-
-            if (coupon.discountType === "percentage"){
-                discountAmount = Math.min(orderTotal * (coupon.discountValue / 100), coupon.maxDiscount || orderTotal)
-            } else if (coupon.discountType === "fixed"){
-                discountAmount = Math.min(coupon.discountValue, orderTotal)
-            } else if (coupon.discountType === "freeShipping"){
-                deliveryCharge = 0
-            }
+            const {absoluteTotalWithTaxes, couponDiscount, deliveryCharge} =
+                await recalculateAndValidateCoupon(req, res, next, userId, coupon, cart.absoluteTotal, parseInt(deliveryCharges), parseInt(gstCharge))
+   
+            console.log(`absoluteTotalWithTaxes-----${absoluteTotalWithTaxes},couponDiscount------> ${couponDiscount}, deliveryCharge------>${deliveryCharge}`)
+            deliveryPrice = deliveryCharge
+            couponDiscounts = couponDiscount
+            totalAmountWithTax = absoluteTotalWithTaxes
         }
-
-        console.log("Order total before discount:", orderTotal)
-        console.log("Discount applied:", discountAmount)
 
         for (const item of cart.products){
             const product = await Product.findById(item.productId)
@@ -191,11 +159,11 @@ const createOrder = async (req, res, next)=> {
         const order = new Order({
             userId,
             products: cart.products,
-            orderTotal: orderTotal - discountAmount,
-            couponDiscount: discountAmount,
-            gst: cart.gst,
-            deliveryCharge: deliveryCharge,
-            absoluteTotalWithTaxes: (orderTotal - discountAmount) + cart.gst + deliveryCharge,
+            orderTotal,
+            couponDiscount: couponDiscounts,
+            gst: gstCharge,
+            deliveryCharge: deliveryPrice,
+            absoluteTotalWithTaxes: totalAmountWithTax,
             paymentDetails,
             shippingAddress: shippingAddressId,
             orderStatus,
@@ -210,11 +178,17 @@ const createOrder = async (req, res, next)=> {
         if (coupon){
             coupon.usedCount += 1
 
-            if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
-                coupon.status = "usedUp";
+            const userUsage = coupon.usedBy.find((usage)=> usage.userId.toString() === userId)
+            if (userUsage) {
+              userUsage.count += 1
+            }else if(coupon.usageLimitPerCustomer){
+              coupon.usedBy.push({ userId, count: 1 })
             }
-            if (now > coupon.endDate) {
-                coupon.status = "expired";
+            if(coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
+                coupon.status = "usedUp"
+            }
+            if(now > coupon.endDate) {
+                coupon.status = "expired"
             }
 
             await coupon.save();

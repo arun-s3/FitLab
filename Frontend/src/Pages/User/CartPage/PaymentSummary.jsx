@@ -14,6 +14,8 @@ export default function PaymentSummary({heading, absoluteTotal, absoluteTotalWit
 
   const [isRemoveModalOpen, setIsRemoveModalOpen] = useState(false)
 
+  const {cart} = useSelector(state=> state.cart)
+
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
@@ -40,17 +42,20 @@ export default function PaymentSummary({heading, absoluteTotal, absoluteTotalWit
               </div>
               {
                 couponDiscount && couponDiscount > 0 ?
-                <div className="relative flex justify-between !mt-[2rem]">
-                  <span className='order-title !text-green-500'> Coupon Discount </span>
-                  <span className='order-value flex items-center gap-[5px]'>
-                    <Minus className='w-[13px]'/> ₹{couponDiscount}
-                  </span>
-                  <X className='absolute top-[5px] right-[-19px] w-[15px] h-[15px] text-red-500 cursor-pointer'
-                    onClick={()=> setIsRemoveModalOpen(true)}></X>
-                </div> : null
+                <div>
+                  <div className="relative flex justify-between !mt-[2rem]">
+                    <span className='order-title !text-green-500'> Coupon Discount </span>
+                    <span className='order-value flex items-center gap-[5px]'>
+                      <Minus className='w-[13px]'/> ₹{couponDiscount.toFixed(2)}
+                    </span>
+                    <X className='absolute top-[5px] right-[-19px] w-[15px] h-[15px] text-red-500 cursor-pointer'
+                      onClick={()=> setIsRemoveModalOpen(true)}></X>
+                  </div> 
+                  <p className='mt-[-5px] text-[12px] !text-muted font-[450] uppercase'> { `( ${cart?.couponUsed?.code} )` } </p>
+                </div>: null
               }
 
-              <RemoveCouponModal isOpen={isRemoveModalOpen} onClose={()=> setIsRemoveModalOpen(false)} couponCode={couponCode}
+              <RemoveCouponModal isOpen={isRemoveModalOpen} onClose={()=> setIsRemoveModalOpen(false)} couponCode={cart?.couponUsed?.code}
                 onConfirm={removeTheCoupon} />
 
               <div className="flex justify-between font-bold pt-[1rem] border-t border-dashed border-mutedDashedSeperation">

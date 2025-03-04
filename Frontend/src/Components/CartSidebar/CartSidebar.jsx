@@ -7,10 +7,14 @@ import {X, Minus, Plus, ChevronRight, ShoppingCart, SquareArrowOutUpLeft, Trash,
 import {toast} from 'react-toastify'
 
 import {SiteSecondaryFillImpButton} from '../SiteButtons/SiteButtons'
+import ProductRemovalModal from '../ProductRemovalModal/ProductRemovalModal'
 
 export default function CartSidebar({ isOpen, onClose, packedupCart, removeFromTheCart, updateQuantity, retractedView }) {
 
   const [scaleDownSidebar, setScaleDownSidebar] = useState(false)
+
+  const [isProductRemovalModalOpen, setIsProductRemovalModalOpen] = useState(false)
+  const [productToRemove, setProductToRemove] = useState({})
 
   const {cart, productAdded, productRemoved, loading, error, message} = useSelector(state=> state.cart)
   const navigate = useNavigate()
@@ -28,7 +32,37 @@ export default function CartSidebar({ isOpen, onClose, packedupCart, removeFromT
     }
   },[packedupCart])
 
+  useEffect(()=> {
+    console.log('productToRemove---->', productToRemove)
+    console.log('isProductRemovalModalOpen---->', isProductRemovalModalOpen)
+  },[productToRemove, isProductRemovalModalOpen,])
+
+  const removeProductFromCart = (id, name)=> {
+    console.log('Removing product from cart....')
+    setProductToRemove({id, name})
+    setIsProductRemovalModalOpen(true)
+  }
+
+  const confirmProductRemoval = ()=> {
+    if(productToRemove !== null){
+      removeFromTheCart(productToRemove.id)
+      setIsProductRemovalModalOpen(false)
+      setProductToRemove({})
+    }
+  }
+
+  const cancelProductRemoval = ()=> {
+    setIsProductRemovalModalOpen(false)
+    setProductToRemove({})
+  }
+
+
   return (
+    <>
+
+    <ProductRemovalModal isOpen={isProductRemovalModalOpen} productToRemove={productToRemove} onConfirm={confirmProductRemoval}
+       onCancel={cancelProductRemoval}/>
+
     <div id='ProductDetailSidebar' className={`fixed ${scaleDownSidebar ? 'top-[55%] h-auto border border-dropdownBorder'
       :'top-0 h-full'} top-0 right-0 ${ (retractedView || scaleDownSidebar) ? 'w-[140px]' : 'lg:w-[400px] sm:w-[300px]'}} bg-white
          shadow-2xl rounded-l-2xl transform transition-transform duration-300 ease-in-out
@@ -67,7 +101,7 @@ export default function CartSidebar({ isOpen, onClose, packedupCart, removeFromT
                      {/* <button onClick={onClose} className=" text-gray-500 hover:text-gray-700">
                         <X size={15} className='text-red-500'/>
                       </button> */}
-                      <button className="self-start text-red-500 hover:text-red-700" onClick={()=> removeFromTheCart(product.productId)}>
+                      <button className="self-start text-red-500 hover:text-red-700" onClick={()=> removeProductFromCart(product.productId, product.title)}>
                         <Trash2 className='h-[13px] w-[13px]'/>
                       </button>
                    </div>
@@ -97,9 +131,9 @@ export default function CartSidebar({ isOpen, onClose, packedupCart, removeFromT
                     </button>
                     {
                       !retractedView &&
-                      <button onClick={()=> removeFromTheCart(product.productId)} className="text-red-500 hover:text-red-700 ml-2">
-                        <Trash className='h-[15px] w-[15px]'/>
-                      </button>
+                        <button onClick={()=> removeProductFromCart(product.productId, product.title)} className="text-red-500 hover:text-red-700 ml-2">
+                          <Trash className='h-[15px] w-[15px]'/>
+                        </button>
                     }
                   </div>
                   <i className='absolute top-[50%] left-[-3px] p-[5px] bg-white border border-dropdownBorder border-l-white
@@ -134,7 +168,10 @@ export default function CartSidebar({ isOpen, onClose, packedupCart, removeFromT
         }  
        
       </div>
+
     </div>
+
+    </>
   )
 }
 

@@ -14,8 +14,11 @@ import FeaturesDisplay from '../../../Components/FeaturesDisplay/FeaturesDisplay
 import PaymentSummary from './PaymentSummary'
 import CouponCodeInput from './CouponCodeInput'
 import {capitalizeFirstLetter} from '../../../Utils/helperFunctions'
+import ProductRemovalModal from '../../../Components/ProductRemovalModal/ProductRemovalModal'
 import {SiteSecondaryFillButton, SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
 import {addToCart, removeFromCart, getTheCart, resetCartStates} from '../../../Slices/cartSlice'
+import {getBestCoupon, resetCouponStates} from '../../../Slices/couponSlice'
+
 import {CustomHashLoader, CustomScaleLoader} from '../../../Components/Loader//Loader'
 import Footer from '../../../Components/Footer/Footer'
 
@@ -24,11 +27,16 @@ export default function ShoppingCartPage(){
   const [couponCode, setCouponCode] = useState('')
   const [currentProductIndex, setCurrentProductIndex] = useState(0)
 
+  const [isProductRemovalModalOpen, setIsProductRemovalModalOpen] = useState(false)
+  const [productToRemove, setProductToRemove] = useState({})
+
   // const [shipping, setShipping] = useState(0)
   // const [gst, setGst] = useState(0)
   // const [absoluteTotalWithTaxes, setAbsoluteTotalWithTaxes] = useState(0)
 
   const {cart, productAdded, productRemoved, loading, error, message, couponApplied} = useSelector(state=> state.cart)
+  const {bestCoupon, couponMessage} = useSelector(state=> state.coupons)
+
   const dispatch = useDispatch()
 
   const navigate = useNavigate()
@@ -40,6 +48,10 @@ export default function ShoppingCartPage(){
 
   useEffect(()=> {
     dispatch(getTheCart())
+    if(!bestCoupon){
+      console.log("Getting the best coupon...")
+      dispatch(getBestCoupon())
+    }
   },[])
 
   useEffect(()=> {
@@ -71,9 +83,12 @@ export default function ShoppingCartPage(){
   //   }
   // }, [cart])
 
-  // useEffect(()=> {
-  //   if(coupon)
-  // },[couponApplied])
+  useEffect(()=> {
+    if(bestCoupon && couponApplied && couponMessage.includes('Best')){
+      toast.success(couponMessage + ' and applied to the cart!')
+      dispatch(resetCartStates())
+    }
+  },[couponApplied, bestCoupon])
 
   useEffect(()=> {
     if(error){
@@ -132,9 +147,24 @@ export default function ShoppingCartPage(){
       dispatch( addToCart({productId: id, quantity: newQuantity}) )
   }
     
-  const removeFromTheCart = (id) => {
-      dispatch(removeFromCart({productId: id}))
+  const removeFromTheCart = (id, name)=> {
+    setProductToRemove({id, name})
+    setIsProductRemovalModalOpen(true)
   }
+
+  const confirmProductRemoval = ()=> {
+    if(productToRemove !== null){
+      dispatch(removeFromCart({productId: productToRemove.id}))
+      setIsProductRemovalModalOpen(false)
+      setProductToRemove({})
+    }
+  }
+
+  const cancelProductRemoval = ()=> {
+    setIsProductRemovalModalOpen(false)
+    setProductToRemove({})
+  }
+
 
 
   return (
@@ -198,15 +228,19 @@ export default function ShoppingCartPage(){
                     <span className="text-center flex-1 text-[15px] tracking-[0.3px]">
                       ₹{(product.price * product.quantity).toLocaleString()}
                     </span>
-                    <button className="text-red-500 hover:text-red-700" onClick={()=> removeFromTheCart(product.productId)}>
+                    <button className="text-red-500 hover:text-red-700" onClick={()=> removeFromTheCart(product.productId, product.title)}>
                       <Trash2 className="w-[16px] h-[16px]" />
                     </button>
+
+                      <ProductRemovalModal isOpen={isProductRemovalModalOpen} productToRemove={productToRemove} 
+                        onConfirm={confirmProductRemoval} onCancel={cancelProductRemoval}/>
+
                   </div>
                 </div>
               ))}
             </div>
 
-            <CouponCodeInput couponCode={couponCode} setCouponCode={setCouponCode} />
+            <CouponCodeInput couponCode={couponCode} setCouponCode={setCouponCode}/>
             
           </div>
 
@@ -224,6 +258,44 @@ export default function ShoppingCartPage(){
         }
 
       </div>
+
+      <div className="mt-[2rem] mx-[3rem]">
+        <h2 className="text-[1.5rem] font-bold mb-[2rem]">Similar Products</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-[1.5rem] relative">
+          {similarProducts.slice(currentProductIndex, currentProductIndex + 4).map((product) => (
+            <div key={product.id} className="relative border rounded-[8px] overflow-hidden">
+              {product.discount && (
+                <span className="absolute top-[8px] left-[8px] bg-purple-600 text-white px-[8px] py-[4px] rounded-[4px] text-[14px]">
+                  {product.discount}
+                </span>
+              )}
+              <div className="p-[1rem]">
+                <img src={product.image} alt={product.name} className="w-full h-auto mb-[1rem]" />
+                <div className="flex items-center gap-[4px] mb-[8px]">
+                  {Array.from({ length: product.rating }).map((_, i) => (
+                    <Star key={i} className="w-[16px] h-[16px] fill-yellow-400 text-yellow-400" />
+                  ))}
+                </div>
+                <h3 className="font-medium">{product.name}</h3>
+                <p className="font-bold mt-[4px]">{product.price}</p>
+              </div>
+            </div>
+          ))}
+          <button
+            className="absolute left-[-1rem] top-1/2 transform -translate-y-1/2 bg-white p-[8px] rounded-full shadow-md"
+            onClick={handlePrevProduct}
+          >
+            <ChevronLeft className="w-[1.5rem] h-[1.5rem]" />
+          </button>
+          <button
+            className="absolute right-[-1rem] top-1/2 transform -translate-y-1/2 bg-white p-[8px] rounded-full shadow-md"
+            onClick={handleNextProduct}
+          >
+            <ChevronRight className="w-[1.5rem] h-[1.5rem]" />
+          </button>
+        </div>
+      </div>
+
     </main>
 
     <FeaturesDisplay />

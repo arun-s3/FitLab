@@ -17,6 +17,7 @@ import UserPageLayout from './Pages/User/UserPageLayout/UserPageLayout'
 import ProductDetailPage from './Pages/User/ProductDetailPage/ProductDetailPage'
 import WishlistPage from './Pages/User/WishlistPage/WishlistPage'
 import CartPage from './Pages/User/CartPage/CartPage'
+import CouponPage from './Pages/User/CouponPage/CouponPage'
 import CheckoutPage from './Pages/User/CheckoutPage/CheckoutPage'
 import OrderConfirmationPage from './Pages/User/OrderConfirmationPage/OrderConfirmationPage'
 import OrderHistoryPage from './Pages/User/OrderHistoryPage/OrderHistoryPage'
@@ -90,6 +91,7 @@ export default function App(){
                         </Route>   
                     </Route>
                     <Route path='wishlist' element={<WishlistPage/>} />
+                    <Route path='coupons' element={<CouponPage/>} />
                     {/* <Route path='wishlist-test' element={<WishlistPage/>} /> */}
                 </Route>
                 <Route path='orders' element={<OrderHistoryPage/>} />

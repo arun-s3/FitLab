@@ -83,7 +83,7 @@ export default function CouponList({ coupons, onEdit, onDelete, onSort, sortConf
                             Applies to all products
                           </div>
                         ) : (
-                          <ul className={`absolute bottom-[100%] left-[50%] py-[10px] px-[10px] list-none bg-white
+                          <ul className={`absolute bottom-[100%] left-[50%] py-[10px] px-[22px] list-disc bg-white
                             ${coupon?.applicableProducts?.length > 6 ? "h-[10rem] overflow-y-scroll" : "h-fit"} 
                               border border-dropdownBorder rounded-[4px] z-[10]`}>
                             {coupon?.applicableProducts?.map((product) => (
@@ -103,7 +103,7 @@ export default function CouponList({ coupons, onEdit, onDelete, onSort, sortConf
                       </span>
                   
                       {showItemsOf === coupon.code && (
-                        <ul className={`absolute bottom-[100%] left-[50%] py-[10px] px-[10px] list-none bg-white 
+                        <ul className={`absolute bottom-[100%] left-[50%] py-[10px] px-[22px] list-disc bg-white 
                           ${coupon?.applicableCategories?.length > 6 ? "h-[10rem] overflow-y-scroll" : "h-fit"} border
                            border-dropdownBorder rounded-[4px] z-[10]`}>
                           {coupon?.applicableCategories?.map((category) => (
@@ -123,7 +123,7 @@ export default function CouponList({ coupons, onEdit, onDelete, onSort, sortConf
                        &nbsp; [See]
                       {
                         showCustomersOf === coupon.code &&
-                        <ul className={`absolute bottom-[100%] left-[50%] py-[10px] px-[10px] list-none bg-white
+                        <ul className={`absolute bottom-[100%] left-[50%] py-[10px] px-[22px] list-disc bg-white
                           ${coupon?.assignedCustomers?.length > 6 ? "h-[10rem] overflow-y-scroll" : "h-fit"} border border-dropdownBorder
                              rounded-[4px] z-[10]`}>
                           {

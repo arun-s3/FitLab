@@ -81,13 +81,30 @@ export const searchCoupons = createAsyncThunk('coupon/search', async ({query}, t
   }
 })
 
+export const getBestCoupon = createAsyncThunk('coupon/getBestCoupon', async (thunkAPI)=> {
+  try {
+    console.log('Inside getBestCoupon createAsyncThunk')
+    const response = await axios.get('/coupons/bestCoupons', {withCredentials: true})
+    console.log('Returning success response from getBestCoupon...', JSON.stringify(response.data))
+    return response.data
+  }catch(error){
+    console.log('Inside catch of getBestCoupon')
+    const errorMessage = error.response?.data?.message
+    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
+    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
+    return thunkAPI.rejectWithValue(errorMessage)
+  }
+})
+
 
 const initialState = {
     coupons: [], 
+    bestCoupon: {},
     couponCreated: false,
     couponRemoved: false,
     couponUpdated: false,
     loading: false,
+    couponMessage: null,
     couponError: null,
 }
 
@@ -187,6 +204,19 @@ const couponSlice = createSlice({
       .addCase(searchCoupons.rejected, (state, action) => {
         console.log('searchCoupons rejected:', action.payload)
         state.loading = false
+        state.couponError = action.payload
+      })
+      .addCase(getBestCoupon.fulfilled, (state, action)=> {
+        console.log('getBestCoupon fulfilled:', action.payload)
+        state.couponError = null
+        state.bestCoupon = action.payload.bestCoupon
+        state.couponMessage = action.payload.message
+      })
+      .addCase(getBestCoupon.pending, (state)=> {
+        state.couponError = null
+      })
+      .addCase(getBestCoupon.rejected, (state, action) => {
+        console.log('getBestCoupon rejected:', action.payload)
         state.couponError = action.payload
       })
     }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react"
-import './CouponModal.css'
+import './OfferModal.css'
 import { useSelector, useDispatch } from "react-redux"
 import {debounce} from 'lodash'
 
@@ -9,31 +9,27 @@ import {toast} from 'react-toastify';
 
 import CategoryDisplay from "../../../Components/CategoryDisplay/CategoryDisplay"
 import {handleInputValidation, displaySuccess, displayErrorAndReturnNewFormData, cancelErrorState} from '../../../Utils/fieldValidator'
-import {createCoupon, updateCoupon, resetCouponStates} from '../../../Slices/couponSlice'
+import {createOffer, updateOffer, resetOfferStates} from '../../../Slices/offerSlice'
 import {searchProduct, getAllProducts} from '../../../Slices/productSlice'
 import {showUsers} from '../../../Slices/adminSlice'
 import {camelToCapitalizedWords} from "../../../Utils/helperFunctions"
 
 
 
-export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
+export default function OfferModal({ isOpen, onClose, offer, isEditing }){
 
 
   const [formData, setFormData] = useState({
-    code: "",
+    name: "",
     description: "",
     discountType: "percentage",
     discountValue: "",
     startDate: "",
     endDate: "",
-    usageLimit: "",
     minimumOrderValue: "",
-    usageLimitPerCustomer: "",
     applicableType: "allProducts",
     applicableCategories: [],
     applicableProducts: [],
-    customerSpecific: false,
-    assignedCustomers: [],
   })
 
   const [showCategories, setShowCategories] = useState(true)
@@ -41,8 +37,7 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
   const [selectedProducts, setSelectedProducts] = useState([])
   const [selectedCustomers, setSelectedCustomers] = useState([])
 
-  const [error, setError] = useState({code: '', startDate: '', endDate: '', discountValue: '', maxDiscount: '', minimumOrderValue: '',
-     usageLimit: '', usageLimitPerCustomer: ''})
+  const [error, setError] = useState({name: '', startDate: '', endDate: '', discountValue: '', maxDiscount: '', minimumOrderValue: ''})
 
   const [currentProductPart, setCurrentProductPart] = useState(1)
   const [productQueryOptions, setProductQueryOptions] = useState({page: 1, limit: 6})
@@ -53,50 +48,43 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
   const { products, productCounts } = useSelector(state=> state.productStore)
   const { adminLoading, adminError, adminSuccess, adminMessage, allUsers } = useSelector(state => state.admin)
   
-  const {couponCreated, couponUpdated} = useSelector(state=> state.coupons)
+  const {offerCreated, offerUpdated} = useSelector(state=> state.offers)
   const dispatch = useDispatch()
- 
 
+  
   useEffect(() => {
-    if (coupon){
-      if(coupon.applicableProducts.length > 0){
-        setSelectedProducts([...coupon.applicableProducts])
-      }
-      if(coupon?.assignedCustomers && coupon.assignedCustomers.length > 0){
-        setSelectedCustomers([...coupon.assignedCustomers])
+    if (offer){
+      if(offer.applicableProducts.length > 0){
+        setSelectedProducts([...offer.applicableProducts])
       }
       setShowCategories(false)
-      // if(coupon.applicableCategories.length > 0){
-      //   setSelectedCategories({categories: [...coupon.applicableCategories]})
+      // if(offer.applicableCategories.length > 0){
+      //   setSelectedCategories({categories: [...offer.applicableCategories]})
       // }
-      setFormData({...coupon, startDate: coupon.startDate.split("T")[0], endDate: coupon.endDate.split("T")[0] })
+      setFormData({...offer, startDate: offer.startDate.split("T")[0], endDate: offer.endDate.split("T")[0] })
     } else {
       setFormData({
-        code: "",
+        name: "",
         description: "",
         discountType: "percentage",
         discountValue: "",
         maxDiscount: "",
         startDate: "",
         endDate: "",
-        usageLimit: "",
         minimumOrderValue: "",
-        usageLimitPerCustomer: "",
         applicableType: "allProducts",
         applicableCategories: [],
         applicableProducts: [],
-        customerSpecific: false,
-        assignedCustomers: [],
       })
     }
 
-  }, [coupon])
+  }, [offer])
 
-  useEffect(()=> {
-    if( Object.keys(error).some(error=> error.trim() !== '') ){
-      setTimeout(()=> setError({}), 3000)
-    }
-  }, [error])
+  // useEffect(()=> {
+  //   if( Object.keys(error).some(error=> error.trim() !== '') ){
+  //     setTimeout(()=> setError({}), 3000)
+  //   }
+  // }, [error])
 
   useEffect(()=> {
     if(selectedCategories?.categories && selectedCategories.categories.length > 0){
@@ -111,12 +99,12 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
         { ...formData, applicableProducts: [...selectedProducts.map(product=> product.title)] }
       ))
     }
-    if(selectedCustomers){
-      console.log("selectedCustomers--->", selectedCustomers)
-      setFormData(formData=> (
-        { ...formData, assignedCustomers: [...selectedCustomers.map(customer=> customer.username)] }
-      ))
-    }
+    // if(selectedCustomers){
+    //   console.log("selectedCustomers--->", selectedCustomers)
+    //   setFormData(formData=> (
+    //     { ...formData, assignedCustomers: [...selectedCustomers.map(customer=> customer.username)] }
+    //   ))
+    // }
   },[selectedCategories, selectedProducts, selectedCustomers])
 
   useEffect(()=> {
@@ -128,21 +116,21 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
         console.log('OUERYOPTIONS--------->', JSON.stringify(productQueryOptions))
         dispatch( getAllProducts({queryOptions: productQueryOptions}) )
     }
-    if(Object.keys(customerQueryOptions).length){
-      dispatch( showUsers({queryOptions: customerQueryOptions}) )
-  }
+    // if(Object.keys(customerQueryOptions).length){
+    //   dispatch( showUsers({queryOptions: customerQueryOptions}) )
+    // }
   },[productQueryOptions, customerQueryOptions])
 
   useEffect(()=> {
-    if(couponCreated){
-      toast.success('A coupon is successfully created!')
-      dispatch(resetCouponStates())
+    if(offerCreated){
+      toast.success('An offer is successfully created!')
+      dispatch(resetOfferStates())
     }
-    if(couponUpdated){
-      toast.success('A coupon is successfully updated!')
-      dispatch(resetCouponStates())
+    if(offerUpdated){
+      toast.success('An offer is successfully updated!')
+      dispatch(resetOfferStates())
     }
-  }, [couponCreated, couponUpdated])
+  }, [offerCreated, offerUpdated])
 
   const handleChange = (e)=> {
     console.log("Inside handleChange...")
@@ -164,13 +152,13 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
     console.log("value--->", value)
     const regexPattern = /^\d+$/
 
-    if( (fieldName === 'code' || fieldName === 'startDate' || fieldName === 'endDate' || fieldName === 'discountValue') && !value){
+    if( (fieldName === 'name' || fieldName === 'startDate' || fieldName === 'endDate' || fieldName === 'discountValue') && !value){
       console.log("Inside if(fieldName === 'code' || fieldName === 'startDate' || fieldName === 'endDate' && !value)")
       setError(error=> ( {...error, [fieldName]: `${camelToCapitalizedWords(fieldName)} cannot be empty!`} ) )
       e.target.style.borderColor = '#e74c3c'
       return
     }
-    if( !['code', 'startDate', 'endDate'].includes(fieldName) && value  && (!regexPattern.test(value) || value < 0) ){
+    if( !['name', 'startDate', 'endDate'].includes(fieldName) && value  && (!regexPattern.test(value) || value < 0) ){
       setError(error=> ( {...error, [fieldName]: `Please enter a valid ${camelToCapitalizedWords(fieldName)}!`} ) )
       e.target.style.borderColor = '#e74c3c'
     }
@@ -180,10 +168,6 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
     // }
     else if(fieldName === 'discountValue' && formData[fieldName] > 100){
       setError(error=> ( {...error, discountValue: 'Discount value must be less than 100!'} ) )
-      e.target.style.borderColor = '#e74c3c'
-    }
-    else if(fieldName === 'usageLimitPerCustomer' && formData[fieldName] > 10){
-      setError(error=> ( {...error, usageLimitPerCustomer: 'Usage / customer cannot be more than 10!'} ) )
       e.target.style.borderColor = '#e74c3c'
     }
     else{
@@ -196,11 +180,8 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
     console.log("Inside incDecHandler")
     console.log("Number(formData[type])-->", Number(formData[type]))
     if( (formData[type] && Number(formData[type])) || formData[type] == '0' ){
-      console.log("Inside 1st")
       if(formData[type] >= 0){
-        console.log("Inside 2nd")
         if(add === 1){
-          console.log("Inside 3rd")
           setFormData(formdata=> ({...formData, [type]: formData[type]++}))
         }else{
           setFormData(formdata=> ({...formData, [type]: formData[type]--}))
@@ -254,50 +235,50 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
     }
   }
 
-  const debouncedCustomersSearch = useRef(
-    debounce((searchData)=> {
-        setCustomerQueryOptions(customerQueryOptions=> (
-            {...customerQueryOptions, searchData: searchData}
-        ))
-    }, 600) 
-).current; 
+//   const debouncedCustomersSearch = useRef(
+//     debounce((searchData)=> {
+//         setCustomerQueryOptions(customerQueryOptions=> (
+//             {...customerQueryOptions, searchData: searchData}
+//         ))
+//     }, 600) 
+// ).current; 
 
-  const searchCustomers = (e)=> {
-    const searchData = e.target.value
-    console.log('searchData--->', searchData)
-    if(searchData.trim() !== ''){
-        setShowSearchResults(results=> ({...results, customers: true}))
-        console.log("Getting searched customers--")
-        debouncedCustomersSearch(searchData)
-    } 
-    else{
-      setShowSearchResults(results=> ({...results, customers: false}))
-    } 
-  }
+  // const searchCustomers = (e)=> {
+  //   const searchData = e.target.value
+  //   console.log('searchData--->', searchData)
+  //   if(searchData.trim() !== ''){
+  //       setShowSearchResults(results=> ({...results, customers: true}))
+  //       console.log("Getting searched customers--")
+  //       debouncedCustomersSearch(searchData)
+  //   } 
+  //   else{
+  //     setShowSearchResults(results=> ({...results, customers: false}))
+  //   } 
+  // }
 
-  const nextCustomers = ()=> {
-    setCustomerQueryOptions(customerQueryOptions=> (
-      {...customerQueryOptions, page: currentCustomerPart + 1}
-    ))
-    setCurrentCustomerPart(part=> part++)
-  }
+  // const nextCustomers = ()=> {
+  //   setCustomerQueryOptions(customerQueryOptions=> (
+  //     {...customerQueryOptions, page: currentCustomerPart + 1}
+  //   ))
+  //   setCurrentCustomerPart(part=> part++)
+  // }
 
-  const previousCustomers = ()=> {
-    setCustomerQueryOptions(customerQueryOptions=> (
-      {...customerQueryOptions, page: currentCustomerPart - 1}
-    ))
-    setCurrentCustomerPart(part=> part--)
-  }
+  // const previousCustomers = ()=> {
+  //   setCustomerQueryOptions(customerQueryOptions=> (
+  //     {...customerQueryOptions, page: currentCustomerPart - 1}
+  //   ))
+  //   setCurrentCustomerPart(part=> part--)
+  // }
 
-  const customerCheckHandler = (e, username)=> {
-    const checked = e.target.checked
-    console.log("checked-->", checked)
-    if(checked){
-      setSelectedCustomers( users=> [...users, {username}] )
-    }else{
-      setSelectedCustomers( users=> users.filter(user=> user.username !== username) )
-    }
-  }
+  // const customerCheckHandler = (e, username)=> {
+  //   const checked = e.target.checked
+  //   console.log("checked-->", checked)
+  //   if(checked){
+  //     setSelectedCustomers( users=> [...users, {username}] )
+  //   }else{
+  //     setSelectedCustomers( users=> users.filter(user=> user.username !== username) )
+  //   }
+  // }
 
   const applicableTypeHandler = (e)=> {
     const selectedValue = e.target.value
@@ -320,8 +301,8 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
 
   const handleSubmit = (e)=> {
     e.preventDefault()
-    const {code, startDate, endDate} =  formData
-    if(!code || !startDate || !endDate){
+    const {name, startDate, endDate} =  formData
+    if(!name || !startDate || !endDate || !discountType || !discountValue || !applicableType){
       toast.error("Please fill the required fields!")
       return
     }
@@ -338,11 +319,11 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
       return
     }
 
-    let couponId
+    let offerId
     if(isEditing){
-      couponId = coupon._id
+      offerId = coupon._id
     } 
-    coupon ? dispatch( updateCoupon({couponDetails: formData, couponId}) )  : dispatch( createCoupon({couponDetails: formData}) ) 
+    offer ? dispatch( updateOffer({offerDetails: formData, offerId}) )  : dispatch( createOffer({offerDetails: formData}) ) 
     onClose()
   }
 
@@ -352,7 +333,7 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
     <main className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" id='CouponModal'>
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         <div className="flex justify-between items-center p-6 border-b border-primary">
-          <h2 className="text-[22px] text-secondary font-[640] text-gray-900"> { coupon ? "Edit Coupon" : "Create Coupon" } </h2>
+          <h2 className="text-[22px] text-secondary font-[640] text-gray-900"> { offer ? "Edit Offer " : "Create Offer " } </h2>
           <button onClick={onClose} className="text-secondary hover:text-purple-700 transition duration-150 ease-in-out">
             <X className="h-6 w-6" />
           </button>
@@ -362,13 +343,13 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
           <div className="grid grid-cols-2 gap-4">
 
             <div className="relative">
-              <label htmlFor="code" className="block text-sm font-medium text-gray-700">
-                Coupon Code
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                Offer Name
               </label>
-              <input type="text" id="code" name="code" value={formData.code} onChange={handleChange} 
-                onBlur={(e)=> inputBlurHandler(e, "code")} style={{paddingLeft: '30px'}}/>
+              <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} 
+                onBlur={(e)=> inputBlurHandler(e, "name")} style={{paddingLeft: '30px'}}/>
               <RiCoupon4Line className="absolute top-[60%] left-[10px] w-[13px] h-[13px] text-muted"/>
-              <span className='error right-0'> {error.code && error.code} </span>
+              <span className='error right-0'> {error.name && error.name} </span>
             </div>
 
             <div>
@@ -436,7 +417,7 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
               </label>
             </div>
             <input type="text" id="minimumOrderValue" name="minimumOrderValue" value={formData.minimumOrderValue}
-              placeholder="Enter the minimum order amount required to apply this coupon"
+              placeholder="Enter the minimum order amount required to apply this offer"
                className="h-[2.5rem]" onBlur={(e)=> inputBlurHandler(e, "minimumOrderValue")} onChange={handleChange}/>
             <div className="input-contoller">
               <Plus onClick={()=> incDecHandler('minimumOrderValue', 1)}/>
@@ -465,7 +446,7 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-
+{/* 
             <div className="relative">
               <div className="flex justify-between items-center">
                 <label htmlFor="usageLimit" className="block text-sm font-medium text-gray-700">
@@ -479,9 +460,9 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
                 <Minus onClick={()=> incDecHandler('usageLimit', -1)}/>
               </div>
               <span className='error right-0'> {error.usageLimit && error.usageLimit} </span>
-            </div>
+            </div> */}
 
-            <div className="relative">
+            {/* <div className="relative">
               <div className="flex justify-between items-center">
                 <label htmlFor="usageLimitPerCustomer" className="block text-sm font-medium text-gray-700">
                   Usage Limit Per Customer (optional)
@@ -494,7 +475,7 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
                 <Minus onClick={()=> incDecHandler('usageLimitPerCustomer', -1)}/>
               </div>
               <span className='error'> {error.usageLimitPerCustomer && error.usageLimitPerCustomer} </span>
-            </div>
+            </div> */}
           </div>
 
           <div>
@@ -625,13 +606,13 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
             </div>
           )}
 
-          <div className="flex items-center">
+          {/* <div className="flex items-center">
             <input type="checkbox" id="customerSpecific" name="customerSpecific" checked={formData.customerSpecific}
               onChange={handleChange} className="mt-[-1px] h-[4px] w-[4px] p-[7px] rounded-[3px] text-secondary focus:ring-secondary border-gray-300"/>
             <label htmlFor="customerSpecific" className="ml-2 block text-sm text-gray-900">
               Customer-specific coupon
             </label>
-          </div>
+          </div> */}
           {/* {formData.customerSpecific && (
             <div>
               <label htmlFor="assignedCustomers" className="block text-sm font-medium text-gray-700">
@@ -646,7 +627,7 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
               </select>
             </div>
           )} */}
-          {formData.customerSpecific && (
+          {/* {formData.customerSpecific && (
             <div className="px-[20px]" id='customers'>
               <label htmlFor="customersSearch" className="block text-[13px] font-medium text-gray-700">
                 Select Customers 
@@ -710,7 +691,7 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
                 </div>
               }
             </div>
-          )}
+          )} */}
 
           <div className="flex justify-end space-x-3 mt-6">
             <button type="button" onClick={onClose} className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm
@@ -720,7 +701,7 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
             </button>
             <button type="submit" className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white
              bg-secondary hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary">
-              {coupon ? "Update Coupon" : "Create Coupon"}
+              {offer ? "Update Offer " : "Create Offer "}
             </button>
           </div>
 

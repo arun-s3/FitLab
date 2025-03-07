@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useRef} from 'react'
-import './AdminCouponManagementPage.css'
+import './AdminOfferManagementPage.css'
 import {useOutletContext} from 'react-router-dom'
 import {useSelector, useDispatch} from "react-redux"
 import {debounce} from 'lodash'
@@ -9,25 +9,25 @@ import {RiArrowDropDownLine} from "react-icons/ri"
 import {MdSort} from "react-icons/md"
 
 import AdminHeader from '../../../Components/AdminHeader/AdminHeader'
-import CouponList from "./CouponList"
-import CouponModal from "./CouponModal"
-import CouponDeleteModal from "./CouponDeleteModal"
+import OfferList from "./OfferList"
+import OfferModal from "./OfferModal"
+import OfferDeleteModal from "./OfferDeleteModal"
 import useFlexiDropdown from '../../../Hooks/FlexiDropdown'
 import {DateSelector} from '../../../Components/Calender/Calender'
 import {getAllCoupons, searchCoupons, resetCouponStates} from '../../../Slices/couponSlice'
 import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
 
 
-export default function AdminCouponManagementPage(){
+export default function AdminOfferManagementPage(){
 
-    const [coupons, setCoupons] = useState([])
+    const [offers, setOffers] = useState([])
 
     const [isModalOpen, setIsModalOpen] = useState(false)
 
-    const [editingCoupon, setEditingCoupon] = useState(null)
+    const [editingOffer, setEditingOffer] = useState(null)
 
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-    const [couponToDelete, setCouponToDelete] = useState(null)
+    const [offerToDelete, setOfferToDelete] = useState(null)
 
     const [startDate, setStartDate] = useState(null)
     const [endDate, setEndDate] = useState(null)
@@ -43,15 +43,15 @@ export default function AdminCouponManagementPage(){
     const {setHeaderZIndex} = useOutletContext()
     setHeaderZIndex(0)
 
-    const {coupons: allCoupons } = useSelector(state=> state.coupons)
+    const {offers: allOffers } = useSelector(state=> state.offers)
     const dispatch = useDispatch()
     
 
     useEffect(() => {
-      if(allCoupons.length > 0){
-        setCoupons(allCoupons)
+      if(allOffers.length > 0){
+        setOffers(allOffers)
       }
-    }, [allCoupons])
+    }, [allOffers])
 
     useEffect(()=> {
       setQueryOptions(query=> {
@@ -62,13 +62,13 @@ export default function AdminCouponManagementPage(){
     useEffect(() => {
       console.log("queryOptions----->", queryOptions)
       if(Object.keys(queryOptions).length > 0){
-        dispatch( getAllCoupons({queryOptions}) )
+        // dispatch( getAllCoupons({queryOptions}) )
       }
     }, [queryOptions])
 
     const sortTypes = [
-      {name: 'Coupons: Recent to Oldest', value: '-1', sortBy: 'createdAt'}, {name: 'Coupons: Oldest to Recent', value: '1', sortBy: 'createdAt'},
-      {name: 'Alphabetical: A to Z', value: '1', sortBy: 'code'}, {name: 'Alphabetical: Z to A', value: '-1', sortBy: 'code'}
+      {name: 'Offers: Recent to Oldest', value: '-1', sortBy: 'createdAt'}, {name: 'Offers: Oldest to Recent', value: '1', sortBy: 'createdAt'},
+      {name: 'Alphabetical: A to Z', value: '1', sortBy: 'name'}, {name: 'Alphabetical: Z to A', value: '-1', sortBy: 'name'}
     ]
 
     const debouncedSearch = useRef(
@@ -79,7 +79,7 @@ export default function AdminCouponManagementPage(){
       }, 600) 
     ).current
   
-    const searchCoupon = (e)=> {
+    const searchOffers = (e)=> {
       const searchData = e.target.value
       console.log('searchData--->', searchData)
       if(searchData.trim() !== ''){
@@ -134,11 +134,12 @@ export default function AdminCouponManagementPage(){
 
 
     return(
-        <section id='AdminCouponManagementPage'>
+        <section id='AdminOfferManagementPage'>
 
             <header>
 
-                <AdminHeader heading='Coupon Management' subHeading="Manage and track Coupons with Advanced controls and Analytics"/>
+                <AdminHeader heading='Offer Management' subHeading="Create, Track, and Optimize Offers, Recurring Deals, Targeted
+                     Promotions, and Analytics Efficiently."/>
 
             </header>
 
@@ -146,21 +147,17 @@ export default function AdminCouponManagementPage(){
 
                 <div className="container mx-auto px-4">
 
-                      <button onClick={()=> setIsModalOpen(true)} className="ml-auto bg-secondary text-[15px] text-white px-[17px]
-                       py-[6px] rounded-md hover:bg-purple-700 transition duration-300 flex items-center">
-                        <Plus className="h-5 w-5 mr-2" />
-                        Create Coupon
-                      </button>
+                      
 
                     <div className="flex justify-between items-center mb-6 mt-[1rem]">
                       <div className="relative">
-                        <input type= "text" placeholder="Search coupons..."
+                        <input type= "text" placeholder="Search offers..."
                             className="w-[20rem] h-[36px] text-[15px] pl-10 pr-4 py-2 rounded-[6px] border border-gray-300 
                               tracking-[0.2px]  placeholder:text-[12px] focus:outline-none focus:border-0 focus:ring-2
-                                 focus:ring-secondary" onChange={(e)=> searchCoupon(e)}/>
+                                 focus:ring-secondary" onChange={(e)=> searchOffers(e)}/>
                         <Search className="absolute left-3 top-2.5 h-[17px] w-[17px] text-gray-400" />
                       </div>
-                      <div id='coupon-menu' className='flex items-center gap-[2rem]'>
+                      <div id='offer-menu' className='flex items-center gap-[2rem]'>
 
                         <DateSelector dateGetter={{startDate, endDate}} dateSetter={{setStartDate, setEndDate}} labelNeeded={true}/>
 
@@ -186,7 +183,7 @@ export default function AdminCouponManagementPage(){
                                   }
                                </span>
                                <span className='flex items-center py-[8px] pr-[16px]'>
-                                 <span className='font-[470]'> Coupons </span> 
+                                 <span className='font-[470]'> Offers </span> 
                                </span>
                            </div>
                            <div className='relative h-[35px] px-[16px] py-[8px] text-[14px] text-muted bg-white flex items-center 
@@ -218,14 +215,14 @@ export default function AdminCouponManagementPage(){
                       
                       </div>
 
-                    <CouponList coupons={coupons} onEdit={(coupon)=> { setEditingCoupon(coupon); setIsModalOpen(true); }}
-                      onDelete={(coupon)=> { setCouponToDelete(coupon); setIsDeleteModalOpen(true); }} onSort={handleSort}/>
+                    <OfferList offers={offers} onEdit={(offer)=> { setEditingOffer(offer); setIsModalOpen(true); }}
+                      onDelete={(offer)=> { setOfferToDelete(offer); setIsDeleteModalOpen(true); }} onSort={handleSort}/>
 
-                    <CouponModal isOpen={isModalOpen} onClose={()=> { setIsModalOpen(false); setEditingCoupon(null); }}
-                        coupon={editingCoupon} isEditing={editingCoupon ? true : false}/>
+                    <OfferModal isOpen={isModalOpen} onClose={()=> { setIsModalOpen(false); setEditingOffer(null); }}
+                        offer={editingOffer} isEditing={editingOffer ? true : false}/>
 
-                    <CouponDeleteModal isOpen={isDeleteModalOpen} onClose={()=> {setIsDeleteModalOpen(false); setCouponToDelete(null)}}
-                        coupon={couponToDelete} />
+                    <OfferDeleteModal isOpen={isDeleteModalOpen} onClose={()=> {setIsDeleteModalOpen(false); setOfferToDelete(null)}}
+                        coupon={offerToDelete} />
                         
                 </div>
 

@@ -37,6 +37,8 @@ import AdminCategoryListPage from './Pages/Admin/AdminCategoryListPage/AdminCate
 import AdminDashboardPage from './Pages/Admin/AdminDashboardPage/AdminDashboardPage'
 import AdminOrderHistory from './Pages/Admin/AdminOrderHistroyPage/AdminOrderHistroyPage'
 import AdminCouponManagementPage from './Pages/Admin/AdminCouponManagementPage/AdminCouponManagementPage'
+import AdminOfferManagementPage from './Pages/Admin/AdminOfferManagementPage/AdminOfferManagementPage'
+import AdminCreateOfferPage from './Pages/Admin/AdminCreateOfferPage/AdminCreateOfferPage'
 
 
 import {ToastContainer} from 'react-toastify'
@@ -110,14 +112,18 @@ export default function App(){
                                 <Route path='list' element={<AdminProductListPage/>} />
                                 <Route path='add' element={<AdminAddAndEditProductPage/>} />
                                 <Route path='edit' element={<AdminAddAndEditProductPage editProduct={true}/>} />
-                                <Route path='category'> 
-                                    <Route index element={<AdminCategoryListPage/>} />
-                                    <Route path='add' element={<AdminAddAndEditCategoryPage/>} />
-                                    <Route path='edit' element={<AdminAddAndEditCategoryPage editCategory={true}/>} />
-                                </Route>
+                            </Route>
+                            <Route path='category'> 
+                                <Route index element={<AdminCategoryListPage/>} />
+                                <Route path='add' element={<AdminAddAndEditCategoryPage/>} />
+                                <Route path='edit' element={<AdminAddAndEditCategoryPage editCategory={true}/>} />
                             </Route>
                             <Route path='orders' element={<AdminOrderHistory/>} />
                             <Route path='coupons' element={<AdminCouponManagementPage/>} />
+                            <Route path='offers' element={<AdminOfferManagementPage/>} />
+                            <Route path='offer'>
+                                <Route path='add' element={<AdminCreateOfferPage/>} />
+                            </Route>
                         </Route>
                     </Route>
                 </Route>

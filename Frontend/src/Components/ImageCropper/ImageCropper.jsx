@@ -195,10 +195,10 @@ const ImageCropper = ({ images, onCropComplete, imageCropperState, setImageCropp
 
                     </div>
                     <div className="flex gap-[10px]">
-                      <SiteButtonSquare clickHandler={()=> skipCrop(currentImageIndex)} tailwindClasses='text-[13px]' customStyle={{paddingBlock: '7px', borderRadius: '7px', fontSize: '13px'}}>
+                      <SiteButtonSquare clickHandler={()=> skipCrop(currentImageIndex)} tailwindClasses='!text-[13px]' customStyle={{paddingBlock: '7px', borderRadius: '7px', fontSize: '13px'}}>
                         Skip this Image for now
                       </SiteButtonSquare>
-                      <SiteButtonSquare clickHandler={handleCrop} tailwindClasses='text-[13px]' customStyle={{paddingBlock: '7px', borderRadius: '7px', fontSize: '13px'}}>
+                      <SiteButtonSquare clickHandler={handleCrop} tailwindClasses='!text-[13px]' customStyle={{paddingBlock: '7px', borderRadius: '7px', fontSize: '13px'}}>
                         Crop Image
                       </SiteButtonSquare>
                     </div>

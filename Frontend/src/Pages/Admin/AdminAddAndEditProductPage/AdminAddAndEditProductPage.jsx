@@ -406,7 +406,7 @@ export default function AdminAddAndEditProductPage({ editProduct }){
                 </div>
                 <div className='w-full h-screen basis-[37%]'>
  
-                     <FileUpload images={images} setImages={setImages} imageLimit={6} needThumbnail={true} 
+                     <FileUpload images={images} setImages={setImages} imageLimit={6} needThumbnail={true} imageType='Product'
                          thumbnail={thumbnail} setThumbnail={setThumbnail} thumbnailIndexOnEditProduct={thumbnailIndexOnEditProduct} 
                             editingMode={editProduct}/>
 

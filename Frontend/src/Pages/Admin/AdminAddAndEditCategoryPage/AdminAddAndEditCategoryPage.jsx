@@ -478,7 +478,8 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
                 </div>
                 <div className='w-full h-screen basis-[35%] mt-[15px]'>
 
-                <FileUpload images={images} setImages={setImages} imageLimit={1} needThumbnail={false} categoryImgPreview={{categoryName: `${categoryData?.categoryName ? categoryData?.categoryName : 'Category Name'}`}}/>
+                <FileUpload images={images} setImages={setImages} imageLimit={1} needThumbnail={false} imageType='Category'
+                     imagePreview={{status: true, imageName: `${categoryData?.categoryName ? categoryData?.categoryName : 'Category Name'}`}}/>
 
                 </div>
             </main>

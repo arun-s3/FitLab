@@ -1,0 +1,7 @@
+
+#OfferList table thead tr th{
+    padding-block: 1.2rem;
+}
+#OfferList table tbody tr td:not(:first-child) > div{
+    font-size: 12px;
+}

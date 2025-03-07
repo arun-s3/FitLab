@@ -10,6 +10,7 @@ import productReducer from '../Slices/productSlice'
 import categoryReducer from '../Slices/categorySlice'
 import wishlistReducer from '../Slices/wishlistSlice'
 import couponReducer from '../Slices/couponSlice'
+import offerReducer from '../Slices/offerSlice'
 import cartReducer from '../Slices/cartSlice'
 import orderReducer from '../Slices/orderSlice'
 
@@ -21,6 +22,7 @@ const rootReducer = combineReducers({
     categoryStore: categoryReducer,
     wishlist: wishlistReducer,
     coupons: couponReducer,
+    offers: offerReducer,
     cart: cartReducer,
     order: orderReducer
 })

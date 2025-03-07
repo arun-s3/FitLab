@@ -1246,6 +1246,11 @@ select{
   margin-right: 3px;
 }
 
+.mx-\[3rem\]{
+  margin-left: 3rem;
+  margin-right: 3rem;
+}
+
 .mx-\[5px\]{
   margin-left: 5px;
   margin-right: 5px;
@@ -1296,21 +1301,6 @@ select{
   margin-bottom: auto;
 }
 
-.mx-\[\]{
-  margin-left: ;
-  margin-right: ;
-}
-
-.mx-\[3r\]{
-  margin-left: 3r;
-  margin-right: 3r;
-}
-
-.mx-\[3rem\]{
-  margin-left: 3rem;
-  margin-right: 3rem;
-}
-
 .\!mt-\[2rem\]{
   margin-top: 2rem !important;
 }
@@ -1357,6 +1347,10 @@ select{
 
 .mb-\[16px\]{
   margin-bottom: 16px;
+}
+
+.mb-\[17px\]{
+  margin-bottom: 17px;
 }
 
 .mb-\[1rem\]{
@@ -1731,10 +1725,6 @@ select{
   margin-top: 8px;
 }
 
-.mt-\[rem\]{
-  margin-top: rem;
-}
-
 .line-clamp-2{
   overflow: hidden;
   display: -webkit-box;
@@ -1843,6 +1833,10 @@ select{
 
 .h-\[113px\]{
   height: 113px;
+}
+
+.h-\[11px\]{
+  height: 11px;
 }
 
 .h-\[120px\]{
@@ -2098,6 +2092,14 @@ select{
   height: 100vh;
 }
 
+.h-\[1px\]{
+  height: 1px;
+}
+
+.h-\[px\]{
+  height: px;
+}
+
 .max-h-\[80vh\]{
   max-height: 80vh;
 }
@@ -2194,6 +2196,10 @@ select{
   width: 11%;
 }
 
+.w-\[11px\]{
+  width: 11px;
+}
+
 .w-\[11rem\]{
   width: 11rem;
 }
@@ -2216,6 +2222,10 @@ select{
 
 .w-\[13px\]{
   width: 13px;
+}
+
+.w-\[13rem\]{
+  width: 13rem;
 }
 
 .w-\[140px\]{
@@ -2485,6 +2495,14 @@ select{
 
 .w-full{
   width: 100%;
+}
+
+.w-\[px\]{
+  width: px;
+}
+
+.w-\[2px\]{
+  width: 2px;
 }
 
 .min-w-full{
@@ -4362,6 +4380,10 @@ select{
   padding-left: 23px;
 }
 
+.pl-\[2rem\]{
+  padding-left: 2rem;
+}
+
 .pl-\[35px\]{
   padding-left: 35px;
 }
@@ -4488,6 +4510,10 @@ select{
 
 .font-sairaCondensed{
   font-family: "Saira Condensed", sans-serif;
+}
+
+.\!text-\[12px\]{
+  font-size: 12px !important;
 }
 
 .text-2xl{
@@ -4648,6 +4674,14 @@ select{
 .text-xs{
   font-size: 0.75rem;
   line-height: 1rem;
+}
+
+.\!text-\[13px\]{
+  font-size: 13px !important;
+}
+
+.\!font-medium{
+  font-weight: 500 !important;
 }
 
 .font-\[13px\]{
@@ -5754,6 +5788,11 @@ select{
 
 .focus\:border-transparent:focus{
   border-color: transparent;
+}
+
+.focus\:text-primaryDark:focus{
+  --tw-text-opacity: 1;
+  color: rgb(241 196 15 / var(--tw-text-opacity));
 }
 
 .focus\:text-secondary:focus{

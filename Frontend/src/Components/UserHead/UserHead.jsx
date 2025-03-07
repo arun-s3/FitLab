@@ -3,7 +3,7 @@ import './UserHead.css'
 import {Link} from 'react-router-dom'
 import {useSelector, useDispatch} from 'react-redux'
 
-import {Clock, CreditCard, Home, LogOut, MapPin} from 'lucide-react'
+import {Clock, CreditCard, BadgePercent, Home, LogOut, MapPin} from 'lucide-react'
 import {IoMdArrowDropdown, IoMdArrowDropup} from "react-icons/io"
 import {IoBagCheckOutline} from "react-icons/io5"
 import axios from 'axios'
@@ -24,6 +24,7 @@ export default function UserHead(){
     const menuItems = [
         { icon: Home, label: 'Account', path: '/account'},
         { icon: CreditCard, label: 'Wallet', path: '' },
+        { icon: BadgePercent, label: 'Coupons', path: '/coupons' },
         { icon: IoBagCheckOutline, label: 'Checkout', path: '/checkout' },
         { icon: Clock, label: 'Order History', path: '/orders' },
         { icon: MapPin, label: 'Manage Addresses', path: '/account/addresses' },

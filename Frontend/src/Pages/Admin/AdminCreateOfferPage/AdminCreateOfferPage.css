@@ -1,0 +1,100 @@
+
+#AdminCreateOfferPage main #offer-content .offer-content-wrapper{
+    display:flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding-block: 15px;
+    padding-inline: 3px;
+    border-bottom: 1px dashed var(--MUTEDDASHEDSEPERATION); 
+}
+#AdminCreateOfferPage main #offer-content .offer-content-wrapper .error{
+    visibility: visible;
+    font-size: 10px;
+    color: red;
+    letter-spacing: 0.2px;
+    height: 17px;
+    margin-top: 3px;
+}
+#AdminCreateOfferPage main #offer-content .offer-content-wrapper .offer-labels{
+    margin-bottom: 17px;
+}
+#AdminCreateOfferPage main #offer-content .offer-content-wrapper #calender input{
+    width: 9.8rem !important; 
+}
+#AdminCreateOfferPage main #offer-content .offer-content-wrapper #calender svg{
+    margin-left: 5px;
+    color: #6b7280;
+    font-size: 11px;
+    top: 14px;
+    height: 12px;
+    width: 12px;
+}
+#AdminCreateOfferPage main #offer-content label:not([id='choices']), #AdminCreateOfferPage main #offer-content h5{
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    word-spacing: 1px;
+    color: var(--SECONDARY);
+    margin-bottom: 2px;
+}
+#AdminCreateOfferPage main #offer-content label + p, #AdminCreateOfferPage main #offer-content h5 + p{
+    font-size: 10px;
+    color: #8f8989;
+    margin-top: 5px;
+}
+#AdminCreateOfferPage main #offer-content .offer-content-wrapper input:not([type='checkbox'], [type='radio']),
+#AdminCreateOfferPage main #offer-content .offer-content-wrapper select{
+    width: 20rem;
+    height: 2.4rem;
+    border: 1px solid var(--PRIMARY);
+    border-radius: 5px;
+    padding-right: 0;
+    font-size: 12px;
+}
+#AdminCreateOfferPage main #offer-content .offer-content-wrapper input::placeholder{
+    color: #6b7280;
+    opacity: 1;
+    font-size: 9px;
+}
+#AdminCreateOfferPage main #offer-content .offer-content-wrapper input:focus[id='category-badge'], 
+#AdminCreateOfferPage main #offer-content .offer-content-wrapper input:focus-visible[id='category-badge'],
+#AdminCreateOfferPage main #offer-content .offer-content-wrapper input:focus[type='checkbox'], 
+#AdminCreateOfferPage main #offer-content .offer-content-wrapper input:focus-visible[type='checkbox']
+{
+    border: 0px !important;
+    outline: 0px !important;
+    --tw-ring-shadow: 0;
+}
+#AdminCreateOfferPage main #offer-content .offer-content-wrapper #relative-category input[type='checkbox']{
+    height: 11.5px;
+    width: 11.5px;
+} 
+#AdminCreateOfferPage main #offer-content .offer-content-wrapper div .input-contoller{
+    position: absolute;
+    top: 9%;
+    right: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+#AdminCreateOfferPage main #offer-content .offer-content-wrapper div .input-contoller > svg{
+    width: 20px;
+    height: 13px;
+    padding: 2px;
+    stroke-width: 4px;
+    color: var(--SECONDARY);
+    background: var(--PRIMARY);
+    border-radius: 2px;
+    cursor: pointer;
+}
+#AdminCreateOfferPage main #offer-content .offer-content-wrapper #applicableCategories-section #applicableCategories #offer-content{
+    gap: 7px;
+}
+#AdminCreateOfferPage main #offer-content .offer-content-wrapper #applicableCategories-section #applicableCategories #offer-content > input{
+    padding: 0px;
+    margin-top: 0px;
+}
+#AdminCreateOfferPage main #offer-content .offer-content-wrapper #applicableCategories-section #applicableCategories #offer-content > span{
+    font-size: 12px;
+}

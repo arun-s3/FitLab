@@ -155,7 +155,7 @@ export default function AdminPageLayout(){
                                              text-white text-[12.5px] sublist'>
                                             <li>
                                                <div>
-                                                    <Link to='/admin/products/category/add'  className='flex items-center'> 
+                                                    <Link to='/admin/category/add'  className='flex items-center'> 
                                                         <CiSquareChevRight/> 
                                                         <span> Add Category </span> 
                                                     </Link>
@@ -163,7 +163,7 @@ export default function AdminPageLayout(){
                                             </li>
                                             <li>
                                                <div className='flex items-center'>
-                                                    <Link to='/admin/products/category'  className='flex items-center'> 
+                                                    <Link to='/admin/category'  className='flex items-center'> 
                                                         <CiSquareChevRight/>
                                                         <span> List/Edit Categories </span> 
                                                     </Link>

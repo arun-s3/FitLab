@@ -30,16 +30,13 @@ const createCoupon = async (req, res, next)=> {
       } = req.body.couponDetails
       
       console.log(`code--->${code}, discountType--->${discountType}, startDate--->${startDate}, endDate--->${endDate}`)
+      
       if (!code || !discountType || !startDate || !endDate) {
         return next(errorHandler(400, "Required fields are missing!"))
       }
       if(discountType === 'percentage' && !discountValue){
         return next(errorHandler(400, "Discount value is missing!"))
       }
-      // if(discountType === 'fixed' && !minimumOrderValue){
-      //   return next(errorHandler(400, "Minimum order value is missing!"))
-      // }
-  
       if (new Date(endDate) <= new Date(startDate)) {
         return next(errorHandler(400, "Expiry date must be after start date!"))
       }
@@ -254,6 +251,7 @@ const getAllCoupons = async (req, res, next) => {
       .populate("assignedCustomers", "username email")
 
     const totalCoupons = await Coupon.countDocuments(filterConditions)
+    console.log(`coupons--->${coupons} and totalCoupons--->${totalCoupons}`)
 
     res.status(200).json({ success: true, coupons, totalCoupons })
   }

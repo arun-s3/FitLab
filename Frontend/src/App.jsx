@@ -120,8 +120,8 @@ export default function App(){
                             </Route>
                             <Route path='orders' element={<AdminOrderHistory/>} />
                             <Route path='coupons' element={<AdminCouponManagementPage/>} />
-                            <Route path='offers' element={<AdminOfferManagementPage/>} />
-                            <Route path='offer'>
+                            <Route path='offers'>
+                                <Route index element={<AdminOfferManagementPage/>} />
                                 <Route path='add' element={<AdminCreateOfferPage/>} />
                             </Route>
                         </Route>

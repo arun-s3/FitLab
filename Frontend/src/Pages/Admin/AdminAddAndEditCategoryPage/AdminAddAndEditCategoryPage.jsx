@@ -298,12 +298,14 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
 
     return(
         <section id='AdminAddAndEditCategoryPage'>
+
             <header>
                     {/* <input type='search' placeholder='Search Categories' className='w-[12rem] h-[35px] border-dotted bg-[#fefff8]
                              rounded-[7px] placeholder:text-[11px]' /> */}
                 <AdminHeader heading={ editCategory ? 'Edit Category' : 'Add Category'} 
                         subHeading={ editCategory ? "Update the Category information" : "Create and organize categories here"}/>
             </header>
+
             <main className='flex gap-[10px]'>
                 <div className='flex flex-col gap-[15px] basis-[65%] w-[65%]' id='category-content'>
                     <div className='category-content-wrapper'>
@@ -469,6 +471,7 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
                             </div>
                         </div> 
                     </div>
+
                     <div className='w-[20%] mt-[2rem]'>
                         <SiteButtonSquare customStyle={{paddingInline:'50px', paddingBlock:'9px', borderRadius:'7px'}}
                                                 clickHandler={(e)=>{ submitHandler(e)}}>
@@ -476,13 +479,16 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
                         </SiteButtonSquare>
                     </div>
                 </div>
-                <div className='w-full h-screen basis-[35%] mt-[15px]'>
+
+                <div className='w-full basis-[35%] mt-[15px]'>
 
                 <FileUpload images={images} setImages={setImages} imageLimit={1} needThumbnail={false} imageType='Category'
-                     imagePreview={{status: true, imageName: `${categoryData?.categoryName ? categoryData?.categoryName : 'Category Name'}`}}/>
+                    imagePreview={{status: true, imageName: `${categoryData?.categoryName ? categoryData?.categoryName : 'Category Name'}`}}
+                        imageCropperBgBlur={false}/>
 
                 </div>
             </main>
+
         </section>
     )
 }

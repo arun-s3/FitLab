@@ -12,7 +12,10 @@ import {FiArrowLeftCircle, FiArrowRightCircle } from "react-icons/fi";
 import {IoCloseSharp} from "react-icons/io5";
 
 
-const ImageCropper = ({ images, onCropComplete, imageCropperState, setImageCropperState, imageCropperDefaultIndex, imageCloseHandler, imageCropperError, setImageCropperError }) => {
+const ImageCropper = ({ images, onCropComplete, imageCropperState, setImageCropperState, imageCropperDefaultIndex,
+   imageCloseHandler, imageCropperError, setImageCropperError, positionFromTop, bgBlur, containerHeight, controllerStyle }) => {
+
+
   const [modalIsOpen, setModalIsOpen] = useState(true)
   const [crop, setCrop] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
@@ -138,10 +141,10 @@ const ImageCropper = ({ images, onCropComplete, imageCropperState, setImageCropp
   return (
     <section id='imageCropper'>
       {modalIsOpen && (
-        <main id="image-cropper-container" className='fixed flex flex-col justify-center items-center gap-[16px] inset-0 
-                top-[3rem] z-[5]'>
-          <div id="image-cropper-content" className="w-[400px] max-w-[90%] h-[89%] text-center p-[20px] bg-white rounded-[8px]
-                      border border-secondary">
+        <main id="image-cropper-container" className={`fixed flex flex-col justify-center items-center gap-[16px] inset-0 
+            ${positionFromTop? positionFromTop : 'top-[3rem]'} ${bgBlur && 'backdrop-blur-[5px]'} z-[5]`}>
+          <div id="image-cropper-content" className={`w-[400px] max-w-[90%] text-center p-[20px] bg-white rounded-[8px] border
+           border-secondary`} style={containerHeight ? {height: containerHeight} : {height: '89%'}}>
           <div className='flex items-center gap-[30px] flex-wrap my-[10px]' id='image-section'>
               <i className="mr-[-20px] px-[2px] py-[4px] rounded-[4px] bg-primary border-[2px] border-[#e6c5fd] cursor-pointer"
                   onClick={()=> showLessImages()}>
@@ -185,7 +188,8 @@ const ImageCropper = ({ images, onCropComplete, imageCropperState, setImageCropp
                   <Cropper image={images[currentImageIndex].url} crop={crop} zoom={zoom} aspect={1} onCropChange={setCrop}
                       onZoomChange={setZoom} onCropComplete={onCropCompleteHandler} />
 
-                  <div className="w-full absolute top-[22rem] left-[5%] flex flex-col gap-[1rem] mt-[20px]">
+                  <div className="w-full absolute top-[22rem] left-[5%] flex flex-col gap-[1rem] mt-[20px]" 
+                    style={controllerStyle ? controllerStyle : {}}>
                     <div className="flex items-center gap-[1rem]">
                       <label htmlFor="zoom-range" className="text-[13px] text-secondary font-[500] tracking-[0.7px]" 
                             style={{color: 'rgba(159, 42, 240, 1)'}}> Zoom: </label>

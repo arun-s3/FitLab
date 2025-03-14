@@ -89,8 +89,22 @@ const offerSchema = new mongoose.Schema(
       default: null
     },
     offerBanner: {
-      type: String, 
-      default: null,
+      name: {
+        type: String,
+        required: true
+      },
+      size: {
+        type: Number,
+        required: true
+      },
+      url: {
+        type: String,
+        required: true
+      },
+      public_id:{
+        type: String,
+        required: true
+      }
     },
     redemptionCount: {
       type: Number,
@@ -105,7 +119,7 @@ const offerSchema = new mongoose.Schema(
     lastUsedAt: {
       type: Date,
       default: null
-    },
+    }
   },
   { timestamps: true }
 )

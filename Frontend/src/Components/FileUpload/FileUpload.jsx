@@ -15,7 +15,8 @@ import {toast} from 'react-toastify'
 // import { uploadImages } from 'Frontend/src/Slices/productSlice'
 
 export default function FileUpload({images, setImages, imageLimit, needThumbnail, thumbnail, setThumbnail, thumbnailIndexOnEditProduct,
-         imagePreview, imageType, editingMode}){
+         imagePreview, imageType, imageCropperPositionFromTop, imageCropperBgBlur, imageCropperContainerHt,
+             imageCropperControllerStyle,  uploadBox, editingMode}){
 
     const [error, setError] = useState(null)
     const [imageMessage, setImageMessage] = useState('')
@@ -313,9 +314,11 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
         editorPath.current = encodeURIComponent(imageUrl)
         console.log(`imageUrl----> ${imageUrl}, name----> ${name}, blob----> ${blob}`)
         console.log("editorPath.current-->"+editorPath.current)
-        windowRef.current = window.open(`../image-editor?name=${name}`, "", "width=1300,height=700,left=300,top=300,resizable=no")
+
+        windowRef.current = window.open(`${window.location.origin}/admin/image-editor?name=${name}`, "", "width=1300,height=700,left=300,top=300,resizable=no")
         // windowRef.current.postMessage({type:'target-img', blob, name}, '*')
-        const messageHandler = (event) => {
+
+        const messageHandler = (event)=> {
             if (event.source === windowRef.current && event.data === 'child-ready') {
                 console.log('Child window is ready. Sending image blob...');
                 windowRef.current.postMessage({ type: 'target-img', blob, name }, '*');
@@ -365,12 +368,13 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
     }
     
     return(
-        <main className='w-full h-screen' id='fileupload'>
+        <main className='w-full' id='fileupload'>
             <div className={ `rounded-[5px] border border-dashed h-[17%] w-full flex justify-center
                         items-center ${checkDragging ? 'border-[#5997f0]' : 'border-secondary' }` } 
                                 onDragEnter ={(e)=> dragEnterHandler(e)} onDragOver={(e)=> dragOverHandler(e)} 
                                     onDrop={(e)=> dropHandler(e)} ref={fileDropContainerRef} onDragLeave={(e)=> dragLeaveHandler(e)}
-                                        style={images.length>0? {height:'17%'} : {height:'33%'}}>
+                                        style={images.length > 0 ? {height: uploadBox && uploadBox?.afterUpload ? uploadBox.afterUpload :'120px'} 
+                                                : {height: uploadBox && uploadBox?.beforeUpload ? uploadBox.beforeUpload : '240px'}}>
                 <h3 className= { `text-center align-middle my-auto text-[13px] ${checkDragging ? 'text-[#5997f0]' : 'text-secondary'}` }> 
                         <span ref={imageDropHeaderRef}> 
                             { checkDragging? 'Drop Images Here' : `Drag and Drop  ${imageType} Image Here or`}
@@ -378,7 +382,7 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
                         <span>
                             <label for='file' className={`px-[8px] py-[2px] rounded-[5px] ml-[5px] text-black bg-primary 
                                     cursor-pointer ${checkDragging && 'hidden'}`}> Browse </label>
-                            <input type='file' accept='image/*' id='file' className='hidden' onChange={(e)=> imageBrowseHandler(e)} multiple/>
+                            <input type='file' accept='image/*' id='file' className='!hidden' onChange={(e)=> imageBrowseHandler(e)} multiple/>
                         </span >
                 </h3>
             </div>
@@ -386,10 +390,14 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
             {   imageCropperState &&
                 <ImageCropper images={images} onCropComplete={handleCropComplete} imageCropperState={imageCropperState}
                      setImageCropperState={setImageCropperState} imageCropperDefaultIndex={imageCropperDefaultIndex} imageCloseHandler={closeHandler}
-                         imageCropperError={imageCropperError} setImageCropperError={setImageCropperError}/>
+                        imageCropperError={imageCropperError} setImageCropperError={setImageCropperError} 
+                            positionFromTop={imageCropperPositionFromTop} bgBlur={imageCropperBgBlur} containerHeight={imageCropperContainerHt} 
+                                controllerStyle={imageCropperControllerStyle}/>
             }
-            <div className='flex gap-[27px] flex-wrap mt-[20px]' id='image-section'>
-                {
+            
+                {   images.length > 0 &&
+                    <div className='flex gap-[27px] flex-wrap mt-[20px]' id='image-section'>
+                    {
                     images.map((image,index)=> 
                         (<div key={image.name} className='flex flex-col'>
                             <figure key={image.name} className='relative w-[75px] h-[75px] rounded-[5px]'>
@@ -416,8 +424,9 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
                             <span className='text-[11px] text-secondary mt-[5px]'> { findImageSize(image.size) } </span>
                         </div>)
                     )
+                    }
+                    </div>
                 }
-            </div>
             <h5 className='text-[12px] text-green-500 invisible h-[17px] mt-[5px] leading-[18px] tracking-[0.2px]' id='image-compress-message' 
                                 style={displayCompressButton? {color:'red', fontSize:'10px'}:{}}>
                 {imageMessage}   
@@ -433,7 +442,7 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
                 <div id='thumbnail-setter' className='mt-[2rem]'>
                 <h4 className='text-[13.5px] font-[500] text-black capitalize mb-[6px] ml-[2px]'> <span className='text-[14px]'>P</span>roduct Thumbnail </h4>
                 <div className='flex gap-[15px] h-[200px]'>
-                    <figure className='h-[200px] w-[200px] rounded-[10px]'>
+                    <figure className='h-[f200px] w-[200px] rounded-[10px]'>
                         <img src={images[Number.parseInt(currentImageIndex)].url} alt={images[Number.parseInt(currentImageIndex)].name} 
                                 className='h-[200px]  w-[200px] rounded-[10px] object-cover'/>
                     </figure>
@@ -447,7 +456,8 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
                     </div>
                 </div>
                 <div className='w-[46%] mt-[7px] flex flex-col gap-[10px]'>
-                    <SiteButtonSquare customStyle={{paddingBlock:'6px', width:'12.5rem', fontSize:'12px'}} clickHandler={(e)=> thumbnailSetter(e)}> 
+                    <SiteButtonSquare customStyle={{paddingBlock:'6px', width:'12.5rem', borderRadius:'5px'}} tailwindClasses='!text-[13px]'
+                     clickHandler={(e)=> thumbnailSetter(e)}> 
                         Set as thumbnail 
                     </SiteButtonSquare>
     
@@ -456,7 +466,8 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
                 : ''
             }
             {imagePreview && imagePreview.status && images.length > 0 &&
-                <div className='h-[auto] w-full rounded-[10px] flex flex-col gap-[10px] justify-center mt-[2rem] relative' id='category-preview'>
+                <div className='h-[auto] w-full rounded-[10px] mt-[2rem] relative' id='category-preview'>
+                    <div className={` ${imagePreview?.size === 'landscape' ? 'w-full' : 'w-[200px]'} `} >
                     <figure className={` ${imagePreview?.size === 'landscape' ? 'w-full h-[300px]' : 'h-[200px] w-[200px]'} 
                         rounded-[10px] outline outline-secondary outline-1 outline-offset-[2px]`}>
                         <img src={images[0].url} alt={images[0].name} 
@@ -465,15 +476,16 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
                     {
                     imagePreview?.imageName &&
                     <span className='absolute bottom-[52px] left-[10px] text-[10px] font-[550] text-secondary px-[10px] 
-                        rounded-[5px] tracking-[0.3px] category-name'> 
-                    {(imagePreview.imageName.length > 20)? `${imagePreview.imageName[0].toUpperCase() + imagePreview.imageName.slice(3,20)}...` : imagePreview.imageName[0].toUpperCase() + imagePreview.imageName}
+                        rounded-[5px] tracking-[0.3px] capitalize category-name'> 
+                    {(imagePreview.imageName.length > 20)? `${imagePreview.imageName[0].toUpperCase() + imagePreview.imageName.slice(3,20)}...` : imagePreview.imageName[0].toUpperCase() + imagePreview.imageName.slice(1)}
                     </span>
                     }
-                    <SiteButtonSquare tailwindClasses={`${imagePreview?.size === 'landscape' ? 'w-full' : 'w-fit'}`} 
-                        customStyle={{paddingBlock:'6px', borderRadius:'7px', fontSize:'12px'}} 
+                    <SiteButtonSquare tailwindClasses={` w-full text-secondary !mt-[10x]`} 
+                        customStyle={{paddingBlock:'9px', borderRadius:'5px', marginTop:'10px'}} lowerFont={true}
                             clickHandler={(e)=> openImageEditor(images[0].url, images[0].name, images[0].blob)} > 
                         { `Edit ${imageType} Image` }
                     </SiteButtonSquare>
+                    </div>
                 </div>
             }
         </main>

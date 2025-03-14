@@ -44,7 +44,8 @@ export default function AdminPageLayout(){
     const [headerZIndex, setHeaderZIndex] = useState(10)
 
     const [showSublist, setShowSublist] = useState({
-        dashboard:false, customers:false, product: false, category: false, couponManager:false, orders:false, salesReport:false, offers:false, banners:false, settings:false
+        dashboard:false, customers:false, product: false, category: false, couponManager:false, orders:false, salesReport:false,
+        offers:false, banners:false, settings:false
     })
 
     const toggleSublist = (type) => {
@@ -196,13 +197,36 @@ export default function AdminPageLayout(){
                                         </Link> 
                                     </div> 
                                 </li>
-                                <li onClick={()=>toggleSublist('offers')}> 
-                                    <div className={`${ showSublist.offers && 'toggleSublist-custom-after'} option`}>
-                                        <Link> 
+                                <li> 
+                                    <div className={`${ showSublist.offers && 'toggleSublist-custom-after'} flex items-center gap-[1.5rem] option list-dropdown`}>
+                                        <span className='flex justify-center items-center gap-[5px] cursor-pointer list-name'> 
                                             <RiDiscountPercentLine/> 
                                             <span className={`${ showSublist.offers && 'text-primaryDark'}`}> Offers </span>
-                                        </Link> 
+                                        </span> 
+                                        <RiArrowDropDownLine onClick={()=> toggleSublist('offers')}/>
                                     </div> 
+                                    {
+                                        showSublist.offers &&
+                                        <ul className='pt-[1rem] pl-[1rem] list-none flex flex-col gap-[10px] justify-center items-start
+                                             text-white text-[12.5px] sublist'>
+                                            <li>
+                                               <div>
+                                                    <Link to='/admin/offers/add'  className='flex items-center'> 
+                                                        <CiSquareChevRight/> 
+                                                        <span> Add Offer </span> 
+                                                    </Link>
+                                               </div> 
+                                            </li>
+                                            <li>
+                                               <div className='flex items-center'>
+                                                    <Link to='/admin/offers'  className='flex items-center'> 
+                                                        <CiSquareChevRight/>
+                                                        <span> List/Edit Offers </span> 
+                                                    </Link>
+                                               </div> 
+                                            </li>
+                                     </ul>
+                                     }
                                 </li>
                                 <li onClick={()=>toggleSublist('banners')}> 
                                     <div className={`${ showSublist.banners && 'toggleSublist-custom-after'} option`}>

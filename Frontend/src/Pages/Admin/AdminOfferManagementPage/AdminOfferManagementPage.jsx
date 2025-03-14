@@ -14,7 +14,7 @@ import OfferModal from "./OfferModal"
 import OfferDeleteModal from "./OfferDeleteModal"
 import useFlexiDropdown from '../../../Hooks/FlexiDropdown'
 import {DateSelector} from '../../../Components/Calender/Calender'
-import {getAllCoupons, searchCoupons, resetCouponStates} from '../../../Slices/couponSlice'
+import {getAllOffers, resetOfferStates} from '../../../Slices/offerSlice'
 import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
 
 
@@ -62,7 +62,7 @@ export default function AdminOfferManagementPage(){
     useEffect(() => {
       console.log("queryOptions----->", queryOptions)
       if(Object.keys(queryOptions).length > 0){
-        // dispatch( getAllCoupons({queryOptions}) )
+        dispatch( getAllOffers({queryOptions}) )
       }
     }, [queryOptions])
 
@@ -147,7 +147,11 @@ export default function AdminOfferManagementPage(){
 
                 <div className="container mx-auto px-4">
 
-                      
+                      <button onClick={()=> setIsModalOpen(true)} className="ml-auto bg-secondary text-[15px] text-white px-[17px]
+                       py-[6px] rounded-md hover:bg-purple-700 transition duration-300 flex items-center">
+                        <Plus className="h-5 w-5 mr-2" />
+                        Create Offer
+                      </button>
 
                     <div className="flex justify-between items-center mb-6 mt-[1rem]">
                       <div className="relative">

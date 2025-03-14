@@ -1144,6 +1144,10 @@ select{
   top: 4.1rem;
 }
 
+.top-\[40\%\]{
+  top: 40%;
+}
+
 .top-\[43\%\]{
   top: 43%;
 }
@@ -1299,6 +1303,10 @@ select{
 .my-auto{
   margin-top: auto;
   margin-bottom: auto;
+}
+
+.\!mt-\[10x\]{
+  margin-top: 10x !important;
 }
 
 .\!mt-\[2rem\]{
@@ -1763,6 +1771,10 @@ select{
   display: grid;
 }
 
+.\!hidden{
+  display: none !important;
+}
+
 .hidden{
   display: none;
 }
@@ -1885,10 +1897,6 @@ select{
 
 .h-\[17\%\]{
   height: 17%;
-}
-
-.h-\[175px\]{
-  height: 175px;
 }
 
 .h-\[17px\]{
@@ -2055,10 +2063,6 @@ select{
   height: 85%;
 }
 
-.h-\[89\%\]{
-  height: 89%;
-}
-
 .h-\[8px\]{
   height: 8px;
 }
@@ -2073,6 +2077,10 @@ select{
 
 .h-\[auto\]{
   height: auto;
+}
+
+.h-\[f200px\]{
+  height: f200px;
 }
 
 .h-auto{
@@ -2090,14 +2098,6 @@ select{
 
 .h-screen{
   height: 100vh;
-}
-
-.h-\[1px\]{
-  height: 1px;
-}
-
-.h-\[px\]{
-  height: px;
 }
 
 .max-h-\[80vh\]{
@@ -2495,14 +2495,6 @@ select{
 
 .w-full{
   width: 100%;
-}
-
-.w-\[px\]{
-  width: px;
-}
-
-.w-\[2px\]{
-  width: 2px;
 }
 
 .min-w-full{
@@ -3365,6 +3357,10 @@ select{
 .border-\[\#94a3b8\]{
   --tw-border-opacity: 1;
   border-color: rgb(148 163 184 / var(--tw-border-opacity));
+}
+
+.border-\[\#A399A880\]{
+  border-color: #A399A880;
 }
 
 .border-\[\#AFD0FF\]{
@@ -4308,6 +4304,10 @@ select{
   padding-bottom: 9px;
 }
 
+.\!pl-\[30px\]{
+  padding-left: 30px !important;
+}
+
 .pb-0{
   padding-bottom: 0px;
 }
@@ -4516,6 +4516,10 @@ select{
   font-size: 12px !important;
 }
 
+.\!text-\[13px\]{
+  font-size: 13px !important;
+}
+
 .text-2xl{
   font-size: 1.5rem;
   line-height: 2rem;
@@ -4674,10 +4678,6 @@ select{
 .text-xs{
   font-size: 0.75rem;
   line-height: 1rem;
-}
-
-.\!text-\[13px\]{
-  font-size: 13px !important;
 }
 
 .\!font-medium{
@@ -5217,6 +5217,12 @@ select{
 
 .filter{
   filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
+}
+
+.backdrop-blur-\[5px\]{
+  --tw-backdrop-blur: blur(5px);
+  -webkit-backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+  backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
 }
 
 .transition{

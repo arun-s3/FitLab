@@ -404,11 +404,11 @@ export default function AdminAddAndEditProductPage({ editProduct }){
                         </p>
                     </div>
                 </div>
-                <div className='w-full h-screen basis-[37%]'>
+                <div className='w-full basis-[37%]'>
  
                      <FileUpload images={images} setImages={setImages} imageLimit={6} needThumbnail={true} imageType='Product'
                          thumbnail={thumbnail} setThumbnail={setThumbnail} thumbnailIndexOnEditProduct={thumbnailIndexOnEditProduct} 
-                            editingMode={editProduct}/>
+                            imageCropperBgBlur={false} editingMode={editProduct}/>
 
                 </div>
             </main>

@@ -88,13 +88,15 @@
     border-radius: 2px;
     cursor: pointer;
 }
-#AdminCreateOfferPage main #offer-content .offer-content-wrapper #applicableCategories-section #applicableCategories #offer-content{
+#AdminCreateOfferPage main #offer-content .offer-content-wrapper #applicableCategories-section #applicableCategories{
     gap: 7px;
 }
-#AdminCreateOfferPage main #offer-content .offer-content-wrapper #applicableCategories-section #applicableCategories #offer-content > input{
+#AdminCreateOfferPage main #offer-content #applicableType-section #applicableCategories-section #applicableCategories input{
     padding: 0px;
     margin-top: 0px;
+    margin-right: 5px;
+    display: inline-block;
 }
-#AdminCreateOfferPage main #offer-content .offer-content-wrapper #applicableCategories-section #applicableCategories #offer-content > span{
+/* #AdminCreateOfferPage main #offer-content #applicableType-section #applicableCategories-section #applicableCategories > span{
     font-size: 12px;
-}
+} */

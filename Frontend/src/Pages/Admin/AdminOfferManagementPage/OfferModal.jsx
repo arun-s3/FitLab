@@ -3,16 +3,18 @@ import './OfferModal.css'
 import { useSelector, useDispatch } from "react-redux"
 import {debounce} from 'lodash'
 
-import { X, DiamondPercent, BadgePercent, Plus, Minus, Search, ChevronDown, ChevronUp } from "lucide-react"
+import { X, DiamondPercent, BadgePercent, Plus, Minus, Search, ChevronDown, ChevronUp, RefreshCcw, CalendarSync, Users, IndianRupee, ListTodo } from "lucide-react"
 import { RiCoupon4Line } from "react-icons/ri"
 import {toast} from 'react-toastify';
 
 import CategoryDisplay from "../../../Components/CategoryDisplay/CategoryDisplay"
+import FileUpload from '../../../Components/FileUpload/FileUpload'
 import {handleInputValidation, displaySuccess, displayErrorAndReturnNewFormData, cancelErrorState} from '../../../Utils/fieldValidator'
 import {createOffer, updateOffer, resetOfferStates} from '../../../Slices/offerSlice'
 import {searchProduct, getAllProducts} from '../../../Slices/productSlice'
 import {showUsers} from '../../../Slices/adminSlice'
 import {camelToCapitalizedWords} from "../../../Utils/helperFunctions"
+import { CgDetailsMore } from "react-icons/cg"
 
 
 
@@ -30,7 +32,10 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
     applicableType: "allProducts",
     applicableCategories: [],
     applicableProducts: [],
+    recurringOffer: false
   })
+  
+  const [images, setImages] = useState([])  
 
   const [showCategories, setShowCategories] = useState(true)
   const [selectedCategories, setSelectedCategories] = useState({})
@@ -43,13 +48,13 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
   const [productQueryOptions, setProductQueryOptions] = useState({page: 1, limit: 6})
   const [showSearchResults, setShowSearchResults] = useState({products: false, customers: false})
 
-  const [customerQueryOptions, setCustomerQueryOptions] = useState({page: 1, limit: 6})
-
   const { products, productCounts } = useSelector(state=> state.productStore)
   const { adminLoading, adminError, adminSuccess, adminMessage, allUsers } = useSelector(state => state.admin)
   
   const {offerCreated, offerUpdated} = useSelector(state=> state.offers)
   const dispatch = useDispatch()
+
+  const userGroupValues = ["all", "newUsers", "returningUsers", "VIPUsers"]
 
   
   useEffect(() => {
@@ -75,6 +80,7 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
         applicableType: "allProducts",
         applicableCategories: [],
         applicableProducts: [],
+        recurringOffer: false
       })
     }
 
@@ -90,7 +96,7 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
     if(selectedCategories?.categories && selectedCategories.categories.length > 0){
       console.log("selectedCategories?.categories--->", selectedCategories.categories)
       setFormData(formData=> (
-        { ...formData, applicableCategories: [ ...new Set([...formData.applicableCategories, ...selectedCategories.categories]) ] }
+        { ...formData, applicableCategories: [ ...selectedCategories.categories ] }
       ))
     }
     if(selectedProducts){
@@ -99,13 +105,7 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
         { ...formData, applicableProducts: [...selectedProducts.map(product=> product.title)] }
       ))
     }
-    // if(selectedCustomers){
-    //   console.log("selectedCustomers--->", selectedCustomers)
-    //   setFormData(formData=> (
-    //     { ...formData, assignedCustomers: [...selectedCustomers.map(customer=> customer.username)] }
-    //   ))
-    // }
-  },[selectedCategories, selectedProducts, selectedCustomers])
+  },[selectedCategories, selectedProducts])
 
   useEffect(()=> {
     console.log("formData--->", formData)
@@ -116,10 +116,7 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
         console.log('OUERYOPTIONS--------->', JSON.stringify(productQueryOptions))
         dispatch( getAllProducts({queryOptions: productQueryOptions}) )
     }
-    // if(Object.keys(customerQueryOptions).length){
-    //   dispatch( showUsers({queryOptions: customerQueryOptions}) )
-    // }
-  },[productQueryOptions, customerQueryOptions])
+  },[productQueryOptions])
 
   useEffect(()=> {
     if(offerCreated){
@@ -176,15 +173,16 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
     }
   }
 
-  const incDecHandler = (type, add)=> {
+  const incDecHandler = (type, operate)=> {
     console.log("Inside incDecHandler")
-    console.log("Number(formData[type])-->", Number(formData[type]))
-    if( (formData[type] && Number(formData[type])) || formData[type] == '0' ){
+    const value = Number(formData[type])
+    console.log("Number(formData[type])-->", value)
+    if( (formData[type] && value) || formData[type] == '0' ){
       if(formData[type] >= 0){
-        if(add === 1){
-          setFormData(formdata=> ({...formData, [type]: formData[type]++}))
+        if(operate === 1){
+          setFormData(formdata=> ({...formData, [type]: value + 1}))
         }else{
-          setFormData(formdata=> ({...formData, [type]: formData[type]--}))
+          value !== 0 && setFormData(formdata=> ({...formData, [type]: value - 1}))
         }
       }
     }else return
@@ -235,51 +233,6 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
     }
   }
 
-//   const debouncedCustomersSearch = useRef(
-//     debounce((searchData)=> {
-//         setCustomerQueryOptions(customerQueryOptions=> (
-//             {...customerQueryOptions, searchData: searchData}
-//         ))
-//     }, 600) 
-// ).current; 
-
-  // const searchCustomers = (e)=> {
-  //   const searchData = e.target.value
-  //   console.log('searchData--->', searchData)
-  //   if(searchData.trim() !== ''){
-  //       setShowSearchResults(results=> ({...results, customers: true}))
-  //       console.log("Getting searched customers--")
-  //       debouncedCustomersSearch(searchData)
-  //   } 
-  //   else{
-  //     setShowSearchResults(results=> ({...results, customers: false}))
-  //   } 
-  // }
-
-  // const nextCustomers = ()=> {
-  //   setCustomerQueryOptions(customerQueryOptions=> (
-  //     {...customerQueryOptions, page: currentCustomerPart + 1}
-  //   ))
-  //   setCurrentCustomerPart(part=> part++)
-  // }
-
-  // const previousCustomers = ()=> {
-  //   setCustomerQueryOptions(customerQueryOptions=> (
-  //     {...customerQueryOptions, page: currentCustomerPart - 1}
-  //   ))
-  //   setCurrentCustomerPart(part=> part--)
-  // }
-
-  // const customerCheckHandler = (e, username)=> {
-  //   const checked = e.target.checked
-  //   console.log("checked-->", checked)
-  //   if(checked){
-  //     setSelectedCustomers( users=> [...users, {username}] )
-  //   }else{
-  //     setSelectedCustomers( users=> users.filter(user=> user.username !== username) )
-  //   }
-  // }
-
   const applicableTypeHandler = (e)=> {
     const selectedValue = e.target.value
     setFormData((prev) => ({ ...prev, applicableType: selectedValue }))
@@ -297,6 +250,19 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
       setShowCategories(false)
       setFormData((prev) => ({ ...prev, applicableProducts: [], applicableCategories: [] }))
     } 
+  }
+
+  const handleRecurringOffer = (e)=> {
+    const value = Boolean(parseInt(e.target.value))
+    setFormData((prev)=> ({ ...prev, [e.target.name]: value }))
+    if(value){
+      setFormData((prev)=> ({ ...prev, recurringFrequency: 'weekly' }))
+    }else{
+      setFormData((prev)=> {
+        const {recurringFrequency, ...rest} = prev
+        return rest
+      })
+    }
   }
 
   const handleSubmit = (e)=> {
@@ -348,9 +314,36 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
               </label>
               <input type="text" id="name" name="name" value={formData.name} onChange={handleChange} 
                 onBlur={(e)=> inputBlurHandler(e, "name")} style={{paddingLeft: '30px'}}/>
-              <RiCoupon4Line className="absolute top-[60%] left-[10px] w-[13px] h-[13px] text-muted"/>
+              <DiamondPercent className="absolute top-[60%] left-[10px] w-[13px] h-[13px] text-muted"/>
               <span className='error right-0'> {error.name && error.name} </span>
             </div>
+
+            <div className="relative">
+              <label htmlFor="targetCustomers" className="block text-sm font-medium text-gray-700">
+                Target Customers 
+              </label>
+              <select id="targetCustomers" name="targetCustomers" value={formData.applicableType} 
+                  onChange={handleChange} style={{paddingLeft: '30px'}}>
+                {
+                  userGroupValues.map(group=> (
+                    <option key={group} value={group}> { camelToCapitalizedWords(group) } </option>
+                  ))
+                }
+              </select>
+              <Users className="absolute top-[60%] left-[10px] w-[13px] h-[13px] text-muted"/>
+            </div>
+          </div>
+
+          <div className="relative">
+            <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+              Description (optional)
+            </label>
+            <textarea id="description" name="description" value={formData.description} onChange={handleChange} rows="2"
+              className="resize-none"></textarea>
+            <CgDetailsMore className="absolute top-[40%] left-[10px] w-[13px] h-[13px] text-muted"/>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
 
             <div>
               <label htmlFor="discountType" className="block text-sm font-medium text-gray-700">
@@ -364,17 +357,6 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
                 <option value="bogo"> Buy 1 Get 1 </option>
               </select>
             </div>
-          </div>
-
-          <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-              Description (optional)
-            </label>
-            <textarea id="description" name="description" value={formData.description} onChange={handleChange} rows="2"
-              className="resize-none"></textarea>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
 
             <div className="relative">
               <div className="flex justify-between items-center">
@@ -391,39 +373,25 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
                 <Plus onClick={()=> incDecHandler('discountValue', 1)}/>
                 <Minus onClick={()=> incDecHandler('discountValue', -1)}/>
               </div>
-            </div>
 
-            <div className="relative">
-              <div className="flex justify-between items-center">
-                <label htmlFor="maxDiscount" className="block text-sm font-medium text-gray-700">
-                  Maximum Discount Value (optional)
-                </label>
-              </div>
-              <input type="text" id="maxDiscount" name="maxDiscount" value={formData.maxDiscount} placeholder='Leave blank for no limit' 
-                 className="h-[2.5rem]" onBlur={(e)=> inputBlurHandler(e, "maxDiscount")} onChange={handleChange}/>
-              <div className="input-contoller">
-                <Plus onClick={()=> incDecHandler('maxDiscount', 1)}/>
-                <Minus onClick={()=> incDecHandler('maxDiscount', -1)}/>
-              </div>  
-              <span className='error left-0'> {error.maxDiscount && error.maxDiscount} </span>
             </div>
 
           </div>
 
           <div className="relative">
             <div className="flex justify-between items-center">
-              <label htmlFor="minimumOrderValue" className="block text-sm font-medium text-gray-700">
-                Minimum Order Value (optional)
+              <label htmlFor="maxDiscount" className="block text-sm font-medium text-gray-700">
+                Maximum Discount Value (optional)
               </label>
             </div>
-            <input type="text" id="minimumOrderValue" name="minimumOrderValue" value={formData.minimumOrderValue}
-              placeholder="Enter the minimum order amount required to apply this offer"
-               className="h-[2.5rem]" onBlur={(e)=> inputBlurHandler(e, "minimumOrderValue")} onChange={handleChange}/>
+            <input type="text" id="maxDiscount" name="maxDiscount" value={formData.maxDiscount} placeholder='Leave blank for no limit' 
+               className="h-[2.5rem] !pl-[30px]" onBlur={(e)=> inputBlurHandler(e, "maxDiscount")} onChange={handleChange}/>
+            <IndianRupee className="absolute top-[60%] left-[10px] w-[13px] h-[13px] text-muted"/>
             <div className="input-contoller">
-              <Plus onClick={()=> incDecHandler('minimumOrderValue', 1)}/>
-              <Minus onClick={()=> incDecHandler('minimumOrderValue', -1)}/>
+              <Plus onClick={()=> incDecHandler('maxDiscount', 1)}/>
+              <Minus onClick={()=> incDecHandler('maxDiscount', -1)}/>
             </div>  
-            <span className='error top-0 right-0'> {error.minimumOrderValue && error.minimumOrderValue} </span>
+            <span className='error left-0'> {error.maxDiscount && error.maxDiscount} </span>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -445,49 +413,33 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-{/* 
-            <div className="relative">
-              <div className="flex justify-between items-center">
-                <label htmlFor="usageLimit" className="block text-sm font-medium text-gray-700">
-                  Usage Limit (optional)
-                </label>
-              </div>
-              <input type="text" id="usageLimit" name="usageLimit" value={formData.usageLimit} className="h-[2.5rem]"
-                onChange={handleChange} onBlur={(e)=> inputBlurHandler(e, "usageLimit")}/>
-              <div className="input-contoller">
-                <Plus onClick={()=> incDecHandler('usageLimit', 1)}/>
-                <Minus onClick={()=> incDecHandler('usageLimit', -1)}/>
-              </div>
-              <span className='error right-0'> {error.usageLimit && error.usageLimit} </span>
-            </div> */}
-
-            {/* <div className="relative">
-              <div className="flex justify-between items-center">
-                <label htmlFor="usageLimitPerCustomer" className="block text-sm font-medium text-gray-700">
-                  Usage Limit Per Customer (optional)
-                </label>
-              </div>
-              <input type="text" id="usageLimitPerCustomer" name="usageLimitPerCustomer" className="h-[2.5rem]"
-                value={formData.usageLimitPerCustomer} onChange={handleChange} onBlur={(e)=> inputBlurHandler(e, "usageLimitPerCustomer")}/>
-              <div className="input-contoller">
-                <Plus onClick={()=> incDecHandler('usageLimitPerCustomer', 1)}/>
-                <Minus onClick={()=> incDecHandler('usageLimitPerCustomer', -1)}/>
-              </div>
-              <span className='error'> {error.usageLimitPerCustomer && error.usageLimitPerCustomer} </span>
-            </div> */}
+          <div className="relative">
+            <div className="flex justify-between items-center">
+              <label htmlFor="minimumOrderValue" className="block text-sm font-medium text-gray-700">
+                Minimum Order Value (optional)
+              </label>
+            </div>
+            <input type="text" id="minimumOrderValue" name="minimumOrderValue" value={formData.minimumOrderValue}
+              placeholder="Enter the minimum order amount required to apply this offer"
+               className="h-[2.5rem]" onBlur={(e)=> inputBlurHandler(e, "minimumOrderValue")} onChange={handleChange}/>
+            <div className="input-contoller">
+              <Plus onClick={()=> incDecHandler('minimumOrderValue', 1)}/>
+              <Minus onClick={()=> incDecHandler('minimumOrderValue', -1)}/>
+            </div>  
+            <span className='error top-0 right-0'> {error.minimumOrderValue && error.minimumOrderValue} </span>
           </div>
 
-          <div>
+          <div className="relative">
             <label htmlFor="applicableType" className="block text-sm font-medium text-gray-700">
               Applicable To
             </label>
-            <select id="applicableType" name="applicableType" value={formData.applicableType}  
+            <select id="applicableType" name="applicableType" value={formData.applicableType} className="!pl-[30px]"
                 onChange={(e)=> applicableTypeHandler(e)}>
               <option value="allProducts"> All Products </option>
               <option value="categories"> Specific Categories </option>
               <option value="products"> Specific Products </option>
             </select>
+            <ListTodo className="absolute top-[60%] left-[10px] w-[13px] h-[13px] text-muted"/>
           </div>
 
           {formData.applicableType === "categories" && (
@@ -606,92 +558,63 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
             </div>
           )}
 
-          {/* <div className="flex items-center">
-            <input type="checkbox" id="customerSpecific" name="customerSpecific" checked={formData.customerSpecific}
-              onChange={handleChange} className="mt-[-1px] h-[4px] w-[4px] p-[7px] rounded-[3px] text-secondary focus:ring-secondary border-gray-300"/>
-            <label htmlFor="customerSpecific" className="ml-2 block text-sm text-gray-900">
-              Customer-specific coupon
+        <div className="grid grid-cols-2 gap-4">
+
+          {/* <div className="relative">
+            <label htmlFor="targetCustomers" className="block text-sm font-medium text-gray-700">
+              Target Customers 
             </label>
-          </div> */}
-          {/* {formData.customerSpecific && (
-            <div>
-              <label htmlFor="assignedCustomers" className="block text-sm font-medium text-gray-700">
-                Select Customers
-              </label>
-              <select multiple id="assignedCustomers" name="assignedCustomers" value={formData.assignedCustomers} onChange={handleChange}>
-                {customers.map((customer) => (
-                  <option key={customer.id} value={customer.id}>
-                    {customer.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )} */}
-          {/* {formData.customerSpecific && (
-            <div className="px-[20px]" id='customers'>
-              <label htmlFor="customersSearch" className="block text-[13px] font-medium text-gray-700">
-                Select Customers 
-              </label>
-              <div className="relative">
-                <input type='text' placeholder="Search customers here..." id='customersSearch' 
-                  className="mt-[5px] w-full h-[1.7rem] text-[12px] px-[5px] pl-[35px] py-[2px] placeholder:text-[11px] border-muted
-                    border-dotted rounded-[4px] focus:border-secondary focus:outline-none focus:ring-0" onChange={(e)=> searchCustomers(e)} />
-                <Search className="absolute top-[12px] left-[12px] w-[14px] h-[14px] text-muted"/>
-                {
-                  showSearchResults.customers && 
-                  <ul className="absolute top-[110%] w-full bg-white list-none flex flex-col gap-[7px] px-[7px] py-[10px] border
-                   border-dropdownBorder rounded-[4px]">
-                    { 
-                      allUsers.length > 0 ?
-                      allUsers.map(user=> (
-                        <li key={user._id} className="flex items-center gap-[7px]">
-                            <input type='checkbox' id='selectProducts' className="h-[15px] w-[15px] border border-primary rounded-[3px]
-                              focus:ring-0 focus:outline-none checked:bg-primary checked:border-primary checked:text-white 
-                                appearance-none active:bg-primary active:border-primary active:text-white cursor-pointer"
-                                 onChange={(e)=> customerCheckHandler(e, user.username)}
-                                 checked={ selectedCustomers.includes(user.username) || false }/>
-                            <label htmlFor='selectProducts' className="text-[12px] capitalize cursor-pointer hover:text-secondary hover:font-medium">
-                               {user.username} 
-                            </label>
-                        </li>
-                      ))
-                      : <h6 className="mx-auto text-[14px] text-muted font-[500]"> No Records! </h6>
-                    }
-                    {
-                      customerQueryOptions.page > 1 &&
-                      <i className="px-[10px] py-[5px] w-full bg-primary" onClick={()=> previousCustomers()}>
-                        <ChevronUp className="mx-auto w-[15px] h-[15px] text-center text-secondary"/>
-                      </i>
-                    }
-                    {
-                      allUsers.length > 5 &&
-                      <i className="px-[10px] py-[5px] w-full bg-primary" onClick={()=> nextCustomers()}>
-                        <ChevronDown className="mx-auto w-[15px] h-[15px] text-center text-secondary"/>
-                      </i>
-                    }
-                  </ul>
-                }
-              </div>
+            <select id="targetCustomers" name="targetCustomers" value={formData.applicableType} 
+                onChange={handleChange} style={{paddingLeft: '30px'}}>
               {
-                selectedCustomers.length > 0 &&
-                <div className="mt-[5px] px-[10px] py-[5px] border border-dropdownBorder rounded-[4px]">
-                <h5 className="mb-[5px] text-[12px] text-muted font-[450]"> Selected Users </h5>
-                <div className="flex gap-[10px]">
-                  {
-                    selectedCustomers.map(customer=> (
-                      <div key={customer.username} className="px-[5px] py-[2px] flex items-center gap-[5px] border border-inputBorderSecondary
-                         rounded-[12px]">
-                        <X className="h-[8px] w-[8px] text-muted cursor-pointer" 
-                          onClick={()=> setSelectedCustomers(users=> users.filter(user=> user.username !== customer.username ))}/>
-                        <span className="text-[11px] text-secondary capitalize"> {customer.username} </span>
-                      </div>
-                    ))
-                  }
-                </div>
-                </div>
+                userGroupValues.map(group=> (
+                  <option key={group} value={group}> { camelToCapitalizedWords(group) } </option>
+                ))
               }
-            </div>
-          )} */}
+            </select>
+            <Users className="absolute top-[60%] left-[10px] w-[13px] h-[13px] text-muted"/>
+          </div> */}
+
+          <div className="relative">
+            <label htmlFor="recurringOffer" className="block text-sm font-medium text-gray-700">
+              Recurring Offer (optional)
+            </label>
+            <select id="recurringOffer" name="recurringOffer" value={formData.recurringOffer}  
+                onChange={handleRecurringOffer} style={{paddingLeft: '30px'}}>
+              <option value="0"> No </option>
+              <option value="1"> Yes </option>
+            </select>
+            <CalendarSync className="absolute top-[60%] left-[10px] w-[13px] h-[13px] text-muted"/>
+          </div>
+
+        </div>
+              
+        {
+          formData.recurringOffer &&
+          <div className="relative">
+            <label htmlFor="recurringFrequency" className="block text-sm font-medium text-gray-700">
+              Recurring Frequency 
+            </label>
+            <select id="recurringFrequency" name="recurringFrequency" value={formData.recurringFrequency}  
+                onChange={handleChange} style={{paddingLeft: '30px'}}>
+              {
+                ['daily', 'weekly', 'monthly', 'yearly'].map(freq=> (
+                  <option key={freq} value={freq}> { camelToCapitalizedWords(freq) } </option>
+                ))
+              }
+            </select>
+            <RefreshCcw className="absolute top-[60%] left-[10px] w-[13px] h-[13px] text-muted"/>
+          </div>
+        }
+
+        <div className='w-full mt-[15px]'>
+        
+          <FileUpload images={images} setImages={setImages} imageLimit={1} needThumbnail={false} imageType='Offer Banner'
+            imagePreview={{status: true, size: 'landscape'}} imageCropperPositionFromTop={'0px'} imageCropperBgBlur={true}
+              imageCropperContainerHt='620px' imageCropperControllerStyle={{marginTop:'2rem', gap:'1.5rem', left:'0px'}}
+                uploadBox={{beforeUpload:'185px', afterUpload:'90px'}}/>
+        
+        </div>  
 
           <div className="flex justify-end space-x-3 mt-6">
             <button type="button" onClick={onClose} className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm

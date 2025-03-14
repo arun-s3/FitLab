@@ -1,4 +1,4 @@
-#OfferModal form input:not([id = 'customerSpecific'], [id = 'applicableProductsSearch'], [id = 'selectProducts'], [id = 'customersSearch']),
+#OfferModal form input:not([id = 'customerSpecific'], [id = 'applicableProductsSearch'], [id = 'selectProducts'], [id = 'customersSearch'], [id = 'file']),
 #OfferModal form textarea, #OfferModal form select{
     margin-top: 4px;
     display: block;

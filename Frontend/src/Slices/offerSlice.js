@@ -5,7 +5,7 @@ export const createOffer = createAsyncThunk('offer/add', async ({offerDetails}, 
   try {
     console.log('Inside createOffer createAsyncThunk')
     console.log("offerDetails from offerSlice---->", offerDetails)
-    const response = await axios.post('/offers/add', {offerDetails}, {withCredentials: true})
+    const response = await axios.post('/offers/add', offerDetails, {headers: {'Content-Type': 'multipart/form-data'}, withCredentials: true})
     console.log('Returning success response from createOffer...', JSON.stringify(response.data))
     return response.data
   }catch(error){

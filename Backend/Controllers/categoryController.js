@@ -11,7 +11,7 @@ const packCategoryData = async (req)=>{
         const result = await cloudinary.uploader.upload(req.file.path, {
             folder: 'category/image',
             resource_type: 'image',
-          })
+        })
         const uploadedImage = {
             public_id: result.public_id,
             name: req.file.originalname,

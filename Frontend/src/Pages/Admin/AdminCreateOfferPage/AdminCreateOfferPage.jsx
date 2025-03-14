@@ -4,20 +4,23 @@ import { useSelector, useDispatch } from "react-redux"
 import {debounce} from 'lodash'
 
 import { X, DiamondPercent, BadgePercent, BadgeIndianRupee, IndianRupee, Plus, Minus, Search, ChevronDown,
-   ChevronUp, ListTodo, CalendarSync, 
-   RefreshCcw} from "lucide-react"
+   ChevronUp, ListTodo, CalendarSync, RefreshCcw,
+   Dot} from "lucide-react"
 import { RiCoupon4Line } from "react-icons/ri"
 import {MdOutlineCategory, MdArrowDropDown} from "react-icons/md"
 import {CgDetailsMore} from "react-icons/cg"
 import {TbShoppingCartDiscount} from "react-icons/tb"
+import {GoDotFill} from "react-icons/go"
 import {toast} from 'react-toastify'
 
 import AdminHeader from "../../../Components/AdminHeader/AdminHeader"
 import PlaceholderIcon from '../../../Components/PlaceholderIcon/PlaceholderIcon'
 import CategoryDisplay from "../../../Components/CategoryDisplay/CategoryDisplay"
-import FileUpload from '../../../Components/FileUpload/FileUpload';
+import FileUpload from '../../../Components/FileUpload/FileUpload'
+import {handleImageCompression} from '../../../Utils/compressImages'
+import {CustomHashLoader} from '../../../Components/Loader/Loader'
 import {DateSelector} from '../../../Components/Calender/Calender'
-import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons';
+import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
 import {handleInputValidation, displaySuccess, displayErrorAndReturnNewFormData, cancelErrorState} from '../../../Utils/fieldValidator'
 import {createOffer, updateOffer, resetOfferStates} from '../../../Slices/offerSlice'
 import {searchProduct, getAllProducts} from '../../../Slices/productSlice'
@@ -40,18 +43,16 @@ export default function AdminCreateOfferPage(){
     applicableType: "allProducts",
     applicableCategories: [],
     applicableProducts: [],
+    targetCustomers: 'all',
     recurringOffer: false,
   })
 
   const [showCategories, setShowCategories] = useState(true)
   const [selectedCategories, setSelectedCategories] = useState({})
   const [selectedProducts, setSelectedProducts] = useState([])
-  const [selectedCustomers, setSelectedCustomers] = useState([])
 
   const [startDate, setStartDate] = useState(null)
   const [endDate, setEndDate] = useState(null)
-
-  const [userGroup, setUserGroup] = useState()
 
   const [images, setImages] = useState([])  
 
@@ -64,12 +65,13 @@ export default function AdminCreateOfferPage(){
 
   const productSearchRef = useRef(null)
 
+  // const [switchApplicableType, setSwitchApplicableType] = useState(false)
+
   const [customerQueryOptions, setCustomerQueryOptions] = useState({page: 1, limit: 6})
 
   const { products, productCounts } = useSelector(state=> state.productStore)
-  const { adminLoading, adminError, adminSuccess, adminMessage, allUsers } = useSelector(state => state.admin)
   
-  const {offerCreated, offerUpdated} = useSelector(state=> state.offers)
+  const {loading, offerCreated, offerUpdated} = useSelector(state=> state.offers)
   const dispatch = useDispatch()
 
   const userGroupValues = ["all", "newUsers", "returningUsers", "VIPUsers"]
@@ -110,17 +112,39 @@ export default function AdminCreateOfferPage(){
   // }, [error])
 
   useEffect(()=> {
-    if(selectedCategories?.categories && selectedCategories.categories.length > 0){
+    if (selectedCategories?.categories) {
       console.log("selectedCategories?.categories--->", selectedCategories.categories)
-      setFormData(formData=> (
-        { ...formData, applicableCategories: [ ...new Set([...formData.applicableCategories, ...selectedCategories.categories]) ] }
-      ))
+      setFormData(formData=> ({
+          ...formData,
+          applicableCategories: Array.isArray(formData.applicableCategories) 
+              ? [...selectedCategories.categories]
+              : [...selectedCategories.categories]
+      }))
+      if(selectedCategories?.categories.length <= 0){
+        setError(error=> ( {...error, applicableCategories: 'Choose atleast one category!'} ) )
+      }else{
+        setError(error=> {
+          const {applicableCategories, ...rest} = error
+          return rest
+         })
+      }
     }
+
     if(selectedProducts){
       console.log("selectedProducts--->", selectedProducts)
       setFormData(formData=> (
         { ...formData, applicableProducts: [...selectedProducts.map(product=> product.title)] }
       ))
+      if(selectedProducts.length > 0){
+        setError(error=> {
+         const {applicableProducts, ...rest} = error
+         return rest
+        })
+      }
+      // if(selectedProducts.length === 0){
+      //   console.log("Inside if(selectedProducts.length === 0 && !switchApplicableType)")
+      //   setError(error=> ( {...error, applicableProducts: 'Choose atleast one product!'} ) )
+      // }
     }
   },[selectedCategories, selectedProducts])
 
@@ -160,6 +184,10 @@ export default function AdminCreateOfferPage(){
       toast.success('An offer is successfully updated!')
       dispatch(resetOfferStates())
     }
+    setFormData({})
+    setImages([])
+    setStartDate(null); setEndDate();
+    setSelectedCategories({}); setSelectedProducts([]); setShowCategories(false); setShowSearchResults(false)
   }, [offerCreated, offerUpdated])
 
   useEffect(() => {
@@ -233,15 +261,16 @@ export default function AdminCreateOfferPage(){
     }
   }
 
-  const incDecHandler = (type, add)=> {
+  const incDecHandler = (type, operate)=> {
     console.log("Inside incDecHandler")
-    console.log("Number(formData[type])-->", Number(formData[type]))
-    if( (formData[type] && Number(formData[type])) || formData[type] == '0' ){
+    const value = Number(formData[type])
+    console.log("Number(formData[type])-->", value)
+    if( (formData[type] && value) || formData[type] == '0' ){
       if(formData[type] >= 0){
-        if(add === 1){
-          setFormData(formdata=> ({...formData, [type]: formData[type]++}))
+        if(operate === 1){
+          setFormData(formdata=> ({...formData, [type]: value + 1}))
         }else{
-          setFormData(formdata=> ({...formData, [type]: formData[type]--}))
+          value !== 0 && setFormData(formdata=> ({...formData, [type]: value - 1}))
         }
       }
     }else return
@@ -265,6 +294,9 @@ export default function AdminCreateOfferPage(){
     } 
     else{
       setShowSearchResults(false)
+      if(selectedProducts.length === 0){
+        setError(error=> ( {...error, applicableProducts: 'Choose atleast one product!'} ) )
+      }
     } 
   }
 
@@ -285,24 +317,37 @@ export default function AdminCreateOfferPage(){
   const productCheckHandler = (e, productName)=> {
     const checked = e.target.checked
     console.log("checked-->", checked)
+    // setSwitchApplicableType(false)
     if(checked){
       setSelectedProducts( products=> [...products, {title: productName}] )
     }else{
       setSelectedProducts( products=> products.filter(product=> product.title !== productName) )
+      if(selectedProducts.length === 0){
+        setError(error=> ( {...error, applicableProducts: 'Choose atleast one product!'} ) )
+      }
     }
   }
 
   const applicableTypeHandler = (e)=> {
     const selectedValue = e.target.value
-    setFormData((prev) => ({ ...prev, applicableType: selectedValue }))
+    // setSwitchApplicableType(true)
+    setFormData((prev)=> ({ ...prev, applicableType: selectedValue }))
     if (selectedValue === "categories"){
       setShowCategories(true)
       setSelectedProducts([])
+      // setError(error=> {
+      //   const {applicableCategories, ...rest} = error
+      //   return rest
+      // })
       setFormData((prev) => ({ ...prev, applicableProducts: [] }))
     } 
     else if (selectedValue === "products"){
       setShowCategories(false)
       setSelectedCategories({})
+      // setError(error=> {
+      //   const {applicableProducts, ...rest} = error
+      //   return rest
+      // })
       setFormData((prev) => ({ ...prev, applicableCategories: [] }))
     } 
     else{
@@ -312,25 +357,27 @@ export default function AdminCreateOfferPage(){
   }
 
   const radioClickHandler = (e, group)=>{
-    const checkStatus = userGroup === group
+    const checkStatus = formData.targetCustomers === group
     console.log("checkStatus-->", checkStatus)
     if(checkStatus){
-        setUserGroup('')
+        setFormData(formData => {
+          const [targetCustomers, ...rest] = formData
+          return rest
+        })
         return
     }else{
-        setUserGroup(group)
+        setFormData((prev) => ({ ...prev, targetCustomers: group }))
         const changeEvent = new Event('change', {bubbles:true})
         e.target.dispatchEvent(changeEvent)
     }
   }
 
   const radioChangeHandler = (e, group)=>{
-    e.target.checked = userGroup === group 
+    e.target.checked = formData.targetCustomers === group 
   }
 
-  const handleSubmit = (e)=> {
-    e.preventDefault()
-    const {name, startDate, endDate} =  formData
+  const handleSubmit = async()=> {
+    const {name, discountType, discountValue, applicableType, startDate, endDate} =  formData
     if(!name || !startDate || !endDate || !discountType || !discountValue || !applicableType){
       toast.error("Please fill the required fields!")
       return
@@ -343,6 +390,14 @@ export default function AdminCreateOfferPage(){
       toast.error("Start date must be before the End date!")
       return
     }
+    if(formData.applicableType === 'products' && selectedProducts.length === 0){
+      toast.error("Choose atleast one product!")
+      return
+    }
+    if(formData.applicableType === 'categories' && selectedCategories.length === 0){
+      toast.error("Choose atleast one category!")
+      return
+    }
     if( Object.values(error).some(error=> error.trim() !== '') ){
       toast.error("There are some errors in the form. Please correct them before submitting!")
       return
@@ -353,12 +408,38 @@ export default function AdminCreateOfferPage(){
     //   offerId = coupon._id
     // } 
     // offer ? dispatch( updateOffer({offerDetails: formData, offerId}) )  : dispatch( createOffer({offerDetails: formData}) ) 
-    dispatch( createOffer({offerDetails: formData}) ) 
-    onClose()
+    let newBlob
+    if(images.length > 0){
+      const compressedImageBlob = async(image)=>{
+        if(image.size > (5*1024*1024)){
+            const newBlob = await handleImageCompression(image.blob)
+            return newBlob
+        }else{
+            return image.blob
+        }
+      } 
+      newBlob = await compressedImageBlob(images[0])
+    }
+
+    const offerData = new FormData()
+    Object.keys(formData).forEach((key)=> {
+        if (Array.isArray(formData[key])) {
+            formData[key].forEach((item) => offerData.append(key, item))
+        }else{
+            offerData.append(key, formData[key])
+        }
+    })
+
+    if(images.length > 0){
+      offerData.append('offerBanner', newBlob, 'offerImg')
+    }
+
+    dispatch( createOffer({offerDetails: offerData}) ) 
   }
 
   return (
      <section id='AdminCreateOfferPage'>
+
         <header>
                 {/* <input type='search' placeholder='Search Categories' className='w-[12rem] h-[35px] border-dotted bg-[#fefff8]
                          rounded-[7px] placeholder:text-[11px]' /> */}
@@ -368,6 +449,7 @@ export default function AdminCreateOfferPage(){
         </header>
 
         <main className='flex gap-[10px]'>
+          
             <div className='flex flex-col gap-[15px] basis-[65%] w-[65%]' id='offer-content'>
 
                 <div className='offer-content-wrapper'>
@@ -396,7 +478,7 @@ export default function AdminCreateOfferPage(){
                     </div>
                     <div className='relative'>
                         <PlaceholderIcon icon={<CgDetailsMore/>} fromTop={14}/>
-                        <textarea rows='3' cols='50' maxlength='500' id='description'
+                        <textarea rows='3' cols='50' maxlength='500' id='description' name='description'
                                className='pl-[21px] w-[20rem] h-[5rem] resize-none border border-primary rounded-[5px] 
                                   text-[12px] overflow-hidden placeholder:text-[9px] placeholder:text-[#6b7280] '
                                         value={formData.description} onChange={handleChange} />
@@ -469,7 +551,7 @@ export default function AdminCreateOfferPage(){
                     <div className='offer-labels'>
                         <label for='maxDiscount'> Maximum Discount Value (optional)</label>
                         <p>
-                        Set the maximum discount limit a user can avail from this offer. This applies to percentage-based discounts
+                        Set the maximum discount limit a user can avail from this offer. This applies to  -based discounts
                         to prevent excessive reductions. Leave blank for no limit.
                         </p>
                     </div>
@@ -507,7 +589,7 @@ export default function AdminCreateOfferPage(){
                     </div>
                 </div>
 
-                <div className='px-[3px] py-[15px] border-b border-dashed border-mutedDashedSeperation'>
+                <div className='px-[3px] py-[15px] border-b border-dashed border-mutedDashedSeperation' id='applicableType-section'>
                     <div className="flex items-center justify-between gap-[10px]">
                       <div className='offer-labels'>
                         <label for='applicableType' className="mb-[17px]"> Applicable To </label>
@@ -543,27 +625,9 @@ export default function AdminCreateOfferPage(){
                           {
                             showCategories &&
                             <CategoryDisplay type='checkboxType' filter={selectedCategories} setFilter={setSelectedCategories} />
-                          }
-          
+                          }        
                           {/* {
-                           isEditing && formData.applicableCategories && formData.applicableCategories?.length > 0 && !showCategories &&
-                          <div className="mt-[5px] flex gap-[10px]">
-                            {
-                              formData.applicableCategories.map(category=> (
-                                <div key={category._id} className="px-[5px] py-[2px] flex items-center gap-[5px] border border-inputBorderSecondary
-                                   rounded-[12px]">
-                                  <X className="h-[8px] w-[8px] text-muted cursor-pointer" 
-                                    onClick={()=> setFormData(formData=> (
-                                      {...formData, applicableCategories: [...formData.applicableCategories.filter(cat=> cat.name !== category.name)]}
-                                    ))}/>
-                                  <span className="text-[11px] text-secondary capitalize"> {category.name} </span>
-                                </div>
-                              ))
-                            }
-                          </div>
-                          } */}
-                          {/* {
-                          isEditing && !showCategories &&
+                          !showCategories &&
                           <h5 className="mt-[10px] mb-[5px] text-[12px] text-muted font-[450] hover:underline transition duration-150 cursor-pointer" 
                             onClick={()=> { setFormData(formData=> (
                                   {...formData, applicableCategories: []}
@@ -573,6 +637,22 @@ export default function AdminCreateOfferPage(){
                           </h5>
                           } */}
                         </div>
+                        {
+                           formData?.applicableCategories?.length > 0 && showCategories &&
+                          <div className="mt-[10px] flex gap-[10px]">
+                            { 
+                              formData.applicableCategories.map(category=> (
+                                <div key={category._id} className="px-[5px] py-[2px] flex items-center gap-[4px]">
+                                  <GoDotFill className="w-[10px] h-[10px] text-primaryDark"/>
+                                  <span className="text-[11px] text-secondary capitalize"> {category} </span>
+                                </div>
+                              ))
+                            }
+                          </div>
+                          }
+                        <p className="mt-[4px] h-[17px] text-[10px] text-red-500 tracking-[0.2px] visible">
+                          {error.applicableCategories && error.applicableCategories} 
+                        </p>
                       </div>
                     )}
           
@@ -585,7 +665,12 @@ export default function AdminCreateOfferPage(){
                           <input type='text' placeholder="Search products here..." id='applicableProductsSearch' 
                             className="mt-[5px] w-full h-[2rem] text-[12px] px-[5px] pl-[35px] py-[2px] placeholder:text-[11px] border-muted
                               border-dotted rounded-[4px] focus:border-secondary focus:outline-none focus:ring-0" onChange={(e)=> searchProducts(e)} 
-                                onBlur={()=> !insideProductResults && setShowSearchResults(false)}/>
+                                onBlur={()=> {
+                                  !insideProductResults && setShowSearchResults(false)
+                                  if(selectedProducts.length === 0){
+                                    setError(error=> ( {...error, applicableProducts: 'Choose atleast one product!'} ) )
+                                  }
+                                }}/>
                           <Search className="absolute top-[14px] left-[12px] w-[14px] h-[14px] text-muted"/>
                           {
                             showSearchResults && 
@@ -632,7 +717,13 @@ export default function AdminCreateOfferPage(){
                                 <div key={product.title} className="px-[5px] py-[2px] flex items-center gap-[5px] border border-inputBorderSecondary
                                    rounded-[12px]">
                                   <X className="h-[8px] w-[8px] text-muted cursor-pointer" 
-                                    onClick={()=> setSelectedProducts(products=> products.filter(item=> item.title !== product.title ))}/>
+                                    onClick={()=> {
+                                      const newSelectedProducts = selectedProducts.filter(item=> item.title !== product.title )
+                                      setSelectedProducts(newSelectedProducts)
+                                      if(newSelectedProducts.length === 0){
+                                        setError(error=> ( {...error, applicableProducts: 'Choose atleast one product!'} ) )
+                                      }
+                                    }}/>
                                   <span className="text-[11px] text-secondary capitalize"> {product.title} </span>
                                 </div>
                               ))
@@ -640,6 +731,9 @@ export default function AdminCreateOfferPage(){
                             </div>
                           </div>
                         }
+                      <p className="mt-[3px] h-[17px] text-[10px] text-red-500 tracking-[0.2px] visible">
+                          {error.applicableProducts && error.applicableProducts} 
+                        </p>
                       </div>
                     )}
                 </div>
@@ -659,14 +753,14 @@ export default function AdminCreateOfferPage(){
                         <div className='flex flex-col gap-[1rem]'>
                           {
                             userGroupValues.map(group=> (
-                                <div className={`px-[15px] py-[7px] w-[13rem] flex items-center justify-between
+                                <div key={group} className={`px-[15px] py-[7px] w-[13rem] flex items-center justify-between
                                       rounded-[5px] cursor-pointer hover:border-primaryDark hover:bg-primaryLight
-                                         ${userGroup === group ? 'border-2 border-primaryDark bg-primaryLight': 
-                                              'border border-mutedDashedSeperation'}`}   onClick={()=> setUserGroup(group)}> 
+                                         ${formData.targetCustomers === group ? 'border-2 border-primaryDark bg-primaryLight': 
+                                              'border border-mutedDashedSeperation'}`} onClick={(e)=> radioClickHandler(e, group)}> 
                                   <input type='radio' className='w-[12px] h-[12px] border border-primaryDark cursor-pointer
                                      checked:bg-primaryDark focus:ring-0 focus:text-primaryDark' id='targetCustomers'
                                       onClick={(e)=> radioClickHandler(e, group)} onChange={(e)=> radioChangeHandler(e, group)}
-                                        checked={userGroup === group}/>
+                                        checked={formData.targetCustomers === group}/>
                                   <span className='text-[13px]'> { camelToCapitalizedWords(group) } </span>
                                 </div>
                             ))
@@ -719,16 +813,15 @@ export default function AdminCreateOfferPage(){
                 <div className='w-[20%] mt-[2rem]'>
 
                     <SiteButtonSquare customStyle={{paddingInline:'50px', paddingBlock:'9px', borderRadius:'7px'}}
-                                            clickHandler={(e)=>{ submitHandler(e)}}>
-                             {/* {loading? <CustomHashLoader loading={loading}/> : 'Submit'}    */}
-                             Submit
+                                            clickHandler={()=>{ handleSubmit()}}>
+                             {loading? <CustomHashLoader loading={loading}/> : 'Submit'}   
                     </SiteButtonSquare>
 
                 </div>
 
             </div>
 
-            <div className='w-full h-screen basis-[35%] mt-[15px]'>
+            <div className='w-full basis-[35%] mt-[15px]'>
 
             <FileUpload images={images} setImages={setImages} imageLimit={1} needThumbnail={false} imageType='Offer Banner'
               imagePreview={{status: true, size: 'landscape'}}/>
@@ -736,7 +829,7 @@ export default function AdminCreateOfferPage(){
             </div>  
             {/*  categoryImgPreview={{categoryName: `${categoryData?.categoryName ? categoryData?.categoryName : 'Category Name'}`}} in FileUpload */}
         </main>
-        
+
     </section>
   )
 }

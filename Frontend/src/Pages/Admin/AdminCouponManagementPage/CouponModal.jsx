@@ -192,18 +192,16 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
     }
   }
 
-  const incDecHandler = (type, add)=> {
+  const incDecHandler = (type, operate)=> {
     console.log("Inside incDecHandler")
-    console.log("Number(formData[type])-->", Number(formData[type]))
-    if( (formData[type] && Number(formData[type])) || formData[type] == '0' ){
-      console.log("Inside 1st")
+    const value = Number(formData[type])
+    console.log("Number(formData[type])-->", value)
+    if( (formData[type] && value) || formData[type] == '0' ){
       if(formData[type] >= 0){
-        console.log("Inside 2nd")
-        if(add === 1){
-          console.log("Inside 3rd")
-          setFormData(formdata=> ({...formData, [type]: formData[type]++}))
+        if(operate === 1){
+          setFormData(formdata=> ({...formData, [type]: value + 1}))
         }else{
-          setFormData(formdata=> ({...formData, [type]: formData[type]--}))
+          value !== 0 && setFormData(formdata=> ({...formData, [type]: value - 1}))
         }
       }
     }else return

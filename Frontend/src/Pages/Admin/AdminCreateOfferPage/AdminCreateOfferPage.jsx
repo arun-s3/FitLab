@@ -71,7 +71,7 @@ export default function AdminCreateOfferPage(){
 
   const { products, productCounts } = useSelector(state=> state.productStore)
   
-  const {loading, offerCreated, offerUpdated} = useSelector(state=> state.offers)
+  const {loading, offerCreated} = useSelector(state=> state.offers)
   const dispatch = useDispatch()
 
   const userGroupValues = ["all", "newUsers", "returningUsers", "VIPUsers"]
@@ -121,7 +121,7 @@ export default function AdminCreateOfferPage(){
               : [...selectedCategories.categories]
       }))
       if(selectedCategories?.categories.length <= 0){
-        setError(error=> ( {...error, applicableCategories: 'Choose atleast one category!'} ) )
+        setError(error=> ( {...error, applicableCategories: 'Choose atleast one category'} ) )
       }else{
         setError(error=> {
           const {applicableCategories, ...rest} = error
@@ -153,6 +153,10 @@ export default function AdminCreateOfferPage(){
   },[formData])
 
   useEffect(()=> {
+    console.log("formData on first launch--->", formData)
+  }, [])
+
+  useEffect(()=> {
     if(startDate){
       setFormData(formData=> (
         {...formData, startDate}
@@ -180,17 +184,13 @@ export default function AdminCreateOfferPage(){
       toast.success('An offer is successfully created!')
       dispatch(resetOfferStates())
     }
-    if(offerUpdated){
-      toast.success('An offer is successfully updated!')
-      dispatch(resetOfferStates())
-    }
     setFormData({})
     setImages([])
     setStartDate(null); setEndDate();
     setSelectedCategories({}); setSelectedProducts([]); setShowCategories(false); setShowSearchResults(false)
-  }, [offerCreated, offerUpdated])
+  }, [offerCreated])
 
-  useEffect(() => {
+  useEffect(()=> {
     const handleClickOutside = (e) => {
       const isOutside = !productSearchRef.current?.contains(e.target)
       if (isOutside) {
@@ -209,14 +209,45 @@ export default function AdminCreateOfferPage(){
     const { name, value, type, checked } = e.target
     console.log("Value--->", value)
     if (type === "checkbox") {
-      setFormData((prev) => ({ ...prev, [name]: checked }))
+      setFormData((prev) => (
+        { ...prev, discountType: prev.discountType || "percentage", recurringOffer: prev.recurringOffer ?? false,
+           applicableType: prev.applicableType ?? 'allProducts',  [name]: checked }
+      ))
     } else if (type === "select-multiple") {
       const selectedOptions = Array.from(e.target.selectedOptions, (option)=> option.value)
-      setFormData((prev) => ({ ...prev, [name]: selectedOptions }))
+      // setFormData((prev) => ({ ...prev, [name]: selectedOptions }))
+      setFormData((prev) => (
+        { ...prev, discountType: prev.discountType || "percentage", recurringOffer: prev.recurringOffer ?? false,
+          applicableType: prev.applicableType ?? 'allProducts',  [name]: selectedOptions }
+      ))
     } else {
-      setFormData((prev) => ({ ...prev, [name]: value }))
+      // setFormData((prev) => ({ ...prev, [name]: value }))
+      setFormData((prev) => (
+        { ...prev, discountType: prev.discountType || "percentage", recurringOffer: prev.recurringOffer ?? false,
+          applicableType: prev.applicableType ?? 'allProducts',  [name]: value }
+      ))
     }
   }
+
+//   const handleChange = (e) => {
+//     console.log("Inside handleChange...");
+//     const { name, value, type, checked } = e.target;
+    
+//     setFormData((prev) => {
+//         console.log("Previous State: ", prev);
+        
+//         const updatedState = {
+//             ...prev,
+//             [name]: type === "checkbox" ? checked : type === "select-multiple"
+//                 ? Array.from(e.target.selectedOptions, (option) => option.value)
+//                 : value
+//         };
+
+//         console.log("Updated State: ", updatedState);
+//         return updatedState;
+//     });
+// };
+
 
   const handleRecurringOffer = (e)=> {
     const value = Boolean(parseInt(e.target.value))
@@ -377,6 +408,7 @@ export default function AdminCreateOfferPage(){
   }
 
   const handleSubmit = async()=> {
+    console.log("formData--->", formData)
     const {name, discountType, discountValue, applicableType, startDate, endDate} =  formData
     if(!name || !startDate || !endDate || !discountType || !discountValue || !applicableType){
       toast.error("Please fill the required fields!")
@@ -437,6 +469,8 @@ export default function AdminCreateOfferPage(){
     dispatch( createOffer({offerDetails: offerData}) ) 
   }
 
+
+
   return (
      <section id='AdminCreateOfferPage'>
 
@@ -494,7 +528,7 @@ export default function AdminCreateOfferPage(){
                       </p>
                     </div>
                     <div className='relative'>
-                        <PlaceholderIcon icon={<TbShoppingCartDiscount />} fromTop={40}  className='h-[12px] w-[12px]'/>
+                        <PlaceholderIcon icon={<TbShoppingCartDiscount />} fromTop={40} className='h-[12px] w-[12px]'/>
                         <select id="discountType" name="discountType" value={formData.discountType} onChange={handleChange}
                             className="text-[13px] text-secondary pl-[1.5rem]">
                             <option value="percentage"> Percentage </option>
@@ -779,7 +813,7 @@ export default function AdminCreateOfferPage(){
                     </div>
                     <div className='relative'>
                         <PlaceholderIcon icon={<CalendarSync className='h-[13px] w-[13px]'/>} fromTop={37} />
-                        <select id="recurringOffer" name="recurringOffer" value={formData.recurringOffer} onChange={handleRecurringOffer}
+                        <select id="recurringOffer" name="recurringOffer" onChange={handleRecurringOffer}
                             className="text-[13px] text-secondary pl-[2rem]">
                             <option value="0"> No </option>
                             <option value="1"> Yes </option>

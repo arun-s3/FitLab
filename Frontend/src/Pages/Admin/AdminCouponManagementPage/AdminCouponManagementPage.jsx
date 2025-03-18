@@ -48,9 +48,7 @@ export default function AdminCouponManagementPage(){
     
 
     useEffect(() => {
-      if(allCoupons.length > 0){
         setCoupons(allCoupons)
-      }
     }, [allCoupons])
 
     useEffect(()=> {
@@ -194,7 +192,7 @@ export default function AdminCouponManagementPage(){
                              hover:bg-gray-50 transition-colors optionDropdown sort-dropdown'
                                  onClick={(e)=> toggleDropdown('sortDropdown')} id='sort-options' ref={dropdownRefs.sortDropdown}>
                              <span className='text-[13px] font-[470]'> Sort By </span>
-                             <MdSort className='h-[15px] w-[15px] text-[#EF4444]'/>
+                             <MdSort className='h-[15px] w-[15px]'/>
                              {openDropdowns.sortDropdown && 
                              <ul className='list-none  px-[10px] py-[1rem] absolute top-[44px] right-0 flex flex-col gap-[10px] justify-center 
                                      w-[12rem] text-[10px] bg-white border border-borderLight2 rounded-[8px] z-[5] cursor-pointer'>

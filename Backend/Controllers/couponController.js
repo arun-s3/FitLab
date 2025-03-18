@@ -226,11 +226,12 @@ const getAllCoupons = async (req, res, next) => {
     console.log("queryOptions--->", JSON.stringify(queryOptions))
 
     let filterConditions = {}
-    if (startDate && endDate) {
+    if (startDate){
       filterConditions.startDate = { $gte: new Date(startDate) }
+    }
+    if (endDate){
       filterConditions.endDate = { $lte: new Date(endDate) }
     }
-
     if (searchData) {
       filterConditions.code = { $regex: searchData, $options: "i" };
     }

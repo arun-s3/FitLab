@@ -1104,6 +1104,10 @@ select{
   top: 2.3rem;
 }
 
+.top-\[2\.4rem\]{
+  top: 2.4rem;
+}
+
 .top-\[22px\]{
   top: 22px;
 }
@@ -1130,6 +1134,10 @@ select{
 
 .top-\[34px\]{
   top: 34px;
+}
+
+.top-\[37px\]{
+  top: 37px;
 }
 
 .top-\[38px\]{
@@ -1679,6 +1687,10 @@ select{
 
 .mt-\[3\.3rem\]{
   margin-top: 3.3rem;
+}
+
+.mt-\[3\.5rem\]{
+  margin-top: 3.5rem;
 }
 
 .mt-\[30px\]{
@@ -2254,6 +2266,10 @@ select{
 
 .w-\[16px\]{
   width: 16px;
+}
+
+.w-\[16rem\]{
+  width: 16rem;
 }
 
 .w-\[175px\]{
@@ -4404,6 +4420,10 @@ select{
   padding-left: 60px;
 }
 
+.pl-\[8px\]{
+  padding-left: 8px;
+}
+
 .pr-0{
   padding-right: 0px;
 }
@@ -4989,6 +5009,10 @@ select{
 .text-indigo-600{
   --tw-text-opacity: 1;
   color: rgb(79 70 229 / var(--tw-text-opacity));
+}
+
+.text-inherit{
+  color: inherit;
 }
 
 .text-muted{
@@ -5585,6 +5609,11 @@ select{
 
 .hover\:bg-\[\#E6FF00\]\/90:hover{
   background-color: rgb(230 255 0 / 0.9);
+}
+
+.hover\:bg-\[\#F5FBD2\]:hover{
+  --tw-bg-opacity: 1;
+  background-color: rgb(245 251 210 / var(--tw-bg-opacity));
 }
 
 .hover\:bg-\[\#f3f7df\]:hover{

@@ -55,7 +55,7 @@ export const deleteOffer = createAsyncThunk('offer/delete', async ({offerId}, th
     console.log("offerId from offerSlice---->", offerId)
     const response = await axios.delete(`/offers/delete/${offerId}`, {withCredentials: true})
     console.log('Returning success response from deleteOffer...', JSON.stringify(response.data))
-    return response.data
+    return {offerId, message: response.data.message}
   }catch(error){
     console.log('Inside catch of deleteOffer')
     const errorMessage = error.response?.data?.message
@@ -180,7 +180,7 @@ const offerSlice = createSlice({
         state.offerError = null
         state.loading = false
         state.offerRemoved = true
-        state.offers = state.offers.filter(offer=> offer._id != action.payload.deletedCoupon._id)
+        state.offers = state.offers.filter(offer=> offer._id != action.payload.offerId)
       })
       .addCase(deleteOffer.pending, (state)=> {
         state.loading = true

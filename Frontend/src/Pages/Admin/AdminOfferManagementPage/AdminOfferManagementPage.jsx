@@ -4,17 +4,24 @@ import {useOutletContext} from 'react-router-dom'
 import {useSelector, useDispatch} from "react-redux"
 import {debounce} from 'lodash'
 
-import { Plus, Search } from "lucide-react"
+import {Plus, Search, CalendarX2, ChevronDown, SlidersHorizontal} from "lucide-react"
 import {RiArrowDropDownLine} from "react-icons/ri"
 import {MdSort} from "react-icons/md"
+import {TbTag, TbTagOff, TbUserStar, TbUsers} from "react-icons/tb"
+import {RiUserReceived2Line} from "react-icons/ri"
+import {GrUserNew} from "react-icons/gr"
+import {FaUsersViewfinder} from "react-icons/fa6"
 
 import AdminHeader from '../../../Components/AdminHeader/AdminHeader'
 import OfferList from "./OfferList"
 import OfferModal from "./OfferModal"
 import OfferDeleteModal from "./OfferDeleteModal"
 import useFlexiDropdown from '../../../Hooks/FlexiDropdown'
+import useStickyDropdown from '../../../Hooks/StickyDropdown'
+import AdvancedFilters from './AdvancedFilters'
 import {DateSelector} from '../../../Components/Calender/Calender'
 import {getAllOffers, resetOfferStates} from '../../../Slices/offerSlice'
+import {camelToCapitalizedWords} from "../../../Utils/helperFunctions"
 import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
 
 
@@ -35,22 +42,30 @@ export default function AdminOfferManagementPage(){
     const [limit, setLimit] = useState(6) 
     const [currentPage, setCurrentPage] = useState(1)
     const totalPages = 20
+    const [activeTab, setActiveTab] = useState('offers')
 
-    const {openDropdowns, dropdownRefs, toggleDropdown} = useFlexiDropdown(['limitDropdown', 'sortDropdown'])
+    const {openDropdowns, dropdownRefs, toggleDropdown} = useFlexiDropdown(['limitDropdown', 'sortDropdown', 'userGroupDropdown'])
+
+    const {openStickyDropdowns, stickyDropdownRefs, toggleStickyDropdown} = useStickyDropdown(['filterDropdown'])
     
-    const [queryOptions, setQueryOptions] = useState({page: 1, limit: 6})
+    
+    const [queryOptions, setQueryOptions] = useState({page: 1, limit: 6, targetUserGroup: 'all', discountType:'all', applicabletype: 'all'})
 
     const {setHeaderZIndex} = useOutletContext()
     setHeaderZIndex(0)
 
     const {offers: allOffers } = useSelector(state=> state.offers)
     const dispatch = useDispatch()
+
+    const statusTabs = [
+      {name: 'Active', subtitle:'All active offers', icon: TbTag},
+      {name: 'Expired', subtitle:'All expired offers', icon: CalendarX2},
+      {name: 'Deactivated', subtitle:'All deactivated offers', icon: TbTagOff},
+    ]
     
 
     useEffect(() => {
-      if(allOffers.length > 0){
         setOffers(allOffers)
-      }
     }, [allOffers])
 
     useEffect(()=> {
@@ -70,6 +85,28 @@ export default function AdminOfferManagementPage(){
       {name: 'Offers: Recent to Oldest', value: '-1', sortBy: 'createdAt'}, {name: 'Offers: Oldest to Recent', value: '1', sortBy: 'createdAt'},
       {name: 'Alphabetical: A to Z', value: '1', sortBy: 'name'}, {name: 'Alphabetical: Z to A', value: '-1', sortBy: 'name'}
     ]
+
+    const userGroups = ["all", "newUsers", "returningUsers", "VIPUsers"]
+
+    const activateTab = (name)=> {
+      setActiveTab(name)
+      // setQueryDetails(query=> {
+      //   return {...query, status: name.toLowerCase().trim()}
+      // })
+    }
+
+    const getUserIcon = (userType)=> {
+      switch(userType){
+        case "all":
+          return TbUsers
+        case "newUsers":
+          return GrUserNew
+        case "returningUsers":
+          return RiUserReceived2Line
+        case "VIPUsers":
+          return TbUserStar
+      }
+    }
 
     const debouncedSearch = useRef(
       debounce((searchData)=> {
@@ -145,22 +182,107 @@ export default function AdminOfferManagementPage(){
 
             <main>
 
-                <div className="container mx-auto px-4">
+                <div className="container mt-[3.5rem] mx-auto px-4">
 
-                      <button onClick={()=> setIsModalOpen(true)} className="ml-auto bg-secondary text-[15px] text-white px-[17px]
-                       py-[6px] rounded-md hover:bg-purple-700 transition duration-300 flex items-center">
-                        <Plus className="h-5 w-5 mr-2" />
-                        Create Offer
+                    {/* <button onClick={()=> setIsModalOpen(true)} className="ml-auto bg-secondary text-[15px] text-white px-[17px]
+                     py-[6px] rounded-md hover:bg-purple-700 transition duration-300 flex items-center">
+                      <Plus className="h-5 w-5 mr-2" />
+                      Create Offer
+                    </button> */}
+                    <div className="flex justify-between items-center">
+                    
+                    <div className="w-fit px-[8px] py-[6px] flex gap-[10px] bg-white rounded-[6px] border border-primary shadow-sm">
+                    {statusTabs.map((tab)=> (
+                      <button key={tab.name} className={`px-[10px] py-[8px] flex items-center gap-[5px] rounded-[7px] transition-all
+                           duration-200 
+                          ${activeTab === tab.name ? 
+                            'text-black shadow-md transform scale-105'
+                            : 'text-gray-600 hover:bg-gray-50' }`} onClick={()=> activateTab(tab.name)}>
+                        <tab.icon className='w-[30px] h-[30px] p-[8px] text-white bg-primaryDark rounded-[5px]'/>
+                        <div className='flex flex-col justify-between items-start'>
+                          <span className='text-[12px]'> {tab.name} </span>
+                          <span className='text-[9px] text-muted'> {tab.subtitle} </span>
+                        </div>
                       </button>
+                    ))}
+                    </div>
+                    
+                    <div className='self-end flex items-center gap-[1rem]'>
+                    {/* <p className='text-right'> Target Customers </p> */}
+                    <div className='relative h-[35px] px-[16px] py-[8px] text-[14px] text-muted bg-white flex items-center 
+                      gap-[10px] justify-between border border-dropdownBorder rounded-[4px] shadow-sm cursor-pointer
+                       hover:bg-gray-50 transition-colors optionDropdown sort-dropdown' onClick={(e)=> toggleStickyDropdown(e, 'filterDropdown')}
+                           id='sort-options' ref={stickyDropdownRefs.filterDropdown}> {/* onClick={(e)=> toggleDropdown('filterDropdown')}*/}
+                       <SlidersHorizontal className='h-[15px] w-[15px]'/>
+                       <span className='text-[13px] font-[470]'> Adv Filters </span>
+                       {openStickyDropdowns.filterDropdown && 
+                          <div className='absolute top-[2.4rem] right-0 z-[10]'>
+                              <AdvancedFilters queryOptions={queryOptions} setQueryOptions={setQueryOptions}/>
+                          </div>
+                       }
+                    </div>
+                    <div className='relative w-[16rem] h-[35px] px-[10px] py-[8px] text-[14px] text-muted bg-white flex items-center 
+                        gap-[10px] justify-center border border-dropdownBorder rounded-[4px] shadow-sm cursor-pointer
+                         hover:bg-gray-50 transition-colors optionDropdown sort-dropdown'
+                             onClick={(e)=> toggleDropdown('userGroupDropdown')} ref={dropdownRefs.userGroupDropdown}>
+                         <div className='w-full flex items-center justify-between'>
+                          <div className='flex items-center gap-[5px]'>
+                           {/* {
+                             (()=> {
+                               const UserIcon = getUserIcon(queryOptions.targetUserGroup)
+                               return <UserIcon className='w-[15px] h-[15px] text-muted'/>
+                             })()
+                           } */}
+                           <FaUsersViewfinder className='w-[15px] h-[15px] text-muted'/>
+                           {/* <span className='text-[13px] font-[470]'>
+                            Target Customers - */}
+                            <div className='flex items-center gap-[4px]'>
+                              <span className='text-[12px] font-[470]'> Target Customers: </span>
+                              <span className='text-[12px] font-[470] text-secondary'> 
+                                { camelToCapitalizedWords(queryOptions.targetUserGroup) } 
+                              </span> 
+                            </div> 
+                           {/* </span> */}
+                          </div>
+                          <ChevronDown className='h-[15px] w-[15px] text-muted'/>
+                         </div>
+                         {openDropdowns.userGroupDropdown && 
+                         <ul className='list-none  px-[10px] py-[1rem] absolute top-[37px] right-0 flex flex-col gap-[10px] justify-center 
+                                 w-[16rem] text-[10px] bg-white border border-borderLight2 rounded-[8px] z-[5] cursor-pointer'>
+                             {userGroups &&
+                              userGroups.map(group=> (
+                                <li key={group} onClick={()=> setQueryOptions(query=> { return {...query, targetUserGroup: group} })}> 
+                                 <span className={`w-full h-[26px] pl-[8px] flex items-center gap-[7px] rounded-[5px] text-muted hover:text-primaryDark
+                                     hover:bg-[#F5FBD2]`}>  
+                                    {
+                                      (()=> {
+                                        const UserIcon = getUserIcon(group)
+                                        return <UserIcon className={`w-[15px] h-[15px] text-inherit`}/>
+                                      })()
+                                    }        
+                                     <span className='text-[13px] capitalize'> { camelToCapitalizedWords(group) } </span>
+                                 </span>
+                                </li>
+                              ))
+                             }
+                          </ul>
+                          }
+                      </div>
+                      
+                      </div>
+
+                    </div>
 
                     <div className="flex justify-between items-center mb-6 mt-[1rem]">
+
                       <div className="relative">
-                        <input type= "text" placeholder="Search offers..."
-                            className="w-[20rem] h-[36px] text-[15px] pl-10 pr-4 py-2 rounded-[6px] border border-gray-300 
-                              tracking-[0.2px]  placeholder:text-[12px] focus:outline-none focus:border-0 focus:ring-2
-                                 focus:ring-secondary" onChange={(e)=> searchOffers(e)}/>
-                        <Search className="absolute left-3 top-2.5 h-[17px] w-[17px] text-gray-400" />
-                      </div>
+                      <input type= "text" placeholder="Search offers..."
+                          className="w-[20rem] h-[36px] text-[15px] pl-10 pr-4 py-2 rounded-[6px] border border-gray-300 
+                            tracking-[0.2px]  placeholder:text-[12px] focus:outline-none focus:border-0 focus:ring-2
+                               focus:ring-secondary" onChange={(e)=> searchOffers(e)}/>
+                      <Search className="absolute left-3 top-2.5 h-[17px] w-[17px] text-gray-400" />
+                    </div>
+
                       <div id='offer-menu' className='flex items-center gap-[2rem]'>
 
                         <DateSelector dateGetter={{startDate, endDate}} dateSetter={{setStartDate, setEndDate}} labelNeeded={true}/>
@@ -168,7 +290,7 @@ export default function AdminOfferManagementPage(){
 
                         <div className='flex items-center gap-[1rem]'>
                            <div className='h-[35px] text-[14px] text-muted bg-white flex items-center gap-[10px]
-                             justify-between border border-dropdownBorder rounded-[8px] shadow-sm cursor-pointer hover:bg-gray-50
+                             justify-between border border-dropdownBorder rounded-[4px] shadow-sm cursor-pointer hover:bg-gray-50
                               transition-colors optionDropdown sort-dropdown' onClick={(e)=> toggleDropdown('limitDropdown')}
                                 id='limit-dropdown' ref={dropdownRefs.limitDropdown}>
                                <span className='relative flex items-center border-r border-dropdownBorder py-[8px] pl-[10px] pr-[2px]'> 
@@ -180,7 +302,7 @@ export default function AdminOfferManagementPage(){
                                       cursor-pointer'>
                                         {
                                           [6, 10, 20, 30, 40].map( limit=> (
-                                            <li onClick={()=> limitHandler(limit)}> {limit} </li>
+                                            <li key={limit} onClick={()=> limitHandler(limit)}> {limit} </li>
                                           ))
                                         }
                                    </ul>
@@ -191,11 +313,11 @@ export default function AdminOfferManagementPage(){
                                </span>
                            </div>
                            <div className='relative h-[35px] px-[16px] py-[8px] text-[14px] text-muted bg-white flex items-center 
-                            gap-[10px] justify-between border border-dropdownBorder rounded-[8px] shadow-sm cursor-pointer
+                            gap-[10px] justify-between border border-dropdownBorder rounded-[4px] shadow-sm cursor-pointer
                              hover:bg-gray-50 transition-colors optionDropdown sort-dropdown'
                                  onClick={(e)=> toggleDropdown('sortDropdown')} id='sort-options' ref={dropdownRefs.sortDropdown}>
                              <span className='text-[13px] font-[470]'> Sort By </span>
-                             <MdSort className='h-[15px] w-[15px] text-[#EF4444]'/>
+                             <MdSort className='h-[15px] w-[15px]'/>
                              {openDropdowns.sortDropdown && 
                              <ul className='list-none  px-[10px] py-[1rem] absolute top-[44px] right-0 flex flex-col gap-[10px] justify-center 
                                      w-[12rem] text-[10px] bg-white border border-borderLight2 rounded-[8px] z-[5] cursor-pointer'>
@@ -226,7 +348,7 @@ export default function AdminOfferManagementPage(){
                         offer={editingOffer} isEditing={editingOffer ? true : false}/>
 
                     <OfferDeleteModal isOpen={isDeleteModalOpen} onClose={()=> {setIsDeleteModalOpen(false); setOfferToDelete(null)}}
-                        coupon={offerToDelete} />
+                        offer={offerToDelete} />
                         
                 </div>
 

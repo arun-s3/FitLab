@@ -28,6 +28,7 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
     // const [readyToCropImages, setReadyToCropImages] = useState([])
     const [croppedImages, setCroppedImages] = useState([]);
     const [imageCropperError, setImageCropperError] = useState('')
+    const [cropWarnOnce, setCropWarnOnce] = useState(false)
 
 
     useEffect(()=>{
@@ -48,13 +49,14 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
             setDisplayCompressButton(false) 
         }
         if(!imageCropperState && !editingMode){
-            if(images.some(img=> !img.isCropped)){
+            if(images.some(img=> !img.isCropped && !cropWarnOnce)){
                 // imageMessageDisplay.current.parentElement.style.visibility = 'visible'
                 // imageMessageDisplay.current.style.display = 'none'
                 // setImageMessage("Make sure you crop every image later before submitting")
+                console.log("INSIDE  if(!imageCropperState && !editingMode")
                 setError("Make sure you crop every image later before submitting")
                 toast.warn("Make sure you crop every image later before submitting")
-
+                setCropWarnOnce(true)
                 // setTimeout(()=>{
                 //     // imageMessageDisplay.current.parentElement.style.visibility = 'invisible'
                 //     // imageMessageDisplay.current.style.display = 'none'
@@ -64,7 +66,7 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
                 
             }
         }
-    },[error, images])
+    },[error, images, !cropWarnOnce])
 
     useEffect(()=>{
         console.log("Images array-->" + JSON.stringify(images))

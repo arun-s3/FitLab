@@ -89,22 +89,25 @@ const offerSchema = new mongoose.Schema(
       default: null
     },
     offerBanner: {
-      name: {
-        type: String,
-        required: true
+      type:{
+        name: {
+          type: String,
+          required: true
+        },
+        size: {
+          type: Number,
+          required: true
+        },
+        url: {
+          type: String,
+          required: true
+        },
+        public_id:{
+          type: String,
+          required: true
+        } 
       },
-      size: {
-        type: Number,
-        required: true
-      },
-      url: {
-        type: String,
-        required: true
-      },
-      public_id:{
-        type: String,
-        required: true
-      }
+      required: false
     },
     redemptionCount: {
       type: Number,

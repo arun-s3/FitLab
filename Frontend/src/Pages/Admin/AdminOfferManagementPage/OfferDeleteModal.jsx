@@ -14,15 +14,15 @@ export default function OfferDeleteModal ({ isOpen, onClose, offer }){
 
   useEffect(()=> {
     if(offerRemoved){
-      toast.success('Coupon removed successfully!')
-      dispatch(resetCouponStates())
+      toast.success('Offer removed successfully!')
+      dispatch(resetOfferStates())
     }
   },[offerRemoved])
 
   if (!isOpen) return null
 
-  const handleDeleteCoupon = ()=> {
-    dispatch(deleteCoupon({offerId: offer._id}))
+  const handleDeleteOffer = ()=> {
+    dispatch(deleteOffer({offerId: offer._id}))
     onClose()
   }
 
@@ -47,17 +47,17 @@ export default function OfferDeleteModal ({ isOpen, onClose, offer }){
             </div>
           </div>
           <p className="text-[14px] text-gray-600 mb-6">
-            You are about to delete the coupon "<span className="font-semibold">{offer.name}</span>".
+            You are about to delete an offer named "<span className="font-semibold">{ offer.name }</span>".
           </p>
           <div className="flex justify-end space-x-3">
             <button onClick={onClose} className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium
              text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
               Cancel
             </button>
-            <button onClick={handleDeleteCoupon} className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm
+            <button onClick={handleDeleteOffer} className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm
              font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2
               focus:ring-red-500">
-              Delete Coupon
+              Delete Offer
             </button>
           </div>
         </div>

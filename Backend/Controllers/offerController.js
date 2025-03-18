@@ -28,7 +28,6 @@ const createOffer = async (req, res, next)=> {
             endDate,
             recurringOffer,
             recurringFrequency,
-            offerBanner
         } = req.body
 
         console.log(`name--->${name}, discountType--->${discountType}, startDate--->${startDate}, endDate--->${endDate}`)
@@ -80,7 +79,7 @@ const createOffer = async (req, res, next)=> {
         }
 
         const newOffer = new Offer({
-            name: name.trim().toUpperCase(),
+            name: name,
             description,
             discountType,
             discountValue,
@@ -94,7 +93,7 @@ const createOffer = async (req, res, next)=> {
             endDate,
             recurringOffer,
             recurringFrequency,
-            offerBanner: uploadedImage
+            ...(uploadedImage ? { offerBanner: uploadedImage } : {})
         })
 
         await newOffer.save();
@@ -119,8 +118,10 @@ const getAllOffers = async (req, res, next) => {
       console.log("queryOptions--->", JSON.stringify(queryOptions))
   
       let filterConditions = {}
-      if (startDate && endDate) {
+      if (startDate){
         filterConditions.startDate = { $gte: new Date(startDate) }
+      }
+      if (endDate){
         filterConditions.endDate = { $lte: new Date(endDate) }
       }
   
@@ -154,7 +155,138 @@ const getAllOffers = async (req, res, next) => {
 }
   
 
+const updateOffer = async (req, res, next)=> {
+    try {
+        console.log("Inside updateOffer of offerController")
+        console.log("req.body.offerDetails", JSON.stringify(req.body))
+
+        const { offerId } = req.params
+        const {
+            name,
+            description,
+            discountType,
+            discountValue,
+            minimumOrderValue,
+            maxDiscount,
+            targetUserGroup,
+            applicableType,
+            applicableCategories,
+            applicableProducts,
+            startDate,
+            endDate,
+            recurringOffer,
+            recurringFrequency,
+        } = req.body.offerDetails
+
+        console.log(`Updating offer: ${offerId}`)
+
+        let uploadedImage = null
+        if (req.file) {
+            console.log("req.file-->", JSON.stringify(req.file))
+            console.log("Image path:", req.file.path)
+            const result = await cloudinary.uploader.upload(req.file.path, {
+                folder: 'offer/image',
+                resource_type: 'image',
+            })
+            uploadedImage = {
+                public_id: result.public_id,
+                name: req.file.originalname,
+                url: result.secure_url,
+                size: result.bytes,
+            }
+            console.log("uploadedImage-->", JSON.stringify(uploadedImage))
+        }
+
+        if (!offerId) {
+            return next(errorHandler(400, "Offer ID is required!"))
+        }
+
+        const existingOffer = await Offer.findById(offerId)
+        if (!existingOffer) {
+            return next(errorHandler(404, "Offer not found!"))
+        }
+
+        if (discountType === 'percentage' && (!discountValue || discountValue <= 0)) {
+            return next(errorHandler(400, "Discount value is missing or invalid!"))
+        }
+
+        if (new Date(endDate) <= new Date(startDate)) {
+            return next(errorHandler(400, "End date must be after start date!"))
+        }
+
+        let categoryIds = []
+        if (Array.isArray(applicableCategories) && applicableCategories.length > 0) {
+            const categories = await Category.find({ name: { $in: applicableCategories } }, "_id")
+            categoryIds = categories.map(cat => cat._id)
+        }
+
+        let productIds = []
+        if (Array.isArray(applicableProducts) && applicableProducts.length > 0) {
+            const products = await Product.find({ title: { $in: applicableProducts } }, "_id")
+            productIds = products.map(prod => prod._id)
+        }
+
+        const updatedOffer = await Offer.findByIdAndUpdate(
+            offerId,
+            {
+                name,
+                description,
+                discountType,
+                discountValue,
+                minimumOrderValue,
+                maxDiscount,
+                targetUserGroup,
+                applicableType,
+                applicableCategories: categoryIds,
+                applicableProducts: productIds,
+                startDate,
+                endDate,
+                recurringOffer,
+                recurringFrequency,
+                ...(uploadedImage ? { offerBanner: uploadedImage } : {})
+            },
+            {new: true}
+        )
+
+        console.log("updatedOffer--->", updatedOffer)
+
+        return res.status(200).json({ success: true, message: "Offer updated successfully!", offer: updatedOffer })
+    }
+    catch(error){
+        console.error("Error updating offer:", error.message)
+        next(error)
+    }
+}
+
+
+const deleteOffer = async (req, res, next)=> {
+    try {
+        console.log("Inside deleteOffer of offerController")
+
+        const { offerId } = req.params
+        console.log("Offer ID to delete:", offerId)
+
+        const offer = await Offer.findById(offerId)
+        if (!offer){
+            return next(errorHandler(404, "Offer not found!"))
+        }
+
+        if (offer.offerBanner && offer.offerBanner.public_id){
+            console.log("Deleting offer banner from Cloudinary:", offer.offerBanner.public_id)
+            await cloudinary.uploader.destroy(offer.offerBanner.public_id)
+        }
+
+        await Offer.findByIdAndDelete(offerId);
+
+        return res.status(200).json({ success: true, message: "Offer deleted successfully!" })
+    }
+    catch(error){
+        console.error("Error deleting offer:", error.message)
+        next(error)
+    }
+}
 
 
 
-module.exports = {createOffer, getAllOffers }
+
+module.exports = {createOffer, getAllOffers, updateOffer, deleteOffer }

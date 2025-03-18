@@ -1,16 +1,15 @@
 const express = require('express')
 const offerRouter = express.Router()
 const upload = require('../Utils/multer')
-const {createOffer, getAllOffers} = require('../Controllers/offerController')
-// const {createOffer, getAllOffers, updateOffer, deleteOffer, searchOffers,
-//     getBestOffer, compareOffers} = require('../Controllers/offerController')
-
 const {isLogin, isLogout} = require('../Middlewares/Authentication')
+const {createOffer, getAllOffers, updateOffer, deleteOffer} = require('../Controllers/offerController')
 
 
 
-offerRouter.post('/add', upload.single('offerBanner'), createOffer)
-offerRouter.post('/list', getAllOffers)
+offerRouter.post('/add', upload.single('offerBanner'), createOffer) // put isLogin later
+offerRouter.post('/list', getAllOffers) // put isLogin later
+offerRouter.post('/update/:offerId', upload.single('offerBanner'), updateOffer) // put isLogin later
+offerRouter.delete('/delete/:offerId', deleteOffer) // put isLogin later
 
 
 

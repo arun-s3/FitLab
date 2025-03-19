@@ -4,7 +4,7 @@
 #AdminOfferManagementPage > main #offer-menu #calender input{
     height: 35px;
     border-color: var(--DROPDOWNBORDER);
-    border-radius: 4px;
+    border-radius: 6px;
 }
 #AdminOfferManagementPage > main #offer-menu #calender input::placeholder{
     color: var(--MUTED);

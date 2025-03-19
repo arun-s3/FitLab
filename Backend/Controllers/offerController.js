@@ -109,44 +109,70 @@ const createOffer = async (req, res, next)=> {
 
 const getAllOffers = async (req, res, next) => {
     try {
-      console.log("Inside getAllOffers of offerController")
-  
-      const { queryOptions = {} } = req.body
-      const { page = 1, limit = 6, startDate, endDate, sort = -1, sortBy = "createdAt", searchData } = queryOptions
-  
-      const skip = (page - 1) * limit
-      console.log("queryOptions--->", JSON.stringify(queryOptions))
-  
-      let filterConditions = {}
-      if (startDate){
-        filterConditions.startDate = { $gte: new Date(startDate) }
-      }
-      if (endDate){
-        filterConditions.endDate = { $lte: new Date(endDate) }
-      }
-  
-      if (searchData) {
-        filterConditions.name = { $regex: searchData, $options: "i" };
-      }
-  
-      let sortOptions = {}
-      if (["name", "startDate", "endDate", "redemptionCount"].includes(sortBy)) {
-        sortOptions[sortBy] = sort
-      } else {
-        sortOptions.createdAt = sort
-      }
-  
-      const offers = await Offer.find(filterConditions)
-        .skip(skip)
-        .limit(parseInt(limit))
-        .sort(sortOptions)
-        .populate("applicableProducts", "title price")
-        .populate("applicableCategories", "name")
-        .populate("usedBy.userId", "username email")
-  
-      const totalOffers = await Offer.countDocuments(filterConditions)
-  
-      res.status(200).json({ success: true, offers, totalOffers })
+        console.log("Inside getAllOffers of offerController")
+
+        const { queryOptions = {} } = req.body
+        const {
+          page = 1,
+          limit = 6,
+          startDate,
+          endDate,
+          sort = -1,
+          sortBy = "createdAt",
+          discountType, 
+          applicableType,
+          minimumOrderValue,
+          usedCount,
+          searchData 
+        } = queryOptions
+
+        const skip = (page - 1) * limit
+        console.log("queryOptions--->", JSON.stringify(queryOptions))
+
+        let filterConditions = {}
+        if (startDate){
+            filterConditions.startDate = { $gte: new Date(startDate) }
+        }
+        if (endDate){
+            filterConditions.endDate = { $lte: new Date(endDate) }
+        }   
+        if (discountType && discountType !== 'all'){
+            filterConditions.discountType = discountType
+        }   
+        if (applicableType && applicableType !== 'all'){
+            filterConditions.applicableType = applicableType
+        }
+
+        if (minimumOrderValue){
+            filterConditions.minimumOrderValue = { $lte: minimumOrderValue }
+        }
+
+        if (usedCount){
+            filterConditions.usedCount = { $lte: usedCount }
+        }
+
+        if (searchData){
+            filterConditions.name = { $regex: searchData, $options: "i" }
+        }
+
+        let sortOptions = {}
+        if (["name", "startDate", "endDate", "redemptionCount"].includes(sortBy)) {
+          sortOptions[sortBy] = sort
+        } else {
+          sortOptions.createdAt = sort
+        }
+
+        const offers = await Offer.find(filterConditions)
+          .skip(skip)
+          .limit(parseInt(limit))
+          .sort(sortOptions)
+          .populate("applicableProducts", "title price")
+          .populate("applicableCategories", "name")
+          .populate("usedBy.userId", "username email")
+
+        const totalOffers = await Offer.countDocuments(filterConditions)
+
+        res.status(200).json({ success: true, offers, totalOffers })
     }
     catch (error) {
       console.error("Error listing offers:", error.message)

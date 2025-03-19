@@ -7,7 +7,9 @@ import {debounce} from 'lodash'
 import {Plus, Search, CalendarX2, ChevronDown, SlidersHorizontal} from "lucide-react"
 import {RiArrowDropDownLine} from "react-icons/ri"
 import {MdSort} from "react-icons/md"
-import {TbTag, TbTagOff, TbUserStar, TbUsers} from "react-icons/tb"
+import {TbTags, TbTagOff, TbUserStar, TbUsers} from "react-icons/tb"
+import {PiTagDuotone} from "react-icons/pi"
+import { VscTag } from "react-icons/vsc";
 import {RiUserReceived2Line} from "react-icons/ri"
 import {GrUserNew} from "react-icons/gr"
 import {FaUsersViewfinder} from "react-icons/fa6"
@@ -18,7 +20,7 @@ import OfferModal from "./OfferModal"
 import OfferDeleteModal from "./OfferDeleteModal"
 import useFlexiDropdown from '../../../Hooks/FlexiDropdown'
 import useStickyDropdown from '../../../Hooks/StickyDropdown'
-import AdvancedFilters from './AdvancedFilters'
+import AdvancedOfferFilters from './AdvancedOfferFilters'
 import {DateSelector} from '../../../Components/Calender/Calender'
 import {getAllOffers, resetOfferStates} from '../../../Slices/offerSlice'
 import {camelToCapitalizedWords} from "../../../Utils/helperFunctions"
@@ -48,8 +50,9 @@ export default function AdminOfferManagementPage(){
 
     const {openStickyDropdowns, stickyDropdownRefs, toggleStickyDropdown} = useStickyDropdown(['filterDropdown'])
     
+    const [advFilterEvent, setAdvFilterEvent] = useState(null)
     
-    const [queryOptions, setQueryOptions] = useState({page: 1, limit: 6, targetUserGroup: 'all', discountType:'all', applicabletype: 'all'})
+    const [queryOptions, setQueryOptions] = useState({page: 1, limit: 6, targetUserGroup: 'all'})
 
     const {setHeaderZIndex} = useOutletContext()
     setHeaderZIndex(0)
@@ -58,8 +61,9 @@ export default function AdminOfferManagementPage(){
     const dispatch = useDispatch()
 
     const statusTabs = [
-      {name: 'Active', subtitle:'All active offers', icon: TbTag},
-      {name: 'Expired', subtitle:'All expired offers', icon: CalendarX2},
+      {name: 'All', subtitle:'All offers', icon: TbTags},
+      {name: 'Active', subtitle:'All active offers', icon: VscTag},
+      {name: 'Expired', subtitle:'All expired offers', icon: CalendarX2}, 
       {name: 'Deactivated', subtitle:'All deactivated offers', icon: TbTagOff},
     ]
     
@@ -195,10 +199,12 @@ export default function AdminOfferManagementPage(){
                     {statusTabs.map((tab)=> (
                       <button key={tab.name} className={`px-[10px] py-[8px] flex items-center gap-[5px] rounded-[7px] transition-all
                            duration-200 
-                          ${activeTab === tab.name ? 
+                          ${activeTab === tab.name.toLowerCase() ? 
                             'text-black shadow-md transform scale-105'
-                            : 'text-gray-600 hover:bg-gray-50' }`} onClick={()=> activateTab(tab.name)}>
-                        <tab.icon className='w-[30px] h-[30px] p-[8px] text-white bg-primaryDark rounded-[5px]'/>
+                            : 'text-gray-600 hover:bg-gray-50' }`} onClick={()=> activateTab(tab.name.toLowerCase())}>
+                        <tab.icon className={`p-[8px] text-white bg-primaryDark rounded-[5px] 
+                           ${tab.name === 'Expired' || tab.name === 'Deactivated' ? 'w-[28px] h-[28px]' : 'w-[30px] h-[30px]'} 
+                            ${tab.name === 'Active' && "[transform:rotateY(180deg)]" } `}/>
                         <div className='flex flex-col justify-between items-start'>
                           <span className='text-[12px]'> {tab.name} </span>
                           <span className='text-[9px] text-muted'> {tab.subtitle} </span>
@@ -210,23 +216,32 @@ export default function AdminOfferManagementPage(){
                     <div className='self-end flex items-center gap-[1rem]'>
                     {/* <p className='text-right'> Target Customers </p> */}
                     <div className='relative h-[35px] px-[16px] py-[8px] text-[14px] text-muted bg-white flex items-center 
-                      gap-[10px] justify-between border border-dropdownBorder rounded-[4px] shadow-sm cursor-pointer
-                       hover:bg-gray-50 transition-colors optionDropdown sort-dropdown' onClick={(e)=> toggleStickyDropdown(e, 'filterDropdown')}
+                      gap-[10px] justify-between border border-dropdownBorder rounded-[6px] shadow-sm cursor-pointer
+                       hover:bg-gray-50 transition-colors optionDropdown sort-dropdown' 
+                        onClick={(e)=> {
+                          toggleStickyDropdown(e, 'filterDropdown')
+                          setAdvFilterEvent(e)
+                        }}
                            id='sort-options' ref={stickyDropdownRefs.filterDropdown}> {/* onClick={(e)=> toggleDropdown('filterDropdown')}*/}
                        <SlidersHorizontal className='h-[15px] w-[15px]'/>
                        <span className='text-[13px] font-[470]'> Adv Filters </span>
+                       
                        {openStickyDropdowns.filterDropdown && 
                           <div className='absolute top-[2.4rem] right-0 z-[10]'>
-                              <AdvancedFilters queryOptions={queryOptions} setQueryOptions={setQueryOptions}/>
+
+                              <AdvancedOfferFilters queryOptions={queryOptions} setQueryOptions={setQueryOptions} 
+                                close={()=> {toggleStickyDropdown(advFilterEvent, 'filterDropdown'); setAdvFilterEvent(null)}}/> 
+
                           </div>
                        }
                     </div>
-                    <div className='relative w-[16rem] h-[35px] px-[10px] py-[8px] text-[14px] text-muted bg-white flex items-center 
-                        gap-[10px] justify-center border border-dropdownBorder rounded-[4px] shadow-sm cursor-pointer
-                         hover:bg-gray-50 transition-colors optionDropdown sort-dropdown'
+                    <div className={`relative ${queryOptions.targetUserGroup === 'all' ? 'w-[12rem]' : 'w-[16rem]'} h-[35px]
+                       px-[10px] py-[8px] text-[14px] text-muted bg-white flex items-center gap-[10px] justify-center
+                        border border-dropdownBorder rounded-[6px]  shadow-sm cursor-pointer
+                         hover:bg-gray-50 transition-colors optionDropdown sort-dropdown`}
                              onClick={(e)=> toggleDropdown('userGroupDropdown')} ref={dropdownRefs.userGroupDropdown}>
                          <div className='w-full flex items-center justify-between'>
-                          <div className='flex items-center gap-[5px]'>
+                          <div className='flex items-center gap-[10px]'>
                            {/* {
                              (()=> {
                                const UserIcon = getUserIcon(queryOptions.targetUserGroup)
@@ -236,7 +251,7 @@ export default function AdminOfferManagementPage(){
                            <FaUsersViewfinder className='w-[15px] h-[15px] text-muted'/>
                            {/* <span className='text-[13px] font-[470]'>
                             Target Customers - */}
-                            <div className='flex items-center gap-[4px]'>
+                            <div className='w-full flex items-center justify-between gap-[4px]'>
                               <span className='text-[12px] font-[470]'> Target Customers: </span>
                               <span className='text-[12px] font-[470] text-secondary'> 
                                 { camelToCapitalizedWords(queryOptions.targetUserGroup) } 
@@ -290,7 +305,7 @@ export default function AdminOfferManagementPage(){
 
                         <div className='flex items-center gap-[1rem]'>
                            <div className='h-[35px] text-[14px] text-muted bg-white flex items-center gap-[10px]
-                             justify-between border border-dropdownBorder rounded-[4px] shadow-sm cursor-pointer hover:bg-gray-50
+                             justify-between border border-dropdownBorder rounded-[6px]  shadow-sm cursor-pointer hover:bg-gray-50
                               transition-colors optionDropdown sort-dropdown' onClick={(e)=> toggleDropdown('limitDropdown')}
                                 id='limit-dropdown' ref={dropdownRefs.limitDropdown}>
                                <span className='relative flex items-center border-r border-dropdownBorder py-[8px] pl-[10px] pr-[2px]'> 
@@ -313,7 +328,7 @@ export default function AdminOfferManagementPage(){
                                </span>
                            </div>
                            <div className='relative h-[35px] px-[16px] py-[8px] text-[14px] text-muted bg-white flex items-center 
-                            gap-[10px] justify-between border border-dropdownBorder rounded-[4px] shadow-sm cursor-pointer
+                            gap-[10px] justify-between border border-dropdownBorder rounded-[6px]  shadow-sm cursor-pointer
                              hover:bg-gray-50 transition-colors optionDropdown sort-dropdown'
                                  onClick={(e)=> toggleDropdown('sortDropdown')} id='sort-options' ref={dropdownRefs.sortDropdown}>
                              <span className='text-[13px] font-[470]'> Sort By </span>

@@ -26,12 +26,19 @@ const productSchema = mongoose.Schema({
        min: 10,
        required: [true, "Must enter the product price"]
      },
-     discountPercentage: {
-        type: Number,
-        min: [1, "Must be more than 1%"],
-        max: [90, "Must be less than 90%"],
-        required: false
+     discountType: {
+      type: String,
+      enum: ["percentage", "fixed"],
+      default: 0
+    },
+     discountValue: {
+      type: Number,
+      default: 0,
      },
+     maxDiscount: {
+      type: Number,
+      default: null,
+    },
      brand: {
         type: String,
         required: [true, "Must enter the brand name"]

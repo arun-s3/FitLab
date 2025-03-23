@@ -828,6 +828,10 @@ select{
   bottom: 0px;
 }
 
+.bottom-\[-10px\]{
+  bottom: -10px;
+}
+
 .bottom-\[-66px\]{
   bottom: -66px;
 }
@@ -948,6 +952,10 @@ select{
   left: 300px;
 }
 
+.left-\[30rem\]{
+  left: 30rem;
+}
+
 .left-\[3px\]{
   left: 3px;
 }
@@ -966,6 +974,10 @@ select{
 
 .left-\[50\%\]{
   left: 50%;
+}
+
+.left-\[5px\]{
+  left: 5px;
 }
 
 .left-\[8px\]{
@@ -1106,6 +1118,10 @@ select{
 
 .top-\[2\.4rem\]{
   top: 2.4rem;
+}
+
+.top-\[2\.5rem\]{
+  top: 2.5rem;
 }
 
 .top-\[22px\]{
@@ -1979,6 +1995,10 @@ select{
   height: 27px;
 }
 
+.h-\[28px\]{
+  height: 28px;
+}
+
 .h-\[2px\]{
   height: 2px;
 }
@@ -2033,6 +2053,10 @@ select{
 
 .h-\[4rem\]{
   height: 4rem;
+}
+
+.h-\[50\%\]{
+  height: 50%;
 }
 
 .h-\[50px\]{
@@ -2095,10 +2119,6 @@ select{
   height: auto;
 }
 
-.h-\[f200px\]{
-  height: f200px;
-}
-
 .h-auto{
   height: auto;
 }
@@ -2114,10 +2134,6 @@ select{
 
 .h-screen{
   height: 100vh;
-}
-
-.h-\[28px\]{
-  height: 28px;
 }
 
 .max-h-\[80vh\]{
@@ -2222,6 +2238,10 @@ select{
 
 .w-\[11rem\]{
   width: 11rem;
+}
+
+.w-\[12\%\]{
+  width: 12%;
 }
 
 .w-\[120px\]{
@@ -2354,6 +2374,10 @@ select{
 
 .w-\[275px\]{
   width: 275px;
+}
+
+.w-\[28px\]{
+  width: 28px;
 }
 
 .w-\[2rem\]{
@@ -2500,6 +2524,10 @@ select{
   width: 90%;
 }
 
+.w-\[900px\]{
+  width: 900px;
+}
+
 .w-\[96px\]{
   width: 96px;
 }
@@ -2519,18 +2547,6 @@ select{
 
 .w-full{
   width: 100%;
-}
-
-.w-\[px\]{
-  width: px;
-}
-
-.w-\[2px\]{
-  width: 2px;
-}
-
-.w-\[28px\]{
-  width: 28px;
 }
 
 .min-w-full{
@@ -5823,6 +5839,18 @@ select{
   --tw-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
   --tw-shadow-colored: 0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+.hover\:transition:hover{
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-backdrop-filter;
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.hover\:duration-500:hover{
+  transition-duration: 500ms;
 }
 
 .focus\:border:focus{

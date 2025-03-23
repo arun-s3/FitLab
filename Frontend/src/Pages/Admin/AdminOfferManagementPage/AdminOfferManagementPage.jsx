@@ -8,8 +8,7 @@ import {Plus, Search, CalendarX2, ChevronDown, SlidersHorizontal} from "lucide-r
 import {RiArrowDropDownLine} from "react-icons/ri"
 import {MdSort} from "react-icons/md"
 import {TbTags, TbTagOff, TbUserStar, TbUsers} from "react-icons/tb"
-import {PiTagDuotone} from "react-icons/pi"
-import { VscTag } from "react-icons/vsc";
+import {VscTag} from "react-icons/vsc";
 import {RiUserReceived2Line} from "react-icons/ri"
 import {GrUserNew} from "react-icons/gr"
 import {FaUsersViewfinder} from "react-icons/fa6"

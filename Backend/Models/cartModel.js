@@ -1,4 +1,5 @@
 const mongoose=require('mongoose')
+const Offer = require('./offerModel')
 const Coupon = require('./couponModel')
 
 
@@ -38,6 +39,22 @@ const cartSchema=new mongoose.Schema({
             price: {
                 type: Number,
                 required: true
+            },
+            offerApplied: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Offer'
+            },
+            offerDiscountType: {
+                type: String,
+                enum: ["percentage", "fixed", "freeShipping", "buyOneGetOne"],
+            },
+            OfferDiscount: {
+                type: Number,
+                default: 0
+            },
+            extraQuantity: {
+                type: Number,
+                default: 0
             },
             total: {
                 type: Number,

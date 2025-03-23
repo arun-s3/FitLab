@@ -1,11 +1,17 @@
 const Cart = require('../Models/cartModel')
 const Order = require('../Models/orderModel')
 const Product = require('../Models/productModel')
+const Category = require('../Models/categoryModel')
 const Coupon = require('../Models/couponModel')
-const {calculateCharges, recalculateAndValidateCoupon} = require('../Controllers/controllerUtils/chargesAndCouponsUtils')
+
+const {calculateCharges} = require('./controllerUtils/taxesUtils')
+const {recalculateAndValidateCoupon} = require('./controllerUtils/couponsUtils')
+const {calculateBestOffer} = require('./controllerUtils/offersAndDiscountsUtils')
 const {errorHandler} = require('../Utils/errorHandler') 
 
+
 const QTY_PER_PERSON = 5
+
 
 
 const addToCart = async (req, res, next)=> {
@@ -36,9 +42,11 @@ const addToCart = async (req, res, next)=> {
     if (quantity > QTY_PER_PERSON) {
       return next(errorHandler(400, `You cannot add more than ${QTY_PER_PERSON} items of this product to your cart.`))
     }
-
-    const productTotal = product.price * quantity
+    
+    const {offerDiscountType, bestDiscount, offerApplied} = await calculateBestOffer(userId, productId, quantity)
+    const productTotal = (product.price - bestDiscount) * quantity
     console.log("productTotal now-->", productTotal)
+
     const productDetails = {
       productId,
       title: product.title,
@@ -46,7 +54,11 @@ const addToCart = async (req, res, next)=> {
       category: product.category,
       thumbnail: product.thumbnail.url,
       quantity,
+      ...(isBOGO ? {extraQuantity: quantity} : {} ),
       price: product.price,
+      offerApplied,
+      offerDiscountType,
+      offerDiscount: bestDiscount,
       total: productTotal,
     }
 
@@ -71,8 +83,14 @@ const addToCart = async (req, res, next)=> {
           return next( errorHandler(400, `You cannot add more than ${QTY_PER_PERSON} items of this product to your cart.`))
         }
 
-        existingProduct.quantity += quantity;
-        existingProduct.total += productTotal;
+        existingProduct.quantity += quantity
+        existingProduct.total += productTotal
+        existingProduct.offerApplied = offerApplied
+        existingProduct.offerDiscountType = offerDiscountType
+        existingProduct.offerDiscount = bestDiscount
+        if(isBOGO){
+          existingProduct.extraQuantity = existingProduct.quantity += quantity
+        } 
       }else{
         console.log("Creating new product in the cart...")
         cart.products.push(productDetails)
@@ -112,93 +130,6 @@ const addToCart = async (req, res, next)=> {
     next(error)
   }
 }
-
-
-// const addToCart = async (req, res, next) => {
-//   try {
-//     console.log("Inside addToCart of cartController")
-//     const userId = req.user._id
-//     const { productId, quantity } = req.body
-
-//     console.log("req.user._id--->", userId)
-//     console.log("quantity--->", quantity)
-
-//     if (!productId || !quantity) {
-//       return next(errorHandler(400, "Invalid product or quantity!"))
-//     }
-
-//     const product = await Product.findById(productId)
-//     console.log("Product found-->", JSON.stringify(product))
-
-//     if (!product) {
-//       return next(errorHandler(404, "Product not found!"))
-//     }
-//     if (product.blocked) {
-//       return next(errorHandler(403, "This product is currently blocked and cannot be added to the cart."))
-//     }
-//     if (quantity > product.stock) {
-//       return next(errorHandler(400, `Insufficient stock! Only ${product.stock} items available.`))
-//     }
-//     if (quantity > QTY_PER_PERSON) {
-//       return next(errorHandler(400, `You cannot add more than ${QTY_PER_PERSON} items of this product to your cart.`))
-//     }
-
-//     const productTotal = product.price * quantity
-//     console.log("productTotal now-->", productTotal)
-//     const productDetails = {
-//       productId,
-//       title: product.title,
-//       subtitle: product.subtitle,
-//       category: product.category,
-//       thumbnail: product.thumbnail.url,
-//       quantity,
-//       price: product.price,
-//       total: productTotal,
-//     }
-
-//     let cart = await Cart.findOne({userId})
-//     if (!cart) {
-//       console.log("Creating new cart...")
-//       cart = new Cart({userId, products: [productDetails], absoluteTotal: productTotal})
-//     }else{
-//       console.log("Manipulating existing cart...")
-//       const existingProductIndex = cart.products.findIndex( (item) => item.productId.toString() === productId )
-//       if (existingProductIndex >= 0) {
-//         console.log("Updating existing product in the cart...")
-//         const existingProduct = cart.products[existingProductIndex]
-//         console.log("existingProduct.quantity---->", existingProduct.quantity)
-
-//         if (existingProduct.quantity + quantity > product.stock) {
-//           return next(errorHandler(400, `Adding this quantity exceeds available stock! Only ${product.stock - existingProduct.quantity} 
-//               more items can be added.`))
-//         }
-
-//         if (existingProduct.quantity + quantity > QTY_PER_PERSON) {
-//           return next( errorHandler(400, `You cannot add more than ${QTY_PER_PERSON} items of this product to your cart.`))
-//         }
-
-//         existingProduct.quantity += quantity;
-//         existingProduct.total += productTotal;
-//       }else{
-//         console.log("Creating new product in the cart...")
-//         cart.products.push(productDetails)
-//       }
-//       cart.absoluteTotal += productTotal
-//     }
-
-//     const {deliveryCharges, gstCharge, absoluteTotalWithTaxes} = calculateCharges(cart.absoluteTotal, cart.products)
-//     cart.gst = gstCharge
-//     cart.deliveryCharge = deliveryCharges
-//     cart.absoluteTotalWithTaxes = absoluteTotalWithTaxes
-
-//     await cart.save()
-
-//     res.status(200).json({ message: "Product added to cart successfully", cart })
-//   }catch (error){
-//     console.log("Error in cartController-addToCart-->" + error.message)
-//     next(error)
-//   }
-// };
 
 
 const removeFromCart = async (req, res, next)=> {

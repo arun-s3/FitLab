@@ -41,8 +41,8 @@ const offerSchema = new mongoose.Schema(
         count: {
           type: Number,
           default: 1,
-        },
-      },
+        }
+      }
     ],
     usedCount: {
       type: Number,

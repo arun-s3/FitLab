@@ -444,7 +444,7 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
                 <div id='thumbnail-setter' className='mt-[2rem]'>
                 <h4 className='text-[13.5px] font-[500] text-black capitalize mb-[6px] ml-[2px]'> <span className='text-[14px]'>P</span>roduct Thumbnail </h4>
                 <div className='flex gap-[15px] h-[200px]'>
-                    <figure className='h-[f200px] w-[200px] rounded-[10px]'>
+                    <figure className='h-[200px] w-[200px] rounded-[10px]'>
                         <img src={images[Number.parseInt(currentImageIndex)].url} alt={images[Number.parseInt(currentImageIndex)].name} 
                                 className='h-[200px]  w-[200px] rounded-[10px] object-cover'/>
                     </figure>

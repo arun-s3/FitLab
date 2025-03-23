@@ -1,8 +1,8 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import './OfferList.css'
 import {useDispatch, useSelector} from 'react-redux'
 
-import { ArrowUpDown, BadgePercent, DiamondPercent, Edit2, IndianRupee, Link2, MessageSquareQuote, ShoppingCart, Trash2 } from "lucide-react"
+import { ArrowUpDown, BadgePercent, DiamondPercent, Edit2, ImageUpscale, IndianRupee, Link2, MessageSquareQuote, Scaling, ShoppingCart, Trash2 } from "lucide-react"
 
 
 export default function OfferList({ offers, onEdit, onDelete, onSort }){
@@ -10,6 +10,12 @@ export default function OfferList({ offers, onEdit, onDelete, onSort }){
   const [showItemsOf, setShowItemsOf] = useState('')
   const [showCustomersOf, setShowCustomersOf] = useState('')
   const [order, setOrder] = useState(-1)
+
+  const [scaledImg, setScaledImg] = useState([])
+
+  useEffect(()=> {
+    console.log('SCALEDIMG--->', scaledImg)
+  },[scaledImg])
 
   const tableHeaders = [
     {value: 'Offer', icon: true, sortBy:'name'}, {value: 'Target Users', icon: false}, 
@@ -43,7 +49,12 @@ export default function OfferList({ offers, onEdit, onDelete, onSort }){
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           { offers && offers.length > 0 && offers.map((offer, index)=> (
-            <tr key={offer?._id} className={`${(index % 2 == 0) ? 'bg-transparent': 'bg-[#eee]'} hover:bg-[rgb(249, 245, 252)]`}>
+            <tr key={offer?._id} className={`${(index % 2 == 0) ? 'bg-transparent': 'bg-[#eee]'} relative hover:bg-[rgb(249, 245, 252)]`}>
+            {
+            scaledImg.some(img=> img.id === offer._id) &&
+              <img src={ scaledImg.find(img=> img.id === offer._id).url } className='fixed top-[2.5rem] left-[30rem] w-[900px] h-[300px]
+                 inset-0 bg-black bg-opacity-50 object-cover rounded-[4px] z-[100]'/> 
+            }
               <td className="pl-[1rem] py-4 flex flex-col gap-[10px] whitespace-nowrap border-r border-dashed border-[#A399A880]">
                 <div className="flex items-center gap-[10px]">
                   <BadgePercent className='w-[15px] h-[15px] text-muted'/>
@@ -53,9 +64,14 @@ export default function OfferList({ offers, onEdit, onDelete, onSort }){
                 </div>
                 {
                   offer.offerBanner ?
-                  <figure className='w-[150px] h-[50px] p-[2px] rounded-[4px]'>
+                  <figure className='relative w-[150px] h-[50px] p-[2px] rounded-[4px]'>
                     <img src={offer.offerBanner.url} alt={offer.offerBanner.name} className='w-[150px] h-[50px] object-cover
                       border border-primaryDark rounded-[4px]'/> 
+                    <i className='absolute bottom-[-10px] left-[5px] w-[12%] h-[50%] z-[20] cursor-pointer'
+                       onMouseEnter={()=> setScaledImg(images=> [...images, {id: offer._id, url: offer.offerBanner.url}] )} 
+                         onMouseLeave={()=> setScaledImg(images=> images.filter(img=> img.id !== offer._id))}>
+                    <Scaling className='w-[15px] h-[15px] text-white hover:transition hover:scale-110 hover:duration-500'/>
+                    </i>
                   </figure> 
                   : null
                 }

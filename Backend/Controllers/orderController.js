@@ -2,8 +2,11 @@ const Order = require('../Models/orderModel')
 const Cart = require('../Models/cartModel')
 const Product = require('../Models/productModel')
 const Coupon = require('../Models/couponModel')
-const {calculateCharges, recalculateAndValidateCoupon} = require('../Controllers/controllerUtils/chargesAndCouponsUtils')
+
+const {calculateCharges} = require('./controllerUtils/taxesUtils')
+const {recalculateAndValidateCoupon} = require('./controllerUtils/couponsUtils')
 const {errorHandler} = require('../Utils/errorHandler') 
+
 
 const ESTIMATED_DELIVERY_DATE = 5
 

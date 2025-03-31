@@ -42,13 +42,13 @@ const cartSchema=new mongoose.Schema({
             },
             offerApplied: {
                 type: mongoose.Schema.Types.ObjectId,
-                ref: 'Offer'
+                ref: 'Offer',
             },
             offerDiscountType: {
                 type: String,
                 enum: ["percentage", "fixed", "freeShipping", "buyOneGetOne"],
             },
-            OfferDiscount: {
+            offerDiscount: {
                 type: Number,
                 default: 0
             },

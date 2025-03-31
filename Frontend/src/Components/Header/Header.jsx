@@ -11,34 +11,23 @@ import {MdFavoriteBorder} from "react-icons/md"
 import Logo from '../Logo/Logo'
 import UserHead from '../UserHead/UserHead'
 import {SiteButton} from '../SiteButtons/SiteButtons'
-import {addToCart, removeFromCart} from '../../Slices/cartSlice'
 import CartSidebar from '../../Components/CartSidebar/CartSidebar'
 
 
 export default function Header({customStyle}){
 
     const [isCartOpen, setIsCartOpen] = useState(false)
-    const [packedupCart, setPackedupCart] = useState({})
     
     const {userToken,user} = useSelector((state)=>state.user)
-    const {cart, productAdded, productRemoved, loading, error, message} = useSelector(state=> state.cart)    
+    const {cart} = useSelector(state=> state.cart)    
 
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
     const openCartSidebar = ()=> {
         if(cart?.products && cart.products.length > 0){
-            setPackedupCart(cart)
             setIsCartOpen(true)
         }
-    }
-
-    const updateQuantity = (id, newQuantity) => {
-       dispatch( addToCart({productId: id, quantity: newQuantity}) )
-    }
-     
-    const removeFromTheCart = (id) => {
-       dispatch(removeFromCart({productId: id}))
     }
 
 
@@ -96,8 +85,7 @@ export default function Header({customStyle}){
                 }
             </div>
                 
-                <CartSidebar isOpen={isCartOpen} onClose={()=> setIsCartOpen(false)} packedupCart={packedupCart} 
-                    updateQuantity={updateQuantity} removeFromTheCart={removeFromTheCart} retractedView={true} />
+                <CartSidebar isOpen={isCartOpen} onClose={()=> setIsCartOpen(false)} retractedView={true} />
 
         </div>
     )

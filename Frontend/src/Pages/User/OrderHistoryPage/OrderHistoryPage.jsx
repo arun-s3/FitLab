@@ -22,7 +22,7 @@ import Modal from '../../../Components/Modal/Modal'
 import CancelForm from '../../../Components/CancelForm/CancelForm'
 import {CustomPuffLoader} from '../../../Components/Loader//Loader'
 import {DateSelector} from '../../../Components/Calender/Calender'
-import {addToCart, removeFromCart, getTheCart, resetCartStates} from '../../../Slices/cartSlice'
+import {addToCart, resetCartStates} from '../../../Slices/cartSlice'
 import {getOrders, cancelOrder, cancelOrderProduct, deleteProductFromOrderHistory, resetOrderStates} from '../../../Slices/orderSlice'
 import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
 
@@ -47,7 +47,7 @@ export default function OrderHistoryPage(){
     const [queryDetails, setQueryDetails] = useState({'page': 1, 'limit': 10, 'sort': -1, 'orderStatus': 'orders'})
 
     const [isCartOpen, setIsCartOpen] = useState(false)
-    const [packedupCart, setPackedupCart] = useState({})
+    
     const [quantity, setQuantity] = useState(1)
     const [currentProductId, setCurrentProductId] = useState(null)
     const [showLoader, setShowLoader] = useState(false)
@@ -120,25 +120,16 @@ export default function OrderHistoryPage(){
   },[orders])
 
   useEffect(()=> {
-      if(error && error.toLowerCase().includes('product')){
-        console.log("Error from ProductDetailPage-->", error)
-        toast.error(error)
-        dispatch(resetCartStates())
-      }
       if(productAdded){
         console.log("Product added to cart successfully!")
-        setPackedupCart(cart)
+        // setPackedupCart(cart)
         setIsCartOpen(true)
-        dispatch(resetCartStates())
-      }
-      if(productRemoved){
-        setPackedupCart(cart)
         dispatch(resetCartStates())
       }
       if(!loading){
         setTimeout(()=> setShowLoader(false), 1000)
       }else setShowLoader(true)
-    },[loading, error, productAdded, productRemoved])
+    },[loading, error, productAdded])
     
     const orderTabs = [
       {name: 'Orders', subtitle:'All Orders', icon: ShoppingBag},
@@ -220,12 +211,6 @@ export default function OrderHistoryPage(){
         console.log("Inside handleAddToCart()--")
         dispatch( addToCart({productId, quantity}) )
         console.log("Dispatched successfully")
-    }
-    const updateQuantity = (id, newQuantity)=> {
-        dispatch( addToCart({productId: id, quantity: newQuantity}) )
-    }
-    const removeFromTheCart = (id)=> {
-        dispatch( removeFromCart({productId: id}) ) 
     }
 
     const viewProduct = async(id)=> {
@@ -665,8 +650,7 @@ export default function OrderHistoryPage(){
               </div>
             </div>
 
-            <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} packedupCart={packedupCart} 
-                      updateQuantity={updateQuantity} removeFromTheCart={removeFromTheCart} />
+            <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
 
 
             </main>

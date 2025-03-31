@@ -18,7 +18,7 @@ import ProductListingTools from '../../../Components/ProductListingTools/Product
 import CategoryDisplay from '../../../Components/CategoryDisplay/CategoryDisplay'
 import CartSidebar from '../../../Components/CartSidebar/CartSidebar'
 import {getAllProducts, toggleProductStatus} from '../../../Slices/productSlice'
-import {addToCart, removeFromCart, resetCartStates} from '../../../Slices/cartSlice'
+import {getTheCart, resetCartStates} from '../../../Slices/cartSlice'
 import {capitalizeFirstLetter} from '../../../Utils/helperFunctions'
 
 
@@ -56,7 +56,6 @@ export default function ProductList({admin}){
     const [queryOptions, setQueryOptions] = useState({})
 
     const [isCartOpen, setIsCartOpen] = useState(false)
-    const [packedupCart, setPackedupCart] = useState({})
 
     const {cart, productAdded, productRemoved, loading, error, message} = useSelector(state=> state.cart)    
 
@@ -80,6 +79,10 @@ export default function ProductList({admin}){
             dispatch( getAllProducts({queryOptions}) )
         }, 1000) 
     ).current
+
+    useEffect(()=> {
+        dispatch(getTheCart())
+    },[])
 
     useEffect(()=>{
         console.log("FILTER-->", JSON.stringify(filter))
@@ -106,8 +109,7 @@ export default function ProductList({admin}){
 
     useEffect(()=> {
         if(cart?.products && cart.products.length > 0){
-            setPackedupCart(cart)
-            setIsCartOpen(true)
+          setIsCartOpen(true)
         }
         if(error && error.toLowerCase().includes('product')){
           console.log("Error from ProductDetailPage-->", error)
@@ -116,15 +118,10 @@ export default function ProductList({admin}){
         }
         if(productAdded){
           console.log("Product added to cart successfully!")
-          setPackedupCart(cart)
           setIsCartOpen(true)
           dispatch(resetCartStates())
         }
-        if(productRemoved){
-          setPackedupCart(cart)
-          dispatch(resetCartStates())
-        }
-    },[error, productAdded, productRemoved])
+    },[error, productAdded, cart])
 
     // const categoryClickHandler = (e)=>{
     //     const value = e.target.innerText.toLowerCase()
@@ -167,14 +164,6 @@ export default function ProductList({admin}){
     })
    }
 
-    const updateQuantity = (id, newQuantity) => {
-       dispatch( addToCart({productId: id, quantity: newQuantity}) )
-    }
-     
-   
-    const removeFromTheCart = (id) => {
-       dispatch(removeFromCart({productId: id}))
-    }
 
 
 
@@ -275,9 +264,7 @@ export default function ProductList({admin}){
 
                     </div>
 
-                        <CartSidebar isOpen={isCartOpen} onClose={()=> setIsCartOpen(false)} packedupCart={packedupCart} 
-                            updateQuantity={updateQuantity} removeFromTheCart={removeFromTheCart} retractedView={true} />
-                        
+                        <CartSidebar isOpen={isCartOpen} onClose={()=> setIsCartOpen(false)} retractedView={true} />
 
                 </section>
             </main>

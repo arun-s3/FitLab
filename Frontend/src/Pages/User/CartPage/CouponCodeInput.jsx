@@ -22,6 +22,7 @@ export default function CouponCodeInput({couponCode, setCouponCode}){
   useEffect(()=> {
     console.log("bestCoupon from CouponCodeInput--->", bestCoupon)
     if(bestCoupon && !couponCode && !cart.couponUsed){
+      console.log("Inside useEffect of CouponCodeInput for bestCoupon")
       setCouponCode(bestCoupon.code)
       console.log("Dispatching applyCoupon the best coupon...")
       dispatch( applyCoupon({couponCode: bestCoupon.code}) )
@@ -62,7 +63,7 @@ export default function CouponCodeInput({couponCode, setCouponCode}){
               <RiCoupon4Line className='w-[18px] h-[18px] text-muted'/>
               <input type="text" placeholder="Coupon Code" className="ml-[-20px] w-[80%] h-[10px] border-0 outline-0 placeholder:text-[13px]
                  placeholder:tracking-[0.1px] text-primaryDark caret-primaryDark" 
-                  value={couponCode.toUpperCase() || cart?.couponUsed?.code} onChange={(e)=> couponInputHandler(e)}/>
+                  value={couponCode ? couponCode.toUpperCase() || cart?.couponUsed?.code : ''} onChange={(e)=> couponInputHandler(e)}/>
               <button className="px-[1.5rem] py-[8px] text-[15px] text-purple-600 font-medium" onClick={()=> applyTheCoupon()}>
                 Apply
               </button> 

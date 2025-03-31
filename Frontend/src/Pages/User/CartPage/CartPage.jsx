@@ -3,7 +3,7 @@ import './CartPage.css'
 import {useNavigate} from 'react-router-dom'
 import {useDispatch, useSelector} from 'react-redux'
 
-import {Trash2, Plus, Minus, Star, ChevronLeft, ChevronRight, ShoppingCart} from 'lucide-react';
+import {Trash2, Plus, Minus, Star, ChevronLeft, ChevronRight, BadgePlus, Check, ShoppingCart} from 'lucide-react';
 import {toast} from 'react-toastify'
 import axios from 'axios'
 
@@ -16,7 +16,7 @@ import CouponCodeInput from './CouponCodeInput'
 import {capitalizeFirstLetter} from '../../../Utils/helperFunctions'
 import ProductRemovalModal from '../../../Components/ProductRemovalModal/ProductRemovalModal'
 import {SiteSecondaryFillButton, SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
-import {addToCart, removeFromCart, getTheCart, resetCartStates} from '../../../Slices/cartSlice'
+import {addToCart, reduceFromCart, removeFromCart, getTheCart, resetCartStates} from '../../../Slices/cartSlice'
 import {getBestCoupon, resetCouponStates} from '../../../Slices/couponSlice'
 
 import {CustomHashLoader, CustomScaleLoader} from '../../../Components/Loader//Loader'
@@ -48,6 +48,7 @@ export default function ShoppingCartPage(){
 
   useEffect(()=> {
     dispatch(getTheCart())
+    console.log("bestCoupon--->", bestCoupon)
     if(!bestCoupon){
       console.log("Getting the best coupon...")
       dispatch(getBestCoupon())
@@ -143,8 +144,14 @@ export default function ShoppingCartPage(){
     )
   }
 
-  const updateQuantity = (id, newQuantity) => {
-      dispatch( addToCart({productId: id, quantity: newQuantity}) )
+  const addQuantity = (id, quantity)=> {
+    console.log("Inside addQuantity")
+    dispatch( addToCart({productId: id, quantity}) )
+  }
+  
+  const lessenQuantity = (id, quantity)=> {
+    console.log("Inside lessenQuantity")
+    dispatch( reduceFromCart({productId: id, quantity}) )
   }
     
   const removeFromTheCart = (id, name)=> {
@@ -202,8 +209,8 @@ export default function ShoppingCartPage(){
                   <div className="flex items-center space-x-[1rem]">
                     <img src={product.thumbnail} alt={product.title} className="w-[6rem] h-[6rem] object-cover rounded"/>
                     <div>
-                      <h3 className="text-[15px] text-secondary font-medium"> 
-                        { !product.title.length > 22 ? product.title : product.title.slice(0,22) + '...'}
+                      <h3 className="text-[15px] text-secondary font-medium capitalize"> 
+                        { !product.title.length > 12 ? product.title : product.title.slice(0,12) + '...'}
                       </h3>
                       {product?.category.length > 0 &&
                         <p className="text-[12px] text-mutedLight"> 
@@ -212,21 +219,54 @@ export default function ShoppingCartPage(){
                       }  {/*{product.sku}*/}
                     </div>
                   </div>
-                  <div className="text-center text-[15px] tracking-[0.3px]"> ₹{product.price.toLocaleString()} </div>
+                  <div className="text-center text-[15px] tracking-[0.3px]">
+                    <p>
+                      <span className={` ${product?.offerApplied && product?.offerDiscount && 
+                        'mr-[10px] line-through decoration-[1.6px] decoration-red-500'}` }>
+                        ₹{(product.price)} 
+                      </span> 
+                      {
+                        product?.offerApplied && product?.offerDiscount &&
+                        <span> ₹{(product.price - product.offerDiscount).toFixed(2)} </span>
+                      }
+                    </p>
+                    {
+                    product?.offerApplied && product?.offerDiscount &&
+                    <p className='ml-[2rem] px-[5px] py-[2px] flex items-center gap-[3px] text-[10px]
+                     text-secondary  hover:underline hover:transition hover:duration-300'>
+                      {/* <p> */}
+                        <BadgePlus className='w-[13px] h-[13px] text-muted'/>
+                        <span>
+                        {
+                          `${product.offerApplied.discountType === 'percentage' ?
+                         `${product.offerApplied.discountValue} %` : `₹ ${product.offerApplied.discountValue}`} Offer `
+                        }
+                        </span>
+                        <span className='capitalize'>
+                          - {product.offerApplied.name}
+                        </span>
+                        {/* <Check className='w-[13px] h-[13px] text-green-500'/> */}
+                      {/* </p> */}
+                      {/* <p className='mt-[3px]'>
+                        Applied!
+                      </p> */}
+                    </p>
+                  }
+                  </div>
                   <div className="flex items-center justify-center space-x-[8px]">
                     <button className="p-[4px] bg-primary hover:bg-primaryDark rounded-[4px]" style={{boxShadow: '2px 2px 9px rgb(219, 214, 223)'}}
-                        onClick={()=> updateQuantity(product.productId, -1)}>
+                        onClick={()=> lessenQuantity(product.productId._id, 1)}>
                       <Minus className="w-[10px] h-[10px] text-secondary" />
                     </button>
                     <span className="w-[2rem] text-center text-[15px]"> {product.quantity} </span>
                     <button className="p-[4px] bg-primary hover:bg-primaryDark rounded-[4px]" style={{boxShadow: '2px 2px 9px rgb(219, 214, 223)'}}
-                          onClick={() => updateQuantity(product.productId, 1)}>
+                          onClick={() => addQuantity(product.productId._id, 1)}>
                       <Plus className="w-[10px] h-[10px] text-secondary" />
                     </button>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-center flex-1 text-[15px] tracking-[0.3px]">
-                      ₹{(product.price * product.quantity).toLocaleString()}
+                      ₹{product.total.toLocaleString()}
                     </span>
                     <button className="text-red-500 hover:text-red-700" onClick={()=> removeFromTheCart(product.productId, product.title)}>
                       <Trash2 className="w-[16px] h-[16px]" />

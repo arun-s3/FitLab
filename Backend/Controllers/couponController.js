@@ -313,6 +313,7 @@ const searchCoupons = async (req, res, next)=> {
 
 const getBestCoupon = async (req, res, next) => {
   try {
+      console.log("Inside getBestCoupon of couponController");
       const userId = req.user._id
       const cart = await Cart.findOne({ userId }).populate("products.productId")
 
@@ -410,6 +411,7 @@ const getBestCoupon = async (req, res, next) => {
           }
       }
 
+      console.log("bestCoupon--->", bestCoupon)
       res.status(200).json({ message: "Best coupon found", bestCoupon })
   }
   catch(error){

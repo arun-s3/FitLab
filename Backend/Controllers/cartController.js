@@ -28,6 +28,8 @@ const addToCart = async (req, res, next)=> {
     }
 
     const product = await Product.findById(productId)
+    let cart = await Cart.findOne({userId})
+
     console.log("Product found-->", JSON.stringify(product))
 
     if (!product) {
@@ -42,9 +44,10 @@ const addToCart = async (req, res, next)=> {
     if (quantity > QTY_PER_PERSON) {
       return next(errorHandler(400, `You cannot add more than ${QTY_PER_PERSON} items of this product to your cart.`))
     }
-    
-    const {offerDiscountType, bestDiscount, offerApplied} = await calculateBestOffer(userId, productId, quantity)
-    const productTotal = (product.price - bestDiscount) * quantity
+  
+    const {offerDiscountType, bestDiscount, offerApplied, isBOGO} = await calculateBestOffer(userId, productId, quantity)
+    productTotal = (product.price - bestDiscount) * quantity
+
     console.log("productTotal now-->", productTotal)
 
     const productDetails = {
@@ -54,15 +57,14 @@ const addToCart = async (req, res, next)=> {
       category: product.category,
       thumbnail: product.thumbnail.url,
       quantity,
-      ...(isBOGO ? {extraQuantity: quantity} : {} ),
       price: product.price,
+      total: productTotal,
       offerApplied,
       offerDiscountType,
       offerDiscount: bestDiscount,
-      total: productTotal,
+      ...(isBOGO ? {extraQuantity: quantity} : {} )
     }
 
-    let cart = await Cart.findOne({userId})
     if (!cart) {
       console.log("Creating new cart...")
       cart = new Cart({userId, products: [productDetails], absoluteTotal: productTotal})
@@ -89,15 +91,17 @@ const addToCart = async (req, res, next)=> {
         existingProduct.offerDiscountType = offerDiscountType
         existingProduct.offerDiscount = bestDiscount
         if(isBOGO){
-          existingProduct.extraQuantity = existingProduct.quantity += quantity
+          existingProduct.extraQuantity = existingProduct.quantity + quantity
         } 
+
       }else{
         console.log("Creating new product in the cart...")
         cart.products.push(productDetails)
       }
-      cart.absoluteTotal += productTotal
+      // cart.absoluteTotal += productTotal
+      cart.absoluteTotal = cart.products.reduce((acc, item) => acc + item.total, 0)
     }
-    await cart.save();
+    // await cart.save();
 
     const {deliveryCharges, gstCharge, absoluteTotalWithTaxes} = calculateCharges(cart.absoluteTotal, cart.products)
     cart.gst = gstCharge
@@ -123,10 +127,113 @@ const addToCart = async (req, res, next)=> {
     }
 
     await cart.save();
-
-    res.status(200).json({ message: "Product added to cart successfully", cart })
+    const updatedCart = await Cart.findOne({ userId })
+                          .populate("couponUsed").populate("products.productId").populate("products.offerApplied")
+    console.log("updatedCart---->", updatedCart)
+    res.status(200).json({ message: "Product added to cart successfully", cart: updatedCart })
   }catch (error){
     console.log("Error in cartController-addToCart-->" + error.message)
+    next(error)
+  }
+}
+
+
+const reduceFromCart = async (req, res, next)=> {
+  try{
+    console.log("Inside reduceFromCart of cartController")
+    const userId = req.user._id
+    const { productId, quantity } = req.body
+
+    console.log("req.user._id--->", userId)
+    console.log("quantity--->", quantity)
+
+    if (!productId || !quantity) {
+      return next(errorHandler(400, "Invalid product or quantity!"))
+    }
+
+    const product = await Product.findById(productId)
+    let cart = await Cart.findOne({userId})
+
+    console.log("Product found-->", JSON.stringify(product))
+
+    if (!product) {
+      return next(errorHandler(404, "Product not found!"))
+    }
+    if (product.blocked) {
+      return next(errorHandler(403, "This product is currently blocked!"))
+    }
+    if (!cart) {
+      return next(errorHandler(404, "Cart not found!"));
+    }
+
+    const existingProductIndex = cart.products.findIndex( (item)=> item.productId.toString() === productId )
+
+    if (existingProductIndex < 0) {
+      return next(errorHandler(404, "No such product found in your cart!"))
+    }
+      
+    console.log("Updating existing product in the cart...")
+    const existingProduct = cart.products[existingProductIndex]
+    console.log("existingProduct.quantity---->", existingProduct.quantity)
+
+    // if (existingProduct.quantity - quantity <= 0) {
+    //   return next(errorHandler(400, 'No product to reduce!'))
+    // }
+    let costToReduce = existingProduct.price * quantity
+    if(existingProduct?.offerDiscount > 0 || existingProduct?.offerApplied){
+      costToReduce = (existingProduct.price - existingProduct.offerDiscount) * quantity
+    }
+    existingProduct.quantity -= quantity
+    existingProduct.total -= costToReduce   
+    if (existingProduct.extraQuantity && existingProduct.offerApplied) {
+      existingProduct.extraQuantity -= quantity
+    }  
+    if (existingProduct.quantity <= 0) {
+      cart.products.splice(existingProductIndex, 1)
+    }   
+
+    cart.absoluteTotal -= costToReduce
+
+    if(existingProduct.quantity){
+      console.log(`Quantity now-->${cart.products[existingProductIndex].quantity}...Total now-->${cart.products[existingProductIndex].total}`)
+    }
+
+    const {deliveryCharges, gstCharge, absoluteTotalWithTaxes} = calculateCharges(cart.absoluteTotal, cart.products)
+    cart.gst = gstCharge
+
+    if(cart.couponUsed && absoluteTotalWithTaxes > 0){
+      console.log("Inside if cart.couponUsed")
+      const coupon = await Coupon.findOne({ _id: cart.couponUsed })
+      console.log("couponUsed found inside cart-->", coupon)
+      const {absoluteTotalWithTaxes, couponDiscount, deliveryCharge} =
+         await recalculateAndValidateCoupon(req, res, next, userId, coupon, cart.absoluteTotal, parseInt(deliveryCharges), parseInt(gstCharge))
+
+      console.log(`absoluteTotalWithTaxes-----${absoluteTotalWithTaxes},couponDiscount------> ${couponDiscount}, deliveryCharge------>${deliveryCharge}`)
+
+      cart.couponDiscount = parseInt(couponDiscount)
+      cart.deliveryCharge = parseInt(deliveryCharge)
+      cart.absoluteTotalWithTaxes = parseInt(absoluteTotalWithTaxes)
+    }else{
+      console.log("Inside else cart.couponUsed")
+      cart.deliveryCharge = parseInt(deliveryCharges)
+      cart.absoluteTotalWithTaxes = parseInt(absoluteTotalWithTaxes)
+    }
+
+    await cart.save();
+    // const updatedCart = await Cart.findOne({ userId })
+    //                     .populate("couponUsed").populate("products.productId").populate("products.offerApplied")
+    // console.log("updatedCart---->", updatedCart)
+    res.status(200).json({ message: "Product added to cart successfully", cart, userId,
+      total: existingProduct.quantity > 0 ? cart.products[existingProductIndex].total : 0,
+      absoluteTotal: cart.absoluteTotal,
+      couponDiscount: cart.couponDiscount,
+      deliveryCharge: cart.deliveryCharge,
+      gst: cart.gst,
+      absoluteTotalWithTaxes: cart.absoluteTotalWithTaxes})
+
+  }
+  catch (error){
+    console.error('Error fetching products from cart:', error.message);
     next(error)
   }
 }
@@ -137,6 +244,7 @@ const removeFromCart = async (req, res, next)=> {
     console.log("Inside removeFromCart of cartController")
     const userId = req.user._id
     const {productId} = req.body
+    console.log('productId----->', productId)
 
     if (!productId) {
       return next(errorHandler(400, "Product ID is required"))
@@ -158,11 +266,11 @@ const removeFromCart = async (req, res, next)=> {
     const amountToDeduct = productToRemove.total
     cart.products.splice(productIndex, 1)
     cart.absoluteTotal -= amountToDeduct
-
     // if (cart.products.length === 0) {
     //   cart.discount = 0 
     // }
     if(cart.products.length > 0){
+
       const {deliveryCharges, gstCharge, absoluteTotalWithTaxes} = calculateCharges(cart.absoluteTotal, cart.products)
       cart.gst = gstCharge
       // cart.deliveryCharge = deliveryCharges
@@ -173,7 +281,7 @@ const removeFromCart = async (req, res, next)=> {
         console.log("cart.gst--->", cart.gst)
         const {absoluteTotalWithTaxes, couponDiscount, deliveryCharge} =
           await recalculateAndValidateCoupon(req, res, next, userId, coupon, cart.absoluteTotal, parseInt(deliveryCharges), parseInt(gstCharge))
-        console.log("cart.gst after recalculateAndValidateCoupon--->", cart.gst)
+        console.log("cart.gst recalculateAndValidateCoupon--->", cart.gst)
 
 
         cart.couponDiscount = parseInt(couponDiscount)
@@ -192,6 +300,7 @@ const removeFromCart = async (req, res, next)=> {
         cart.absoluteTotalWithTaxes = 0
     }
 
+    console.log("cart now--->", cart)
     await cart.save();
 
     res.status(200).json({
@@ -209,12 +318,15 @@ const removeFromCart = async (req, res, next)=> {
   }
 }
 
-const getTheCart = async (req, res, next) => {
+const getTheCart = async (req, res, next)=> {
   try {
     const userId = req.user._id
     console.log("Fetching cart for user:", userId)
 
-    const cart = await Cart.findOne({ userId }).populate("couponUsed")
+    // const cart = await Cart.findOne({ userId }).populate("couponUsed", "products products.")
+    const cart = await Cart.findOne({ userId })
+                          .populate("couponUsed").populate("products.productId").populate("products.offerApplied")
+    console.log("cart---->", cart)
     if (!cart || cart.products.length === 0) {
       return res.status(200).json({message: 'Your cart is empty', cart: []})
     }
@@ -229,13 +341,13 @@ const getTheCart = async (req, res, next) => {
 
 const applyCoupon = async (req, res, next)=> {
   try {
-      console.log("Inside applyCoupon controller")
+      console.log("Inside applyCoupon  ")
       const userId = req.user._id
       const {couponCode} = req.body
 
-      if (!couponCode){
-          return next(errorHandler(400, "Coupon code is required."))
-      }
+      // if (!couponCode){
+      //     return next(errorHandler(400, "Coupon code is required."))
+      // }
 
       const coupon = await Coupon.findOne({ code: couponCode.toUpperCase() })
       const cart = await Cart.findOne({ userId }).populate("products.productId")
@@ -407,4 +519,4 @@ const removeCoupon = async (req, res, next)=> {
 
 
 
-module.exports = {addToCart, removeFromCart, getTheCart, calculateCharges, applyCoupon, removeCoupon}
+module.exports = {addToCart, reduceFromCart, removeFromCart, getTheCart, calculateCharges, applyCoupon, removeCoupon}

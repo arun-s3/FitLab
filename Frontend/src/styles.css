@@ -1521,6 +1521,10 @@ select{
   margin-left: 2px;
 }
 
+.ml-\[2rem\]{
+  margin-left: 2rem;
+}
+
 .ml-\[3px\]{
   margin-left: 3px;
 }
@@ -1575,6 +1579,10 @@ select{
 
 .mr-\[-20px\]{
   margin-right: -20px;
+}
+
+.mr-\[10px\]{
+  margin-right: 10px;
 }
 
 .mr-\[15px\]{
@@ -2268,10 +2276,6 @@ select{
   width: 13rem;
 }
 
-.w-\[140px\]{
-  width: 140px;
-}
-
 .w-\[14px\]{
   width: 14px;
 }
@@ -2290,6 +2294,10 @@ select{
 
 .w-\[15rem\]{
   width: 15rem;
+}
+
+.w-\[160px\]{
+  width: 160px;
 }
 
 .w-\[16px\]{
@@ -5143,6 +5151,14 @@ select{
   text-decoration-line: line-through;
 }
 
+.decoration-red-500{
+  text-decoration-color: #ef4444;
+}
+
+.decoration-\[1\.6px\]{
+  text-decoration-thickness: 1.6px;
+}
+
 .placeholder-\[13px\]::-moz-placeholder{
   color: 13px;
 }
@@ -5847,6 +5863,10 @@ select{
   transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-backdrop-filter;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
+}
+
+.hover\:duration-300:hover{
+  transition-duration: 300ms;
 }
 
 .hover\:duration-500:hover{

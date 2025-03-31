@@ -14,7 +14,7 @@ import ProductListingTools from '../../../Components/ProductListingTools/Product
 import WishlistModal from './WishlistModal'
 import ListDeletionModal from './ListDeletionModal'
 import {getAllWishlistProducts, getUserWishlist, searchList, resetWishlistStates} from '../../../Slices/wishlistSlice'
-import {addToCart, removeFromCart, resetCartStates} from '../../../Slices/cartSlice'
+import {getTheCart, resetCartStates} from '../../../Slices/cartSlice'
 import CartSidebar from '../../../Components/CartSidebar/CartSidebar'
 import {UserPageLayoutContext} from '../UserPageLayout/UserPageLayout'
 
@@ -51,7 +51,6 @@ export default function WishlistPage(){
     const [listToDelete, setListToDelete] = useState(null)
 
     const [isCartOpen, setIsCartOpen] = useState(false)
-    const [packedupCart, setPackedupCart] = useState({})
 
     const {cart, productAdded, productRemoved, error, message} = useSelector(state=> state.cart) 
     const {wishlist, listCreated, listRemoved, listUpdated, loading, wishlistError, wishlistSuccess} = useSelector(state=> state.wishlist) 
@@ -81,6 +80,10 @@ export default function WishlistPage(){
         backgroundImage: "url('/header-bg.png')",
         backgrounSize: 'cover'
     }
+
+    useEffect(()=> {
+        dispatch(getTheCart())
+    },[])
 
     useEffect(()=>{
         console.log("currentListName-->", currentList)
@@ -114,33 +117,9 @@ export default function WishlistPage(){
 
     useEffect(()=> {
         if(cart?.products && cart.products.length > 0){
-            setPackedupCart(cart)
             setIsCartOpen(true)
         }
-        if(error && error.toLowerCase().includes('product')){
-          console.log("Error from ProductDetailPage-->", error)
-          toast.error(error)
-          dispatch(resetCartStates())
-        }
-        if(productAdded){
-          console.log("Product added to cart successfully!")
-          setPackedupCart(cart)
-          setIsCartOpen(true)
-          dispatch(resetCartStates())
-        }
-        if(productRemoved){
-          setPackedupCart(cart)
-          dispatch(resetCartStates())
-        }
     },[error, productAdded, productRemoved])
-
-    const updateQuantity = (id, newQuantity)=> {
-        dispatch( addToCart({productId: id, quantity: newQuantity}) )
-    }
-         
-    const removeFromTheCart = (id)=> {
-        dispatch(removeFromCart({productId: id}))
-    }
 
     const openDeleteListModal = ({listId, listName})=> {
         setIsDeleteListModalOpen(true)
@@ -282,8 +261,7 @@ export default function WishlistPage(){
 
                     </div>
 
-                    <CartSidebar isOpen={isCartOpen} onClose={()=> setIsCartOpen(false)} packedupCart={packedupCart} 
-                        updateQuantity={updateQuantity} removeFromTheCart={removeFromTheCart} retractedView={true} />
+                    <CartSidebar isOpen={isCartOpen} onClose={()=> setIsCartOpen(false)} retractedView={true} />
                         
                 </div>
 

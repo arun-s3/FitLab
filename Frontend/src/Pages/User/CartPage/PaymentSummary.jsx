@@ -37,7 +37,10 @@ export default function PaymentSummary({heading, absoluteTotal, absoluteTotalWit
                 <span className='order-value'> ₹{deliveryCharge} </span>
               </div>
               <div className="flex justify-between">
-                <span className='order-title'> GST (10%) </span>
+                <span className='order-title flex flex-col'>
+                  <span> GST (12-18%) </span>
+                  <span className='text-[10px] text-muted'>  (12% for supplements and 18% for others are added to each item) </span>
+                </span>
                 <span className='order-value'> ₹{gst} </span>
               </div>
               {

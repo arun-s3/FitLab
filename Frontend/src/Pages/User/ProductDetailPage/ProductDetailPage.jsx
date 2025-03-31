@@ -8,7 +8,7 @@ import {toast} from 'react-toastify'
 import Header from '../../../Components/Header/Header'
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
 import {SiteSecondaryFillButton} from '../../../Components/SiteButtons/SiteButtons'
-import {addToCart, removeFromCart, resetCartStates} from '../../../Slices/cartSlice'
+import {addToCart, getTheCart, resetCartStates} from '../../../Slices/cartSlice'
 import {CustomHashLoader, CustomScaleLoader} from '../../../Components/Loader//Loader'
 import StarGenerator from '../../../Components/StarGenerator/StarGenerator'
 import CartSidebar from '../../../Components/CartSidebar/CartSidebar'
@@ -28,7 +28,6 @@ export default function ProductDetailPage(){
   const [currentProductIndex, setCurrentProductIndex] = useState(0)
 
   const [isCartOpen, setIsCartOpen] = useState(false)
-  const [packedupCart, setPackedupCart] = useState({})
 
   const [productDetails, setProductDetails] = useState({})
 
@@ -37,8 +36,12 @@ export default function ProductDetailPage(){
 
   const location = useLocation()
 
-  const {cart, productAdded, productRemoved, loading, error, message} = useSelector(state=> state.cart)
+  const {cart, productAdded, loading, error} = useSelector(state=> state.cart)
   const dispatch = useDispatch()
+
+  // useEffect(()=> {
+  //     dispatch(getTheCart())
+  // },[])
 
   useEffect(()=> {
     if(location?.state?.product){
@@ -51,6 +54,9 @@ export default function ProductDetailPage(){
   },[location])
 
   useEffect(()=> {
+    if(cart?.products && cart.products.length > 0){
+        setIsCartOpen(true)
+      }
     if(error && error.toLowerCase().includes('product')){
       console.log("Error from ProductDetailPage-->", error)
       toast.error(error)
@@ -58,21 +64,10 @@ export default function ProductDetailPage(){
     }
     if(productAdded){
       console.log("Product added to cart successfully!")
-      // const newItem = {
-      //   product,
-      //   id: Date.now(),
-      //   quantity: quantity,
-      //   weight: selectedWeight
-      // }
-      setPackedupCart(cart)
       setIsCartOpen(true)
       dispatch(resetCartStates())
     }
-    if(productRemoved){
-      setPackedupCart(cart)
-      dispatch(resetCartStates())
-    }
-  },[error, productAdded, productRemoved, cart])
+  },[error, productAdded, cart])
 
   const reviews = [
     {
@@ -177,20 +172,7 @@ export default function ProductDetailPage(){
     // setIsCartOpen(true)
   }
 
-  const updateQuantity = (id, newQuantity) => {
-    // setCartItems(
-    //   cartItems.map((item) =>
-    //     item.id === id ? { ...item, quantity: newQuantity } : item
-    //   )
-    // );
-    dispatch( addToCart({productId: id, quantity: newQuantity}) )
-  };
-  
 
-  const removeFromTheCart = (id) => {
-    // setCartItems(cartItems.filter(item => item.id !== id)) 
-    dispatch(removeFromCart({productId: id}))
-  }
 
   return (
     <section id='ProductDetailPage'>
@@ -421,8 +403,7 @@ export default function ProductDetailPage(){
                 </button>
               </div>
 
-              <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} packedupCart={packedupCart} 
-                  updateQuantity={updateQuantity} removeFromTheCart={removeFromTheCart} />
+              <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)}/>
 
             </div>
 

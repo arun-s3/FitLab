@@ -83,31 +83,34 @@ const recalculateAndValidateCoupon = async(req, res, next, userId, coupon, absol
       } else if (coupon.discountType === "freeShipping") {
           deliveryCharge = 0
       } else if (coupon.discountType === "buyOneGetOne") {
-          let eligibleProducts = []
-          for (const item of cart.products) {
-              const product = item.productId
-              if (
-                  coupon.applicableType === "allProducts" ||
-                  (coupon.applicableType === "products" && coupon.applicableProducts.includes(product._id)) ||
-                  (coupon.applicableType === "categories" && product.category.some(catId => coupon.applicableCategories.includes(catId)))
-              ) {
-                  eligibleProducts.push(item)
-              }
-          }
-          if (eligibleProducts.length >= 2) {
-            eligibleProducts.sort((a, b) => a.price - b.price)
-          
-            let freeItemsCount = 0
-            let totalBOGODiscount = 0
-          
-            for (let i = 1; i < eligibleProducts.length; i += 2) {
-                totalBOGODiscount += eligibleProducts[i].price
-                freeItemsCount++
+          if(!cart?.offerApplied || (cart?.offerApplied && cart?.offerDiscountType !== "buyOneGetOne")){
+            let eligibleProducts = []
+            for (const item of cart.products) {
+                const product = item.productId
+                if (
+                    coupon.applicableType === "allProducts" ||
+                    (coupon.applicableType === "products" && coupon.applicableProducts.includes(product._id)) ||
+                    (coupon.applicableType === "categories" && product.category.some(catId => coupon.applicableCategories.includes(catId)))
+                ) {
+                    eligibleProducts.push(item)
+                }
             }
-            discountAmount = totalBOGODiscount;
-          }else {
-            errorHandler(400, "BOGO coupon requires at least two eligible products.")
+            if (eligibleProducts.length >= 2) {
+              eligibleProducts.sort((a, b)=> a.price - b.price)
+            
+              let freeItemsCount = 0
+              let totalBOGODiscount = 0
+            
+              for (let i = 1; i < eligibleProducts.length; i += 2) {
+                  totalBOGODiscount += eligibleProducts[i].price
+                  freeItemsCount++
+              }
+              discountAmount = totalBOGODiscount;
+            }else {
+              errorHandler(400, "BOGO coupon requires at least two eligible products.")
+            }
           }
+          
       }
   
       const finalTotal = (absoluteTotal - discountAmount) + gstCharge + deliveryCharge

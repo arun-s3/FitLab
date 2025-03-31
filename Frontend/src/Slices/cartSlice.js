@@ -16,9 +16,25 @@ export const addToCart = createAsyncThunk('cart/addToCart', async ({productId, q
   }
 })
 
+export const reduceFromCart = createAsyncThunk('cart/reduceFromCart', async ({productId, quantity}, thunkAPI) => {
+  try {
+    console.log('Inside reduceFromCart createAsyncThunk');
+    const response = await axios.post('/cart/reduce', {productId, quantity}, {withCredentials: true})
+    console.log('Returning success response from reduceFromCart...', JSON.stringify(response.data))
+    return {productId, quantity, couponDiscount: response.data.couponDiscount, deliveryCharge: response.data.deliveryCharge, total: response.data.total,
+      absoluteTotal: response.data.absoluteTotal, absoluteTotalWithTaxes: response.data.absoluteTotalWithTaxes, gst: response.data.gst}
+  }catch(error){
+    console.log('Inside catch of reduceFromCart')
+    const errorMessage = error.response?.data?.message
+    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
+    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
+    return thunkAPI.rejectWithValue(errorMessage)
+  }
+})
+
 export const removeFromCart = createAsyncThunk('cart/removeFromCart', async ({productId}, thunkAPI) => {
   try {
-    console.log('Inside removeFromCart createAsyncThunk');
+    console.log('Inside removeFromCart createAsyncThunk')
     const response = await axios.post('/cart/delete', {productId}, {withCredentials: true})
     console.log('Returning success response from removeFromCart...', JSON.stringify(response.data))
     return {productId, couponDiscount: response.data.couponDiscount, deliveryCharge: response.data.deliveryCharge,
@@ -80,6 +96,7 @@ export const removeCoupon = createAsyncThunk('cart/removeCoupon', async (thunkAP
 const initialState = {
   cart: null, 
   productAdded: false,
+  productReduced: false,
   productRemoved: false,
   couponApplied: false,
   loading: false,
@@ -124,6 +141,72 @@ const cartSlice = createSlice({
         state.message = action.payload.message
         state.success = false
       })
+      .addCase(reduceFromCart.fulfilled, (state, action) => {
+        console.log("reduceFromCart fulfilled:", action.payload);
+        state.error = null;
+        state.loading = false;
+        state.success = true;
+        state.message = action.payload.message;
+        
+        console.log(`action.payload.couponDiscount---${action.payload.couponDiscount}, 
+          action.payload.deliveryCharge-->${action.payload.deliveryCharge}, action.payload.absoluteTotalWithTaxes-->${action.payload.absoluteTotalWithTaxes},`)
+
+        console.log("action.payload.productId-->", action.payload.productId)
+
+        const productIndex = state.cart.products.findIndex( (item)=> item.productId._id === action.payload.productId )
+        console.log("productIndex-->", productIndex)
+
+        if (productIndex === -1){
+          console.log("Error: Product not found in cart, skipping update!")
+          return
+        }
+
+        if ( state.cart.products[productIndex].quantity - action.payload.quantity > 0 ) {
+          state.cart.products = state.cart.products.map((item) =>
+            item.productId._id.toString() === action.payload.productId.toString()
+              ? { ...item, total: action.payload.total, quantity: item.quantity - action.payload.quantity }
+              : item
+          )
+        }
+        else{
+          console.log("Inside else state.cart.products[productIndex].quantity - action.payload.quantity > 0 ")
+          console.log("Before filter:", JSON.stringify(state.cart.products));
+          const newCartProducts = state.cart.products.filter(
+            (item)=> item.productId._id.toString() !== action.payload.productId.toString()
+          )
+          state.cart.products = [...newCartProducts]
+          console.log("After filter:", JSON.stringify(state.cart.products));
+        }    
+        
+        state.cart.absoluteTotal = action.payload.absoluteTotal;
+        state.cart.couponDiscount = action.payload.couponDiscount;
+        state.cart.gst = action.payload.gst
+        state.cart.deliveryCharge = action.payload.deliveryCharge;
+        state.cart.absoluteTotalWithTaxes = action.payload.absoluteTotalWithTaxes;
+      
+        if (state.cart.products.length <= 0) {
+          state.cart.couponDiscount = 0
+          state.cart.deliveryCharge = 0
+          state.cart.absoluteTotalWithTaxes = 0
+          state.cart.couponUsed = null
+        }
+      
+        state.productReduced = true
+        state.productAdded = false
+        // console.log(`state.cart.products[productIndex].total--> ${state.cart.products[productIndex].total} ..state.cart.products[productIndex].quantity---> ${state.cart.products[productIndex].quantity}`)
+      })
+      .addCase(reduceFromCart.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(reduceFromCart.rejected, (state, action) => {
+        console.log('addToCart rejected:', action.payload)
+        state.loading = false
+        state.error = action.payload
+        state.message = action.payload.message
+        state.success = false
+        state.productReduced = false
+      })
       // .addCase(removeFromCart.fulfilled, (state, action) => {
       //   console.log('removeFromCart fulfilled:', action.payload)
       //   state.error = null
@@ -153,7 +236,7 @@ const cartSlice = createSlice({
         console.log(`action.payload.couponDiscount---${action.payload.couponDiscount}, 
           action.payload.deliveryCharge-->${action.payload.deliveryCharge}, action.payload.absoluteTotalWithTaxes-->${action.payload.absoluteTotalWithTaxes},
            `)
-        const productIndex = state.cart.products.findIndex( (item) => item.productId.toString() === action.payload.productId )
+        const productIndex = state.cart.products.findIndex( (item) => item.productId.toString() === action.payload.productId.toString() )
 
         if (productIndex !== -1) {
           const productToRemove = state.cart.products[productIndex]

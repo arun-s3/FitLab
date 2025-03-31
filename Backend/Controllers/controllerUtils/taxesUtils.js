@@ -18,7 +18,11 @@ const calculateCharges = (absoluteTotal, products)=> {
       console.log("absoluteTotal inside calculateCharges of cartController--->", absoluteTotal)
   
       if (!absoluteTotal || absoluteTotal <= 0) {
-        errorHandler(400, "Invalid total amount provided")
+        return {
+          deliveryCharges: 0,
+          gstCharge: 0,
+          absoluteTotalWithTaxes: 0,
+        }
       }
       
       let totalGST = 0
@@ -27,7 +31,11 @@ const calculateCharges = (absoluteTotal, products)=> {
       products.forEach((product) => {
         let gstRate = GST_GYM_PERCENTAGE
         if (product.category === "supplements") gstRate = GST_SUPPLEMENTS_PERCENTAGE
-        const productGST = (product.price - product.offerDiscount) * product.quantity * gstRate 
+        let productPrice = product.price
+        if(product?.offerDiscount){
+          productPrice -= product.offerDiscount
+        }
+        const productGST = productPrice * product.quantity * gstRate 
         totalGST += productGST
         if(product?.weight && product.offerDiscountType !== 'freeShipping'){
           actualDeliveryCharge += product.weight > 15 ? 200 : 50

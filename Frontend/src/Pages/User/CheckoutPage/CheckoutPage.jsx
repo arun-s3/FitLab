@@ -16,7 +16,7 @@ import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
 import OrderStepper from '../../../Components/OrderStepper/OrderStepper'
 import FeaturesDisplay from '../../../Components/FeaturesDisplay/FeaturesDisplay'
 import Footer from '../../../Components/Footer/Footer'
-import {addToCart, removeFromCart, getTheCart, resetCartStates} from '../../../Slices/cartSlice'
+import {addToCart, reduceFromCart, removeFromCart, getTheCart, resetCartStates} from '../../../Slices/cartSlice'
 import {createOrder, resetOrderStates} from '../../../Slices/orderSlice'
 import {getAllAddress} from '../../../Slices/addressSlice'
 import {SiteButtonSquare, SiteSecondaryFillImpButton} from '../../../Components/SiteButtons/SiteButtons'
@@ -41,6 +41,8 @@ export default function CheckoutPage(){
     const [isCouponFocused, setIsCouponFocused] = useState(false);
 
     const [orderDetails, setOrderDetails] = useState({})
+
+    const [orderReviewError, setOrderReviewError] = useState('')
 
     const {cart, productAdded, productRemoved, loading, error, message} = useSelector(state=> state.cart)
     const {addresses} = useSelector(state=> state.address)
@@ -86,7 +88,10 @@ export default function CheckoutPage(){
         navigate('/order-confirm')
         dispatch(resetOrderStates())
       }
-    },[orderCreated, orderMessage, orderError])
+      if(orderReviewError){
+        setTimeout(()=> setOrderReviewError(''), 2500)
+      }
+    },[orderCreated, orderMessage, orderError, orderReviewError])
 
     // useEffect(() => {
     //   async function loadCharges() {
@@ -144,12 +149,22 @@ export default function CheckoutPage(){
       }
     }
 
-    const updateQuantity = (id, newQuantity) => {
-          dispatch( addToCart({productId: id, quantity: newQuantity}) ) 
+    const addQuantity = (id, quantity)=> {
+      console.log("Inside addQuantity")
+      dispatch( addToCart({productId: id, quantity}) )
+    }
+    
+    const lessenQuantity = (id, quantity, currentQuantity)=> {
+      console.log("Inside lessenQuantity")
+      if(currentQuantity > 1){
+        dispatch( reduceFromCart({productId: id, quantity}) )
+      }else{
+        setOrderReviewError('There must be atleast 1 item to ship!')
+      }
     }
         
     const removeFromTheCart = (id) => {
-          dispatch(removeFromCart({productId: id}))
+      dispatch(removeFromCart({productId: id}))
     }
 
     const radioClickHandler = (e, type, value)=>{
@@ -231,7 +246,8 @@ export default function CheckoutPage(){
                                     {/* <div className="space-y-4 mb-6"> */}
                                   {cart.products &&
                                   cart.products.map((product) => (
-                                    <div key={product.productId} className="flex cursor-pointer">
+                                  <div key={product.productId}>
+                                    <div className="flex cursor-pointer">
                                       <img src={product.thumbnail} alt={product.title} className="w-20 h-20 object-cover rounded"
                                         onClick={()=> goToProductDetailPage(product.productId)}/>
                                       <div className="flex-1 flex flex-col justify-between ml-4">
@@ -246,31 +262,35 @@ export default function CheckoutPage(){
                                               : null
                                             }
                                           </div>
-                                          <button className="text-gray-400 hover:text-gray-600"
-                                              onClick={() =>  removeFromTheCart(product.productId)}>
-                                            <X size={16} className='text-secondary' />
-                                          </button>
                                         </div>
                                         <div className="flex justify-between items-center gap-[30px] mt-2">
                                           <div className="flex items-center space-x-2">
                                             <button className="w-[20px] h-[20px] flex items-center justify-center
-                                                 border-primaryDark border rounded" onClick={() => updateQuantity(product.productId, -1)}>
+                                                 border-primaryDark border rounded" onClick={()=> lessenQuantity(product.productId._id, 1, product.quantity)}>
                                               <Minus size={14} className='text-primaryDark'/>
                                             </button>
                                             <span className="w-8 text-center text-[14px]">{product.quantity}</span>
                                             <button className="w-[20px] h-[20px] flex items-center justify-center border-primaryDark
-                                                 border rounded" onClick={() => updateQuantity(product.productId, 1)}>
+                                                 border rounded" onClick={()=> addQuantity(product.productId._id, 1)}>
                                               <Plus size={14} className='text-primaryDark'/>
                                             </button>
                                           </div>
-                                          <span className="text-[14px] font-[450]">
-                                            &#8377; {(product.price * product.quantity).toFixed(2)}
+                                          <span className="text-[14px] font-[450] flex flex-col">
+                                            <span className='line-through decoration-[1.6px] decoration-red-500'>
+                                              &#8377; {(product.price).toFixed(2)} 
+                                            </span>
+                                            { product?.offerApplied && product?.offerDiscount &&
+                                              <span>
+                                                ₹{(product.price - product.offerDiscount).toFixed(2)}
+                                              </span>
+                                            }
                                           </span>
                                         </div>
                                       </div>
                                     </div>
+                                    <p className='mt-[5px] text-[10px] text-red-500 tracking-[0.3px]'> {orderReviewError && orderReviewError} </p>
+                                  </div>
                                   ))}
-
                                 </div>
 
                             </div>
@@ -296,7 +316,7 @@ export default function CheckoutPage(){
                                                     onClick={()=> setShippingAddress(address)}>
                                               <div className='flex gap-[5px]'>
                                                 <input type='radio' onClick={(e)=> radioClickHandler(e, "address", address)}
-                                                   onChange={(e)=> radioChangeHandler(e, "address", address)} checked={shippingAddress._id === address._id}/>
+                                                   onChange={(e)=> radioChangeHandler(e, "address", address)} checked={shippingAddress && shippingAddress._id === address._id}/>
                                                 <address className='not-italic flex flex-col justify-center text-[12px] text-[#3C3D37] capitalize cursor-pointer'>
                                                       <span className='mb-[5px] flex items-center justify-between'>
                                                           <span className='px-[6px] w-fit text-[11px] text-white capitalize bg-secondary

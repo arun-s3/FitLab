@@ -1,8 +1,11 @@
 const mongoose = require("mongoose")
 const Product = require("../../Models/productModel")
+const Category = require("../../Models/categoryModel")
 const Cart = require("../../Models/cartModel")
 const Order = require("../../Models/orderModel")
 const Coupon = require("../../Models/couponModel")
+const Offer = require("../../Models/offerModel")
+
 const {errorHandler} = require("../../Utils/errorHandler")
 
 
@@ -12,8 +15,11 @@ const USER_INACTIVE_PERIOD = 6 * 30 * 24 * 60 * 60 * 1000
 
 const findUserGroup = async(userId)=> {
     try{
-        let userType = !lastOrder 
+        const lastOrder = await Order.findOne({ userId, 'paymentDetails.paymentStatus': 'completed'}).sort({ orderDate: -1 })
+        console.log("lastOrder-->", lastOrder)
+        let userType = !lastOrder || lastOrder == null
           ? 'newUsers' : (Date.now() - new Date(lastOrder.orderDate).getTime() > USER_INACTIVE_PERIOD) ? 'returningUsers' : 'all'
+        console.log("userType inside findUserGroup-->", userType)
 
         const totalSpent = await Order.aggregate([
             { $match: { userId, 'paymentDetails.paymentStatus': 'completed' } },
@@ -22,6 +28,7 @@ const findUserGroup = async(userId)=> {
             
         userType = !totalSpent.length ? userType : totalSpent[0].totalSpent >= VIP_SPENDING_TRESHHOLD ? 'VIP' : userType
       
+        console.log("returning userType-->", userType)
         return userType
     }
     catch(error){
@@ -33,29 +40,29 @@ const findUserGroup = async(userId)=> {
 
 const calculateBestOffer = async (userId, productId, quantity)=> {
   try {
-      console.log("Inside calculateOffer")
+      console.log("Inside calculateBestOffer")
       console.log(`userId--->${userId}, productId--->${productId}, quantity---${quantity}`)
 
-      const cart = await Cart.findOne({ userId }).populate("products.productId")
-      if (!cart){
-          errorHandler(404, "Cart not found!")
-      }
+      // const cart = await Cart.findOne({ userId }).populate("products.productId")
+      // if (!cart){
+      //     errorHandler(404, "Cart not found!")
+      // }
       const product = await Product.findById(productId)
       if (!product){
           errorHandler(404, "Product not found!")
       }
 
-      const lastOrder = await Order.findOne({ userId, 'paymentDetails.paymentStatus': 'completed'}).sort({ orderDate: -1 })
-
-      const userType = findUserGroup(userId)
+      const userType = await findUserGroup(userId)
+      console.log("userType--->", userType)
 
       const offers = await Offer.find({
-        targetUserGroup: { $in: [userType, 'all'] },
+        targetUserGroup: {$in: [userType, 'all']},
         startDate: { $lte: new Date() },
         endDate: { $gte: new Date() },
         status: "active"
-    });
+      });
 
+      let discount = 0;
       let bestDiscount = 0;
       let offerDiscountType = null;
       let bestOffer = null;
@@ -63,6 +70,7 @@ const calculateBestOffer = async (userId, productId, quantity)=> {
       let freeItem = null;
     
       const calculateDiscount = (offer)=> {
+        console.log("Inside calculateDiscount for offer--->", offer)
         if (offer.discountType === "percentage") {
           discount = (product.price * quantity * offer.discountValue) / 100
           if (offer.maxDiscount) {
@@ -78,20 +86,25 @@ const calculateBestOffer = async (userId, productId, quantity)=> {
         else if (offer.discountType === "buyOneGetOne") {
           isBOGO = true
         }
+        if (discount > bestDiscount) {
+          bestDiscount = discount
+          bestOffer = offer._id
+          offerDiscountType = offer.discountType
+        }
       }
       
-      offers.forEach(async(offer)=> {
-        const categoryIds = await Category.find({ name: {$all: product.category} })
+      const categoryIds = await Category.find({ name: {$all: product.category} }, {_id: 1})
+      console.log("categoryIds--->", categoryIds)
+
+      offers.forEach((offer)=> {
           if (offer.applicableType === 'categories' && categoryIds.some(id=> offer.applicableCategories.includes(id))) {
               calculateDiscount(offer)
           }
           if (offer.applicableType === 'products' && offer.applicableProducts.includes(productId.toString())){
             calculateDiscount(offer)
           }
-          if (discount > bestDiscount) {
-            bestDiscount = discount
-            bestOffer = offer._id
-            offerDiscountType = offer.discountType
+          if (offer.applicableType === 'allProducts'){
+            calculateDiscount(offer)
           }
       })
 
@@ -119,6 +132,8 @@ const calculateBestOffer = async (userId, productId, quantity)=> {
       // }
 
       // await cart.save();
+
+      console.log(`offerApplied: bestOffer--->${bestOffer}..bestDiscount--->${bestDiscount}..offerDiscountType-->${offerDiscountType}...isBOGO-->${isBOGO}`)
 
       return { offerDiscountType, bestDiscount, offerApplied: bestOffer, isBOGO }
  

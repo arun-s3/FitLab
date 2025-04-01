@@ -55,11 +55,17 @@ const calculateBestOffer = async (userId, productId, quantity)=> {
       const userType = await findUserGroup(userId)
       console.log("userType--->", userType)
 
+      const orderValue = product.price * quantity
+
       const offers = await Offer.find({
         targetUserGroup: {$in: [userType, 'all']},
         startDate: { $lte: new Date() },
         endDate: { $gte: new Date() },
-        status: "active"
+        status: "active",
+        $or: [
+          { minimumOrderValue: { $exists: false } }, 
+          { minimumOrderValue: { $lte: orderValue } }, 
+        ],
       });
 
       let discount = 0;
@@ -67,7 +73,7 @@ const calculateBestOffer = async (userId, productId, quantity)=> {
       let offerDiscountType = null;
       let bestOffer = null;
       let isBOGO = false;
-      let freeItem = null;
+      let offerDetails = null;
     
       const calculateDiscount = (offer)=> {
         console.log("Inside calculateDiscount for offer--->", offer)
@@ -88,6 +94,7 @@ const calculateBestOffer = async (userId, productId, quantity)=> {
         }
         if (discount > bestDiscount) {
           bestDiscount = discount
+          offerDetails = offer
           bestOffer = offer._id
           offerDiscountType = offer.discountType
         }
@@ -132,10 +139,21 @@ const calculateBestOffer = async (userId, productId, quantity)=> {
       // }
 
       // await cart.save();
+      let offerOrProductDiscount = null
+      if(bestOffer == null){
+        offerOrProductDiscount = {offerOrProductDiscount: null}
+      }
+      else if(bestOffer === 'productDiscount'){
+        offerOrProductDiscount = {offerOrProductDiscount: 'discount'}
+        bestOffer = null
+      }
+      else{
+        offerOrProductDiscount = {offerOrProductDiscount: 'offer'}
+      }
 
       console.log(`offerApplied: bestOffer--->${bestOffer}..bestDiscount--->${bestDiscount}..offerDiscountType-->${offerDiscountType}...isBOGO-->${isBOGO}`)
-
-      return { offerDiscountType, bestDiscount, offerApplied: bestOffer, isBOGO }
+      
+      return { offerDiscountType, bestDiscount, offerApplied: bestOffer, offerDetails, isBOGO, ...offerOrProductDiscount }
  
   } catch (error) {
       console.error("Error in calculateBestOffer:", error.message)

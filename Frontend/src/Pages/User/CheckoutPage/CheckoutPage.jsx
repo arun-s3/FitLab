@@ -288,7 +288,7 @@ export default function CheckoutPage(){
                                         </div>
                                       </div>
                                     </div>
-                                    <p className='mt-[5px] text-[10px] text-red-500 tracking-[0.3px]'> {orderReviewError && orderReviewError} </p>
+                                    <p className='mt-[5px] h-[5px] text-[10px] text-red-500 tracking-[0.3px]'> {orderReviewError} </p>
                                   </div>
                                   ))}
                                 </div>

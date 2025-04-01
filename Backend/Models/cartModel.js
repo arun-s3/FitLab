@@ -56,6 +56,10 @@ const cartSchema=new mongoose.Schema({
                 type: Number,
                 default: 0
             },
+            offerOrProductDiscount: {
+                type: String,
+                enum: ["offer", "discount"]
+            },
             total: {
                 type: Number,
                 required: true

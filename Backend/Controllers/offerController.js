@@ -5,6 +5,8 @@ const Product = require('../Models/productModel')
 const Category = require('../Models/categoryModel')
 const User = require('../Models/userModel')
 const cloudinary = require('../Utils/cloudinary')
+
+const {calculateBestOffer} = require('./controllerUtils/offersAndDiscountsUtils')
 const {errorHandler} = require('../Utils/errorHandler') 
 
 
@@ -313,6 +315,46 @@ const deleteOffer = async (req, res, next)=> {
 }
 
 
+const getBestOffer = async (req, res, next)=> {
+    try{
+        console.log("Inside getBestOffer of offerController")
+        console.log("req.user--->", JSON.stringify(req.user))
+
+        const userId = req.user._id
+        const {productId, quantity} = req.body
+
+        console.log(`productId-----> ${productId}...quantity-----> ${quantity}`)
+
+        if (!productId || !quantity) {
+          return next(errorHandler(400, "Invalid product or quantity!"))
+        }
+    
+        const product = await Product.findById(productId)    
+        console.log("Product found-->", JSON.stringify(product))
+    
+        if (!product) {
+          return next(errorHandler(404, "Product not found!"))
+        }
+        if (product.blocked) {
+          return next(errorHandler(403, "This product is currently blocked and cannot be added to the cart."))
+        }
+
+        const {offerDiscountType, bestDiscount, offerApplied, isBOGO, offerDetails} = await calculateBestOffer(userId, productId, quantity) 
+
+        res.status(200).json({
+            message: "Found the best offer!", offerDiscountType, bestDiscount, offerApplied, isBOGO,
+            bestOffer: {
+                offerDiscountType, bestDiscount, offerApplied, isBOGO, offerDetails
+            }
+        })
+    }
+    catch(error){
+        console.error("Error getting best offer:", error.message)
+        next(error) 
+    }
+}
 
 
-module.exports = {createOffer, getAllOffers, updateOffer, deleteOffer }
+
+
+module.exports = {createOffer, getAllOffers, updateOffer, deleteOffer, getBestOffer }

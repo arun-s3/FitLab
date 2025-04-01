@@ -2,13 +2,14 @@ import React, {useEffect, useState, useRef} from 'react'
 import {useLocation} from 'react-router-dom'
 import {useDispatch, useSelector} from 'react-redux'
 
-import {Star, Minus, Plus, Heart, ChevronLeft, ChevronRight} from 'lucide-react'
+import {Star, Minus, Plus, Heart, ChevronLeft, ChevronRight, BadgePlus, Check} from 'lucide-react'
 import {toast} from 'react-toastify'
 
 import Header from '../../../Components/Header/Header'
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
 import {SiteSecondaryFillButton} from '../../../Components/SiteButtons/SiteButtons'
 import {addToCart, getTheCart, resetCartStates} from '../../../Slices/cartSlice'
+import {getBestOffer} from '../../../Slices/offerSlice'
 import {CustomHashLoader, CustomScaleLoader} from '../../../Components/Loader//Loader'
 import StarGenerator from '../../../Components/StarGenerator/StarGenerator'
 import CartSidebar from '../../../Components/CartSidebar/CartSidebar'
@@ -37,6 +38,7 @@ export default function ProductDetailPage(){
   const location = useLocation()
 
   const {cart, productAdded, loading, error} = useSelector(state=> state.cart)
+  const {bestOffer} = useSelector(state=> state.offers)
   const dispatch = useDispatch()
 
   // useEffect(()=> {
@@ -50,6 +52,8 @@ export default function ProductDetailPage(){
         setSelectedWeight(location.state.product.weights[0])
         const thumbnailIndex = location.state.product.images.findIndex(img=> img.isThumbnail)
         setCurrentImageIndex(thumbnailIndex)
+
+        dispatch( getBestOffer({productId: location.state.product._id, quantity}) )
     }
   },[location])
 
@@ -68,6 +72,12 @@ export default function ProductDetailPage(){
       dispatch(resetCartStates())
     }
   },[error, productAdded, cart])
+
+  // useEffect(()=> {
+  //   if(Object.keys(bestOffer).length > 0){
+
+  //   }
+  // }, [bestOffer])
 
   const reviews = [
     {
@@ -216,7 +226,42 @@ export default function ProductDetailPage(){
                     <p className="text-gray-600">
                       {productDetails.subtitle}
                     </p>
-                    <div className="text-[24px] font-bold"> &#8377; {productDetails.price} </div>
+                    <div className="flex items-center gap-[1rem]">
+                      <div className="flex flex-col text-[24px] font-bold">
+                        <p className={` ${bestOffer && bestOffer.bestDiscount > 0 && 'line-through decoration-[2px] decoration-red-500'}`}>
+                          &#8377; {productDetails.price}  
+                        </p>
+                        { bestOffer && bestOffer.bestDiscount > 0 && 
+                          <span className='mt-[-5px] text-green-500'> 
+                          &#8377; { (productDetails.price - bestOffer.bestDiscount).toFixed(2) }  
+                          </span>
+                        }
+                      </div>
+                      {
+                        bestOffer && bestOffer.offerApplied &&
+                        <p className={`mb-[5px] px-[10px] py-[2px] bg-inputBgSecondary self-end flex items-center
+                           gap-[3px] text-[13px] font-medium text-secondary border border-inputBorderSecondary rounded-[4px] 
+                            hover:underline hover:transition hover:duration-300`}>
+                            <span>
+                              {bestOffer && bestOffer?.offerDetails &&
+                                `${bestOffer.offerDiscountType === 'percentage' ?
+                               `${bestOffer.offerDetails.discountValue} %` : `₹ ${'-' + bestOffer.offerDetails.discountValue}`} Offer `
+                              }
+                            </span>
+                            <span className='pl-[5px] capitalize text-red-500'>
+                              {bestOffer && bestOffer.offerDetails &&
+                                '-' + ' ' + bestOffer.offerDetails.name + '!'
+                              }
+                            </span> 
+                            {
+                              bestOffer && bestOffer.isBogo &&
+                              <figure className='h-[100px] w-auto'>
+                                <img src='/bogo.png' className='h-[100px] w-auto object-cover'/>
+                              </figure>
+                            }
+                        </p>
+                      }
+                    </div>
                   </div>
 
                   <div>

@@ -63,7 +63,7 @@ export default function PaymentSummary({heading, absoluteTotal, absoluteTotalWit
 
               <div className="flex justify-between font-bold pt-[1rem] border-t border-dashed border-mutedDashedSeperation">
                 <span> Order Total </span>
-                <span> ₹{absoluteTotalWithTaxes} </span>
+                <span> ₹{absoluteTotalWithTaxes.toFixed(2)} </span>
               </div>
             </div>
             {/* <button className="w-full bg-[#E6FF00] text-black font-bold py-[12px] rounded-[8px] mt-[1.5rem]

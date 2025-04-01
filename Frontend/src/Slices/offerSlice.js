@@ -81,10 +81,10 @@ export const searchOffers = createAsyncThunk('offer/search', async ({query}, thu
   }
 })
 
-export const getBestOffer = createAsyncThunk('offer/getBestOffer', async (thunkAPI)=> {
+export const getBestOffer = createAsyncThunk('offer/getBestOffer', async ({productId, quantity}, thunkAPI)=> {
   try {
     console.log('Inside getBestOffer createAsyncThunk')
-    const response = await axios.get('/offers/bestOffer', {withCredentials: true})
+    const response = await axios.post('/offers/bestOffers', {productId, quantity}, {withCredentials: true})
     console.log('Returning success response from getBestOffer...', JSON.stringify(response.data))
     return response.data
   }catch(error){
@@ -99,7 +99,7 @@ export const getBestOffer = createAsyncThunk('offer/getBestOffer', async (thunkA
 
 const initialState = {
     offers: [], 
-    bestCoupon: {},
+    bestOffer: {},
     offerCreated: false,
     offerRemoved: false,
     offerUpdated: false,
@@ -209,8 +209,8 @@ const offerSlice = createSlice({
       .addCase(getBestOffer.fulfilled, (state, action)=> {
         console.log('getBestOffer fulfilled:', action.payload)
         state.offerError = null
-        state.bestCoupon = action.payload.bestCoupon
-        state.couponMessage = action.payload.message
+        state.bestOffer = action.payload.bestOffer
+        state.offerMessage = action.payload.message
       })
       .addCase(getBestOffer.pending, (state)=> {
         state.offerError = null

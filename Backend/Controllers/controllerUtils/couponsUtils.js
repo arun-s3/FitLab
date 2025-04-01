@@ -47,9 +47,9 @@ const recalculateAndValidateCoupon = async(req, res, next, userId, coupon, absol
       }
   
       const cart = await Cart.findOne({ userId }).populate("products.productId")
-      if (!cart || cart.products.length === 0) {
-          errorHandler(400, "Your cart is empty!")
-      }
+      // if (!cart || cart.products.length === 0) {
+      //     return
+      // }
   
       let discountAmount = 0;
   

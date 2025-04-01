@@ -49,7 +49,7 @@ export default function ShoppingCartPage(){
   useEffect(()=> {
     dispatch(getTheCart())
     console.log("bestCoupon--->", bestCoupon)
-    if(!bestCoupon){
+    if(Object.keys(bestCoupon).length <= 0){
       console.log("Getting the best coupon...")
       dispatch(getBestCoupon())
     }
@@ -85,7 +85,7 @@ export default function ShoppingCartPage(){
   // }, [cart])
 
   useEffect(()=> {
-    if(bestCoupon && couponApplied && couponMessage.includes('Best')){
+    if(bestCoupon && couponApplied && couponMessage && couponMessage?.includes('Best')){
       toast.success(couponMessage + ' and applied to the cart!')
       dispatch(resetCartStates())
     }
@@ -155,12 +155,14 @@ export default function ShoppingCartPage(){
   }
     
   const removeFromTheCart = (id, name)=> {
+    console.log("Removal confirmation for id--->", id)
     setProductToRemove({id, name})
     setIsProductRemovalModalOpen(true)
   }
 
   const confirmProductRemoval = ()=> {
     if(productToRemove !== null){
+      console.log("On confirmation--->", productToRemove.id)
       dispatch(removeFromCart({productId: productToRemove.id}))
       setIsProductRemovalModalOpen(false)
       setProductToRemove({})
@@ -233,7 +235,7 @@ export default function ShoppingCartPage(){
                     {
                     product?.offerApplied && product?.offerDiscount &&
                     <p className='ml-[2rem] px-[5px] py-[2px] flex items-center gap-[3px] text-[10px]
-                     text-secondary  hover:underline hover:transition hover:duration-300'>
+                     text-secondary'>
                       {/* <p> */}
                         <BadgePlus className='w-[13px] h-[13px] text-muted'/>
                         <span>
@@ -268,7 +270,7 @@ export default function ShoppingCartPage(){
                     <span className="text-center flex-1 text-[15px] tracking-[0.3px]">
                       ₹{product.total.toLocaleString()}
                     </span>
-                    <button className="text-red-500 hover:text-red-700" onClick={()=> removeFromTheCart(product.productId, product.title)}>
+                    <button className="text-red-500 hover:text-red-700" onClick={()=> removeFromTheCart(product.productId._id, product.title)}>
                       <Trash2 className="w-[16px] h-[16px]" />
                     </button>
 

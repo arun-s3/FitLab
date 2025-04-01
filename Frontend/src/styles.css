@@ -4465,6 +4465,10 @@ select{
   padding-left: 4rem;
 }
 
+.pl-\[5px\]{
+  padding-left: 5px;
+}
+
 .pl-\[60px\]{
   padding-left: 60px;
 }
@@ -5157,6 +5161,10 @@ select{
 
 .decoration-\[1\.6px\]{
   text-decoration-thickness: 1.6px;
+}
+
+.decoration-\[2px\]{
+  text-decoration-thickness: 2px;
 }
 
 .placeholder-\[13px\]::-moz-placeholder{

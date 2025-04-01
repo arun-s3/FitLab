@@ -236,7 +236,7 @@ const cartSlice = createSlice({
         console.log(`action.payload.couponDiscount---${action.payload.couponDiscount}, 
           action.payload.deliveryCharge-->${action.payload.deliveryCharge}, action.payload.absoluteTotalWithTaxes-->${action.payload.absoluteTotalWithTaxes},
            `)
-        const productIndex = state.cart.products.findIndex( (item) => item.productId.toString() === action.payload.productId.toString() )
+        const productIndex = state.cart.products.findIndex( (item) => item.productId._id.toString() === action.payload.productId.toString() )
 
         if (productIndex !== -1) {
           const productToRemove = state.cart.products[productIndex]
@@ -302,6 +302,7 @@ const cartSlice = createSlice({
           state.cart.deliveryCharge = action.payload.deliveryCharge
           state.cart.couponDiscount = action.payload.couponDiscount
         }
+        console.log('state.couponApplied---->', state.couponApplied)
       })
       .addCase(applyCoupon.pending, (state) => {
         state.loading = true

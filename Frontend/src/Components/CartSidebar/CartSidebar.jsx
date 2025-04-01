@@ -135,7 +135,7 @@ export default function CartSidebar({ isOpen, onClose, retractedView }) {
           ) : (
             packedupCart?.products.map((product)=> (
               <div key={product.productId._id} id='cart-product' className={`flex ${retractedView && 'flex-col gap-[10px]'} items-center
-                 justify-between bg-gray-50 p-3 rounded-lg shadow-sm`}>
+                 justify-between flex-wrap bg-gray-50 p-3 rounded-lg shadow-sm`}>
                   {
                    retractedView ? 
                    <div className='flex gap-[5px]'>
@@ -157,7 +157,15 @@ export default function CartSidebar({ isOpen, onClose, retractedView }) {
                         { !product.title.length > 22 ? product.title : product.title.slice(0,22) + '...' }
                       </h3>
                       <p className="text-[11px] text-secondary"> 
-                        &#8377;{product.price} x {product.quantity} = &#8377;{product.total.toFixed(2)}
+                        <span className={` ${product?.offerApplied && product?.offerDiscount && 
+                        'mr-[4px] line-through decoration-[1.6px] decoration-red-500'}` }>
+                            &#8377;{product.price} 
+                        </span> 
+                        {
+                        product?.offerApplied && product?.offerDiscount &&
+                        <span> ₹{(product.price - product.offerDiscount).toFixed(2)} </span>
+                        }
+                        x {product.quantity} = &#8377;{product.total.toFixed(2)}
                       </p>
                     </div>
                   }
@@ -180,9 +188,9 @@ export default function CartSidebar({ isOpen, onClose, retractedView }) {
                   </div>
                   {
                     product?.offerApplied && product?.offerDiscount &&
-                    <p className='px-[5px] py-[2px] bg-inputBgSecondary flex items-center gap-[3px] text-[10px]
-                     text-secondary border border-inputBorderSecondary rounded-[4px] hover:underline hover:transition hover:duration-300'>
-                      {/* <p> */}
+                    <p className={` ${!retractedView && 'mt-[10px] w-full'} px-[5px] py-[2px] bg-inputBgSecondary flex items-center
+                       gap-[3px] text-[10px] text-secondary border border-inputBorderSecondary rounded-[4px] 
+                        hover:underline hover:transition hover:duration-300`}>
                         <BadgePlus className='w-[13px] h-[13px] text-muted'/>
                         <span>
                         {
@@ -191,10 +199,6 @@ export default function CartSidebar({ isOpen, onClose, retractedView }) {
                         }
                         </span>
                         <Check className='w-[13px] h-[13px] text-green-500'/>
-                      {/* </p> */}
-                      {/* <p className='mt-[3px]'>
-                        Applied!
-                      </p> */}
                     </p>
                   }
                   <i className='absolute top-[50%] left-[-3px] p-[5px] bg-white border border-dropdownBorder border-l-white

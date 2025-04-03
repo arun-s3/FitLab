@@ -2,10 +2,12 @@ import React, {useState, useEffect} from 'react'
 import './OfferList.css'
 import {useDispatch, useSelector} from 'react-redux'
 
-import { ArrowUpDown, BadgePercent, DiamondPercent, Edit2, ImageUpscale, IndianRupee, Link2, MessageSquareQuote, Scaling, ShoppingCart, Trash2 } from "lucide-react"
+import { ArrowUpDown, BadgePercent, DiamondPercent, Edit2, ImageUpscale, IndianRupee, Link2, MessageSquareQuote, Scaling,
+   ShoppingCart, Trash2 } from "lucide-react"
+import { BsToggle2On, BsToggle2Off } from "react-icons/bs";
 
 
-export default function OfferList({ offers, onEdit, onDelete, onSort }){
+export default function OfferList({ offers, onEdit, onDelete, onSort, onDeactivate }){
 
   const [showItemsOf, setShowItemsOf] = useState('')
   const [showCustomersOf, setShowCustomersOf] = useState('')
@@ -34,7 +36,7 @@ export default function OfferList({ offers, onEdit, onDelete, onSort }){
         <thead className="bg-inputBorderLow">
           <tr>
             { tableHeaders.map( (header)=> (
-              <th key={header} className="px-[12px] py-3 text-left text-[12px] font-medium text-gray-500 uppercase tracking-wider
+              <th key={header.value} className="px-[12px] py-3 text-left text-[12px] font-medium text-gray-500 uppercase tracking-wider
                  cursor-pointer" onClick={()=> {
                   header.sortBy && onSort(header.sortBy, order)
                   changeSortOrder()
@@ -48,18 +50,18 @@ export default function OfferList({ offers, onEdit, onDelete, onSort }){
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          { offers && offers.length > 0 && offers.map((offer, index)=> (
+          { offers && offers.length > 0 ? offers.map((offer, index)=> (
             <tr key={offer?._id} className={`${(index % 2 == 0) ? 'bg-transparent': 'bg-[#eee]'} relative hover:bg-[rgb(249, 245, 252)]`}>
             {
             scaledImg.some(img=> img.id === offer._id) &&
-              <img src={ scaledImg.find(img=> img.id === offer._id).url } className='fixed top-[2.5rem] left-[30rem] w-[900px] h-[300px]
-                 inset-0 bg-black bg-opacity-50 object-cover rounded-[4px] z-[100]'/> 
+              <img src={ scaledImg.find(img=> img.id === offer._id).url } className='fixed top-[30%] left-[35%] w-[900px] h-[300px]
+                 inset-0 bg-black bg-opacity-50 object-cover rounded-[4px] shadow-lg z-[100]'/> 
             }
               <td className="pl-[1rem] py-4 flex flex-col gap-[10px] whitespace-nowrap border-r border-dashed border-[#A399A880]">
                 <div className="flex items-center gap-[10px]">
                   <BadgePercent className='w-[15px] h-[15px] text-muted'/>
-                  <span className='text-sm font-medium capitalize text-green-500'>
-                    {offer?.name && offer?.name.length > 13 ? offer.name.substring(0,10) + '...' : offer.name}  
+                  <span className={`text-sm font-medium capitalize ${offer.status === 'active' ? 'text-green-500' : 'text-red-500' }`}>
+                    {offer != null && offer?.name && offer?.name.length > 13 ? offer.name.substring(0,10) + '...' : offer.name}  
                   </span>
                 </div>
                 {
@@ -69,7 +71,7 @@ export default function OfferList({ offers, onEdit, onDelete, onSort }){
                       border border-primaryDark rounded-[4px]'/> 
                     <i className='absolute bottom-[-10px] left-[5px] w-[12%] h-[50%] z-[20] cursor-pointer'
                        onMouseEnter={()=> setScaledImg(images=> [...images, {id: offer._id, url: offer.offerBanner.url}] )} 
-                         onMouseLeave={()=> setScaledImg(images=> images.filter(img=> img.id !== offer._id))}>
+                        onMouseLeave={()=> setScaledImg(images=> images.filter(img=> img.id !== offer._id))}> 
                     <Scaling className='w-[15px] h-[15px] text-white hover:transition hover:scale-110 hover:duration-500'/>
                     </i>
                   </figure> 
@@ -93,7 +95,8 @@ export default function OfferList({ offers, onEdit, onDelete, onSort }){
                       {offer?.applicableType === "allProducts" || offer?.applicableType === "products" ? (
                       <span className="relative" onMouseEnter={()=> setShowItemsOf(offer?.name)} onMouseLeave={()=> setShowItemsOf("")}>
                       <span className='text-[12.5px]'> Products - </span>
-                      <span className="text-[11px] text-secondary hover:underline hover:font-medium transition duration-300 cursor-pointer">
+                      <span className={`text-[11px] ${offer.status === 'active' ? 'text-secondary' : 'text-muted' } 
+                        hover:underline hover:font-medium transition duration-300 cursor-pointer`}>
                         {offer?.applicableType === "allProducts" ? "All" : "See products"}
                       </span>
                   
@@ -120,7 +123,8 @@ export default function OfferList({ offers, onEdit, onDelete, onSort }){
                       ) : (
                       <span className="relative" onMouseEnter={()=> setShowItemsOf(offer?.name)} onMouseLeave={()=> setShowItemsOf("")}>
                         <span className='text-[12.5px]'> &#8226; Categories -</span>
-                        <span className="text-[11px] text-secondary hover:underline hover:font-medium transition duration-300 cursor-pointer">
+                        <span className={`text-[11px] ${offer.status === 'active' ? 'text-secondary' : 'text-muted' } 
+                          hover:underline hover:font-medium transition duration-300 cursor-pointer`}>
                           See categories
                         </span>
                         
@@ -152,7 +156,7 @@ export default function OfferList({ offers, onEdit, onDelete, onSort }){
 
               </td> */}
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm text-secondary capitalize">
+                <div className={`text-sm capitalize ${offer.status === 'active' ? 'text-secondary' : 'text-muted' } `}>
                 {
                   offer?.discountType === 'percentage' ? `${offer?.discountValue} %` 
                     : offer?.discountType === 'fixed' ? `₹ ${offer?.discountValue}`
@@ -219,7 +223,18 @@ export default function OfferList({ offers, onEdit, onDelete, onSort }){
                 
               </td> */}
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm text-gray-500 capitalize">{offer?.status}</div>
+                <div className={`w-[2rem] text-sm text-gray-500 capitalize ${offer.status === 'active' ? 'text-muted' : 'text-red-500' }`}>
+                  {offer?.status}
+                </div>
+                <button className='w-full' onClick={()=> onDeactivate(offer._id)}>
+                  {
+                    offer.status === 'deactivated' ?
+                    <BsToggle2Off className='mt-[2px] h-[20px] w-[20px] text-red-500'/>
+                    : offer.status === 'active' ?
+                    <BsToggle2On className='mt-[2px] h-[20px] w-[20px] text-green-500'/>
+                    :null
+                  }
+                </button>
                 {
                   offer?.lastUsedAt ? 
                   <div className="text-sm text-gray-500 capitalize">{ 'Last Used -' + offer.lastUsedAt }</div>
@@ -235,7 +250,8 @@ export default function OfferList({ offers, onEdit, onDelete, onSort }){
                 </button>
               </td>
             </tr>
-          ))}
+          ))
+        : <h2 className='text-[15px] text-muted capitalize'> No Offers Available! </h2>}
         </tbody>
       </table>
     </div>

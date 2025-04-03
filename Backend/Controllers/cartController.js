@@ -250,7 +250,6 @@ const reduceFromCart = async (req, res, next)=> {
       deliveryCharge: cart.deliveryCharge,
       gst: cart.gst,
       absoluteTotalWithTaxes: cart.absoluteTotalWithTaxes})
-
   }
   catch (error){
     console.error('Error fetching products from cart:', error.message);

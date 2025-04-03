@@ -96,6 +96,21 @@ export const getBestCoupon = createAsyncThunk('coupon/getBestCoupon', async (thu
   }
 })
 
+export const toggleCouponStatus = createAsyncThunk('coupon/toggleCouponStatus', async ({couponId}, thunkAPI)=> {
+  try {
+    console.log('Inside toggleCouponStatus createAsyncThunk')
+    const response = await axios.patch(`/coupons/toggle-status/${couponId}`, {withCredentials: true})
+    console.log('Returning success response from toggleCouponStatus...', JSON.stringify(response.data))
+    return {couponId, message: response.data.message}
+  }catch(error){
+    console.log('Inside catch of toggleCouponStatus')
+    const errorMessage = error.response?.data?.message
+    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
+    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
+    return thunkAPI.rejectWithValue(errorMessage)
+  }
+})
+
 
 const initialState = {
     coupons: [], 
@@ -103,6 +118,7 @@ const initialState = {
     couponCreated: false,
     couponRemoved: false,
     couponUpdated: false,
+    couponToggled: false,
     loading: false,
     couponMessage: null,
     couponError: null,
@@ -118,6 +134,7 @@ const couponSlice = createSlice({
       state.couponCreated = false
       state.couponRemoved = false
       state.couponUpdated = false
+      state.couponToggled = false
     }
   },
   extraReducers: (builder)=> {
@@ -218,6 +235,25 @@ const couponSlice = createSlice({
       .addCase(getBestCoupon.rejected, (state, action) => {
         console.log('getBestCoupon rejected:', action.payload)
         state.couponError = action.payload
+      })
+      .addCase(toggleCouponStatus.fulfilled, (state, action)=> {
+        console.log('toggleCouponStatus fulfilled:', action.payload)
+        state.couponError = null
+        state.couponToggled = true
+        state.coupons =  state.coupons.map(coupon=> {
+          if(coupon._id === action.payload.couponId){
+            coupon.status = coupon.status === "active" ? "deactivated" : "active"
+          }
+          return coupon
+        })
+      })
+      .addCase(toggleCouponStatus.pending, (state)=> {
+        state.couponError = null
+      })
+      .addCase(toggleCouponStatus.rejected, (state, action) => {
+        console.log('toggleCouponStatus rejected:', action.payload)
+        state.couponError = action.payload
+        state.couponToggled = false
       })
     }
 })

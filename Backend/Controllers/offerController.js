@@ -355,6 +355,33 @@ const getBestOffer = async (req, res, next)=> {
 }
 
 
+const toggleOfferStatus = async (req, res, next)=> {
+    try {
+        console.log("Inside toggleOfferStatus controller")
+
+        const { offerId } = req.params
+        console.log("Offer ID to toggle status:", offerId)
+
+        const offer = await Offer.findById(offerId)
+        if (!offer){
+            return res.status(404).json({ success: false, message: "Offer not found!" })
+        }
+
+        offer.status = offer.status === "active" ? "deactivated" : "active"
+        await offer.save()
+
+        return res.status(200).json({ 
+            success: true, 
+            message: `Offer status changed to '${offer.status}' successfully!`, 
+        })
+    } catch (error) {
+        console.error("Error toggling offer status:", error.message)
+        next(error)
+    }
+}
 
 
-module.exports = {createOffer, getAllOffers, updateOffer, deleteOffer, getBestOffer }
+
+
+
+module.exports = {createOffer, getAllOffers, updateOffer, deleteOffer, getBestOffer, toggleOfferStatus }

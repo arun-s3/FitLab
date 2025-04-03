@@ -542,7 +542,35 @@ const compareCoupons = async (req, res, next) => {
 }
 
 
+const toggleCouponStatus = async (req, res, next)=> {
+  try {
+      console.log("Inside toggleCouponStatus controller")
+
+      const { couponId } = req.params
+      console.log("Coupon ID to toggle status:", couponId)
+
+      const coupon = await Coupon.findById(couponId)
+      if (!coupon) {
+          return res.status(404).json({ success: false, message: "Coupon not found!" })
+      }
+
+      coupon.status = coupon.status === "active" ? "deactivated" : "active"
+      await coupon.save()
+
+      return res.status(200).json({ 
+          success: true, 
+          message: `Coupon status changed to '${coupon.status}' successfully!`
+      })
+  } catch (error){
+      console.error("Error toggling coupon status:", error.message)
+      next(error)
+  }
+}
 
 
 
-module.exports = {createCoupon, updateCoupon, getAllCoupons, deleteCoupon, searchCoupons, getBestCoupon, compareCoupons}
+
+
+
+
+module.exports = {createCoupon, updateCoupon, getAllCoupons, deleteCoupon, searchCoupons, getBestCoupon, compareCoupons, toggleCouponStatus}

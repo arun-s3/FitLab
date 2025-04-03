@@ -952,8 +952,8 @@ select{
   left: 300px;
 }
 
-.left-\[30rem\]{
-  left: 30rem;
+.left-\[35\%\]{
+  left: 35%;
 }
 
 .left-\[3px\]{
@@ -1118,10 +1118,6 @@ select{
 
 .top-\[2\.4rem\]{
   top: 2.4rem;
-}
-
-.top-\[2\.5rem\]{
-  top: 2.5rem;
 }
 
 .top-\[22px\]{
@@ -4272,6 +4268,11 @@ select{
 .py-\[0\.55rem\]{
   padding-top: 0.55rem;
   padding-bottom: 0.55rem;
+}
+
+.py-\[1\.5rem\]{
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
 }
 
 .py-\[10px\]{

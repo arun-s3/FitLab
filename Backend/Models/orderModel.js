@@ -39,6 +39,26 @@ const orderSchema = new mongoose.Schema({
                 required: true,
                 min: 0
             },
+            offerApplied: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Offer',
+            },
+            offerDiscountType: {
+                type: String,
+                enum: ["percentage", "fixed", "freeShipping", "buyOneGetOne"],
+            },
+            offerDiscount: {
+                type: Number,
+                default: 0
+            },
+            extraQuantity: {
+                type: Number,
+                default: 0
+            },
+            offerOrProductDiscount: {
+                type: String,
+                enum: ["offer", "discount"]
+            },
             total: {
                 type: Number,
                 required: true,

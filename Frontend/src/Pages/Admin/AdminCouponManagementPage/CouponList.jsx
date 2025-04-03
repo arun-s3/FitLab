@@ -2,10 +2,13 @@ import React, {useState} from 'react'
 import './CouponList.css'
 
 import { ArrowUpDown, Edit2, Trash2 } from "lucide-react"
+import {IoToggle} from "react-icons/io5"
+import { BsToggle2On, BsToggle2Off } from "react-icons/bs";
+import { BsToggleOn, BsToggleOff } from "react-icons/bs";
 
 
 
-export default function CouponList({ coupons, onEdit, onDelete, onSort, sortConfig }){
+export default function CouponList({ coupons, onEdit, onDelete, onDeactivate, onSort, sortConfig }){
 
   const [showItemsOf, setShowItemsOf] = useState('')
   const [showCustomersOf, setShowCustomersOf] = useState('')
@@ -27,7 +30,7 @@ export default function CouponList({ coupons, onEdit, onDelete, onSort, sortConf
         <thead className="bg-inputBorderLow">
           <tr>
             { tableHeaders.map( (header)=> (
-              <th key={header} className="px-[12px] py-3 text-left text-[13px] font-medium text-gray-500 uppercase tracking-wider
+              <th key={header.value} className="px-[12px] py-3 text-left text-[13px] font-medium text-gray-500 uppercase tracking-wider
                  cursor-pointer" onClick={()=> {
                   header.sortBy && onSort(header.sortBy, order)
                   changeSortOrder()
@@ -44,8 +47,8 @@ export default function CouponList({ coupons, onEdit, onDelete, onSort, sortConf
           { coupons && coupons.length > 0 && coupons.map((coupon, index)=> (
             <tr key={coupon?._id} className={`${(index % 2 == 0) ? 'bg-transparent': 'bg-[#eee]'} hover:bg-[rgb(249, 245, 252)]`}>
               <td className="pl-[1rem] py-4 whitespace-nowrap">
-                <div className="text-sm font-medium text-green-500">
-                {coupon?.code && coupon?.code.length > 13 ? coupon.code.substring(0,10) + '...' : coupon.code} 
+                <div className={`text-sm font-medium ${coupon.status === 'active' ? 'text-green-500' : 'text-red-500' } `}>
+                {coupon && coupon?.code && coupon?.code.length > 13 ? coupon.code.substring(0,10) + '...' : coupon.code} 
                 </div>
               </td>
               <td className="px-6 py-4">
@@ -71,7 +74,8 @@ export default function CouponList({ coupons, onEdit, onDelete, onSort, sortConf
                   {coupon?.applicableType === "allProducts" || coupon?.applicableType === "products" ? (
                     <span className="relative" onMouseEnter={()=> setShowItemsOf(coupon?.code)} onMouseLeave={()=> setShowItemsOf("")}>
                       <span> Products - </span>
-                      <span className="text-[11px] text-secondary hover:underline hover:font-medium transition duration-300 cursor-pointer">
+                      <span className={`text-[11px] ${coupon.status === 'active' ? 'text-secondary' : 'text-muted' }
+                        hover:underline hover:font-medium transition duration-300 cursor-pointer`}>
                         {coupon?.applicableType === "allProducts" ? "[All]" : "[See products]"}
                       </span>
                   
@@ -120,7 +124,9 @@ export default function CouponList({ coupons, onEdit, onDelete, onSort, sortConf
                     coupon?.customerSpecific && 
                     <span className="text-[11px] text-secondary hover:underline hover:font-medium cursor-pointer"
                       onMouseEnter={()=> setShowCustomersOf(coupon?.code)} onMouseLeave={()=> setShowCustomersOf("")}>
-                       &nbsp; [See]
+                      <span className={`${coupon.status === 'active' ? 'text-secondary' : 'text-muted' }`}>
+                        &nbsp; [See]
+                      </span>
                       {
                         showCustomersOf === coupon.code &&
                         <ul className={`absolute bottom-[100%] left-[50%] py-[10px] px-[22px] list-disc bg-white
@@ -161,15 +167,28 @@ export default function CouponList({ coupons, onEdit, onDelete, onSort, sortConf
                 </p>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm text-gray-500 capitalize">{coupon?.status}</div>
+                <div className={`w-[2rem] text-sm text-gray-500 capitalize ${coupon.status === 'active' ? 'text-muted' : 'text-red-500' } `}>
+                  {coupon?.status}
+                </div>
+                <button className='w-full' onClick={()=> onDeactivate(coupon._id)}>
+                  {
+                    coupon.status === 'deactivated' ?
+                    <BsToggle2Off className='mt-[2px] h-[20px] w-[20px] text-red-500'/>
+                    : coupon.status === 'active' ?
+                    <BsToggle2On className='mt-[2px] h-[20px] w-[20px] text-green-500'/>
+                    :null
+                  }
+                </button>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <button onClick={()=> onEdit(coupon)} className="mr-4">
-                  <Edit2 className="h-[15x] w-[15px] text-secondary hover:text-purple-900" />
-                </button>
-                <button onClick={()=> onDelete(coupon)} className="text-red-500 hover:text-red-700">
-                  <Trash2 className="h-[15x] w-[15px]" />
-                </button>
+              <td className="px-6 py-[1.5rem]">
+                <div className='flex items-center gap-[10px]'>
+                  <button onClick={()=> onEdit(coupon)}>
+                    <Edit2 className="h-[15x] w-[15px] text-secondary hover:text-purple-900" />
+                  </button>
+                  <button onClick={()=> onDelete(coupon)} className="text-red-500 hover:text-red-700">
+                    <Trash2 className="h-[15x] w-[15px]" />
+                  </button>
+                </div>
               </td>
             </tr>
           ))}

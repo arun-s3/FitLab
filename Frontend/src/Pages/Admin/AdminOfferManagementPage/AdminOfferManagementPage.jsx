@@ -21,7 +21,7 @@ import useFlexiDropdown from '../../../Hooks/FlexiDropdown'
 import useStickyDropdown from '../../../Hooks/StickyDropdown'
 import AdvancedOfferFilters from './AdvancedOfferFilters'
 import {DateSelector} from '../../../Components/Calender/Calender'
-import {getAllOffers, resetOfferStates} from '../../../Slices/offerSlice'
+import {getAllOffers, toggleOfferStatus, resetOfferStates} from '../../../Slices/offerSlice'
 import {camelToCapitalizedWords} from "../../../Utils/helperFunctions"
 import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
 
@@ -355,8 +355,12 @@ export default function AdminOfferManagementPage(){
                       
                       </div>
 
-                    <OfferList offers={offers} onEdit={(offer)=> { setEditingOffer(offer); setIsModalOpen(true); }}
-                      onDelete={(offer)=> { setOfferToDelete(offer); setIsDeleteModalOpen(true); }} onSort={handleSort}/>
+                    {
+                      offers && offers.length > 0 &&
+                      <OfferList offers={offers} onEdit={(offer)=> { setEditingOffer(offer); setIsModalOpen(true); }}
+                        onDelete={(offer)=> { setOfferToDelete(offer); setIsDeleteModalOpen(true); }} onSort={handleSort}
+                          onDeactivate={(id)=> dispatch(toggleOfferStatus({offerId: id}))}/>
+                    }
 
                     <OfferModal isOpen={isModalOpen} onClose={()=> { setIsModalOpen(false); setEditingOffer(null); }}
                         offer={editingOffer} isEditing={editingOffer ? true : false}/>

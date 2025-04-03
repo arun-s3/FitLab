@@ -507,13 +507,13 @@ export default function CheckoutPage(){
                             <div className="flex justify-between !mt-[2rem]">
                               <span className="text-green-600"> Coupon Discount </span>
                               <span className='flex items-center gap-[5px]'>
-                                <Minus className='w-[13px]'/> ₹{cart.couponDiscount}
+                                <Minus className='w-[13px]'/> ₹{cart.couponDiscount.toFixed(2)}
                               </span>
                             </div>
                           }
                           <div className="flex justify-between text-lg font-bold pt-2">
                             <span> Total </span>
-                            <span> ₹{cart.absoluteTotalWithTaxes} </span>
+                            <span> ₹{cart.absoluteTotalWithTaxes.toFixed(2)} </span>
                           </div>
                         </div>
                       

@@ -7,6 +7,7 @@ import {debounce} from 'lodash'
 import { Plus, Search } from "lucide-react"
 import {RiArrowDropDownLine} from "react-icons/ri"
 import {MdSort} from "react-icons/md"
+import {toast} from 'react-toastify'
 
 import AdminHeader from '../../../Components/AdminHeader/AdminHeader'
 import CouponList from "./CouponList"
@@ -14,7 +15,7 @@ import CouponModal from "./CouponModal"
 import CouponDeleteModal from "./CouponDeleteModal"
 import useFlexiDropdown from '../../../Hooks/FlexiDropdown'
 import {DateSelector} from '../../../Components/Calender/Calender'
-import {getAllCoupons, searchCoupons, resetCouponStates} from '../../../Slices/couponSlice'
+import {getAllCoupons, searchCoupons, toggleCouponStatus, resetCouponStates} from '../../../Slices/couponSlice'
 import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
 
 
@@ -43,7 +44,7 @@ export default function AdminCouponManagementPage(){
     const {setHeaderZIndex} = useOutletContext()
     setHeaderZIndex(0)
 
-    const {coupons: allCoupons } = useSelector(state=> state.coupons)
+    const {coupons: allCoupons, couponDeactivated} = useSelector(state=> state.coupons)
     const dispatch = useDispatch()
     
 
@@ -63,6 +64,13 @@ export default function AdminCouponManagementPage(){
         dispatch( getAllCoupons({queryOptions}) )
       }
     }, [queryOptions])
+
+    useEffect(()=> {
+      if(couponDeactivated){
+        toast.success('The coupon is successfully deactivated!')
+      }
+      dispatch(resetCouponStates())
+    },[couponDeactivated])
 
     const sortTypes = [
       {name: 'Coupons: Recent to Oldest', value: '-1', sortBy: 'createdAt'}, {name: 'Coupons: Oldest to Recent', value: '1', sortBy: 'createdAt'},
@@ -216,8 +224,12 @@ export default function AdminCouponManagementPage(){
                       
                       </div>
 
-                    <CouponList coupons={coupons} onEdit={(coupon)=> { setEditingCoupon(coupon); setIsModalOpen(true); }}
-                      onDelete={(coupon)=> { setCouponToDelete(coupon); setIsDeleteModalOpen(true); }} onSort={handleSort}/>
+                    {
+                      coupons && coupons.length > 0 &&
+                        <CouponList coupons={coupons} onEdit={(coupon)=> { setEditingCoupon(coupon); setIsModalOpen(true); }}
+                          onDelete={(coupon)=> { setCouponToDelete(coupon); setIsDeleteModalOpen(true); }} 
+                            onDeactivate={(id)=> dispatch(toggleCouponStatus({couponId: id}))} onSort={handleSort}/>
+                    }
 
                     <CouponModal isOpen={isModalOpen} onClose={()=> { setIsModalOpen(false); setEditingCoupon(null); }}
                         coupon={editingCoupon} isEditing={editingCoupon ? true : false}/>

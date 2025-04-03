@@ -96,6 +96,21 @@ export const getBestOffer = createAsyncThunk('offer/getBestOffer', async ({produ
   }
 })
 
+export const toggleOfferStatus = createAsyncThunk('offer/toggleOfferStatus', async ({offerId}, thunkAPI)=> {
+  try {
+    console.log('Inside toggleOfferStatus createAsyncThunk')
+    const response = await axios.patch(`/offers/toggle-status/${offerId}`, {withCredentials: true})
+    console.log('Returning success response from toggleOfferStatus...', JSON.stringify(response.data))
+    return {offerId, message: response.data.message}
+  }catch(error){
+    console.log('Inside catch of toggleOfferStatus')
+    const errorMessage = error.response?.data?.message
+    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
+    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
+    return thunkAPI.rejectWithValue(errorMessage)
+  }
+})
+
 
 const initialState = {
     offers: [], 
@@ -103,6 +118,7 @@ const initialState = {
     offerCreated: false,
     offerRemoved: false,
     offerUpdated: false,
+    offerToggled: false,
     loading: false,
     offerMessage: null,
     offerError: null,
@@ -161,9 +177,8 @@ const offerSlice = createSlice({
         state.offers = state.offers.map(offer=> {
           if(offer._id === action.payload.offer._id){
             return action.payload.offer
-          }else{
-            return offer
-          } 
+          }
+          return offer
         })
       })
       .addCase(updateOffer.pending, (state)=> {
@@ -218,6 +233,25 @@ const offerSlice = createSlice({
       .addCase(getBestOffer.rejected, (state, action) => {
         console.log('getBestOffer rejected:', action.payload)
         state.offerError = action.payload
+      })
+      .addCase(toggleOfferStatus.fulfilled, (state, action)=> {
+        console.log('toggleOfferStatus fulfilled:', action.payload)
+        state.offerError = null
+        state.offerToggled = true
+        state.offers = state.offers.map(offer=> {
+          if(offer._id === action.payload.offerId){
+            offer.status = offer.status === "active" ? "deactivated" : "active"
+          }
+          return offer
+        })
+      })
+      .addCase(toggleOfferStatus.pending, (state)=> {
+        state.offerError = null
+      })
+      .addCase(toggleOfferStatus.rejected, (state, action) => {
+        console.log('toggleOfferStatus rejected:', action.payload)
+        state.offerError = action.payload
+        state.offerToggled = false
       })
     }
 })

@@ -1,6 +1,7 @@
 const Order = require('../Models/orderModel')
 const Cart = require('../Models/cartModel')
 const Product = require('../Models/productModel')
+const Offer = require('../Models/offerModel')
 const Coupon = require('../Models/couponModel')
 
 const {calculateCharges} = require('./controllerUtils/taxesUtils')
@@ -91,7 +92,7 @@ const ESTIMATED_DELIVERY_DATE = 5
 
 const createOrder = async (req, res, next)=> {
     try {
-        console.log("Inside createOrder of orderController")
+        console.log("Inside createOrder of orderController")   
         const userId = req.user._id
 
         console.log("orderDetails---->", JSON.stringify(req.body))
@@ -118,12 +119,12 @@ const createOrder = async (req, res, next)=> {
         let totalAmountWithTax = 0
 
         for (const item of cart.products){
-          orderTotal += item.quantity * item.price
+          orderTotal += item.total
         }
 
         const {deliveryCharges, gstCharge, absoluteTotalWithTaxes} = calculateCharges(orderTotal, cart.products)
-        deliveryPrice = deliveryCharges
-        totalAmountWithTax = absoluteTotalWithTaxes
+        cart.deliveryPrice = deliveryCharges
+        cart.totalAmountWithTax  = absoluteTotalWithTaxes
 
         const now = new Date()
 
@@ -157,6 +158,26 @@ const createOrder = async (req, res, next)=> {
             }
             product.stock -= item.quantity
             await product.save()
+
+            if(item.offerApplied){
+              const offer = await Offer.findOne({_id: item.offerApplied}) 
+
+              offer.usedCount += 1
+              offer.lastUsedAt = new Date()
+
+              const userUsage = offer.usedBy.find((usage) => usage.userId.toString() === userId.toString())
+              if(userUsage){
+                  userUsage.count += 1
+              }else{
+                  offer.usedBy.push({ userId, count: 1 })
+              }
+
+              const totalUsersApplied = offer.usedBy.reduce((acc, curr) => acc + curr.count, 0)
+              offer.conversionRate = totalUsersApplied > 0
+                  ? ((offer.usedCount / offer.redemptionCount) * 100).toFixed(2) : 0
+
+              await offer.save()
+            }
         }
 
         const order = new Order({

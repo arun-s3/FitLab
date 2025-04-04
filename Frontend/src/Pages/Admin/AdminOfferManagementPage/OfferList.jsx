@@ -4,7 +4,8 @@ import {useDispatch, useSelector} from 'react-redux'
 
 import { ArrowUpDown, BadgePercent, DiamondPercent, Edit2, ImageUpscale, IndianRupee, Link2, MessageSquareQuote, Scaling,
    ShoppingCart, Trash2 } from "lucide-react"
-import { BsToggle2On, BsToggle2Off } from "react-icons/bs";
+import { BsToggle2On, BsToggle2Off } from "react-icons/bs"
+import {format} from "date-fns"
 
 
 export default function OfferList({ offers, onEdit, onDelete, onSort, onDeactivate }){
@@ -213,17 +214,15 @@ export default function OfferList({ offers, onEdit, onDelete, onSort, onDeactiva
                 }
                 {
                   offer?.conversionRate ?
-                  <p className='text-[11px] text-muted'>
+                  <p className={`text-[11px] ${offer.status === 'active' ? 'text-secondary' : 'text-muted' } `}>
                     Conversion Rate - { offer.conversionRate + ' %' } 
                   </p>
                   : null
                 }
               </td>
-              {/* <td className="px-6 py-4 whitespace-nowrap">
-                
-              </td> */}
-              <td className="px-6 py-4 whitespace-nowrap">
-                <div className={`w-[2rem] text-sm text-gray-500 capitalize ${offer.status === 'active' ? 'text-muted' : 'text-red-500' }`}>
+              <td className="px-6 py-4 whitespace-nowrap relative">
+                <div className={`w-[2rem] text-sm text-gray-500 capitalize 
+                  ${offer.status === 'active' ? 'text-muted' : 'text-red-500' }`}>
                   {offer?.status}
                 </div>
                 <button className='w-full' onClick={()=> onDeactivate(offer._id)}>
@@ -237,7 +236,10 @@ export default function OfferList({ offers, onEdit, onDelete, onSort, onDeactiva
                 </button>
                 {
                   offer?.lastUsedAt ? 
-                  <div className="text-sm text-gray-500 capitalize">{ 'Last Used -' + offer.lastUsedAt }</div>
+                  <div className={` absolute !text-[11px] text-gray-500 capitalize 
+                    ${offer.status === 'active' ? 'text-green-500' : 'text-red-500' }`}>
+                    { 'Last Used -' + format( new Date(offer.lastUsedAt), "MMMM dd, yyyy" ) }
+                  </div>
                   : null
                 }
               </td>

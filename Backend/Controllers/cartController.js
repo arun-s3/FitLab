@@ -2,6 +2,7 @@ const Cart = require('../Models/cartModel')
 const Order = require('../Models/orderModel')
 const Product = require('../Models/productModel')
 const Category = require('../Models/categoryModel')
+const Offer = require('../Models/offerModel')
 const Coupon = require('../Models/couponModel')
 
 const {calculateCharges} = require('./controllerUtils/taxesUtils')
@@ -136,6 +137,12 @@ const addToCart = async (req, res, next)=> {
       console.log("Inside else cart.couponUsed")
       cart.deliveryCharge = parseInt(deliveryCharges)
       cart.absoluteTotalWithTaxes = parseInt(absoluteTotalWithTaxes)
+    }
+
+    if(offerApplied){
+      const offer = await Offer.findOne({_id: offerApplied}) 
+      offer.redemptionCount += 1
+      offer.save()
     }
 
     await cart.save();

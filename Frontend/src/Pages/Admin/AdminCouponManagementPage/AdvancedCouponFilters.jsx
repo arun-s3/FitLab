@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from 'react'
-import './AdvancedOfferFilters.css'
+import './AdvancedCouponFilters.css'
 
 import {BadgePercent, BadgeIndianRupee, Truck, ChevronDown, Tag, ListTodo, Check, ChevronUp, Plus, Minus} from "lucide-react"
 import {TbShoppingCartPlus} from "react-icons/tb"
@@ -11,7 +11,7 @@ import {camelToCapitalizedWords} from "../../../Utils/helperFunctions"
 import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
 
 
-export default function AdvancedOfferFilters({queryOptions, setQueryOptions, close}){
+export default function AdvancedCouponFilters({queryOptions, setQueryOptions, close}){
 
     const [discountType, setDiscountType] = useState({show: false, value: 'all'})
     const [applicableType, setApplicableType] = useState({show: false, value: 'all', name: 'All'})
@@ -99,7 +99,7 @@ export default function AdvancedOfferFilters({queryOptions, setQueryOptions, clo
 
     return(
         <main className='w-[20rem] bg-white pt-[20px] pb-[25px] px-[35px] border border-borderLight2 rounded-[8px]'
-             id='advancedOfferFilters' onClick={(e)=> e.stopPropagation()}>    
+             id='advancedCouponFilters' onClick={(e)=> e.stopPropagation()}>    
 
         <h4 className='text-[17px] font-[600] text-secondary tracking-[1.3px]'> Filter </h4>
 

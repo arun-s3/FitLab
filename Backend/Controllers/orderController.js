@@ -220,6 +220,12 @@ const createOrder = async (req, res, next)=> {
 
         cart.products = []
         cart.absoluteTotal = 0
+        cart.couponUsed = null
+        cart.couponDiscount = 0
+        cart.deliveryCharge = 0
+        cart.gst = 0
+        cart.absoluteTotalWithTaxes = 0
+        
         await cart.save();
 
         res.status(200).json({ message: "Checkout successful! Your order has been placed.", order })

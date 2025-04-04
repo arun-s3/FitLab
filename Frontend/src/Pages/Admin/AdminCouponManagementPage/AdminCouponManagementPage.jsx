@@ -4,16 +4,19 @@ import {useOutletContext} from 'react-router-dom'
 import {useSelector, useDispatch} from "react-redux"
 import {debounce} from 'lodash'
 
-import { Plus, Search } from "lucide-react"
+import {Plus, Search, SlidersHorizontal, CalendarX2} from "lucide-react"
 import {RiArrowDropDownLine} from "react-icons/ri"
 import {MdSort} from "react-icons/md"
 import {toast} from 'react-toastify'
+import {IconFilePercent, IconRosetteDiscount, IconRosetteDiscountCheck, IconRosetteDiscountOff} from "@tabler/icons-react"
 
 import AdminHeader from '../../../Components/AdminHeader/AdminHeader'
 import CouponList from "./CouponList"
 import CouponModal from "./CouponModal"
 import CouponDeleteModal from "./CouponDeleteModal"
+import AdvancedCouponFilters from './AdvancedCouponFilters'
 import useFlexiDropdown from '../../../Hooks/FlexiDropdown'
+import useStickyDropdown from '../../../Hooks/StickyDropdown'
 import {DateSelector} from '../../../Components/Calender/Calender'
 import {getAllCoupons, searchCoupons, toggleCouponStatus, resetCouponStates} from '../../../Slices/couponSlice'
 import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
@@ -37,7 +40,11 @@ export default function AdminCouponManagementPage(){
     const [currentPage, setCurrentPage] = useState(1)
     const totalPages = 20
 
-    const {openDropdowns, dropdownRefs, toggleDropdown} = useFlexiDropdown(['limitDropdown', 'sortDropdown'])
+    const {openDropdowns, dropdownRefs, toggleDropdown} = useFlexiDropdown(['limitDropdown', 'sortDropdown', 'statusDropdown'])
+
+    const {openStickyDropdowns, stickyDropdownRefs, toggleStickyDropdown} = useStickyDropdown(['filterDropdown'])
+
+    const [advFilterEvent, setAdvFilterEvent] = useState(null)
     
     const [queryOptions, setQueryOptions] = useState({page: 1, limit: 6})
 
@@ -77,6 +84,14 @@ export default function AdminCouponManagementPage(){
       {name: 'Alphabetical: A to Z', value: '1', sortBy: 'code'}, {name: 'Alphabetical: Z to A', value: '-1', sortBy: 'code'}
     ]
 
+    const statusTypes = [
+      {name: 'All', icon: IconFilePercent},
+      {name: 'Active', icon: IconRosetteDiscount},
+      {name: 'Expired', icon: CalendarX2}, 
+      {name: 'Deactivated', icon: IconRosetteDiscountOff},
+      {name: 'Used up', icon: IconRosetteDiscountCheck},
+    ]
+
     const debouncedSearch = useRef(
       debounce((searchData)=> {
         setQueryOptions(query=> (
@@ -109,26 +124,33 @@ export default function AdminCouponManagementPage(){
       setLimit(value)
     }
   
-    const radioClickHandler = (e, sortBy)=>{
+    const radioClickHandler = (e, sortBy, optionType)=>{
       const value = Number.parseInt(e.target.value)
       console.log("value---->", value)
-      const checkStatus = queryOptions.sort === value
+      const checkStatus = optionType === 'sort' ? queryOptions.sort === value : queryOptions.status === value
       console.log("checkStatus-->", checkStatus)
       if(checkStatus){
           console.log("returning..")
           return
       }else{
           console.log("Checking radio..")
-          setQueryOptions(query=> {
-            return {...query, sort: value, sortBy}
-          })
+          if(optionType === 'sort'){
+            setQueryOptions(query=> {
+              return {...query, sort: value, sortBy}
+            })
+          }else if(optionType === 'status'){
+            setQueryOptions(query=> {
+              return {...query, status: value}
+            })
+          }
           const changeEvent = new Event('change', {bubbles:true})
           e.target.dispatchEvent(changeEvent)
       }
     }
   
-    const radioChangeHandler = (e, value, sortBy)=>{
-      e.target.checked = (queryOptions.sort === Number.parseInt(value))
+    const radioChangeHandler = (e, value, optionType)=>{
+      e.target.checked = optionType === 'sort' ? (queryOptions.sort === Number.parseInt(value))
+                                            :(queryOptions.status === Number.parseInt(value))
     }
 
     const handleSort = (sortBy, sort)=> {
@@ -148,17 +170,65 @@ export default function AdminCouponManagementPage(){
 
             </header>
 
-            <main>
+            <main className='mt-[3rem]'>
 
                 <div className="container mx-auto px-4">
 
-                      <button onClick={()=> setIsModalOpen(true)} className="ml-auto bg-secondary text-[15px] text-white px-[17px]
-                       py-[6px] rounded-md hover:bg-purple-700 transition duration-300 flex items-center">
-                        <Plus className="h-5 w-5 mr-2" />
-                        Create Coupon
-                      </button>
+                  <div className="flex justify-between items-center mb-[10px] mt-[1rem]">
+                    <button onClick={()=> setIsModalOpen(true)} className="bg-secondary text-[15px] text-white px-[17px]
+                     py-[6px] rounded-md hover:bg-purple-700 transition duration-300 flex items-center">
+                      <Plus className="h-5 w-5 mr-2" />
+                      Create Coupon
+                    </button>
 
-                    <div className="flex justify-between items-center mb-6 mt-[1rem]">
+                    <div className='relative h-[35px] px-[16px] py-[8px] text-[14px] text-muted bg-white flex items-center 
+                        gap-[10px] justify-between border border-dropdownBorder rounded-[6px]  shadow-sm cursor-pointer
+                         hover:bg-gray-50 transition-colors optionDropdown sort-dropdown'
+                             onClick={(e)=> toggleDropdown('statusDropdown')} id='sort-options' ref={dropdownRefs.statusDropdown}>
+                         <span className='text-[13px] font-[470]'> Status </span>
+                         <MdSort className='h-[15px] w-[15px]'/>
+                         {openDropdowns.statusDropdown && 
+                         <ul className='list-none  px-[10px] py-[1rem] absolute top-[44px] right-0 flex flex-col gap-[10px] justify-center 
+                                 w-[12rem] text-[10px] bg-white border border-borderLight2 rounded-[8px] z-[5] cursor-pointer'>
+                             {
+                              statusTypes.map(statusType=> (
+                                <li key={`${statusType.name}`}> 
+                                 <span>  
+                                     <input type='radio' value={statusType.name} onClick={(e)=> radioClickHandler(e, statusType.name)}
+                                         onChange={(e)=> radioChangeHandler(e, statusType.name)} 
+                                         checked={queryOptions.status === Number(statusType.name) && queryOptions.status === statusType.name}/>
+                                     <span> {statusType.name} </span>
+                                 </span>
+                                </li>
+                              ))
+                             }
+                         </ul>
+                         }
+                    </div>
+                      
+                      <div className='relative h-[35px] px-[16px] py-[8px] text-[14px] text-muted bg-white flex items-center 
+                        gap-[10px] justify-between border border-dropdownBorder rounded-[6px] shadow-sm cursor-pointer
+                         hover:bg-gray-50 transition-colors optionDropdown sort-dropdown' 
+                          onClick={(e)=> {
+                            toggleStickyDropdown(e, 'filterDropdown')
+                            setAdvFilterEvent(e)
+                          }}
+                             id='sort-options' ref={stickyDropdownRefs.filterDropdown}> {/* onClick={(e)=> toggleDropdown('filterDropdown')}*/}
+                         <SlidersHorizontal className='h-[15px] w-[15px]'/>
+                         <span className='text-[13px] font-[470]'> Adv Filters </span>
+                         
+                         {openStickyDropdowns.filterDropdown && 
+                            <div className='absolute top-[2.4rem] right-0 z-[10]'>
+  
+                                <AdvancedCouponFilters queryOptions={queryOptions} setQueryOptions={setQueryOptions} 
+                                  close={()=> {toggleStickyDropdown(advFilterEvent, 'filterDropdown'); setAdvFilterEvent(null)}}/> 
+  
+                            </div>
+                         }
+                      </div>
+                    </div>
+
+                    <div className="flex justify-between items-center mb-6 mt-[12px]">
                       <div className="relative">
                         <input type= "text" placeholder="Search coupons..."
                             className="w-[20rem] h-[36px] text-[15px] pl-10 pr-4 py-2 rounded-[6px] border border-gray-300 
@@ -169,7 +239,6 @@ export default function AdminCouponManagementPage(){
                       <div id='coupon-menu' className='flex items-center gap-[2rem]'>
 
                         <DateSelector dateGetter={{startDate, endDate}} dateSetter={{setStartDate, setEndDate}} labelNeeded={true}/>
-
 
                         <div className='flex items-center gap-[1rem]'>
                            <div className='h-[35px] text-[14px] text-muted bg-white flex items-center gap-[10px]

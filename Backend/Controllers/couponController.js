@@ -221,7 +221,19 @@ const getAllCoupons = async (req, res, next) => {
     console.log("Inside getAllCoupons of couponController")
 
     const { queryOptions = {} } = req.body
-    const { page = 1, limit = 6, startDate, endDate, sort = -1, sortBy = "createdAt", searchData } = queryOptions
+    const { 
+      page = 1,
+      limit = 6,
+      startDate,
+      endDate,
+      sort = -1,
+      sortBy = "createdAt",
+      discountType, 
+      applicableType,
+      minimumOrderValue,
+      usedCount, searchData 
+    } = queryOptions
+    
     const skip = (page - 1) * limit
     console.log("queryOptions--->", JSON.stringify(queryOptions))
 
@@ -232,8 +244,20 @@ const getAllCoupons = async (req, res, next) => {
     if (endDate){
       filterConditions.endDate = { $lte: new Date(endDate) }
     }
+    if (discountType && discountType !== 'all'){
+      filterConditions.discountType = discountType
+    }   
+    if (applicableType && applicableType !== 'all'){
+        filterConditions.applicableType = applicableType
+    }
+    if (minimumOrderValue){
+        filterConditions.minimumOrderValue = { $lte: minimumOrderValue }
+    }
+    if (usedCount){
+        filterConditions.usedCount = { $lte: usedCount }
+    }
     if (searchData) {
-      filterConditions.code = { $regex: searchData, $options: "i" };
+        filterConditions.code = { $regex: searchData, $options: "i" };
     }
 
     let sortOptions = {};

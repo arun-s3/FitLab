@@ -832,6 +832,10 @@ select{
   bottom: -10px;
 }
 
+.bottom-\[-15px\]{
+  bottom: -15px;
+}
+
 .bottom-\[-66px\]{
   bottom: -66px;
 }
@@ -1361,6 +1365,10 @@ select{
   margin-bottom: 1.5rem;
 }
 
+.mb-\[10px\]{
+  margin-bottom: 10px;
+}
+
 .mb-\[10rem\]{
   margin-bottom: 10rem;
 }
@@ -1663,6 +1671,10 @@ select{
 
 .mt-\[10px\]{
   margin-top: 10px;
+}
+
+.mt-\[12px\]{
+  margin-top: 12px;
 }
 
 .mt-\[14px\]{
@@ -4584,6 +4596,10 @@ select{
 
 .font-sairaCondensed{
   font-family: "Saira Condensed", sans-serif;
+}
+
+.\!text-\[11px\]{
+  font-size: 11px !important;
 }
 
 .\!text-\[12px\]{

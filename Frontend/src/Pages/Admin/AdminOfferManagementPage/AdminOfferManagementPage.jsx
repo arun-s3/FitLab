@@ -43,7 +43,7 @@ export default function AdminOfferManagementPage(){
     const [limit, setLimit] = useState(6) 
     const [currentPage, setCurrentPage] = useState(1)
     const totalPages = 20
-    const [activeTab, setActiveTab] = useState('offers')
+    const [activeTab, setActiveTab] = useState('all')
 
     const {openDropdowns, dropdownRefs, toggleDropdown} = useFlexiDropdown(['limitDropdown', 'sortDropdown', 'userGroupDropdown'])
 
@@ -51,7 +51,7 @@ export default function AdminOfferManagementPage(){
     
     const [advFilterEvent, setAdvFilterEvent] = useState(null)
     
-    const [queryOptions, setQueryOptions] = useState({page: 1, limit: 6, targetUserGroup: 'all'})
+    const [queryOptions, setQueryOptions] = useState({page: 1, limit: 6, targetUserGroup: 'all', status: 'all'})
 
     const {setHeaderZIndex} = useOutletContext()
     setHeaderZIndex(0)
@@ -93,9 +93,9 @@ export default function AdminOfferManagementPage(){
 
     const activateTab = (name)=> {
       setActiveTab(name)
-      // setQueryDetails(query=> {
-      //   return {...query, status: name.toLowerCase().trim()}
-      // })
+      setQueryOptions(query=> {
+        return {...query, status: name.toLowerCase().trim()}
+      })
     }
 
     const getUserIcon = (userType)=> {

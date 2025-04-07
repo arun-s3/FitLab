@@ -7,7 +7,7 @@ const {isLogin, isLogout} = require('../Middlewares/Authentication')
 
 couponRouter.get('/', isLogin, searchCoupons)
 couponRouter.post('/add', isLogin, createCoupon)
-couponRouter.post('/list', isLogin, getAllCoupons)
+couponRouter.post('/list', getAllCoupons)
 couponRouter.post('/update/:couponId', isLogin, updateCoupon)
 couponRouter.delete('/delete/:couponId', isLogin, deleteCoupon)
 couponRouter.get('/bestCoupons', isLogin, getBestCoupon)

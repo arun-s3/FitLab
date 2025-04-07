@@ -231,7 +231,9 @@ const getAllCoupons = async (req, res, next) => {
       discountType, 
       applicableType,
       minimumOrderValue,
-      usedCount, searchData 
+      usedCount,
+      status,
+      searchData 
     } = queryOptions
     
     const skip = (page - 1) * limit
@@ -255,6 +257,9 @@ const getAllCoupons = async (req, res, next) => {
     }
     if (usedCount){
         filterConditions.usedCount = { $lte: usedCount }
+    }
+    if (status !== 'all'){
+      filterConditions.status = status
     }
     if (searchData) {
         filterConditions.code = { $regex: searchData, $options: "i" };

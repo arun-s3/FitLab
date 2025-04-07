@@ -5,11 +5,10 @@ import {useSelector, useDispatch} from "react-redux"
 import {debounce} from 'lodash'
 
 import {Plus, Search, SlidersHorizontal, CalendarX2} from "lucide-react"
-import {IconFilePercent, IconRosetteDiscount, IconRosetteDiscountCheck, IconRosetteDiscountOff} from "@tabler/icons-react"
 import {RiArrowDropDownLine} from "react-icons/ri"
 import {MdSort} from "react-icons/md"
 import {toast} from 'react-toastify'
-import {TbDiscountOff} from "react-icons/tb";
+import {IconFilePercent, IconRosetteDiscount, IconRosetteDiscountCheck, IconRosetteDiscountOff} from "@tabler/icons-react"
 
 import AdminHeader from '../../../Components/AdminHeader/AdminHeader'
 import CouponList from "./CouponList"
@@ -18,7 +17,6 @@ import CouponDeleteModal from "./CouponDeleteModal"
 import AdvancedCouponFilters from './AdvancedCouponFilters'
 import useFlexiDropdown from '../../../Hooks/FlexiDropdown'
 import useStickyDropdown from '../../../Hooks/StickyDropdown'
-import {convertToCamelCase, camelToCapitalizedWords} from "../../../Utils/helperFunctions"
 import {DateSelector} from '../../../Components/Calender/Calender'
 import {getAllCoupons, searchCoupons, toggleCouponStatus, resetCouponStates} from '../../../Slices/couponSlice'
 import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
@@ -48,7 +46,7 @@ export default function AdminCouponManagementPage(){
 
     const [advFilterEvent, setAdvFilterEvent] = useState(null)
     
-    const [queryOptions, setQueryOptions] = useState({page: 1, limit: 6, status: 'all'})
+    const [queryOptions, setQueryOptions] = useState({page: 1, limit: 6})
 
     const {setHeaderZIndex} = useOutletContext()
     setHeaderZIndex(0)
@@ -94,21 +92,6 @@ export default function AdminCouponManagementPage(){
       {name: 'Used up', icon: IconRosetteDiscountCheck},
     ]
 
-    const getStatusIcon = (statusType)=> {
-      switch(statusType){
-        case "All":
-          return IconFilePercent
-        case "Active":
-          return IconRosetteDiscount
-        case "Expired":
-          return CalendarX2
-        case "Deactivated":
-          return IconRosetteDiscountOff
-        case "Used up": 
-          return IconRosetteDiscountCheck
-      }
-    }
-
     const debouncedSearch = useRef(
       debounce((searchData)=> {
         setQueryOptions(query=> (
@@ -141,26 +124,33 @@ export default function AdminCouponManagementPage(){
       setLimit(value)
     }
   
-    const radioClickHandler = (e, sortBy)=>{
+    const radioClickHandler = (e, selectedOption, radioOptionType)=>{
       const value = Number.parseInt(e.target.value)
       console.log("value---->", value)
-      const checkStatus = queryOptions.sort === value
+      const checkStatus = radioOptionType === 'sort' ? queryOptions.sort === value : queryOptions.status === value
       console.log("checkStatus-->", checkStatus)
       if(checkStatus){
           console.log("returning..")
           return
       }else{
           console.log("Checking radio..")
-          setQueryOptions(query=> {
-            return {...query, sort: value, sortBy}
-          })
+          if(radioOptionType === 'sort'){
+            setQueryOptions(query=> {
+              return {...query, sort: value, sortBy: selectedOption}
+            })
+          }else if(radioOptionType === 'status'){
+            setQueryOptions(query=> {
+              return {...query, status: value}
+            })
+          }
           const changeEvent = new Event('change', {bubbles:true})
           e.target.dispatchEvent(changeEvent)
       }
     }
   
-    const radioChangeHandler = (e, value)=>{
-      e.target.checked = (queryOptions.sort === Number.parseInt(value))
+    const radioChangeHandler = (e, value, radioOptionType)=>{
+      e.target.checked = radioOptionType === 'sort' ? (queryOptions.sort === Number.parseInt(value))
+            : (queryOptions.status === Number.parseInt(value))
     }
 
     const handleSort = (sortBy, sort)=> {
@@ -191,7 +181,30 @@ export default function AdminCouponManagementPage(){
                       Create Coupon
                     </button>
 
-                    <div className='flex items-center gap-[1rem]'>
+                    <div className='relative h-[35px] px-[16px] py-[8px] text-[14px] text-muted bg-white flex items-center 
+                        gap-[10px] justify-between border border-dropdownBorder rounded-[6px]  shadow-sm cursor-pointer
+                         hover:bg-gray-50 transition-colors optionDropdown sort-dropdown'
+                             onClick={(e)=> toggleDropdown('statusDropdown')} id='sort-options' ref={dropdownRefs.statusDropdown}>
+                         <span className='text-[13px] font-[470]'> Status </span>
+                         <MdSort className='h-[15px] w-[15px]'/>
+                         {openDropdowns.statusDropdown && 
+                         <ul className='list-none  px-[10px] py-[1rem] absolute top-[44px] right-0 flex flex-col gap-[10px] justify-center 
+                                 w-[12rem] text-[10px] bg-white border border-borderLight2 rounded-[8px] z-[5] cursor-pointer'>
+                             {
+                              statusTypes.map(statusType=> (
+                                <li key={`${statusType.name}`}> 
+                                 <span>  
+                                     <input type='radio' value={statusType.name} onClick={(e)=> radioClickHandler(e, statusType.name, 'status')}
+                                         onChange={(e)=> radioChangeHandler(e, statusType.name, 'status')} 
+                                         checked={queryOptions.status === Number(statusType.name) && queryOptions.status === statusType.name}/>
+                                     <span> {statusType.name} </span>
+                                 </span>
+                                </li>
+                              ))
+                             }
+                         </ul>
+                         }
+                    </div>
                       
                       <div className='relative h-[35px] px-[16px] py-[8px] text-[14px] text-muted bg-white flex items-center 
                         gap-[10px] justify-between border border-dropdownBorder rounded-[6px] shadow-sm cursor-pointer
@@ -212,50 +225,6 @@ export default function AdminCouponManagementPage(){
   
                             </div>
                          }
-                      </div>
-
-                      <div className='relative h-[35px] px-[16px] py-[8px] text-[14px] text-muted bg-white flex items-center 
-                        gap-[10px] justify-between border border-dropdownBorder rounded-[6px] shadow-sm cursor-pointer
-                         hover:bg-gray-50 transition-colors optionDropdown sort-dropdown'
-                             onClick={(e)=> toggleDropdown('statusDropdown')} id='sort-options' ref={dropdownRefs.statusDropdown}>
-                         <div className='flex items-center gap-[8px]'>
-                          {Object.keys(queryOptions).length > 0 &&
-                           (()=> {
-                             const StatusIcon = getStatusIcon(camelToCapitalizedWords(queryOptions.status))
-                             return <StatusIcon className='w-[19px] h-[19px] text-muted'/>
-                           })()
-                          }
-                          <div className='flex items-center gap-[5px]'>
-                            <span className='text-[13px] font-[470]'> Status: </span>
-                            <span className='text-secondary'> { camelToCapitalizedWords(queryOptions.status) } </span>
-                          </div>
-                         </div>
-                         {openDropdowns.statusDropdown && 
-                         <ul className='list-none px-[10px] py-[1rem] absolute top-[44px] right-0 flex flex-col gap-[10px] justify-center 
-                                 w-fit text-[10px] bg-white border border-borderLight2 rounded-[8px] z-[5] cursor-pointer'>
-                             {
-                              statusTypes.map(statusType=> (
-                                <li key={`${statusType.name}`} className={`px-[8px] py-[5px] flex items-center gap-[8px] rounded-[5px] 
-                                  hover:text-primaryDark hover:bg-[#F5FBD2] 
-                                      ${statusType.name === queryOptions.status ? 'text-primaryDark' : 'text-muted'}`}
-                                 onClick={()=> {
-                                  setQueryOptions(query=> {
-                                    return {...query, status: convertToCamelCase(statusType.name)}
-                                  })
-                                }}> 
-                                 {
-                                    (()=> {
-                                      const StatusIcon = getStatusIcon(statusType.name)
-                                      return <StatusIcon className='w-[17px] h-[17px] text-muted'/>
-                                    })()
-                                  }
-                                  <span className='text-[12px]'> { camelToCapitalizedWords(statusType.name) } </span>
-                                </li>
-                              ))
-                             }
-                         </ul>
-                         }
-                      </div>
                       </div>
                     </div>
 
@@ -308,8 +277,8 @@ export default function AdminCouponManagementPage(){
                                   sortTypes.map(sortType=> (
                                     <li key={`${sortType.value}-${sortType.sortBy}`}> 
                                      <span>  
-                                         <input type='radio' value={sortType.value} onClick={(e)=> radioClickHandler(e, sortType.sortBy)}
-                                             onChange={(e)=> radioChangeHandler(e, sortType.value, sortType.sortBy)} 
+                                         <input type='radio' value={sortType.value} onClick={(e)=> radioClickHandler(e, sortType.sortBy, 'sort')}
+                                             onChange={(e)=> radioChangeHandler(e, sortType.value, sortType.sortBy, 'sort')} 
                                              checked={queryOptions.sort === Number(sortType.value) && queryOptions.sortBy === sortType.sortBy}/>
                                          <span> {sortType.name} </span>
                                      </span>

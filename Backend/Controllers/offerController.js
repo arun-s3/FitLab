@@ -125,6 +125,7 @@ const getAllOffers = async (req, res, next) => {
           applicableType,
           minimumOrderValue,
           usedCount,
+          status,
           searchData 
         } = queryOptions
 
@@ -144,15 +145,15 @@ const getAllOffers = async (req, res, next) => {
         if (applicableType && applicableType !== 'all'){
             filterConditions.applicableType = applicableType
         }
-
         if (minimumOrderValue){
             filterConditions.minimumOrderValue = { $lte: minimumOrderValue }
         }
-
         if (usedCount){
             filterConditions.usedCount = { $lte: usedCount }
         }
-
+        if (status !== 'all'){
+            filterConditions.status = status
+        }
         if (searchData){
             filterConditions.name = { $regex: searchData, $options: "i" }
         }

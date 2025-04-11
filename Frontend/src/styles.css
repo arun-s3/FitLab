@@ -2152,10 +2152,6 @@ select{
   height: 100vh;
 }
 
-.h-\[1px\]{
-  height: 1px;
-}
-
 .max-h-\[80vh\]{
   max-height: 80vh;
 }

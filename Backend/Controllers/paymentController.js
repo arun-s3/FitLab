@@ -11,10 +11,21 @@ const Product = require('../Models/productModel')
 const {errorHandler} = require('../Utils/errorHandler') 
 
 
+const getRazorpayKey = async (req, res, next)=> {
+    try{
+        console.log("Inside getRazorpayKeys of paymentController") 
+        res.status(200).json({key: process.env.RAZORPAY_KEY_ID})  
+    }
+    catch(error){
+        console.log("Error in getRazorpayKeys:", error.message)
+        next(error)
+    }
+}
+
 
 const createRazorpayPayment = async (req, res, next)=> {
     try {
-        console.log("Inside createOrder of orderController")   
+        console.log("Inside createRazorpayPayment of paymentController")   
         const { amount } = req.body
 
         const options = {
@@ -41,10 +52,11 @@ const createRazorpayPayment = async (req, res, next)=> {
 
   const verifyRazorpayPayment = async(req, res, next)=> {
     try{
-        const {razorpay_order_id, razorpay_payment_id, razorpay_signature, amount, receipt, notes} = req.body
+        console.log("Inside verifyRazorpayPayment of paymentController")   
+
+        const {razorpay_order_id, razorpay_payment_id, razorpay_signature, amount, receipt} = req.body
 
         const userId = req.user._id
-        const {orderId} = req.params
   
         const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
         hmac.update(`${razorpay_order_id}|${razorpay_payment_id}`)
@@ -60,10 +72,8 @@ const createRazorpayPayment = async (req, res, next)=> {
                 paymentMethod: 'razorpay',
                 paymentDate: Date.now(),
                 userId,
-                orderId, 
                 amount,
-                notes, 
-                receipt
+                receipt: receipt || ''
             })
             await payment.save()
             res.status(200).json({message: "Payment Success!"})
@@ -80,4 +90,4 @@ const createRazorpayPayment = async (req, res, next)=> {
   }
 
 
-module.exports = {createRazorpayPayment, verifyRazorpayPayment}
+module.exports = {getRazorpayKey, createRazorpayPayment, verifyRazorpayPayment}

@@ -3,6 +3,7 @@ const Cart = require('../Models/cartModel')
 const Product = require('../Models/productModel')
 const Offer = require('../Models/offerModel')
 const Coupon = require('../Models/couponModel')
+const Payment = require('../Models/paymentModel')
 
 const {calculateCharges} = require('./controllerUtils/taxesUtils')
 const {recalculateAndValidateCoupon} = require('./controllerUtils/couponsUtils')
@@ -100,7 +101,7 @@ const createOrder = async (req, res, next)=> {
         const { paymentDetails, shippingAddressId, couponCode } = req.body.orderDetails
         let orderStatus = 'processing'
         let deliveryDate
-        if (paymentDetails.paymentMethod === 'cashOnDelivery'){
+        if (paymentDetails.paymentMethod === 'cashOnDelivery' || paymentDetails.paymentMethod === 'razorpay'){
             orderStatus = 'confirmed'
             deliveryDate = new Date()
             deliveryDate.setDate(deliveryDate.getDate() + ESTIMATED_DELIVERY_DATE)
@@ -198,6 +199,12 @@ const createOrder = async (req, res, next)=> {
 
         await order.save();
         console.log("Order created successfully:", order)
+
+        if(paymentDetails.paymentMethod === 'razorpay'){
+          const payment = await Payment.findOne({paymentId: paymentDetails.transactionId})
+          payment.orderId = order._id
+          payment.save();
+        }
 
         if (coupon){
             coupon.usedCount += 1

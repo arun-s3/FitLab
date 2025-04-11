@@ -8,8 +8,8 @@ const paymentSchema = new mongoose.Schema({
     required: true,
   },
   orderId: {
-    type: String, 
-    required: true,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Order'
   },
   paymentOrderId: {
     type: String,
@@ -38,10 +38,6 @@ const paymentSchema = new mongoose.Schema({
   },
   receipt: {
     type: String,
-    default: ''
-  },
-  notes: {
-    type: Object,
     default: ''
   },
   paymentDate: {

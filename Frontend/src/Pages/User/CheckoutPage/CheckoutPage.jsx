@@ -54,6 +54,11 @@ export default function CheckoutPage(){
     useEffect(()=> {
       dispatch(getTheCart())
       dispatch(getAllAddress())
+
+      const script = document.createElement("script")
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.async = true
+      document.body.appendChild(script)
     },[])
 
     useEffect(()=> {
@@ -200,9 +205,74 @@ export default function CheckoutPage(){
       // }
   }
 
-  const checkoutHandler= ()=> {
-    dispatch( createOrder({orderDetails}) ) 
+  const checkoutHandler= async()=> {
+    try{
+      console.log("Inside checkoutHandler")
+      if(paymentMethod === 'razorpay'){
+        const response = await axios.post(`http://localhost:3000/payment/razorpay/order`,
+          {amount: cart.absoluteTotalWithTaxes.toFixed(2)}, { withCredentials: true }
+        )
+        // const data = await response.json()
+        console.log("razorpay created order--->", response.data.data)
+        handleRazorpayVerification(response.data.data)
+      }else{
+        dispatch( createOrder({orderDetails}) ) 
+      }
+    }
+    catch(error){
+      console.log('Error in checkoutHandler:', error.message)
+    }
   }
+
+  const handleRazorpayVerification = async (data) => {
+    const res = await axios.get('http://localhost:3000/payment/razorpay/key', { withCredentials: true })
+    console.log("Razorpay key --->", res.data.key)
+    const options = {
+        key: res.data.key,
+        amount: data.amount,
+        currency: data.currency,
+        name: "Fitlab",
+        description: "Fitlab test Mode",
+        order_id: data.id,
+        modal: {
+          ondismiss: function() {
+            alert("Payment was not completed!")
+          }
+        },
+        handler: async (response) => {
+            console.log("response from handler-->", response)
+            try {
+                const verifiedData = await axios.post('http://localhost:3000/payment/razorpay/verify', {
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_signature: response.razorpay_signature,
+                    amount: data.amount
+                }, 
+                { withCredentials: true }
+                )
+                console.log("verifiedData--->", verifiedData)
+                if (verifiedData.data.message.toLowerCase().includes('success')) {
+                    toast.success(verifiedData.data.message)
+                    dispatch( createOrder({
+                      orderDetails: {
+                        ...orderDetails, 
+                        paymentDetails: {paymentMethod: 'razorpay', transactionId: response.razorpay_payment_id, paymentStatus: 'completed'}
+                      }
+                    }) ) 
+                }else{
+                    toast.error('Payment Failed! Try again later!')
+                }
+            } catch (error) {
+                console.log(error)
+            }
+        },
+        theme: {
+            color: "#9f2af0"
+        }
+    };
+    const razorpayWindow = new window.Razorpay(options)
+    razorpayWindow.open()
+}
 
 
     return(

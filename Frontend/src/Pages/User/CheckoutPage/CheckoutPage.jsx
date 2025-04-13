@@ -15,6 +15,9 @@ import Header from '../../../Components/Header/Header'
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
 import OrderStepper from '../../../Components/OrderStepper/OrderStepper'
 import FeaturesDisplay from '../../../Components/FeaturesDisplay/FeaturesDisplay'
+import StripePayment from './StripePayment'
+// import StripeCheckout from './StripePayment'
+// import CardPayment from './CardPayment'
 import Footer from '../../../Components/Footer/Footer'
 import {addToCart, reduceFromCart, removeFromCart, getTheCart, resetCartStates} from '../../../Slices/cartSlice'
 import {createOrder, resetOrderStates} from '../../../Slices/orderSlice'
@@ -35,10 +38,12 @@ export default function CheckoutPage(){
 
     const [paymentMethod, setPaymentMethod] = useState('')
 
-    const [couponCode, setCouponCode] = useState('');
-    const [appliedDiscount, setAppliedDiscount] = useState('');
-    const [discountAmount, setDiscountAmount] = useState(0);
-    const [isCouponFocused, setIsCouponFocused] = useState(false);
+    const [cardElementChanged, setCardElementChanged] = useState(false)
+
+    const [couponCode, setCouponCode] = useState('')
+    const [appliedDiscount, setAppliedDiscount] = useState('')
+    const [discountAmount, setDiscountAmount] = useState(0)
+    const [isCouponFocused, setIsCouponFocused] = useState(false)
 
     const [orderDetails, setOrderDetails] = useState({})
 
@@ -129,15 +134,24 @@ export default function CheckoutPage(){
     const paymentOptions = [
       {
         name: 'razorpay',
-        icon: SiRazorpay
+        icon: './razorpay.png'
       },
       {
         name: 'wallet',
-        icon: IoWallet
+        icon: '/wallet.png'
+      },
+      {
+        name: 'paypal',
+        icon: '/paypal.png'
       },
       {
         name: 'cashOnDelivery',
-        icon: GiTakeMyMoney
+        icon: '/cod.png'
+      },
+      {
+        name: 'cards',
+        icon: '/card3.png',
+        // content: <StripePayment amount={cart.absoluteTotalWithTaxes.toFixed(2)} />
       }
     ]
 
@@ -196,18 +210,12 @@ export default function CheckoutPage(){
       setOrderDetails(orderDetails=> {
         return {...orderDetails, couponCode}
       })
-      // if (couponCode === 'SPRING2021') {
-      //   setAppliedDiscount(couponCode)
-      //   setDiscountAmount(20.95)
-      // } else {
-      //   setAppliedDiscount('')
-      //   setDiscountAmount(0)
-      // }
-  }
+    }
 
   const checkoutHandler= async()=> {
     try{
       console.log("Inside checkoutHandler")
+
       if(paymentMethod === 'razorpay'){
         const response = await axios.post(`http://localhost:3000/payment/razorpay/order`,
           {amount: cart.absoluteTotalWithTaxes.toFixed(2)}, { withCredentials: true }
@@ -215,7 +223,11 @@ export default function CheckoutPage(){
         // const data = await response.json()
         console.log("razorpay created order--->", response.data.data)
         handleRazorpayVerification(response.data.data)
-      }else{
+      }
+      else if(paymentMethod === 'card'){
+
+      }
+      else{
         dispatch( createOrder({orderDetails}) ) 
       }
     }
@@ -272,6 +284,10 @@ export default function CheckoutPage(){
     };
     const razorpayWindow = new window.Razorpay(options)
     razorpayWindow.open()
+}
+
+const handleStripePayment = ()=> {
+
 }
 
 
@@ -484,24 +500,47 @@ export default function CheckoutPage(){
                                 <div className='mt-[30px] grid grid-cols-2 gap-x-[3rem] gap-y-[1rem]'>
                                 {
                                   paymentOptions.map(option=> (
-                                      <div className={`px-[15px] py-[10px] w-[18rem] flex items-center justify-between
-                                            rounded-[5px] cursor-pointer hover:border-primaryDark hover:bg-primaryLight
+                                      <div className={`px-[15px] py-[10px] ${option.name === 'cards' ? 'col-span-2 w-[102%]' : 'w-[20rem]'}
+                                         flex items-center justify-between flex-wrap rounded-[5px] cursor-pointer
+                                           hover:border-primaryDark hover:bg-primaryLight
                                                ${paymentMethod === option.name ? 'border-2 border-primaryDark bg-primaryLight': 
                                                     'border border-mutedDashedSeperation'}`} id='checkout-payment-methods'
                                                         onClick={()=> setPaymentMethod(option.name)}>
                                         <div className='flex items-center gap-[10px]'>
-                                          <option.icon className='text-muted'/>
-                                          <span className='text-[15px]'> { camelToCapitalizedWords(option.name) } </span>
+                                          {/* <option.icon className='text-muted'/> */}
+                                          <img src={option.icon} className='w-[20px] h-[20px]'/>
+                                          <span className={`text-[15px] flex items-center 
+                                              ${paymentMethod === option.name && 'text-secondary font-medium'}`}>
+                                          { camelToCapitalizedWords(option.name) } 
+                                          {
+                                              option.name === 'cards' &&
+                                              <span className='ml-[5px] mt-[1px] text-[12px] text-muted'> 
+                                                  (All global cards taken - Visa, Mastercard, American Express, Discover, JCB, etc)
+                                              </span>
+                                          }
+                                          </span>
                                         </div>
                                         <input type='radio' className='border border-primaryDark cursor-pointer checked:bg-primaryDark' 
                                             onClick={(e)=> radioClickHandler(e, "paymentOption", option.name)} 
                                                 onChange={(e)=> radioChangeHandler(e, "paymentOption", option.name)}
                                                     checked={paymentMethod === option.name}/>
+                                        {
+                                          option.name === 'cards' &&
+                                          <div onClick={()=> setPaymentMethod('cards')}>
+                                            <StripePayment amount={cart.absoluteTotalWithTaxes.toFixed(2)} 
+                                              setCardElementChanged={setCardElementChanged} onPayment={handleStripePayment}/>
+                                          </div>
+                                        }
                                       </div>
                                   ))
                                 }
+                                <div>
+                                  {/* <StripePayment amount={cart.absoluteTotalWithTaxes.toFixed(2)} /> */}
+                                  {/* <StripeCheckout /> */}
+                                </div>
                                 </div>
                             </div>
+                            {/* <CardPayment /> */}
                         </div>
                     </div>
                    {
@@ -587,9 +626,13 @@ export default function CheckoutPage(){
                           </div>
                         </div>
                       
-                        <SiteSecondaryFillImpButton className='px-[50px] py-[9px] rounded-[7px]' clickHandler={()=> checkoutHandler()}>
-                          Place Order
-                        </SiteSecondaryFillImpButton>
+                        {
+                          (!cardElementChanged || paymentMethod !== 'cards') &&
+                          <SiteSecondaryFillImpButton className='px-[50px] py-[9px] rounded-[7px]' clickHandler={()=> checkoutHandler()}>
+                            Place Order
+                          </SiteSecondaryFillImpButton>
+                        }
+
                     </div>
 
                     </div>

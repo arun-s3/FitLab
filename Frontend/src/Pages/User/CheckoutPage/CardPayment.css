@@ -1,0 +1,12 @@
+#CardPayment iframe html .p-Accordion .AccordionItem > .p-AccordionButton{
+    display: none !important;
+}
+
+.stripe .Tab, .stripe .TabIcon, .stripe .TabLabel {
+  display: none !important;
+}
+
+.stripe .PaymentElement {
+  border: none !important;
+  box-shadow: none !important;
+}

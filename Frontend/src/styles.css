@@ -1264,6 +1264,10 @@ select{
   z-index: 5;
 }
 
+.col-span-2{
+  grid-column: span 2 / span 2;
+}
+
 .mx-\[1\.5rem\]{
   margin-left: 1.5rem;
   margin-right: 1.5rem;
@@ -1687,6 +1691,10 @@ select{
 
 .mt-\[16px\]{
   margin-top: 16px;
+}
+
+.mt-\[1px\]{
+  margin-top: 1px;
 }
 
 .mt-\[1rem\]{
@@ -2330,10 +2338,6 @@ select{
 
 .w-\[18px\]{
   width: 18px;
-}
-
-.w-\[18rem\]{
-  width: 18rem;
 }
 
 .w-\[19px\]{
@@ -5764,6 +5768,11 @@ select{
 .hover\:bg-purple-700:hover{
   --tw-bg-opacity: 1;
   background-color: rgb(126 34 206 / var(--tw-bg-opacity));
+}
+
+.hover\:bg-purple-800:hover{
+  --tw-bg-opacity: 1;
+  background-color: rgb(107 33 168 / var(--tw-bg-opacity));
 }
 
 .hover\:bg-purple-900:hover{

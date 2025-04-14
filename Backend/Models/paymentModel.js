@@ -21,7 +21,6 @@ const paymentSchema = new mongoose.Schema({
   },
   paymentSignature: {
     type: String,
-    required: true
   },
   amount: {
     type: Number,

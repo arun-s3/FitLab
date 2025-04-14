@@ -101,7 +101,7 @@ const createOrder = async (req, res, next)=> {
         const { paymentDetails, shippingAddressId, couponCode } = req.body.orderDetails
         let orderStatus = 'processing'
         let deliveryDate
-        if (paymentDetails.paymentMethod === 'cashOnDelivery' || paymentDetails.paymentMethod === 'razorpay'){
+        if (paymentDetails.paymentMethod !== 'wallet'){
             orderStatus = 'confirmed'
             deliveryDate = new Date()
             deliveryDate.setDate(deliveryDate.getDate() + ESTIMATED_DELIVERY_DATE)
@@ -200,7 +200,7 @@ const createOrder = async (req, res, next)=> {
         await order.save();
         console.log("Order created successfully:", order)
 
-        if(paymentDetails.paymentMethod === 'razorpay'){
+        if(paymentDetails.paymentMethod === 'razorpay' || paymentDetails.paymentMethod === 'stripe'){
           const payment = await Payment.findOne({paymentId: paymentDetails.transactionId})
           payment.orderId = order._id
           payment.save();

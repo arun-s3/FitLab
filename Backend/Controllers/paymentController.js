@@ -31,7 +31,7 @@ const createRazorpayPayment = async (req, res, next)=> {
         const options = {
           amount: amount * 100, 
           currency: 'INR',
-          receipt: `receipt_${Date.now()}`,
+          receipt: `Fitlab_Razorpay_${Date.now()}`,
         }
 
         Razorpay.orders.create(options, (error, order)=> {
@@ -54,7 +54,7 @@ const createRazorpayPayment = async (req, res, next)=> {
     try{
         console.log("Inside verifyRazorpayPayment of paymentController")   
 
-        const {razorpay_order_id, razorpay_payment_id, razorpay_signature, amount, receipt} = req.body
+        const {razorpay_order_id, razorpay_payment_id, razorpay_signature, amount} = req.body
 
         const userId = req.user._id
   
@@ -64,6 +64,9 @@ const createRazorpayPayment = async (req, res, next)=> {
 
         const isAuthentic = expectedSignature === razorpay_signature
 
+        const order = await Razorpay.orders.fetch(razorpay_order_id)
+        const receipt = order?.receipt
+
         if (isAuthentic){
             const payment = new Payment({
                 paymentOrderId: razorpay_order_id,
@@ -72,7 +75,7 @@ const createRazorpayPayment = async (req, res, next)=> {
                 paymentMethod: 'razorpay',
                 paymentDate: Date.now(),
                 userId,
-                amount,
+                amount: amount / 100,
                 receipt: receipt || ''
             })
             await payment.save()
@@ -117,20 +120,24 @@ const createRazorpayPayment = async (req, res, next)=> {
   const saveStripePayment = async(req, res, next)=> {
     try{
         const userId = req.user._id
-        const { paymentIntent } = req.body
+        const { paymentDatas } = req.body
+        console.log("paymentDatas-->", JSON.stringify(paymentDatas))
+
+        const paymentIntent = await stripe.paymentIntents.retrieve(paymentDatas.paymentId, { expand: ['latest_charge'] })
+        console.log("paymentIntent--->", JSON.stringify(paymentIntent, null, 2))
+      
+        const receipt = paymentIntent.latest_charge?.receipt_url || ''
 
         const payment = new Payment({
-            paymentId: paymentIntent.id,
-            // status: paymentIntent.status,
-            paymentMethod: 'stripe',
+            ...paymentDatas,
             paymentDate: Date.now(),
+            receipt,
             userId,
-            amount,
-            receipt: receipt || ''
           });
         
         await payment.save();
 
+        res.status(200).json({ message: 'Payment saved!' })
     }
     catch(error){
         console.log("Error in saveStripePayment:", error.message)

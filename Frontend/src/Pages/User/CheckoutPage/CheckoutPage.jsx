@@ -38,7 +38,7 @@ export default function CheckoutPage(){
 
     const [paymentMethod, setPaymentMethod] = useState('')
 
-    const [cardElementChanged, setCardElementChanged] = useState(false)
+    const [cardsEnterError, setCardsEnterError] = useState('')
 
     const [couponCode, setCouponCode] = useState('')
     const [appliedDiscount, setAppliedDiscount] = useState('')
@@ -102,29 +102,6 @@ export default function CheckoutPage(){
         setTimeout(()=> setOrderReviewError(''), 2500)
       }
     },[orderCreated, orderMessage, orderError, orderReviewError])
-
-    // useEffect(() => {
-    //   async function loadCharges() {
-    //     try {
-    //       const response = await axios.post("http://localhost:3000/cart/calculate-charges", {absoluteTotal: cart.absoluteTotal, products: cart.products},
-    //         { withCredentials: true }
-    //       )
-    //       console.log("Response from calculate-charges", response.data)
-    //       const {deliveryCharges, gstCharge, absoluteTotalWithTaxes} = response.data.rates
-  
-    //       setShipping(deliveryCharges)
-    //       setGst(gstCharge)
-    //       setAbsoluteTotalWithTaxes(absoluteTotalWithTaxes)
-    //     }catch(error){
-    //       console.error("Error in loadCharges -->", error.message);
-    //     }
-    //   }
-  
-    //   if (cart.products.length > 0) {
-    //     setAbsoluteTotalWithTaxes(cart.absoluteTotal)
-    //     loadCharges()
-    //   }
-    // }, [cart])
 
     const headerBg = {
         backgroundImage: "url('/header-bg.png')",
@@ -215,7 +192,14 @@ export default function CheckoutPage(){
   const checkoutHandler= async()=> {
     try{
       console.log("Inside checkoutHandler")
-
+      if(paymentMethod === ''){
+        toast.error('Please select a payment Method!')
+        return
+      }
+      if(Object.keys(shippingAddress) === 0){
+        toast.error('Please select a delivery address!')
+        return
+      }
       if(paymentMethod === 'razorpay'){
         const response = await axios.post(`http://localhost:3000/payment/razorpay/order`,
           {amount: cart.absoluteTotalWithTaxes.toFixed(2)}, { withCredentials: true }
@@ -286,8 +270,14 @@ export default function CheckoutPage(){
     razorpayWindow.open()
 }
 
-const handleStripePayment = ()=> {
-
+const handleStripePayment = (paymentId)=> {
+  toast.success("Payment Successfull!")
+  dispatch( createOrder({
+    orderDetails: {
+      ...orderDetails, 
+      paymentDetails: {paymentMethod: 'stripe', transactionId: paymentId, paymentStatus: 'completed'}
+    }
+  }) ) 
 }
 
 
@@ -316,20 +306,7 @@ const handleStripePayment = ()=> {
                                     <h2> Review Your Orders </h2>
                                 </div>
                                 <div className='mt-[30px] grid grid-cols-2 gap-x-[3rem] gap-y-[1rem]'>
-                                    {/* <div className='flex gap-[10px]'>
-                                        <figure className='h-[100px] w-[100px] rounded-[5px]'>
-                                            <img alt='' src='https://placehold.co/100x100' className='h-[100px] w-[100px] rounded-[5px]'/>
-                                        </figure>
-                                        <div className='flex flex-col justify-between'>
-                                            <div>
-                                                <h5 className='text-[15px] font-[500]'> Barbell M15 </h5>
-                                                <h6 className='text-[10px] text-muted'> WEIGHT: 10kg </h6>
-                                            </div>
-                                            <p className='text-[10px] text-muted'> QTY: 2 </p>
-                                        </div>
-                                        <h5 className='self-end ml-[10px]'> &#8377;50000 </h5>
-                                    </div> */}
-                                    {/* <div className="space-y-4 mb-6"> */}
+
                                   {cart.products &&
                                   cart.products.map((product) => (
                                   <div key={product.productId}>
@@ -362,7 +339,7 @@ const handleStripePayment = ()=> {
                                             </button>
                                           </div>
                                           <span className="text-[14px] font-[450] flex flex-col">
-                                            <span className='line-through decoration-[1.6px] decoration-red-500'>
+                                            <span className={`${ product?.offerApplied && 'line-through decoration-[1.6px] decoration-red-500'}`}>
                                               &#8377; {(product.price).toFixed(2)} 
                                             </span>
                                             { product?.offerApplied && product?.offerDiscount &&
@@ -514,8 +491,8 @@ const handleStripePayment = ()=> {
                                           { camelToCapitalizedWords(option.name) } 
                                           {
                                               option.name === 'cards' &&
-                                              <span className='ml-[5px] mt-[1px] text-[12px] text-muted'> 
-                                                  (All global cards taken - Visa, Mastercard, American Express, Discover, JCB, etc)
+                                              <span className='ml-[5px] mt-[1px] text-[12px] text-muted font-normal'> 
+                                                  (All global cards accepted - Visa, Mastercard, American Express, Discover, JCB, etc)
                                               </span>
                                           }
                                           </span>
@@ -526,10 +503,26 @@ const handleStripePayment = ()=> {
                                                     checked={paymentMethod === option.name}/>
                                         {
                                           option.name === 'cards' &&
-                                          <div onClick={()=> setPaymentMethod('cards')}>
-                                            <StripePayment amount={cart.absoluteTotalWithTaxes.toFixed(2)} 
-                                              setCardElementChanged={setCardElementChanged} onPayment={handleStripePayment}/>
-                                          </div>
+                                            <div className='relative w-full'>
+                                                <p className='absolute top-[5px] text-[10px] text-red-500 font-medium tracking-[0.3px] z-[30]'>
+                                                  {cardsEnterError && cardsEnterError} 
+                                                </p>
+
+                                                {
+                                                  cart && cart?.absoluteTotalWithTaxes &&
+                                                  <StripePayment amount={cart.absoluteTotalWithTaxes.toFixed(2)} 
+                                                    onPayment={(id)=> handleStripePayment(id)}/>
+                                                }
+
+                                               {
+                                                 paymentMethod !== 'cards' &&
+                                                 <div className='absolute top-[1.5rem] left-[1.5rem] right-[1.5rem] bottom-[1.5rem]
+                                                   cursor-not-allowed z-[10]' 
+                                                    style={{background: 'rgba(255,255,255,0.3)'}} 
+                                                      onMouseEnter={()=> setCardsEnterError("Please select the cards' radiobutton first!")}
+                                                        onMouseLeave={()=> setCardsEnterError('')}/>
+                                               }
+                                            </div>
                                         }
                                       </div>
                                   ))
@@ -612,13 +605,13 @@ const handleStripePayment = ()=> {
                             <span> {cart.deliveryCharge === 0 ? 'Free' : `₹${cart.gst}`} </span>
                           </div>
                           {
-                            cart?.couponDiscount &&
+                            cart?.couponDiscount ?
                             <div className="flex justify-between !mt-[2rem]">
                               <span className="text-green-600"> Coupon Discount </span>
                               <span className='flex items-center gap-[5px]'>
                                 <Minus className='w-[13px]'/> ₹{cart.couponDiscount.toFixed(2)}
                               </span>
-                            </div>
+                            </div> : null
                           }
                           <div className="flex justify-between text-lg font-bold pt-2">
                             <span> Total </span>
@@ -626,12 +619,12 @@ const handleStripePayment = ()=> {
                           </div>
                         </div>
                       
-                        {
-                          (!cardElementChanged || paymentMethod !== 'cards') &&
-                          <SiteSecondaryFillImpButton className='px-[50px] py-[9px] rounded-[7px]' clickHandler={()=> checkoutHandler()}>
-                            Place Order
+                          <SiteSecondaryFillImpButton className={`px-[50px] py-[9px] rounded-[7px] 
+                            ${paymentMethod === 'cards' && 'hidden'}`} clickHandler={()=> checkoutHandler()}>
+                              {
+                                paymentMethod === 'cashOnDelivery' || paymentMethod === '' ? 'Place Order' : 'Pay and Place Order'
+                              }
                           </SiteSecondaryFillImpButton>
-                        }
 
                     </div>
 

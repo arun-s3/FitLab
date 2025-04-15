@@ -16,6 +16,7 @@ import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
 import OrderStepper from '../../../Components/OrderStepper/OrderStepper'
 import FeaturesDisplay from '../../../Components/FeaturesDisplay/FeaturesDisplay'
 import StripePayment from './StripePayment'
+import PaypalPayment from './PayPalPayment'
 // import StripeCheckout from './StripePayment'
 // import CardPayment from './CardPayment'
 import Footer from '../../../Components/Footer/Footer'
@@ -270,12 +271,13 @@ export default function CheckoutPage(){
     razorpayWindow.open()
 }
 
-const handleStripePayment = (paymentId)=> {
+const handleStripeOrPaypalPayment = (paymentGateway, paymentId)=> {
   toast.success("Payment Successfull!")
+  const paymentMethod = paymentGateway
   dispatch( createOrder({
     orderDetails: {
       ...orderDetails, 
-      paymentDetails: {paymentMethod: 'stripe', transactionId: paymentId, paymentStatus: 'completed'}
+      paymentDetails: {paymentMethod, transactionId: paymentId, paymentStatus: 'completed'}
     }
   }) ) 
 }
@@ -511,7 +513,7 @@ const handleStripePayment = (paymentId)=> {
                                                 {
                                                   cart && cart?.absoluteTotalWithTaxes &&
                                                   <StripePayment amount={cart.absoluteTotalWithTaxes.toFixed(2)} 
-                                                    onPayment={(id)=> handleStripePayment(id)}/>
+                                                    onPayment={(id)=> handleStripeOrPaypalPayment('stripe', id)}/>
                                                 }
 
                                                {
@@ -619,12 +621,22 @@ const handleStripePayment = (paymentId)=> {
                           </div>
                         </div>
                       
-                          <SiteSecondaryFillImpButton className={`px-[50px] py-[9px] rounded-[7px] 
-                            ${paymentMethod === 'cards' && 'hidden'}`} clickHandler={()=> checkoutHandler()}>
-                              {
-                                paymentMethod === 'cashOnDelivery' || paymentMethod === '' ? 'Place Order' : 'Pay and Place Order'
-                              }
-                          </SiteSecondaryFillImpButton>
+                          {
+                            paymentMethod !== 'paypal' ?
+                            <SiteSecondaryFillImpButton className={`px-[50px] py-[9px] rounded-[7px] 
+                              ${paymentMethod === 'cards' && 'hidden'}`} clickHandler={()=> checkoutHandler()}>
+                                {
+                                  paymentMethod === 'cashOnDelivery' || paymentMethod === '' ? 'Place Order' : 'Pay and Place Order'
+                                }
+                            </SiteSecondaryFillImpButton>
+                            :
+                            (cart && cart?.absoluteTotalWithTaxes) ?
+
+                            <PaypalPayment amount={cart.absoluteTotalWithTaxes.toFixed(2)} 
+                              onPayment={(id)=> handleStripeOrPaypalPayment('paypal', id)} />
+
+                            :null
+                          }
 
                     </div>
 

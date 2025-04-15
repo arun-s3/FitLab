@@ -5,9 +5,10 @@ const Razorpay = require('../Utils/razorpay')
 const Order = require('../Models/orderModel')
 const Cart = require('../Models/cartModel')
 const Product = require('../Models/productModel')
-// const Offer = require('../Models/offerModel')
-// const Coupon = require('../Models/couponModel')
+
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
+const {paypal, client} = require('../Utils/paypal')
+
 const {errorHandler} = require('../Utils/errorHandler') 
 
 
@@ -145,7 +146,139 @@ const createRazorpayPayment = async (req, res, next)=> {
     }
   }
 
+
+const getPaypalClientId = async (req, res, next)=> {
+    try{
+        console.log("Inside getPaypalClientId of paymentController") 
+        res.status(200).json({id: process.env.PAYPAL_CLIENT_ID})  
+    }
+    catch(error){
+        console.log("Error in getPaypalClientId:", error.message)
+        next(error)
+    }
+}
+
+  
+const createPaypalOrder = async (req, res)=> {
+    console.log("Inside createPaypalOrder of paymentController") 
+    const {amount} = req.body 
+    console.log("amount--->", amount)
+    if (!amount || isNaN(amount)) {
+        return res.status(400).json({ error: true, message: "Invalid amount provided." });
+    }
+
+    const request = new paypal.orders.OrdersCreateRequest()
+
+    request.prefer("return=representation")
+    request.requestBody({
+      intent: "CAPTURE",
+      purchase_units: [{
+        amount: {
+          currency_code: "USD",
+          value: amount
+        }
+      }],
+      application_context: {
+        return_url: "http://localhost:5173/order-confirm",
+        cancel_url: "http://localhost:5173/checkout"
+      }
+    })
+
+    try{
+      const order = await client.execute(request)
+      res.status(200).json({ id: order.result.id })
+    }
+    catch (error) {
+      console.error("PayPal create order error:", error)
+      res.status(500).json({
+        error: true,
+        message: error.message,
+        details: error?.response?.data?.details || [],
+        debug_id: error?.response?.data?.debug_id || null
+      })
+    //   next(errorHandler(500, "Payment creation failed."))
+    }
+  }
+
+
+  const capturePaypalOrder = async (req, res) => {
+    console.log("Inside capturePaypalOrder of paymentController")
+    const {orderId} = req.body
+    console.log("orderId--->", orderId)
+  
+    if (!orderId) {
+      return res.status(400).json({ error: true, message: "Missing order ID" })
+    }
+  
+    const request = new paypal.orders.OrdersCaptureRequest(orderId)
+    request.requestBody({}) // Required even if it's empty
+  
+    try {
+      const capture = await client.execute(request)
+      console.log('Sending captureResult....')
+  
+      res.status(200).json({
+        success: true,
+        message: "Order captured successfully",
+        captureResult: capture.result
+      })
+    } catch (error) {
+      console.error("PayPal capture error:", error)
+  
+      res.status(500).json({
+        error: true,
+        message: error.message || "Capture failed",
+        details: error?.response?.data?.details || [],
+        debug_id: error?.response?.data?.debug_id || null
+      })
+    }
+  }
+
+
+  const savePaypalPayment = async (req, res,next)=> {
+    try {
+      console.log("Inside savePaypalPayment of paymentController")
+      const {captureResult, inrAmount} = req.body
+
+      const userId = req.user._id
+  
+      if (!userId || !captureResult) {
+        return res.status(400).json({ error: 'Missing required fields' })
+      }
+  
+      const purchaseUnit = captureResult?.purchase_units?.[0]
+      const capture = purchaseUnit?.payments?.captures?.[0]
+  
+      if (!capture) {
+        return res.status(400).json({ error: 'Invalid PayPal capture response structure' })
+      }
+
+      const newPayment = new Payment({
+        userId,
+        paymentOrderId: captureResult.id,      
+        paymentId: capture.id,                  
+        amount: inrAmount.toFixed(2), 
+        paymentMethod: 'paypal',
+        receipt: capture.invoice_id || `Fitlab-${new Date().getTime()}-${capture.id}` || '',
+        paymentDate: capture.create_time ? new Date(capture.create_time) : Date.now()
+      })
+  
+      const savedPayment = await newPayment.save();
+      res.status(201).json({
+        success: true,
+        message: 'Payment saved successfully',
+        payment: savedPayment
+      })
+  
+    } 
+    catch (error) {
+      console.error('Error saving PayPal payment:', error.message);
+      next(error)
+    }
+  }
+
   
 
 
-module.exports = {getRazorpayKey, createRazorpayPayment, verifyRazorpayPayment, createStripePayment, saveStripePayment}
+module.exports = {getRazorpayKey, createRazorpayPayment, verifyRazorpayPayment, createStripePayment, saveStripePayment,
+    getPaypalClientId, createPaypalOrder, capturePaypalOrder, savePaypalPayment }

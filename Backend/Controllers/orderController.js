@@ -200,7 +200,7 @@ const createOrder = async (req, res, next)=> {
         await order.save();
         console.log("Order created successfully:", order)
 
-        if(paymentDetails.paymentMethod === 'razorpay' || paymentDetails.paymentMethod === 'stripe'){
+        if(paymentDetails.paymentMethod === 'razorpay' || paymentDetails.paymentMethod === 'stripe' || paymentDetails.paymentMethod === 'paypal'){
           const payment = await Payment.findOne({paymentId: paymentDetails.transactionId})
           payment.orderId = order._id
           payment.save();

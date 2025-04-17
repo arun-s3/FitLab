@@ -20,7 +20,7 @@ export default function UserSidebar({currentPath, openMenuByDefault = true, flex
         { icon: Home, label: 'Account', path: '/account'},
         { icon: Clock, label: 'Order History', path: '/orders' },
         { icon: IoBagCheckOutline, label: 'Checkout', path: '/checkout' },
-        { icon: CreditCard, label: 'Wallet', path: '' },
+        { icon: CreditCard, label: 'Wallet', path: '/wallet' },
         { icon: ShoppingCart, label: 'Shopping Cart', path: '/cart' },
         { icon: Heart, label: 'Wishlist', path: '/wishlist' },
         { icon: BadgePercent, label: 'Coupons', path: '/coupons' },

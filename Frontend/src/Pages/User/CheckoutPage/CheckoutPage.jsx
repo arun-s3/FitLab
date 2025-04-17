@@ -30,10 +30,6 @@ import {camelToCapitalizedWords, capitalizeFirstLetter, convertToCamelCase} from
 export default function CheckoutPage(){
     
     const [currentProductIndex, setCurrentProductIndex] = useState(0)
-  
-    // const [shipping, setShipping] = useState(0)
-    // const [gst, setGst] = useState(0)
-    // const [absoluteTotalWithTaxes, setAbsoluteTotalWithTaxes] = useState(0)
 
     const [shippingAddress, setShippingAddress] = useState({})
 
@@ -57,15 +53,15 @@ export default function CheckoutPage(){
 
     const navigate = useNavigate()
 
-    useEffect(()=> {
-      dispatch(getTheCart())
-      dispatch(getAllAddress())
+    // useEffect(()=> {
+    //   dispatch(getTheCart())
+    //   dispatch(getAllAddress())
 
-      const script = document.createElement("script")
-      script.src = "https://checkout.razorpay.com/v1/checkout.js";
-      script.async = true
-      document.body.appendChild(script)
-    },[])
+    //   const script = document.createElement("script")
+    //   script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    //   script.async = true
+    //   document.body.appendChild(script)
+    // },[])
 
     useEffect(()=> {
       const defaultAddress = addresses.find(address=> address.defaultAddress)
@@ -129,7 +125,6 @@ export default function CheckoutPage(){
       {
         name: 'cards',
         icon: '/card3.png',
-        // content: <StripePayment amount={cart.absoluteTotalWithTaxes.toFixed(2)} />
       }
     ]
 
@@ -529,13 +524,8 @@ const handleStripeOrPaypalPayment = (paymentGateway, paymentId)=> {
                                       </div>
                                   ))
                                 }
-                                <div>
-                                  {/* <StripePayment amount={cart.absoluteTotalWithTaxes.toFixed(2)} /> */}
-                                  {/* <StripeCheckout /> */}
-                                </div>
                                 </div>
                             </div>
-                            {/* <CardPayment /> */}
                         </div>
                     </div>
                    {
@@ -632,9 +622,12 @@ const handleStripeOrPaypalPayment = (paymentGateway, paymentId)=> {
                             :
                             (cart && cart?.absoluteTotalWithTaxes) ?
 
-                            <PaypalPayment amount={cart.absoluteTotalWithTaxes.toFixed(2)} 
-                              onPayment={(id)=> handleStripeOrPaypalPayment('paypal', id)} />
+                            <div className='mt-[1rem]'>
 
+                                <PaypalPayment amount={cart.absoluteTotalWithTaxes.toFixed(2)} 
+                                    onPayment={(id)=> handleStripeOrPaypalPayment('paypal', id)} />
+
+                            </div>
                             :null
                           }
 

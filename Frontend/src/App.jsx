@@ -21,6 +21,7 @@ import CouponPage from './Pages/User/CouponPage/CouponPage'
 import CheckoutPage from './Pages/User/CheckoutPage/CheckoutPage'
 import OrderConfirmationPage from './Pages/User/OrderConfirmationPage/OrderConfirmationPage'
 import OrderHistoryPage from './Pages/User/OrderHistoryPage/OrderHistoryPage'
+import WalletPage from './Pages/User/WalletPage/WalletPage'
 
 import AdminSignInPage from './Pages/Admin/AdminSignInPage/AdminSignInPage'
 import AdminPageLayout from './Pages/Admin/AdminPageLayout/AdminPageLayout'
@@ -94,9 +95,11 @@ export default function App(){
                     </Route>
                     <Route path='wishlist' element={<WishlistPage/>} />
                     <Route path='coupons' element={<CouponPage/>} />
+                    <Route path='wallet' element={<WalletPage/>} />
                     {/* <Route path='wishlist-test' element={<WishlistPage/>} /> */}
                 </Route>
                 <Route path='orders' element={<OrderHistoryPage/>} />
+                {/* <Route path='wallet' element={<WalletPage/>} /> */}
                 <Route path='profile'> 
                 </Route>
                 {/* </Route> */}

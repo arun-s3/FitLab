@@ -5,15 +5,17 @@ import {toast} from 'react-toastify'
 
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js'
 
+import {CustomHashLoader} from '../../../Components/Loader/Loader'
 
-function Message({ content }) {
-    return <p>{content}</p>;
-}
+
+
 
 export default function PaypalPayment({amount, onPayment}) {
 
     const [message, setMessage] = useState("")
     const [clientId, setClientId] = useState(null)
+
+    const currencyApiKey = import.meta.env.VITE_EXCHANGERATEAPI_KEY
 
     useEffect(() => {
         axios.get('http://localhost:3000/payment/paypal/clientid', {withCredentials: true})
@@ -26,6 +28,22 @@ export default function PaypalPayment({amount, onPayment}) {
             console.log('clientId from useEffect-->', clientId)
         }
     },[clientId])
+
+    const findUsdAmount = async(amount)=> {
+        const currencyRateResponse = await fetch(`https://v6.exchangerate-api.com/v6/${currencyApiKey}/latest/INR`)
+        const data = await currencyRateResponse.json()
+        const usdRate = data.conversion_rates.USD
+        console.log("usdRate--->", usdRate)
+        return (amount * usdRate)
+    }
+
+    const findInrAmount = async(amount)=> {
+        const currencyRateResponse = await fetch(`https://v6.exchangerate-api.com/v6/${currencyApiKey}/latest/USD`)
+        const data = await currencyRateResponse.json()
+        const inrRate = data.conversion_rates.INR
+        console.log("inrRate--->", inrRate)
+        return (amount * inrRate)
+    }
 
     const initialOptions = {
         "client-id": clientId,
@@ -42,14 +60,9 @@ export default function PaypalPayment({amount, onPayment}) {
     const makePaypalOrder = async()=> {
         try {
             console.log('clientId--->', clientId)
-            const currencyApiKey = import.meta.env.VITE_EXCHANGERATEAPI_KEY
-            const currencyRateResponse = await fetch(`https://v6.exchangerate-api.com/v6/${currencyApiKey}/latest/INR`)
-            const data = await currencyRateResponse.json()
-            const usdRate = data.conversion_rates.USD
-            console.log("usdRate--->", usdRate)
-
-            const usdAmount = amount * usdRate
-
+            
+            const usdAmount = await findUsdAmount(amount)
+            
             const response = await fetch("http://localhost:3000/payment/paypal/order", {
                 method: "POST",
                 headers: {
@@ -63,13 +76,12 @@ export default function PaypalPayment({amount, onPayment}) {
 
             if (orderData.id) {
                 return orderData.id
-            } else {
+            }else{
                 const errorDetail = orderData?.details?.[0]
                 const errorMessage = errorDetail
                     ? `${errorDetail.issue} ${errorDetail.description} (${orderData.debug_id})`
                     : JSON.stringify(orderData)
 
-                // throw new Error(errorMessage)
                 toast.error(errorMessage)
                 return
             }
@@ -93,44 +105,27 @@ export default function PaypalPayment({amount, onPayment}) {
                     },
                     body: JSON.stringify({orderId: data.orderID})
                 }
-            );
+            )
 
             const orderData = await response.json()
             const errorDetail = orderData?.details?.[0]
 
             if (errorDetail?.issue === "INSTRUMENT_DECLINED") {
-                // (1) Recoverable INSTRUMENT_DECLINED -> call actions.restart()
-                // recoverable state, per https://developer.paypal.com/docs/checkout/standard/customize/handle-funding-failures/
-                return actions.restart();
+                return actions.restart()
             } else if (errorDetail) {
-                // (2) Other non-recoverable errors -> Show a failure message
-                // throw new Error(
-                //     `${errorDetail.description} (${orderData.debug_id})`
-                // )
                 toast.error(`${errorDetail.description} (${orderData.debug_id})`)
                 return
             } else {
-                // (3) Successful transaction -> Show confirmation or thank you message
-                // Or go to another URL:  actions.redirect('thank_you.html');
                 const transaction = orderData.captureResult.purchase_units[0].payments.captures[0]
-                setMessage(
-                    `Transaction ${transaction.status}: ${transaction.id}. See console for all available details`
-                );
+                setMessage(`Transaction ${transaction.status}: ${transaction.id}. See console for all available details`)
                 console.log('Payment Completed!')
                 console.log(
                     "Capture result",
                     orderData,
                     JSON.stringify(orderData, null, 2)
-                );
+                )
 
-                const currencyApiKey = import.meta.env.VITE_EXCHANGERATEAPI_KEY
-
-                const currencyRateResponse = await fetch(`https://v6.exchangerate-api.com/v6/${currencyApiKey}/latest/USD`)
-                const data = await currencyRateResponse.json()
-                const inrRate = data.conversion_rates.INR
-                console.log("inrRate--->", inrRate)
-                
-                const inrAmount = transaction.amount.value * inrRate
+                const inrAmount = await findInrAmount(transaction.amount.value)
                 console.log("inrRate--->", inrAmount)
 
                 await axios.post('http://localhost:3000/payment/paypal/save', 
@@ -140,18 +135,17 @@ export default function PaypalPayment({amount, onPayment}) {
 
                 onPayment(transaction.id)
             }
-        } catch (error) {
-            console.error(error);
-            setMessage(
-                `Sorry, your transaction could not be processed...${error}`
-            );
+        }
+        catch (error){
+            console.error(error)
+            setMessage(`Sorry, your transaction could not be processed...${error}`)
             toast.error(`Sorry, your transaction could not be processed...${error}`)
         }
     }
 
 
     return (
-        <div className="App">
+        <div className="PaypalPayment">
             {
                 clientId ?
                 <PayPalScriptProvider options={initialOptions}>
@@ -170,9 +164,10 @@ export default function PaypalPayment({amount, onPayment}) {
                        onApprove={(data, actions)=> onPaypalApproval(data, actions)}
                     />
                 </PayPalScriptProvider>
-                : <p> Loading PayPal... </p>
+                
+                : <CustomHashLoader loading={!clientId}/>
             }
-            <Message content={message} />
+            <p className="text-[12px] text-red-500 tracking-[0.2px]"> {message} </p>
         </div>
     );
 }

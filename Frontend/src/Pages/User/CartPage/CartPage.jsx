@@ -49,7 +49,7 @@ export default function ShoppingCartPage(){
   useEffect(()=> {
     dispatch(getTheCart())
     console.log("bestCoupon--->", bestCoupon)
-    if(Object.keys(bestCoupon).length <= 0){
+    if(bestCoupon && Object.keys(bestCoupon).length <= 0){
       console.log("Getting the best coupon...")
       dispatch(getBestCoupon())
     }

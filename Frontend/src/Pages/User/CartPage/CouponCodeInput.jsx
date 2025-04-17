@@ -21,7 +21,7 @@ export default function CouponCodeInput({couponCode, setCouponCode}){
 
   useEffect(()=> {
     console.log("bestCoupon from CouponCodeInput--->", bestCoupon)
-    if(Object.keys(bestCoupon).length > 0 && !couponCode && !cart.couponUsed){
+    if(bestCoupon && Object.keys(bestCoupon).length > 0 && !couponCode && !cart.couponUsed){
       console.log("Inside useEffect of CouponCodeInput for bestCoupon")
       setCouponCode(bestCoupon.code)
       console.log("Dispatching applyCoupon the best coupon...")

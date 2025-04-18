@@ -233,7 +233,13 @@ export default function WalletPage() {
                               <td className="text-sm text-secondary"> {transaction.referenceAc} </td>
                               <td className="text-sm text-muted"> 
                                <span className="font-medium"> Notes: </span>
-                               <span className="capitalize"> {transaction.notes ? transaction.notes : '--'} </span>
+                               <span className="capitalize">
+                                {
+                                  transaction.notes ? 
+                                  transaction.notes.length > 25 ? transaction.notes.slice(0,25) + '...' : transaction.notes
+                                  : '---'
+                                } 
+                               </span>
                               </td>
                               <td>
                                 {

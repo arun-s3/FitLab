@@ -5,8 +5,11 @@ import {useDispatch, useSelector} from 'react-redux'
 
 import { ArrowUp, Calendar, ChevronDown, ChevronRight, Clipboard, CloudLightningIcon as Lightning, PlusCircle,
   Share2, Tag, Users, Eye, EyeOff, Plus, Clock, CreditCard, Download} from "lucide-react"
+import {toast} from 'react-toastify'
+import axios from 'axios'
 
 import {UserPageLayoutContext} from '../UserPageLayout/UserPageLayout'
+import WalletFundingModal from "./WalletFundingModal"
 
 
 export default function WalletPage() {
@@ -19,40 +22,93 @@ export default function WalletPage() {
 
     setContentTileClasses('basis-[85%] mt-[2rem]')
 
-    const [accountNo, setAccountNo] = useState('724598567414')
+    const [wallet, setWallet] = useState({})
+    const [firstTimeUser, setFirstTimeUser] = useState(false)
+
+    const [message, setMessage] = useState('')
+
+    const [accountNo, setAccountNo] = useState('')
     const [showAcNumber, setShowAcNumber] = useState(false)
     const [hiddenAccountNo, setHiddenAccountNo] = useState('')
+
+    const [showFundingModal, setShowFundingModal] = useState(false)
+    const [paymentVia, setPaymentVia] = useState("razorpayAndPaypal")
+  
+    const openFundingModal = () => {
+      console.log("Opening funding modal...")
+      setShowFundingModal(true)
+    }
+  
+    const closeFundingModal = () => {
+      setShowFundingModal(false)
+    }  
 
     const membershipCredits = 3
 
     useEffect(()=> {
-      if(accountNo){
-        const hiddenAcNo = "**** ****" + " " + accountNo.slice(8)
-        setHiddenAccountNo(hiddenAcNo)
-      }
-    },[accountNo])
-
-    const formatAccountNumber = (number)=> {
-      let num = ''
-      for(let i=0; i<number.length; i++){
-        if( (i+1) % 4 === 0 && i+1 !== number.length ){
-          num += number[i] + ' '
-        }else{
-          num += number[i]
+      async function fetchWallet(){
+        try{
+          console.log('Inside fetchWallet')
+          const response = await axios.get('http://localhost:3000/wallet/', {withCredentials: true})
+          console.log('Response--->', response)
+          if(response.data.wallet){
+            setAccountNo(response.data.wallet.accountNumber)
+            setWallet(response.data.wallet)
+          }
+          if(response.data?.message && response.data.message.includes('created')){
+            console.log('Its a First time user!')
+            setFirstTimeUser(true)
+            setMessage("Welcome to FitLab Wallet! Your unique account number:")
+            setAccountNo(response.data.wallet.accountNumber)
+            setWallet(response.data.wallet)
+            toast.success("A new FitLab Account has been created for you!")
+          }
+        }
+        catch(error){
+          console.log('Error in WalletPage while fetching wallet details:', error.message)
         }
       }
-      return num
+
+      fetchWallet()
+    },[])
+
+    useEffect(()=> {
+      if(accountNo){
+        const hiddenAcNo = "FTL **** ****" + " " + accountNo.slice(11)
+        setHiddenAccountNo(hiddenAcNo)
+      }
+      console.log('message--->', message)
+      console.log('firstTimeUser--->', firstTimeUser)
+    },[accountNo, firstTimeUser])
+
+    useEffect(()=> {
+      if(message){
+        if(firstTimeUser && message && message.toLowerCase().includes('welcome to fitlab wallet')){
+          setTimeout(()=> setMessage(''), 4000)
+        }
+      }
+    },[message])
+
+    const formatAccountNumber = (number)=> {
+      const numbersOnly = number.slice(3)
+      console.log("Acc no now--->",numbersOnly)
+      let num = ''
+      for(let i=0; i<numbersOnly.length; i++){
+        if( (i+1) % 4 === 0 && i+1 !== numbersOnly.length ){
+          num += numbersOnly[i] + ' '
+        }else{
+          num += numbersOnly[i]
+        }
+      }
+      return 'FTL' + ' ' + num
     }
 
     const walletActionButtons = [
-        {name: 'Add Money', Icon: PlusCircle}, {name: 'Auto-recharge', Icon: Lightning},
-        {name: 'Wallet-only deals', Icon: Tag}, {name: 'Refer', Icon: Users}
+        {name: 'Add Money', Icon: PlusCircle, clickHandler: ()=> openFundingModal()},
+        {name: 'Auto-recharge', Icon: Lightning},
+        {name: 'Wallet-only deals', Icon: Tag},
+        {name: 'Refer', Icon: Users}
     ]
-
-    const headerBg = {
-        backgroundImage: "url('/header-bg.png')",
-        backgrounSize: 'cover'
-    }
 
     const dummyTransactions = [
       {
@@ -96,12 +152,24 @@ export default function WalletPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
                   <div className="bg-white shadow-sm rounded-lg">
-                    <div className="p-6">
+                    <div className="relative p-6">
+                      <p className="absolute top-0 ml-[10px] text-[11px] text-green-600 tracking-[0.3px]"> 
+                      {
+                        firstTimeUser && message && message.toLowerCase().includes('welcome to fitlab wallet') &&
+                        message
+                      } 
+                      <span className="ml-[5px] font-bold text-secondary">
+                        {
+                          firstTimeUser && message && message.toLowerCase().includes('welcome to fitlab wallet') &&
+                          accountNo
+                        }
+                      </span>
+                      </p>
                       <div className="relative bg-gradient-to-r from-purple-500 to-purple-700 rounded-xl p-5 text-white mb-6">
                         <div className="mb-1 text-sm opacity-80">Total Balance</div>
                         {/* <img src="/Logo_main.png" alt="Fitlab" className="absolute bottom-[5px] right-0 h-[2rem]"/> */}
                         <img src="/Logo_main_light1.png" alt="Fitlab" className="absolute bottom-[-18px] right-0 h-[4rem]"/>
-                        <div className="text-4xl font-bold mb-2">₹ 2000.00</div>
+                        <div className="text-4xl font-bold mb-2"> ₹ {wallet && wallet.balance} </div>
                         <div className="flex items-center gap-[10px]">
                           <pre className="text-sm opacity-80">
                             {
@@ -123,7 +191,7 @@ export default function WalletPage() {
                             <div className={`h-[4.5rem] flex flex-col items-center justify-around py-[7px] text-muted 
                               bg-whitesmoke rounded-[6px] border border-dropdownBorder hover:shadow-md hover:text-primaryDark 
                                 ${button.name === 'Add Money' ? 'text-primaryDark' : 'text-muted'} cursor-pointer
-                                   ${button.name === 'Wallet-only deals' && 'w-[105%]'} `}>
+                                   ${button.name === 'Wallet-only deals' && 'w-[105%]'} `} onClick={()=> button.clickHandler()}>
                                 <button.Icon className={`h-[1.3rem] w-[1.3rem] 
                                   ${button.name === 'Add Money' ? 'text-primaryDark' : 'text-muted'}`} />
                                 <span className={`text-[13px] text-inherit font-medium ${button.name !== 'Wallet-only deals' && 'tracking-[0.3px]'}
@@ -135,6 +203,13 @@ export default function WalletPage() {
                       }
                       </div>
                     </div>
+
+                      {
+                        showFundingModal &&
+                        <WalletFundingModal showFundingModal={showFundingModal} closeFundingModal={closeFundingModal}
+                          paymentVia={paymentVia} setPaymentVia={setPaymentVia}/>
+                      }
+
                   </div>
     
                   <div className="flex flex-col gap-[10px]">

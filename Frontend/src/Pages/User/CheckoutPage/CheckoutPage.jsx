@@ -53,15 +53,15 @@ export default function CheckoutPage(){
 
     const navigate = useNavigate()
 
-    // useEffect(()=> {
-    //   dispatch(getTheCart())
-    //   dispatch(getAllAddress())
+    useEffect(()=> {
+      dispatch(getTheCart())
+      dispatch(getAllAddress())
 
-    //   const script = document.createElement("script")
-    //   script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    //   script.async = true
-    //   document.body.appendChild(script)
-    // },[])
+      const script = document.createElement("script")
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.async = true
+      document.body.appendChild(script)
+    },[])
 
     useEffect(()=> {
       const defaultAddress = addresses.find(address=> address.defaultAddress)

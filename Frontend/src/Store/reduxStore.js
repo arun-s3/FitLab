@@ -1,7 +1,8 @@
-import {configureStore, combineReducers} from '@reduxjs/toolkit';
+import {configureStore, combineReducers} from '@reduxjs/toolkit'
 import {persistReducer,persistStore} from 'redux-persist'
-import storage from 'redux-persist/lib/storage';
-import { PAUSE,PERSIST,REGISTER,REHYDRATE,PURGE,FLUSH } from 'redux-persist';
+import storage from 'redux-persist/lib/storage'
+import sessionStorage from 'redux-persist/lib/storage/session' 
+import { PAUSE,PERSIST,REGISTER,REHYDRATE,PURGE,FLUSH } from 'redux-persist'
 
 import userReducer from '../Slices/userSlice'
 import adminReducer from '../Slices/adminSlice'
@@ -13,6 +14,8 @@ import couponReducer from '../Slices/couponSlice'
 import offerReducer from '../Slices/offerSlice'
 import cartReducer from '../Slices/cartSlice'
 import orderReducer from '../Slices/orderSlice'
+import walletReducer from '../Slices/walletSlice'
+
 
 const rootReducer = combineReducers({
     user: userReducer,
@@ -31,6 +34,11 @@ const persistConfig = {
     key: 'root',
     storage,
     // blacklist: ["success", "error"]
+}
+
+const walletPersistConfig = {
+    key: 'wallet',
+    storage: sessionStorage
 }
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

@@ -24,9 +24,9 @@ const walletSchema = new mongoose.Schema({
         type: Number,
         required: true
       },
-      orderId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Order'
+      transactionId: {
+        type: String,
+        required: true
       },
       transactionAccountDetails: {
         type: {
@@ -39,9 +39,8 @@ const walletSchema = new mongoose.Schema({
           required: true
         }
       },      
-      description: {
+      notes: {
         type: String, 
-        required: true
       },
       status: {
         type: String,

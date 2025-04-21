@@ -4,8 +4,8 @@ import axios from '../Utils/axiosConfig'
 export const getOrCreateWallet = createAsyncThunk('wallet/getOrCreateWallet', async (thunkAPI)=> {
   try {
     console.log('Inside getOrCreateWallet createAsyncThunk');
-    console.log("getOrCreateWallet from walletSlice---->", orderDetails)
-    const response = await axios.post('/wallet', {withCredentials: true})
+    // console.log("getOrCreateWallet from walletSlice---->", orderDetails)
+    const response = await axios.get('/wallet', {withCredentials: true})
     console.log('Returning success response from getOrCreateWallet...', JSON.stringify(response.data))
     return response.data
   }catch(error){
@@ -19,7 +19,7 @@ export const getOrCreateWallet = createAsyncThunk('wallet/getOrCreateWallet', as
 
 
 const initialState = {
-  securedWallet: {}, 
+  safeWallet: {}, 
   walletCreated: false,
   walletUpdated: false,
   walletLoading: false,
@@ -46,10 +46,8 @@ const walletSlice = createSlice({
         console.log('getOrCreateWallet fulfilled:', action.payload)
         state.walletError = null
         state.walletLoading = false
-        state.walletSuccess = true
         state.walletMessage = action.payload.message
-        state.orders.push(action.payload.wallet) 
-        state.walletCreated = true
+        state.safeWallet = action.payload.safeWallet
       })
       .addCase(getOrCreateWallet.pending, (state) => {
         state.walletLoading = true
@@ -60,11 +58,10 @@ const walletSlice = createSlice({
         state.walletLoading = false
         state.walletError = action.payload
         state.walletMessage = action.payload.message
-        state.walletSuccess = false
       })
       
     }
 })
   
 export default walletSlice.reducer
-export const {resetOrderStates} = walletSlice.actions
+export const {resetWalletStates} = walletSlice.actions

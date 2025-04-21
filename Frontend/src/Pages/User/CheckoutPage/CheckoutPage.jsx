@@ -334,7 +334,7 @@ const handleStripeOrPaypalPayment = (paymentGateway, paymentId)=> {
                                                  border rounded" onClick={()=> addQuantity(product.productId._id, 1)}>
                                               <Plus size={14} className='text-primaryDark'/>
                                             </button>
-                                          </div>
+                                          </div> 
                                           <span className="text-[14px] font-[450] flex flex-col">
                                             <span className={`${ product?.offerApplied && 'line-through decoration-[1.6px] decoration-red-500'}`}>
                                               &#8377; {(product.price).toFixed(2)} 
@@ -645,4 +645,4 @@ const handleStripeOrPaypalPayment = (paymentGateway, paymentId)=> {
 
         </section>
     )
-}
+} 

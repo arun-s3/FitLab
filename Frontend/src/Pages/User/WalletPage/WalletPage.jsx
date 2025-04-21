@@ -10,6 +10,8 @@ import axios from 'axios'
 
 import {UserPageLayoutContext} from '../UserPageLayout/UserPageLayout'
 import WalletFundingModal from "./WalletFundingModal"
+import {decryptWalletData} from '../../../Utils/decryption'
+import {getOrCreateWallet} from '../../../Slices/walletSlice'
 
 
 export default function WalletPage() {
@@ -27,13 +29,16 @@ export default function WalletPage() {
 
     const [message, setMessage] = useState('')
 
-    const [accountNo, setAccountNo] = useState('')
     const [showAcNumber, setShowAcNumber] = useState(false)
     const [hiddenAccountNo, setHiddenAccountNo] = useState('')
 
     const [showFundingModal, setShowFundingModal] = useState(false)
     const [paymentVia, setPaymentVia] = useState("razorpayAndPaypal")
-  
+
+    const dispatch = useDispatch()
+    
+    const {safeWallet, walletLoading, walletError, walletMessage} = useSelector(state=> state.wallet)
+
     const openFundingModal = () => {
       console.log("Opening funding modal...")
       setShowFundingModal(true)
@@ -46,48 +51,36 @@ export default function WalletPage() {
     const membershipCredits = 3
 
     useEffect(()=> {
-      async function fetchWallet(){
-        try{
-          console.log('Inside fetchWallet')
-          const response = await axios.get('http://localhost:3000/wallet/', {withCredentials: true})
-          console.log('Response--->', response)
-          if(response.data.wallet){
-            setAccountNo(response.data.wallet.accountNumber)
-            setWallet(response.data.wallet)
-          }
-          if(response.data?.message && response.data.message.includes('created')){
-            console.log('Its a First time user!')
-            setFirstTimeUser(true)
-            setMessage("Welcome to FitLab Wallet! Your unique account number:")
-            setAccountNo(response.data.wallet.accountNumber)
-            setWallet(response.data.wallet)
-            toast.success("A new FitLab Account has been created for you!")
-          }
-        }
-        catch(error){
-          console.log('Error in WalletPage while fetching wallet details:', error.message)
-        }
-      }
-
-      fetchWallet()
+      console.log('Getting wallet...')
+      dispatch(getOrCreateWallet())
     },[])
 
     useEffect(()=> {
-      if(accountNo){
-        const hiddenAcNo = "FTL **** ****" + " " + accountNo.slice(11)
+      if(safeWallet && Object.keys(safeWallet).length > 0){
+        console.log("Got safeWallet--->", safeWallet)
+        setWallet(safeWallet)
+        const decryptedWallet = decryptWalletData(safeWallet)
+        console.log("decryptedWallet--->", decryptedWallet)
+        const hiddenAcNo = "FTL **** ****" + " " + decryptedWallet?.accountNumber?.slice(11)
         setHiddenAccountNo(hiddenAcNo)
+        }
+      if(walletMessage && walletMessage?.includes('created')){
+        console.log('Its a First time user!')
+        setFirstTimeUser(true)
+        setMessage("Welcome to FitLab Wallet! Your unique account number:")
+        toast.success("A new FitLab Account has been created for you!")
       }
-      console.log('message--->', message)
-      console.log('firstTimeUser--->', firstTimeUser)
-    },[accountNo, firstTimeUser])
+    },[safeWallet, walletMessage])
 
     useEffect(()=> {
+      console.log('message--->', message)
+      console.log('firstTimeUser--->', firstTimeUser)
       if(message){
         if(firstTimeUser && message && message.toLowerCase().includes('welcome to fitlab wallet')){
           setTimeout(()=> setMessage(''), 4000)
         }
       }
-    },[message])
+    },[message, firstTimeUser])
 
     const formatAccountNumber = (number)=> {
       const numbersOnly = number.slice(3)
@@ -161,7 +154,7 @@ export default function WalletPage() {
                       <span className="ml-[5px] font-bold text-secondary">
                         {
                           firstTimeUser && message && message.toLowerCase().includes('welcome to fitlab wallet') &&
-                          accountNo
+                          decryptWalletData(safeWallet)?.accountNumber
                         }
                       </span>
                       </p>
@@ -169,12 +162,12 @@ export default function WalletPage() {
                         <div className="mb-1 text-sm opacity-80">Total Balance</div>
                         {/* <img src="/Logo_main.png" alt="Fitlab" className="absolute bottom-[5px] right-0 h-[2rem]"/> */}
                         <img src="/Logo_main_light1.png" alt="Fitlab" className="absolute bottom-[-18px] right-0 h-[4rem]"/>
-                        <div className="text-4xl font-bold mb-2"> ₹ {wallet && wallet.balance} </div>
+                        <div className="text-4xl font-bold mb-2"> ₹ {safeWallet && decryptWalletData(safeWallet)?.balance} </div>
                         <div className="flex items-center gap-[10px]">
                           <pre className="text-sm opacity-80">
                             {
-                              accountNo && 
-                              showAcNumber ? formatAccountNumber(accountNo) : hiddenAccountNo
+                              safeWallet && 
+                              showAcNumber ? formatAccountNumber( decryptWalletData(safeWallet)?.accountNumber ) : hiddenAccountNo
                             } 
                           </pre>
                           {
@@ -188,7 +181,7 @@ export default function WalletPage() {
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       {
                         walletActionButtons.map(button=> (
-                            <div className={`h-[4.5rem] flex flex-col items-center justify-around py-[7px] text-muted 
+                            <div key={button.name} className={`h-[4.5rem] flex flex-col items-center justify-around py-[7px] text-muted 
                               bg-whitesmoke rounded-[6px] border border-dropdownBorder hover:shadow-md hover:text-primaryDark 
                                 ${button.name === 'Add Money' ? 'text-primaryDark' : 'text-muted'} cursor-pointer
                                    ${button.name === 'Wallet-only deals' && 'w-[105%]'} `} onClick={()=> button.clickHandler()}>
@@ -284,7 +277,7 @@ export default function WalletPage() {
                       <table cellSpacing={10} cellPadding={10} className="w-full">
                         {
                           dummyTransactions.map(transaction=> (
-                            <tr>
+                            <tr key={transaction.id}>
                               <td className="flex items-center gap-[5px]">
                                 <span className={`${transaction.type === 'credit' ? 'bg-green-100' : 'bg-red-100'}
                                  rounded-full p-[5px]`}>

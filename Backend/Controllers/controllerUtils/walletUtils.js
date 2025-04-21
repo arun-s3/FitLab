@@ -1,3 +1,4 @@
+const Wallet = require('../../Models/walletModel')
 
 const generateUniqueAccountNumber = async ()=> {
     let accountNumber

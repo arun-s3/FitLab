@@ -6,6 +6,8 @@ const Cart = require('../Models/cartModel')
 const Product = require('../Models/productModel')
 
 const {generateUniqueAccountNumber} = require('../Controllers/controllerUtils/walletUtils')
+const {encryptData} = require('../Controllers/controllerUtils/encryption')
+
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 const {paypal, client} = require('../Utils/paypal')
 
@@ -18,7 +20,8 @@ const getOrCreateWallet = async (req, res, next)=> {
         console.log("Inside getOrCreateWallet of walletController")   
         const userId = req.user._id
 
-        const wallet = await Wallet.findOne({userId})
+        const wallet = await Wallet.findOne({ userId })
+        console.log("wallet now--->", wallet)
 
         if (!wallet) {
           const uniqueAccountNumber = await generateUniqueAccountNumber()
@@ -33,14 +36,21 @@ const getOrCreateWallet = async (req, res, next)=> {
           await newWallet.save();
           console.log("Wallet created successfully:", newWallet)
 
-          res.status(200).json({wallet: newWallet, message: 'wallet created'});
+          const {userId: _, ...safeWallet} = newWallet.toObject()
+          const encryptedWallet = encryptData(safeWallet)
+
+          res.status(200).json({safeWallet: encryptedWallet, message: 'wallet created'});
         }else{
             console.log("Already has a wallet....")
-            res.status(200).json({wallet});
+            console.log("wallet--->", JSON.stringify(wallet))
+
+            const encryptedWallet = encryptData(wallet)
+
+            res.status(200).json({safeWallet: encryptedWallet, message: 'wallet sent'});
         }
     }
     catch(error){
-        console.log("Error in orderController-checkout:", error.message)
+        console.log("Error in walletController-getOrCreateWallet:", error.message)
         next(error)
     }
 }

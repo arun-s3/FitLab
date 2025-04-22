@@ -145,7 +145,7 @@ export default function PaypalPayment({amount, onPayment}) {
 
 
     return (
-        <div className="PaypalPayment">
+        <div className="PaypalPayment w-full">
             {
                 clientId ?
                 <PayPalScriptProvider options={initialOptions}>

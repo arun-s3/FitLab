@@ -9,7 +9,7 @@ import CardPayment from "./CardPayment"
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
 
 
-export default function StripePayment({ amount, onPayment }){
+export default function StripePayment({ amount, onPayment, payButtonText = 'Pay and Place Order' }){
 
 
   const [clientSecret, setClientSecret] = useState("")
@@ -61,7 +61,7 @@ export default function StripePayment({ amount, onPayment }){
     <>
       {clientSecret ? (
         <Elements stripe={stripePromise} options={options}>
-          <CardPayment onPayment={(id)=> onPayment(id)}/>
+          <CardPayment onPayment={(id)=> onPayment(id)} payButtonText={payButtonText}/>
         </Elements>
       ) : 'Loading.....'}
     </>

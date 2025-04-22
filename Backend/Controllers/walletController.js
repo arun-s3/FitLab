@@ -20,7 +20,7 @@ const getOrCreateWallet = async (req, res, next)=> {
         console.log("Inside getOrCreateWallet of walletController")   
         const userId = req.user._id
 
-        const wallet = await Wallet.findOne({ userId })
+        const wallet = await Wallet.findOne({ userId }).select('-userId -transactions.transactionId')
         console.log("wallet now--->", wallet)
 
         if (!wallet) {
@@ -43,7 +43,7 @@ const getOrCreateWallet = async (req, res, next)=> {
         }else{
             console.log("Already has a wallet....")
             console.log("wallet--->", JSON.stringify(wallet))
-
+            
             const encryptedWallet = encryptData(wallet)
 
             res.status(200).json({safeWallet: encryptedWallet, message: 'wallet sent'});
@@ -61,17 +61,20 @@ const addFundsToWallet = async (req, res, next)=> {
       console.log("Inside addFundsToWallet controller")
   
       const userId = req.user._id
-      const { amount, notes, paymentMethod, paymentId } = req.body
+      const { amount, notes, paymentMethod, paymentId } = req.body.paymentDetails
   
       if (!amount || amount <= 0) {
         return next(errorHandler(400, "Invalid amount provided"))
+      }
+      if (!["paypal", "stripe", "razorpay"].includes(paymentMethod)) {
+        return next(errorHandler(400, "Invalid payment method"))
       }
   
       if (!paymentMethod || !["paypal", "stripe", "razorpay"].includes(paymentMethod)) {
         return next(errorHandler(400, "Invalid or missing payment gateway"))
       }
   
-      let wallet = await Wallet.findOne({ userId })
+      let wallet = await Wallet.findOne({userId}).select('-userId -transactions.transactionId')
   
       if (!wallet) {
         const uniqueAccountNumber = await generateUniqueAccountNumber()
@@ -86,11 +89,18 @@ const addFundsToWallet = async (req, res, next)=> {
           console.log("Wallet created successfully:", wallet)
       }
   
-      wallet.balance += amount
+      wallet.balance += parseInt(amount)
   
       const payment = await Payment.findOne({paymentId})
+      if (!payment) {
+        return next(errorHandler(404, "Payment not found"))
+      }
+      const isAlreadyAdded = wallet.transactions.some(transaction=> transaction.transactionId === paymentId)
+      if (isAlreadyAdded){
+        return res.status(200).json({ message: "Payment already added to wallet" })
+      }      
 
-      wallet.transactions.unshift({
+      const transactionDetails = {
         type: "credit",
         amount,
         transactionId: paymentId,
@@ -101,13 +111,19 @@ const addFundsToWallet = async (req, res, next)=> {
         notes,
         status: "success",
         createdAt: payment.paymentDate
-      })
+      }
+      wallet.transactions.unshift(transactionDetails)
   
       await wallet.save()
   
       console.log("Funds added successfully to wallet:", wallet._id);
-  
-      res.status(200).json({ message: "Funds added successfully to wallet", wallet })
+
+      delete transactionDetails.transactionId
+      const {userId: _, ...safeWallet} = wallet.toObject()
+      safeWallet.transactions.unshift(transactionDetails)
+
+      const encryptedWallet = encryptData(safeWallet)
+      res.status(200).json({ safeWallet: encryptedWallet, message: "Funds added successfully to wallet" })
     }
     catch (error) {
       console.error("Error in addFundsToWallet controller:", error.message)

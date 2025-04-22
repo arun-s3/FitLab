@@ -166,8 +166,8 @@ export default function WalletPage() {
                         <div className="flex items-center gap-[10px]">
                           <pre className="text-sm opacity-80">
                             {
-                              safeWallet && 
-                              showAcNumber ? formatAccountNumber( decryptWalletData(safeWallet)?.accountNumber ) : hiddenAccountNo
+                              safeWallet && showAcNumber ? 
+                              formatAccountNumber( decryptWalletData(safeWallet)?.accountNumber ) : hiddenAccountNo
                             } 
                           </pre>
                           {

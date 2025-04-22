@@ -8,7 +8,7 @@ import { useStripe, useElements, PaymentElement } from "@stripe/react-stripe-js"
 
 
 
-export default function CardPayment({onPayment}){
+export default function CardPayment({onPayment, payButtonText}){
 
   const [message, setMessage] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -90,7 +90,7 @@ export default function CardPayment({onPayment}){
           <button type="submit" disabled={isLoading || !stripe || !elements || isDisabled} className={`w-full bg-secondary
              text-white py-3 px-4 rounded-md font-medium hover:bg-purple-800 transition-colors 
                 ${ (isLoading || !stripe || !elements || isDisabled) && 'cursor-not-allowed'}`} onClick={handleSubmit}>
-           {isLoading ? "Processing..." : "Pay and Place Order"}
+           {isLoading ? "Processing..." : payButtonText}
           </button>
 
       </form>

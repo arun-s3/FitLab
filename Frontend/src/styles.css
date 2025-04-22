@@ -2238,6 +2238,10 @@ select{
   height: 100vh;
 }
 
+.max-h-\[19rem\]{
+  max-height: 19rem;
+}
+
 .max-h-\[80vh\]{
   max-height: 80vh;
 }

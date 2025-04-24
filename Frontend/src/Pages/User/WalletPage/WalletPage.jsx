@@ -4,12 +4,14 @@ import {useNavigate, useLocation} from 'react-router-dom'
 import {useDispatch, useSelector} from 'react-redux'
 
 import { ArrowUp, Calendar, ChevronDown, ChevronRight, Clipboard, CloudLightningIcon as Lightning, PlusCircle,
-  Share2, Tag, Users, Eye, EyeOff, Plus, Clock, CreditCard, Download} from "lucide-react"
+  Share2, Tag, Users, Eye, EyeOff, Plus, Clock, CreditCard, Download,
+  UserPlus} from "lucide-react"
 import {toast} from 'react-toastify'
 import axios from 'axios'
 
 import {UserPageLayoutContext} from '../UserPageLayout/UserPageLayout'
 import WalletFundingModal from "./WalletFundingModal"
+import MoneyTransferModal from "./MoneyTransferModal"
 import {decryptWalletData} from '../../../Utils/decryption'
 import {getOrCreateWallet} from '../../../Slices/walletSlice'
 
@@ -34,6 +36,10 @@ export default function WalletPage() {
 
     const [showFundingModal, setShowFundingModal] = useState(false)
     const [paymentVia, setPaymentVia] = useState("razorpayAndPaypal")
+
+    const [isTransferModalOpen, setIsTransferModalOpen] = useState(false)
+    const [transferAmount, setTransferAmount] = useState("")
+    const [selectedRecipient, setSelectedRecipient] = useState(null)
 
     const dispatch = useDispatch()
     
@@ -222,12 +228,23 @@ export default function WalletPage() {
                           <button className="h-[2rem] w-10 flex items-center justify-center border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500">
                             <Clipboard className="h-4 w-4" />
                           </button>
+                          <button className="h-[2rem] w-10 flex items-center justify-center border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500" onClick={()=> setIsTransferModalOpen(true)}>
+                            <UserPlus className="h-4 w-4" />
+                          </button>
                           <button className="h-[2rem] w-10 flex items-center justify-center bg-purple-500 text-white rounded-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500">
                             <ChevronRight className="h-4 w-4" />
                           </button>
                         </div>
                         <div className="ml-[1px] text-[11px] text-gray-500"> Send Money for your friend as a gift! </div>
                       </div>
+                      {
+                        isTransferModalOpen &&
+
+                        <MoneyTransferModal isTransferModalOpen={isTransferModalOpen} setIsTransferModalOpen={setIsTransferModalOpen}  
+                          setTransferAmount={setTransferAmount} selectedRecipient={selectedRecipient} setSelectedRecipient={setSelectedRecipient}
+                            walletBalance={safeWallet && decryptWalletData(safeWallet)?.balance} transferAmount={transferAmount}/>
+
+                      }
                     </div>
 
                     <div className="bg-white shadow-sm rounded-lg">
@@ -247,6 +264,9 @@ export default function WalletPage() {
                              focus:ring-purple-500"/>
                           <button className="h-[2rem] w-10 flex items-center justify-center border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500">
                             <Clipboard className="h-4 w-4" />
+                          </button>
+                          <button className="h-[2rem] w-10 flex items-center justify-center border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            <UserPlus className="h-4 w-4" />
                           </button>
                           <button className="h-[2rem] w-10 flex items-center justify-center bg-purple-500 text-white rounded-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500">
                             <ChevronRight className="h-4 w-4" />

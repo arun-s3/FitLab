@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react'
 import {useDispatch, useSelector} from 'react-redux'
 
-import { CreditCard, PlusCircle, X, Globe } from "lucide-react" 
+import { CreditCard, PlusCircle, X, Globe, ChevronLeft } from "lucide-react" 
 import {toast} from 'react-toastify'
 import axios from 'axios'
 
@@ -151,7 +151,7 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
                   </button>
                 </div>
         
-                <div className="p-6">
+                <div className={`${paymentMethod === 'cards' ? 'p-0' : 'p-6'}`}>
                   <div className="flex border-b mb-6">
                     <button className={`flex-1 py-3 font-medium text-[15px] text-center ${
                         paymentVia === "razorpayAndPaypal"
@@ -263,24 +263,29 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
                   )}
       
                   { paymentVia === 'cards' &&  paymentMethod === 'cards' &&
-                    <div className='flex flex-col gap-[10px] items-center'>
+                    <div className='px-[1rem] pb-[1rem] flex flex-col gap-0 items-center'>
+
+                      <i className='ml-[1.5rem] p-[5px] self-start border border-dropdownBorder rounded-[4px] cursor-pointer'>
+                        <ChevronLeft className='w-[20px] h-[20px] text-muted' onClick={()=> setPaymentMethod('')}/>
+                      </i>
 
                       <StripePayment amount={amount} onPayment={(id)=> handleStripeOrPaypalPayment('stripe', id)} 
-                        payButtonText='Pay Amount'/>
+                        payButtonText='Add Money'/>
 
-                      <button className="w-full py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white font-medium 
-                          rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-                            onClick={()=> {setPaymentMethod('')}}>
-                          Go Back
-                      </button>
-
+                      {/* <div className='px-[1rem]'>
+                        <button className="w-full py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white font-medium 
+                            rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+                              onClick={()=> {setPaymentMethod('')}}>
+                            Go Back
+                        </button>
+                      </div> */}
                     </div>
                   }
 
                 </div>
         
                 <div className={`p-6 border-t bg-gray-50 rounded-b-lg 
-                  ${paymentMethod === 'paypal' && 'max-h-[19rem] overflow-y-scroll'}`}>
+                  ${paymentMethod === 'paypal' && 'max-h-[19rem] overflow-y-scroll'} ${paymentMethod === 'cards' && 'hidden'}`}>
 
                   {
                     paymentMethod !== 'paypal' && !PaypalPaymentStarted && !stripePaymentStarted && paymentMethod !== 'cards' &&

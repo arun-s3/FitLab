@@ -13,4 +13,5 @@ const generateUniqueAccountNumber = async ()=> {
     return accountNumber
 }
 
+
 module.exports = {generateUniqueAccountNumber}

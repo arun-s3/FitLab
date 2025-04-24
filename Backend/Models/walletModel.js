@@ -14,6 +14,18 @@ const walletSchema = new mongoose.Schema({
     type: String, 
     required: true
   },
+  beneficiaryAccounts : [
+    {
+      accountNumber: {
+        type: String, 
+        required: true
+      },
+      name:  {
+        type: String, 
+        required: true
+      }
+    }
+  ],
   transactions: [
     {
       type: {

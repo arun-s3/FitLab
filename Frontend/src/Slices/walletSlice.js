@@ -33,15 +33,15 @@ export const addFundsToWallet = createAsyncThunk('wallet/addFundsToWallet', asyn
   }
 })
 
-export const addBeneficiaryAccount = createAsyncThunk('wallet/addBeneficiaryAccount', async ({accountDetails}, thunkAPI)=> {
+export const addPeerAccount = createAsyncThunk('wallet/peer-account', async ({accountDetails}, thunkAPI)=> {
   try {
-    console.log('Inside addBeneficiaryAccount createAsyncThunk')
-    console.log("addBeneficiaryAccount from walletSlice---->", accountDetails)
-    const response = await axios.post('/wallet/beneficiary', {accountDetails}, {withCredentials: true})
-    console.log('Returning success response from addBeneficiaryAccount...', JSON.stringify(response.data))
+    console.log('Inside addPeerAccount createAsyncThunk')
+    console.log("addPeerAccount from walletSlice---->", accountDetails)
+    const response = await axios.post('/wallet/peer-account', {accountDetails}, {withCredentials: true})
+    console.log('Returning success response from addPeerAccount...', JSON.stringify(response.data))
     return response.data
   }catch(error){
-    console.log('Inside catch of addBeneficiaryAccount')
+    console.log('Inside catch of addPeerAccount')
     const errorMessage = error.response?.data?.message
     console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
     console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
@@ -87,7 +87,7 @@ const initialState = {
   balance: 0,
   moneySent: false,
   moneyRequested: false,
-  beneficiaryAdded: true,
+  peerAccountAdded: true,
   walletCreated: false,
   walletUpdated: false,
   walletLoading: false,
@@ -130,7 +130,7 @@ const walletSlice = createSlice({
     resetWalletStates: (state) => {
       state.moneySent = false
       state.moneyRequested = false
-      state.beneficiaryAdded = false
+      state.peerAccountAdded = false
       state.walletLoading = false
       state.walletError = null
       state.walletMessage = null
@@ -144,7 +144,7 @@ const walletSlice = createSlice({
     handleAsyncThunkCases(builder, addFundsToWallet)
     handleAsyncThunkCases(builder, sendMoneyToUser)
     handleAsyncThunkCases(builder, requestMoneyFromUser)
-    handleAsyncThunkCases(builder, addBeneficiaryAccount)
+    handleAsyncThunkCases(builder, addPeerAccount)
     }
 })
   

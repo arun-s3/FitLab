@@ -168,27 +168,28 @@ const getUserNameFromAccountNumber = async (req, res, next) => {
 }
 
 
-const addBeneficiaryAccount = async (req, res, next) => {
+const addPeerAccount = async (req, res, next) => {
   try {
-    console.log("Inside addBeneficiaryAccount controller")
+    console.log("Inside addPeerAccount controller")
     const userId = req.user._id 
-    const {accountNumber, name} = req.body.accountDetails
+    const {accountNumber, name, isBeneficiary} = req.body.accountDetails
 
     if (!accountNumber || !name) {
       return next(errorHandler(400, "Account number and name are required"))
     }
-    console.log(`account number---> ${accountNumber} and name-----> ${name}`)
+    console.log(`account number---> ${accountNumber}, name-----> ${name} and isBeneficiary-----> ${isBeneficiary}`)
 
     const wallet = await Wallet.findOne({userId})
     if (!wallet) {
       return next(errorHandler(404, "Wallet not found for the user"))
     }
 
-    const alreadyExists = wallet.beneficiaryAccounts.some(
-      (acc)=> acc.accountNumber === accountNumber
-    )
+    const alreadyExists = isBeneficiary 
+        ? wallet.beneficiaryAccounts.some(acc=> acc.accountNumber === accountNumber)
+        : wallet.creditorAccounts.some(acc=> acc.accountNumber === accountNumber)
+
     if (alreadyExists) {
-      return next(errorHandler(409, "Beneficiary already added"))
+      return next(errorHandler(409, `${isBeneficiary ? 'Beneficiary' : 'Creditor'} already added`))
     }
 
     const walletExists = await Wallet.findOne({accountNumber})
@@ -196,16 +197,22 @@ const addBeneficiaryAccount = async (req, res, next) => {
       return next(errorHandler(404, "The entered account number doesn't match any existing FitLab user"))
     }
 
-    wallet.beneficiaryAccounts.push({accountNumber, name})
+    if(isBeneficiary){
+      wallet.beneficiaryAccounts.push({accountNumber, name})
+    }else{
+      wallet.creditorAccounts.push({accountNumber, name})
+    }
+    
     await wallet.save();
 
     const walletWithoutIds = await Wallet.findOne({ userId }).select('-userId -transactions.transactionId')
     const encryptedWallet = encryptData(walletWithoutIds)
 
-    res.status(200).json({safeWallet: encryptedWallet, message: 'Beneficiary added successfully'})
+    res.status(200).json({safeWallet: encryptedWallet, message: 'Peer account added successfully'})
   }
   catch(error){
-    console.error('Error adding beneficiary:', error.message)
+    const peerType = req?.body?.accountDetails?.isBeneficiary ? 'Beneficiary' : 'Creditor'
+    console.error(`Error adding ${peerType}:`, error.message)
     next(error)
   }
 }
@@ -220,7 +227,7 @@ const sendMoneyToUser = async (req, res, next)=> {
     console.log(`recipientAccountNumber---> ${recipientAccountNumber}, amount----> ${amount} and notes---> ${notes}`)
 
     if (!recipientAccountNumber || !amount || amount <= 0){
-      return next(errorHandler(400, "Invalid recipient accountNumber"))
+      return next(errorHandler(400, "Invalid recepient account number or amount"))
     }
     if (!amount || amount <= 0) {
       return next(errorHandler(400, "Invalid amount provided"))
@@ -291,17 +298,25 @@ const requestMoneyFromUser = async (req, res, next)=> {
   try {
     console.log("Inside requestMoneyFromUser controller")
     const userId = req.user._id
-    const {destinationAccountNumber, amount, notes} = req.body
+    const {destinationAccountNumber, amount, notes} = req.body.paymentDetails
+
+    console.log(`destinationAccountNumber---> ${destinationAccountNumber}, amount----> ${amount} and notes---> ${notes}`)
 
     if (!destinationAccountNumber) {
-      return res.status(400).json({ message: "Invalid destination accountNumber!" })
+      return next(errorHandler(400, "Invalid destination account number!"))
     }
     if (!amount || amount <= 0) {
       return next(errorHandler(400, "Invalid amount provided"))
     }
 
     const wallet = await Wallet.findOne({ userId: userId })
-    const destinationWallet = await Wallet.findOne({ accountNumber: destinationAccountNumber })
+    const destinationWallet = await Wallet.findOne({ accountNumber: 'FTL' + destinationAccountNumber })
+
+    if (!destinationWallet) {
+      return next(errorHandler(400, "The entered account number doesn't match any existing FitLab user!"))
+    }
+
+    console.log("destinationWallet--->", destinationWallet)
 
     if (!wallet) return next(errorHandler(404, "Your wallet not found"))
 
@@ -355,5 +370,5 @@ const requestMoneyFromUser = async (req, res, next)=> {
 
 
 
-module.exports = {getOrCreateWallet, addFundsToWallet, getUserNameFromAccountNumber, addBeneficiaryAccount,
+module.exports = {getOrCreateWallet, addFundsToWallet, getUserNameFromAccountNumber, addPeerAccount,
    sendMoneyToUser, requestMoneyFromUser}

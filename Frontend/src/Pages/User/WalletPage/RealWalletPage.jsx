@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useContext, useRef} from "react"
+import React, {useState, useEffect, useContext} from "react"
 import './WalletPage.css'
 import {useNavigate, useLocation} from 'react-router-dom'
 import {useDispatch, useSelector} from 'react-redux'
@@ -9,11 +9,9 @@ import { ArrowUp, Calendar, ChevronDown, ChevronRight, Clipboard, CloudLightning
 import {toast} from 'react-toastify'
 import axios from 'axios'
 
+import {UserPageLayoutContext} from '../UserPageLayout/UserPageLayout'
 import WalletFundingModal from "./WalletFundingModal"
 import MoneyTransferModal from "./MoneyTransferModal"
-import TransactionDetailsSection from "./TransactionDetailsSection"
-import WalletUtilitySection from "./WalletUtilitySection"
-import {UserPageLayoutContext} from '../UserPageLayout/UserPageLayout'
 import {decryptWalletData} from '../../../Utils/decryption'
 import {getOrCreateWallet} from '../../../Slices/walletSlice'
 
@@ -41,21 +39,15 @@ export default function WalletPage() {
 
     const [isTransferModalOpen, setIsTransferModalOpen] = useState(false)
     const [complexModal, setComplexModal] = useState(true)
-    const [selectedPeerAccount, setSelectedPeerAccount] = useState(null)
+    const [selectedRecipient, setSelectedRecipient] = useState({name: '', accountNumber: ''})
 
     const [isRequester, setIsRequester] = useState(false)
-
-    const [selectedRecipient, setSelectedRecipient] = useState({name: '', accountNumber: ''}) 
     const [selectedCreditor, setSelectedCreditor] = useState({name: '', accountNumber: ''}) 
-    const [requestMoney, setRequestMoney] = useState(null)
 
     const [error, setError] = useState({sendMoney: '', receiveMoney: ''})
 
     const dispatch = useDispatch()
     
-    const sendMoneyRef = useRef(null) 
-    const requestMoneyRef = useRef(null) 
-
     const {safeWallet, walletLoading, walletError, walletMessage} = useSelector(state=> state.wallet)
 
     const openFundingModal = () => {
@@ -108,17 +100,6 @@ export default function WalletPage() {
         return () => clearTimeout(timeout)
       }
     }, [error])
-
-    useEffect(()=> {
-      if(Object.values(selectedRecipient).some(val=> val)){
-        setSelectedPeerAccount(selectedRecipient)
-      }
-      if(Object.values(selectedCreditor).some(val=> val)){
-        setSelectedPeerAccount(selectedCreditor)
-      }
-      console.log('isRequester--->', isRequester)
-      console.log('complexModal--->', complexModal)
-    }, [selectedRecipient, selectedCreditor, isRequester, complexModal])
     
 
     const formatAccountNumber = (number)=> {
@@ -137,109 +118,50 @@ export default function WalletPage() {
 
     const validateAccountNumber = (type)=> {
       console.log("Inside validateAccountNumber..")
-      const errorMessage = "Please enter a valid account number"
+      console.log("selectedRecipient.accountNumber--->", selectedRecipient.accountNumber)
+      const errors = { sendMoney: "", recieveMoney: "" }
 
-      const validityTest = (accountNumber)=> {
-        return accountNumber && /^[0-9\s]{12}$/.test(accountNumber.replace(/\s/g, ""))
-      }
-
-      const returnError = (type)=> {
-          console.log("Not valid-->", errorMessage)
-          setError(error=> ({...error, [type]: errorMessage}))
-          return 1
-      }
-
-      const returnNoError = (type)=> {
+      if(selectedRecipient.accountNumber && !/^[0-9\s]{12}$/.test(selectedRecipient.accountNumber.replace(/\s/g, ""))) {
+        const errorMessage = "Please enter a valid account number"
+        console.log("Not valid-->", errorMessage)
+        setError(error=> ({...error, [type]: errorMessage}))
+        return 1
+      }else{
         console.log("Valid...")
         setError(error=> ({...error, [type]: ''}))
-      }
-
-      if(type === 'sendMoney'){
-        if(validityTest(selectedRecipient.accountNumber)){
-          returnNoError('sendMoney')
-          return 0
-        }else{
-          returnError('sendMoney')
-          return 1
-        }
-      }
-      if(type === 'receiveMoney'){
-        if(validityTest(selectedCreditor.accountNumber)){
-          returnNoError('receiveMoney')
-          return 0
-        }else{
-          returnError('receiveMoney')
-          return 1
-        }
+        return 0
       }
     }
 
-    const handlePasteFromClipboard = async (type) => {
-      try {
-        const text = await navigator.clipboard.readText()
-        console.log("Clipboard text--->", text)
-        const setAccNo = (no)=> type === 'sendMoney' ? setSelectedRecipient({name: '', accountNumber: no})  
-                  : setSelectedCreditor({name: '', accountNumber: no})
-        setAccNo(text)
-        setTimeout(()=> {
-          const digitsOnly = text.replace(/[^\d\s]/g, "") 
-          setAccNo(digitsOnly)
-        }, 1500)
-        validateAccountNumber(type)
-      }
-      catch(error){
-        console.error("Failed to read clipboard contents:", error.message)
-      }
-    }
-
-    const openSimpleMoneyTransferModal = (type)=> {
-      console.log('Inside openSimpleMoneyTransferModal(), type-->', type)
-      const errorExists = validateAccountNumber(type)
-      if(errorExists){
-        console.log("Error exists...")
+    const sendAmount = ()=> {
+      console.log('Inside sendAmount()')
+      const errorExists = validateAccountNumber()
+      if(errorExists) return
+      setComplexModal(false)
+      if(!selectedRecipient.accountNumber){
+        setError(error=> ({...error, sendMoney: "Please enter a FitLab account number"}))
         return
-      }
-
-      const makeError = (type)=> {
-        setError(error=> ({...error, [type]: "Please enter a FitLab account number"}))
-      }
-
-      const openModal = (type)=> {
-        setComplexModal(false)
-        console.log('inside, openModal(), type--->', type)
-        console.log('isRequester before setting--->', isRequester)
-        type === 'sendMoney' ? setIsRequester(false) : setIsRequester(true)
-        console.log("Opening Modal....")
+      }else{
+        setIsRequester(false)
+        console.log("Opening send money modal....")
         setIsTransferModalOpen(true)
       }
+    }
 
-      if(type === 'sendMoney'){
-        if(!selectedRecipient.accountNumber){
-          makeError('sendMoney')
-          return
-        }else{
-          openModal('sendMoney')
-          return
-        }
-      }
-
-      if(type === 'receiveMoney'){
-        if(!selectedCreditor.accountNumber){
-          makeError('receiveMoney')
-          return
-        }else{
-          openModal('receiveMoney')
-          return
-        }
+    const requestMoney = ()=> {
+      console.log('Inside requestMoney()')
+      const errorExists = validateAccountNumber()
+      if(errorExists) return
+      if(!selectedCreditor.accountNumber){
+        setError(error=> ({...error, sendMoney: "Please enter a FitLab account number"}))
+        return
+      }else{
+        setIsRequester(true)
+        console.log("Opening request money modal....")
+        // setIsTransferModalOpen(true)
       }
     }
 
-    const openComplexMoneyTransferModal = (type)=> {
-      type === 'sendMoney' ? setIsRequester(false) : setIsRequester(true)
-      setComplexModal(true)
-      setIsTransferModalOpen(true)
-    }
-    
     const walletActionButtons = [
         {name: 'Add Money', Icon: PlusCircle, clickHandler: ()=> openFundingModal()},
         {name: 'Auto-recharge', Icon: Lightning},
@@ -247,7 +169,36 @@ export default function WalletPage() {
         {name: 'Refer', Icon: Users}
     ]
 
-    
+    const dummyTransactions = [
+      {
+        id: "Ty89cc28077knL",
+        createdAt: "Feb 23, 10:30 AM",
+        type: 'debit',
+        amount: "1000",
+        referenceAc: 'FitLab',
+        status: "pending"
+      },
+      { 
+        id: "Rj78p8cc2807",
+        createdAt: "Feb 22, 11:22 PM",
+        type: 'credit',
+        amount: "500",
+        referenceAc: 'FitLab',
+        notes: "nweinwnfwnfewfopwefowefowe",
+        status: "success"
+      }
+    ]
+
+    const getTransactionStatusStyle = (status)=> {
+      switch(status){
+        case 'pending': 
+        return 'bg-yellow-100 text-yellow-800'
+        case 'success':
+        return 'bg-green-100 text-green-800 '
+        case 'failed':
+        return 'bg-red-100 text-red-800 '
+      }
+    }
 
 
   return (
@@ -338,17 +289,18 @@ export default function WalletPage() {
                               setSelectedRecipient({name:'', accountNumber: value})
                             }}
                             onBlur={()=> validateAccountNumber('sendMoney')} value={selectedRecipient?.accountNumber}/>
-                          <button className="h-[2rem] w-10 flex items-center justify-center border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                              onClick={()=> handlePasteFromClipboard('sendMoney')}>
+                          <button className="h-[2rem] w-10 flex items-center justify-center border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500">
                             <Clipboard className="h-4 w-4" />
                           </button>
-                          <button className="h-[2rem] w-10 flex items-center justify-center border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                           onClick={()=> openComplexMoneyTransferModal('sendMoney')}>
+                          <button className="h-[2rem] w-10 flex items-center justify-center border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500" onClick={()=>{
+                             setComplexModal(true)
+                             setIsTransferModalOpen(true)
+                          }}>
                             <UserPlus className="h-4 w-4" />
                           </button>
                           <button className="h-[2rem] w-10 flex items-center justify-center bg-purple-500
                            text-white rounded-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                              onClick={()=> openSimpleMoneyTransferModal('sendMoney')}>
+                              onClick={()=> sendAmount()}>
                             <ChevronRight className="h-4 w-4" />
                           </button>
                         </div>
@@ -361,9 +313,9 @@ export default function WalletPage() {
                         isTransferModalOpen &&
 
                         <MoneyTransferModal isTransferModalOpen={isTransferModalOpen} setIsTransferModalOpen={setIsTransferModalOpen}  
-                          selectedPeerAccount={selectedPeerAccount} setSelectedPeerAccount={setSelectedPeerAccount} isRequester={isRequester} 
-                              walletBalance={safeWallet && decryptWalletData(safeWallet)?.balance} requestMoney={requestMoney}
-                                complexModal={complexModal}/>
+                          selectedRecipient={selectedRecipient} setSelectedRecipient={setSelectedRecipient}
+                            isRequester={isRequester} selectedCreditor={selectedCreditor} setSelectedCreditor={setSelectedCreditor}
+                              walletBalance={safeWallet && decryptWalletData(safeWallet)?.balance} complexModal={complexModal}/>
 
                       }
                     </div>
@@ -379,31 +331,26 @@ export default function WalletPage() {
     
                         <div className="relative flex gap-2 mb-[5px]">
                           <input type="text" placeholder="Enter Amount" className="w-[7rem] h-[2rem] px-3 py-2 text-[12px]
-                           border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                              onChange={(e)=> {
-                                const value = e.target.value.replace(/\D/g, "")
-                                setRequestMoney(value)
-                              }} value={requestMoney}/>
+                           border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"/>
+                          {/* <div className="relative"> */}
                             <input type="text" placeholder="Enter his/her FitLab account number" className="flex-1 h-[2rem] px-3 
                               py-2 text-[12px] border border-gray-300 rounded-md focus:outline-none focus:ring-2
                                focus:ring-purple-500"  onChange={(e)=> {
                                 const value = e.target.value.replace(/[^\d\s]/g, "")
                                 setSelectedCreditor({name:'', accountNumber: value})
                               }}
-                                onBlur={()=> validateAccountNumber('receiveMoney')} value={selectedCreditor?.accountNumber}/>
-                          <button className="h-[2rem] w-10 flex items-center justify-center border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                              onClick={()=> handlePasteFromClipboard('receiveMoney')}>
+                                onBlur={()=> validateAccountNumber('receiveMoney')}/>
+                          {/* </div> */}
+                          <button className="h-[2rem] w-10 flex items-center justify-center border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500">
                             <Clipboard className="h-4 w-4" />
                           </button>
-                          <button className="h-[2rem] w-10 flex items-center justify-center border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500"  
-                            onClick={()=> openComplexMoneyTransferModal('receiveMoney')}>
+                          <button className="h-[2rem] w-10 flex items-center justify-center border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-500">
                             <UserPlus className="h-4 w-4" />
                           </button>
-                          <button className="h-[2rem] w-10 flex items-center justify-center bg-purple-500 text-white rounded-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500" 
-                            onClick={()=> openSimpleMoneyTransferModal('receiveMoney')}>
+                          <button className="h-[2rem] w-10 flex items-center justify-center bg-purple-500 text-white rounded-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500" onClick={()=> requestMoney()}>
                             <ChevronRight className="h-4 w-4" />
                           </button>
-                          <p className="absolute top-[-20px] right-0 text-[11px] text-red-500"> {error.receiveMoney} </p>
+                          <p className="absolute text-[11px] text-red-500"> {error.receiveMoney} </p>
                         </div>
     
                         <div className="ml-[1px] text-[11px] text-gray-500"> Ask a friend for money by entering their FitLab account number! </div>
@@ -413,9 +360,129 @@ export default function WalletPage() {
                   </div>
                 </div>
     
-                <TransactionDetailsSection transactions={safeWallet && decryptWalletData(safeWallet)?.transactions}/>
+                <div className="bg-white shadow-sm rounded-lg">
+                  <div className="p-6">
+                    <div className="flex justify-between items-center mb-4">
+                      <h2 className="text-[16px] capitalize tracking-[0.3px] font-semibold">Recent transactions</h2>
+                      { dummyTransactions.length > 0 &&
+                        <button className="text-[13px] text-purple-500 flex items-center gap-1 hover:underline focus:outline-none">
+                          View all
+                          <ChevronRight className="w-[14px] h-[14px]" />
+                        </button>
+                      }
+                    </div>
 
-                <WalletUtilitySection membershipCredits={membershipCredits}/>
+                    {
+                      dummyTransactions.length > 0 ?
+                      <table cellSpacing={10} cellPadding={10} className="w-full">
+                        {
+                          dummyTransactions.map(transaction=> (
+                            <tr key={transaction.id}>
+                              <td className="flex items-center gap-[5px]">
+                                <span className={`${transaction.type === 'credit' ? 'bg-green-100' : 'bg-red-100'}
+                                 rounded-full p-[5px]`}>
+                                  {
+                                    transaction.type === 'credit' ?
+                                    <ArrowUp className="h-4 w-4 text-green-500 transform rotate-180" />
+                                    : <ArrowUp className="h-4 w-4 text-red-500" />
+                                  }
+                                </span>
+                                <span className="text-[13px] font-medium">
+                                  {transaction.id}
+                                </span>
+                              </td>
+                              <td className="text-sm text-muted"> {transaction.createdAt} </td>
+                              <td className={`${transaction.type === 'credit' ? 'text-green-500' : 'text-red-500'} font-medium`}>
+                                <span>
+                                { transaction.type === 'credit' ? '+' : '-' }
+                                </span>
+                                <span> ₹ {transaction.amount} </span>
+                              </td>
+                              <td className="text-sm text-secondary"> {transaction.referenceAc} </td>
+                              <td className="text-sm text-muted"> 
+                               <span className="font-medium"> Notes: </span>
+                               <span className="capitalize">
+                                {
+                                  transaction.notes ? 
+                                  transaction.notes.length > 25 ? transaction.notes.slice(0,25) + '...' : transaction.notes
+                                  : '---'
+                                } 
+                               </span>
+                              </td>
+                              <td>
+                                {
+                                  (()=>{
+                                    const statusStyle = getTransactionStatusStyle(transaction.status)
+                                    return (
+                                      <span className={`${statusStyle} px-3 py-1 text-[13px] capitalize rounded-[6px]`}>
+                                      { transaction.status }
+                                      </span>
+                                    )
+                                    } 
+                                  )()
+                                }
+                              </td>
+                            </tr>
+                          ))
+                        }
+                      </table>
+                      : <p className="ml-[5px] text-[13px] text-muted capitalize tracking-[0.2px]"> 
+                          You haven't made any transactions yet ! 
+                        </p>
+                    }
+
+                    </div>
+                  </div>
+
+
+                  <div className="mx-[1.5rem] flex justify-between gap-[1rem]">
+
+                    <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+                      <div className="flex flex-col space-y-1.5 p-6 pb-2">
+                        <p className="text-sm text-muted-foreground">Membership Credits</p>
+                        <h3 className="text-4xl text-secondary font-bold">{membershipCredits}</h3>
+                      </div>
+                      <div className="p-6 pt-0">
+                        <p className="text-sm text-muted-foreground">
+                          Use credits for class bookings or personal training sessions
+                        </p>
+                      </div>
+                      <div className="flex items-center p-6 pt-0 ">
+                        <button className="inline-flex items-center justify-center rounded-md text-sm font-medium
+                          border border-primary border-input bg-background hover:bg-primary hover:text-accent-foreground h-9 px-3">
+                          <Plus className="mr-2 h-3 w-3 text-secondary" />
+                          Buy Credits
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+                      <div className="flex flex-col space-y-1.5 p-6">
+                        <h3 className="text-[20px] font-semibold leading-none tracking-tight">Quick Actions</h3>
+                      </div>
+                      <div className="p-6 pt-0 mt-[10px] mb-[1px] grid gap-[1rem]">
+                        <button className="inline-flex items-center justify-start rounded-md text-sm text-muted font-medium
+                          border border-input bg-background hover:bg-whitesmoke hover:text-primaryDark h-10 px-4 py-2 w-full">
+                          <CreditCard className="mr-2 h-4 w-4 text-secondary" />
+                          Manage Payment Methods
+                        </button>
+                        {/* <button className="inline-flex items-center justify-start rounded-md text-sm text-muted
+                         font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2
+                          focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50
+                           border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 w-full">
+                          <Clock className="mr-2 h-4 w-4 text-secondary" />
+                          Recurring Payments
+                        </button> */}
+                        <button className="inline-flex items-center justify-start rounded-md text-sm text-muted font-medium 
+                          border border-input bg-background hover:bg-whitesmoke hover:text-primaryDark h-10 px-4 py-2 w-full">
+                          <Download className="mr-2 h-4 w-4 text-secondary" />
+                          Download Statement
+                        </button>
+                      </div>
+                    </div>
+
+                  </div>
+
 
                 </div>
 

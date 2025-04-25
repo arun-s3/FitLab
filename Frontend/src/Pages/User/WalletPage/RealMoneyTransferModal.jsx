@@ -1,32 +1,31 @@
 import React, {useState, useEffect} from 'react'
 import {useDispatch, useSelector} from 'react-redux'
 
-import { CreditCard, BanknoteArrowUp, HeartPlus, Plus, User, ArrowRight, AlertCircle, X, Check, IndianRupee, BanknoteArrowDown, } from "lucide-react" 
+import { CreditCard, BanknoteArrowUp, HeartPlus, Plus, User, ArrowRight, AlertCircle, X, Check, IndianRupee, } from "lucide-react" 
 import {toast} from 'react-toastify'
 
-import {addPeerAccount, sendMoneyToUser, requestMoneyFromUser, resetWalletStates} from '../../../Slices/walletSlice'
+import {addBeneficiaryAccount, sendMoneyToUser, resetWalletStates} from '../../../Slices/walletSlice'
 import {decryptWalletData} from '../../../Utils/decryption'
 
 
     
-export default function MoneyTransferModal({isTransferModalOpen, setIsTransferModalOpen, walletBalance, selectedPeerAccount, setSelectedPeerAccount,
-   isRequester, requestMoney, complexModal}){
+export default function MoneyTransferModal({isTransferModalOpen, setIsTransferModalOpen, walletBalance, selectedRecipient, 
+  setSelectedRecipient, complexModal}){
 
     if (!isTransferModalOpen) return null
 
-    const [isAddingPeerAccount, setIsAddingPeerAccount] = useState(false)
-    const [newPeerAccount, setNewPeerAccount] = useState({ name: "", accountNumber: "" })
-    const [newPeerAccountErrors, setNewPeerAccountErrors] = useState({ name: "", accountNumber: "" })
+    const [transferConfirmationChecked, setTransferConfirmationChecked] = useState(false)
+    const [transferError, setTransferError] = useState(false)
+    const [transferSuccess, setTransferSuccess] = useState(false)
+
+    const [isAddingNewRecipient, setIsAddingNewRecipient] = useState(false)
+    const [newRecipient, setNewRecipient] = useState({ name: "", accountNumber: "" })
+    const [newRecipientErrors, setNewRecipientErrors] = useState({ name: "", accountNumber: "" })
 
     const [transferAmount, setTransferAmount] = useState("")
 
-    const [transferConfirmationChecked, setTransferConfirmationChecked] = useState(false)
-    const [transferSuccess, setTransferSuccess] = useState(false)
-
-    const [error, setError] = useState(false)
-
     const dispatch = useDispatch()
-    const {safeWallet, walletLoading, walletError, walletMessage, peerAccountAdded, moneySent
+    const {safeWallet, walletLoading, walletError, walletMessage, beneficiaryAdded, moneySent
       , moneyRequested} = useSelector(state=> state.wallet)
 
     const savedRecipients = [
@@ -34,15 +33,6 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
         { id: 2, name: "Robert Johnson", accountNumber: "5678 9012 3456 7890", recent: true },
         { id: 3, name: "Sarah Williams", accountNumber: "1234 5678 9012 3456", recent: false },
     ]
-
-    useEffect(()=> {
-      if(complexModal){
-        setSelectedPeerAccount(null)
-      }
-      if(!complexModal && requestMoney){
-        setTransferAmount(requestMoney)
-      }
-    },[])
 
     useEffect(()=> {
         if(moneySent){
@@ -54,33 +44,32 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
             toast.success("Money requested successfull!")
             dispatch(resetWalletStates())
         }
-        if(peerAccountAdded){
-            toast.success(`${!isRequester ? 'Beneficiary' : 'Creditor'} account added successfully!`)
+        if(beneficiaryAdded){
+            toast.success("Beneficiary account added successfully!")
 
-            setSelectedPeerAccount(newPeerAccount)
-            setNewPeerAccount({name: '', accountNumber: ''})
-            setNewPeerAccountErrors({ name: "", accountNumber: "" })
-            setIsAddingPeerAccount(false)
+            setSelectedRecipient(newRecipient)
+            setNewRecipient({name: '', accountNumber: ''})
+            setNewRecipientErrors({ name: "", accountNumber: "" })
+            setIsAddingNewRecipient(false)
 
             dispatch(resetWalletStates())
         }
         if(walletError){
             toast.error(walletError)
             if(walletError.includes("doesn't match any existing FitLab user")){
-              setNewPeerAccountErrors(error=> ({...error, accountNumber: walletError.toString()}))
-              setIsAddingPeerAccount(true)
+              setNewRecipientErrors(error=> ({...error, accountNumber: walletError.toString()}))
+              setIsAddingNewRecipient(true)
             }
             dispatch(resetWalletStates())
         }
-    }, [moneySent, moneyRequested, peerAccountAdded, walletError])
-
+    }, [moneySent, moneyRequested, beneficiaryAdded, walletError])
 
     const handleTransferAmountChange = (e) => {
         const value = e.target.value
         // Only allow numbers and decimals
         if (value === "" || /^\d+(\.\d{0,2})?$/.test(value)) {
           setTransferAmount(value)
-          setError(false)
+          setTransferError(false)
         }
     }
 
@@ -89,57 +78,53 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
       const errors = { name: "", accountNumber: "" }
 
       if(type === 'name'){
-        if(!newPeerAccount.name.trim()) {
+        if(!newRecipient.name.trim()) {
           errors.name = "Name is required"
-        }else if(!/^[a-zA-Z\s]+$/.test(newPeerAccount.name)) {
+        }else if(!/^[a-zA-Z\s]+$/.test(newRecipient.name)) {
           errors.name = "Please enter a valid name"
         }
         else{
           errors.name = ""
         }
       }else{
-        if(!newPeerAccount.accountNumber.trim()) {
+        if(!newRecipient.accountNumber.trim()) {
           errors.accountNumber = "Account number is required"
-        }else if(!/^[0-9\s]{12}$/.test(newPeerAccount.accountNumber.replace(/\s/g, ""))) {
+        }else if(!/^[0-9\s]{12}$/.test(newRecipient.accountNumber.replace(/\s/g, ""))) {
           errors.accountNumber = "Please enter a valid account number"
         }else{
           errors.accountNumber = ""
         }
       }
-      setNewPeerAccountErrors(errors)
+      setNewRecipientErrors(errors)
     }
 
-    const handleAddPeerAccount = ()=> {
-        console.log("Inside handleAddPeerAccount..")
+    const handleAddNewRecipient = ()=> {
+        console.log("Inside handleAddNewRecipient..")
         const errors = { name: "", accountNumber: "" }
         let hasError = false
     
-        if (!newPeerAccount.name.trim()) {
+        if (!newRecipient.name.trim()) {
           errors.name = "Name is required"
           hasError = true
         }
     
-        if (!newPeerAccount.accountNumber.trim()) {
+        if (!newRecipient.accountNumber.trim()) {
           errors.accountNumber = "Account number is required"
           hasError = true
-        } else if (!/^[0-9\s]{10,19}$/.test(newPeerAccount.accountNumber.replace(/\s/g, ""))) {
+        } else if (!/^[0-9\s]{10,19}$/.test(newRecipient.accountNumber.replace(/\s/g, ""))) {
           errors.accountNumber = "Please enter a valid account number"
           hasError = true
         }
     
         if (hasError) {
-          setNewPeerAccountErrors(errors)
+          setNewRecipientErrors(errors)
           return
         }
 
-        const accountDetails = {
-          name: newPeerAccount.name,
-          accountNumber: 'FTL' + newPeerAccount.accountNumber.toString(),
-          isBeneficiary: !isRequester ? true : false
-        }
+        const accountDetails = {name: newRecipient.name, accountNumber: 'FTL' + newRecipient.accountNumber.toString()}
         console.log('accountDetails---->', accountDetails)
 
-        dispatch( addPeerAccount({accountDetails}) )
+        dispatch( addBeneficiaryAccount({accountDetails}) )
       }
 
     const handleTransferSubmit = (e) => {
@@ -147,31 +132,23 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
     
         const numAmount = Number.parseFloat(transferAmount)
         if (isNaN(numAmount) || numAmount <= 0 || numAmount > walletBalance) {
-          setError(true)
+          setTransferError(true)
           return
         }
-
-        let accNo = selectedPeerAccount.accountNumber
-        if(selectedPeerAccount.accountNumber.startsWith('FTL')){
-          accNo = accNo.slice(3)
-        }
-
-        const targetAccountNumber = isRequester ? {destinationAccountNumber: accNo} : {recipientAccountNumber: accNo}
         const paymentDetails = {
-            ...targetAccountNumber,
+            recipientAccountNumber: selectedRecipient.accountNumber,
             amount: transferAmount,
             notes: ''
         }
         console.log('paymentDetails--->', paymentDetails)
-
-        isRequester ? dispatch( requestMoneyFromUser({paymentDetails}) ) : dispatch( sendMoneyToUser({paymentDetails}) )
+        dispatch( sendMoneyToUser({paymentDetails}) )
     
         setTimeout(() => {
           setTransferSuccess(false)
           setTransferAmount("")
           setTransferConfirmationChecked(false)
           setIsTransferModalOpen(false)
-          complexModal && setSelectedPeerAccount(null)
+          setSelectedRecipient(null)
         }, 2700)
     }
 
@@ -183,11 +160,8 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
 
           <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
             <h2 className="flex items-center gap-[10px] text-xl font-semibold">
-              {
-                !isRequester ? <BanknoteArrowUp className='w-[30px] h-[35px] text-primaryDark' />
-                  : <BanknoteArrowDown className='w-[30px] h-[35px] text-primaryDark' />
-              }
-              { !isRequester ? 'Send Money' : 'Request Money' }
+              <BanknoteArrowUp className='w-[30px] h-[35px] text-primaryDark' />
+              Send Money
             </h2>
             <button
               onClick={() => {
@@ -195,8 +169,8 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
                 setIsTransferModalOpen(false)
                 setTransferAmount("")
                 setTransferConfirmationChecked(false)
-                setError(false)
-                if(complexModal) setSelectedPeerAccount(null)
+                setTransferError(false)
+                if(complexModal) setSelectedRecipient(null)
               }}
               className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-full p-1
                hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
@@ -213,7 +187,7 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
               <h3 className="text-xl font-semibold mb-2"> Transfer Successful! </h3>
               <p className="text-center text-[15px] text-gray-600 tracking-[0.4px] dark:text-gray-300 mb-6">
                 You have successfully sent ₹{Number.parseFloat(transferAmount).toFixed(2)} to{" "}
-                {selectedPeerAccount?.name}.
+                {selectedRecipient?.name}.
               </p>
               <button
                 onClick={() => {
@@ -221,9 +195,7 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
                   setIsTransferModalOpen(false)
                   setTransferAmount("")
                   setTransferConfirmationChecked(false)
-                  if(complexModal){
-                    setSelectedPeerAccount(null)
-                  }
+                  setSelectedRecipient(null)
                 }}
                 className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background
                  transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
@@ -236,44 +208,32 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
             <form onSubmit={handleTransferSubmit}>
               <div className="p-4 space-y-4">
 
-                { !selectedPeerAccount ? (
+                {!selectedRecipient ? (
                   <div className="space-y-4">
                     {
-                    ((!isRequester && decryptWalletData(safeWallet)?.beneficiaryAccounts.length > 0) ||
-                      (isRequester && decryptWalletData(safeWallet)?.creditorAccounts.length > 0)) &&
+                    decryptWalletData(safeWallet)?.beneficiaryAccounts.length > 0 &&
                         <div className="space-y-2">
-                            <label className="text-sm font-medium"> {!isRequester ? 'Select Recipient' : 'Select Creditor'} </label>
+                            <label className="text-sm font-medium"> Select Recipient </label>
                             <div className="space-y-2">
                               { 
-                               (function generateRecepientOrCreditor(){
-
-                                  const accountGroup = !isRequester ? decryptWalletData(safeWallet)?.beneficiaryAccounts
-                                      : decryptWalletData(safeWallet)?.creditorAccounts
-                                  
-                                  return (
-                                    accountGroup.map((account)=> (
-                                      <div key={account._id}
-                                       onClick={()=> setSelectedPeerAccount(account)}
-                                        className="flex items-center p-3 border rounded-md cursor-pointer hover:bg-gray-50
-                                           dark:hover:bg-gray-800">
-                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700">
-                                          <User className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-                                        </div>
-                                        <div className="ml-3">
-                                          <p className="text-[14px] font-medium"> {account.name} </p>
-                                          <p className="text-[12px] text-gray-500 dark:text-gray-400"> {account.accountNumber} </p>
-                                        </div>
-                                      </div>
-                                    ))
-                                  )
-                                }
-                               )()
+                                decryptWalletData(safeWallet)?.beneficiaryAccounts.map((recipient)=> (
+                                <div key={recipient._id} onClick={()=> setSelectedRecipient(recipient)}
+                                  className="flex items-center p-3 border rounded-md cursor-pointer hover:bg-gray-50
+                                   dark:hover:bg-gray-800">
+                                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-700">
+                                    <User className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                                  </div>
+                                  <div className="ml-3">
+                                    <p className="text-[14px] font-medium"> {recipient.name} </p>
+                                    <p className="text-[12px] text-gray-500 dark:text-gray-400"> {recipient.accountNumber} </p>
+                                  </div>
+                                </div>
+                              ))
                               }
                             </div>
                         </div>
                     }
-                    <div className={`relative ${!isRequester && decryptWalletData(safeWallet)?.beneficiaryAccounts.length <= 0 && 'hidden' }
-                         ${isRequester && decryptWalletData(safeWallet)?.creditorAccounts.length <= 0 && 'hidden' } `}>
+                    <div className={`relative ${decryptWalletData(safeWallet)?.beneficiaryAccounts.length <= 0 && 'hidden'}`}>
                       <div className="absolute inset-0 flex items-center">
                         <span className="w-full border-t"></span>
                       </div>
@@ -281,15 +241,15 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
                         <span className="bg-white dark:bg-gray-900 px-2 text-gray-500 dark:text-gray-400"> or </span>
                       </div>
                     </div>
-                    { isAddingPeerAccount ? (
+                    {isAddingNewRecipient ? (
                       <div className="border rounded-md p-4 space-y-4">
                         <div className="!mb-[2rem] flex items-center justify-between">
                           <h3 className="text-[17px] text-secondary font-[550]">Add New Recipient</h3>
                           <button type="button"
                             onClick={() => {
-                              setIsAddingPeerAccount(false)
-                              setNewPeerAccount({name: '', accountNumber: ''})
-                              setNewPeerAccountErrors({ name: "", accountNumber: "" })
+                              setIsAddingNewRecipient(false)
+                              setNewRecipient({name: '', accountNumber: ''})
+                              setNewRecipientErrors({ name: "", accountNumber: "" })
                             }}
                             className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
                             <X className="h-4 w-4 text-secondary" />
@@ -297,20 +257,19 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
                         </div>
 
                         <div className="space-y-2">
-                          <label htmlFor="peerAccountName" className="block text-sm font-medium">
-                            { !isRequester ? 'Recipient Name' : 'Creditor Name' }
+                          <label htmlFor="recipientName" className="block text-sm font-medium">
+                            Recipient Name
                           </label>
                           <div className='relative'>
-                            <input id="peerAccountName" type="text" value={newPeerAccount.name} 
-                              placeholder={!isRequester ? "Enter recipient name" : "Enter creditor name"}
-                              onChange={(e)=> setNewPeerAccount(user=> ({...user, name: e.target.value}))}
+                            <input id="recipientName" type="text" value={newRecipient.name} placeholder="Enter recipient name"
+                              onChange={(e)=> setNewRecipient(user=> ({...user, name: e.target.value}))}
                                 onBlur={()=> validateAccountDetails('name')}    
                                   className={`w-full px-3 py-2 border text-[14px] placeholder:text-[12px] ${
-                                    newPeerAccountErrors.name ? "border-red-500" : "border-gray-300 dark:border-gray-600"
+                                    newRecipientErrors.name ? "border-red-500" : "border-gray-300 dark:border-gray-600"
                                     } rounded-md focus:outline-none focus:border-none focus-within:ring-0 focus:ring-2
                                     focus:ring-secondary dark:bg-gray-800`}/>
-                            {newPeerAccountErrors.name && (
-                              <p className="absolute mt-[4px] text-[11px] text-red-500">{newPeerAccountErrors.name}</p>
+                            {newRecipientErrors.name && (
+                              <p className="absolute mt-[4px] text-[11px] text-red-500">{newRecipientErrors.name}</p>
                             )}
                           </div>
                         </div>
@@ -320,41 +279,41 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
                             Account Number (Enter the last 12 digits)
                           </label>
                           <div className='relative'>
-                            <input id="accountNumber" type="text" value={newPeerAccount.accountNumber} placeholder="Enter account number"
+                            <input id="accountNumber" type="text" value={newRecipient.accountNumber} placeholder="Enter account number"
                               onChange={(e) => {
                                 const value = e.target.value.replace(/[^\d\s]/g, "")
-                                setNewPeerAccount(user=> ({...user, accountNumber: value}))
+                                setNewRecipient(user=> ({...user, accountNumber: value}))
                               }}
                               onBlur={()=> validateAccountDetails('accountNumber')}
                               className={`w-full px-3 py-2 border text-[14px] placeholder:text-[12px] ${
-                                newPeerAccountErrors.accountNumber ? "border-red-500" : "border-gray-300 dark:border-gray-600"
+                                newRecipientErrors.accountNumber ? "border-red-500" : "border-gray-300 dark:border-gray-600"
                                   } rounded-md focus:outline-none focus:border-none focus-within:ring-0 focus:ring-2
                                      focus:ring-secondary dark:bg-gray-800`}/>
-                            {newPeerAccountErrors.accountNumber && (
-                              <p className="absolute mt-[4px] text-[11px] text-red-500"> {newPeerAccountErrors.accountNumber} </p>
+                            {newRecipientErrors.accountNumber && (
+                              <p className="absolute mt-[4px] text-[11px] text-red-500"> {newRecipientErrors.accountNumber} </p>
                             )}
                           </div>
                         </div>
 
-                        <button type="button" onClick={handleAddPeerAccount} className="w-full !mt-[1.5rem] px-4 py-2 text-sm
+                        <button type="button" onClick={handleAddNewRecipient} className="w-full !mt-[1.5rem] px-4 py-2 text-sm
                          font-medium text-white bg-secondary rounded-md hover:bg-purple-700 focus:outline-none
                           focus:border-none focus:ring-purple-700">
-                          { !isRequester ? 'Save Recipient' : 'Save Creditor' }
+                          Save Recipient
                         </button>
                       </div>
                     ) : (
                       <>
                         <p className='flex gap-[1rem] text-[14px] text-secondary tracking-[0.3px]'>
                           <HeartPlus className='w-[50px] h-[25px] text-muted'/>
-                          {`Add a ${!isRequester ? 'beneficiary/recepient' : 'creditor/payer'} account to securely transfer funds
-                           from your FitLab wallet. Simply enter their account number and name to send money anytime with ease.`}
+                          Add a beneficiary/recepient account to securely transfer funds from your FitLab wallet. Simply enter
+                          their account number and name to send money anytime with ease.
                         </p>
-                        <button type="button" onClick={()=> setIsAddingPeerAccount(true)}  className="mt-[1rem] w-full flex 
+                        <button type="button" onClick={()=> setIsAddingNewRecipient(true)}  className="mt-[1rem] w-full flex 
                           items-center justify-center text-[15px] gap-2 border border-dashed p-[7px] rounded-md text-gray-500
                            hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-50
                             dark:hover:bg-gray-800">
                           <Plus className="h-4 w-4" />
-                          { !isRequester ? 'Add New Recipient' : 'Add New Creditor' }
+                          Add New Recipient
                         </button>
                       </>
                     )}
@@ -364,10 +323,10 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
                     <div className="bg-gray-50 dark:bg-gray-800 p-4 border border-dashed border-inputBorderLow rounded-lg">
                       <div className="flex items-center mb-2">
                         <User className="h-5 w-5 text-secondary dark:text-gray-400 mr-2" />
-                        <span className="text-[15px] font-medium"> { !isRequester ? 'Recipient' : 'Creditor' } </span>
+                        <span className="text-[15px] font-medium"> Recipient </span>
                         {
                           complexModal &&
-                            <button type="button" onClick={()=> setSelectedPeerAccount(null)}
+                            <button type="button" onClick={()=> setSelectedRecipient(null)}
                               className="ml-auto text-[12px] text-blue-600 dark:text-blue-400 hover:underline">
                                 Change
                             </button>
@@ -375,13 +334,13 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
                       </div>
                       <div className="pl-7">
                         {
-                          selectedPeerAccount?.name &&
-                          <p className="text-[14px] font-[400]"> {selectedPeerAccount.name} </p>
+                          selectedRecipient?.name &&
+                          <p className="text-[14px] font-[400]"> {selectedRecipient.name} </p>
                         }
                         <div className="flex items-center mt-1">
                           <CreditCard className="h-[15px] w-[15px] text-gray-500 dark:text-gray-400 mr-1" />
                           <span className="text-[12px] text-gray-600 dark:text-gray-300">
-                            {selectedPeerAccount.accountNumber}
+                            {selectedRecipient.accountNumber}
                           </span>
                         </div>
                       </div>
@@ -395,7 +354,7 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
                         <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 h-[15px] w-[15px] dark:text-gray-400" />
                         <input id="amount" type="text" value={transferAmount} onChange={handleTransferAmountChange} placeholder="0.00"
                           className={`w-full pl-10 pr-4 py-2 border text-[15px] text-secondary placeholder:text-[13px] ${
-                            error ? "border-red-500 dark:border-red-500"
+                            transferError ? "border-red-500 dark:border-red-500"
                               : "border-gray-300 dark:border-gray-600"
                             } rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800`}/>
                       </div>
@@ -404,7 +363,7 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
                         <span className="text-[12px] text-gray-500 dark:text-gray-400">
                           Available: ₹{walletBalance.toFixed(2)}
                         </span>
-                        {error && (
+                        {transferError && (
                           <span className="text-red-500 flex items-center">
                             <AlertCircle className="h-4 w-4 mr-1" />
                             Invalid amount
@@ -413,40 +372,29 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
                       </div>
                     </div>
 
-                    {
-                      !isRequester &&
-                      <div className="flex items-start mt-4">
-                        <div className="flex items-center h-5">
-                          <input id="confirmation" type="checkbox" checked={transferConfirmationChecked}
-                            onChange={(e) => setTransferConfirmationChecked(e.target.checked)}
-                            className="h-4 w-4 text-secondary border-gray-300 rounded focus:ring-secondary"/>
-                        </div>
-                        <label htmlFor="confirmation" className="ml-2 text-[12px] text-gray-600 dark:text-gray-300">
-                          I confirm that I want to send money to this recipient and the account details are correct.
-                        </label>
+                    <div className="flex items-start mt-4">
+                      <div className="flex items-center h-5">
+                        <input id="confirmation" type="checkbox" checked={transferConfirmationChecked}
+                          onChange={(e) => setTransferConfirmationChecked(e.target.checked)}
+                          className="h-4 w-4 text-secondary border-gray-300 rounded focus:ring-secondary"/>
                       </div>
-                    }
+                      <label htmlFor="confirmation" className="ml-2 text-[12px] text-gray-600 dark:text-gray-300">
+                        I confirm that I want to send money to this recipient and the account details are correct.
+                      </label>
+                    </div>
 
                     {transferAmount &&
                       !isNaN(Number.parseFloat(transferAmount)) &&
                       Number.parseFloat(transferAmount) > 0 && (
                         <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md mt-4">
                           <div className="flex justify-between items-center">
-                            <span className="text-sm font-medium"> {!isRequester ? "You're sending" : "You're requesting"} </span>
+                            <span className="text-sm font-medium"> You're sending </span>
                             <span className="text-secondary font-bold"> ₹{Number.parseFloat(transferAmount).toFixed(2)} </span>
                           </div>
                           <div className="flex items-center text-[13px] text-gray-600 dark:text-gray-400 mt-1">
-                            <span> 
-                              { !isRequester ? 'Your wallet' 
-                                    : selectedPeerAccount.name ? selectedPeerAccount.name : selectedPeerAccount.accountNumber
-                              }
-                            </span>
+                            <span> Your wallet </span>
                             <ArrowRight className="h-3 w-3 mx-2" />
-                            <span>
-                              { !isRequester ? selectedPeerAccount.name ? selectedPeerAccount.name : selectedPeerAccount.accountNumber 
-                                    : 'Your wallet' 
-                              }
-                            </span>
+                            <span> {selectedRecipient.name ? selectedRecipient.name : selectedRecipient.accountNumber} </span>
                           </div>
                         </div>
                       )}
@@ -460,9 +408,7 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
                     setIsTransferModalOpen(false)
                     setTransferAmount("")
                     setTransferConfirmationChecked(false)
-                    if(complexModal){
-                      setSelectedPeerAccount(null)
-                    }
+                    setSelectedRecipient(null)
                   }}
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300
                    rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800
@@ -470,15 +416,15 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
                   Cancel
                 </button>
 
-                {selectedPeerAccount && (
+                {selectedRecipient && (
                   <button type="submit"
-                    disabled={ !isRequester &&
-                      (!transferAmount || isNaN(Number.parseFloat(transferAmount)) || Number.parseFloat(transferAmount) <= 0 
-                        || Number.parseFloat(transferAmount) > walletBalance || !transferConfirmationChecked)}
+                    disabled={
+                      !transferAmount || isNaN(Number.parseFloat(transferAmount)) || Number.parseFloat(transferAmount) <= 0 
+                      || Number.parseFloat(transferAmount) > walletBalance || !transferConfirmationChecked}
                     className="px-4 py-2 text-sm font-medium text-white bg-secondary rounded-md hover:bg-purple-700
                      focus:outline-none focus:ring-2 focus:ring-purple-700 disabled:opacity-50 disabled:cursor-not-allowed
                       disabled:hover:bg-purple-400">
-                     { !isRequester ? 'Send Money' : 'Request Money' }
+                    Send Money
                   </button>
                 )}
               </div>
@@ -488,5 +434,3 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
       </div>
     )
 }
-
-

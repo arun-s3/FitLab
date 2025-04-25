@@ -26,6 +26,18 @@ const walletSchema = new mongoose.Schema({
       }
     }
   ],
+  creditorAccounts : [
+    {
+      accountNumber: {
+        type: String, 
+        required: true
+      },
+      name:  {
+        type: String, 
+        required: true
+      }
+    }
+  ],
   transactions: [
     {
       type: {

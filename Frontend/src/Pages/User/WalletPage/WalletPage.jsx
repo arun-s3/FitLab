@@ -15,7 +15,7 @@ import TransactionDetailsSection from "./TransactionDetailsSection"
 import WalletUtilitySection from "./WalletUtilitySection"
 import {UserPageLayoutContext} from '../UserPageLayout/UserPageLayout'
 import {decryptWalletData} from '../../../Utils/decryption'
-import {getOrCreateWallet} from '../../../Slices/walletSlice'
+import {getOrCreateWallet, resetWalletStates} from '../../../Slices/walletSlice'
 
 
 export default function WalletPage() {
@@ -49,7 +49,10 @@ export default function WalletPage() {
     const [selectedCreditor, setSelectedCreditor] = useState({name: '', accountNumber: ''}) 
     const [requestMoney, setRequestMoney] = useState(null)
 
+    const [queryOptions, setQueryOptions] = useState({page: 1, limit: 6, status: 'all'})
+
     const [error, setError] = useState({sendMoney: '', receiveMoney: ''})
+    const [inputMsg, setInputMsg] = useState({sendMoney: '', receiveMoney: ''})
 
     const dispatch = useDispatch()
     
@@ -70,6 +73,7 @@ export default function WalletPage() {
     const membershipCredits = 3
 
     useEffect(()=> {
+      dispatch(resetWalletStates())
       console.log('Getting wallet...')
       dispatch(getOrCreateWallet())
     },[])
@@ -107,7 +111,11 @@ export default function WalletPage() {
         const timeout = setTimeout(()=> { setError({ sendMoney: '', receiveMoney: '' }) }, 2000)
         return () => clearTimeout(timeout)
       }
-    }, [error])
+      if (Object.values(inputMsg).some(val=> val)){
+        const msgTimeout = setTimeout(()=> { setInputMsg({ sendMoney: '', receiveMoney: '' }) }, 700)
+        return () => clearTimeout(msgTimeout)
+      }
+    }, [error], inputMsg)
 
     useEffect(()=> {
       if(Object.values(selectedRecipient).some(val=> val)){
@@ -135,7 +143,7 @@ export default function WalletPage() {
       return 'FTL' + ' ' + num
     }
 
-    const validateAccountNumber = (type)=> {
+    const validateAccountNumber = (type, accountNumberGiven)=> {
       console.log("Inside validateAccountNumber..")
       const errorMessage = "Please enter a valid account number"
 
@@ -154,6 +162,15 @@ export default function WalletPage() {
         setError(error=> ({...error, [type]: ''}))
       }
 
+      if(accountNumberGiven){
+        if (validityTest(accountNumberGiven)) {
+          returnNoError(type)
+          return 0
+        }else {
+          returnError(type)
+          return 1
+        }
+      }
       if(type === 'sendMoney'){
         if(validityTest(selectedRecipient.accountNumber)){
           returnNoError('sendMoney')
@@ -174,20 +191,38 @@ export default function WalletPage() {
       }
     }
 
-    const handlePasteFromClipboard = async (type) => {
+    const handlePasteFromClipboard = async (type)=> {
       try {
         const text = await navigator.clipboard.readText()
         console.log("Clipboard text--->", text)
-        const setAccNo = (no)=> type === 'sendMoney' ? setSelectedRecipient({name: '', accountNumber: no})  
-                  : setSelectedCreditor({name: '', accountNumber: no})
+    
+        const setAccNo = (no) => type === 'sendMoney' ? setSelectedRecipient({ name: '', accountNumber: no })
+                                            : setSelectedCreditor({ name: '', accountNumber: no })
         setAccNo(text)
-        setTimeout(()=> {
-          const digitsOnly = text.replace(/[^\d\s]/g, "") 
-          setAccNo(digitsOnly)
-        }, 1500)
-        validateAccountNumber(type)
-      }
-      catch(error){
+
+        const hasNonDigit = /\D/.test(text)
+        if (hasNonDigit) {
+          setInputMsg(msg => ({ ...msg, [type]: 'Extracting digits...' }))
+    
+          setTimeout(() => {
+            const digitsOnly = text.replace(/\D/g, "")
+            setAccNo(digitsOnly)
+            const errorExists = validateAccountNumber(type, digitsOnly)
+            console.log("errorExists after extracting digits-->", errorExists)
+            if (!errorExists) {
+              setInputMsg(msg => ({ ...msg, [type]: '' }))
+            }
+          }, 700)
+        }else{
+          const errorExists = validateAccountNumber(type, text)
+          console.log("errorExists for pure digits-->", errorExists)
+          if (errorExists) {
+            setInputMsg(msg => ({ ...msg, [type]: 'Invalid account number format' }))
+          } else {
+            setInputMsg(msg => ({ ...msg, [type]: '' }))
+          }
+        }
+      } catch (error) {
         console.error("Failed to read clipboard contents:", error.message)
       }
     }
@@ -330,7 +365,7 @@ export default function WalletPage() {
                           <h2 className="text-[16px] font-semibold">Send</h2>
                         </div>
     
-                        <div className="flex gap-2 mb-[5px]">
+                        <div className="relative flex gap-2 mb-[5px]">
                           <input type="text" placeholder="Enter his/her FitLab account number" className="flex-1 h-[2rem] px-3
                            py-2 text-[12px] border border-gray-300 rounded-md focus:outline-none focus:ring-2
                             focus:ring-purple-500" onChange={(e)=> {
@@ -351,6 +386,7 @@ export default function WalletPage() {
                               onClick={()=> openSimpleMoneyTransferModal('sendMoney')}>
                             <ChevronRight className="h-4 w-4" />
                           </button>
+                          <p className="absolute top-[-20px] right-0 text-[11px] text-secondary"> {inputMsg.sendMoney} </p>
                         </div>
                         <div className="ml-[1px] flex items-center justify-between text-[11px] text-gray-500">
                           <span> Send Money for your friend as a gift! </span> 
@@ -404,6 +440,7 @@ export default function WalletPage() {
                             <ChevronRight className="h-4 w-4" />
                           </button>
                           <p className="absolute top-[-20px] right-0 text-[11px] text-red-500"> {error.receiveMoney} </p>
+                          <p className="absolute top-[-20px] left-[25%] text-[11px] text-secondary"> {inputMsg.receiveMoney} </p>
                         </div>
     
                         <div className="ml-[1px] text-[11px] text-gray-500"> Ask a friend for money by entering their FitLab account number! </div>
@@ -413,7 +450,10 @@ export default function WalletPage() {
                   </div>
                 </div>
     
-                <TransactionDetailsSection transactions={safeWallet && decryptWalletData(safeWallet)?.transactions}/>
+                { 
+                  safeWallet &&
+                  <TransactionDetailsSection transactions={safeWallet && decryptWalletData(safeWallet)?.transactions}/>
+                }
 
                 <WalletUtilitySection membershipCredits={membershipCredits}/>
 

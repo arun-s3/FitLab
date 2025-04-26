@@ -861,6 +861,10 @@ select{
   bottom: -66px;
 }
 
+.bottom-\[1\.3rem\]{
+  bottom: 1.3rem;
+}
+
 .bottom-\[1\.5rem\]{
   bottom: 1.5rem;
 }
@@ -1071,6 +1075,10 @@ select{
 
 .right-\[19\%\]{
   right: 19%;
+}
+
+.right-\[1rem\]{
+  right: 1rem;
 }
 
 .right-\[2rem\]{
@@ -2814,8 +2822,8 @@ select{
   border-spacing: var(--tw-border-spacing-x) var(--tw-border-spacing-y);
 }
 
-.border-spacing-y-4{
-  --tw-border-spacing-y: 1rem;
+.border-spacing-y-2{
+  --tw-border-spacing-y: 0.5rem;
   border-spacing: var(--tw-border-spacing-x) var(--tw-border-spacing-y);
 }
 
@@ -3384,22 +3392,6 @@ select{
   border-radius: 0.75rem;
 }
 
-.rounded-\[\]{
-  border-radius: ;
-}
-
-.rounded-\[6\]{
-  border-radius: 6;
-}
-
-.rounded-\[6p\]{
-  border-radius: 6p;
-}
-
-.rounded-\[px\]{
-  border-radius: px;
-}
-
 .rounded-b-\[4px\]{
   border-bottom-right-radius: 4px;
   border-bottom-left-radius: 4px;
@@ -3511,11 +3503,6 @@ select{
   border-width: 2px;
 }
 
-.border-x{
-  border-left-width: 1px;
-  border-right-width: 1px;
-}
-
 .border-x-0{
   border-left-width: 0px;
   border-right-width: 0px;
@@ -3571,10 +3558,6 @@ select{
 
 .border-t-\[1px\]{
   border-top-width: 1px;
-}
-
-.border-l{
-  border-left-width: 1px;
 }
 
 .border-solid{
@@ -3916,6 +3899,11 @@ select{
   background-color: rgb(245 245 245 / var(--tw-bg-opacity));
 }
 
+.bg-\[\#f5ffbd\]{
+  --tw-bg-opacity: 1;
+  background-color: rgb(245 255 189 / var(--tw-bg-opacity));
+}
+
 .bg-\[\#fefff8\]{
   --tw-bg-opacity: 1;
   background-color: rgb(254 255 248 / var(--tw-bg-opacity));
@@ -3978,6 +3966,11 @@ select{
 .bg-gray-600{
   --tw-bg-opacity: 1;
   background-color: rgb(75 85 99 / var(--tw-bg-opacity));
+}
+
+.bg-gray-800{
+  --tw-bg-opacity: 1;
+  background-color: rgb(31 41 55 / var(--tw-bg-opacity));
 }
 
 .bg-grayLightMuted{
@@ -5303,11 +5296,6 @@ select{
 .text-\[\#d2caca\]{
   --tw-text-opacity: 1;
   color: rgb(210 202 202 / var(--tw-text-opacity));
-}
-
-.text-\[\#d7f148\]{
-  --tw-text-opacity: 1;
-  color: rgb(215 241 72 / var(--tw-text-opacity));
 }
 
 .text-\[\#f1c40f\]{

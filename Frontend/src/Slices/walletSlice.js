@@ -81,12 +81,46 @@ export const requestMoneyFromUser = createAsyncThunk('wallet/requestMoneyFromUse
   }
 })
 
+export const confirmMoneyRequest = createAsyncThunk('wallet/confirmMoneyRequest', async ({transaction_id}, thunkAPI)=> {
+  try {
+    console.log('Inside confirmMoneyRequest createAsyncThunk');
+    console.log("confirmMoneyRequest from walletSlice---->", transaction_id)
+    const response = await axios.post('/wallet/request-confirm', {transaction_id}, {withCredentials: true})
+    console.log('Returning success response from confirmMoneyRequest...', JSON.stringify(response.data))
+    return response.data
+  }catch(error){
+    console.log('Inside catch of confirmMoneyRequest')
+    const errorMessage = error.response?.data?.message
+    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
+    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
+    return thunkAPI.rejectWithValue(errorMessage)
+  }
+})
+
+export const declineMoneyRequest = createAsyncThunk('wallet/declineMoneyRequest', async ({transaction_id}, thunkAPI)=> {
+  try {
+    console.log('Inside declineMoneyRequest createAsyncThunk');
+    console.log("declineMoneyRequest from walletSlice---->", transaction_id)
+    const response = await axios.post('/wallet/request-decline', {transaction_id}, {withCredentials: true})
+    console.log('Returning success response from declineMoneyRequest...', JSON.stringify(response.data))
+    return response.data
+  }catch(error){
+    console.log('Inside catch of declineMoneyRequest')
+    const errorMessage = error.response?.data?.message
+    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
+    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
+    return thunkAPI.rejectWithValue(errorMessage)
+  }
+})
+
 
 const initialState = {
   safeWallet: {}, 
   balance: 0,
   moneySent: false,
   moneyRequested: false,
+  moneyRequestConfirmed: false,
+  moneyRequestDeclined: false,
   peerAccountAdded: true,
   walletCreated: false,
   walletUpdated: false,
@@ -109,6 +143,12 @@ const handleAsyncThunkCases = (builder, asyncThunk) => {
       if(asyncThunk === requestMoneyFromUser){
         state.moneyRequested = true
       }
+      if(asyncThunk === confirmMoneyRequest){
+        state.moneyRequestConfirmed = true
+      }
+      if(asyncThunk === declineMoneyRequest){
+        state.moneyRequestDeclined = true
+      }
     })
     .addCase(asyncThunk.pending, (state) => {
       state.walletLoading = true
@@ -129,7 +169,9 @@ const walletSlice = createSlice({
   reducers: {
     resetWalletStates: (state) => {
       state.moneySent = false
-      state.moneyRequested = false
+      state.moneyRequested = false 
+      state.moneyRequestConfirmed = false
+      state.moneyRequestDeclined = false
       state.peerAccountAdded = false
       state.walletLoading = false
       state.walletError = null
@@ -144,6 +186,8 @@ const walletSlice = createSlice({
     handleAsyncThunkCases(builder, addFundsToWallet)
     handleAsyncThunkCases(builder, sendMoneyToUser)
     handleAsyncThunkCases(builder, requestMoneyFromUser)
+    handleAsyncThunkCases(builder, confirmMoneyRequest) 
+    handleAsyncThunkCases(builder, declineMoneyRequest)
     handleAsyncThunkCases(builder, addPeerAccount)
     }
 })

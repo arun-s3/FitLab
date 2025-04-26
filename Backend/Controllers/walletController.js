@@ -368,7 +368,161 @@ const requestMoneyFromUser = async (req, res, next)=> {
 }
 
 
+const confirmMoneyRequest = async (req, res, next)=> {
+  try {
+    console.log("Inside confirmMoneyRequest controller")
+
+    const userId = req.user._id
+    const transaction_id = req.body.transaction_id
+
+    console.log(`Confirming transaction_id ---> ${transaction_id}`)
+
+    if (!transaction_id){
+      return next(errorHandler(400, "Transaction ID is required"))
+    }
+
+    const userWallet = await Wallet.findOne({ userId })
+    if (!userWallet) return next(errorHandler(404, "Your wallet not found"))
+
+    const receivedRequest = userWallet.transactions.find(
+      (tx)=> tx._id.toString() === transaction_id && tx.type === 'request_received' && tx.status === 'pending'
+    );
+
+    if (!receivedRequest) {
+      return next(errorHandler(404, "Pending money request not found"))
+    }
+
+    const {amount, transactionAccountDetails, transactionId: userTransactionId} = receivedRequest
+
+    if (userWallet.balance < amount) {
+      return next(errorHandler(400, "Insufficient balance to confirm the request"))
+    }
+
+    const requesterWallet = await Wallet.findOne({ accountNumber: transactionAccountDetails.account })
+    if (!requesterWallet) {
+      return next(errorHandler(404, "Requester wallet not found"))
+    }
+
+    userWallet.balance -= parseFloat(amount)
+    requesterWallet.balance += parseFloat(amount)
+
+    receivedRequest.status = 'success'
+    receivedRequest.completedAt = new Date()
+
+    const userWalletTransactionDetails = {
+      type: 'debit',
+      amount,
+      transactionId: uuidv4(),
+      transactionAccountDetails: {
+        type: 'user',
+        account: requesterWallet.accountNumber
+      },
+      notes: `Confirmed money request to ${requesterWallet.accountNumber}`,
+      status: 'success',
+      createdAt: new Date()
+    }
+
+    userWallet.transactions.unshift(userWalletTransactionDetails);
+
+    const sentRequest = requesterWallet.transactions.find(
+      (tx)=> tx.transactionId === userTransactionId && tx.type === 'request_sent' && tx.status === 'pending'
+    )
+
+    if (sentRequest){
+      sentRequest.status = 'success'
+      sentRequest.completedAt = new Date()
+    }
+
+    requesterWallet.transactions.unshift({
+      type: 'credit',
+      amount,
+      transactionId: uuidv4(),
+      transactionAccountDetails: {
+        type: 'user',
+        account: userWallet.accountNumber
+      },
+      notes: `Money received from ${userWallet.accountNumber}`,
+      status: 'success',
+      createdAt: new Date()
+    });
+
+    await userWallet.save()
+    await requesterWallet.save()
+
+    delete userWalletTransactionDetails.transactionId
+    const { userId: _, ...safeWallet } = userWallet.toObject()
+    safeWallet.transactions.unshift(userWalletTransactionDetails)
+    const encryptedWallet = encryptData(safeWallet)
+
+    return res.status(200).json({safeWallet: encryptedWallet, message: "Money request confirmed and amount transferred successfully"});
+  }
+  catch (error){
+    console.error("Error in confirmMoneyRequest:", error.message)
+    next(error)
+  }
+}
+
+
+const declineMoneyRequest = async (req, res, next)=> {
+  try {
+    console.log("Inside declineMoneyRequest controller")
+
+    const userId = req.user._id
+    const transaction_id = req.body.transaction_id
+
+    console.log(`Declining transaction_id ---> ${transaction_id}`)
+
+    if (!transaction_id){
+      return next(errorHandler(400, "Transaction ID is required"))
+    }
+
+    const userWallet = await Wallet.findOne({ userId })
+    if (!userWallet) return next(errorHandler(404, "Your wallet not found"))
+
+    const receivedRequest = userWallet.transactions.find(
+      (tx) => tx._id.toString() === transaction_id && tx.type === 'request_received' && tx.status === 'pending'
+    )
+
+    if (!receivedRequest) {
+      return next(errorHandler(404, "Pending money request not found"))
+    }
+
+    const { transactionAccountDetails, transactionId: userTransactionId } = receivedRequest
+
+    const requesterWallet = await Wallet.findOne({ accountNumber: transactionAccountDetails.account })
+    if (!requesterWallet) {
+      return next(errorHandler(404, "Requester wallet not found"))
+    }
+
+    receivedRequest.status = 'failed'
+    receivedRequest.completedAt = new Date()
+
+    const sentRequest = requesterWallet.transactions.find(
+      (tx) => tx.transactionId === userTransactionId && tx.type === 'request_sent' && tx.status === 'pending'
+    )
+
+    if (sentRequest){
+      sentRequest.status = 'failed'
+      sentRequest.completedAt = new Date()
+    }
+
+    await userWallet.save();
+    await requesterWallet.save();
+
+    const walletWithoutIds = await Wallet.findOne({ userId }).select('-userId -transactions.transactionId')
+    const encryptedWallet = encryptData(walletWithoutIds)
+
+    return res.status(200).json({ safeWallet: encryptedWallet, message: "Money request declined successfully." });
+
+  } catch (error) {
+    console.error("Error in declineMoneyRequest:", error.message)
+    next(error)
+  }
+}
+
+
+
 
 
 module.exports = {getOrCreateWallet, addFundsToWallet, getUserNameFromAccountNumber, addPeerAccount,
-   sendMoneyToUser, requestMoneyFromUser}
+   sendMoneyToUser, requestMoneyFromUser, confirmMoneyRequest, declineMoneyRequest}

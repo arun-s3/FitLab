@@ -5,7 +5,7 @@ const {getOrCreateWallet, addFundsToWallet, getUserNameFromAccountNumber, addPee
 const {isLogin, isLogout} = require('../Middlewares/Authentication')
 
 
-walletRouter.get('/', isLogin, getOrCreateWallet)
+walletRouter.post('/', isLogin, getOrCreateWallet)
 walletRouter.post('/add', isLogin, addFundsToWallet)
 walletRouter.get('/account/:acc', isLogin, getUserNameFromAccountNumber)
 walletRouter.post('/peer-account', isLogin, addPeerAccount)

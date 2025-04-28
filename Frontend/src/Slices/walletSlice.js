@@ -1,11 +1,11 @@
 import {createSlice, createAsyncThunk} from '@reduxjs/toolkit'
 import axios from '../Utils/axiosConfig'
 
-export const getOrCreateWallet = createAsyncThunk('wallet/getOrCreateWallet', async (thunkAPI)=> {
+export const getOrCreateWallet = createAsyncThunk('wallet/getOrCreateWallet', async ({queryOptions}, thunkAPI)=> {
   try {
     console.log('Inside getOrCreateWallet createAsyncThunk');
-    // console.log("getOrCreateWallet from walletSlice---->", orderDetails)
-    const response = await axios.get('/wallet', {withCredentials: true})
+    console.log("getOrCreateWallet from walletSlice---->", queryOptions)
+    const response = await axios.post('/wallet', {queryOptions},  {withCredentials: true})
     console.log('Returning success response from getOrCreateWallet...', JSON.stringify(response.data))
     return response.data
   }catch(error){

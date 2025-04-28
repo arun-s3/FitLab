@@ -13,8 +13,8 @@ export default function useStickyDropdown(dropdownKeys) {
 
       console.log('Sticky dropdowns--isOutside--', isOutside);
       if (isOutside) {
-        setOpenStickyDropdowns(
-          Object.keys(openStickyDropdowns).reduce((newState, key) => {
+        setOpenStickyDropdowns( prevState=> 
+          Object.keys(prevState).reduce((newState, key) => {
             newState[key] = false
             return newState;
           }, {})

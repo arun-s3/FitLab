@@ -1,7 +1,7 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
 
-const PaginationV2 = ({ currentPage, totalPages, onPageChange }) => {
+const PaginationV2 = ({ currentPage, totalPages, onPageChange, bgColorStyle }) => {
   const pageNumbers = [];
   const maxVisiblePages = 5;
 
@@ -51,7 +51,7 @@ const PaginationV2 = ({ currentPage, totalPages, onPageChange }) => {
               onClick={() => onPageChange(page)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition duration-150 ease-in-out ${
                 currentPage === page
-                  ? 'bg-blue-600 text-white'
+                  ? `${bgColorStyle ? bgColorStyle : bg-blue-600} text-white`
                   : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
               }`}
             >

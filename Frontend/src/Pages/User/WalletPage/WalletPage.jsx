@@ -49,7 +49,7 @@ export default function WalletPage() {
     const [selectedCreditor, setSelectedCreditor] = useState({name: '', accountNumber: ''}) 
     const [requestMoney, setRequestMoney] = useState(null)
 
-    const [queryOptions, setQueryOptions] = useState({page: 1, limit: 6, status: 'all'})
+    const [queryOptions, setQueryOptions] = useState({page: 1, status: 'all', type: 'all', userLevel: false})
 
     const [error, setError] = useState({sendMoney: '', receiveMoney: ''})
     const [inputMsg, setInputMsg] = useState({sendMoney: '', receiveMoney: ''})
@@ -74,9 +74,15 @@ export default function WalletPage() {
 
     useEffect(()=> {
       dispatch(resetWalletStates())
-      console.log('Getting wallet...')
-      dispatch(getOrCreateWallet())
     },[])
+
+    useEffect(() => {
+      console.log("queryOptions----->", queryOptions)
+      console.log('Getting wallet...')
+      if(Object.keys(queryOptions).length > 0){
+        dispatch( getOrCreateWallet({queryOptions}) )
+      }
+    }, [queryOptions])
 
     useEffect(()=> {
       if(safeWallet && Object.keys(safeWallet).length > 0){
@@ -126,7 +132,8 @@ export default function WalletPage() {
       }
       console.log('isRequester--->', isRequester)
       console.log('complexModal--->', complexModal)
-    }, [selectedRecipient, selectedCreditor, isRequester, complexModal])
+      console.log('queryOptions--->', queryOptions)
+    }, [selectedRecipient, selectedCreditor, isRequester, complexModal, queryOptions])
     
 
     const formatAccountNumber = (number)=> {
@@ -452,7 +459,8 @@ export default function WalletPage() {
     
                 { 
                   safeWallet &&
-                  <TransactionDetailsSection transactions={safeWallet && decryptWalletData(safeWallet)?.transactions}/>
+                  <TransactionDetailsSection transactions={safeWallet && decryptWalletData(safeWallet)?.transactions}
+                    queryOptions={queryOptions} setQueryOptions={setQueryOptions}/>
                 }
 
                 <WalletUtilitySection membershipCredits={membershipCredits}/>

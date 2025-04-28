@@ -17,53 +17,155 @@ const {errorHandler} = require('../Utils/errorHandler')
 
 
 
+// const getOrCreateWallet = async (req, res, next)=> {
+//     try{
+//         console.log("Inside getOrCreateWallet of walletController")   
+//         const userId = req.user._id
+
+//         const wallet = await Wallet.findOne({ userId }).select('-userId -transactions.transactionId')
+//         console.log("wallet now--->", wallet)
+
+//         if (!wallet) {
+//           const uniqueAccountNumber = await generateUniqueAccountNumber()
+//           console.log("Creating new wallet....")
+//           console.log("uniqueAccountNumber--->", uniqueAccountNumber)
+//           const newWallet = new Wallet({
+//             userId,
+//             accountNumber: uniqueAccountNumber,
+//             balance: 0,
+//             transactions: []
+//           })
+//           await newWallet.save();
+//           console.log("Wallet created successfully:", newWallet)
+
+//           const {userId: _, ...safeWallet} = newWallet.toObject()
+//           const encryptedWallet = encryptData(safeWallet)
+
+//           res.status(200).json({safeWallet: encryptedWallet, message: 'wallet created'});
+//         }else{
+//             console.log("Already has a wallet....")
+//             console.log("wallet--->", JSON.stringify(wallet))
+            
+//             const encryptedWallet = encryptData(wallet)
+
+//             res.status(200).json({safeWallet: encryptedWallet, message: 'wallet sent'});
+//         }
+//     }
+//     catch(error){
+//         console.log("Error in walletController-getOrCreateWallet:", error.message)
+//         next(error)
+//     }
+// }
+
+
 const getOrCreateWallet = async (req, res, next)=> {
-    try{
-        console.log("Inside getOrCreateWallet of walletController")   
-        const userId = req.user._id
+  try {
+    console.log("Inside getOrCreateWallet of walletController")
 
-        const wallet = await Wallet.findOne({ userId }).select('-userId -transactions.transactionId')
-        console.log("wallet now--->", wallet)
+    const userId = req.user._id
+    const queryOptions = req.body.queryOptions || {}
 
-        if (!wallet) {
-          const uniqueAccountNumber = await generateUniqueAccountNumber()
-          console.log("Creating new wallet....")
-          console.log("uniqueAccountNumber--->", uniqueAccountNumber)
-          const newWallet = new Wallet({
-            userId,
-            accountNumber: uniqueAccountNumber,
-            balance: 0,
-            transactions: []
-          })
-          await newWallet.save();
-          console.log("Wallet created successfully:", newWallet)
+    const wallet = await Wallet.findOne({ userId }).select('-userId -transactions.transactionId')
+    console.log("wallet now--->", wallet)
 
-          const {userId: _, ...safeWallet} = newWallet.toObject()
-          const encryptedWallet = encryptData(safeWallet)
+    if (!wallet) {
+      const uniqueAccountNumber = await generateUniqueAccountNumber()
+      console.log("Creating new wallet....")
+      console.log("uniqueAccountNumber--->", uniqueAccountNumber)
 
-          res.status(200).json({safeWallet: encryptedWallet, message: 'wallet created'});
-        }else{
-            console.log("Already has a wallet....")
-            console.log("wallet--->", JSON.stringify(wallet))
+      const newWallet = new Wallet({
+        userId,
+        accountNumber: uniqueAccountNumber,
+        balance: 0,
+        transactions: [],
+      })
+      await newWallet.save();
+      console.log("Wallet created successfully:", newWallet)
 
-            // delete transactionDetails.transactionId
-            // const {userId: _, ...safeWallet} = wallet.toObject()
-            // safeWallet.transactions.unshift(transactionDetails)
-            
-            // allTransactions =  safeWallet.transactions.map(transaction=> {
-            //   delete transaction.transactionId
-            // })
-            
-            const encryptedWallet = encryptData(wallet)
+      const { userId: _, ...safeWallet } = newWallet.toObject()
+      const encryptedWallet = encryptData(safeWallet)
 
-            res.status(200).json({safeWallet: encryptedWallet, message: 'wallet sent'});
+      return res.status(200).json({ safeWallet: encryptedWallet, message: 'wallet created' })
+    } else {
+      console.log("Already has a wallet....")
+
+      let transactions = wallet.transactions || []
+
+      if (Object.keys(queryOptions).length > 0) {
+        const {
+          page = 1,
+          status,
+          userLevel,
+          paymentMethod,
+          type,
+          startDate,
+          endDate,
+          sortBy = 'createdAt',
+          sort = -1, 
+        } = queryOptions;
+
+        console.log("Applying queryOptions--->", queryOptions)
+
+        if (status && status !== 'all'){
+          transactions = transactions.filter(txn=> txn.status === status)
         }
+
+        if (userLevel){
+          transactions = transactions.filter(txn=> txn.transactionAccountDetails.type === 'user')
+        }
+
+        if (paymentMethod && paymentMethod !== 'all'){
+          transactions = transactions.filter(txn=> 
+            txn.transactionAccountDetails.type === 'gateway' &&
+            txn.transactionAccountDetails.account.toLowerCase() === paymentMethod.toLowerCase()
+          )
+        }
+
+        if (type && type !== 'all'){
+          transactions = transactions.filter(txn => txn.type && txn.type.toLowerCase() === type.toLowerCase());
+        }
+
+        if (startDate && endDate){
+          const start = new Date(startDate)
+          const end = new Date(endDate)
+          transactions = transactions.filter(txn=> {
+            const created = new Date(txn.createdAt)
+            return created >= start && created <= end
+          })
+        }
+
+        transactions.sort((a, b) => {
+          if (sortBy === 'amount') {
+            return sort === 1 ? a.amount - b.amount : b.amount - a.amount
+          } else if (sortBy === 'createdAt') {
+            return sort === 1 
+              ? new Date(a.createdAt) - new Date(b.createdAt)
+              : new Date(b.createdAt) - new Date(a.createdAt)
+          }
+          return 0
+        })
+
+        const limit = 6
+        const startSlice = (page - 1) * limit
+        const endSlice = startSlice + limit
+        transactions = transactions.slice(startSlice, endSlice)
+      }
+
+      // const { userId: _, transactions: __, ...safeWallet } = wallet.toObject()
+      const walletWithFilteredTransactions = { ...wallet.toObject(), transactions }
+      console.log("walletWithFilteredTransactions--->", JSON.stringify(walletWithFilteredTransactions))
+
+      const encryptedWallet = encryptData(walletWithFilteredTransactions)
+
+      return res.status(200).json({ safeWallet: encryptedWallet, message: 'wallet sent' })
     }
-    catch(error){
-        console.log("Error in walletController-getOrCreateWallet:", error.message)
-        next(error)
-    }
+  }
+  catch (error){
+    console.log("Error in walletController-getOrCreateWallet:", error.message)
+    next(error)
+  }
 }
+
 
 
 const addFundsToWallet = async (req, res, next)=> {

@@ -7,7 +7,7 @@ const Product = require('../Models/productModel')
 
 const {v4: uuidv4} = require('uuid')
 
-const {generateUniqueAccountNumber} = require('../Controllers/controllerUtils/walletUtils')
+const {generateUniqueAccountNumber, generateTransactionId} = require('../Controllers/controllerUtils/walletUtils')
 const {encryptData} = require('../Controllers/controllerUtils/encryption')
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
@@ -65,7 +65,9 @@ const getOrCreateWallet = async (req, res, next)=> {
     const userId = req.user._id
     const queryOptions = req.body.queryOptions || {}
 
-    const wallet = await Wallet.findOne({ userId }).select('-userId -transactions.transactionId')
+    const wallet = await Wallet.findOne({ userId })
+    // const wallet = await Wallet.findOne({ userId }).select('-userId -transactions.transactionId')
+
     console.log("wallet now--->", wallet)
 
     if (!wallet) {
@@ -151,11 +153,15 @@ const getOrCreateWallet = async (req, res, next)=> {
         transactions = transactions.slice(startSlice, endSlice)
       }
 
-      // const { userId: _, transactions: __, ...safeWallet } = wallet.toObject()
-      const walletWithFilteredTransactions = { ...wallet.toObject(), transactions }
-      console.log("walletWithFilteredTransactions--->", JSON.stringify(walletWithFilteredTransactions))
+      const { userId: _, ...walletWithoutUserId } = wallet.toObject()
+      const transactionsWithoutIds = transactions.map(txn=> {
+        delete txn.transactionId
+        return txn
+      })
+      const walletWithoutIds = { ...walletWithoutUserId, transactions: transactionsWithoutIds }
+      console.log("walletWithFilteredTransactions--->", JSON.stringify(walletWithoutIds))
 
-      const encryptedWallet = encryptData(walletWithFilteredTransactions)
+      const encryptedWallet = encryptData(walletWithoutIds)
 
       return res.status(200).json({ safeWallet: encryptedWallet, message: 'wallet sent' })
     }
@@ -186,7 +192,9 @@ const addFundsToWallet = async (req, res, next)=> {
         return next(errorHandler(400, "Invalid or missing payment gateway"))
       }
   
-      let wallet = await Wallet.findOne({userId}).select('-userId -transactions.transactionId')
+      let wallet = await Wallet.findOne({userId})
+      // let wallet = await Wallet.findOne({userId}).select('-userId -transactions.transactionId')
+
   
       if (!wallet) {
         const uniqueAccountNumber = await generateUniqueAccountNumber()
@@ -623,8 +631,61 @@ const declineMoneyRequest = async (req, res, next)=> {
 }
 
 
+const payOrderWithWallet = async(req, res, next)=> {
+  try {
+    console.log("Inside payOrderWithWallet controller")
+
+    const userId = req.user._id
+    const {amount, notes} = req.body
+
+    const wallet = await Wallet.findOne({ userId })
+    if (!wallet) {
+      return next(errorHandler(404, "Wallet not found."))
+    }
+
+    console.log("amount-->", amount)
+    if (wallet.balance < amount) {
+      return next(errorHandler(400, "Insufficient wallet balance."))
+    }
+
+    console.log("Wallet balance before payment---->", wallet.balance)
+    wallet.balance -= amount
+    console.log("Wallet balance after payment---->", wallet.balance)
+
+    const transactionId = generateTransactionId()
+    console.log("transactionId-->", transactionId)
+
+    const newTransaction = {
+      type: 'debit',
+      amount,
+      transactionId: transactionId,
+      transactionAccountDetails: {
+        type: 'fitlab',
+        account: 'fitlab',
+      },
+      notes,
+      status: 'success',
+      createdAt: new Date()
+    }
+
+    console.log('newTransaction--->', JSON.stringify(newTransaction))
+    wallet.transactions.push(newTransaction)
+
+    await wallet.save();
+
+    console.log("Wallet payment successful")
+
+    return res.status(200).json({message: "Payment successful via wallet.", transactionId});
+  }
+  catch (error){
+    console.error("Error in payOrderWithWallet controller:", error.message)
+    next(error)
+  }
+}
+
+
 
 
 
 module.exports = {getOrCreateWallet, addFundsToWallet, getUserNameFromAccountNumber, addPeerAccount,
-   sendMoneyToUser, requestMoneyFromUser, confirmMoneyRequest, declineMoneyRequest}
+   sendMoneyToUser, requestMoneyFromUser, confirmMoneyRequest, declineMoneyRequest, payOrderWithWallet}

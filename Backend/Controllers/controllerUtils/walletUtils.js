@@ -1,4 +1,5 @@
 const Wallet = require('../../Models/walletModel')
+const { v4: uuidv4 } = require('uuid')
 
 const generateUniqueAccountNumber = async ()=> {
     let accountNumber
@@ -13,5 +14,10 @@ const generateUniqueAccountNumber = async ()=> {
     return accountNumber
 }
 
+const generateTransactionId = () => {
+  const randomId = uuidv4()
+  const transactionId = `WLTFTL_${randomId.replace(/-/g, '').slice(0, 16)}`
+  return transactionId
+}
 
-module.exports = {generateUniqueAccountNumber}
+module.exports = {generateUniqueAccountNumber, generateTransactionId}

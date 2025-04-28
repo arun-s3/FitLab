@@ -192,7 +192,7 @@ export default function CheckoutPage(){
         toast.error('Please select a payment Method!')
         return
       }
-      if(Object.keys(shippingAddress) === 0){
+      if(Object.keys(shippingAddress).length === 0){
         toast.error('Please select a delivery address!')
         return
       }
@@ -204,15 +204,29 @@ export default function CheckoutPage(){
         console.log("razorpay created order--->", response.data.data)
         handleRazorpayVerification(response.data.data)
       }
-      else if(paymentMethod === 'card'){
-
+      else if(paymentMethod === 'wallet'){
+        console.log('Paying with wallet...')
+        const response = await axios.post(`http://localhost:3000/wallet/order`,
+          {amount: cart.absoluteTotalWithTaxes.toFixed(2)}, { withCredentials: true }
+        )
+        console.log('response.data--->', response.data)
+        if(response.data.transactionId){ 
+          toast.success("Payment via Wallet successfull!")
+          const paymentDetails = {paymentMethod: 'wallet', paymentStatus: 'completed', transactionId: response.data.transactionId}
+          dispatch( createOrder({orderDetails: {...orderDetails, paymentDetails}}) ) 
+        }
       }
       else{
         dispatch( createOrder({orderDetails}) ) 
       }
     }
     catch(error){
-      console.log('Error in checkoutHandler:', error.message)
+      console.log('Error in checkoutHandler:', error.response.data?.message || error.message)
+      if (error.response && error.response.status !== 500){
+        toast.error(error.response.data?.message || error.message)
+      }else{
+        toast.error('Something went wrong.')
+      }
     }
   }
 

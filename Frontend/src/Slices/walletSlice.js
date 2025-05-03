@@ -113,6 +113,22 @@ export const declineMoneyRequest = createAsyncThunk('wallet/declineMoneyRequest'
   }
 })
 
+export const updateAutoRechargeSettings = createAsyncThunk('wallet/updateAutoRechargeSettings', async ({settings}, thunkAPI)=> {
+  try {
+    console.log('Inside updateAutoRechargeSettings createAsyncThunk');
+    console.log("updateAutoRechargeSettings from walletSlice---->", settings)
+    const response = await axios.post('/wallet/recharge-settings', {settings}, {withCredentials: true})
+    console.log('Returning success response from updateAutoRechargeSettings...', JSON.stringify(response.data))
+    return response.data
+  }catch(error){
+    console.log('Inside catch of updateAutoRechargeSettings')
+    const errorMessage = error.response?.data?.message
+    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
+    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
+    return thunkAPI.rejectWithValue(errorMessage)
+  }
+})
+
 
 const initialState = {
   safeWallet: {}, 
@@ -148,6 +164,9 @@ const handleAsyncThunkCases = (builder, asyncThunk) => {
       }
       if(asyncThunk === declineMoneyRequest){
         state.moneyRequestDeclined = true
+      }
+      if(asyncThunk === updateAutoRechargeSettings){
+        state.walletUpdated = true
       }
     })
     .addCase(asyncThunk.pending, (state) => {
@@ -189,6 +208,7 @@ const walletSlice = createSlice({
     handleAsyncThunkCases(builder, confirmMoneyRequest) 
     handleAsyncThunkCases(builder, declineMoneyRequest)
     handleAsyncThunkCases(builder, addPeerAccount)
+    handleAsyncThunkCases(builder, updateAutoRechargeSettings)
     }
 })
   

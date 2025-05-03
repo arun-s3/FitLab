@@ -8,7 +8,7 @@ import {Plus, Search, SlidersHorizontal, CalendarX2} from "lucide-react"
 import {RiArrowDropDownLine} from "react-icons/ri"
 import {MdSort} from "react-icons/md"
 import {toast} from 'react-toastify'
-import {IconFilePercent, IconRosetteDiscount, IconRosetteDiscountCheck, IconRosetteDiscountOff} from "@tabler/icons-react"
+// import {IconFilePercent, IconRosetteDiscount, IconRosetteDiscountCheck, IconRosetteDiscountOff} from "@tabler/icons-react"
 
 import AdminHeader from '../../../Components/AdminHeader/AdminHeader'
 import CouponList from "./CouponList"

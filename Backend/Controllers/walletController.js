@@ -684,8 +684,40 @@ const payOrderWithWallet = async(req, res, next)=> {
 }
 
 
+const updateAutoRechargeSettings = async(req, res, next)=> {
+  try {
+    const userId = req.user._id
+    const {isEnabled, thresholdAmount, rechargeAmount, paymentMethod} = req.body.settings
+
+    const wallet = await Wallet.findOne({userId})
+    if (!wallet){
+      return next(errorHandler(404, "Wallet not foun."))
+    }
+
+    wallet.autoRecharge = {
+      isEnabled,
+      thresholdAmount,
+      rechargeAmount,
+      paymentMethod
+    }
+
+    await wallet.save();
+
+    const walletWithoutIds = await Wallet.findOne({ userId }).select('-userId -transactions.transactionId')
+    const encryptedWallet = encryptData(walletWithoutIds)
+
+    res.status(200).json({safeWallet: encryptedWallet, message: 'Auto-Recharge settings updated successfully'})
+  }
+  catch(error){
+    console.error('Error updating auto-recharge settings:', error)
+    next(error)
+  }
+}
 
 
 
-module.exports = {getOrCreateWallet, addFundsToWallet, getUserNameFromAccountNumber, addPeerAccount,
-   sendMoneyToUser, requestMoneyFromUser, confirmMoneyRequest, declineMoneyRequest, payOrderWithWallet}
+
+
+
+module.exports = {getOrCreateWallet, addFundsToWallet, getUserNameFromAccountNumber, addPeerAccount, sendMoneyToUser,
+   requestMoneyFromUser, confirmMoneyRequest, declineMoneyRequest, payOrderWithWallet, updateAutoRechargeSettings}

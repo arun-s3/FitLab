@@ -12,6 +12,8 @@ import axios from 'axios'
 import WalletFundingModal from "./WalletFundingModal"
 import MoneyTransferModal from "./MoneyTransferModal"
 import TransactionDetailsSection from "./TransactionDetailsSection"
+import AutoRechargeFeature from "./AutoRechargeFeature"
+import AutoRechargeModal from "./AutoRechargeModal"
 import WalletUtilitySection from "./WalletUtilitySection"
 import {UserPageLayoutContext} from '../UserPageLayout/UserPageLayout'
 import {decryptWalletData} from '../../../Utils/decryption'
@@ -54,21 +56,15 @@ export default function WalletPage() {
     const [error, setError] = useState({sendMoney: '', receiveMoney: ''})
     const [inputMsg, setInputMsg] = useState({sendMoney: '', receiveMoney: ''})
 
+    const [isAutoRechargeModalOpen, setIsAutoRechargeModalOpen] = useState(false)
+    const [autoRechargeSettings, setAutoRechargeSettings] = useState(null)
+
     const dispatch = useDispatch()
     
     const sendMoneyRef = useRef(null) 
     const requestMoneyRef = useRef(null) 
 
     const {safeWallet, walletLoading, walletError, walletMessage} = useSelector(state=> state.wallet)
-
-    const openFundingModal = () => {
-      console.log("Opening funding modal...")
-      setShowFundingModal(true)
-    }
-  
-    const closeFundingModal = () => {
-      setShowFundingModal(false)
-    }  
 
     const membershipCredits = 3
 
@@ -134,7 +130,22 @@ export default function WalletPage() {
       console.log('complexModal--->', complexModal)
       console.log('queryOptions--->', queryOptions)
     }, [selectedRecipient, selectedCreditor, isRequester, complexModal, queryOptions])
-    
+
+    const openFundingModal = () => {
+      console.log("Opening funding modal...")
+      setShowFundingModal(true)
+    }
+  
+    const closeFundingModal = () => {
+      setShowFundingModal(false)
+    }  
+
+    const walletActionButtons = [
+      {name: 'Add Money', Icon: PlusCircle, clickHandler: ()=> openFundingModal()},
+      {name: 'Auto-recharge', Icon: Lightning, clickHandler: ()=> setIsAutoRechargeModalOpen(true)},
+      {name: 'Wallet-only deals', Icon: Tag},
+      {name: 'Refer', Icon: Users}
+    ]
 
     const formatAccountNumber = (number)=> {
       const numbersOnly = number.slice(3)
@@ -281,15 +292,12 @@ export default function WalletPage() {
       setComplexModal(true)
       setIsTransferModalOpen(true)
     }
-    
-    const walletActionButtons = [
-        {name: 'Add Money', Icon: PlusCircle, clickHandler: ()=> openFundingModal()},
-        {name: 'Auto-recharge', Icon: Lightning},
-        {name: 'Wallet-only deals', Icon: Tag},
-        {name: 'Refer', Icon: Users}
-    ]
 
-    
+    const handleSaveAutoRechargeSettings = (settings) => {
+      setAutoRechargeSettings(settings)
+      // In a real app, this would save to the backend
+      console.log("Auto-recharge settings saved:", settings)
+    }
 
 
   return (
@@ -359,6 +367,9 @@ export default function WalletPage() {
                         <WalletFundingModal showFundingModal={showFundingModal} closeFundingModal={closeFundingModal}
                           paymentVia={paymentVia} setPaymentVia={setPaymentVia}/>
                       }
+
+                      <AutoRechargeModal isOpen={isAutoRechargeModalOpen} onClose={() => setIsAutoRechargeModalOpen(false)}
+                         onSave={handleSaveAutoRechargeSettings} currentSettings={autoRechargeSettings} />
 
                   </div>
     
@@ -464,6 +475,8 @@ export default function WalletPage() {
                 }
 
                 <WalletUtilitySection membershipCredits={membershipCredits}/>
+
+                <AutoRechargeFeature />
 
                 </div>
 

@@ -5,7 +5,7 @@ import {useSelector, useDispatch} from "react-redux"
 import {debounce} from 'lodash'
 
 import {Plus, Search, SlidersHorizontal, CalendarX2} from "lucide-react"
-import {IconFilePercent, IconRosetteDiscount, IconRosetteDiscountCheck, IconRosetteDiscountOff} from "@tabler/icons-react"
+// import {IconFilePercent, IconRosetteDiscount, IconRosetteDiscountCheck, IconRosetteDiscountOff} from "@tabler/icons-react"
 import {RiArrowDropDownLine} from "react-icons/ri"
 import {MdSort} from "react-icons/md"
 import {toast} from 'react-toastify'

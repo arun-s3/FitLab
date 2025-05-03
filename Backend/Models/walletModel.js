@@ -74,7 +74,28 @@ const walletSchema = new mongoose.Schema({
       createdAt: {
         type: Date,
         default: Date.now
+      },
+      autoRecharge: {
+        isEnabled: {
+          type: Boolean,
+          default: false 
+        },
+        thresholdAmount: {
+          type: Number 
+        },   
+        rechargeAmount: {
+          type: Number 
+        },    
+        paymentMethod: {                      
+          type: {
+            type: String,
+            enum: ['paypal', 'razorpay', 'stripe'],
+            default: 'razorpay'
+          },
+          account: { type: String },   
+        }
       }
+      
     }
   ]
 })

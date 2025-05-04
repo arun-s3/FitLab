@@ -2687,6 +2687,10 @@ select{
   width: 5px;
 }
 
+.w-\[5rem\]{
+  width: 5rem;
+}
+
 .w-\[60\%\]{
   width: 60%;
 }
@@ -6866,11 +6870,6 @@ select{
 
   .lg\:grid-cols-3{
     grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .lg\:px-6{
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
   }
 }
 

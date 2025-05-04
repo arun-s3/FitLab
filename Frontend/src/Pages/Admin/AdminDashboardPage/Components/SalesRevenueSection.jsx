@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useContext } from "react"
+import './componentsStyle.css'
 import { motion, AnimatePresence } from "framer-motion"
+
+import axios from 'axios'
 
 import { useTogglerEnabled } from "../../../../Hooks/ToggleEnabler"
 
@@ -18,7 +21,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts"
-import { ArrowUp, ArrowDown, IndianRupee, TrendingUp, ShoppingBag, ChevronDown, ChevronUp } from "lucide-react"
+import { ArrowUp, ArrowDown, IndianRupee, TrendingUp, ShoppingBag, ChevronDown, ChevronUp, TrendingDown } from "lucide-react"
 
 import {AnalyticsContext} from '.././AdminDashboardPage'
 
@@ -84,13 +87,129 @@ const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent
 
 
 export default function SalesRevenueSection() {
-  const [activeTab, setActiveTab] = useState("daily")
+  const [activeTab, setActiveTab] = useState("monthly")
 
   const {dateRange, showAnalytics, setShowAnalytics} = useContext(AnalyticsContext)
 
+  const [stats, setStats] = useState([])
+  const [orderedStats, setOrderedStats] = useState([])
+  const [loading, setLoading] = useState({
+    totalRevenue: false,
+    avgOrders: false,
+    totalOrders: false,
+    revenueTrendsDaily: false,
+    revenueTrendsMonthly: false,
+    revenueTrendsYearly: false,
+    revenueByCat: false,
+    avgOrderValue: false
+  })
+
+  const [revenueDatas, setRevenueDatas] = useState([])
+
   const togglerEnabled = useTogglerEnabled(showAnalytics, 'sales')
 
-  const stats = [
+  useEffect(() => {
+    const fetchAllStats = async ()=> {
+      const newStats = []
+  
+      setLoading(status => ({...status, totalRevenue: true, avgOrders: true, totalOrders: true})) 
+  
+      const [revenueResponse, avgOrdersResponse, totalOrdersResponse, monthlyRevenueResponse] = await Promise.allSettled([
+        axios.get('http://localhost:3000/admin/dashboard/revenue/total', { withCredentials: true }),
+        axios.get('http://localhost:3000/admin/dashboard/orders/average', { withCredentials: true }),
+        axios.get('http://localhost:3000/admin/dashboard/orders/total', { withCredentials: true }),
+        axios.get('http://localhost:3000/admin/dashboard/revenue/monthly', { withCredentials: true })
+      ])
+  
+      if (revenueResponse.status === 'fulfilled'){
+        const response = revenueResponse.value
+        newStats.push({
+          name: "totalRevenue",
+          title: "Total Revenue",
+          value: response.data.currentYear.revenue,
+          change: response.data.changePercentage,
+          trend: response.data.changePercentage > 0 || response.data.changePercentage === 'N/A' ? 'up' : 'down',
+          icon: IndianRupee,
+          color: "bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400"
+        })
+      }else{
+        console.log("Error in total revenue:", revenueResponse.reason.message)
+      }
+  
+      if (avgOrdersResponse.status === 'fulfilled'){
+        const response = avgOrdersResponse.value
+        newStats.push({
+          name: "avgOrders",
+          title: "Average Order Value",
+          value: response.data.averageOrderTotal,
+          change: response.data.changePercentage,
+          trend: response.data.changePercentage > 0 || response.data.changePercentage === 'N/A' ? 'up' : 'down',
+          icon: TrendingUp,
+          color: "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+        })
+      }else{
+        console.log("Error in avg orders:", avgOrdersResponse.reason.message)
+      }
+      
+      if (totalOrdersResponse.status === 'fulfilled') {
+        const response = totalOrdersResponse.value
+        newStats.push({
+          name: "totalOrders",
+          title: "Total Orders",
+          value: response.data.totalOrders,
+          change: response.data.changePercentage,
+          trend: response.data.changePercentage > 0 || response.data.changePercentage === 'N/A' ? 'up' : 'down',
+          icon: ShoppingBag,
+          color: "bg-orange-50 text-primaryDark dark:bg-orange-900/30 dark:text-orange-400"
+        })
+      }else{
+        console.log("Error in total orders:", totalOrdersResponse.reason.message) 
+      }
+  
+      setLoading(status => ({...status, totalRevenue: false, avgOrders: false, totalOrders: false}))
+  
+      setStats(prev => {
+        const existingNames = new Set(prev.map(stat => stat.name));
+        const filtered = newStats.filter(stat => !existingNames.has(stat.name));
+        return [...prev, ...filtered];
+      });
+
+      if (monthlyRevenueResponse.status === 'fulfilled') {
+        const response = monthlyRevenueResponse.value
+        setRevenueDatas(response.data.revenueDatas) 
+      }else{
+        console.log("Error in revenue datas:", monthlyRevenueResponse.reason.message) 
+      }
+    }
+  
+    fetchAllStats();
+  }, [])
+  
+  useEffect(()=> {
+    console.log("stats--->", stats)
+    const priorityOrder = ['totalRevenue', 'avgOrders', 'totalOrders']
+
+    const orderedStats = stats.sort(
+      (a, b) => priorityOrder.indexOf(a.name) - priorityOrder.indexOf(b.name)
+    )
+    setOrderedStats(orderedStats)
+  },[stats])
+
+  // useEffect(()=> {
+  //   const loadRevenueDatas = async()=> {
+  //     try{
+
+  //     }
+  //     catch(error){
+  //       console.log("Error in loadRevenueDatas-->", error.message)
+  //     }
+  //   }
+  //   if(activeTab !== 'monthly'){
+  //     loadRevenueDatas(activeTab)
+  //   }
+  // },[activeTab])
+
+  const currentStats = [
     {
       title: "Total Revenue",
       value: "₹286,400",
@@ -98,6 +217,7 @@ export default function SalesRevenueSection() {
       trend: "up",
       icon: IndianRupee,
       color: "bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400",
+      name: "totalRevenue"
     },
     {
       title: "Average Order Value",
@@ -106,14 +226,16 @@ export default function SalesRevenueSection() {
       trend: "up",
       icon: TrendingUp,
       color: "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
+      name: "avgOrders"
     },
     {
-      title: "Total Orders",
+      title: "Total Delivered Orders",
       value: "2,845",
       change: "-2.3%",
       trend: "down",
       icon: ShoppingBag,
       color: "bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400",
+      name: "totalOrders"
     },
   ]
 
@@ -139,17 +261,18 @@ export default function SalesRevenueSection() {
       <h2 className="text-xl text-secondary font-bold flex items-center gap-[10px]">
         <span className={`w-fit whitespace-nowrap ${!showAnalytics.sales && 'text-muted'}`}>  Sales & Revenue Analysis  </span>
         <div className={`w-full flex items-center justify-between gap-[10px] rounded-[4px] cursor-pointer`}
-            onClick={()=> setShowAnalytics(status=> ({...status, sales: !status.sales}))}>
+            onClick={()=> togglerEnabled && setShowAnalytics(status=> ({...status, sales: !status.sales}))}>
           <hr className={`mt-[2px] w-full h-[2px] border-t border-inputBorderSecondary border-dashed shadow-sm
               ${!showAnalytics.sales && 'border-muted'} `}/>
           {
              showAnalytics.sales ?
             <ChevronUp className={`p-[2px] w-[18px] h-[18px] text-muted border border-secondary rounded-[3px]
              hover:border-purple-800 hover:text-secondary hover:bg-inputBorderSecondary hover:transition
-              hover:duration-150 hover:delay-75 hover:ease-in ${!togglerEnabled && 'hidden'} `}/>
-            :<ChevronDown className={`p-[2px] w-[18px] h-[18px] text-muted border border-secondary rounded-[3px]
+              hover:duration-150 hover:delay-75 hover:ease-in ${!togglerEnabled && 'cursor-not-allowed'} `}/>
+            :
+            <ChevronDown className={`p-[2px] w-[18px] h-[18px] text-muted border border-secondary rounded-[3px]
              hover:border-purple-800 hover:text-secondary hover:bg-inputBorderSecondary hover:transition
-              hover:duration-150 hover:delay-75 hover:ease-in ${!togglerEnabled && 'hidden'} `}/>
+              hover:duration-150 hover:delay-75 hover:ease-in ${!togglerEnabled && 'cursor-not-allowed'} `}/>
           }
         </div>
       </h2>
@@ -158,21 +281,26 @@ export default function SalesRevenueSection() {
       {
         showAnalytics.sales &&
         <motion.div initial={{opacity: 0, y: -20}} animate={{opacity: 1, y: 0}} 
-          exit={{opacity: 0, transition: { duration: 0.5, ease: "easeInOut" }}} transition={{type: 'spring', delay:0.2}}>
+          exit={{opacity: 0, transition: { duration: 0.5, ease: "easeInOut" }}} transition={{type: 'spring', delay:0.2}}
+            className="flex flex-col gap-[1.3rem]">
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {stats.map((stat, index) => (
+            {orderedStats && orderedStats.length > 0 &&
+            orderedStats.map((stat, index) => (
+              !loading?.[stat.name] ?
               <motion.div
                 key={stat.title}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1, duration: 0.5 }}
-                className={`bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border ${index === 0 && 'border-primary'}`}
+                className={`flex items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border ${index === 0 && 'border-primary'}`}
               >
-                <div className="flex items-center justify-between">
-                  <div>
+                <div className="w-full flex items-center justify-between">
+                  <div> 
                     <p className="text-[13px] text-gray-500 dark:text-gray-400">{stat.title}</p>
-                    <h3 className="text-[20px] font-bold mt-1">{stat.value}</h3>
+                    <h3 className="text-[20px] font-bold mt-1">
+                      {stat.name !== 'totalOrders' ? '₹' + ' ' + stat.value : stat.value}
+                    </h3>
                     <div className="flex items-center mt-1">
                       <span
                         className={`flex items-center text-[12px] ${stat.trend === "up" ? "text-green-500" : "text-red-500"}`}
@@ -180,7 +308,7 @@ export default function SalesRevenueSection() {
                         {stat.trend === "up" ? <ArrowUp size={14} /> : <ArrowDown size={14} />}
                         {stat.change}
                       </span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">vs last period</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">vs yesterday</span>
                     </div>
                   </div>
                   <div className={`p-3 rounded-full ${stat.color}`}>
@@ -188,6 +316,14 @@ export default function SalesRevenueSection() {
                   </div>
                 </div>
               </motion.div>
+              :<motion.div
+                key={stat.title}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1, duration: 0.5 }}
+                id='skeleton'
+                className={`w-[5rem] h-[5rem] bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border ${index === 0 && 'border-primary'}`}
+                />
             ))}
           </div>
           
@@ -209,38 +345,40 @@ export default function SalesRevenueSection() {
               </div>
             </div>
             <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={revenueData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8} />
-                      <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                  <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} tickFormatter={(value) => `₹${value.toLocaleString()}`} />
-                  <Tooltip
-                    formatter={(value)=> [`₹${value.toLocaleString()}`, "Revenue"]}
-                    contentStyle={{
-                      fontSize: '13px',
-                      backgroundColor: "rgba(255, 255, 255, 0.9)",
-                      borderRadius: "6px",
-                      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-                      border: "none",
-                    }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="revenue"
-                    stroke="#8b5cf6"
-                    fillOpacity={1}
-                    fill="url(#colorRevenue)"
-                    strokeWidth={2}
-                    activeDot={{ r: 6 }}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+                { revenueDatas.length > 0 &&
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={revenueDatas} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8} />
+                          <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                      <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                      <YAxis tick={{ fontSize: 12 }} tickFormatter={(value) => `₹${value.toLocaleString()}`} />
+                      <Tooltip
+                        formatter={(value)=> [`₹${value.toLocaleString()}`, "Revenue"]}
+                        contentStyle={{
+                          fontSize: '13px',
+                          backgroundColor: "rgba(255, 255, 255, 0.9)",
+                          borderRadius: "6px",
+                          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+                          border: "none",
+                        }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="revenue"
+                        stroke="#8b5cf6"
+                        fillOpacity={1}
+                        fill="url(#colorRevenue)"
+                        strokeWidth={2}
+                        activeDot={{ r: 6 }}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                }
             </div>
           </motion.div>
                   
@@ -296,8 +434,8 @@ export default function SalesRevenueSection() {
                       tickFormatter={(value) => `$${value}`}
                       domain={["dataMin - 10", "dataMax + 10"]}
                     />
-                    <Tooltip
-                      formatter={(value) => [`$${value}`, "AOV"]}
+                    <Tooltip 
+                      formatter={(value) => [`₹ ${value}`, "AOV"]} 
                       contentStyle={{
                         fontSize: '13px',
                         backgroundColor: "rgba(255, 255, 255, 0.9)",

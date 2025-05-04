@@ -6,6 +6,9 @@ import {Search, ChevronDown} from 'lucide-react'
 import SalesRevenueSection from "./Components/SalesRevenueSection"
 import OrdersFulfillmentSection from "./Components/OrderFulfillmentSection."
 import CustomerInsightsSection from "./Components/CustomerInsightsSection"
+import InventoryInsightsSection from './Components/InventoryInsightsSection'
+import CouponOffersInsightsSection from './Components/CouponOffersInsightsSection'
+import PaymentsInsightsSection from './Components/PaymentsInsightsSection'
 import DateRangePicker from "./Components/DateRangePicker"
 
 import AdminHeader from '../../../Components/AdminHeader/AdminHeader'
@@ -59,6 +62,12 @@ export default function AdminDashboardPage(){
                       <OrdersFulfillmentSection />
 
                       <CustomerInsightsSection />
+
+                      <InventoryInsightsSection />
+
+                      <CouponOffersInsightsSection />
+
+                      <PaymentsInsightsSection />
 
                     </AnalyticsContext.Provider>
 

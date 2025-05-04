@@ -75,17 +75,17 @@ export default function OrdersFulfillmentSection() {
       <h2 className="text-xl text-secondary font-bold flex items-center gap-[10px]">
         <span className={`w-fit whitespace-nowrap ${!showAnalytics.orders && 'text-muted'}`}> Orders & Fulfillment </span>
         <div className={`w-full flex items-center justify-between gap-[10px] rounded-[4px] cursor-pointer`}
-            onClick={()=> setShowAnalytics(status=> ({...status, orders: !status.orders}))}>
+            onClick={()=>togglerEnabled && setShowAnalytics(status=> ({...status, orders: !status.orders}))}>
           <hr className={`mt-[2px] w-full h-[2px] border-t border-inputBorderSecondary border-dashed shadow-sm
               ${!showAnalytics.orders && 'border-muted'}`}/>
           {
             showAnalytics.orders ?
             <ChevronUp className={`p-[2px] w-[18px] h-[18px] text-muted border border-secondary rounded-[3px]
              hover:border-purple-800 hover:text-secondary hover:bg-inputBorderSecondary hover:transition
-              hover:duration-150 hover:delay-75 hover:ease-in ${!togglerEnabled && 'hidden'} `}/>
+              hover:duration-150 hover:delay-75 hover:ease-in ${!togglerEnabled && 'cursor-not-allowed'} `}/>
             :<ChevronDown className={`p-[2px] w-[18px] h-[18px] text-muted border border-secondary rounded-[3px]
              hover:border-purple-800 hover:text-secondary hover:bg-inputBorderSecondary hover:transition
-              hover:duration-150 hover:delay-75 hover:ease-in ${!togglerEnabled && 'hidden'} `}/>
+              hover:duration-150 hover:delay-75 hover:ease-in ${!togglerEnabled && 'cursor-not-allowed'} `}/>
           }
         </div>
       </h2>
@@ -94,7 +94,8 @@ export default function OrdersFulfillmentSection() {
       {
         showAnalytics.orders &&
         <motion.div initial={{opacity: 0, y: -20}} animate={{opacity: 1, y: 0}} 
-          exit={{opacity: 0, transition: { duration: 0.5, ease: "easeInOut" }}} transition={{type: 'spring', delay:0.2}}>
+          exit={{opacity: 0, transition: { duration: 0.5, ease: "easeInOut" }}} transition={{type: 'spring', delay:0.2}}
+            className="flex flex-col gap-[1.3rem]">
         
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
@@ -122,7 +123,7 @@ export default function OrdersFulfillmentSection() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1, duration: 0.5 }}
-                className={`bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border ${index === 0 && 'border-primary'}`}
+                className={`flex items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border ${index === 0 && 'border-primary'}`}
               >
                 <div className="flex items-center">
                   <div className={`p-3 rounded-full ${stat.color} mr-4`}>

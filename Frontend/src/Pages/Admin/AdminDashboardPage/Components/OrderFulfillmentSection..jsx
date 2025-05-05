@@ -1,4 +1,5 @@
-import React, {useContext} from 'react'
+import React, {useState, useEffect, useContext} from 'react'
+import './componentsStyle.css'
 import { motion, AnimatePresence } from "framer-motion"
 
 import {
@@ -17,6 +18,7 @@ import {
   ResponsiveContainer,
 } from "recharts"
 import { Package, Clock, CheckCircle, ChevronDown, ChevronUp } from "lucide-react"
+import axios from 'axios'
 
 import {AnalyticsContext} from '.././AdminDashboardPage'
 import { useTogglerEnabled } from "../../../../Hooks/ToggleEnabler"
@@ -57,12 +59,114 @@ export default function OrdersFulfillmentSection() {
 
   const togglerEnabled = useTogglerEnabled(showAnalytics, 'orders')
 
+  const [stats, setStats] = useState([])
+
+  const [loading, setLoading] = useState({
+      totalOrders: false,
+      pendingOrders: false,
+      fulfillmentRate: false,
+      ordersOverTime: false,
+      mostPurchasedProducts: false,
+      orderStatusDistribution: false,
+  })
 
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
     transition: { duration: 0.5 },
   }
+
+  // useEffect(() => {
+  //     const fetchAllStats = async ()=> {
+  //       const newStats = []
+    
+  //       setLoading(status => ({...status, totalOrders: true, pendingOrders: true, fulfillmentRate: true})) 
+    
+  //       const [orderStatsResponse] = await Promise.allSettled([
+  //         axios.get('http://localhost:3000/admin/dashboard/orders/stats', { withCredentials: true }),
+  //       ])
+    
+  //       if (orderStatsResponse.status === 'fulfilled'){
+  //         const response = revenueResponse.value
+  //         newStats.concat({
+  //           name: "totalOrders",
+  //           title: "Total Orders",
+  //           value: response.data.stats.total,
+  //           icon: Package,
+  //           color: "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+  //         })
+  //         .concat({
+  //           name: "pendingOrders",
+  //           title: "Pending Orders",
+  //           value: response.data.stats.pending,
+  //           icon: Clock,
+  //           color: "bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400"
+  //         })
+  //         .concat({
+  //           name: "fulfillmentRate",
+  //           title: "Fulfillment Rate",
+  //           value: response.data.stats.pending,
+  //           icon: CheckCircle,
+  //           color: "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400"
+  //         })
+
+  //       }else{
+  //         console.log("Error in total revenue:", revenueResponse.reason.message)
+  //       }
+    
+  //       if (avgOrdersResponse.status === 'fulfilled'){
+  //         const response = avgOrdersResponse.value
+  //         newStats.push({
+  //           name: "avgOrders",
+  //           title: "Average Order Value",
+  //           value: response.data.averageOrderTotal,
+  //           change: response.data.changePercentage,
+  //           trend: response.data.changePercentage > 0 || response.data.changePercentage === 'N/A' ? 'up' : 'down',
+  //           icon: TrendingUp,
+  //           color: "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+  //         })
+  //       }else{
+  //         console.log("Error in avg orders:", avgOrdersResponse.reason.message)
+  //       } 
+        
+  //       if (totalOrdersResponse.status === 'fulfilled') {
+  //         const response = totalOrdersResponse.value
+  //         newStats.push({
+  //           name: "totalOrders",
+  //           title: "Total Orders",
+  //           value: response.data.totalOrders,
+  //           change: response.data.changePercentage,
+  //           trend: response.data.changePercentage > 0 || response.data.changePercentage === 'N/A' ? 'up' : 'down',
+  //           icon: ShoppingBag,
+  //           color: "bg-orange-50 text-primaryDark dark:bg-orange-900/30 dark:text-orange-400"
+  //         })
+  //       }else{
+  //         console.log("Error in total orders:", totalOrdersResponse.reason.message) 
+  //       }
+    
+  //       setLoading(status => ({...status, totalRevenue: false, avgOrders: false, totalOrders: false}))
+    
+  //       setStats(prev => {
+  //         const existingNames = new Set(prev.map(stat => stat.name));
+  //         const filtered = newStats.filter(stat => !existingNames.has(stat.name));
+  //         return [...prev, ...filtered];
+  //       });
+  
+  //       if (categoryDatasResponse.status === 'fulfilled') {
+  //         const value = categoryDatasResponse.value.data.categoryDatas
+  //         console.log("setting categoryDatas--->", categoryDatasResponse.value.data.categoryDatas)
+  //         setCategoryDatas(value)
+  //       }else{
+  //         console.log("Error in total orders:", categoryDatasResponse.reason.message) 
+  //       }
+  
+  //     }
+    
+  //     fetchAllStats();
+  // }, [])
+
+
+
 
   return (
     <motion.section

@@ -2,10 +2,6 @@ import React, { useState, useEffect, useContext } from "react"
 import './componentsStyle.css'
 import { motion, AnimatePresence } from "framer-motion"
 
-import axios from 'axios'
-
-import { useTogglerEnabled } from "../../../../Hooks/ToggleEnabler"
-
 import {
   AreaChart,
   Area,
@@ -22,72 +18,19 @@ import {
   ResponsiveContainer,
 } from "recharts"
 import { ArrowUp, ArrowDown, IndianRupee, TrendingUp, ShoppingBag, ChevronDown, ChevronUp, TrendingDown } from "lucide-react"
+import axios from 'axios'
 
+import {useTogglerEnabled} from "../../../../Hooks/ToggleEnabler"
 import {AnalyticsContext} from '.././AdminDashboardPage'
-
-const revenueData = [
-  { name: "Jan", revenue: 12400 },
-  { name: "Feb", revenue: 15600 },
-  { name: "Mar", revenue: 14200 },
-  { name: "Apr", revenue: 18900 },
-  { name: "May", revenue: 21500 },
-  { name: "Jun", revenue: 25800 },
-  { name: "Jul", revenue: 26100 },
-  { name: "Aug", revenue: 28400 },
-  { name: "Sep", revenue: 27300 },
-  { name: "Oct", revenue: 29800 },
-  { name: "Nov", revenue: 32100 },
-  { name: "Dec", revenue: 35600 },
-]
-
-const categoryData = [
-  { name: "Cardio Equipment", value: 35 },
-  { name: "Strength Training", value: 30 },
-  { name: "Supplements", value: 20 },
-  { name: "Accessories", value: 15 },
-]
-
-const aovData = [
-  { name: "Jan", aov: 85 },
-  { name: "Feb", aov: 87 },
-  { name: "Mar", aov: 84 },
-  { name: "Apr", aov: 92 },
-  { name: "May", aov: 95 },
-  { name: "Jun", aov: 98 },
-  { name: "Jul", aov: 102 },
-  { name: "Aug", aov: 105 },
-  { name: "Sep", aov: 108 },
-  { name: "Oct", aov: 112 },
-  { name: "Nov", aov: 115 },
-  { name: "Dec", aov: 120 },
-]
-
-const COLORS = ["#8b5cf6", "#cb8ef5", "#f1c40f", "#d7f148"]
-
-const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name })=> {
-  const RADIAN = Math.PI / 180;
-  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-  const x = cx + radius * Math.cos(-midAngle * RADIAN);
-  const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-  return (
-    <text
-      x={x}
-      y={y}
-      fill="#333"
-      textAnchor={x > cx ? 'start' : 'end'}
-      dominantBaseline="central"
-      fontSize={13} 
-      fontWeight="bold"
-    >
-      {`${name} (${(percent * 100).toFixed(0)}%)`}
-    </text>
-  );
-};
 
 
 export default function SalesRevenueSection() {
   const [activeTab, setActiveTab] = useState("monthly")
+
+  const [salesDate, setSalesDate] = useState(new Date())
+  const [hourlySalesDatas, setHourlySalesDatas] = useState([])
+
+  const [categoryDatas, setCategoryDatas] = useState([])
 
   const {dateRange, showAnalytics, setShowAnalytics} = useContext(AnalyticsContext)
 
@@ -108,17 +51,19 @@ export default function SalesRevenueSection() {
 
   const togglerEnabled = useTogglerEnabled(showAnalytics, 'sales')
 
+  const COLORS = ["#8b5cf6", "#cb8ef5", "#f1c40f", "#d7f148"]
+
   useEffect(() => {
     const fetchAllStats = async ()=> {
       const newStats = []
   
       setLoading(status => ({...status, totalRevenue: true, avgOrders: true, totalOrders: true})) 
   
-      const [revenueResponse, avgOrdersResponse, totalOrdersResponse, monthlyRevenueResponse] = await Promise.allSettled([
+      const [revenueResponse, avgOrdersResponse, totalOrdersResponse, categoryDatasResponse] = await Promise.allSettled([
         axios.get('http://localhost:3000/admin/dashboard/revenue/total', { withCredentials: true }),
         axios.get('http://localhost:3000/admin/dashboard/orders/average', { withCredentials: true }),
         axios.get('http://localhost:3000/admin/dashboard/orders/total', { withCredentials: true }),
-        axios.get('http://localhost:3000/admin/dashboard/revenue/monthly', { withCredentials: true })
+        axios.get('http://localhost:3000/admin/dashboard/revenue/category', { withCredentials: true })
       ])
   
       if (revenueResponse.status === 'fulfilled'){
@@ -132,6 +77,7 @@ export default function SalesRevenueSection() {
           icon: IndianRupee,
           color: "bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400"
         })
+        setLoading(status => ({...status, totalRevenue: false}))
       }else{
         console.log("Error in total revenue:", revenueResponse.reason.message)
       }
@@ -147,9 +93,10 @@ export default function SalesRevenueSection() {
           icon: TrendingUp,
           color: "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
         })
+        setLoading(status => ({...status, avgOrders: false}))
       }else{
         console.log("Error in avg orders:", avgOrdersResponse.reason.message)
-      }
+      } 
       
       if (totalOrdersResponse.status === 'fulfilled') {
         const response = totalOrdersResponse.value
@@ -162,24 +109,25 @@ export default function SalesRevenueSection() {
           icon: ShoppingBag,
           color: "bg-orange-50 text-primaryDark dark:bg-orange-900/30 dark:text-orange-400"
         })
+        setLoading(status => ({...status, totalOrders: false}))
       }else{
         console.log("Error in total orders:", totalOrdersResponse.reason.message) 
       }
-  
-      setLoading(status => ({...status, totalRevenue: false, avgOrders: false, totalOrders: false}))
-  
+    
       setStats(prev => {
         const existingNames = new Set(prev.map(stat => stat.name));
         const filtered = newStats.filter(stat => !existingNames.has(stat.name));
         return [...prev, ...filtered];
       });
 
-      if (monthlyRevenueResponse.status === 'fulfilled') {
-        const response = monthlyRevenueResponse.value
-        setRevenueDatas(response.data.revenueDatas) 
+      if (categoryDatasResponse.status === 'fulfilled') {
+        const value = categoryDatasResponse.value.data.categoryDatas
+        console.log("setting categoryDatas--->", categoryDatasResponse.value.data.categoryDatas)
+        setCategoryDatas(value)
       }else{
-        console.log("Error in revenue datas:", monthlyRevenueResponse.reason.message) 
+        console.log("Error in total orders:", categoryDatasResponse.reason.message) 
       }
+
     }
   
     fetchAllStats();
@@ -195,19 +143,46 @@ export default function SalesRevenueSection() {
     setOrderedStats(orderedStats)
   },[stats])
 
-  // useEffect(()=> {
-  //   const loadRevenueDatas = async()=> {
-  //     try{
+  useEffect(()=> {
+    const loadRevenueDatas = async()=> {
+      console.log("Inside loadRevenueDatas")
+      console.log("activeTab--->", activeTab)
+      try{
+        let response = null
+        if(activeTab === 'monthly'){
+          console.log("Inide activeTab === 'monthly'")
+          response = await axios.get('http://localhost:3000/admin/dashboard/revenue/monthly', { withCredentials: true })
+        }
+        if(activeTab === 'weekly'){
+          console.log("Inide activeTab === 'weekly'")
+          response = await axios.get('http://localhost:3000/admin/dashboard/revenue/weekly', { withCredentials: true })
+        }
+        console.log("response.data---->", response.data)
+        if(response?.data){
+          setRevenueDatas(response.data.revenueDatas) 
+        }
+      }
+      catch(error){
+        console.log("Error in loadRevenueDatas-->", error.message)
+      }
+    }
+    if(activeTab){
+      loadRevenueDatas(activeTab)
+    }
+    const loadHourlyRevenue = async()=> {
+      console.log("loadHourlyRevenue")
+      const response = await axios.get(`http://localhost:3000/admin/dashboard/revenue/hourly/:${salesDate}`, { withCredentials: true })
+      setHourlySalesDatas(response.data.daySalesDatas)
+    }
+    if(salesDate){
+      loadHourlyRevenue()
+    }
+  },[activeTab, salesDate])
 
-  //     }
-  //     catch(error){
-  //       console.log("Error in loadRevenueDatas-->", error.message)
-  //     }
-  //   }
-  //   if(activeTab !== 'monthly'){
-  //     loadRevenueDatas(activeTab)
-  //   }
-  // },[activeTab])
+  useEffect(()=> {
+    console.log("hourlySalesDatas---->", hourlySalesDatas)
+    console.log("categoryDatas---->", categoryDatas)
+  },[hourlySalesDatas, categoryDatas])
 
   const currentStats = [
     {
@@ -240,7 +215,6 @@ export default function SalesRevenueSection() {
   ]
 
   const tabs = [
-    { id: "daily", label: "Daily" },
     { id: "weekly", label: "Weekly" },
     { id: "monthly", label: "Monthly" },
   ]
@@ -285,8 +259,8 @@ export default function SalesRevenueSection() {
             className="flex flex-col gap-[1.3rem]">
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {orderedStats && orderedStats.length > 0 &&
-            orderedStats.map((stat, index) => (
+            {stats && stats.length > 0 &&
+            stats.map((stat, index) => (
               !loading?.[stat.name] ?
               <motion.div
                 key={stat.title}
@@ -317,12 +291,11 @@ export default function SalesRevenueSection() {
                 </div>
               </motion.div>
               :<motion.div
-                key={stat.title}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1, duration: 0.5 }}
-                id='skeleton'
-                className={`w-[5rem] h-[5rem] bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border ${index === 0 && 'border-primary'}`}
+                className={`w-[5rem] h-[5rem] skeleton-loader bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm 
+                  border ${index === 0 && 'border-primary'}`}
                 />
             ))}
           </div>
@@ -383,24 +356,26 @@ export default function SalesRevenueSection() {
           </motion.div>
                   
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <motion.div {...fadeInUp} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border">
+            {
+              categoryDatas && categoryDatas.length > 0 &&
+              <motion.div {...fadeInUp} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border">
               <h3 className="text-[17px] font-semibold mb-6">Revenue by Category</h3>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={categoryData}
+                      data={categoryDatas}
                       cx="50%"
                       cy="50%"
                       innerRadius={60}
                       outerRadius={80}
                       fill="#8884d8"
                       paddingAngle={5}
-                      dataKey="value"
+                      dataKey="revenue"
                       label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                       labelLine={true}
                     >
-                      {categoryData.map((entry, index) => (
+                      {categoryDatas.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
@@ -421,21 +396,35 @@ export default function SalesRevenueSection() {
                 </ResponsiveContainer>
               </div>
             </motion.div>
-                  
+            }
+            
             <motion.div {...fadeInUp} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border">
-              <h3 className="text-[17p] font-semibold mb-6">Average Order Value</h3>
+              <h3 className="w-full flex items-center justify-between text-[17p] font-semibold mb-6">
+                <span>
+                    Hourly Sales Data
+                </span>   
+                {
+                  salesDate &&
+                  <input type="date" id="date" name="date" value={salesDate instanceof Date ? salesDate.toISOString().split('T')[0] : salesDate}
+                   onChange={(e)=> setSalesDate(e.target.value)}
+                    className="w-[8.5rem] h-[2.1rem] text-[11px] text-secondary capitalize border border-primary rounded-[6px]
+                     cursor-pointer focus:ring-2 focus:ring-primaryDark focus:outline-none"/>
+                }
+              </h3>
               <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={aovData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                {
+                  hourlySalesDatas && hourlySalesDatas.length > 0 &&
+                  <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={hourlySalesDatas} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                    <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                    <XAxis dataKey="hour" tick={{ fontSize: 12 }} />
                     <YAxis
                       tick={{ fontSize: 12 }}
-                      tickFormatter={(value) => `$${value}`}
+                      tickFormatter={(value)=> `₹${value}`}
                       domain={["dataMin - 10", "dataMax + 10"]}
                     />
                     <Tooltip 
-                      formatter={(value) => [`₹ ${value}`, "AOV"]} 
+                      formatter={(value)=> [`₹ ${value}`, "Total Order Value"]} 
                       contentStyle={{
                         fontSize: '13px',
                         backgroundColor: "rgba(255, 255, 255, 0.9)",
@@ -446,7 +435,7 @@ export default function SalesRevenueSection() {
                     />
                     <Line
                       type="monotone"
-                      dataKey="aov"
+                      dataKey="totalSales"
                       // stroke="#d7f148"
                       stroke='#9f2af0'
                       strokeWidth={3}
@@ -455,6 +444,7 @@ export default function SalesRevenueSection() {
                     />
                   </LineChart>
                 </ResponsiveContainer>
+                }
               </div>
             </motion.div>
           </div>

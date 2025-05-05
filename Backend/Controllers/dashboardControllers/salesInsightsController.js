@@ -1,11 +1,9 @@
-const Offer = require('../Models/offerModel')
-const Order = require('../Models/orderModel')
-const Cart = require('../Models/cartModel')
-const Product = require('../Models/productModel') 
-const Category = require('../Models/categoryModel')
-const User = require('../Models/userModel')
+const Order = require('../../Models/orderModel')
+const Product = require('../../Models/productModel') 
+const Category = require('../../Models/categoryModel')
+const User = require('../../Models/userModel')
 
-const {errorHandler} = require('../Utils/errorHandler') 
+const {errorHandler} = require('../../Utils/errorHandler') 
 
 
 
@@ -222,7 +220,7 @@ const getMonthlyRevenue = async (req, res, next)=> {
     ];
 
     const revenueDatas = monthNames.map((name, index)=> {
-      const found = monthlyRevenue.find(m => m.month === index + 1);
+      const found = monthlyRevenue.find(m=> m.month === index + 1);
       return {
         name,
         revenue: found ? found.revenue : 0
@@ -234,7 +232,174 @@ const getMonthlyRevenue = async (req, res, next)=> {
     res.status(200).json({revenueDatas})
   }
   catch(error){
-    console.error("Error fetching monthly revenue:", error)
+    console.error("Error fetching monthly revenue:", error.message)
+    next(error)
+  }
+}
+
+
+const getWeeklyRevenue = async (req, res, next)=> {
+  try {
+    console.log("Inside getWeeklyRevenue")
+    const today = new Date()
+    const lastWeek = new Date()
+    lastWeek.setDate(today.getDate() - 6)
+
+    const weeklyRevenue = await Order.aggregate([
+      {
+        $match: {
+          orderStatus: 'delivered',
+          orderDate: {
+            $gte: new Date(lastWeek.setHours(0, 0, 0, 0)),
+            $lte: new Date(today.setHours(23, 59, 59, 999))
+          }
+        }
+      },
+      {
+        $group: {
+          _id: { $dayOfWeek: "$orderDate" },
+          totalRevenue: { $sum: "$absoluteTotalWithTaxes" }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          day: "$_id",
+          revenue: "$totalRevenue"
+        }
+      }
+    ])
+
+    console.log("monthlyRevenue---->", weeklyRevenue)
+
+    const dayMap = {
+      1: "Sun",
+      2: "Mon",
+      3: "Tue",
+      4: "Wed",
+      5: "Thu",
+      6: "Fri",
+      7: "Sat"
+    }
+
+    const fullWeek = [1, 2, 3, 4, 5, 6, 7]
+    const revenueDatas = fullWeek.map(dayNum => {
+      const found = weeklyRevenue.find(item => item.day === dayNum);
+      return {
+        name: dayMap[dayNum],
+        revenue: found ? found.revenue : 0
+      }
+    })
+
+    console.log("weeklyRevenue with weeks---->", revenueDatas)
+
+    res.status(200).json({revenueDatas});
+  }
+  catch(error){
+    console.error("Error fetching weekly revenue:", error.message)
+    next(error)
+  }
+}
+
+
+const getHourlySalesOfDay = async (req, res, next)=> {
+  try {
+    console.log("Inside getHourlySalesOfDay")
+      
+    const {date} = req.params
+    console.log("date--->", date)
+
+    if (!date) {
+      return next(errorHandler(400, "Please provide a date in YYYY-MM-DD format.!"))
+    }
+
+    const start = new Date(date)
+    const end = new Date(date)
+    end.setDate(end.getDate() + 1)
+
+    const salesData = await Order.aggregate([
+      {
+        $match: {
+          orderDate: { $gte: start, $lt: end },
+          orderStatus: 'delivered'
+        }
+      },
+      {
+        $project: {
+          hour: { $hour: '$orderDate' },
+          total: '$absoluteTotalWithTaxes'
+        }
+      },
+      {
+        $group: {
+          _id: '$hour',
+          totalSales: { $sum: '$total' }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          hour: '$_id',
+          totalSales: 1
+        }
+      }
+    ]);
+
+    const daySalesDatas = Array.from({ length: 24 }, (_, i) => {
+      const found = salesData.find(s => s.hour === i);
+      return {
+        hour: `${i.toString().padStart(2, '0')}:00`,
+        totalSales: found ? found.totalSales : 0
+      }
+    })
+    console.log("daySalesDatas--->", daySalesDatas)
+
+    res.status(200).json({daySalesDatas})
+  }
+  catch(error){
+    console.error('Hourly sales error:', error.message)
+    next(error)
+  }
+}
+
+
+const getRevenueByMainCategory = async (req, res, next) => {
+  try {
+    console.log("Inside getRevenueByMainCategory")
+
+    const categoryDatas = await Order.aggregate([
+      {
+        $match: {
+          orderStatus: 'delivered'
+        }
+      },
+      {
+        $unwind: '$products'
+      },
+      {
+        $unwind: '$products.category'
+      },
+      {
+        $group: {
+          _id: '$products.category',
+          revenue: { $sum: '$products.total' }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          name: '$_id',
+          revenue: 1
+        }
+      }
+    ]);
+
+    console.log("categoryDatas--->", categoryDatas)
+
+    res.status(200).json({categoryDatas})
+  }
+  catch(error){
+    console.error('Error fetching revenue by category:', error.message)
     next(error)
   }
 }
@@ -243,4 +408,8 @@ const getMonthlyRevenue = async (req, res, next)=> {
 
 
 
-module.exports = {getAnnualRevenueStats, getAverageOrderTotal, getTotalOrdersCount, getMonthlyRevenue}
+
+
+
+module.exports = {getAnnualRevenueStats, getAverageOrderTotal, getTotalOrdersCount, getMonthlyRevenue, getWeeklyRevenue,
+   getHourlySalesOfDay, getRevenueByMainCategory}

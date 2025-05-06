@@ -1,7 +1,4 @@
 const Order = require('../../Models/orderModel')
-const Product = require('../../Models/productModel') 
-const Category = require('../../Models/categoryModel')
-const User = require('../../Models/userModel')
 
 const {errorHandler} = require('../../Utils/errorHandler') 
 

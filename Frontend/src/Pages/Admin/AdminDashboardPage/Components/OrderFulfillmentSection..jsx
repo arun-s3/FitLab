@@ -23,35 +23,7 @@ import axios from 'axios'
 import {AnalyticsContext} from '.././AdminDashboardPage'
 import { useTogglerEnabled } from "../../../../Hooks/ToggleEnabler"
 
-const ordersTimeData = [
-  { name: "Jan", completed: 145, pending: 23, canceled: 12 },
-  { name: "Feb", completed: 158, pending: 25, canceled: 10 },
-  { name: "Mar", completed: 162, pending: 28, canceled: 14 },
-  { name: "Apr", completed: 175, pending: 30, canceled: 15 },
-  { name: "May", completed: 182, pending: 32, canceled: 13 },
-  { name: "Jun", completed: 195, pending: 35, canceled: 16 },
-  { name: "Jul", completed: 210, pending: 38, canceled: 18 },
-  { name: "Aug", completed: 222, pending: 40, canceled: 15 },
-  { name: "Sep", completed: 235, pending: 42, canceled: 17 },
-  { name: "Oct", completed: 248, pending: 45, canceled: 19 },
-  { name: "Nov", completed: 260, pending: 48, canceled: 20 },
-  { name: "Dec", completed: 275, pending: 50, canceled: 22 },
-]
 
-const topProductsData = [
-  { name: "Premium Dumbbells Set", value: 120 },
-  { name: "Resistance Bands Pack", value: 98 },
-  { name: "Protein Powder (2kg)", value: 86 },
-  { name: "Yoga Mat Pro", value: 72 },
-  { name: "Fitness Tracker", value: 65 },
-]
-
-const orderStatusData = [
-  { name: "Completed", value: 68, color: "#10b981" },
-  { name: "Processing", value: 17, color: "#6366f1" },
-  { name: "Pending", value: 10, color: "#f59e0b" },
-  { name: "Canceled", value: 5, color: "#ef4444" },
-]
 
 export default function OrdersFulfillmentSection() {
 
@@ -60,6 +32,9 @@ export default function OrdersFulfillmentSection() {
   const togglerEnabled = useTogglerEnabled(showAnalytics, 'orders')
 
   const [stats, setStats] = useState([])
+  const [ordersOverTimeStats, setOrdersOverTimeStats] = useState([])
+  const [topProductDatas, setTopProductDatas] = useState([])
+  const [orderStatusDistribution, setOrderStatusDistribution] = useState([])
 
   const [loading, setLoading] = useState({
       totalOrders: false,
@@ -76,95 +51,98 @@ export default function OrdersFulfillmentSection() {
     transition: { duration: 0.5 },
   }
 
-  // useEffect(() => {
-  //     const fetchAllStats = async ()=> {
-  //       const newStats = []
+  useEffect(() => {
+      const fetchAllStats = async ()=> {
+        const newStats = []
     
-  //       setLoading(status => ({...status, totalOrders: true, pendingOrders: true, fulfillmentRate: true})) 
+        setLoading(status => ({...status, totalOrders: true, pendingOrders: true, fulfillmentRate: true})) 
     
-  //       const [orderStatsResponse] = await Promise.allSettled([
-  //         axios.get('http://localhost:3000/admin/dashboard/orders/stats', { withCredentials: true }),
-  //       ])
-    
-  //       if (orderStatsResponse.status === 'fulfilled'){
-  //         const response = revenueResponse.value
-  //         newStats.concat({
-  //           name: "totalOrders",
-  //           title: "Total Orders",
-  //           value: response.data.stats.total,
-  //           icon: Package,
-  //           color: "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
-  //         })
-  //         .concat({
-  //           name: "pendingOrders",
-  //           title: "Pending Orders",
-  //           value: response.data.stats.pending,
-  //           icon: Clock,
-  //           color: "bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400"
-  //         })
-  //         .concat({
-  //           name: "fulfillmentRate",
-  //           title: "Fulfillment Rate",
-  //           value: response.data.stats.pending,
-  //           icon: CheckCircle,
-  //           color: "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400"
-  //         })
-
-  //       }else{
-  //         console.log("Error in total revenue:", revenueResponse.reason.message)
-  //       }
-    
-  //       if (avgOrdersResponse.status === 'fulfilled'){
-  //         const response = avgOrdersResponse.value
-  //         newStats.push({
-  //           name: "avgOrders",
-  //           title: "Average Order Value",
-  //           value: response.data.averageOrderTotal,
-  //           change: response.data.changePercentage,
-  //           trend: response.data.changePercentage > 0 || response.data.changePercentage === 'N/A' ? 'up' : 'down',
-  //           icon: TrendingUp,
-  //           color: "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
-  //         })
-  //       }else{
-  //         console.log("Error in avg orders:", avgOrdersResponse.reason.message)
-  //       } 
+        const [orderStatsResponse, ordersOverTimeResponse, topProductsResponse, orderStatusPercentRes] = await Promise.allSettled([
+          axios.get('http://localhost:3000/admin/dashboard/orders/stats', { withCredentials: true }), 
+          axios.get('http://localhost:3000/admin/dashboard/orders/stats/monthly', { withCredentials: true }),
+          axios.get('http://localhost:3000/admin/dashboard/products/top', { withCredentials: true }),
+          axios.get('http://localhost:3000/admin/dashboard/orders/status-percent', { withCredentials: true }),
+        ])
         
-  //       if (totalOrdersResponse.status === 'fulfilled') {
-  //         const response = totalOrdersResponse.value
-  //         newStats.push({
-  //           name: "totalOrders",
-  //           title: "Total Orders",
-  //           value: response.data.totalOrders,
-  //           change: response.data.changePercentage,
-  //           trend: response.data.changePercentage > 0 || response.data.changePercentage === 'N/A' ? 'up' : 'down',
-  //           icon: ShoppingBag,
-  //           color: "bg-orange-50 text-primaryDark dark:bg-orange-900/30 dark:text-orange-400"
-  //         })
-  //       }else{
-  //         console.log("Error in total orders:", totalOrdersResponse.reason.message) 
-  //       }
-    
-  //       setLoading(status => ({...status, totalRevenue: false, avgOrders: false, totalOrders: false}))
-    
-  //       setStats(prev => {
-  //         const existingNames = new Set(prev.map(stat => stat.name));
-  //         const filtered = newStats.filter(stat => !existingNames.has(stat.name));
-  //         return [...prev, ...filtered];
-  //       });
-  
-  //       if (categoryDatasResponse.status === 'fulfilled') {
-  //         const value = categoryDatasResponse.value.data.categoryDatas
-  //         console.log("setting categoryDatas--->", categoryDatasResponse.value.data.categoryDatas)
-  //         setCategoryDatas(value)
-  //       }else{
-  //         console.log("Error in total orders:", categoryDatasResponse.reason.message) 
-  //       }
-  
-  //     }
-    
-  //     fetchAllStats();
-  // }, [])
+        if (orderStatsResponse.status === 'fulfilled'){
+          const response = orderStatsResponse.value
+          console.log("ORDER response.data.stats----->", response.data.stats)
 
+          newStats.push({
+            name: "totalOrders",
+            title: "Total Orders",
+            value: response.data.stats.total,
+            icon: Package,
+            color: "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+          },
+          {
+            name: "pendingOrders",
+            title: "Pending Orders",
+            value: response.data.stats.pending,
+            icon: Clock,
+            color: "bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400"
+          },
+          {
+            name: "fulfillmentRate",
+            title: "Fulfillment Rate",
+            value: response.data.stats.pending + ' ' + '%',
+            icon: CheckCircle,
+            color: "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400"
+          })
+          console.log('newStats----->', newStats)
+
+          setStats(newStats)
+          setLoading(status => ({...status, totalOrders: false, pendingOrders: false, fulfillmentRate: false})) 
+        }
+        else{
+          console.log("Error in total revenue:", orderStatsResponse.reason.message)
+        }
+        
+        if (ordersOverTimeResponse.status === 'fulfilled'){ 
+          const response = ordersOverTimeResponse.value
+          console.log("ordersOverTimeResponse response----->", response.data.ordersOverTime) 
+          setOrdersOverTimeStats(response.data.ordersOverTime)
+        }
+        else{
+          console.log("Error in orders over time:", ordersOverTimeResponse.reason.message)
+        }
+
+        if (topProductsResponse.status === 'fulfilled'){
+          const response = topProductsResponse.value
+          console.log("ordersOverTimeResponse response----->", response.data.topProductDatas) 
+          setTopProductDatas(response.data.topProductDatas)
+        }
+        else{
+          console.log("Error in orders over time:", topProductsResponse.reason.message)
+        }
+
+        if (orderStatusPercentRes.status === 'fulfilled'){
+          const response = orderStatusPercentRes.value
+          console.log("orderStatusPercentRes response----->", response.data.orderStatusDistribution) 
+          const statusColors = [
+            { name: "Delivered", color: "#10b981" },
+            { name: "Pending", color: "#f59e0b" },
+            { name: "Cancelled", color: "#ef4444" },
+            { name: "Shipped", color: "#d7f148" },
+            { name: "Refunded", color: "#00e6d4" }
+          ]
+          const colorMappedStatus = response.data.orderStatusDistribution.map(status=> {
+            const color = statusColors.find(statusColor=> statusColor.name === status.name).color
+            return {...status, color}
+          })
+          setOrderStatusDistribution(colorMappedStatus)
+        }
+        else{
+          console.log("Error in orders over time:", orderStatusPercentRes.reason.message)
+        }
+      }
+    
+      fetchAllStats();
+  }, [])
+
+  useEffect(()=> {
+    console.log('ORDER stats---->', stats)
+  },[stats])
 
 
 
@@ -202,92 +180,112 @@ export default function OrdersFulfillmentSection() {
             className="flex flex-col gap-[1.3rem]">
         
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[
-              {
-                title: "Total Orders",
-                value: "2,845",
-                icon: Package,
-                color: "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
-              },
-              {
-                title: "Pending Orders",
-                value: "42",
-                icon: Clock,
-                color: "bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400",
-              },
-              {
-                title: "Fulfillment Rate",
-                value: "98.2%",
-                icon: CheckCircle,
-                color: "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400",
-              },
-            ].map((stat, index) => (
-              <motion.div
-                key={stat.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1, duration: 0.5 }}
-                className={`flex items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border ${index === 0 && 'border-primary'}`}
-              >
-                <div className="flex items-center">
-                  <div className={`p-3 rounded-full ${stat.color} mr-4`}>
-                    <stat.icon size={17} />
+            { stats && stats.length > 0 ?
+              stats.map((stat, index) => (
+                <motion.div
+                  key={stat.title}
+                  className={`flex items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border 
+                    ${index === 0 && 'border-primary'}`}
+                >
+                  <div className="flex items-center">
+                    <div className={`p-3 rounded-full ${stat.color} mr-4`}>
+                      <stat.icon size={17} />
+                    </div>
+                    <div>
+                      <p className="text-[13px] text-gray-500 dark:text-gray-400">{stat.title}</p>
+                      <h3 className="text-[20px] font-bold mt-1">{stat.value}</h3>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-[13px] text-gray-500 dark:text-gray-400">{stat.title}</p>
-                    <h3 className="text-[20px] font-bold mt-1">{stat.value}</h3>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+                ))
+                :
+                [...Array(3)].map((_, index)=> (
+                  <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1, duration: 0.5 }}
+                  className={`skeleton-loader flex items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border 
+                    ${index === 0 && 'border-primary'}`}
+                  >
+                    <div className="flex items-center">
+                      <div className='invisible p-3 rounded-full mr-4'> Insight Icon </div>
+                      <div>
+                        <p className="invisible text-[13px] text-gray-500 dark:text-gray-400"> Insight </p>
+                        <h3 className="invisible w-[17px] h-[17px] text-[20px] font-bold mt-1"> Value </h3>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))
+            }
           </div>
 
           <motion.div {...fadeInUp} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border">
             <h3 className="text-[17px]  font-semibold mb-6"> Orders Over Time </h3>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={ordersTimeData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#dab3f6" />
-                  <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip
-                    contentStyle={{
-                        fontSize: '13px',
-                        backgroundColor: "rgba(255, 255, 255, 0.9)",
-                        borderRadius: "6px",
-                        boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-                        border: "none",
-                    }}
-                  />
-                  <Legend  formatter={(value, entry, index)=> (
-                        <span style={{ fontSize: '13px', color: '#333' }}>{value}</span>
-                   )}/>
-                  <Line
-                    type="monotone"
-                    dataKey="completed"
-                    name="Completed"
-                    stroke="#10b981"
-                    strokeWidth={2}
-                    activeDot={{ r: 6 }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="pending"
-                    name="Pending"
-                    stroke="#f59e0b"
-                    strokeWidth={2}
-                    activeDot={{ r: 6 }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="canceled"
-                    name="Canceled"
-                    stroke="#ef4444"
-                    strokeWidth={2}
-                    activeDot={{ r: 6 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+            <div className="h-80">  
+              {
+                ordersOverTimeStats && ordersOverTimeStats.length > 0 ?
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={ordersOverTimeStats} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#dab3f6" />
+                    <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                    <YAxis tick={{ fontSize: 12 }} />
+                    <Tooltip
+                      contentStyle={{
+                          fontSize: '13px',
+                          backgroundColor: "rgba(255, 255, 255, 0.9)",
+                          borderRadius: "6px",
+                          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+                          border: "none",
+                      }}
+                    />
+                    <Legend  formatter={(value, entry, index)=> (
+                          <span style={{ fontSize: '13px', color: '#333' }}>{value}</span>
+                     )}/>
+                    <Line
+                      type="monotone"
+                      dataKey="delivered"
+                      name="Delivered"
+                      stroke="#10b981"
+                      strokeWidth={2}
+                      activeDot={{ r: 6 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="pending"
+                      name="Pending"
+                      stroke="#f59e0b"
+                      strokeWidth={2}
+                      activeDot={{ r: 6 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="shipped"
+                      name="Shipped"
+                      stroke="#d7f148"
+                      strokeWidth={2}
+                      activeDot={{ r: 6 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="cancelled"
+                      name="Cancelled"
+                      stroke="#ef4444"
+                      strokeWidth={2}
+                      activeDot={{ r: 6 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="refunded"
+                      name="Refunded"
+                      stroke="#7d7c8c"
+                      strokeWidth={2}
+                      activeDot={{ r: 6 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+                : <div className="w-full h-full skeleton-loader"/>
+              }
             </div>
           </motion.div>
 
@@ -295,11 +293,13 @@ export default function OrdersFulfillmentSection() {
             <motion.div {...fadeInUp} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border">
               <h3 className="text-[17px] font-semibold mb-6"> Most Purchased Products </h3>
               <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={topProductsData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                {
+                  topProductDatas && topProductDatas.length > 0 ?
+                  <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={topProductDatas} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
                     <XAxis type="number" tick={{ fontSize: 12 }}/>
-                    <YAxis type="category" dataKey="name" tick={{ fontSize: 12 }} width={150} />
+                    <YAxis type="category" dataKey="product" tick={{ fontSize: 12 }} width={150} />
                     <Tooltip
                       formatter={(value) => [`${value} orders`, "Quantity"]}
                       contentStyle={{
@@ -310,19 +310,23 @@ export default function OrdersFulfillmentSection() {
                         border: "none",
                       }}
                     />
-                    <Bar dataKey="value" fill="#8b5cf6" radius={[0, 4, 4, 0]} barSize={20} />
+                    <Bar dataKey="orders" fill="#8b5cf6" radius={[0, 4, 4, 0]} barSize={20} />
                   </BarChart>
                 </ResponsiveContainer>
+                : <div className="w-full h-full skeleton-loader"/>
+                }
               </div>
             </motion.div>
                     
             <motion.div {...fadeInUp} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border">
               <h3 className="text-[17px] font-semibold mb-6">Order Status Distribution</h3>
               <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
+                {
+                  orderStatusDistribution && orderStatusDistribution.length > 0 ?
+                  <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={orderStatusData}
+                      data={orderStatusDistribution}
                       cx="50%"
                       cy="50%"
                       innerRadius={60}
@@ -330,7 +334,7 @@ export default function OrdersFulfillmentSection() {
                       paddingAngle={5}
                       dataKey="value"
                     >
-                      {orderStatusData.map((entry, index) => (
+                      {orderStatusDistribution.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
@@ -349,6 +353,8 @@ export default function OrdersFulfillmentSection() {
                     )}/>
                   </PieChart>
                 </ResponsiveContainer>
+                : <div className="w-full h-full skeleton-loader"/>
+                }
               </div>
             </motion.div>
           </div>

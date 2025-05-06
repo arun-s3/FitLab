@@ -184,36 +184,6 @@ export default function SalesRevenueSection() {
     console.log("categoryDatas---->", categoryDatas)
   },[hourlySalesDatas, categoryDatas])
 
-  const currentStats = [
-    {
-      title: "Total Revenue",
-      value: "₹286,400",
-      change: "+12.5%",
-      trend: "up",
-      icon: IndianRupee,
-      color: "bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400",
-      name: "totalRevenue"
-    },
-    {
-      title: "Average Order Value",
-      value: "₹98.50",
-      change: "+5.2%",
-      trend: "up",
-      icon: TrendingUp,
-      color: "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
-      name: "avgOrders"
-    },
-    {
-      title: "Total Delivered Orders",
-      value: "2,845",
-      change: "-2.3%",
-      trend: "down",
-      icon: ShoppingBag,
-      color: "bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400",
-      name: "totalOrders"
-    },
-  ]
-
   const tabs = [
     { id: "weekly", label: "Weekly" },
     { id: "monthly", label: "Monthly" },
@@ -259,14 +229,10 @@ export default function SalesRevenueSection() {
             className="flex flex-col gap-[1.3rem]">
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {stats && stats.length > 0 &&
-            stats.map((stat, index) => (
-              !loading?.[stat.name] ?
+            {orderedStats && orderedStats.length > 0 ?
+            orderedStats.map((stat, index)=> (
               <motion.div
                 key={stat.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1, duration: 0.5 }}
                 className={`flex items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border ${index === 0 && 'border-primary'}`}
               >
                 <div className="w-full flex items-center justify-between">
@@ -290,14 +256,38 @@ export default function SalesRevenueSection() {
                   </div>
                 </div>
               </motion.div>
-              :<motion.div
+            ))
+          : 
+            [...Array(3)].map((_, index)=> (
+              <AnimatePresence>
+              <div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
+                // type='tween'
+                // ease='circInOut'
                 transition={{ delay: index * 0.1, duration: 0.5 }}
-                className={`w-[5rem] h-[5rem] skeleton-loader bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm 
-                  border ${index === 0 && 'border-primary'}`}
-                />
-            ))}
+                key={index}
+                className={`skeleton-loader flex items-center bg-white dark:bg-gray-800 p-4
+                   rounded-lg shadow-sm border ${index === 0 && 'border-primary'}`}
+              >
+                <div className="w-full flex items-center justify-between">
+                  <div> 
+                    <p className="invisible text-[13px] text-gray-500 dark:text-gray-400"> Insight </p>
+                    <h3 className="invisible text-[20px] font-bold mt-1"> Value </h3>
+                    <div className="flex items-center mt-1">
+                      <span
+                        className={`invisible flex items-center text-[12px]`}
+                      > Insight Inc/Dec
+                      </span>
+                      <span className="invisible text-xs text-gray-500 dark:text-gray-400 ml-1"> Insight Change </span>
+                    </div>
+                  </div>
+                  <div className={`invisible h-[17px] w-[17px] p-3 rounded-full `}> Insight Icon </div>
+                </div>
+              </div>
+              </AnimatePresence>
+            ))
+          }
           </div>
           
           <motion.div {...fadeInUp} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border">
@@ -318,47 +308,48 @@ export default function SalesRevenueSection() {
               </div>
             </div>
             <div className="h-80">
-                { revenueDatas.length > 0 &&
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={revenueDatas} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                      <defs>
-                        <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8} />
-                          <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                      <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                      <YAxis tick={{ fontSize: 12 }} tickFormatter={(value) => `₹${value.toLocaleString()}`} />
-                      <Tooltip
-                        formatter={(value)=> [`₹${value.toLocaleString()}`, "Revenue"]}
-                        contentStyle={{
-                          fontSize: '13px',
-                          backgroundColor: "rgba(255, 255, 255, 0.9)",
-                          borderRadius: "6px",
-                          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-                          border: "none",
-                        }}
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="revenue"
-                        stroke="#8b5cf6"
-                        fillOpacity={1}
-                        fill="url(#colorRevenue)"
-                        strokeWidth={2}
-                        activeDot={{ r: 6 }}
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                }
+            { revenueDatas.length > 0 ?
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={revenueDatas} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                  <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                  <YAxis tick={{ fontSize: 12 }} tickFormatter={(value) => `₹${value.toLocaleString()}`} />
+                  <Tooltip
+                    formatter={(value)=> [`₹${value.toLocaleString()}`, "Revenue"]}
+                    contentStyle={{
+                      fontSize: '13px',
+                      backgroundColor: "rgba(255, 255, 255, 0.9)",
+                      borderRadius: "6px",
+                      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+                      border: "none",
+                    }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="#8b5cf6"
+                    fillOpacity={1}
+                    fill="url(#colorRevenue)"
+                    strokeWidth={2}
+                    activeDot={{ r: 6 }}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+              : <div className="w-full h-full skeleton-loader"/>
+            }
             </div>
           </motion.div>
                   
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {
-              categoryDatas && categoryDatas.length > 0 &&
-              <motion.div {...fadeInUp} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border">
+              categoryDatas && categoryDatas.length > 0 ?
+              <motion.div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border">
               <h3 className="text-[17px] font-semibold mb-6">Revenue by Category</h3>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
@@ -396,6 +387,12 @@ export default function SalesRevenueSection() {
                 </ResponsiveContainer>
               </div>
             </motion.div>
+            :<motion.div {...fadeInUp} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border">
+              <h3 className="invisiblle text-[17px] font-semibold mb-6">Revenue by Category</h3>
+              <div className="h-64">
+                <div className="w-full h-full skeleton-loader"/>
+              </div>
+            </motion.div>
             }
             
             <motion.div {...fadeInUp} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border">
@@ -413,7 +410,7 @@ export default function SalesRevenueSection() {
               </h3>
               <div className="h-64">
                 {
-                  hourlySalesDatas && hourlySalesDatas.length > 0 &&
+                  hourlySalesDatas && hourlySalesDatas.length > 0 ?
                   <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={hourlySalesDatas} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
@@ -444,6 +441,7 @@ export default function SalesRevenueSection() {
                     />
                   </LineChart>
                 </ResponsiveContainer>
+                : <div className="w-full h-full skeleton-loader"/>
                 }
               </div>
             </motion.div>

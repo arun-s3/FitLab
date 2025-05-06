@@ -1,4 +1,5 @@
-import React, {useContext} from 'react'
+import React, {useContext, useState, useEffect} from 'react'
+import './componentsStyle.css'
 import { motion, AnimatePresence } from "framer-motion"
 
 import {
@@ -15,29 +16,10 @@ import {
   ResponsiveContainer,
 } from "recharts"
 import { Users, UserPlus, UserCheck, Award, ChevronDown, ChevronUp } from "lucide-react"
+import axios from 'axios'
 
 import {AnalyticsContext} from '.././AdminDashboardPage'
 import { useTogglerEnabled } from "../../../../Hooks/ToggleEnabler"
-
-const customerTypeData = [
-  { name: "New Customers", value: 35, color: "#d7f148" },
-  { name: "Returning Customers", value: 65, color: "#8b5cf6" },
-]
-
-const customerGrowthData = [
-  { name: "Jan", customers: 1250 },
-  { name: "Feb", customers: 1380 },
-  { name: "Mar", customers: 1490 },
-  { name: "Apr", customers: 1620 },
-  { name: "May", customers: 1740 },
-  { name: "Jun", customers: 1890 },
-  { name: "Jul", customers: 2050 },
-  { name: "Aug", customers: 2180 },
-  { name: "Sep", customers: 2340 },
-  { name: "Oct", customers: 2490 },
-  { name: "Nov", customers: 2650 },
-  { name: "Dec", customers: 2820 },
-]
 
 const vipCustomersData = [
   { name: "John D.", orders: 24, spent: 4850 },
@@ -47,11 +29,108 @@ const vipCustomersData = [
   { name: "Michael P.", orders: 10, spent: 2100 },
 ]
 
+
+
 export default function CustomerInsightsSection() {
 
   const {dateRange, showAnalytics, setShowAnalytics} = useContext(AnalyticsContext)
 
   const togglerEnabled = useTogglerEnabled(showAnalytics, 'customers')
+
+  const [userMetrics, setUserMetrics] = useState([])
+  const [userTypeDatas, setuserTypeDatas] = useState([])
+  const [monthlyUserGrowthDatas, setMonthlyUserGrowthDatas] = useState([])
+  const [vipCustomersDatas, setVipCustomersDatas] = useState([])
+
+
+  useEffect(() => {
+        const fetchAllStats = async ()=> {
+          const newMetrics = []
+            
+          const [usersMetricsResponse, userTypesResponse, userGrowthResponse, vipCustomersRes] = await Promise.allSettled([ 
+            axios.get('http://localhost:3000/admin/dashboard/customers/metrics', { withCredentials: true }), 
+            axios.get('http://localhost:3000/admin/dashboard/customers/types', { withCredentials: true }), 
+            axios.get('http://localhost:3000/admin/dashboard/customers/monthly', { withCredentials: true }), 
+            axios.get('http://localhost:3000/admin/dashboard/customers/vip', { withCredentials: true }), 
+          ])
+          
+          if (usersMetricsResponse.status === 'fulfilled'){
+            const response = usersMetricsResponse.value
+            console.log("Customer Metrics response.data----->", response.data)
+  
+            newMetrics.push({
+              name: "totalCustomers",
+              title: "Total Customers",
+              value: response.data.totalUsers,
+              icon: Users,
+              color: "bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400"
+            },
+            {
+              name: "newCustomers",
+              title: "New Customers",
+              value: response.data.newUsers,
+              icon: UserPlus,
+              color: "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+            },
+            {
+              name: "returningRate",
+              title: "Returning Rate",
+              value: response.data.returningRate + ' ' + '%',
+              icon: UserCheck,
+              color: "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400"
+            })
+            console.log('newMetrics----->', newMetrics)
+  
+            setUserMetrics(newMetrics)
+          }
+          else{
+            console.log("Error in User Metrics:", usersMetricsResponse.reason.message)
+          }
+
+          if (userTypesResponse.status === 'fulfilled'){ 
+            const response = userTypesResponse.value
+            console.log("userTypesResponse response----->", response.data.userTypesDatas)
+            const userTypeColors = [
+              { name: "New Customers", color: "#d7f148" },
+              { name: "Returning Customers", color: "#8b5cf6" },
+              { name: "VIP Customers", color: "#f59e0b" },
+            ]
+            const colorMappedUserTypes = response.data.userTypesDatas.map(type=> {
+              const color = userTypeColors.find(userTypeColor=> userTypeColor.name === type.name).color
+              return {...type, color}
+            }) 
+            setuserTypeDatas(colorMappedUserTypes)
+          }
+          else{
+            console.log("Error in orders over time:", userTypesResponse.reason.message)
+          }
+  
+          if (userGrowthResponse.status === 'fulfilled'){
+            const response = userGrowthResponse.value
+            console.log("userGrowthResponse response----->", response.data.monthlyUserGrowthData) 
+            setMonthlyUserGrowthDatas(response.data.monthlyUserGrowthData)
+          }
+          else{
+            console.log("Error in user growth response:", userGrowthResponse.reason.message)
+          }
+
+          if (vipCustomersRes.status === 'fulfilled'){
+            const response = vipCustomersRes.value
+            console.log("vipCustomersRes response----->", response.data.vipCustomerDatas) 
+            setVipCustomersDatas(response.data.vipCustomerDatas)
+          }
+          else{
+            console.log("Error in vipCustomersdata:", vipCustomersRes.reason.message)
+          }
+  
+        }
+        
+        fetchAllStats();
+    }, [])
+  
+    useEffect(()=> {
+      console.log('ORDER stats---->', userMetrics)
+    },[userMetrics])
   
 
   const fadeInUp = {
@@ -94,54 +173,56 @@ export default function CustomerInsightsSection() {
             className="flex flex-col gap-[1.3rem]">
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[
-              {
-                title: "Total Customers",
-                value: "2,820",
-                icon: Users,
-                color: "bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400",
-              },
-              {
-                title: "New Customers",
-                value: "168",
-                icon: UserPlus,
-                color: "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
-              },
-              {
-                title: "Returning Rate",
-                value: "65%",
-                icon: UserCheck,
-                color: "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400",
-              },
-            ].map((stat, index) => (
+            {
+              userMetrics && userMetrics.length > 0 ?
+              userMetrics.map((stat, index)=> (
+                <motion.div
+                  key={stat.title}
+                  className={`flex items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border ${index === 0 && 'border-primary'}`}
+                >
+                  <div className="flex items-center">
+                    <div className={`p-3 rounded-full ${stat.color} mr-4`}>
+                      <stat.icon size={17} />
+                    </div>
+                    <div>
+                      <p className="text-[13px] text-gray-500 dark:text-gray-400">{stat.title}</p>
+                      <h3 className="text-[20px] font-bold mt-1">{stat.value}</h3>
+                    </div>
+                  </div>
+                </motion.div>
+            ))
+            :
+            [...Array(3)].map((_, index)=> (
               <motion.div
-                key={stat.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1, duration: 0.5 }}
-                className={`flex items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border ${index === 0 && 'border-primary'}`}
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1, duration: 0.5 }}
+              className={`skeleton-loader flex items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border 
+                ${index === 0 && 'border-primary'}`}
               >
                 <div className="flex items-center">
-                  <div className={`p-3 rounded-full ${stat.color} mr-4`}>
-                    <stat.icon size={17} />
-                  </div>
+                  <div className='w-[17px] h-[17px] p-3 rounded-full mr-4'></div>
                   <div>
-                    <p className="text-[13px] text-gray-500 dark:text-gray-400">{stat.title}</p>
-                    <h3 className="text-[20px] font-bold mt-1">{stat.value}</h3>
+                    <p className="invisible text-[13px] text-gray-500 dark:text-gray-400">Insight Title</p>
+                    <h3 className="invisible text-[20px] font-bold mt-1">Insight Value</h3>
                   </div>
                 </div>
-              </motion.div>
-            ))}
+            </motion.div>
+            ))
+          }
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <motion.div {...fadeInUp} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border">
-              <h3 className="text-[17px] font-semibold mb-6">New vs Returning Customers</h3>
+              <h3 className="text-[17px] font-semibold mb-6">New Customers vs Returning Customers vs VIP Customers</h3>
               <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
+                {
+                  userTypeDatas && userTypeDatas.length > 0 ?
+                  <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={customerTypeData}
+                      data={userTypeDatas}
                       cx="50%"
                       cy="50%"
                       innerRadius={60}
@@ -151,7 +232,7 @@ export default function CustomerInsightsSection() {
                       dataKey="value"
                       label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                     >
-                      {customerTypeData.map((entry, index) => (
+                      {userTypeDatas.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
@@ -170,37 +251,43 @@ export default function CustomerInsightsSection() {
                     )}/>
                   </PieChart>
                 </ResponsiveContainer>
+                : <div className="w-full h-full skeleton-loader"/>
+                }
               </div>
             </motion.div>
                   
             <motion.div {...fadeInUp} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border">
               <h3 className="text-[17px] font-semibold mb-6">Customer Growth Over Time</h3>
               <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={customerGrowthData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                    <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                    <YAxis tick={{ fontSize: 12 }} />
-                    <Tooltip
-                      formatter={(value) => [`${value.toLocaleString()}`, "Customers"]}
-                      contentStyle={{
-                        fontSize: '13px',
-                        backgroundColor: "rgba(255, 255, 255, 0.9)",
-                        borderRadius: "6px",
-                        boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-                        border: "none",
-                      }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="customers"
-                      stroke="#8b5cf6"
-                      strokeWidth={3}
-                      dot={{ r: 4, strokeWidth: 2 }}
-                      activeDot={{ r: 6 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+                {
+                  monthlyUserGrowthDatas && monthlyUserGrowthDatas.length ?
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={monthlyUserGrowthDatas} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                      <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                      <YAxis tick={{ fontSize: 12 }} />
+                      <Tooltip
+                        formatter={(value) => [`${value.toLocaleString()}`, "Customers"]}
+                        contentStyle={{
+                          fontSize: '13px',
+                          backgroundColor: "rgba(255, 255, 255, 0.9)",
+                          borderRadius: "6px",
+                          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+                          border: "none",
+                        }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="customers"
+                        stroke="#8b5cf6"
+                        strokeWidth={3}
+                        dot={{ r: 4, strokeWidth: 2 }}
+                        activeDot={{ r: 6 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                : <div className="w-full h-full skeleton-loader"/>
+                }
               </div>
             </motion.div>
           </div>
@@ -222,14 +309,11 @@ export default function CustomerInsightsSection() {
                   </tr>
                 </thead>
                 <tbody>
-                  {vipCustomersData.map((customer, index) => (
-                    <motion.tr
-                      key={customer.name}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.05, duration: 0.3 }}
+                  { vipCustomersDatas && vipCustomersDatas.length > 0 ?
+                    vipCustomersDatas.map((customer, index) => (
+                      <motion.tr
                       className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                    >
+                      >
                       <td className="py-3 px-4">
                         <div className="flex items-center">
                           <div className="w-[20px] h-[20px] rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-medium mr-3">
@@ -247,7 +331,36 @@ export default function CustomerInsightsSection() {
                         </button>
                       </td>
                     </motion.tr>
-                  ))}
+                    ))
+                    :
+                    [...Array(5)].map((_, index)=> (
+                      <motion.tr
+                      key={index}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05, duration: 0.3 }}
+                      className="skeleton-loader border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                      >
+                      <td className="py-3 px-4">
+                        <div className="flex items-center">
+                          <div className="invisible w-[20px] h-[20px] rounded-full bg-purple-100 flex items-center justify-center
+                           text-purple-600 font-medium mr-3">
+                            Customer profile
+                          </div>
+                          <span className='invisible text-[15px]'>Customer name</span>
+                        </div>
+                      </td>
+                      <td className="invisiblepy-3 px-4 text-[15px]">customer total orders</td>
+                      <td className="invisiblepy-3 px-4 text-[15px]">customer total spent</td>
+                      <td className="py-3 px-4">
+                        <button className="invisible text-sm text-purple-600 hover:text-purple-800 dark:text-purple-400
+                         dark:hover:text-purple-300 font-medium">
+                          View Details
+                        </button>
+                      </td>
+                    </motion.tr>
+                    ))
+                  }
                 </tbody>
               </table>
             </div>

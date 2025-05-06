@@ -2691,10 +2691,6 @@ select{
   width: 5px;
 }
 
-.w-\[5rem\]{
-  width: 5rem;
-}
-
 .w-\[60\%\]{
   width: 60%;
 }
@@ -2830,6 +2826,10 @@ select{
 }
 
 .flex-grow{
+  flex-grow: 1;
+}
+
+.grow{
   flex-grow: 1;
 }
 
@@ -5588,11 +5588,6 @@ select{
 .text-orange-500{
   --tw-text-opacity: 1;
   color: rgb(249 115 22 / var(--tw-text-opacity));
-}
-
-.text-orange-600{
-  --tw-text-opacity: 1;
-  color: rgb(234 88 12 / var(--tw-text-opacity));
 }
 
 .text-primary{

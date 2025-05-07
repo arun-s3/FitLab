@@ -16,7 +16,7 @@ import {
 } from "recharts"
 import { Tag, Percent, TrendingUp, ArrowUp, ChevronUp, ChevronDown } from "lucide-react"
 
-import {AnalyticsContext} from '.././AdminDashboardPage'
+import {OperationsAnalyticsContext} from '.././AdminDashboardPage'
 import { useTogglerEnabled } from "../../../../Hooks/ToggleEnabler"
 
 
@@ -46,9 +46,9 @@ const discountImpactData = [
 
 export default function CouponOffersInsightsSection() {
 
-  const {dateRange, showAnalytics, setShowAnalytics} = useContext(AnalyticsContext)
+  const {dateRange, showOperationsAnalytics, setShowOperationsAnalytics} = useContext(OperationsAnalyticsContext)
 
-  const togglerEnabled = useTogglerEnabled(showAnalytics, 'couponOffers')
+  const togglerEnabled = useTogglerEnabled(showOperationsAnalytics, 'couponOffers')
 
 
   const fadeInUp = {
@@ -66,13 +66,13 @@ export default function CouponOffersInsightsSection() {
     >
 
       <h2 className="text-xl text-secondary font-bold flex items-center gap-[10px]">
-        <span className={`w-fit whitespace-nowrap ${!showAnalytics.couponOffers && 'text-muted'}`}> Offers & Coupon Usage </span>
+        <span className={`w-fit whitespace-nowrap ${!showOperationsAnalytics.couponOffers && 'text-muted'}`}> Offers & Coupon Usage </span>
         <div className={`w-full flex items-center justify-between gap-[10px] rounded-[4px] cursor-pointer`}
-            onClick={()=> togglerEnabled && setShowAnalytics(status=> ({...status, couponOffers: !status.couponOffers}))}>
+            onClick={()=> togglerEnabled && setShowOperationsAnalytics(status=> ({...status, couponOffers: !status.couponOffers}))}>
           <hr className={`mt-[2px] w-full h-[2px] border-t border-inputBorderSecondary border-dashed shadow-sm
-              ${!showAnalytics.couponOffers && 'border-muted'}`}/>
+              ${!showOperationsAnalytics.couponOffers && 'border-muted'}`}/>
           {
-            showAnalytics.couponOffers ?
+            showOperationsAnalytics.couponOffers ?
             <ChevronUp className={`p-[2px] w-[18px] h-[18px] text-muted border border-secondary rounded-[3px]
              hover:border-purple-800 hover:text-secondary hover:bg-inputBorderSecondary hover:transition
               hover:duration-150 hover:delay-75 hover:ease-in ${!togglerEnabled && 'cursor-not-allowed'} `}/>
@@ -85,7 +85,7 @@ export default function CouponOffersInsightsSection() {
 
       <AnimatePresence>
         {
-          showAnalytics.couponOffers &&
+          showOperationsAnalytics.couponOffers &&
           <motion.div initial={{opacity: 0, y: -20}} animate={{opacity: 1, y: 0}} 
             exit={{opacity: 0, transition: { duration: 0.5, ease: "easeInOut" }}} transition={{type: 'spring', delay:0.2}}
               className="flex flex-col gap-[1.3rem]">

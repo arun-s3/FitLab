@@ -8,6 +8,7 @@ const {getOrdersStats, getMonthlyOrderStats, getTopFiveProductsByOrders, getOrde
 } = require('../Controllers/dashboardControllers/ordersInsightsController')
 const {getUserMetrics, getUserTypePercentages, getMonthlyCustomersGrowth, getTopVIPCustomers
 } = require('../Controllers/dashboardControllers/customersInsightsController')
+const {getProductStockInsights} = require('../Controllers/dashboardControllers/inventoryInsightsController')
 
 dashboardRouter.get('/revenue/total', isLogin, authorizeAdmin, getAnnualRevenueStats) 
 dashboardRouter.get('/revenue/monthly', isLogin, authorizeAdmin, getMonthlyRevenue) 
@@ -26,6 +27,8 @@ dashboardRouter.get('/customers/metrics', isLogin, authorizeAdmin, getUserMetric
 dashboardRouter.get('/customers/types', isLogin, authorizeAdmin, getUserTypePercentages) 
 dashboardRouter.get('/customers/monthly', isLogin, authorizeAdmin, getMonthlyCustomersGrowth) 
 dashboardRouter.get('/customers/vip', isLogin, authorizeAdmin, getTopVIPCustomers) 
+
+dashboardRouter.get('/products/stock', isLogin, authorizeAdmin, getProductStockInsights) 
 
 
 module.exports = dashboardRouter

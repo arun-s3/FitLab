@@ -18,7 +18,7 @@ import {
 import { Users, UserPlus, UserCheck, Award, ChevronDown, ChevronUp } from "lucide-react"
 import axios from 'axios'
 
-import {AnalyticsContext} from '.././AdminDashboardPage'
+import {BusinessAnalyticsContext} from '.././AdminDashboardPage'
 import { useTogglerEnabled } from "../../../../Hooks/ToggleEnabler"
 
 const vipCustomersData = [
@@ -33,19 +33,22 @@ const vipCustomersData = [
 
 export default function CustomerInsightsSection() {
 
-  const {dateRange, showAnalytics, setShowAnalytics} = useContext(AnalyticsContext)
+  const {dateRange, showBusinessAnalytics, setShowBusinessAnalytics} = useContext(BusinessAnalyticsContext)
 
-  const togglerEnabled = useTogglerEnabled(showAnalytics, 'customers')
+  const togglerEnabled = useTogglerEnabled(showBusinessAnalytics, 'customers')
 
   const [userMetrics, setUserMetrics] = useState([])
   const [userTypeDatas, setuserTypeDatas] = useState([])
   const [monthlyUserGrowthDatas, setMonthlyUserGrowthDatas] = useState([])
   const [vipCustomersDatas, setVipCustomersDatas] = useState([])
 
+  const [loading, setLoading] = useState({vipCustomersDatas: false, userTypeDatas: false})
+
 
   useEffect(() => {
         const fetchAllStats = async ()=> {
           const newMetrics = []
+          setLoading(status=> ({...status, vipCustomersDatas: true}))
             
           const [usersMetricsResponse, userTypesResponse, userGrowthResponse, vipCustomersRes] = await Promise.allSettled([ 
             axios.get('http://localhost:3000/admin/dashboard/customers/metrics', { withCredentials: true }), 
@@ -79,7 +82,7 @@ export default function CustomerInsightsSection() {
               icon: UserCheck,
               color: "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400"
             })
-            console.log('newMetrics----->', newMetrics)
+            console.log('newMetrics, ie userMetrics----->', newMetrics)
   
             setUserMetrics(newMetrics)
           }
@@ -100,9 +103,10 @@ export default function CustomerInsightsSection() {
               return {...type, color}
             }) 
             setuserTypeDatas(colorMappedUserTypes)
+            setLoading(status=> ({...status, userTypeDatas: false}))
           }
           else{
-            console.log("Error in orders over time:", userTypesResponse.reason.message)
+            console.log("Error in user type percentage:", userTypesResponse.reason.message)
           }
   
           if (userGrowthResponse.status === 'fulfilled'){
@@ -118,13 +122,14 @@ export default function CustomerInsightsSection() {
             const response = vipCustomersRes.value
             console.log("vipCustomersRes response----->", response.data.vipCustomerDatas) 
             setVipCustomersDatas(response.data.vipCustomerDatas)
+            setLoading(status=> ({...status, vipCustomersDatas: false}))
           }
           else{
             console.log("Error in vipCustomersdata:", vipCustomersRes.reason.message)
           }
   
         }
-        
+
         fetchAllStats();
     }, [])
   
@@ -148,13 +153,13 @@ export default function CustomerInsightsSection() {
     >
 
       <h2 className="text-xl text-secondary font-bold flex items-center gap-[10px]">
-        <span className={`w-fit whitespace-nowrap ${!showAnalytics.customers && 'text-muted'}`}> Customer Insights </span>
+        <span className={`w-fit whitespace-nowrap ${!showBusinessAnalytics.customers && 'text-muted'}`}> Customer Insights </span>
         <div className={`w-full flex items-center justify-between gap-[10px] rounded-[4px] cursor-pointer`}
-            onClick={()=> togglerEnabled && setShowAnalytics(status=> ({...status, customers: !status.customers}))}>
+            onClick={()=> togglerEnabled && setShowBusinessAnalytics(status=> ({...status, customers: !status.customers}))}>
           <hr className={`mt-[2px] w-full h-[2px] border-t border-inputBorderSecondary border-dashed shadow-sm
-              ${!showAnalytics.customers && 'border-muted'}`}/>
+              ${!showBusinessAnalytics.customers && 'border-muted'}`}/>
           {
-            showAnalytics.customers ?
+            showBusinessAnalytics.customers ?
             <ChevronUp className={`p-[2px] w-[18px] h-[18px] text-muted border border-secondary rounded-[3px]
              hover:border-purple-800 hover:text-secondary hover:bg-inputBorderSecondary hover:transition
               hover:duration-150 hover:delay-75 hover:ease-in ${!togglerEnabled && 'cursor-not-allowed'} `}/>
@@ -167,7 +172,7 @@ export default function CustomerInsightsSection() {
       
       <AnimatePresence>
       {
-        showAnalytics.customers &&
+        showBusinessAnalytics.customers &&
         <motion.div initial={{opacity: 0, y: -20}} animate={{opacity: 1, y: 0}} 
           exit={{opacity: 0, transition: { duration: 0.5, ease: "easeInOut" }}} transition={{type: 'spring', delay:0.2}}
             className="flex flex-col gap-[1.3rem]">
@@ -218,7 +223,7 @@ export default function CustomerInsightsSection() {
               <h3 className="text-[17px] font-semibold mb-6">New Customers vs Returning Customers vs VIP Customers</h3>
               <div className="h-64">
                 {
-                  userTypeDatas && userTypeDatas.length > 0 ?
+                  userTypeDatas && userTypeDatas.length > 0 && !userTypeDatas.every(data=> data.value === 0) ?
                   <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -237,7 +242,7 @@ export default function CustomerInsightsSection() {
                       ))}
                     </Pie>
                     <Tooltip
-                      formatter={(value) => [`${value}%`, "Percentage"]}
+                      formatter={(value)=> [`${value}%`, "Percentage"]}
                       contentStyle={{
                         fontSize: '13px',
                         backgroundColor: "rgba(255, 255, 255, 0.9)",
@@ -251,7 +256,13 @@ export default function CustomerInsightsSection() {
                     )}/>
                   </PieChart>
                 </ResponsiveContainer>
-                : <div className="w-full h-full skeleton-loader"/>
+                : userTypeDatas && userTypeDatas.length > 0 && userTypeDatas.every(data=> data.value === 0) ?
+                  <p className="w-full h-full flex items-center justify-center text-muted font-medium tracking-[0.3px]"
+                    style={{wordSpacing: '2px'}}>
+                     No customers yet! 
+                  </p>
+                : userTypeDatas && userTypeDatas.length === 0 &&
+                  <div className="w-full h-full skeleton-loader"/>
                 }
               </div>
             </motion.div>
@@ -309,7 +320,7 @@ export default function CustomerInsightsSection() {
                   </tr>
                 </thead>
                 <tbody>
-                  { vipCustomersDatas && vipCustomersDatas.length > 0 ?
+                  { !loading.vipCustomersDatas && vipCustomersDatas && vipCustomersDatas.length > 0 ?
                     vipCustomersDatas.map((customer, index) => (
                       <motion.tr
                       className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50"
@@ -317,8 +328,9 @@ export default function CustomerInsightsSection() {
                       <td className="py-3 px-4">
                         <div className="flex items-center">
                           <div className="w-[20px] h-[20px] rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-medium mr-3">
-                            {customer.name.split(" ")[0][0]}
-                            {customer.name.split(" ")[1][0]}
+                            {/* {customer.name.split(" ")[0][0]}
+                            {customer.name.split(" ")[1][0]} */}
+                            JJ
                           </div>
                           <span className='text-[15px]'>{customer.name}</span>
                         </div>
@@ -332,7 +344,15 @@ export default function CustomerInsightsSection() {
                       </td>
                     </motion.tr>
                     ))
-                    :
+                    : ( !loading.vipCustomersDatas && vipCustomersDatas.length === 0 )
+                      || Object.values(vipCustomersDatas).every(value=> value === 0) ?
+                    <tr> 
+                      <td colSpan={4} className='w-full h-[5rem] text-[15px] text-muted text-center font-medium tracking-[0.3px]'
+                        style={{wordSpacing: '1px'}}>
+                          No VIP Customers Found!
+                      </td>
+                    </tr>
+                    : loading.vipCustomersDatas ?
                     [...Array(5)].map((_, index)=> (
                       <motion.tr
                       key={index}
@@ -350,8 +370,12 @@ export default function CustomerInsightsSection() {
                           <span className='invisible text-[15px]'>Customer name</span>
                         </div>
                       </td>
-                      <td className="invisiblepy-3 px-4 text-[15px]">customer total orders</td>
-                      <td className="invisiblepy-3 px-4 text-[15px]">customer total spent</td>
+                      <td className="py-3 px-4 text-[15px]">
+                        <span className='invisible'> customer total orders </span>
+                      </td>
+                      <td className="py-3 px-4 text-[15px]">
+                        <span className='invisible'> customer total spent </span>  
+                      </td>
                       <td className="py-3 px-4">
                         <button className="invisible text-sm text-purple-600 hover:text-purple-800 dark:text-purple-400
                          dark:hover:text-purple-300 font-medium">
@@ -360,6 +384,7 @@ export default function CustomerInsightsSection() {
                       </td>
                     </motion.tr>
                     ))
+                    : null
                   }
                 </tbody>
               </table>

@@ -13,7 +13,7 @@ const getUserMetrics = async (req, res, next)=> {
     const oneMonthAgo = new Date()
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1)
 
-    const totalUsers = await User.countDocuments({isBlocked: false})
+    const totalUsers = await User.countDocuments({isBlocked: false, isAdmin: false})
 
     const orderCounts = await Order.aggregate([
       {
@@ -54,10 +54,11 @@ const getUserMetrics = async (req, res, next)=> {
 
 const getUserTypePercentages = async (req, res, next)=> {
   try {
+    console.log("inside getUserTypePercentages")
     const oneMonthAgo = new Date()
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1)
 
-    const allUsers = await User.find({isBlocked: false}, '_id')
+    const allUsers = await User.find({isBlocked: false, isAdmin: false}, '_id')
     const userIdList = allUsers.map(user=> user._id.toString())
 
     const recentOrderStats = await Order.aggregate([
@@ -73,6 +74,7 @@ const getUserTypePercentages = async (req, res, next)=> {
         }
       }
     ])
+    console.log("recentOrderStats--->", JSON.stringify(recentOrderStats))
 
     const newUsersSet = new Set()
     const returningUsersSet = new Set()
@@ -84,13 +86,19 @@ const getUserTypePercentages = async (req, res, next)=> {
     }
 
     const totalSpendStats = await Order.aggregate([
-      {
-        $group: {
-          _id: "$userId",
-          totalSpent: { $sum: "$absoluteTotalWithTaxes" }
+        { 
+          $match: {
+            orderStatus: { $in: ['delivered', 'confirmed', 'shipped'] }
+          }
+        },
+        {
+          $group: {
+            _id: "$userId",
+            totalSpent: { $sum: "$absoluteTotalWithTaxes" }
+          }
         }
-      }
     ])
+    console.log("totalSpendStats--->", JSON.stringify(totalSpendStats))
 
     const vipUsersSet = new Set()
     for (const stat of totalSpendStats) {
@@ -101,10 +109,13 @@ const getUserTypePercentages = async (req, res, next)=> {
     }
 
     const totalUsers = userIdList.length
+    console.log("totalUsers-->", totalUsers)
 
     const newUsers = [...newUsersSet].filter(id => userIdList.includes(id)).length
     const returningUsers = [...returningUsersSet].filter(id => userIdList.includes(id)).length
     const vipUsers = [...vipUsersSet].filter(id => userIdList.includes(id)).length
+
+    console.log(`newUsers--->${newUsers} returningUsers--->${returningUsers} vipUsers--->${vipUsers}`)
 
     const percentage = count => totalUsers ? Math.round((count / totalUsers) * 100) : 0
 
@@ -113,6 +124,7 @@ const getUserTypePercentages = async (req, res, next)=> {
       { name: "Returning Customers", value: percentage(returningUsers) },
       { name: "VIP Customers", value: percentage(vipUsers) }
     ]
+    console.log("result--->", result)
 
     return res.status(200).json({userTypesDatas: result});
   }
@@ -132,6 +144,7 @@ const getMonthlyCustomersGrowth = async(req, res, next)=> {
       {
         $match: {
           isBlocked: false,
+          isAdmin: false,
           createdAt: {
             $gte: new Date(`${currentYear}-01-01T00:00:00.000Z`),
             $lte: new Date(`${currentYear}-12-31T23:59:59.999Z`)
@@ -186,7 +199,6 @@ const getTopVIPCustomers = async (req, res) => {
       {
         $match: {
           orderStatus: { $in: ['delivered', 'confirmed', 'shipped'] },
-          'paymentDetails.paymentStatus': 'completed'
         }
       },
       {
@@ -217,6 +229,11 @@ const getTopVIPCustomers = async (req, res) => {
       },
       {
         $unwind: '$user'
+      },
+      {
+        $match: {
+          'user.isAdmin': false 
+        }
       },
       {
         $project: {

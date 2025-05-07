@@ -1,4 +1,6 @@
 const Order = require('../../Models/orderModel')
+const Category = require('../../Models/categoryModel')
+
 
 const {errorHandler} = require('../../Utils/errorHandler') 
 
@@ -364,7 +366,9 @@ const getRevenueByMainCategory = async (req, res, next) => {
   try {
     console.log("Inside getRevenueByMainCategory")
 
-    const categoryDatas = await Order.aggregate([
+    const allMainCategories = await Category.find({parentCategory: null}, {name: 1}).lean()
+
+    const revenueData = await Order.aggregate([
       {
         $match: {
           orderStatus: 'delivered'
@@ -382,14 +386,19 @@ const getRevenueByMainCategory = async (req, res, next) => {
           revenue: { $sum: '$products.total' }
         }
       },
-      {
-        $project: {
-          _id: 0,
-          name: '$_id',
-          revenue: 1
-        }
-      }
     ]);
+    console.log("revenueData-->", JSON.stringify(revenueData))
+
+    const revenueMap = new Map()
+    revenueData.forEach(item=> {
+      revenueMap.set(item._id, item.revenue)
+    })
+    console.log("revenueMap-->", JSON.stringify(revenueMap))
+
+    const categoryDatas = allMainCategories.map(cat => ({
+      name: cat.name,
+      revenue: revenueMap.get(cat.name) || 0
+    }))
 
     console.log("categoryDatas--->", categoryDatas)
 

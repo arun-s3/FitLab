@@ -222,6 +222,7 @@ const getOrderStatusDistribution = async (req, res, next)=> {
       name: key,
       value: totalOrders > 0 ? Math.round((value / totalOrders) * 100) : 0
     }))
+    console.log("orderStatusDistribution---->", result)
 
     res.status(200).json({orderStatusDistribution: result});
   } 

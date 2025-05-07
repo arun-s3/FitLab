@@ -43,6 +43,8 @@ export default function AdminPageLayout(){
 
     const [headerZIndex, setHeaderZIndex] = useState(10)
 
+    const [isDashboardOpen, setIsDashboardOpen] = useState(false)
+
     const [showSublist, setShowSublist] = useState({
         dashboard:false, customers:false, product: false, category: false, couponManager:false, orders:false, salesReport:false,
         offers:false, banners:false, settings:false
@@ -50,7 +52,7 @@ export default function AdminPageLayout(){
 
     const toggleSublist = (type) => {
         setShowSublist((prevState) => {
-            const updatedState = Object.keys(prevState).reduce((acc, key) => {
+            const updatedState = Object.keys(prevState).reduce((acc, key)=> {
                 acc[key] = (key === type)? !prevState[key] : false
                 return acc
             }, {})
@@ -90,16 +92,51 @@ export default function AdminPageLayout(){
                 <aside className='inline-flex gap-0 z-[10]' id='admin-wrapper-aside'>
                     <div className='h-screen w-[14rem] bg-black' style={asideBgImg}id='aside-content' >
                         <nav className='flex justify-center items-center mt-[3.3rem]'>
-                            <ul className='w-full ml-[3rem] list-none flex flex-col gap-[1.5rem] justify-center items-start text-white text-[13.5px]'>
+                            <ul className='w-full ml-[3rem] list-none flex flex-col gap-[1.5rem] justify-center
+                                 items-start text-white text-[13.5px]'>
                                 <li onClick={()=>toggleSublist('dashboard')}> 
-                                    <div className={`${ showSublist.dashboard && 'toggleSublist-custom-after'} option`}> 
-                                        <Link to='/admin/dashboard'> 
+                                    <div className={`${ showSublist.dashboard && 'toggleSublist-custom-after'} flex items-start
+                                         justify-between gap-[1.5rem] pr-[1.5rem] option list-dropdown`}> 
+                                        <span className='flex justify-center items-center gap-[5px] cursor-pointer list-name'> 
                                             <MdOutlineDashboardCustomize className='inline-block'/> 
-                                            <span className={`${ showSublist.dashboard && 'text-primaryDark'}`}> Dashboard </span>
-                                        </Link>
+                                            <span className={`${ showSublist.dashboard && 'text-primaryDark'}`}> Dashboards </span>
+                                        </span>
+                                        <RiArrowDropDownLine/>
                                     </div> 
+                                    {
+                                        showSublist.dashboard &&
+                                        <ul className='pt-[1rem] pl-[1rem] list-none flex flex-col gap-[10px] justify-center items-start
+                                             text-white text-[12.5px] sublist'>
+                                            <li>
+                                               <div>
+                                                    <Link to='/admin/dashboard/business'  className='flex items-start'> 
+                                                        <CiSquareChevRight/> 
+                                                        <div className='flex flex-col gap-[5px]'>
+                                                            <span> Business Overview </span> 
+                                                            <span className='text-[10px] text-[#ebebebba] first-letter:text-[12px]'>
+                                                                Sales, Orders and Customers Insights 
+                                                            </span> 
+                                                        </div>
+                                                    </Link>
+                                               </div> 
+                                            </li>
+                                            <li>
+                                               <div className='flex items-center'>
+                                                    <Link to='/admin/dashboard/operations'  className='flex items-start'> 
+                                                        <CiSquareChevRight className='!mt-[-4px] !w-[28px] !h-[28px]'/>
+                                                        <div className='flex flex-col gap-[5px]'>
+                                                            <span> Operations Overview </span> 
+                                                            <span className='text-[10px] text-[#ebebebba] first-letter:text-[12px]'>
+                                                                Inventory, Payments, Offers and Coupons Insights 
+                                                            </span> 
+                                                        </div>
+                                                    </Link>
+                                               </div> 
+                                            </li>
+                                     </ul>
+                                     }
                                 </li>
-                                <li onClick={()=>toggleSublist('customers')}> 
+                                <li className={`${showSublist.dashboard && 'mt-[-6px]'}`} onClick={()=>toggleSublist('customers')}> 
                                     <div className={`${ showSublist.customers && 'toggleSublist-custom-after'} option`}>
                                         <Link to='/admin/customers'> 
                                             <HiOutlineUsers/> 
@@ -107,15 +144,14 @@ export default function AdminPageLayout(){
                                         </Link> 
                                     </div> 
                                 </li>
-                                <li> 
-                                    <div className={`${ showSublist.product && 'toggleSublist-custom-after'} flex items-center gap-[1.5rem] option list-dropdown`}>
+                                <li className={`${showSublist.dashboard && 'mt-[-6px]'}`} onClick={()=>toggleSublist('product')}> 
+                                    <div className={`${ showSublist.product && 'toggleSublist-custom-after'} flex items-center 
+                                        justify-between gap-[1.5rem] pr-[1.5rem] option list-dropdown`}>
                                         <span className='flex justify-center items-center gap-[5px] cursor-pointer list-name'>
                                             <BsCart3/> 
                                             <span className={`${ showSublist.product && 'text-primaryDark'}`}>  Products </span> 
                                         </span>
-                                        {/* <MdOutlineArrowDropDownCircle/> */}
-                                        {/* <IoIosArrowDropdown/> */}
-                                        <RiArrowDropDownLine onClick={()=>toggleSublist('product')}/>
+                                        <RiArrowDropDownLine/>
                                      </div> 
                                      {
                                         showSublist.product &&
@@ -140,15 +176,14 @@ export default function AdminPageLayout(){
                                      </ul>
                                      }
                                 </li>
-                                <li> 
-                                    <div className={`${ showSublist.category && 'toggleSublist-custom-after'} flex items-center gap-[1.5rem] option list-dropdown`}>
+                                <li className={`${showSublist.dashboard && 'mt-[-6px]'}`} onClick={()=>toggleSublist('category')}> 
+                                    <div className={`${ showSublist.category && 'toggleSublist-custom-after'} flex items-center 
+                                        justify-between gap-[1.5rem] pr-[1.5rem] option list-dropdown`}>
                                         <span className='flex justify-center items-center gap-[5px] cursor-pointer list-name'>
                                             <LuLayoutList/> 
                                             <span>Category</span> 
                                         </span>
-                                        {/* <MdOutlineArrowDropDownCircle/> */}
-                                        {/* <IoIosArrowDropdown/> */}
-                                        <RiArrowDropDownLine onClick={()=>toggleSublist('category')}/>
+                                        <RiArrowDropDownLine />
                                      </div> 
                                      {
                                         showSublist.category &&
@@ -173,7 +208,7 @@ export default function AdminPageLayout(){
                                      </ul>
                                      }
                                 </li>
-                                <li onClick={()=>toggleSublist('couponManager')}> 
+                                <li  className={`${showSublist.dashboard && 'mt-[-6px]'}`} onClick={()=>toggleSublist('couponManager')}> 
                                     <div className={`${ showSublist.couponManager && 'toggleSublist-custom-after'} option`}> 
                                         <Link  to='/admin/coupons'  className='flex items-center'> 
                                             <IoPricetagOutline/>
@@ -181,7 +216,7 @@ export default function AdminPageLayout(){
                                         </Link> 
                                     </div> 
                                 </li>
-                                <li onClick={()=>toggleSublist('orders')}> 
+                                <li className={`${showSublist.dashboard && 'mt-[-6px]'}`} onClick={()=>toggleSublist('orders')}> 
                                     <div className={`${ showSublist.orders && 'toggleSublist-custom-after'} option`}>
                                         <Link to='/admin/orders'>
                                             <TbTruckDelivery/> 
@@ -189,7 +224,7 @@ export default function AdminPageLayout(){
                                         </Link> 
                                     </div>
                                  </li>
-                                <li onClick={()=>toggleSublist('salesReport')}>
+                                <li className={`${showSublist.dashboard && 'mt-[-6px]'}`} onClick={()=>toggleSublist('salesReport')}>
                                      <div className={`${ showSublist.salesReport && 'toggleSublist-custom-after'} option`}>
                                         <Link>
                                             <FaChartLine/> 
@@ -197,13 +232,14 @@ export default function AdminPageLayout(){
                                         </Link> 
                                     </div> 
                                 </li>
-                                <li> 
-                                    <div className={`${ showSublist.offers && 'toggleSublist-custom-after'} flex items-center gap-[1.5rem] option list-dropdown`}>
+                                <li className={`${showSublist.dashboard && 'mt-[-6px]'}`} onClick={()=> toggleSublist('offers')}> 
+                                    <div className={`${ showSublist.offers && 'toggleSublist-custom-after'} flex items-center 
+                                        justify-between gap-[1.5rem] pr-[1.5rem] option list-dropdown`}>
                                         <span className='flex justify-center items-center gap-[5px] cursor-pointer list-name'> 
                                             <RiDiscountPercentLine/> 
                                             <span className={`${ showSublist.offers && 'text-primaryDark'}`}> Offers </span>
                                         </span> 
-                                        <RiArrowDropDownLine onClick={()=> toggleSublist('offers')}/>
+                                        <RiArrowDropDownLine/>
                                     </div> 
                                     {
                                         showSublist.offers &&
@@ -228,7 +264,7 @@ export default function AdminPageLayout(){
                                      </ul>
                                      }
                                 </li>
-                                <li onClick={()=>toggleSublist('banners')}> 
+                                <li className={`${showSublist.dashboard && 'mt-[-6px]'}`} onClick={()=>toggleSublist('banners')}> 
                                     <div className={`${ showSublist.banners && 'toggleSublist-custom-after'} option`}>
                                         <Link>
                                             <GrGallery/>
@@ -236,10 +272,13 @@ export default function AdminPageLayout(){
                                         </Link> 
                                     </div>
                                  </li>
-                                <div className='bg-[#5c5858] w-[85%] h-[1.3px] mt-[5px]'></div>
+                                <div className={`bg-[#5c5858] w-[85%] h-[1.3px] 
+                                    ${showSublist.dashboard ? 'mt-[2px]' : 'mt-[5px]'}`}></div>
                                 {/* <ul className='list-none flex flex-col gap-[1rem] justify-center items-start
                                                  text-white text-descReg1 mt-[-10px] '> */}
-                                    <li className='mt-[-10px] text-[14px] tracking-[0.5px]' onClick={()=>toggleSublist('settings')}>
+                                    <li className={`mt-[-10px] text-[14px] tracking-[0.5px] 
+                                        ${showSublist.dashboard ? 'mt-[-15px]' : 'mt-[-10px]'}`}
+                                        onClick={()=>toggleSublist('settings')}>
                                         <div className={`${ showSublist.settings && 'toggleSublist-custom-after'} option`}> 
                                             <Link>
                                                 <IoSettingsOutline className='h-[15px] w-[15px]'/>  
@@ -247,14 +286,15 @@ export default function AdminPageLayout(){
                                             </Link> 
                                         </div>
                                     </li>
-                                    <li className='mt-[-10px] text-[14px] tracking-[0.5px]'> 
+                                    <li className={`mt-[-10px] text-[14px] tracking-[0.5px] 
+                                        ${showSublist.dashboard ? 'mt-[-15px]' : 'mt-[-10px]'}`}> 
                                         <div className='option'>
                                             <Link className='hover:text-red-500' onClick={()=> logoutAdmin()}> 
                                                 <MdLogout className='h-[15px] w-[15px]'/> Logout
                                             </Link>
                                         </div>
                                     </li>
-                                {/* </ul> */}
+                                {/* </ul> */} 
                             </ul>
                         </nav> 
                     </div>

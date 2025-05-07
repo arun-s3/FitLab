@@ -21,7 +21,7 @@ import { ArrowUp, ArrowDown, IndianRupee, TrendingUp, ShoppingBag, ChevronDown, 
 import axios from 'axios'
 
 import {useTogglerEnabled} from "../../../../Hooks/ToggleEnabler"
-import {AnalyticsContext} from '.././AdminDashboardPage'
+import {BusinessAnalyticsContext} from '.././AdminDashboardPage'
 
 
 export default function SalesRevenueSection() {
@@ -32,7 +32,7 @@ export default function SalesRevenueSection() {
 
   const [categoryDatas, setCategoryDatas] = useState([])
 
-  const {dateRange, showAnalytics, setShowAnalytics} = useContext(AnalyticsContext)
+  const {dateRange, showBusinessAnalytics, setShowBusinessAnalytics} = useContext(BusinessAnalyticsContext)
 
   const [stats, setStats] = useState([])
   const [orderedStats, setOrderedStats] = useState([])
@@ -43,13 +43,13 @@ export default function SalesRevenueSection() {
     revenueTrendsDaily: false,
     revenueTrendsMonthly: false,
     revenueTrendsYearly: false,
-    revenueByCat: false,
+    revenueByCategory: false,
     avgOrderValue: false
   })
 
   const [revenueDatas, setRevenueDatas] = useState([])
 
-  const togglerEnabled = useTogglerEnabled(showAnalytics, 'sales')
+  const togglerEnabled = useTogglerEnabled(showBusinessAnalytics, 'sales')
 
   const COLORS = ["#8b5cf6", "#cb8ef5", "#f1c40f", "#d7f148"]
 
@@ -121,9 +121,11 @@ export default function SalesRevenueSection() {
       });
 
       if (categoryDatasResponse.status === 'fulfilled') {
+        console.log('Inside categoryDatasResponse..')
         const value = categoryDatasResponse.value.data.categoryDatas
         console.log("setting categoryDatas--->", categoryDatasResponse.value.data.categoryDatas)
         setCategoryDatas(value)
+        setLoading(status => ({...status, revenueByCategory: false}))
       }else{
         console.log("Error in total orders:", categoryDatasResponse.reason.message) 
       }
@@ -203,13 +205,13 @@ export default function SalesRevenueSection() {
       className="space-y-6"
     >
       <h2 className="text-xl text-secondary font-bold flex items-center gap-[10px]">
-        <span className={`w-fit whitespace-nowrap ${!showAnalytics.sales && 'text-muted'}`}>  Sales & Revenue Analysis  </span>
+        <span className={`w-fit whitespace-nowrap ${!showBusinessAnalytics.sales && 'text-muted'}`}>  Sales & Revenue Analysis  </span>
         <div className={`w-full flex items-center justify-between gap-[10px] rounded-[4px] cursor-pointer`}
-            onClick={()=> togglerEnabled && setShowAnalytics(status=> ({...status, sales: !status.sales}))}>
+            onClick={()=> togglerEnabled && setShowBusinessAnalytics(status=> ({...status, sales: !status.sales}))}>
           <hr className={`mt-[2px] w-full h-[2px] border-t border-inputBorderSecondary border-dashed shadow-sm
-              ${!showAnalytics.sales && 'border-muted'} `}/>
+              ${!showBusinessAnalytics.sales && 'border-muted'} `}/>
           {
-             showAnalytics.sales ?
+             showBusinessAnalytics.sales ?
             <ChevronUp className={`p-[2px] w-[18px] h-[18px] text-muted border border-secondary rounded-[3px]
              hover:border-purple-800 hover:text-secondary hover:bg-inputBorderSecondary hover:transition
               hover:duration-150 hover:delay-75 hover:ease-in ${!togglerEnabled && 'cursor-not-allowed'} `}/>
@@ -223,7 +225,7 @@ export default function SalesRevenueSection() {
       
       <AnimatePresence>
       {
-        showAnalytics.sales &&
+        showBusinessAnalytics.sales &&
         <motion.div initial={{opacity: 0, y: -20}} animate={{opacity: 1, y: 0}} 
           exit={{opacity: 0, transition: { duration: 0.5, ease: "easeInOut" }}} transition={{type: 'spring', delay:0.2}}
             className="flex flex-col gap-[1.3rem]">
@@ -348,7 +350,7 @@ export default function SalesRevenueSection() {
                   
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {
-              categoryDatas && categoryDatas.length > 0 ?
+              categoryDatas && categoryDatas.length > 0 && !categoryDatas.every(data=> data.revenue === 0) ?
               <motion.div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border">
               <h3 className="text-[17px] font-semibold mb-6">Revenue by Category</h3>
               <div className="h-64">
@@ -387,12 +389,23 @@ export default function SalesRevenueSection() {
                 </ResponsiveContainer>
               </div>
             </motion.div>
-            :<motion.div {...fadeInUp} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border">
-              <h3 className="invisiblle text-[17px] font-semibold mb-6">Revenue by Category</h3>
-              <div className="h-64">
-                <div className="w-full h-full skeleton-loader"/>
-              </div>
-            </motion.div>
+            : categoryDatas && categoryDatas.length > 0 && categoryDatas.every(data=> data.revenue === 0) ?
+              <motion.div {...fadeInUp} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border">
+                <h3 className="text-[17px] font-semibold mb-6">Revenue by Category</h3>
+                <div className="h-64">
+                  <p className="w-full h-full flex items-center justify-center text-muted font-medium tracking-[0.3px]"
+                    style={{wordSpacing: '2px'}}>
+                       No revenue datas yet! 
+                    </p>
+                </div>
+              </motion.div>
+            :  categoryDatas && categoryDatas.length === 0 &&
+              <motion.div {...fadeInUp} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border">
+                <h3 className="text-[17px] font-semibold mb-6">Revenue by Category</h3>
+                <div className="h-64">
+                  <div className="w-full h-full skeleton-loader"/>
+                </div>
+              </motion.div>
             }
             
             <motion.div {...fadeInUp} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border">

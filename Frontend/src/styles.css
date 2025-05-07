@@ -1420,6 +1420,10 @@ select{
   margin-bottom: 2rem !important;
 }
 
+.\!mt-\[-4px\]{
+  margin-top: -4px !important;
+}
+
 .\!mt-\[1\.5rem\]{
   margin-top: 1.5rem !important;
 }
@@ -1752,6 +1756,10 @@ select{
   margin-top: -12px;
 }
 
+.mt-\[-15px\]{
+  margin-top: -15px;
+}
+
 .mt-\[-1px\]{
   margin-top: -1px;
 }
@@ -1770,6 +1778,10 @@ select{
 
 .mt-\[-5px\]{
   margin-top: -5px;
+}
+
+.mt-\[-6px\]{
+  margin-top: -6px;
 }
 
 .mt-\[-7px\]{
@@ -1948,6 +1960,10 @@ select{
 
 .\!h-\[12px\]{
   height: 12px !important;
+}
+
+.\!h-\[28px\]{
+  height: 28px !important;
 }
 
 .h-0{
@@ -2349,6 +2365,10 @@ select{
 
 .\!w-\[12px\]{
   width: 12px !important;
+}
+
+.\!w-\[28px\]{
+  width: 28px !important;
 }
 
 .w-0{
@@ -2826,10 +2846,6 @@ select{
 }
 
 .flex-grow{
-  flex-grow: 1;
-}
-
-.grow{
   flex-grow: 1;
 }
 
@@ -4921,6 +4937,10 @@ select{
   padding-right: 1rem;
 }
 
+.pr-\[1\.5rem\]{
+  padding-right: 1.5rem;
+}
+
 .pr-\[15px\]{
   padding-right: 15px;
 }
@@ -5456,6 +5476,10 @@ select{
 .text-\[\#d2caca\]{
   --tw-text-opacity: 1;
   color: rgb(210 202 202 / var(--tw-text-opacity));
+}
+
+.text-\[\#ebebebba\]{
+  color: #ebebebba;
 }
 
 .text-\[\#f1c40f\]{
@@ -5995,6 +6019,10 @@ select{
       background-color: rgba(113, 34, 168, 0.09);
     }
   }
+}
+
+.first-letter\:text-\[12px\]::first-letter{
+  font-size: 12px;
 }
 
 .first-letter\:text-\[20px\]::first-letter{

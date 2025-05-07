@@ -109,7 +109,10 @@ export default function App(){
                     <Route element={<PrivateAdminRoutes/>}>
                         <Route path='image-editor' element={<ImageEditor/>} />
                         <Route element={<AdminPageLayout/>}>
-                            <Route path="dashboard" element={<AdminDashboardPage/>} />
+                            <Route path='dashboard'>
+                                <Route path="business" element={<AdminDashboardPage insightType='business'/>} />
+                                <Route path="operations" element={<AdminDashboardPage insightType='operations'/>} />
+                            </Route>
                             <Route path="customers" element={<AdminCustomersPage/>} />
                             <Route path='products'>
                                 <Route path='list' element={<AdminProductListPage/>} />

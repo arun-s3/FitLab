@@ -20,16 +20,16 @@ import {
 import { Package, Clock, CheckCircle, ChevronDown, ChevronUp } from "lucide-react"
 import axios from 'axios'
 
-import {AnalyticsContext} from '.././AdminDashboardPage'
+import {BusinessAnalyticsContext} from '.././AdminDashboardPage'
 import { useTogglerEnabled } from "../../../../Hooks/ToggleEnabler"
 
 
 
 export default function OrdersFulfillmentSection() {
 
-  const {dateRange, showAnalytics, setShowAnalytics} = useContext(AnalyticsContext)
+  const {dateRange, showBusinessAnalytics, setShowBusinessAnalytics} = useContext(BusinessAnalyticsContext)
 
-  const togglerEnabled = useTogglerEnabled(showAnalytics, 'orders')
+  const togglerEnabled = useTogglerEnabled(showBusinessAnalytics, 'orders')
 
   const [stats, setStats] = useState([])
   const [ordersOverTimeStats, setOrdersOverTimeStats] = useState([])
@@ -131,6 +131,7 @@ export default function OrdersFulfillmentSection() {
             return {...status, color}
           })
           setOrderStatusDistribution(colorMappedStatus)
+          setLoading(status => ({...status, orderStatusDistribution: false})) 
         }
         else{
           console.log("Error in orders over time:", orderStatusPercentRes.reason.message)
@@ -155,13 +156,13 @@ export default function OrdersFulfillmentSection() {
     >
 
       <h2 className="text-xl text-secondary font-bold flex items-center gap-[10px]">
-        <span className={`w-fit whitespace-nowrap ${!showAnalytics.orders && 'text-muted'}`}> Orders & Fulfillment </span>
+        <span className={`w-fit whitespace-nowrap ${!showBusinessAnalytics.orders && 'text-muted'}`}> Orders & Fulfillment </span>
         <div className={`w-full flex items-center justify-between gap-[10px] rounded-[4px] cursor-pointer`}
-            onClick={()=>togglerEnabled && setShowAnalytics(status=> ({...status, orders: !status.orders}))}>
+            onClick={()=>togglerEnabled && setShowBusinessAnalytics(status=> ({...status, orders: !status.orders}))}>
           <hr className={`mt-[2px] w-full h-[2px] border-t border-inputBorderSecondary border-dashed shadow-sm
-              ${!showAnalytics.orders && 'border-muted'}`}/>
+              ${!showBusinessAnalytics.orders && 'border-muted'}`}/>
           {
-            showAnalytics.orders ?
+            showBusinessAnalytics.orders ?
             <ChevronUp className={`p-[2px] w-[18px] h-[18px] text-muted border border-secondary rounded-[3px]
              hover:border-purple-800 hover:text-secondary hover:bg-inputBorderSecondary hover:transition
               hover:duration-150 hover:delay-75 hover:ease-in ${!togglerEnabled && 'cursor-not-allowed'} `}/>
@@ -174,7 +175,7 @@ export default function OrdersFulfillmentSection() {
 
       <AnimatePresence>
       {
-        showAnalytics.orders &&
+        showBusinessAnalytics.orders &&
         <motion.div initial={{opacity: 0, y: -20}} animate={{opacity: 1, y: 0}} 
           exit={{opacity: 0, transition: { duration: 0.5, ease: "easeInOut" }}} transition={{type: 'spring', delay:0.2}}
             className="flex flex-col gap-[1.3rem]">
@@ -322,7 +323,8 @@ export default function OrdersFulfillmentSection() {
               <h3 className="text-[17px] font-semibold mb-6">Order Status Distribution</h3>
               <div className="h-64">
                 {
-                  orderStatusDistribution && orderStatusDistribution.length > 0 ?
+                  orderStatusDistribution && orderStatusDistribution.length > 0 &&
+                    !orderStatusDistribution.every(data=> data.value === 0) ?
                   <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -333,6 +335,7 @@ export default function OrdersFulfillmentSection() {
                       outerRadius={80}
                       paddingAngle={5}
                       dataKey="value"
+                      labelLine={true}
                     >
                       {orderStatusDistribution.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
@@ -353,7 +356,14 @@ export default function OrdersFulfillmentSection() {
                     )}/>
                   </PieChart>
                 </ResponsiveContainer>
-                : <div className="w-full h-full skeleton-loader"/>
+                : orderStatusDistribution && orderStatusDistribution.length > 0 &&
+                    orderStatusDistribution.every(data=> data.value === 0) ?
+                  <p className="w-full h-full flex items-center justify-center text-muted font-medium tracking-[0.3px]"
+                    style={{wordSpacing: '2px'}}>
+                     No Orders made yet! 
+                   </p>
+                :  orderStatusDistribution && orderStatusDistribution.length === 0 &&
+                  <div className="w-full h-full skeleton-loader"/>
                 }
               </div>
             </motion.div>

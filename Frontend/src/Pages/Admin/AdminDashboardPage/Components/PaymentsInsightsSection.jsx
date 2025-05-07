@@ -16,7 +16,7 @@ import {
 } from "recharts"
 import { CreditCard, RefreshCcw, IndianRupee, ArrowDown, ChevronUp, ChevronDown } from "lucide-react"
 
-import {AnalyticsContext} from '.././AdminDashboardPage'
+import {OperationsAnalyticsContext} from '.././AdminDashboardPage'
 import { useTogglerEnabled } from "../../../../Hooks/ToggleEnabler"
 
 
@@ -81,9 +81,9 @@ const recentRefundsData = [
 
 export default function PaymentsInsightsSection() {
 
-  const {dateRange, showAnalytics, setShowAnalytics} = useContext(AnalyticsContext)
+  const {dateRange, showOperationsAnalytics, setShowOperationsAnalytics} = useContext(OperationsAnalyticsContext)
 
-  const togglerEnabled = useTogglerEnabled(showAnalytics, 'payments')
+  const togglerEnabled = useTogglerEnabled(showOperationsAnalytics, 'payments')
   
 
   const fadeInUp = {
@@ -115,13 +115,13 @@ export default function PaymentsInsightsSection() {
     >
 
       <h2 className="text-xl text-secondary font-bold flex items-center gap-[10px]">
-        <span className={`w-fit whitespace-nowrap ${!showAnalytics.payments && 'text-muted'}`}> Payments & Refunds </span>
+        <span className={`w-fit whitespace-nowrap ${!showOperationsAnalytics.payments && 'text-muted'}`}> Payments & Refunds </span>
         <div className={`w-full flex items-center justify-between gap-[10px] rounded-[4px] cursor-pointer`}
-            onClick={()=> togglerEnabled && setShowAnalytics(status=> ({...status, payments: !status.payments}))}>
+            onClick={()=> togglerEnabled && setShowOperationsAnalytics(status=> ({...status, payments: !status.payments}))}>
           <hr className={`mt-[2px] w-full h-[2px] border-t border-inputBorderSecondary border-dashed shadow-sm
-              ${!showAnalytics.payments && 'border-muted'}`}/>
+              ${!showOperationsAnalytics.payments && 'border-muted'}`}/>
           {
-            showAnalytics.payments ?
+            showOperationsAnalytics.payments ?
             <ChevronUp className={`p-[2px] w-[18px] h-[18px] text-muted border border-secondary rounded-[3px]
              hover:border-purple-800 hover:text-secondary hover:bg-inputBorderSecondary hover:transition
               hover:duration-150 hover:delay-75 hover:ease-in ${!togglerEnabled && 'cursor-not-allowed'} `}/>
@@ -134,7 +134,7 @@ export default function PaymentsInsightsSection() {
 
       <AnimatePresence>
         {
-          showAnalytics.payments &&
+          showOperationsAnalytics.payments &&
           <motion.div initial={{opacity: 0, y: -20}} animate={{opacity: 1, y: 0}} 
             exit={{opacity: 0, transition: { duration: 0.5, ease: "easeInOut" }}} transition={{type: 'spring', delay:0.2}}
               className="flex flex-col gap-[1.3rem]">

@@ -1,11 +1,13 @@
-import React, {useContext} from 'react'
-import { motion, AnimatePresence } from "framer-motion"
+import React, {useContext, useState, useEffect} from 'react'
+import './componentsStyle.css'
+import {motion, AnimatePresence} from "framer-motion"
 
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
-import { Package, AlertTriangle, BarChart3, ChevronDown, ChevronUp } from "lucide-react"
+import {BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from "recharts"
+import {Package, AlertTriangle, BarChart3, ChevronDown, ChevronUp} from "lucide-react"
+import axios from 'axios'
 
-import {AnalyticsContext} from '.././AdminDashboardPage'
-import { useTogglerEnabled } from "../../../../Hooks/ToggleEnabler"
+import {OperationsAnalyticsContext} from '.././AdminDashboardPage'
+import {useTogglerEnabled} from "../../../../Hooks/ToggleEnabler"
 
 // Sample data
 const lowStockData = [
@@ -51,9 +53,96 @@ const stockDistributionData = [
 
 export default function InventoryInsightsSection() {
 
-  const {dateRange, showAnalytics, setShowAnalytics} = useContext(AnalyticsContext)
+  const {dateRange, showOperationsAnalytics, setShowOperationsAnalytics} = useContext(OperationsAnalyticsContext)
 
-  const togglerEnabled = useTogglerEnabled(showAnalytics, 'inventory')
+  const togglerEnabled = useTogglerEnabled(showOperationsAnalytics, 'inventory')
+
+  const [productStats, setProductStats] = useState([])
+
+
+  useEffect(() => {
+        const fetchAllStats = async ()=> {
+          const newStats = []
+      
+          const [productStockResponse] = await Promise.allSettled([
+            axios.get('http://localhost:3000/admin/dashboard/products/stock', { withCredentials: true }), 
+          ])
+
+          if (productStockResponse.status === 'fulfilled'){
+            const response = productStockResponse.value
+            console.log("productStockResponse totalProducts----->", response.data.totalProducts)
+  
+            newStats.push({
+              name: "totalProducts",
+              title: "Total Products",
+              value: response.data.totalProducts,
+              icon: Package,
+              color: "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+            },
+            {
+              name: "lowStockItems",
+              title: "Low Stock Items",
+              value: response.data.outOfStockProducts,
+              icon: AlertTriangle,
+              color: "bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400"
+            },
+            {
+              name: "outOfStock",
+              title: "Out of Stock",
+              value: response.data.outOfStockProducts,
+              icon: BarChart3,
+              color: "bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400"
+            })
+            console.log('newStats----->', newStats)
+  
+            setProductStats(newStats)
+          }
+          else{
+            console.log("Error in total revenue:", productStockResponse.reason.message)
+          }
+          
+          // if (ordersOverTimeResponse.status === 'fulfilled'){ 
+          //   const response = ordersOverTimeResponse.value
+          //   console.log("ordersOverTimeResponse response----->", response.data.ordersOverTime) 
+          //   setOrdersOverTimeStats(response.data.ordersOverTime)
+          // }
+          // else{
+          //   console.log("Error in orders over time:", ordersOverTimeResponse.reason.message)
+          // }
+  
+          // if (topProductsResponse.status === 'fulfilled'){
+          //   const response = topProductsResponse.value
+          //   console.log("ordersOverTimeResponse response----->", response.data.topProductDatas) 
+          //   setTopProductDatas(response.data.topProductDatas)
+          // }
+          // else{
+          //   console.log("Error in orders over time:", topProductsResponse.reason.message)
+          // }
+  
+          // if (orderStatusPercentRes.status === 'fulfilled'){
+          //   const response = orderStatusPercentRes.value
+          //   console.log("orderStatusPercentRes response----->", response.data.orderStatusDistribution) 
+          //   const statusColors = [
+          //     { name: "Delivered", color: "#10b981" },
+          //     { name: "Pending", color: "#f59e0b" },
+          //     { name: "Cancelled", color: "#ef4444" },
+          //     { name: "Shipped", color: "#d7f148" },
+          //     { name: "Refunded", color: "#00e6d4" }
+          //   ]
+          //   const colorMappedStatus = response.data.orderStatusDistribution.map(status=> {
+          //     const color = statusColors.find(statusColor=> statusColor.name === status.name).color
+          //     return {...status, color}
+          //   })
+          //   setOrderStatusDistribution(colorMappedStatus)
+          //   setLoading(status => ({...status, orderStatusDistribution: false})) 
+          // }
+          // else{
+          //   console.log("Error in orders over time:", orderStatusPercentRes.reason.message)
+          // }
+        }
+      
+        fetchAllStats();
+    }, [])
 
 
   const fadeInUp = {
@@ -84,13 +173,13 @@ export default function InventoryInsightsSection() {
     >
 
       <h2 className="text-xl text-secondary font-bold flex items-center gap-[10px]">
-        <span className={`w-fit whitespace-nowrap ${!showAnalytics.inventory && 'text-muted'}`}> Inventory & Stock </span>
+        <span className={`w-fit whitespace-nowrap ${!showOperationsAnalytics.inventory && 'text-muted'}`}> Inventory & Stock </span>
         <div className={`w-full flex items-center justify-between gap-[10px] rounded-[4px] cursor-pointer`}
-            onClick={()=> togglerEnabled && setShowAnalytics(status=> ({...status, inventory: !status.inventory}))}>
+            onClick={()=> togglerEnabled && setShowOperationsAnalytics(status=> ({...status, inventory: !status.inventory}))}>
           <hr className={`mt-[2px] w-full h-[2px] border-t border-inputBorderSecondary border-dashed shadow-sm
-              ${!showAnalytics.inventory && 'border-muted'}`}/>
+              ${!showOperationsAnalytics.inventory && 'border-muted'}`}/>
           {
-            showAnalytics.inventory ?
+            showOperationsAnalytics.inventory ?
             <ChevronUp className={`p-[2px] w-[18px] h-[18px] text-muted border border-secondary rounded-[3px]
              hover:border-purple-800 hover:text-secondary hover:bg-inputBorderSecondary hover:transition
               hover:duration-150 hover:delay-75 hover:ease-in ${!togglerEnabled && 'cursor-not-allowed'} `}/>
@@ -103,51 +192,52 @@ export default function InventoryInsightsSection() {
 
       <AnimatePresence>
         {
-          showAnalytics.inventory &&
+          showOperationsAnalytics.inventory &&
           <motion.div initial={{opacity: 0, y: -20}} animate={{opacity: 1, y: 0}} 
             exit={{opacity: 0, transition: { duration: 0.5, ease: "easeInOut" }}} transition={{type: 'spring', delay:0.2}}
               className="flex flex-col gap-[1.3rem]">
 
                   {/* Inventory stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {[
-                {
-                  title: "Total Products",
-                  value: "248",
-                  icon: Package,
-                  color: "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
-                },
-                {
-                  title: "Low Stock Items",
-                  value: "32",
-                  icon: AlertTriangle,
-                  color: "bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400",
-                },
-                {
-                  title: "Out of Stock",
-                  value: "15",
-                  icon: BarChart3,
-                  color: "bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400",
-                },
-              ].map((stat, index) => (
-                <motion.div
-                  key={stat.title}
+              {
+                productStats && productStats.length > 0 ?
+                productStats.map((stat, index)=> (
+                  <motion.div
+                    key={stat.title}
+                    className={`flex items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border
+                       ${index === 0 && 'border-primary'}`}
+                  >
+                    <div className="flex items-center">
+                      <div className={`p-3 rounded-full ${stat.color} mr-4`}>
+                        <stat.icon size={17} />
+                      </div>
+                      <div>
+                        <p className="text-[13px] text-gray-500 dark:text-gray-400">{stat.title}</p>
+                        <h3 className="text-[20px] font-bold mt-1">{stat.value}</h3>
+                      </div>
+                    </div>
+                  </motion.div>
+              ))
+              :
+                [...Array(3)].map((_, index)=> (
+                  <motion.div
+                  key={index}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1, duration: 0.5 }}
-                  className={`flex items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border ${index === 0 && 'border-primary'}`}
-                >
-                  <div className="flex items-center">
-                    <div className={`p-3 rounded-full ${stat.color} mr-4`}>
-                      <stat.icon size={17} />
+                  className={`skeleton-loader flex items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border 
+                    ${index === 0 && 'border-primary'}`}
+                  >
+                    <div className="flex items-center">
+                      <div className='w-[17px] h-[17px] p-3 rounded-full mr-4'></div>
+                      <div>
+                        <p className="invisible text-[13px] text-gray-500 dark:text-gray-400">Insight Title</p>
+                        <h3 className="invisible text-[20px] font-bold mt-1">Insight Value</h3>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-[13px] text-gray-500 dark:text-gray-400">{stat.title}</p>
-                      <h3 className="text-[20px] font-bold mt-1">{stat.value}</h3>
-                    </div>
-                  </div>
                 </motion.div>
-              ))}
+              ))
+            }
             </div>
 
             {/* Low Stock Alerts */}

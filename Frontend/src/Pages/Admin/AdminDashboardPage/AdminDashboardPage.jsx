@@ -13,22 +13,36 @@ import DateRangePicker from "./Components/DateRangePicker"
 
 import AdminHeader from '../../../Components/AdminHeader/AdminHeader'
 
-export const AnalyticsContext = createContext()
+export const BusinessAnalyticsContext = createContext()
+export const OperationsAnalyticsContext = createContext()
 
 
-export default function AdminDashboardPage(){
+export default function AdminDashboardPage({ insightType }){
 
     const [dateRange, setDateRange] = useState("30d")
-    const [showAnalytics, setShowAnalytics] = useState({
-      sales: true, customers: true, inventory: true, orders: true, payments: true, couponOffers: true
-    })
+
+    const [showBusinessAnalytics, setShowBusinessAnalytics] = useState({sales: true, orders: true, customers: true})
+    const [showOperationsAnalytics, setShowOperationsAnalytics] = useState({inventory: true, payments: true, couponOffers: true})
+
+    const businessOverviewHeader = "Business Overview"
+    const operationsOverviewHeader = "Operations Overview"
+
+    const businessOverviewSubHeader = "Get a visual summary of sales, revenue, orders, and customer trends to track and analyze your business performance"
+    const operationsOverviewSubHeader = "Visualize and monitor key operational metrics including inventory levels, payment trends, offers, and coupon usage"
 
 
     return(
         <section id='adminDashboard'>
             <header>
 
-                <AdminHeader heading='Dashboard' subHeading='Manage, Monitor, and Optimize Your E-commerce Platform'/>
+                {
+                  (()=> {
+                    const header = insightType === 'business' ? businessOverviewHeader : operationsOverviewHeader
+                    const subheader = insightType === 'business' ? businessOverviewSubHeader : operationsOverviewSubHeader
+                    return <AdminHeader heading={header} subHeading={subheader}/>
+                  }
+                  )()
+                }
 
             </header>
 
@@ -55,21 +69,31 @@ export default function AdminDashboardPage(){
 
                   <div className='flex flex-col gap-[3rem]'>
 
-                    <AnalyticsContext.Provider value={{dateRange, showAnalytics, setShowAnalytics}}>
+                      {
+                        insightType === 'business' ?
+                          <BusinessAnalyticsContext.Provider value={{dateRange, showBusinessAnalytics, setShowBusinessAnalytics}}>
 
-                      <SalesRevenueSection />
+                            <SalesRevenueSection />
 
-                      <OrdersFulfillmentSection />
+                            <OrdersFulfillmentSection />
 
-                      <CustomerInsightsSection />
+                            <CustomerInsightsSection />
 
-                      <InventoryInsightsSection />
+                          </BusinessAnalyticsContext.Provider>
+                          
+                          : insightType === 'operations' &&
 
-                      <CouponOffersInsightsSection />
+                            <OperationsAnalyticsContext.Provider value={{dateRange, showOperationsAnalytics, setShowOperationsAnalytics}}>
 
-                      <PaymentsInsightsSection />
+                              <InventoryInsightsSection />
 
-                    </AnalyticsContext.Provider>
+                              <CouponOffersInsightsSection />
+
+                              <PaymentsInsightsSection />
+
+                            </OperationsAnalyticsContext.Provider>
+                      }
+
 
                   </div>
 

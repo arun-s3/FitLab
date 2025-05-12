@@ -7,7 +7,8 @@ import SalesRevenueSection from "./Components/SalesRevenueSection"
 import OrdersFulfillmentSection from "./Components/OrderFulfillmentSection."
 import CustomerInsightsSection from "./Components/CustomerInsightsSection"
 import InventoryInsightsSection from './Components/InventoryInsightsSection'
-import CouponOffersInsightsSection from './Components/CouponOffersInsightsSection'
+import CouponsInsightsSection from './Components/CouponsInsightsSection'
+import OffersInsightsSection from './Components/OffersInsightsSection'
 import PaymentsInsightsSection from './Components/PaymentsInsightsSection'
 import DateRangePicker from "./Components/DateRangePicker"
 
@@ -22,7 +23,7 @@ export default function AdminDashboardPage({ insightType }){
     const [dateRange, setDateRange] = useState("30d")
 
     const [showBusinessAnalytics, setShowBusinessAnalytics] = useState({sales: true, orders: true, customers: true})
-    const [showOperationsAnalytics, setShowOperationsAnalytics] = useState({inventory: true, payments: true, couponOffers: true})
+    const [showOperationsAnalytics, setShowOperationsAnalytics] = useState({inventory: true, payments: true, coupons: true, offers: true})
 
     const businessOverviewHeader = "Business Overview"
     const operationsOverviewHeader = "Operations Overview"
@@ -87,7 +88,9 @@ export default function AdminDashboardPage({ insightType }){
 
                               <InventoryInsightsSection />
 
-                              <CouponOffersInsightsSection />
+                              <CouponsInsightsSection />
+
+                              <OffersInsightsSection />
 
                               <PaymentsInsightsSection />
 

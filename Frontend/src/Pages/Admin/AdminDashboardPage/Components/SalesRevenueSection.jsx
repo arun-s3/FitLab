@@ -2,21 +2,8 @@ import React, { useState, useEffect, useContext } from "react"
 import './componentsStyle.css'
 import { motion, AnimatePresence } from "framer-motion"
 
-import {
-  AreaChart,
-  Area,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts"
+import {AreaChart, Area, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, 
+  Legend, ResponsiveContainer} from "recharts"
 import { ArrowUp, ArrowDown, IndianRupee, TrendingUp, ShoppingBag, ChevronDown, ChevronUp, TrendingDown } from "lucide-react"
 import axios from 'axios'
 
@@ -115,9 +102,9 @@ export default function SalesRevenueSection() {
       }
     
       setStats(prev => {
-        const existingNames = new Set(prev.map(stat => stat.name));
-        const filtered = newStats.filter(stat => !existingNames.has(stat.name));
-        return [...prev, ...filtered];
+        const existingNames = new Set(prev.map(stat => stat.name))
+        const filtered = newStats.filter(stat => !existingNames.has(stat.name))
+        return [...prev, ...filtered]
       });
 
       if (categoryDatasResponse.status === 'fulfilled') {

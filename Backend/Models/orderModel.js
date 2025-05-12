@@ -116,6 +116,10 @@ const orderSchema = new mongoose.Schema({
         ref: "Coupon",
         default: null
     },
+    couponDiscount:{
+        type: Number,
+        min: 0
+    },
     discount: {
         type: Number,
         default: 0, 

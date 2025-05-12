@@ -9,47 +9,7 @@ import axios from 'axios'
 import {OperationsAnalyticsContext} from '.././AdminDashboardPage'
 import {useTogglerEnabled} from "../../../../Hooks/ToggleEnabler"
 
-// Sample data
-const lowStockData = [
-  { name: "Premium Dumbbells Set", stock: 5, threshold: 10 },
-  { name: "Resistance Bands Pack", stock: 3, threshold: 15 },
-  { name: "Protein Powder (2kg)", stock: 8, threshold: 20 },
-  { name: "Yoga Mat Pro", stock: 4, threshold: 10 },
-  { name: "Fitness Tracker", stock: 2, threshold: 8 },
-]
 
-const stockDistributionData = [
-  {
-    name: "Cardio Equipment",
-    inStock: 45,
-    lowStock: 5,
-    outOfStock: 2,
-  },
-  {
-    name: "Strength Training",
-    inStock: 38,
-    lowStock: 8,
-    outOfStock: 4,
-  },
-  {
-    name: "Supplements",
-    inStock: 65,
-    lowStock: 12,
-    outOfStock: 3,
-  },
-  {
-    name: "Accessories",
-    inStock: 52,
-    lowStock: 7,
-    outOfStock: 1,
-  },
-  {
-    name: "Apparel",
-    inStock: 78,
-    lowStock: 10,
-    outOfStock: 5,
-  },
-]
 
 export default function InventoryInsightsSection() {
 
@@ -58,14 +18,21 @@ export default function InventoryInsightsSection() {
   const togglerEnabled = useTogglerEnabled(showOperationsAnalytics, 'inventory')
 
   const [productStats, setProductStats] = useState([])
+  const [lowStockDatas, setLowStockDatas] = useState([])
+  const [categoryStockDatas, setCategoryStockDatas] = useState([])
 
+  const [loading, setLoading] = useState({lowStockDatas: false})
+  
 
-  useEffect(() => {
+  useEffect(()=> {
         const fetchAllStats = async ()=> {
           const newStats = []
+          setLoading(status=> ({...status, lowStockDatas: true}))
       
-          const [productStockResponse] = await Promise.allSettled([
+          const [productStockResponse, productLowStockResponse, categoryStockDatasResponse] = await Promise.allSettled([
             axios.get('http://localhost:3000/admin/dashboard/products/stock', { withCredentials: true }), 
+            axios.get('http://localhost:3000/admin/dashboard/products/stock/low', { withCredentials: true }),
+            axios.get('http://localhost:3000/admin/dashboard/category/stock', { withCredentials: true })  
           ])
 
           if (productStockResponse.status === 'fulfilled'){
@@ -98,47 +65,27 @@ export default function InventoryInsightsSection() {
             setProductStats(newStats)
           }
           else{
-            console.log("Error in total revenue:", productStockResponse.reason.message)
+            console.log("Error in product stock response:", productStockResponse.reason.message)
           }
           
-          // if (ordersOverTimeResponse.status === 'fulfilled'){ 
-          //   const response = ordersOverTimeResponse.value
-          //   console.log("ordersOverTimeResponse response----->", response.data.ordersOverTime) 
-          //   setOrdersOverTimeStats(response.data.ordersOverTime)
-          // }
-          // else{
-          //   console.log("Error in orders over time:", ordersOverTimeResponse.reason.message)
-          // }
-  
-          // if (topProductsResponse.status === 'fulfilled'){
-          //   const response = topProductsResponse.value
-          //   console.log("ordersOverTimeResponse response----->", response.data.topProductDatas) 
-          //   setTopProductDatas(response.data.topProductDatas)
-          // }
-          // else{
-          //   console.log("Error in orders over time:", topProductsResponse.reason.message)
-          // }
-  
-          // if (orderStatusPercentRes.status === 'fulfilled'){
-          //   const response = orderStatusPercentRes.value
-          //   console.log("orderStatusPercentRes response----->", response.data.orderStatusDistribution) 
-          //   const statusColors = [
-          //     { name: "Delivered", color: "#10b981" },
-          //     { name: "Pending", color: "#f59e0b" },
-          //     { name: "Cancelled", color: "#ef4444" },
-          //     { name: "Shipped", color: "#d7f148" },
-          //     { name: "Refunded", color: "#00e6d4" }
-          //   ]
-          //   const colorMappedStatus = response.data.orderStatusDistribution.map(status=> {
-          //     const color = statusColors.find(statusColor=> statusColor.name === status.name).color
-          //     return {...status, color}
-          //   })
-          //   setOrderStatusDistribution(colorMappedStatus)
-          //   setLoading(status => ({...status, orderStatusDistribution: false})) 
-          // }
-          // else{
-          //   console.log("Error in orders over time:", orderStatusPercentRes.reason.message)
-          // }
+          if(productLowStockResponse.status === 'fulfilled'){
+            const response = productLowStockResponse.value
+            console.log("productLowStockResponse----->", response.data.lowStockDatas) 
+            setLowStockDatas(response.data.lowStockDatas)
+            setLoading(status=> ({...status, lowStockDatas: false}))
+          }
+          else{
+            console.log("Error in productLowStockResponse:", productLowStockResponse.reason.message)
+          }
+
+          if (categoryStockDatasResponse.status === 'fulfilled'){
+            const response = categoryStockDatasResponse.value
+            console.log("categoryStockDatasResponse ----->", response.data.categoryStockDatas) 
+            setCategoryStockDatas(response.data.categoryStockDatas)
+          }
+          else{
+            console.log("Error in categoryStockDatas response:", categoryStockDatasResponse.reason.message)
+          }
         }
       
         fetchAllStats();
@@ -151,18 +98,18 @@ export default function InventoryInsightsSection() {
     transition: { duration: 0.5 },
   }
 
-  // Calculate stock level percentage for the progress bar
-  const getStockPercentage = (stock, threshold) => {
+  const getStockPercentage = (stock, threshold)=> {
     return Math.min((stock / threshold) * 100, 100)
   }
 
-  // Determine color based on stock level
   const getStockColor = (stock, threshold) => {
     const percentage = (stock / threshold) * 100
-    if (percentage <= 25) return "#ef4444" // Red for critical
-    if (percentage <= 50) return "#f59e0b" // Amber for warning
-    return "#10b981" // Green for good
+    if (percentage <= 25) return "#ef4444" 
+    if (percentage <= 50) return "#f59e0b" 
+    return "#10b981" 
   }
+
+
 
   return (
     <motion.section
@@ -197,7 +144,6 @@ export default function InventoryInsightsSection() {
             exit={{opacity: 0, transition: { duration: 0.5, ease: "easeInOut" }}} transition={{type: 'spring', delay:0.2}}
               className="flex flex-col gap-[1.3rem]">
 
-                  {/* Inventory stats */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {
                 productStats && productStats.length > 0 ?
@@ -240,81 +186,123 @@ export default function InventoryInsightsSection() {
             }
             </div>
 
-            {/* Low Stock Alerts */}
             <motion.div {...fadeInUp} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border">
               <div className="flex items-center mb-6">
                 <AlertTriangle className="text-amber-500 mr-2" size={20} />
                 <h3 className="text-[17px] font-semibold">Low Stock Alerts</h3>
               </div>
-
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
                     <tr className="border-b dark:border-gray-700">
                       <th className="text-left py-3 px-4 font-semibold text-sm">Product</th>
                       <th className="text-left py-3 px-4 font-semibold text-sm">Current Stock</th>
-                      <th className="text-left py-3 px-4 font-semibold text-sm">Threshold</th>
                       <th className="text-left py-3 px-4 font-semibold text-sm">Stock Level</th>
                       <th className="text-left py-3 px-4 font-semibold text-sm">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {lowStockData.map((product, index) => (
-                      <motion.tr
-                        key={product.name}
+                    {
+                      !loading.lowStockDatas && lowStockDatas && lowStockDatas.length > 0 ?
+                      lowStockDatas.map((product, index)=> (
+                        <motion.tr
+                          key={product.name}
+                          className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                        >
+                          <td className="py-3 px-4">
+                            <div className="flex items-center">
+                              <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-medium mr-3">
+                                <Package size={16} />
+                              </div>
+                              <span className='text-[15px]'>{product.name}</span>
+                            </div>
+                          </td>
+                          <td className="py-3 px-4 text-[15px]">{product.stock}</td>
+                          <td className="py-3 px-4 w-48">
+                            <div className="flex items-center">
+                              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mr-2">
+                                <div
+                                  className="h-2.5 rounded-full"
+                                  style={{
+                                    width: `${getStockPercentage(product.stock, 5)}%`,
+                                    backgroundColor: getStockColor(product.stock, 5),
+                                  }}
+                                ></div>
+                              </div>
+                              <span
+                                className="text-xs font-medium"
+                                style={{ color: getStockColor(product.stock, 5) }}
+                              >
+                                {getStockPercentage(product.stock, 5).toFixed(0)}%
+                              </span>
+                            </div>
+                          </td>
+                          <td className="py-3 px-4">
+                            <button className="text-sm text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 font-medium">
+                              Restock
+                            </button>
+                          </td>
+                        </motion.tr>
+                    ))
+                    : ( !loading.lowStockDatas && lowStockDatas.length === 0 )
+                        || lowStockDatas.every(data=> data.stock === 0) ?
+                      <tr> 
+                        <td colSpan={4} className='w-full h-[5rem] text-[15px] text-muted text-center font-medium tracking-[0.3px]'
+                          style={{wordSpacing: '1px'}}>
+                            No such datas Found!
+                        </td>
+                      </tr>
+                      : loading.lowStockDatas ?
+                      [...Array(5)].map((_, index)=> (
+                        <motion.tr
+                        key={index}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.05, duration: 0.3 }}
-                        className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50"
-                      >
-                        <td className="py-3 px-4">
-                          <div className="flex items-center">
-                            <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-medium mr-3">
-                              <Package size={16} />
+                        className="skeleton-loader border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                        >
+                          <td className="py-3 px-4">
+                            <div className="flex items-center">
+                              <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 
+                                font-medium mr-3">
+                                <div className=' w-[16px] h-[16px]'/>
+                              </div>
+                              <span className='invisible text-[15px]'> Product name </span>
                             </div>
-                            <span className='text-[15px]'>{product.name}</span>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4 text-[15px]">{product.stock}</td>
-                        <td className="py-3 px-4 text-[15px]">{product.threshold}</td>
-                        <td className="py-3 px-4 w-48">
-                          <div className="flex items-center">
-                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mr-2">
-                              <div
-                                className="h-2.5 rounded-full"
-                                style={{
-                                  width: `${getStockPercentage(product.stock, product.threshold)}%`,
-                                  backgroundColor: getStockColor(product.stock, product.threshold),
-                                }}
-                              ></div>
+                          </td>
+                          <td className="invisible py-3 px-4 text-[15px]"> Product stock </td>
+                          <td className="py-3 px-4 w-48">
+                            <div className="flex items-center">
+                              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mr-2">
+                                <div className="h-2.5 rounded-full"></div>
+                              </div>
+                              <span className="invisible text-xs font-medium" >
+                                Product stock %
+                              </span>
                             </div>
-                            <span
-                              className="text-xs font-medium"
-                              style={{ color: getStockColor(product.stock, product.threshold) }}
-                            >
-                              {getStockPercentage(product.stock, product.threshold).toFixed(0)}%
-                            </span>
-                          </div>
-                        </td>
-                        <td className="py-3 px-4">
-                          <button className="text-sm text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 font-medium">
-                            Restock
-                          </button>
-                        </td>
-                      </motion.tr>
-                    ))}
+                          </td>
+                          <td className="py-3 px-4">
+                            <button className="invisible text-sm font-medium">
+                              Restock
+                            </button>
+                          </td>
+                        </motion.tr>
+                      ))
+                      : null
+                    }
                   </tbody>
                 </table>
               </div>
             </motion.div>
 
-            {/* Stock Distribution by Category */}
             <motion.div {...fadeInUp} className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border">
-              <h3 className="text-[17px] font-semibold mb-6">Stock Distribution by Category</h3>
+              <h3 className="text-[17px] font-semibold mb-6"> Stock Distribution by Category </h3>
               <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
+                {
+                  categoryStockDatas && categoryStockDatas.length > 0 ?
+                  <ResponsiveContainer width="100%" height="100%">
                   <BarChart
-                    data={stockDistributionData}
+                    data={categoryStockDatas}
                     margin={{
                       top: 20,
                       right: 30,
@@ -342,6 +330,8 @@ export default function InventoryInsightsSection() {
                     <Bar dataKey="outOfStock" name="Out of Stock" stackId="a" fill="#ef4444" />
                   </BarChart>
                 </ResponsiveContainer>
+                : <div className="w-full h-full skeleton-loader"/>
+                }
               </div>
             </motion.div>
 

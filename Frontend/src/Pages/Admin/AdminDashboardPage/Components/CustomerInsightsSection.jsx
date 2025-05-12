@@ -2,32 +2,12 @@ import React, {useContext, useState, useEffect} from 'react'
 import './componentsStyle.css'
 import { motion, AnimatePresence } from "framer-motion"
 
-import {
-  PieChart,
-  Pie,
-  Cell,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts"
+import {PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from "recharts"
 import { Users, UserPlus, UserCheck, Award, ChevronDown, ChevronUp } from "lucide-react"
 import axios from 'axios'
 
 import {BusinessAnalyticsContext} from '.././AdminDashboardPage'
 import { useTogglerEnabled } from "../../../../Hooks/ToggleEnabler"
-
-const vipCustomersData = [
-  { name: "John D.", orders: 24, spent: 4850 },
-  { name: "Sarah M.", orders: 18, spent: 3720 },
-  { name: "Robert K.", orders: 15, spent: 3150 },
-  { name: "Emily L.", orders: 12, spent: 2640 },
-  { name: "Michael P.", orders: 10, spent: 2100 },
-]
 
 
 
@@ -344,8 +324,7 @@ export default function CustomerInsightsSection() {
                       </td>
                     </motion.tr>
                     ))
-                    : ( !loading.vipCustomersDatas && vipCustomersDatas.length === 0 )
-                      || Object.values(vipCustomersDatas).every(value=> value === 0) ?
+                    : !loading.vipCustomersDatas && vipCustomersDatas.length === 0 ?
                     <tr> 
                       <td colSpan={4} className='w-full h-[5rem] text-[15px] text-muted text-center font-medium tracking-[0.3px]'
                         style={{wordSpacing: '1px'}}>

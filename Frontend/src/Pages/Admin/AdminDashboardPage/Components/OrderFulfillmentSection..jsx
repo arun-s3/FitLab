@@ -2,21 +2,8 @@ import React, {useState, useEffect, useContext} from 'react'
 import './componentsStyle.css'
 import { motion, AnimatePresence } from "framer-motion"
 
-import {
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts"
+import {BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip,
+  Legend, ResponsiveContainer} from "recharts"
 import { Package, Clock, CheckCircle, ChevronDown, ChevronUp } from "lucide-react"
 import axios from 'axios'
 

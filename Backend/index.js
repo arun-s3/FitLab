@@ -53,8 +53,7 @@ const adminRoutes = require('./Routes/adminRoutes.js')
 const adminProductRoutes = require('./Routes/adminProductRoutes.js')
 const adminCategoryRoutes = require('./Routes/adminCategoryRoutes.js')
 const adminDashboardRoutes = require('./Routes/dashboardRoutes.js')
-
-
+const adminCustomerGeographyRoutes = require('./Routes/adminCustomerGeographyRoute.js')
 
 
 app.use('/', userRoutes)
@@ -73,6 +72,7 @@ app.use('/admin', adminRoutes)
 app.use('/admin/products', adminProductRoutes)
 app.use('/admin/products/category', adminCategoryRoutes)
 app.use('/admin/dashboard', adminDashboardRoutes)
+app.use('/admin/locations', adminCustomerGeographyRoutes)
 // app.use('/product', productRoutes)
 
 app.use( (error ,req ,res, next)=> {

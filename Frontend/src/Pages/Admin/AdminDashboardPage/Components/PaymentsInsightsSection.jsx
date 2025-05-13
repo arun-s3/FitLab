@@ -15,11 +15,18 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts"
-import { CreditCard, RefreshCcw, IndianRupee, ArrowDown, ChevronUp, ChevronDown } from "lucide-react"
+import { CreditCard, RefreshCcw, IndianRupee, ArrowDown, ChevronUp, ChevronDown, ArrowUp } from "lucide-react"
 import axios from 'axios'
 
 import {OperationsAnalyticsContext} from '.././AdminDashboardPage'
 import { useTogglerEnabled } from "../../../../Hooks/ToggleEnabler"
+
+import { ComposableMap, Geographies, Geography } from "react-simple-maps"
+import { scaleLinear } from "d3-scale"
+
+const INDIA_TOPO_JSON =
+  "https://raw.githubusercontent.com/markmarkoh/datamaps/master/src/js/data/ind.topo.json";
+
 
 
 export default function PaymentsInsightsSection() {
@@ -31,6 +38,19 @@ export default function PaymentsInsightsSection() {
   const [paymentStats, setPaymentStats] = useState([])
   const [paymentMethodsDatas, setPaymentMethodsDatas] = useState([])
   const [refundRequestDatas, setRefundRequestDatas] = useState([])
+
+  const [locationDatas, setLocationDatas] = useState([])
+
+  const colorScale = scaleLinear()
+    .domain([0, Math.max(...locationDatas.map((s) => s.customerCount)) || 1])
+    .range(["#d4f0ff", "#084081"])
+
+  const getCustomerCount = (stateName)=> {
+    const match = locationDatas.find(
+      (item) => item.state.toLowerCase() === stateName.toLowerCase()
+    )
+    return match?.customerCount || 0
+  }
   
 
   const fadeInUp = {
@@ -53,10 +73,15 @@ export default function PaymentsInsightsSection() {
             if (paymentStatsResponse.status === 'fulfilled'){
               const response = paymentStatsResponse.value
               console.log("paymentStatsResponse totalWalletPayments----->", response.data.totalWalletPayments)
+              console.log("response.data.refundChangePercent----->", response.data.refundChangePercent)
 
-              const changeValue = response.data.refundChangePercent && response.data.refundChangePercent !== 'N/A' ? 
-                                        (response.data.refundChangePercent > 0  ? "+" : "-") + " " + response.data.refundChangePercent + '%'
-                                          : 'N/A'
+              const changePercent = parseInt(response.data.refundChangePercent)
+
+              const changeValue = (changePercent !== 0 && changePercent !== 'N/A') ? 
+                                        (changePercent > 0  ? "+" : "-") + " " + changePercent + '%'
+                                          : '0 %'
+              console.log("changeValue----->", changeValue)
+              
 
               newStats.push({
                 name: "totalWalletPayments",
@@ -71,8 +96,8 @@ export default function PaymentsInsightsSection() {
                 value: '₹' + ' ' + response.data.totalRefund,
                 change: changeValue,
                 icon: RefreshCcw,
-                trend: response.data.refundChangePercent > 0 || response.data.refundChangePercent === 'N/A' ? 'up' : 'down',
-                color: response.data.refundChangePercent > 0 || response.data.refundChangePercent === 'N/A' 
+                trend: changePercent >= 0 || changePercent === 'N/A' ? 'up' : 'down',
+                color: changePercent >= 0 || changePercent === 'N/A' 
                           ? "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400"
                           : "bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400"
               },
@@ -108,8 +133,10 @@ export default function PaymentsInsightsSection() {
             else{
               console.log("Error in refundRequestRes response:", refundRequestRes.reason.message)
             }
+
+            await axios.get("http://localhost:3000/admin/dashboard/payments/customers-by-state").then((res) => setLocationDatas(res.data)).catch((err) => console.error(err));
           }
-        
+          
           fetchAllStats();
   }, [])
   
@@ -167,8 +194,13 @@ export default function PaymentsInsightsSection() {
                       {stat.change && (
                         <div className="flex items-center mt-1">
                           <span className="flex items-center text-sm text-green-500">
-                            <ArrowDown size={14} className="text-red-500" />
-                            <span className="text-[12px] text-red-500">{stat.change}</span>
+                            {
+                              parseInt(stat.change) >= 0 ? <ArrowUp size={14} className="text-green-500" /> 
+                                : <ArrowDown size={14} className="text-red-500" />
+                            }
+                            <span className={`text-[12px] ${parseInt(stat.change) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                              {stat.change}
+                            </span>
                           </span>
                           <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">vs yesterday</span>
                         </div>
@@ -314,6 +346,7 @@ export default function PaymentsInsightsSection() {
 
           </motion.div>
         }
+
       </AnimatePresence>
 
     </motion.section>

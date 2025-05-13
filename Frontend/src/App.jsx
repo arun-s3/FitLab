@@ -36,6 +36,7 @@ import AdminProductListPage from './Pages/Admin/AdminProductListPage/AdminProduc
 import AdminAddAndEditCategoryPage from './Pages/Admin/AdminAddAndEditCategoryPage/AdminAddAndEditCategoryPage'
 import AdminCategoryListPage from './Pages/Admin/AdminCategoryListPage/AdminCategoryListPage'
 import AdminDashboardPage from './Pages/Admin/AdminDashboardPage/AdminDashboardPage'
+import AdminDashboardHeatmapPage from './Pages/Admin/AdminCustomerHeatmapPage/AdminDashboardHeatmapPage.jsx'
 import AdminOrderHistory from './Pages/Admin/AdminOrderHistroyPage/AdminOrderHistroyPage'
 import AdminCouponManagementPage from './Pages/Admin/AdminCouponManagementPage/AdminCouponManagementPage'
 import AdminOfferManagementPage from './Pages/Admin/AdminOfferManagementPage/AdminOfferManagementPage'
@@ -108,10 +109,11 @@ export default function App(){
                     <Route path="signin" element={<AdminSignInPage/>}/>
                     <Route element={<PrivateAdminRoutes/>}>
                         <Route path='image-editor' element={<ImageEditor/>} />
-                        <Route element={<AdminPageLayout/>}>
+                        <Route element={<AdminPageLayout/>}>AdminDashboardHeatmapPage
                             <Route path='dashboard'>
                                 <Route path="business" element={<AdminDashboardPage insightType='business'/>} />
                                 <Route path="operations" element={<AdminDashboardPage insightType='operations'/>} />
+                                <Route path="heatmap" element={<AdminDashboardHeatmapPage/>} />
                             </Route>
                             <Route path="customers" element={<AdminCustomersPage/>} />
                             <Route path='products'>

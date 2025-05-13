@@ -21,6 +21,7 @@ import {IoIosArrowDropdown} from "react-icons/io";
 import {RiArrowDropDownLine} from "react-icons/ri";
 import {FaRegCaretSquareRight} from "react-icons/fa";
 import {CiSquareChevRight} from "react-icons/ci";
+import {MapPinned} from "lucide-react"
 
 
 export default function AdminPageLayout(){
@@ -46,7 +47,7 @@ export default function AdminPageLayout(){
     const [isDashboardOpen, setIsDashboardOpen] = useState(false)
 
     const [showSublist, setShowSublist] = useState({
-        dashboard:false, customers:false, product: false, category: false, couponManager:false, orders:false, salesReport:false,
+        dashboard:false, customerHeatmap:false, customers:false, product: false, category: false, couponManager:false, orders:false,
         offers:false, banners:false, settings:false
     })
 
@@ -133,8 +134,26 @@ export default function AdminPageLayout(){
                                                     </Link>
                                                </div> 
                                             </li>
-                                     </ul>
-                                     }
+                                            {/* <li>
+                                                <div className='flex items-center'>
+                                                    <Link to='/admin/dashboard/heatmap'  className='flex items-start'> 
+                                                        <CiSquareChevRight className='!mt-[-4px] !w-[28px] !h-[28px]'/>
+                                                        <span> Customer Heatmap </span> 
+                                                    </Link>
+                                               </div> 
+                                            </li> */}
+                                        </ul>
+                                    }
+                                </li>
+                                <li className={`${showSublist.dashboard && 'mt-[-6px]'}`} onClick={()=>toggleSublist('customerHeatmap')}> 
+                                    <div className={`${ showSublist.customerHeatmap && 'toggleSublist-custom-after'} option`}>
+                                        <Link to='/admin/dashboard/heatmap'> 
+                                            <MapPinned className='w-[13px] h-[13px]'/> 
+                                            <span className={`${ showSublist.customerHeatmap && 'text-primaryDark'} ml-[5px]`}> 
+                                                 Customers Heatmap 
+                                            </span> 
+                                        </Link> 
+                                    </div> 
                                 </li>
                                 <li className={`${showSublist.dashboard && 'mt-[-6px]'}`} onClick={()=>toggleSublist('customers')}> 
                                     <div className={`${ showSublist.customers && 'toggleSublist-custom-after'} option`}>
@@ -224,14 +243,14 @@ export default function AdminPageLayout(){
                                         </Link> 
                                     </div>
                                  </li>
-                                <li className={`${showSublist.dashboard && 'mt-[-6px]'}`} onClick={()=>toggleSublist('salesReport')}>
+                                {/* <li className={`${showSublist.dashboard && 'mt-[-6px]'}`} onClick={()=>toggleSublist('salesReport')}>
                                      <div className={`${ showSublist.salesReport && 'toggleSublist-custom-after'} option`}>
                                         <Link>
                                             <FaChartLine/> 
                                             <span className={`${ showSublist.salesReport && 'text-primaryDark'} option`}> Sales Report </span> 
                                         </Link> 
                                     </div> 
-                                </li>
+                                </li> */}
                                 <li className={`${showSublist.dashboard && 'mt-[-6px]'}`} onClick={()=> toggleSublist('offers')}> 
                                     <div className={`${ showSublist.offers && 'toggleSublist-custom-after'} flex items-center 
                                         justify-between gap-[1.5rem] pr-[1.5rem] option list-dropdown`}>

@@ -4,15 +4,21 @@ const {isLogin, isLogout, authorizeAdmin} = require('../Middlewares/Authenticati
 
 const {getAnnualRevenueStats, getMonthlyRevenue, getWeeklyRevenue, getAverageOrderTotal,
      getTotalOrdersCount, getHourlySalesOfDay, getRevenueByMainCategory} = require('../Controllers/dashboardControllers/salesInsightsController')
+
 const {getOrdersStats, getMonthlyOrderStats, getTopFiveProductsByOrders, getOrderStatusDistribution,
 } = require('../Controllers/dashboardControllers/ordersInsightsController')
+
 const {getUserMetrics, getUserTypePercentages, getMonthlyCustomersGrowth, getTopVIPCustomers
 } = require('../Controllers/dashboardControllers/customersInsightsController')
+
 const {getProductStockInsights, getLowStockProducts, getCategoryStockDatas} = require('../Controllers/dashboardControllers/inventoryInsightsController')
+
 const {getCouponRevenueStats, getCouponStats, getCouponRedemptionDetails, getDiscountImpactDatas}
       = require('../Controllers/dashboardControllers/couponInsightsController')
+
 const {getOfferRevenueStats, getOfferStats, getTopUsedOffers, getMonthlyOfferStats, getOffersCountByUserGroup} 
       = require('../Controllers/dashboardControllers/offerInsightsController')
+      
 const {getWalletAndRefundStats, getPaymentMethodStats, getMonthlyRefundRequests} = require('../Controllers/dashboardControllers/paymentInsightsController')
 
 
@@ -53,6 +59,7 @@ dashboardRouter.get('/offers/userGroup', isLogin, authorizeAdmin, getOffersCount
 dashboardRouter.get('/payments/stats', isLogin, authorizeAdmin, getWalletAndRefundStats) 
 dashboardRouter.get('/payments/methods', isLogin, authorizeAdmin, getPaymentMethodStats) 
 dashboardRouter.get('/payments/refunds', isLogin, authorizeAdmin, getMonthlyRefundRequests) 
+
 
 
 module.exports = dashboardRouter

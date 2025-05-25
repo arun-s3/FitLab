@@ -19,6 +19,7 @@ import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
 import Footer from '../../../Components/Footer/Footer'
 import CartSidebar from '../../../Components/CartSidebar/CartSidebar'
 import Modal from '../../../Components/Modal/Modal'
+import TextChatBox from '../TextChatBox/TextChatBox'
 import CancelForm from '../../../Components/CancelForm/CancelForm'
 import {CustomPuffLoader} from '../../../Components/Loader//Loader'
 import {DateSelector} from '../../../Components/Calender/Calender'
@@ -646,6 +647,7 @@ export default function OrderHistoryPage(){
                       </div>
                     </div>
                   )}
+                  <TextChatBox />
                 </div>
               </div>
             </div>

@@ -162,10 +162,11 @@ const colorRanges = generateColorBuckets();
 
           <div className="flex flex-col lg:flex-row gap-8">
 
-            <div className="relative w-full lg:w-3/4 h-[600px] border border-gray-300 rounded-[5px] shadow bg-white">
+            <div className="relative w-full lg:w-3/4 h-[600px] border border-gray-300 rounded-[5px] shadow
+             bg-white cursor-grab">
               <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
                 <button
-                  onClick={() => setZoom((z) => Math.min(z + 0.5, 5))}
+                  onClick={() => setZoom((z) => Math.min(z + 0.5, 10))}
                   className="bg-primaryDark hover:bg-orange-400 text-white rounded px-2 py-1 shadow"
                 >
                   <Plus className='h-[15px] w-[15px]'/>

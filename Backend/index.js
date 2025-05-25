@@ -48,6 +48,7 @@ const cartRoutes = require('./Routes/cartRoutes.js')
 const orderRoutes = require('./Routes/orderRoutes.js')
 const paymentRoutes = require('./Routes/paymentRoutes.js')
 const walletRoutes = require('./Routes/walletRoutes.js')
+const textChatBoxRoutes = require('./Routes/textChatBoxRoutes.js')
 
 const adminRoutes = require('./Routes/adminRoutes.js')
 const adminProductRoutes = require('./Routes/adminProductRoutes.js')
@@ -66,6 +67,8 @@ app.use('/cart', cartRoutes)
 app.use('/order', orderRoutes)
 app.use('/payment', paymentRoutes)
 app.use('/wallet', walletRoutes)
+app.use('/chat', textChatBoxRoutes)
+
 
 
 app.use('/admin', adminRoutes)

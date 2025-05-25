@@ -1,6 +1,6 @@
-const User = require('../../Models/userModel')
-const Address = require('../../Models/addressModel')
-const Order = require('../../Models/orderModel')
+const User = require('../Models/userModel')
+const Address = require('../Models/addressModel')
+const Order = require('../Models/orderModel')
 
 
 

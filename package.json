@@ -27,6 +27,7 @@
     "node-fetch": "^3.3.2",
     "nodemailer": "^6.9.16",
     "razorpay": "^2.9.6",
+    "socket.io": "^4.8.1",
     "stripe": "^18.0.0",
     "uuid": "^11.1.0"
   },

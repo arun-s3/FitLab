@@ -1,6 +1,9 @@
 const express = require('express')
 const app = express()
 
+const http = require('http')
+const server = http.createServer(app)
+
 const dotenv = require('dotenv')
 dotenv.config()
 
@@ -56,6 +59,9 @@ const adminCategoryRoutes = require('./Routes/adminCategoryRoutes.js')
 const adminDashboardRoutes = require('./Routes/dashboardRoutes.js')
 const adminCustomerGeographyRoutes = require('./Routes/adminCustomerGeographyRoute.js')
 
+const textChatBoxSocket = require('./Sockets/textChatSocketHandler.js')
+textChatBoxSocket(server)
+
 
 app.use('/', userRoutes)
 app.use('/products', userProductRoutes)
@@ -86,4 +92,4 @@ app.use( (error ,req ,res, next)=> {
 })
 
 const port = process.env.PORT||3000
-app.listen(port, ()=>{ console.log(`Listening to port ${port}...`)})
+server.listen(port, ()=>{ console.log(`Listening to port ${port}...`)})

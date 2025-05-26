@@ -21,7 +21,7 @@ import {IoIosArrowDropdown} from "react-icons/io";
 import {RiArrowDropDownLine} from "react-icons/ri";
 import {FaRegCaretSquareRight} from "react-icons/fa";
 import {CiSquareChevRight} from "react-icons/ci";
-import {MapPinned} from "lucide-react"
+import {MapPinned, Headset} from "lucide-react"
 
 
 export default function AdminPageLayout(){
@@ -48,7 +48,7 @@ export default function AdminPageLayout(){
 
     const [showSublist, setShowSublist] = useState({
         dashboard:false, customerHeatmap:false, customers:false, product: false, category: false, couponManager:false, orders:false,
-        offers:false, banners:false, settings:false
+        offers:false, banners:false, support:false, settings:false
     })
 
     const toggleSublist = (type) => {
@@ -291,6 +291,40 @@ export default function AdminPageLayout(){
                                         </Link> 
                                     </div>
                                  </li>
+                                 <li className={`${showSublist.dashboard && 'mt-[-6px]'}`} onClick={()=>toggleSublist('support')}> 
+                                    <div className={`${ showSublist.support && 'toggleSublist-custom-after'} flex items-center 
+                                        justify-between gap-[1.5rem] pr-[1.5rem] option list-dropdown`}>
+                                        <span className='flex justify-center items-center gap-[5px] cursor-pointer list-name'>
+                                            <Headset className='w-[13px] h-[13px]'/> 
+                                            <span className={`${ showSublist.support && 'text-primaryDark'}`}> 
+                                                Support
+                                            </span> 
+                                        </span>
+                                        <RiArrowDropDownLine/>
+                                     </div> 
+                                     {
+                                        showSublist.support &&
+                                        <ul className='pt-[1rem] pl-[1rem] list-none flex flex-col gap-[10px] justify-center items-start
+                                             text-white text-[12.5px] sublist'>
+                                            <li>
+                                               <div> 
+                                                    <Link to='/admin/support/text' className='flex items-center'> 
+                                                        <CiSquareChevRight/> 
+                                                        <span> Text Chat </span> 
+                                                    </Link>
+                                               </div> 
+                                            </li>
+                                            <li>
+                                               <div>
+                                                    <Link to='/admin/support/video' className='flex items-center'> 
+                                                        <CiSquareChevRight/>
+                                                        <span> Video Chat </span> 
+                                                    </Link>
+                                               </div> 
+                                            </li>
+                                     </ul>
+                                     }
+                                </li>
                                 <div className={`bg-[#5c5858] w-[85%] h-[1.3px] 
                                     ${showSublist.dashboard ? 'mt-[2px]' : 'mt-[5px]'}`}></div>
                                 {/* <ul className='list-none flex flex-col gap-[1rem] justify-center items-start

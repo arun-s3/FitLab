@@ -616,7 +616,7 @@ export default function OrderHistoryPage(){
                 </div>
                 
                 <div className="fixed bottom-[2rem] right-[2rem] z-50">
-                  {!showChat ? (
+                  {/* {!showChat ? (
                     <button className="bg-white shadow-lg rounded-2xl p-[1rem] flex items-center gap-[12px] hover:shadow-xl 
                         transition-all duration-200 transform hover:-translate-y-px" onClick={()=> setShowChat(true)}>
                       <div className="w-[2.5rem] h-[2.5rem] flex items-center justify-center bg-gradient-to-r
@@ -646,7 +646,7 @@ export default function OrderHistoryPage(){
                         </button>
                       </div>
                     </div>
-                  )}
+                  )} */}
                   <TextChatBox />
                 </div>
               </div>

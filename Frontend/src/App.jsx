@@ -41,6 +41,7 @@ import AdminOrderHistory from './Pages/Admin/AdminOrderHistroyPage/AdminOrderHis
 import AdminCouponManagementPage from './Pages/Admin/AdminCouponManagementPage/AdminCouponManagementPage'
 import AdminOfferManagementPage from './Pages/Admin/AdminOfferManagementPage/AdminOfferManagementPage'
 import AdminCreateOfferPage from './Pages/Admin/AdminCreateOfferPage/AdminCreateOfferPage'
+import AdminTextChatSupportPage from './Pages/Admin/AdminTextChatSupportPage/AdminTextChatSupportPage'
 
 
 import {ToastContainer} from 'react-toastify'
@@ -109,7 +110,7 @@ export default function App(){
                     <Route path="signin" element={<AdminSignInPage/>}/>
                     <Route element={<PrivateAdminRoutes/>}>
                         <Route path='image-editor' element={<ImageEditor/>} />
-                        <Route element={<AdminPageLayout/>}>AdminDashboardHeatmapPage
+                        <Route element={<AdminPageLayout/>}>
                             <Route path='dashboard'>
                                 <Route path="business" element={<AdminDashboardPage insightType='business'/>} />
                                 <Route path="operations" element={<AdminDashboardPage insightType='operations'/>} />
@@ -131,6 +132,9 @@ export default function App(){
                             <Route path='offers'>
                                 <Route index element={<AdminOfferManagementPage/>} />
                                 <Route path='add' element={<AdminCreateOfferPage/>} />
+                            </Route>
+                            <Route path='support'>
+                                <Route path='text' element={<AdminTextChatSupportPage/>} />
                             </Route>
                         </Route>
                     </Route>

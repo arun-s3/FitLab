@@ -4,6 +4,9 @@ const nodemailer = require("nodemailer");
 // const crypto = require("crypto");
 const {errorHandler} = require('../Utils/errorHandler')
 const {generateToken, verifyToken} = require('../Utils/jwt')
+const {encryptData} = require('../Controllers/controllerUtils/encryption')
+
+
 
 const tester = async(req,res)=>{res.send("UserTest-- Success")}
 
@@ -348,6 +351,55 @@ const googleSignin = async(req,res,next)=>{
     }
 }
 
+const getUserId = async(req, res, next)=> {
+    try{
+        console.log("Inside getUserId..")
+        const userId = req.user._id
+        const userDoc = await User.findOne({_id: userId}, {username: 1})
+        console.log("username--->", userDoc.username)
+
+        const encryptedUserId = encryptData(userId)
+        return res.status(200).json({encryptedUserId, username: userDoc.username})
+    }
+    catch(error){
+        console.log("Inside catch of getUserId from userController")
+        next(error)
+    }
+}
+
+const searchUsernames = async(req, res, next)=> {
+    try{
+        console.log("Inside searchUsernames..")
+        const searchTerm = req.params.searchTerm
+        const usernameDocs = await User.find({username: { $regex: `^${searchTerm}`, $options: "i" }}).select('username -_id')
+        const usernames = usernameDocs.map(doc=> doc.username)
+        console.log("usernames--->", usernames)
+
+        return res.status(200).json({usernames})
+    }
+    catch(error){
+        console.log("Inside catch of searchUsernames from userController")
+        next(error)
+    }
+}
+
+
+const totalUsersCount = async(req, res, next)=> {
+    try{
+        console.log("Inside totalUsersCount..")
+        
+        const totalUsers = await User.countDocuments({isBlocked: false, isAdmin: false})
+        console.log("totalUsers--->", totalUsers)
+
+        return res.status(200).json({totalUsers})
+    }
+    catch(error){
+        console.log("Inside catch of totalUsersCount from userController")
+        next(error)
+    }
+}
+
+
 const signout = (req,res,next)=>{
     console.log("JWT Cookie from signout controller-->"+req.cookies.jwt)
     try{
@@ -362,4 +414,4 @@ const signout = (req,res,next)=>{
 
 
 module.exports = {tester, createUser, sendOtp, verifyOtp, loginUser, updateUserDetails, updateForgotPassword, resetPassword,
-     googleSignin, signout}
+     googleSignin, getUserId, searchUsernames, totalUsersCount, signout}

@@ -16,7 +16,7 @@ import AutoRechargeFeature from "./AutoRechargeFeature"
 import AutoRechargeModal from "./AutoRechargeModal"
 import WalletUtilitySection from "./WalletUtilitySection"
 import {UserPageLayoutContext} from '../UserPageLayout/UserPageLayout'
-import {decryptWalletData} from '../../../Utils/decryption'
+import {decryptData} from '../../../Utils/decryption'
 import {getOrCreateWallet, resetWalletStates} from '../../../Slices/walletSlice'
 
 
@@ -84,7 +84,7 @@ export default function WalletPage() {
       if(safeWallet && Object.keys(safeWallet).length > 0){
         console.log("Got safeWallet--->", safeWallet)
         setWallet(safeWallet)
-        const decryptedWallet = decryptWalletData(safeWallet)
+        const decryptedWallet = decryptData(safeWallet)
         console.log("decryptedWallet--->", decryptedWallet)
         const hiddenAcNo = "FTL **** ****" + " " + decryptedWallet?.accountNumber?.slice(11)
         setHiddenAccountNo(hiddenAcNo)
@@ -319,7 +319,7 @@ export default function WalletPage() {
                       <span className="ml-[5px] font-bold text-secondary">
                         {
                           firstTimeUser && message && message.toLowerCase().includes('welcome to fitlab wallet') &&
-                          decryptWalletData(safeWallet)?.accountNumber
+                          decryptData(safeWallet)?.accountNumber
                         }
                       </span>
                       </p>
@@ -327,12 +327,12 @@ export default function WalletPage() {
                         <div className="mb-1 text-sm opacity-80">Total Balance</div>
                         {/* <img src="/Logo_main.png" alt="Fitlab" className="absolute bottom-[5px] right-0 h-[2rem]"/> */}
                         <img src="/Logo_main_light1.png" alt="Fitlab" className="absolute bottom-[-18px] right-0 h-[4rem]"/>
-                        <div className="text-4xl font-bold mb-2"> ₹ {safeWallet && decryptWalletData(safeWallet)?.balance} </div>
+                        <div className="text-4xl font-bold mb-2"> ₹ {safeWallet && decryptData(safeWallet)?.balance} </div>
                         <div className="flex items-center gap-[10px]">
                           <pre className="text-sm opacity-80">
                             {
                               safeWallet && showAcNumber ? 
-                              formatAccountNumber( decryptWalletData(safeWallet)?.accountNumber ) : hiddenAccountNo
+                              formatAccountNumber( decryptData(safeWallet)?.accountNumber ) : hiddenAccountNo
                             } 
                           </pre>
                           {
@@ -416,7 +416,7 @@ export default function WalletPage() {
 
                         <MoneyTransferModal isTransferModalOpen={isTransferModalOpen} setIsTransferModalOpen={setIsTransferModalOpen}  
                           selectedPeerAccount={selectedPeerAccount} setSelectedPeerAccount={setSelectedPeerAccount} isRequester={isRequester} 
-                              walletBalance={safeWallet && decryptWalletData(safeWallet)?.balance} requestMoney={requestMoney}
+                              walletBalance={safeWallet && decryptData(safeWallet)?.balance} requestMoney={requestMoney}
                                 complexModal={complexModal}/>
 
                       }
@@ -470,7 +470,7 @@ export default function WalletPage() {
     
                 { 
                   safeWallet &&
-                  <TransactionDetailsSection transactions={safeWallet && decryptWalletData(safeWallet)?.transactions}
+                  <TransactionDetailsSection transactions={safeWallet && decryptData(safeWallet)?.transactions}
                     queryOptions={queryOptions} setQueryOptions={setQueryOptions}/>
                 }
 

@@ -1,6 +1,9 @@
 const Server = require("socket.io").Server
 
 
+const activeUsers = new Map() 
+const adminSessions = new Set() 
+
 let io
 
 async function textChatBoxSocket(server) {
@@ -13,8 +16,36 @@ async function textChatBoxSocket(server) {
       },
     })
 
-    io.on("connection", (socket) => {
-      console.log("User connected:", socket.id)
+      io.on("connection", (socket) => {
+      // console.log("User connected:", socket.id)
+
+      socket.on("admin-login", (adminData) => {
+        adminSessions.add(socket.id)
+        socket.join("admin-room")
+
+        socket.emit("active-users-update", Array.from(activeUsers.values()))
+        console.log("Admin connected:", socket.id)
+      })
+
+      socket.on("user-login", (userData) => {
+        console.log("activeUsers--->", activeUsers)
+        const joinedUserDatas = Object.values(Object.fromEntries(activeUsers))
+        console.log("joinedUserDatas--->", joinedUserDatas)
+        const usernameJoined = joinedUserDatas.some(data=> data.username === userData.username)
+        console.log("usernameJoined--->", usernameJoined)
+
+        if(!usernameJoined){
+          activeUsers.set(socket.id, {
+            socketId: socket.id,
+            userId: userData.userId,
+            username: userData.username,
+            joinedAt: new Date().toISOString(),
+            lastSeen: new Date().toISOString(),
+            isOnline: true,
+          })
+        }
+        io.to("admin-room").emit("active-users-update", Array.from(activeUsers.values()))
+      })
 
       socket.on("join-room", (roomId) => {
         socket.join(roomId)
@@ -22,16 +53,61 @@ async function textChatBoxSocket(server) {
       })
 
       socket.on("send-message", (data) => {
-        io.to(data.roomId).emit("receive-message", {
+        if (activeUsers.has(socket.id)) {
+          const user = activeUsers.get(socket.id)
+          user.lastSeen = new Date().toISOString()
+          activeUsers.set(socket.id, user)
+        }
+
+        const messageData = {
           id: Date.now(),
           message: data.message,
           sender: data.sender,
           timestamp: new Date().toISOString(),
           isAdmin: data.isAdmin || false,
-        })
+          roomId: data.roomId,
+          socketId: socket.id,
+        }
+
+        io.to(data.roomId).emit("receive-message", messageData)
+
+        io.to("admin-room").emit("new-message-notification", messageData)
+      })
+
+      socket.on("admin-send-message", (data) => {
+        console.log("admin sent message---->", data)
+        const messageData = {
+          id: Date.now(),
+          message: data.message,
+          sender: data.sender,
+          timestamp: new Date().toISOString(),
+          isAdmin: true,
+          roomId: data.roomId,
+          targetSocketId: data.targetSocketId,
+          targetRoomId: data.targetRoomId
+        }
+
+        io.to(data.roomId).emit("receive-message", messageData)
+
+        io.to("admin-room").emit("admin-message-sent", messageData)
       })
 
       socket.on("typing", (data) => {
+        // socket.to(data.roomId).emit("user-typing", {
+        //   userId: data.roomId,
+        //   isTyping: data.isTyping,
+        //   sender: data.sender,
+        // })
+
+        io.to(data.roomId).emit("user-typing-admin", {
+          userId: data.roomId,
+          isTyping: data.isTyping,
+          sender: data.sender,
+          roomId: data.roomId,
+        })
+      })
+
+      socket.on("admin-typing", (data) => {
         socket.to(data.roomId).emit("user-typing", {
           userId: socket.id,
           isTyping: data.isTyping,
@@ -41,10 +117,24 @@ async function textChatBoxSocket(server) {
 
       socket.on("disconnect", () => {
         console.log("User disconnected:", socket.id)
+
+        adminSessions.delete(socket.id)
+
+        if (activeUsers.has(socket.id)) {
+          const user = activeUsers.get(socket.id)
+          user.isOnline = false
+          user.lastSeen = new Date().toISOString()
+          activeUsers.set(socket.id, user)
+
+          io.to("admin-room").emit("active-users-update", Array.from(activeUsers.values()))
+        }
       })
     })
+
   }
 }
+
+
 
 module.exports = textChatBoxSocket
 

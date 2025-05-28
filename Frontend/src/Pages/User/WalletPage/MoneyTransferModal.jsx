@@ -5,7 +5,7 @@ import { CreditCard, BanknoteArrowUp, HeartPlus, Plus, User, ArrowRight, AlertCi
 import {toast} from 'react-toastify'
 
 import {addPeerAccount, sendMoneyToUser, requestMoneyFromUser, resetWalletStates} from '../../../Slices/walletSlice'
-import {decryptWalletData} from '../../../Utils/decryption'
+import {decryptData} from '../../../Utils/decryption'
 
 
     
@@ -239,16 +239,16 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
                 { !selectedPeerAccount ? (
                   <div className="space-y-4">
                     {
-                    ((!isRequester && decryptWalletData(safeWallet)?.beneficiaryAccounts.length > 0) ||
-                      (isRequester && decryptWalletData(safeWallet)?.creditorAccounts.length > 0)) &&
+                    ((!isRequester && decryptData(safeWallet)?.beneficiaryAccounts.length > 0) ||
+                      (isRequester && decryptData(safeWallet)?.creditorAccounts.length > 0)) &&
                         <div className="space-y-2">
                             <label className="text-sm font-medium"> {!isRequester ? 'Select Recipient' : 'Select Creditor'} </label>
                             <div className="space-y-2">
                               { 
                                (function generateRecepientOrCreditor(){
 
-                                  const accountGroup = !isRequester ? decryptWalletData(safeWallet)?.beneficiaryAccounts
-                                      : decryptWalletData(safeWallet)?.creditorAccounts
+                                  const accountGroup = !isRequester ? decryptData(safeWallet)?.beneficiaryAccounts
+                                      : decryptData(safeWallet)?.creditorAccounts
                                   
                                   return (
                                     accountGroup.map((account)=> (
@@ -272,8 +272,8 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
                             </div>
                         </div>
                     }
-                    <div className={`relative ${!isRequester && decryptWalletData(safeWallet)?.beneficiaryAccounts.length <= 0 && 'hidden' }
-                         ${isRequester && decryptWalletData(safeWallet)?.creditorAccounts.length <= 0 && 'hidden' } `}>
+                    <div className={`relative ${!isRequester && decryptData(safeWallet)?.beneficiaryAccounts.length <= 0 && 'hidden' }
+                         ${isRequester && decryptData(safeWallet)?.creditorAccounts.length <= 0 && 'hidden' } `}>
                       <div className="absolute inset-0 flex items-center">
                         <span className="w-full border-t"></span>
                       </div>

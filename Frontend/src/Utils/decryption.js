@@ -2,7 +2,7 @@ import CryptoJS from 'crypto-js'
 
 const secretKey = import.meta.env.VITE_WALLET_SECRET_KEY
 
-export const decryptWalletData = ({encryptedData, iv})=> {
+export const decryptData = ({encryptedData, iv})=> {
   
     if (!encryptedData ||encryptedData.iv){
         return null

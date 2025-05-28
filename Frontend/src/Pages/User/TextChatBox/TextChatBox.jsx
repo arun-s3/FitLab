@@ -1,8 +1,11 @@
 import React, {useState, useEffect, useRef} from "react"
 import {motion, AnimatePresence} from "framer-motion"
-import {MessageSquare, X, Send, User, Headphones, Minimize2, Maximize2} from "lucide-react"
 import { io } from "socket.io-client"
 
+import {MessageCircle, MessageSquare, X, Send, User, Headphones, Minimize2, Maximize2} from "lucide-react"
+import axios from 'axios'
+
+import {decryptData} from '../../../Utils/decryption'
 
 
 export default function TextChatBox() {
@@ -25,17 +28,35 @@ export default function TextChatBox() {
   const [socket, setSocket] = useState(null)
   const [isConnected, setIsConnected] = useState(false)
   
-  const [userName] = useState(`User_${Math.random().toString(36).substr(2, 9)}`)
+  const [username, setUsername] = useState(null)
+
   const messagesEndRef = useRef(null)
   const typingTimeoutRef = useRef(null)
 
-  const roomId = "support-room" 
+  const [roomId, setRoomId] = useState(null) 
+
+  useEffect(()=> {
+    async function fetchUserId(){
+      const response = await axios.get('http://localhost:3000/getUserid', {withCredentials: true})
+      console.log("response from fetchUserId--->", response)
+      const decryptedUserId = decryptData(response.data.encryptedUserId)
+      setRoomId(decryptedUserId)
+      setUsername(response.data.username)
+    } 
+    fetchUserId()
+  }, [])
+
+  useEffect(()=> {
+    console.log("username--->", username)
+    console.log("roomId--->", roomId)
+  },[username, roomId])
 
   useEffect(() => {
     const socket = io("http://localhost:3000")
 
     socket.on("connect", () => {
       setIsConnected(true)
+      socket.emit("user-login", { userId: roomId, username })
       socket.emit("join-room", roomId)
     })
 
@@ -44,11 +65,12 @@ export default function TextChatBox() {
     })
 
     socket.on("receive-message", (message) => {
+      console.log('Message received from admin--->', message)
       setMessages((prev) => [...prev, message])
     })
 
     socket.on("user-typing", (data) => {
-      if (data.sender !== userName) {
+      if (data.sender !== username) {
         setIsTyping(data.isTyping)
       }
     })
@@ -58,7 +80,7 @@ export default function TextChatBox() {
     return () => {
       socket.disconnect()
     }
-  }, [userName])
+  }, [roomId])
 
   useEffect(() => {
     scrollToBottom()
@@ -75,14 +97,17 @@ export default function TextChatBox() {
     const messageData = {
       roomId,
       message: newMessage,
-      sender: userName,
+      sender: username,
       isAdmin: false,
     }
 
     socket.emit("send-message", messageData)
+    setMessages((prev) => [...prev, messageData])
+
     setNewMessage("")
 
-    socket.emit("typing", { roomId, isTyping: false, sender: userName })
+
+    socket.emit("typing", { roomId, isTyping: false, sender: username })
   }
 
   const handleTyping = (e) => {
@@ -90,14 +115,14 @@ export default function TextChatBox() {
 
     if (!socket) return
 
-    socket.emit("typing", { roomId, isTyping: true, sender: userName })
+    socket.emit("typing", { roomId, isTyping: true, sender: username })
 
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current)
     }
 
     typingTimeoutRef.current = setTimeout(() => {
-      socket.emit("typing", { roomId, isTyping: false, sender: userName })
+      socket.emit("typing", { roomId, isTyping: false, sender: username })
     }, 2000)
   }
 
@@ -198,7 +223,7 @@ export default function TextChatBox() {
                           <span className="text-xs opacity-75">{message.sender}</span>
                         </div>
                         <p className="text-sm">{message.message}</p>
-                        <p className="text-xs opacity-75 mt-1">{formatTime(message.timestamp)}</p>
+                        <p className="text-[10px] opacity-75 mt-1">{formatTime(message.timestamp)}</p>
                       </div>
                     </motion.div>
                   ))}

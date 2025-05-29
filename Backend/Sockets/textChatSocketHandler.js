@@ -1,7 +1,7 @@
 const Server = require("socket.io").Server
 
 
-const activeUsers = new Map() 
+const activeUsers = new Map()
 const adminSessions = new Set() 
 
 let io
@@ -31,9 +31,9 @@ async function textChatBoxSocket(server) {
         console.log("activeUsers--->", activeUsers)
         const joinedUserDatas = Object.values(Object.fromEntries(activeUsers))
         console.log("joinedUserDatas--->", joinedUserDatas)
-        const usernameJoined = joinedUserDatas.some(data=> data.username === userData.username)
+        const usernameJoined = joinedUserDatas.some(data=> (data.username === userData.username))
         console.log("usernameJoined--->", usernameJoined)
-
+        
         if(!usernameJoined){
           activeUsers.set(socket.id, {
             socketId: socket.id,
@@ -43,6 +43,28 @@ async function textChatBoxSocket(server) {
             lastSeen: new Date().toISOString(),
             isOnline: true,
           })
+        }else{
+          const usernameJoinedButOffline = joinedUserDatas.some(data=> (data.username === userData.username) && !data.isOnline)
+          if(usernameJoinedButOffline){
+            const activeButOfflineUser = joinedUserDatas.find(data=> (data.username === userData.username) && !data.isOnline)
+            activeUsers.delete(activeButOfflineUser.socketId)
+            console.log("Deleted old copy of user and put new one....")
+            const newUserData =  {
+              socketId: socket.id,
+              userId: userData.userId,
+              username: userData.username,
+              joinedAt: new Date().toISOString(),
+              lastSeen: new Date().toISOString(),
+              isOnline: true,
+            }
+            activeUsers.set(socket.id, newUserData)
+            io.to("admin-room").emit('reconnect-user', newUserData)
+            // activeButOfflineUser.isOnline = true
+            // activeButOfflineUser.lastSeen = new Date().toISOString()
+            // activeButOfflineUser.socketId = socket.id
+            // console.log("Updating the online status of the active offline user....")
+            // activeUsers.set(socket.id, activeButOfflineUser)
+          }
         }
         io.to("admin-room").emit("active-users-update", Array.from(activeUsers.values()))
       })
@@ -53,6 +75,7 @@ async function textChatBoxSocket(server) {
       })
 
       socket.on("send-message", (data) => {
+        console.log("Inside send-message..data-->", data)
         if (activeUsers.has(socket.id)) {
           const user = activeUsers.get(socket.id)
           user.lastSeen = new Date().toISOString()
@@ -99,6 +122,7 @@ async function textChatBoxSocket(server) {
         //   sender: data.sender,
         // })
 
+        console.log("Inside typing..data-->", data)
         io.to(data.roomId).emit("user-typing-admin", {
           userId: data.roomId,
           isTyping: data.isTyping,
@@ -115,6 +139,21 @@ async function textChatBoxSocket(server) {
         })
       })
 
+      socket.on("update-and-sort-activeUsers", (user)=> {
+        console.log("Inside update-and-sort-activeUsers")
+        const userData = activeUsers.get(user.socketId)
+        activeUsers.delete(user.socketId)
+        // const newActiveUsers = new Map()
+        // newActiveUsers.set(userSocketId, user)
+        reorderedActiveUsers = [[user.socketId, userData], ...activeUsers.entries()]
+        activeUsers.clear()
+        for(const [key, value] of reorderedActiveUsers){
+          activeUsers.set(key, value)
+        }
+        console.log("activeUsers--->", activeUsers)
+        io.to("admin-room").emit("updated-activeUsers", {user, users: Array.from(activeUsers.values())})
+      })
+
       socket.on("disconnect", () => {
         console.log("User disconnected:", socket.id)
 
@@ -124,8 +163,10 @@ async function textChatBoxSocket(server) {
           const user = activeUsers.get(socket.id)
           user.isOnline = false
           user.lastSeen = new Date().toISOString()
+          console.log('Disconnecting user--->', user)
           activeUsers.set(socket.id, user)
 
+          io.to("admin-room").emit("update-last-seen", user)
           io.to("admin-room").emit("active-users-update", Array.from(activeUsers.values()))
         }
       })

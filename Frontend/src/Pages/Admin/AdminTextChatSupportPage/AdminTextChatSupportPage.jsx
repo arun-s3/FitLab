@@ -7,6 +7,7 @@ import {Users, Send, Search, Clock, User, Headphones, Circle, MessageSquare, Set
 import axios from 'axios'
 
 import AdminHeader from '../../../Components/AdminHeader/AdminHeader'
+import useFlexiDropdown from '../../../Hooks/FlexiDropdown'
 
 
 export default function AdminTextChatSupportPage() {
@@ -32,6 +33,25 @@ export default function AdminTextChatSupportPage() {
 
   const [textOrReply, setTextOrReply] = useState('Text')
 
+  const [lastSeen, setLastSeen] = useState('')
+
+  const {openDropdowns, dropdownRefs, toggleDropdown} = useFlexiDropdown(['searchResultDropdown'])
+
+
+  const handleUserSelect = (user) => {
+    setSelectedUser(user)
+    setLastSeen(user.lastSeen)
+    setUnreadCounts((prev) => ({
+      ...prev,
+      [user.socketId]: 0,
+    }))
+
+    if (socket) {
+      socket.emit("join-room", user.userId)
+    }
+  }
+
+
   useEffect(() => {
     const socket = io("http://localhost:3000")
 
@@ -41,14 +61,21 @@ export default function AdminTextChatSupportPage() {
     })
 
     socket.on("disconnect", () => {
-      setIsConnected(false)
+      setIsConnected(false) 
     })
 
     socket.on("active-users-update", (users) => {
       setActiveUsers(users)
     })
 
+    socket.on("updated-activeUsers", (updater) => {
+      console.log("Inside updated-activeUsers")
+      setActiveUsers(updater.users)
+      handleUserSelect(updater.user)
+    })
+
     socket.on("receive-message", (message) => {
+      console.log("Message received from user--->", message)
       setMessages((prev) => ({
         ...prev,
         [message.socketId]: [...(prev[message.socketId] || []), message],
@@ -82,6 +109,20 @@ export default function AdminTextChatSupportPage() {
       }, 3000)
     })
 
+    socket.on('reconnect-user', (user)=> {
+      if(selectedUser.username === user.username){
+        handleUserSelect(user)
+      }
+    })
+
+    socket.on('update-last-seen', (user)=> {
+      console.log("Inside update-last-seen")
+      console.log("selectedUser--->", selectedUser)
+      if(selectedUser && selectedUser.username === user.username){
+        setLastSeen(user.lastSeen)
+      }
+    })
+
     setSocket(socket)
 
     return () => {
@@ -102,7 +143,7 @@ export default function AdminTextChatSupportPage() {
   useEffect(()=> {
     scrollToBottom()
 
-    if(selectedUser && messages[selectedUser.socketId].length > 0){
+    if(selectedUser && messages?.[selectedUser.socketId]?.length > 0){
       console.log("messages[messages.length - 1]---->", messages[selectedUser.socketId][messages.length - 1])
       const lastMsg = messages[selectedUser.socketId][messages[selectedUser.socketId].length - 1]
       const isLastMsgByAdmin = lastMsg.isAdmin
@@ -116,23 +157,15 @@ export default function AdminTextChatSupportPage() {
     console.log("typingUsers--->", typingUsers)
     if(selectedUser){
       console.log("selectedUser.userId--->", selectedUser.userId)
+      setLastSeen(selectedUser.lastSeen)
     }
-  },[typingUsers, selectedUser])
+    if(activeUsers){
+      console.log("activeUsers--->", activeUsers)
+    }
+  },[typingUsers, selectedUser, activeUsers])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
-
-  const handleUserSelect = (user) => {
-    setSelectedUser(user)
-    setUnreadCounts((prev) => ({
-      ...prev,
-      [user.socketId]: 0,
-    }))
-
-    if (socket) {
-      socket.emit("join-room", user.userId)
-    }
   }
 
   const handleSendMessage = (e) => {
@@ -187,11 +220,13 @@ export default function AdminTextChatSupportPage() {
   const fetchUsernameList = (searchTerm)=> {
     async function fetchUsernames(){
       const response = await axios.get(`http://localhost:3000/search/${searchTerm}`, {withCredentials: true})
-      console.log("searchResponse from fetchUserId--->", searchResponse)
+      console.log("response from fetchUserId--->", response)
       const usernames = response.data.usernames
       if(usernames.length > 0){
+        toggleDropdown('searchResultDropdown')
         setUsernameList({searched: true, list: usernames})
       }else{
+        toggleDropdown('searchResultDropdown')
         setUsernameList({searched: true, list: []})
       }    
     } 
@@ -216,6 +251,18 @@ export default function AdminTextChatSupportPage() {
     else{
       setUsernameList({searched: false})
     } 
+  }
+
+  const selectSearchedUser = (username)=> {
+    console.log("Insdie selectSearchedUser...")
+    const user = activeUsers.find(user=> user.username === username && user.isOnline)
+    if(user){
+      if(socket){
+        socket.emit("update-and-sort-activeUsers", user)
+      }
+    }else{
+      // sendOfflineMessage(username)
+    }
   }
 
   // const filteredUsers = activeUsers.filter((user) => user.username.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -270,26 +317,41 @@ export default function AdminTextChatSupportPage() {
               type="text"
               placeholder="Search users by usernames..."
               onChange={(e)=> searchUsernames(e)}
+              ref={dropdownRefs.searchResultDropdown}
               className="w-full h-8 pl-10 pr-4 py-2 bg-white text-secondary text-[13px] placeholder-secondaryLight2 
                 placeholder:text-[12px] rounded-lg border border-dropdownBorder focus:outline-none focus:ring-2 focus:ring-secondary"
             />
             {
-              usernameList && usernameList?.searched &&
+              usernameList && usernameList?.searched && openDropdowns.searchResultDropdown &&
               <motion.div className="absolute w-full py-[7px] px-[10px] bg-whitesmoke flex flex-col gap-[10px] border
                border-dropdownBorder rounded-[4px] z-10"
                 initial={{y: -50, opacity: 0, scale: 0.5}}
                 animate={{y: 0, opacity: 1, scale: 1}}
                 exit={{y: -50, opacity: 0, scale: 0.5}}>
-                { usernameList.list.length > 0 ?
+                { usernameList.list.length > 0 ? 
                   usernameList.list.map(username=> (
-                    <span className="w-full px-[5px] text-[12px] text-muted hover:bg-primaryDark hover:text-secondary 
-                      rounded-[4px] cursor-pointer" onClick={()=> setSearchTerm(username)}>
-                       {username} 
+                    <span className="w-full px-[5px] text-[12px] text-muted flex items-center gap-[5px] hover:bg-primaryDark
+                     hover:text-secondary rounded-[4px] cursor-pointer" onClick={()=> selectSearchedUser(username)}>
+                       {
+                        (
+                          ()=>{
+                            const isOnline = activeUsers.find(user=> user.username === username && user.isOnline)
+                            return(
+                              <motion.div
+                                className={`w-[5px] h-[5px] rounded-full ${isOnline ? "bg-green-500" : "bg-red-500 scale-110"}`}
+                                animate={isOnline && { scale: [1, 1.2], opacity: [0.5, 1]}}
+                                transition={isOnline && { duration: 1.5, repeat: Infinity, ease: "easeOut" }}
+                              />
+                            )
+                          }
+                        )()
+                       }
+                       <span> {username}  </span>
                     </span>
                   ))
                   : <p className="h-[2rem] flex justify-center items-center text-muted text-[14px] tracking-[0.3px]">
                      No such users found! 
-                  </p>
+                    </p>
                 }
               </motion.div>
             }
@@ -308,6 +370,7 @@ export default function AdminTextChatSupportPage() {
             </div>
           </div>
         </div>
+        
 
         <div className="flex-1 overflow-y-auto">
           <AnimatePresence>
@@ -338,13 +401,13 @@ export default function AdminTextChatSupportPage() {
                     <div className="flex-1 min-w-0">
                       <div className="font-medium text-gray-900 truncate">{user.username}</div>
                       <div className="text-xs text-gray-500 flex items-center">
-                        <Clock size={12} className="mr-1" />
+                        {!user.isOnline && <Clock size={12} className="mr-1" />}
                         {user.isOnline ? "Online" : formatLastSeen(user.lastSeen)}
                       </div>
                     </div>
                   </div>
                   <div className="flex flex-col items-end space-y-1">
-                    {unreadCounts[user.socketId] > 0 && (
+                    {unreadCounts[user.socketId] > 0 && selectedUser.socketId !== user.socketId && (
                       <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
@@ -397,7 +460,7 @@ export default function AdminTextChatSupportPage() {
                   <div>
                     <h2 className="font-semibold text-gray-900">{selectedUser.username}</h2>
                     <p className="text-sm text-gray-500">
-                      {selectedUser.isOnline ? "Online" : `Last seen ${formatLastSeen(selectedUser.lastSeen)}`}
+                      {selectedUser.isOnline ? "Online" : `Last seen ${formatLastSeen(lastSeen)}`}
                     </p>
                   </div>
                 </div>

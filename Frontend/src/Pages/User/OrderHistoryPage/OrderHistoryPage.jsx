@@ -616,38 +616,9 @@ export default function OrderHistoryPage(){
                 </div>
                 
                 <div className="fixed bottom-[2rem] right-[2rem] z-50">
-                  {/* {!showChat ? (
-                    <button className="bg-white shadow-lg rounded-2xl p-[1rem] flex items-center gap-[12px] hover:shadow-xl 
-                        transition-all duration-200 transform hover:-translate-y-px" onClick={()=> setShowChat(true)}>
-                      <div className="w-[2.5rem] h-[2.5rem] flex items-center justify-center bg-gradient-to-r
-                         from-primary to-[#f3d14b] rounded-full">
-                        <MessageSquare className="w-[20px] h-[20px] text-white" />
-                      </div>
-                      <div className="text-left">
-                        <h3 className="text-[14px] font-[650] text-gray-800">Send us a message</h3>
-                        <p className="text-[13px] leading-[20px] text-gray-500">We typically reply within a day</p>
-                      </div>
-                    </button>
-                  ) : (
-                    <div className="bg-white shadow-xl rounded-2xl w-[320px]">
-                      <div className="p-[1rem] flex justify-between items-center border-b border-gray-100">
-                        <h3 className="text-[15px] font-bold text-gray-800">Send us a message</h3>
-                        <button className="text-gray-400 hover:text-gray-600 transition-colors" onClick={()=> setShowChat(false)}>                       
-                          <X className="w-[20px] h-[20px]" />
-                        </button>
-                      </div>
-                      <div className="p-[1rem]">
-                        <p className="text-[13px] text-gray-600 mb-[1rem]">
-                          If you unable to find answers to your questions, please describe your issue. Our team will provide solutions within the next 24 hours.
-                        </p>
-                        <button className="w-full px-[1.5rem] py-[8px] bg-gradient-to-r from-primary to-[#f3d14b] text-white
-                             rounded-full hover:shadow-md transition-all duration-200 transform hover:translate-y-px">
-                          Send us a message
-                        </button>
-                      </div>
-                    </div>
-                  )} */}
+
                   <TextChatBox />
+                  
                 </div>
               </div>
             </div>

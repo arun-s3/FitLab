@@ -47,64 +47,71 @@ import AdminTextChatSupportPage from './Pages/Admin/AdminTextChatSupportPage/Adm
 import {ToastContainer} from 'react-toastify'
 import "react-toastify/dist/ReactToastify.css";
 import Header from './Components/Header/Header'
+import SocketProvider from './Components/SocketProvider/SocketProvider'
+
 
 export default function App(){
     
     return(
         <BrowserRouter>
+
             <ToastContainer theme='dark' autoClose={1500} style={{fontSize:'12px'}} hideProgressBar />
+            
             <Routes path="/">
                 {/* <Route path='test' element={AdminCategoryListPage} /> */}
-                <Route path='test-cropper' element={<TestImageCropper/>}/>
-                <Route path='test-address' element={<TestAddressPage/>}/>
-                <Route path='test' element={<TestRandomPage/>}/>
-                <Route element={<PrivateUserRoutes/>}>
-                </Route>
-                <Route index element={<HomePage/>}/>
-                <Route path='error'>
-                    <Route path='userPresent' element={<UserPresenceErrorPage/>}/>
-                 </Route>
-                <Route path='signup'>
-                    <Route index element={<SignUpAndInPage type='signup' />} />
-                    <Route path='otp-verify' element={<OtpVerificationPage/>}/>
-                </Route>
-                <Route path='signin' element={<SignUpAndInPage type='signin' />}/>
-                <Route path='forgot-password' element={<ForgotAndResetPasswordPage/>}/>
-                {/* <Route path='account' element={<UserAccountPage/>}/> */}
-                {/* <Route path='products'>
-                    <Route index element={<ProductListPage/>}/>
-                </Route>
-                <Route path='shop'>
-                    <Route path='product' element={<ProductDetailPage/>} />
-                </Route> */}
-                <Route path='shop'>
-                    <Route index element={<ProductListPage/>}/>
-                    <Route path='product' element={<ProductDetailPage/>} />
-                </Route>
-
-                <Route path='cart' element={<CartPage/>} />
-                <Route path='checkout' element={<CheckoutPage/>} />
-                <Route path='order-confirm' element={<OrderConfirmationPage/>} />
-                {/* <Route path='order-completed' element={<OrderCompletedPage/>}  /> */}
-                <Route element={<UserPageLayout/>} >
-                    <Route path='account'>
-                        <Route index element={<UserAccountPage/>}/>
-                        <Route path='addresses'>
-                            <Route index element={<AddressListingPage/>}/>
-                            <Route path='add' element={<AddressManagementPage/>}/>
-                            <Route path='edit' element={<AddressManagementPage editAddresses={true}/>}/>
-                        </Route>   
+                <Route element={<SocketProvider/>}>
+                    <Route path='test-cropper' element={<TestImageCropper/>}/>
+                    <Route path='test-address' element={<TestAddressPage/>}/>
+                    <Route path='test' element={<TestRandomPage/>}/>
+                    <Route element={<PrivateUserRoutes/>}>
                     </Route>
-                    <Route path='wishlist' element={<WishlistPage/>} />
-                    <Route path='coupons' element={<CouponPage/>} />
-                    <Route path='wallet' element={<WalletPage/>} />
-                    {/* <Route path='wishlist-test' element={<WishlistPage/>} /> */}
-                </Route>
-                <Route path='orders' element={<OrderHistoryPage/>} />
-                {/* <Route path='wallet' element={<WalletPage/>} /> */}
-                <Route path='profile'> 
+                    <Route index element={<HomePage/>}/>
+                    <Route path='error'>
+                        <Route path='userPresent' element={<UserPresenceErrorPage/>}/>
+                     </Route>
+                    <Route path='signup'>
+                        <Route index element={<SignUpAndInPage type='signup' />} />
+                        <Route path='otp-verify' element={<OtpVerificationPage/>}/>
+                    </Route>
+                    <Route path='signin' element={<SignUpAndInPage type='signin' />}/>
+                    <Route path='forgot-password' element={<ForgotAndResetPasswordPage/>}/>
+                    {/* <Route path='account' element={<UserAccountPage/>}/> */}
+                    {/* <Route path='products'>
+                        <Route index element={<ProductListPage/>}/>
+                    </Route>
+                    <Route path='shop'>
+                        <Route path='product' element={<ProductDetailPage/>} />
+                    </Route> */}
+                    <Route path='shop'>
+                        <Route index element={<ProductListPage/>}/>
+                        <Route path='product' element={<ProductDetailPage/>} />
+                    </Route>
+
+                    <Route path='cart' element={<CartPage/>} />
+                    <Route path='checkout' element={<CheckoutPage/>} />
+                    <Route path='order-confirm' element={<OrderConfirmationPage/>} />
+                    {/* <Route path='order-completed' element={<OrderCompletedPage/>}  /> */}
+                    <Route element={<UserPageLayout/>} >
+                        <Route path='account'>
+                            <Route index element={<UserAccountPage/>}/>
+                            <Route path='addresses'>
+                                <Route index element={<AddressListingPage/>}/>
+                                <Route path='add' element={<AddressManagementPage/>}/>
+                                <Route path='edit' element={<AddressManagementPage editAddresses={true}/>}/>
+                            </Route>   
+                        </Route>
+                        <Route path='wishlist' element={<WishlistPage/>} />
+                        <Route path='coupons' element={<CouponPage/>} />
+                        <Route path='wallet' element={<WalletPage/>} />
+                        {/* <Route path='wishlist-test' element={<WishlistPage/>} /> */}
+                    </Route>
+                    <Route path='orders' element={<OrderHistoryPage/>} />
+                    {/* <Route path='wallet' element={<WalletPage/>} /> */}
+                    <Route path='profile'> 
+                    </Route>
                 </Route>
                 {/* </Route> */}
+                
 
                 <Route path="admin/">
                     <Route path="signin" element={<AdminSignInPage/>}/>

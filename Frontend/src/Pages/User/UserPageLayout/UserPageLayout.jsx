@@ -1,5 +1,5 @@
 import React, {createContext, useState} from 'react'
-import {Outlet,} from 'react-router-dom'
+import {Outlet} from 'react-router-dom'
 
 import Header from '../../../Components/Header/Header'
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'

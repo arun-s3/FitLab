@@ -13,6 +13,7 @@ import OrderStepper from '../../../Components/OrderStepper/OrderStepper'
 import FeaturesDisplay from '../../../Components/FeaturesDisplay/FeaturesDisplay'
 import PaymentSummary from './PaymentSummary'
 import CouponCodeInput from './CouponCodeInput'
+import TextChatBox from '../TextChatBox/TextChatBox'
 import {capitalizeFirstLetter} from '../../../Utils/helperFunctions'
 import ProductRemovalModal from '../../../Components/ProductRemovalModal/ProductRemovalModal'
 import {SiteSecondaryFillButton, SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
@@ -336,6 +337,12 @@ export default function ShoppingCartPage(){
             <ChevronRight className="w-[1.5rem] h-[1.5rem]" />
           </button>
         </div>
+      </div>
+
+      <div className="fixed bottom-[2rem] right-[2rem] z-50">
+        
+        <TextChatBox />
+                
       </div>
 
     </main>

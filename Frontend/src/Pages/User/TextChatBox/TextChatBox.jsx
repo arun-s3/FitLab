@@ -1,6 +1,8 @@
-import React, {useState, useEffect, useRef} from "react"
+import React, {useState, useEffect, useRef, useContext} from "react"
 import {motion, AnimatePresence} from "framer-motion"
 import { io } from "socket.io-client"
+
+import {SocketContext} from '../../../Components/SocketProvider/SocketProvider'
 
 import {MessageCircle, MessageSquare, X, Send, User, Headphones, Minimize2, Maximize2} from "lucide-react"
 import axios from 'axios'
@@ -13,119 +15,9 @@ export default function TextChatBox() {
   const [isOpen, setIsOpen] = useState(false)
   const [isMinimized, setIsMinimized] = useState(false)
 
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      message: "Hello! Welcome to FitLab support. How can we help you today?",
-      sender: "Support Team",
-      timestamp: new Date().toISOString(),
-      isAdmin: true,
-    },
-  ])
-  const [newMessage, setNewMessage] = useState("")
-  const [isTyping, setIsTyping] = useState(false)
+  const {isConnected, messages, newMessage, isTyping, messagesEndRef, handleSendMessage, handleTyping} = useContext(SocketContext);
 
-  const [socket, setSocket] = useState(null)
-  const [isConnected, setIsConnected] = useState(false)
   
-  const [username, setUsername] = useState(null)
-
-  const messagesEndRef = useRef(null)
-  const typingTimeoutRef = useRef(null)
-
-  const [roomId, setRoomId] = useState(null) 
-
-  useEffect(()=> {
-    async function fetchUserId(){
-      const response = await axios.get('http://localhost:3000/getUserid', {withCredentials: true})
-      console.log("response from fetchUserId--->", response)
-      const decryptedUserId = decryptData(response.data.encryptedUserId)
-      setRoomId(decryptedUserId)
-      setUsername(response.data.username)
-    } 
-    fetchUserId()
-  }, [])
-
-  useEffect(()=> {
-    console.log("username--->", username)
-    console.log("roomId--->", roomId)
-  },[username, roomId])
-
-  useEffect(() => {
-    const socket = io("http://localhost:3000")
-
-    socket.on("connect", () => {
-      setIsConnected(true)
-      socket.emit("user-login", { userId: roomId, username })
-      socket.emit("join-room", roomId)
-    })
-
-    socket.on("disconnect", () => {
-      setIsConnected(false)
-    })
-
-    socket.on("receive-message", (message) => {
-      console.log('Message received from admin--->', message)
-      setMessages((prev) => [...prev, message])
-    })
-
-    socket.on("user-typing", (data) => {
-      if (data.sender !== username) {
-        setIsTyping(data.isTyping)
-      }
-    })
-
-    setSocket(socket)
-
-    return () => {
-      socket.disconnect()
-    }
-  }, [roomId])
-
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
-
-  const handleSendMessage = (e) => {
-    e.preventDefault()
-    if (!newMessage.trim() || !socket) return
-
-    const messageData = {
-      roomId,
-      message: newMessage,
-      sender: username,
-      isAdmin: false,
-    }
-
-    socket.emit("send-message", messageData)
-    setMessages((prev) => [...prev, messageData])
-
-    setNewMessage("")
-
-
-    socket.emit("typing", { roomId, isTyping: false, sender: username })
-  }
-
-  const handleTyping = (e) => {
-    setNewMessage(e.target.value)
-
-    if (!socket) return
-
-    socket.emit("typing", { roomId, isTyping: true, sender: username })
-
-    if (typingTimeoutRef.current) {
-      clearTimeout(typingTimeoutRef.current)
-    }
-
-    typingTimeoutRef.current = setTimeout(() => {
-      socket.emit("typing", { roomId, isTyping: false, sender: username })
-    }, 2000)
-  }
-
   const toggleChat = () => {
     setIsOpen(!isOpen)
     setIsMinimized(false)
@@ -250,12 +142,12 @@ export default function TextChatBox() {
                   <div ref={messagesEndRef} />
                 </div>
 
-                <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-200 bg-white">
+                <form onSubmit={(e)=> handleSendMessage(e)} className="p-4 border-t border-gray-200 bg-white">
                   <div className="flex space-x-2">
                     <input
                       type="text"
                       value={newMessage}
-                      onChange={handleTyping}
+                      onChange={(e)=> handleTyping(e)}
                       placeholder="Type your message..."
                       className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2
                        placeholder:text-[12px] focus:ring-blue-500 focus:border-transparent"

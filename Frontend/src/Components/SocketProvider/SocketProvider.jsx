@@ -1,5 +1,7 @@
 import React,{ createContext, useState, useEffect, useMemo, useRef } from "react"
 import {Outlet} from 'react-router-dom'
+import {useDispatch, useSelector} from 'react-redux'
+
 
 import { io } from "socket.io-client"
 
@@ -13,6 +15,8 @@ export const SocketContext = createContext();
 export default function SocketProvider(props) {
 
     // const socket = useMemo(()=> io("http://localhost:3000"), [])
+
+    const {userToken} = useSelector((state)=> state.user)
 
     const [socket, setSocket] = useState(null)
 
@@ -45,7 +49,17 @@ export default function SocketProvider(props) {
         setRoomId(decryptedUserId)
         setUsername(response.data.username)
       } 
-      fetchUserId()
+      async function fetchGuestId(){
+        const response = await axios.get('http://localhost:3000/guest', {withCredentials: true})
+        console.log("response from fetchGuestId--->", response)
+        setRoomId(response.data.userId)
+        setUsername(response.data.username)
+      } 
+      if(userToken){
+        fetchUserId()
+      }else{
+        fetchGuestId()
+      }
     }, [])
     
     useEffect(()=> {
@@ -138,11 +152,18 @@ export default function SocketProvider(props) {
       }
     
 
-
   return (
-    <SocketContext.Provider value={{socket, isConnected, roomId, username, messages, setMessages, newMessage, setNewMessage, isTyping, setIsTyping, messagesEndRef, typingTimeoutRef, handleSendMessage, handleTyping}}>
-
-      {/* {props.children} */}
+    <SocketContext.Provider value={{
+        isConnected,
+        messages,
+        newMessage,
+        isTyping,
+        messagesEndRef,
+        typingTimeoutRef,
+        handleSendMessage,
+        handleTyping
+      }}
+    >
 
       <Outlet/>
 

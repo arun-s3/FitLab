@@ -2655,6 +2655,10 @@ select{
   width: 22px;
 }
 
+.w-\[22rem\]{
+  width: 22rem;
+}
+
 .w-\[23\%\]{
   width: 23%;
 }
@@ -2697,10 +2701,6 @@ select{
 
 .w-\[31\.5rem\]{
   width: 31.5rem;
-}
-
-.w-\[320px\]{
-  width: 320px;
 }
 
 .w-\[32px\]{
@@ -5625,11 +5625,6 @@ select{
 .text-black{
   --tw-text-opacity: 1;
   color: rgb(0 0 0 / var(--tw-text-opacity));
-}
-
-.text-blue-500{
-  --tw-text-opacity: 1;
-  color: rgb(59 130 246 / var(--tw-text-opacity));
 }
 
 .text-blue-600{

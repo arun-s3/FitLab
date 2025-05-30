@@ -16,6 +16,7 @@ export default function AdminTextChatSupportPage() {
   const [selectedUser, setSelectedUser] = useState(null)
 
   const [totalUsers, setTotalUsers] = useState(null)
+  const [guestCount, setGuestCount] = useState(0)
 
   const [messages, setMessages] = useState({})
   const [newMessage, setNewMessage] = useState("")
@@ -58,6 +59,8 @@ export default function AdminTextChatSupportPage() {
     socket.on("connect", () => {
       setIsConnected(true)
       socket.emit("admin-login", { adminId: "admin_1", adminName })
+
+      socket.emit('count-all-guests')
     })
 
     socket.on("disconnect", () => {
@@ -78,7 +81,7 @@ export default function AdminTextChatSupportPage() {
       console.log("Message received from user--->", message)
       setMessages((prev) => ({
         ...prev,
-        [message.socketId]: [...(prev[message.socketId] || []), message],
+        [message.sender]: [...(prev[message.sender] || []), message],
       }))
 
       if (!selectedUser || selectedUser.socketId !== message.socketId) {
@@ -108,6 +111,11 @@ export default function AdminTextChatSupportPage() {
         }))
       }, 3000)
     })
+
+    socket.on('guest-counts', (count)=> {
+      console.log("Guest count-->", count)
+      setGuestCount(count)
+    }) 
 
     socket.on('reconnect-user', (user)=> {
       if(selectedUser.username === user.username){
@@ -143,9 +151,10 @@ export default function AdminTextChatSupportPage() {
   useEffect(()=> {
     scrollToBottom()
 
-    if(selectedUser && messages?.[selectedUser.socketId]?.length > 0){
-      console.log("messages[messages.length - 1]---->", messages[selectedUser.socketId][messages.length - 1])
-      const lastMsg = messages[selectedUser.socketId][messages[selectedUser.socketId].length - 1]
+    console.log("Messages--->", messages)
+    if(selectedUser && messages?.[selectedUser.username]?.length > 0){
+      console.log("messages[messages.length - 1]---->", messages[selectedUser.username][messages.length - 1])
+      const lastMsg = messages[selectedUser.username][messages[selectedUser.username].length - 1]
       const isLastMsgByAdmin = lastMsg.isAdmin
       if(!isLastMsgByAdmin){
         setTextOrReply('Reply')
@@ -186,8 +195,7 @@ export default function AdminTextChatSupportPage() {
 
     setMessages((prev) => ({
       ...prev,
-      [selectedUser.socketId]: [
-        ...(prev[selectedUser.socketId] || []),
+      [selectedUser.username]: [...(prev[selectedUser.username] || []),
         {
           id: Date.now(),
           message: newMessage,
@@ -297,7 +305,8 @@ export default function AdminTextChatSupportPage() {
         <main className="mr-4 p-4 border border-primaryDark rounded-[7px]">
 
             <div className="h-screen bg-gray-100 flex">
-      <div className="w-80 p-[7px] bg-white border border-dropdownBorder rounded-[5px] flex flex-col">
+      <div className={`${guestCount > 0 ? 'w-[22rem]' : 'w-80'} p-[7px] bg-white border border-dropdownBorder 
+        rounded-[5px] flex flex-col`}>
         <div className="p-4 border-b border-gray-200 bg-purple-500 text-white rounded-[3px]"> {/*rgb(187, 103, 245) */}
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-lg font-semibold"> Admin Chat </h1>
@@ -359,15 +368,24 @@ export default function AdminTextChatSupportPage() {
         </div>
 
         <div className="p-4 border-b border-gray-200 bg-gray-50">
-          <div className="grid grid-cols-2 gap-4">
+          <div className={`${guestCount > 0 ? 'flex items-center justify-between gap-4' : 'grid grid-cols-2 gap-4'}`}>
             <div className="text-center">
               <div className="text-2xl font-bold text-secondary">{totalUsers ? totalUsers : '--'}</div>
-              <div className="text-xs text-gray-600">Total Users</div>
+              <div className="text-xs text-gray-600"> Total FitLab Users </div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">{activeUsers.filter((user) => user.isOnline).length}</div>
-              <div className="text-xs text-gray-600">Online Now</div>
+              <div className="text-2xl font-bold text-green-600">
+                {activeUsers.filter((user) => user.isOnline && !user.username.startsWith('guest')).length}
+              </div>
+              <div className="text-xs text-gray-600"> Online Users </div>
             </div>
+            {
+              guestCount > 0 &&
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600"> {guestCount} </div>
+                <div className="text-xs text-gray-600"> Online Guests </div>
+              </div>
+            }
           </div>
         </div>
         
@@ -399,32 +417,34 @@ export default function AdminTextChatSupportPage() {
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-gray-900 truncate">{user.username}</div>
+                      <div className="font-medium text-gray-900 truncate flex items-center gap-[5px]">
+                        <span> {user.username} </span>
+                        <span className="text-[11px] text-green-500 italic">
+                           {(user.username).startsWith('guest') ? '(Guest)' : null} 
+                        </span>
+                      </div>
                       <div className="text-xs text-gray-500 flex items-center">
                         {!user.isOnline && <Clock size={12} className="mr-1" />}
-                        {user.isOnline ? "Online" : formatLastSeen(user.lastSeen)}
+                        {
+                          user.isOnline && selectedUser && typingUsers[selectedUser?.userId] ? 
+                          (
+                            <motion.div className="flex items-center gap-[5px]" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                              <span className="text-xs text-green-500"> typing </span>
+                              <motion.div
+                                className="flex space-x-1 mt-[2px]"
+                                animate={{ opacity: [0.5, 1, 0.5] }}
+                                transition={{ repeat: Number.POSITIVE_INFINITY, duration: 1.5 }}
+                              >
+                                <div className="w-1 h-1 bg-gray-400 rounded-full" />
+                                <div className="w-1 h-1 bg-gray-400 rounded-full" />
+                                <div className="w-1 h-1 bg-gray-400 rounded-full" />
+                              </motion.div>
+                            </motion.div>
+                          )
+                          : user.isOnline ? "Online" : formatLastSeen(user.lastSeen) 
+                        }
                       </div>
                     </div>
-                  </div>
-                  <div className="flex flex-col items-end space-y-1">
-                    {unreadCounts[user.socketId] > 0 && selectedUser.socketId !== user.socketId && (
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center"
-                      >
-                        {unreadCounts[user.socketId]}
-                      </motion.div>
-                    )}
-                    {typingUsers[user.socketId] && (
-                      <motion.div
-                        animate={{ opacity: [0.5, 1, 0.5] }}
-                        transition={{ repeat: Number.POSITIVE_INFINITY, duration: 1.5 }}
-                        className="text-xs text-blue-500"
-                      >
-                        typing...
-                      </motion.div>
-                    )}
                   </div>
                 </div>
               </motion.div>
@@ -476,7 +496,7 @@ export default function AdminTextChatSupportPage() {
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-              {(messages[selectedUser.socketId] || []).map((message) => (
+              {(messages[selectedUser.username] || []).map((message) => (
                 <motion.div
                   key={message.id}
                   className={`flex ${message.isAdmin ? "justify-end" : "justify-start"}`}

@@ -1,13 +1,10 @@
 import React, {useState, useEffect, useRef, useContext} from "react"
 import {motion, AnimatePresence} from "framer-motion"
-import { io } from "socket.io-client"
 
 import {SocketContext} from '../../../Components/SocketProvider/SocketProvider'
 
-import {MessageCircle, MessageSquare, X, Send, User, Headphones, Minimize2, Maximize2} from "lucide-react"
-import axios from 'axios'
+import {MessageSquare, X, Send, User, Headphones, Minimize2, Maximize2} from "lucide-react"
 
-import {decryptData} from '../../../Utils/decryption'
 
 
 export default function TextChatBox() {
@@ -15,9 +12,8 @@ export default function TextChatBox() {
   const [isOpen, setIsOpen] = useState(false)
   const [isMinimized, setIsMinimized] = useState(false)
 
-  const {isConnected, messages, newMessage, isTyping, messagesEndRef, handleSendMessage, handleTyping} = useContext(SocketContext);
+  const {isConnected, messages, newMessage, isTyping, messagesEndRef, handleSendMessage, handleTyping} = useContext(SocketContext)
 
-  
   const toggleChat = () => {
     setIsOpen(!isOpen)
     setIsMinimized(false)

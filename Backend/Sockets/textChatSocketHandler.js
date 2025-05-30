@@ -27,7 +27,22 @@ async function textChatBoxSocket(server) {
         console.log("Admin connected:", socket.id)
       })
 
-      socket.on("user-login", (userData) => {
+      const guestCounter = ()=> {
+        console.log('Getting guest count')
+        const currentJoinedUserDatas = Object.values(Object.fromEntries(activeUsers))
+        const guestCount = currentJoinedUserDatas.reduce((count, data) => {
+          if (data.username.startsWith('guest') && data.isOnline) {
+              return count + 1
+          }
+          return count
+        }, 0)
+        console.log("guestCount-->", guestCount)
+        return guestCount
+      }
+
+      socket.on("user-login", (userData)=> {
+        console.log('New user comes up-->', userData.username)
+        console.log("userData.username.startsWith('guest')-->", userData.username.startsWith('guest'))
         console.log("activeUsers--->", activeUsers)
         const joinedUserDatas = Object.values(Object.fromEntries(activeUsers))
         console.log("joinedUserDatas--->", joinedUserDatas)
@@ -42,7 +57,12 @@ async function textChatBoxSocket(server) {
             joinedAt: new Date().toISOString(),
             lastSeen: new Date().toISOString(),
             isOnline: true,
-          })
+            }
+          )
+          if(userData.username.startsWith('guest')){
+            const guestCount = guestCounter()
+            io.to("admin-room").emit('guest-counts', guestCount)
+          }
         }else{
           const usernameJoinedButOffline = joinedUserDatas.some(data=> (data.username === userData.username) && !data.isOnline)
           if(usernameJoinedButOffline){
@@ -72,6 +92,12 @@ async function textChatBoxSocket(server) {
       socket.on("join-room", (roomId) => {
         socket.join(roomId)
         console.log(`User ${socket.id} joined room ${roomId}`)
+      })
+
+      socket.on("count-all-guests", ()=> {
+        console.log('Inside count-all-guests...')
+        const guestCount = guestCounter()
+        io.to("admin-room").emit("guest-counts", guestCount)
       })
 
       socket.on("send-message", (data) => {

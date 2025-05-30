@@ -399,6 +399,43 @@ const totalUsersCount = async(req, res, next)=> {
     }
 }
 
+const guestUsersByIP = new Map(); 
+const generatedUsernames = new Set();
+
+const generateUniqueGuestUser = (req, res, next) => {
+  try{  
+        console.log("Inside generateUniqueGuestUser...")
+        const ip = req.ip || req.connection.remoteAddress
+        
+        console.log('ip-->', ip)
+
+        if (guestUsersByIP.has(ip)){
+          const existing = guestUsersByIP.get(ip)
+          return res.status(200).json({ ...existing, role: "guest" })
+        }
+    
+        let userId, username;
+        do{
+          userId = `guest_${Math.random().toString(36).substring(2, 6)}`
+          username = `guest${Math.floor(1000 + Math.random() * 9000)}`;
+        }
+        while (generatedUsernames.has(username))
+        
+        generatedUsernames.add(username)
+
+        const userData = {userId, username}
+        guestUsersByIP.set(ip, userData)
+
+        console.log("guestUsersByIP--->", guestUsersByIP)
+
+        return res.status(200).json({message: "Guest user created successfully", ...userData});
+    }
+    catch(error) {
+        console.error("Error in generateUniqueGuestUser from userController", error)
+        next(error)
+    }
+}
+
 
 const signout = (req,res,next)=>{
     console.log("JWT Cookie from signout controller-->"+req.cookies.jwt)
@@ -414,4 +451,4 @@ const signout = (req,res,next)=>{
 
 
 module.exports = {tester, createUser, sendOtp, verifyOtp, loginUser, updateUserDetails, updateForgotPassword, resetPassword,
-     googleSignin, getUserId, searchUsernames, totalUsersCount, signout}
+     googleSignin, getUserId, searchUsernames, totalUsersCount, generateUniqueGuestUser, signout}

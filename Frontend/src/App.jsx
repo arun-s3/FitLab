@@ -48,6 +48,7 @@ import {ToastContainer} from 'react-toastify'
 import "react-toastify/dist/ReactToastify.css";
 import Header from './Components/Header/Header'
 import SocketProvider from './Components/SocketProvider/SocketProvider'
+import AdminSocketProvider from './Components/AdminSocketProvider/AdminSocketProvider'
 
 
 export default function App(){
@@ -59,34 +60,26 @@ export default function App(){
             
             <Routes path="/">
                 {/* <Route path='test' element={AdminCategoryListPage} /> */}
+                <Route path='test-cropper' element={<TestImageCropper/>}/>
+                <Route path='test-address' element={<TestAddressPage/>}/>
+                <Route path='test' element={<TestRandomPage/>}/>
+                <Route element={<PrivateUserRoutes/>}>
+                </Route>
+                <Route path='signup'>
+                    <Route index element={<SignUpAndInPage type='signup' />} />
+                    <Route path='otp-verify' element={<OtpVerificationPage/>}/>
+                </Route>
+                <Route path='signin' element={<SignUpAndInPage type='signin' />}/>
+                <Route path='forgot-password' element={<ForgotAndResetPasswordPage/>}/>
+                <Route path='error'>
+                    <Route path='userPresent' element={<UserPresenceErrorPage/>}/>
+                </Route>
                 <Route element={<SocketProvider/>}>
-                    <Route path='test-cropper' element={<TestImageCropper/>}/>
-                    <Route path='test-address' element={<TestAddressPage/>}/>
-                    <Route path='test' element={<TestRandomPage/>}/>
-                    <Route element={<PrivateUserRoutes/>}>
-                    </Route>
                     <Route index element={<HomePage/>}/>
-                    <Route path='error'>
-                        <Route path='userPresent' element={<UserPresenceErrorPage/>}/>
-                     </Route>
-                    <Route path='signup'>
-                        <Route index element={<SignUpAndInPage type='signup' />} />
-                        <Route path='otp-verify' element={<OtpVerificationPage/>}/>
-                    </Route>
-                    <Route path='signin' element={<SignUpAndInPage type='signin' />}/>
-                    <Route path='forgot-password' element={<ForgotAndResetPasswordPage/>}/>
-                    {/* <Route path='account' element={<UserAccountPage/>}/> */}
-                    {/* <Route path='products'>
-                        <Route index element={<ProductListPage/>}/>
-                    </Route>
-                    <Route path='shop'>
-                        <Route path='product' element={<ProductDetailPage/>} />
-                    </Route> */}
                     <Route path='shop'>
                         <Route index element={<ProductListPage/>}/>
                         <Route path='product' element={<ProductDetailPage/>} />
                     </Route>
-
                     <Route path='cart' element={<CartPage/>} />
                     <Route path='checkout' element={<CheckoutPage/>} />
                     <Route path='order-confirm' element={<OrderConfirmationPage/>} />
@@ -110,40 +103,41 @@ export default function App(){
                     <Route path='profile'> 
                     </Route>
                 </Route>
-                {/* </Route> */}
-                
+
 
                 <Route path="admin/">
                     <Route path="signin" element={<AdminSignInPage/>}/>
-                    <Route element={<PrivateAdminRoutes/>}>
-                        <Route path='image-editor' element={<ImageEditor/>} />
-                        <Route element={<AdminPageLayout/>}>
-                            <Route path='dashboard'>
-                                <Route path="business" element={<AdminDashboardPage insightType='business'/>} />
-                                <Route path="operations" element={<AdminDashboardPage insightType='operations'/>} />
-                                <Route path="heatmap" element={<AdminDashboardHeatmapPage/>} />
+                        <Route element={<AdminSocketProvider/>}>
+                            <Route element={<PrivateAdminRoutes/>}>
+                                <Route path='image-editor' element={<ImageEditor/>} />
+                                <Route element={<AdminPageLayout/>}>
+                                    <Route path='dashboard'>
+                                        <Route path="business" element={<AdminDashboardPage insightType='business'/>} />
+                                        <Route path="operations" element={<AdminDashboardPage insightType='operations'/>} />
+                                        <Route path="heatmap" element={<AdminDashboardHeatmapPage/>} />
+                                    </Route>
+                                    <Route path="customers" element={<AdminCustomersPage/>} />
+                                    <Route path='products'>
+                                        <Route path='list' element={<AdminProductListPage/>} />
+                                        <Route path='add' element={<AdminAddAndEditProductPage/>} />
+                                        <Route path='edit' element={<AdminAddAndEditProductPage editProduct={true}/>} />
+                                    </Route>
+                                    <Route path='category'> 
+                                        <Route index element={<AdminCategoryListPage/>} />
+                                        <Route path='add' element={<AdminAddAndEditCategoryPage/>} />
+                                        <Route path='edit' element={<AdminAddAndEditCategoryPage editCategory={true}/>} />
+                                    </Route>
+                                    <Route path='orders' element={<AdminOrderHistory/>} />
+                                    <Route path='coupons' element={<AdminCouponManagementPage/>} />
+                                    <Route path='offers'>
+                                        <Route index element={<AdminOfferManagementPage/>} />
+                                        <Route path='add' element={<AdminCreateOfferPage/>} />
+                                    </Route>
+                                    <Route path='support'>
+                                        <Route path='text' element={<AdminTextChatSupportPage/>} />
+                                    </Route>
+                                </Route>
                             </Route>
-                            <Route path="customers" element={<AdminCustomersPage/>} />
-                            <Route path='products'>
-                                <Route path='list' element={<AdminProductListPage/>} />
-                                <Route path='add' element={<AdminAddAndEditProductPage/>} />
-                                <Route path='edit' element={<AdminAddAndEditProductPage editProduct={true}/>} />
-                            </Route>
-                            <Route path='category'> 
-                                <Route index element={<AdminCategoryListPage/>} />
-                                <Route path='add' element={<AdminAddAndEditCategoryPage/>} />
-                                <Route path='edit' element={<AdminAddAndEditCategoryPage editCategory={true}/>} />
-                            </Route>
-                            <Route path='orders' element={<AdminOrderHistory/>} />
-                            <Route path='coupons' element={<AdminCouponManagementPage/>} />
-                            <Route path='offers'>
-                                <Route index element={<AdminOfferManagementPage/>} />
-                                <Route path='add' element={<AdminCreateOfferPage/>} />
-                            </Route>
-                            <Route path='support'>
-                                <Route path='text' element={<AdminTextChatSupportPage/>} />
-                            </Route>
-                        </Route>
                     </Route>
                 </Route>
             </Routes>

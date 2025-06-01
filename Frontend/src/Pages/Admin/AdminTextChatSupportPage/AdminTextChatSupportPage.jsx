@@ -1,43 +1,41 @@
-import React, {useState, useEffect, useRef} from "react"
+import React, {useState, useEffect, useRef, useContext} from "react"
 import {motion, AnimatePresence} from "framer-motion"
-import { io } from "socket.io-client"
 import {debounce} from 'lodash'
 
 import {Users, Send, Search, Clock, User, Headphones, Circle, MessageSquare, Settings, Bell} from "lucide-react"
 import axios from 'axios'
 
+import {AdminSocketContext} from '../../../Components/AdminSocketProvider/AdminSocketProvider'
 import AdminHeader from '../../../Components/AdminHeader/AdminHeader'
 import useFlexiDropdown from '../../../Hooks/FlexiDropdown'
 
 
 export default function AdminTextChatSupportPage() {
-    
-  const [activeUsers, setActiveUsers] = useState([])
-  const [selectedUser, setSelectedUser] = useState(null)
 
   const [totalUsers, setTotalUsers] = useState(null)
-  const [guestCount, setGuestCount] = useState(0)
-
-  const [messages, setMessages] = useState({})
-  const [newMessage, setNewMessage] = useState("")
-  const [socket, setSocket] = useState(null)
-  const [isConnected, setIsConnected] = useState(false)
-
-  const [searchTerm, setSearchTerm] = useState("")
   const [usernameList, setUsernameList] = useState({searched: false, list: []})
 
-  const [typingUsers, setTypingUsers] = useState({})
-  const [unreadCounts, setUnreadCounts] = useState({})
-
-  const messagesEndRef = useRef(null)
-  const adminName = "Support Agent"
-
-  const [textOrReply, setTextOrReply] = useState('Text')
-
-  const [lastSeen, setLastSeen] = useState('')
+  const {
+      isConnected,
+      socket,
+      guestCount,
+      activeUsers,
+      selectedUser,
+      setSelectedUser,
+      messages, 
+      newMessage, 
+      typingUsers, 
+      unreadCounts,
+      setUnreadCounts, 
+      lastSeen,
+      setLastSeen,
+      messagesEndRef, 
+      textOrReply,
+      handleTyping,
+      handleSendMessage
+  } = useContext(AdminSocketContext)
 
   const {openDropdowns, dropdownRefs, toggleDropdown} = useFlexiDropdown(['searchResultDropdown'])
-
 
   const handleUserSelect = (user) => {
     setSelectedUser(user)
@@ -52,92 +50,6 @@ export default function AdminTextChatSupportPage() {
     }
   }
 
-
-  useEffect(() => {
-    const socket = io("http://localhost:3000")
-
-    socket.on("connect", () => {
-      setIsConnected(true)
-      socket.emit("admin-login", { adminId: "admin_1", adminName })
-
-      socket.emit('count-all-guests')
-    })
-
-    socket.on("disconnect", () => {
-      setIsConnected(false) 
-    })
-
-    socket.on("active-users-update", (users) => {
-      setActiveUsers(users)
-    })
-
-    socket.on("updated-activeUsers", (updater) => {
-      console.log("Inside updated-activeUsers")
-      setActiveUsers(updater.users)
-      handleUserSelect(updater.user)
-    })
-
-    socket.on("receive-message", (message) => {
-      console.log("Message received from user--->", message)
-      setMessages((prev) => ({
-        ...prev,
-        [message.sender]: [...(prev[message.sender] || []), message],
-      }))
-
-      if (!selectedUser || selectedUser.socketId !== message.socketId) {
-        setUnreadCounts((prev) => ({
-          ...prev,
-          [message.socketId]: (prev[message.socketId] || 0) + 1,
-        }))
-      }
-    })
-
-    socket.on("new-message-notification", (message) => {
-      if (!message.isAdmin) {
-        console.log("New message from user:", message.sender)
-      }
-    })
-
-    socket.on("user-typing-admin", (data) => {
-      setTypingUsers((prev) => ({
-        ...prev,
-        [data.userId]: data.isTyping,
-      }))
-
-      setTimeout(() => {
-        setTypingUsers((prev) => ({
-          ...prev,
-          [data.userId]: false,
-        }))
-      }, 3000)
-    })
-
-    socket.on('guest-counts', (count)=> {
-      console.log("Guest count-->", count)
-      setGuestCount(count)
-    }) 
-
-    socket.on('reconnect-user', (user)=> {
-      if(selectedUser.username === user.username){
-        handleUserSelect(user)
-      }
-    })
-
-    socket.on('update-last-seen', (user)=> {
-      console.log("Inside update-last-seen")
-      console.log("selectedUser--->", selectedUser)
-      if(selectedUser && selectedUser.username === user.username){
-        setLastSeen(user.lastSeen)
-      }
-    })
-
-    setSocket(socket)
-
-    return () => {
-      socket.disconnect()
-    }
-  }, [])
-
   useEffect(()=> {
     async function fetchTotalUserCount(){
       const response = await axios.get('http://localhost:3000/totalUsers', {withCredentials: true})
@@ -147,83 +59,6 @@ export default function AdminTextChatSupportPage() {
       fetchTotalUserCount()
     }
   },[])
-
-  useEffect(()=> {
-    scrollToBottom()
-
-    console.log("Messages--->", messages)
-    if(selectedUser && messages?.[selectedUser.username]?.length > 0){
-      console.log("messages[messages.length - 1]---->", messages[selectedUser.username][messages.length - 1])
-      const lastMsg = messages[selectedUser.username][messages[selectedUser.username].length - 1]
-      const isLastMsgByAdmin = lastMsg.isAdmin
-      if(!isLastMsgByAdmin){
-        setTextOrReply('Reply')
-      }else setTextOrReply('Text')
-    }
-  }, [messages, selectedUser])
-
-  useEffect(()=> {
-    console.log("typingUsers--->", typingUsers)
-    if(selectedUser){
-      console.log("selectedUser.userId--->", selectedUser.userId)
-      setLastSeen(selectedUser.lastSeen)
-    }
-    if(activeUsers){
-      console.log("activeUsers--->", activeUsers)
-    }
-  },[typingUsers, selectedUser, activeUsers])
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
-
-  const handleSendMessage = (e) => {
-    e.preventDefault()
-    if (!newMessage.trim() || !socket || !selectedUser) return
-
-    console.log()
-
-    const messageData = {
-      roomId: selectedUser.userId,
-      message: newMessage,
-      sender: adminName,
-      targetSocketId: selectedUser.socketId,
-    }
-
-    socket.emit("admin-send-message", messageData)
-    setNewMessage("")
-
-    setMessages((prev) => ({
-      ...prev,
-      [selectedUser.username]: [...(prev[selectedUser.username] || []),
-        {
-          id: Date.now(),
-          message: newMessage,
-          sender: adminName,
-          timestamp: new Date().toISOString(),
-          isAdmin: true,
-        },
-      ],
-    }))
-
-    socket.emit("admin-typing", {
-        roomId: selectedUser.userId,
-        isTyping: false,
-        sender: adminName,
-      })
-  }
-
-  const handleTyping = (e) => {
-    setNewMessage(e.target.value)
-
-    if (socket && selectedUser) {
-      socket.emit("admin-typing", {
-        roomId: selectedUser.userId,
-        isTyping: true,
-        sender: adminName,
-      })
-    }
-  }
 
   const fetchUsernameList = (searchTerm)=> {
     async function fetchUsernames(){
@@ -272,8 +107,6 @@ export default function AdminTextChatSupportPage() {
       // sendOfflineMessage(username)
     }
   }
-
-  // const filteredUsers = activeUsers.filter((user) => user.username.toLowerCase().includes(searchTerm.toLowerCase()))
 
   const formatTime = (timestamp) => {
     return new Date(timestamp).toLocaleTimeString([], {
@@ -541,12 +374,12 @@ export default function AdminTextChatSupportPage() {
               <div ref={messagesEndRef} />
             </div>
 
-            <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-200 bg-white">
+            <form onSubmit={(e)=> handleSendMessage(e)} className="p-4 border-t border-gray-200 bg-white">
               <div className="flex space-x-3">
                 <input
                   type="text"
                   value={newMessage}
-                  onChange={handleTyping}
+                  onChange={(e)=> handleTyping(e)}
                   placeholder={` ${textOrReply === 'Text' ?
                                `Type a message for ${selectedUser.username}...` : `Reply to ${selectedUser.username}...`} `}
                   className="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"

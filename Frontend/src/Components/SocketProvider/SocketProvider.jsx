@@ -1,6 +1,6 @@
 import React,{ createContext, useState, useEffect, useMemo, useRef } from "react"
 import {Outlet} from 'react-router-dom'
-import {useDispatch, useSelector} from 'react-redux'
+import {useSelector} from 'react-redux'
 
 
 import { io } from "socket.io-client"
@@ -160,8 +160,8 @@ export default function SocketProvider(props) {
         isTyping,
         messagesEndRef,
         typingTimeoutRef,
-        handleSendMessage,
-        handleTyping
+        handleTyping,
+        handleSendMessage
       }}
     >
 

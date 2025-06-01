@@ -1,0 +1,246 @@
+import React, {useState, useEffect, useRef, createContext} from "react"
+import {Outlet} from 'react-router-dom'
+import { io } from "socket.io-client"
+
+
+export const AdminSocketContext = createContext();
+
+
+export default function AdminSocketProvider() {
+
+  const [isConnected, setIsConnected] = useState(false)
+    
+  const [activeUsers, setActiveUsers] = useState([])
+  const [selectedUser, setSelectedUser] = useState(null)
+ 
+  const [guestCount, setGuestCount] = useState(0)
+
+  const [messages, setMessages] = useState({})
+  const [newMessage, setNewMessage] = useState("")
+  const [socket, setSocket] = useState(null)
+
+  const [typingUsers, setTypingUsers] = useState({})
+  const [unreadCounts, setUnreadCounts] = useState({})
+
+  const messagesEndRef = useRef(null)
+  const adminName = "Support Agent"
+
+  const [textOrReply, setTextOrReply] = useState('Text')
+
+  const [lastSeen, setLastSeen] = useState('')
+
+
+  const handleUserSelect = (user)=> {
+    setSelectedUser(user)
+    setLastSeen(user.lastSeen)
+    setUnreadCounts((prev) => ({
+      ...prev,
+      [user.socketId]: 0,
+    }))
+
+    if (socket) {
+      socket.emit("join-room", user.userId)
+    }
+  }
+
+
+  useEffect(() => {
+    const socket = io("http://localhost:3000")
+
+    socket.on("connect", () => {
+      setIsConnected(true)
+      socket.emit("admin-login", { adminId: "admin_1", adminName })
+
+      socket.emit('count-all-guests')
+    })
+
+    socket.on("disconnect", () => {
+      setIsConnected(false) 
+    })
+
+    socket.on("active-users-update", (users) => {
+      setActiveUsers(users)
+    })
+
+    socket.on("updated-activeUsers", (updater) => {
+      console.log("Inside updated-activeUsers")
+      setActiveUsers(updater.users)
+      handleUserSelect(updater.user)
+    })
+
+    socket.on("receive-message", (message) => {
+      console.log("Message received from user--->", message)
+      setMessages((prev) => ({
+        ...prev,
+        [message.sender]: [...(prev[message.sender] || []), message],
+      }))
+      // if(selectedUser){
+      //   setMessages((prev) => ({
+      //   ...prev,
+      //   [selectedUser.username]: [...(prev[selectedUser.username] || []), message],
+      //   }))
+      // }
+
+      if (!selectedUser || selectedUser.socketId !== message.socketId) {
+        setUnreadCounts((prev) => ({
+          ...prev,
+          [message.socketId]: (prev[message.socketId] || 0) + 1,
+        }))
+      }
+    })
+
+    socket.on("new-message-notification", (message) => {
+      if (!message.isAdmin) {
+        console.log("New message from user:", message.sender)
+      }
+    })
+
+    socket.on("user-typing-admin", (data) => {
+      setTypingUsers((prev) => ({
+        ...prev,
+        [data.userId]: data.isTyping,
+      }))
+
+      setTimeout(() => {
+        setTypingUsers((prev) => ({
+          ...prev,
+          [data.userId]: false,
+        }))
+      }, 3000)
+    })
+
+    socket.on('guest-counts', (count)=> {
+      console.log("Guest count-->", count)
+      setGuestCount(count)
+    }) 
+
+    socket.on('reconnect-user', (user)=> {
+      if(selectedUser.username === user.username){
+        handleUserSelect(user)
+      }
+    })
+
+    socket.on('update-last-seen', (user)=> {
+      console.log("Inside update-last-seen")
+      console.log("selectedUser--->", selectedUser)
+      if(selectedUser && selectedUser.username === user.username){
+        setLastSeen(user.lastSeen)
+      }
+    })
+
+    setSocket(socket)
+
+    return () => {
+      socket.disconnect()
+    }
+  }, [])
+
+  useEffect(()=> {
+    scrollToBottom()
+
+    console.log("Messages--->", messages)
+    if(selectedUser && messages?.[selectedUser.username]?.length > 0){
+      console.log("messages[messages.length - 1]---->", messages[selectedUser.username][messages.length - 1])
+      const lastMsg = messages[selectedUser.username][messages[selectedUser.username].length - 1]
+      const isLastMsgByAdmin = lastMsg.isAdmin
+      if(!isLastMsgByAdmin){
+        setTextOrReply('Reply')
+      }else setTextOrReply('Text')
+    }
+  }, [messages, selectedUser])
+
+  useEffect(()=> {
+    console.log("typingUsers--->", typingUsers)
+    if(selectedUser){
+      console.log("selectedUser.userId--->", selectedUser.userId)
+      setLastSeen(selectedUser.lastSeen)
+    }
+    if(activeUsers){
+      console.log("activeUsers--->", activeUsers)
+    }
+  },[typingUsers, selectedUser, activeUsers])
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
+
+  const handleSendMessage = (e) => {
+    e.preventDefault()
+    if (!newMessage.trim() || !socket || !selectedUser) return
+
+    console.log()
+
+    const messageData = {
+      roomId: selectedUser.userId,
+      message: newMessage,
+      sender: adminName,
+      targetSocketId: selectedUser.socketId,
+    }
+
+    socket.emit("admin-send-message", messageData)
+    setNewMessage("")
+
+    setMessages((prev) => ({
+      ...prev,
+      [selectedUser.username]: [...(prev[selectedUser.username] || []),
+        {
+          id: Date.now(),
+          message: newMessage,
+          sender: adminName,
+          timestamp: new Date().toISOString(),
+          isAdmin: true,
+        },
+      ],
+    }))
+
+    socket.emit("admin-typing", {
+        roomId: selectedUser.userId,
+        isTyping: false,
+        sender: adminName,
+      })
+  }
+
+  const handleTyping = (e) => {
+    setNewMessage(e.target.value)
+
+    if (socket && selectedUser) {
+      socket.emit("admin-typing", {
+        roomId: selectedUser.userId,
+        isTyping: true,
+        sender: adminName,
+      })
+    }
+  }
+
+
+
+  return (
+      <AdminSocketContext.Provider value={{
+          isConnected,
+          socket,
+          guestCount,
+          activeUsers,
+          selectedUser,
+          setSelectedUser,
+          messages, 
+          newMessage, 
+          typingUsers, 
+          unreadCounts, 
+          lastSeen,
+          setLastSeen,
+          setUnreadCounts,
+          messagesEndRef, 
+          textOrReply,
+          handleTyping,
+          handleSendMessage,
+        }}
+      >
+  
+        <Outlet/>
+  
+      </AdminSocketContext.Provider>
+    )
+  
+
+}
+

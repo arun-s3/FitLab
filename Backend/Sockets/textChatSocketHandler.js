@@ -78,7 +78,7 @@ async function textChatBoxSocket(server) {
               isOnline: true,
             }
             activeUsers.set(socket.id, newUserData)
-            io.to("admin-room").emit('reconnect-user', newUserData)
+            io.to("admin-room").emit('reconnect-if-user-selected', newUserData)
             // activeButOfflineUser.isOnline = true
             // activeButOfflineUser.lastSeen = new Date().toISOString()
             // activeButOfflineUser.socketId = socket.id
@@ -89,9 +89,45 @@ async function textChatBoxSocket(server) {
         io.to("admin-room").emit("active-users-update", Array.from(activeUsers.values()))
       })
 
-      socket.on("join-room", (roomId) => {
+      socket.on("user-join-room", (roomId) => {
+        console.log("Inside on user-join-room...")
         socket.join(roomId)
         console.log(`User ${socket.id} joined room ${roomId}`)
+        const isAdminJoined = adminSessions.size > 0
+        console.log("isAdminJoined--->", isAdminJoined)
+        if(isAdminJoined){
+          console.log("Emiting let-user-connect-admin...")
+          io.to("admin-room").emit('let-user-connect-admin', roomId)
+        }
+      })
+
+      socket.on("admin-permits-user-connection", (roomId)=> {
+        console.log("Inside on admin-permits-user-connection...")
+        socket.join(roomId)
+      })
+
+      socket.on("admin-joins-every-rooms", ()=> {
+        console.log("Inside on join-every-rooms...")
+        if(activeUsers.size > 0){
+          activeUsers.forEach((userData, socketId)=> {
+          socket.join(userData.userId)
+          console.log(`Admin joined room ${userData.userId}`)
+        })
+        }
+      })
+
+      socket.on("delete-guest", (user)=> {
+        if(user){
+          console.log('Inside delete-guest..., guest details--->', user)
+          const joinedUserDatas = Object.values(Object.fromEntries(activeUsers))
+          const guestUser = joinedUserDatas.find(data=> (data.username === user.username))
+          console.log("guestUser-->", guestUser)
+          activeUsers.delete(guestUser.socketId)
+          console.log("guestUser deleted")
+          const guestCount = guestCounter()
+          io.to("admin-room").emit('guest-counts', guestCount)
+          io.to("admin-room").emit("active-users-update", Array.from(activeUsers.values()))
+        }
       })
 
       socket.on("count-all-guests", ()=> {

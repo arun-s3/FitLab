@@ -7,12 +7,16 @@ import {MessageSquare, X, Send, User, Headphones, Minimize2, Maximize2} from "lu
 
 
 
-export default function TextChatBox() {
+export default function TextChatBox({closeable, onCloseChat}) {
 
   const [isOpen, setIsOpen] = useState(false)
   const [isMinimized, setIsMinimized] = useState(false)
 
   const {isConnected, messages, newMessage, isTyping, messagesEndRef, handleSendMessage, handleTyping} = useContext(SocketContext)
+
+  useEffect(()=> {
+    console.log("new message--->", newMessage)
+  },[newMessage])
 
   const toggleChat = () => {
     setIsOpen(!isOpen)
@@ -34,7 +38,8 @@ export default function TextChatBox() {
           transition={{ type: "spring", stiffness: 260, damping: 20 }}
           whileHover={{ scale: 1.1 }}   
           whileTap={{ scale: 0.9 }}
-          className={` ${isOpen ? 'bg-transparent p-0 shadow-none' : 'bg-white p-[1rem] shadow-lg'} rounded-2xl flex items-center gap-[12px] hover:shadow-xl 
+          className={` ${isOpen ? 'bg-transparent p-0 shadow-none' : 'bg-white p-[1rem] shadow-lg'} 
+              relative rounded-2xl flex items-center gap-[12px] hover:shadow-xl 
             transition-all duration-200 transform hover:-translate-y-px`} onClick={toggleChat}>       {/* onClick={()=> setShowChat(true)} */}
           <div className="w-[2.5rem] h-[2.5rem] flex items-center justify-center bg-gradient-to-r
              from-primary to-[#f3d14b] rounded-full">
@@ -52,6 +57,12 @@ export default function TextChatBox() {
             animate={{ scale: [1, 1.2, 1] }}
             transition={{ repeat: Number.POSITIVE_INFINITY, duration: 2 }}
           />
+          {
+            closeable && !isOpen &&
+            <X className={`absolute -top-[1.7rem] right-0 p-1 w-[20px] h-[20px] text-secondary bg-white shadow-sm 
+              rounded-full cursor-pointer z-[70] hover:scale-105 hover:transition hover:duration-150 hover:ease-in`}
+                onClick={()=> onCloseChat()}/>
+          }
         </button>
 
       <AnimatePresence>
@@ -145,7 +156,7 @@ export default function TextChatBox() {
                       value={newMessage}
                       onChange={(e)=> handleTyping(e)}
                       placeholder="Type your message..."
-                      className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-[13px] focus:outline-none focus:ring-2
+                      className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-[13px] text-black focus:outline-none focus:ring-2
                        placeholder:text-[12px] focus:ring-blue-500 focus:border-transparent"
                       disabled={!isConnected}
                     />
@@ -162,6 +173,13 @@ export default function TextChatBox() {
                 </form>
               </>
             )}
+{/* 
+            {
+              closeable && isOpen &&
+              <X className="absolute top-[5px] left-[5px] p-1 w-[20px] h-[20px] text-secondary bg-white shadow-sm rounded-full 
+              cursor-pointer hover:scale-105 hover:transition hover:duration-150 hover:ease-in"
+                onClick={()=> onCloseChat()}/>
+            } */}
           </motion.div>
         )}
       </AnimatePresence>

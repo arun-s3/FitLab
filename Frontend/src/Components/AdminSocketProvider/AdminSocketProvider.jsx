@@ -38,9 +38,9 @@ export default function AdminSocketProvider() {
       [user.socketId]: 0,
     }))
 
-    if (socket) {
-      socket.emit("join-room", user.userId)
-    }
+    // if (socket) {
+    //   socket.emit("user-join-room", user.userId)
+    // }
   }
 
 
@@ -50,12 +50,19 @@ export default function AdminSocketProvider() {
     socket.on("connect", () => {
       setIsConnected(true)
       socket.emit("admin-login", { adminId: "admin_1", adminName })
+      console.log("Admin going to join all rooms...")
+      socket.emit("admin-joins-every-rooms")
 
       socket.emit('count-all-guests')
     })
 
     socket.on("disconnect", () => {
       setIsConnected(false) 
+    })
+
+    socket.on("let-user-connect-admin", (roomId)=> {
+      console.log("Inside let-user-connect-admin and Emiting admin-permits-user-connection...")
+      socket.emit("admin-permits-user-connection", roomId)
     })
 
     socket.on("active-users-update", (users) => {
@@ -68,12 +75,32 @@ export default function AdminSocketProvider() {
       handleUserSelect(updater.user)
     })
 
+    // socket.on("user-selected", (user) => {
+    //   if(!selectedUser){
+    //     console.log("Inside on- user-selected")
+    //     handleUserSelect(user)
+    //   }
+    // }) ---> Test this later for admin multiple tab synchronous
+
+    // socket.on("admin-message-sent", (message) => {
+    //   console.log("Inside on- admin-message-sent....selectedUser--->", selectedUser)
+    //   if(selectedUser?.username && selectedUser.username === message.username){
+    //     console.log("Message sent by admin--->", message)
+    //     setMessages((prev) => ({
+    //     ...prev,
+    //     [selectedUser.username]: [...(prev[selectedUser?.username] || []), message],
+    //     }))
+    //   }
+    // }) ---> Test this later for admin multiple tab synchronous
+
     socket.on("receive-message", (message) => {
-      console.log("Message received from user--->", message)
-      setMessages((prev) => ({
-        ...prev,
-        [message.sender]: [...(prev[message.sender] || []), message],
-      }))
+      // if(message.sender !== adminName){
+        console.log("Message received from user--->", message)
+        setMessages((prev) => ({
+          ...prev,
+          [message.sender]: [...(prev[message.sender] || []), message],
+        }))
+      // }
       // if(selectedUser){
       //   setMessages((prev) => ({
       //   ...prev,
@@ -114,7 +141,7 @@ export default function AdminSocketProvider() {
       setGuestCount(count)
     }) 
 
-    socket.on('reconnect-user', (user)=> {
+    socket.on('reconnect-if-user-selected', (user)=> {
       if(selectedUser.username === user.username){
         handleUserSelect(user)
       }
@@ -220,6 +247,7 @@ export default function AdminSocketProvider() {
           socket,
           guestCount,
           activeUsers,
+          setActiveUsers,
           selectedUser,
           setSelectedUser,
           messages, 

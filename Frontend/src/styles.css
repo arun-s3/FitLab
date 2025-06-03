@@ -853,6 +853,10 @@ select{
   top: -0.75rem;
 }
 
+.-top-\[1\.7rem\]{
+  top: -1.7rem;
+}
+
 .-top-\[7px\]{
   top: -7px;
 }
@@ -1371,6 +1375,10 @@ select{
 
 .z-\[5\]{
   z-index: 5;
+}
+
+.z-\[70\]{
+  z-index: 70;
 }
 
 .col-span-2{
@@ -2206,6 +2214,10 @@ select{
   height: 20px;
 }
 
+.h-\[21px\]{
+  height: 21px;
+}
+
 .h-\[22px\]{
   height: 22px;
 }
@@ -2649,6 +2661,10 @@ select{
 
 .w-\[20rem\]{
   width: 20rem;
+}
+
+.w-\[21px\]{
+  width: 21px;
 }
 
 .w-\[22px\]{

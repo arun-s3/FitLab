@@ -436,6 +436,25 @@ const generateUniqueGuestUser = (req, res, next) => {
     }
 }
 
+const verifyAndDeleteGuestUser = async(req, res, next)=> {
+    try{  
+        console.log("Inside verifyAndDeleteGuestUser...")
+        const ip = req.ip
+        if(guestUsersByIP.has(ip)){
+            const {userId, username} = guestUsersByIP.get(ip)
+            console.log(`username--> ${username}...userId--> ${userId}`)
+            guestUsersByIP.delete(ip)
+            return res.status(200).json({wasGuest: true, credentials: {userId, username}});
+        }else{
+            return res.status(200).json({wasGuest: false});
+        }
+    }
+    catch(error) {
+        console.error("Error in verifyAndDeleteGuestUser from userController", error)
+        next(error)
+    }
+}
+
 
 const signout = (req,res,next)=>{
     console.log("JWT Cookie from signout controller-->"+req.cookies.jwt)
@@ -451,4 +470,4 @@ const signout = (req,res,next)=>{
 
 
 module.exports = {tester, createUser, sendOtp, verifyOtp, loginUser, updateUserDetails, updateForgotPassword, resetPassword,
-     googleSignin, getUserId, searchUsernames, totalUsersCount, generateUniqueGuestUser, signout}
+     googleSignin, getUserId, searchUsernames, totalUsersCount, generateUniqueGuestUser, verifyAndDeleteGuestUser, signout}

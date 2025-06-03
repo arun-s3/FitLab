@@ -45,9 +45,9 @@ export default function AdminTextChatSupportPage() {
       [user.socketId]: 0,
     }))
 
-    if (socket) {
-      socket.emit("join-room", user.userId)
-    }
+    // if (socket) {
+    //   socket.emit("user-join-room", user.userId)
+    // }
   }
 
   useEffect(()=> {

@@ -24,6 +24,8 @@ export default function SocketProvider(props) {
     const [username, setUsername] = useState(null)  
     const [roomId, setRoomId] = useState(null) 
 
+    const [userWasGuest, setUserWasGuest] = useState({wasGuest: false, credentials: {}})
+
     const [messages, setMessages] = useState([
         {
           id: 1,
@@ -41,8 +43,14 @@ export default function SocketProvider(props) {
     const typingTimeoutRef = useRef(null)
 
     
-    useEffect(()=> {
+    useEffect(()=> { 
       async function fetchUserId(){
+        const guestVerificationRes = await axios.get('http://localhost:3000/guest-check', {withCredentials: true})
+        console.log("guestVerificationRes--->", guestVerificationRes.data)
+        if(guestVerificationRes.data.wasGuest){
+          const {userId, username} = guestVerificationRes.data.credentials
+          setUserWasGuest({wasGuest: true, credentials: {userId, username}})
+        }
         const response = await axios.get('http://localhost:3000/getUserid', {withCredentials: true})
         console.log("response from fetchUserId--->", response)
         const decryptedUserId = decryptData(response.data.encryptedUserId)
@@ -65,15 +73,24 @@ export default function SocketProvider(props) {
     useEffect(()=> {
         console.log("username--->", username)
         console.log("roomId--->", roomId)
-    },[username, roomId])
+        console.log("userWasGuest--->", userWasGuest)
+    },[username, roomId, userWasGuest])
 
     useEffect(() => {
         const socket = io("http://localhost:3000")
     
         socket.on("connect", () => {
           setIsConnected(true)
-          socket.emit("user-login", { userId: roomId, username })
-          socket.emit("join-room", roomId)
+          if(userWasGuest.wasGuest){
+            console.log("Guest details before emiting delete-guest--->", userWasGuest)
+            socket.emit("delete-guest", {userId: userWasGuest.credentials.userId, username: userWasGuest.credentials.username})
+            setUserWasGuest({wasGuest: false, credentials: {}})
+          }
+          if(roomId && username){
+            socket.emit("user-login", { userId: roomId, username })
+            console.log("User going to join room....")
+            socket.emit("user-join-room", roomId)
+          }
         })
     
         socket.on("disconnect", () => {

@@ -2,7 +2,8 @@ const express = require('express')
 const userRouter = express.Router()
 const {isLogin, isLogout} = require('../Middlewares/Authentication')
 const {tester, createUser, sendOtp, verifyOtp, loginUser, updateForgotPassword, resetPassword, updateUserDetails, googleSignin,
-     signout, getUserId,searchUsernames, totalUsersCount, generateUniqueGuestUser, googleSignout} = require('../Controllers/userController')
+     signout, getUserId,searchUsernames, totalUsersCount, generateUniqueGuestUser, verifyAndDeleteGuestUser,
+     googleSignout} = require('../Controllers/userController')
 
 userRouter.get('/test', tester)
 
@@ -18,6 +19,7 @@ userRouter.get('/search/:searchTerm', isLogin, searchUsernames)
 userRouter.get('/getUserid', isLogin, getUserId) 
 userRouter.get('/totalUsers', isLogin, totalUsersCount)
 userRouter.get('/guest', generateUniqueGuestUser)
+userRouter.get('/guest-check', verifyAndDeleteGuestUser)
 userRouter.post('/googleSignin', googleSignin)
 userRouter.get('/googlesignout', signout) 
 

@@ -7,16 +7,22 @@ import {IoIosSearch} from "react-icons/io"
 import {CiUser} from "react-icons/ci"
 import {IoCartOutline} from "react-icons/io5"
 import {MdFavoriteBorder} from "react-icons/md"
+import {Headset} from "lucide-react"
+
 
 import Logo from '../Logo/Logo'
 import UserHead from '../UserHead/UserHead'
 import {SiteButton} from '../SiteButtons/SiteButtons'
 import CartSidebar from '../../Components/CartSidebar/CartSidebar'
+import TextChatBox from '../../Pages/User/TextChatBox/TextChatBox'
+
 
 
 export default function Header({customStyle}){
 
     const [isCartOpen, setIsCartOpen] = useState(false)
+
+    const [openChatBox, setOpenChatBox] = useState(false)
     
     const {userToken,user} = useSelector((state)=>state.user)
     const {cart} = useSelector(state=> state.cart)    
@@ -65,7 +71,7 @@ export default function Header({customStyle}){
                 <i onClick={()=> navigate('/account')}>
                     <CiUser style={{fontSize:'25px'}}/>
                 </i>
-                <i className='relative' onClick={()=> navigate('/cart')} onMouseEnter={()=> openCartSidebar()} >
+                <i className='relative' onClick={()=> setOpenChatBox()} onMouseEnter={()=> openCartSidebar()} >
                     <IoCartOutline style={{fontSize:'23px'}}/>
                     {
                      cart?.products && cart.products.length > 0 &&
@@ -79,6 +85,9 @@ export default function Header({customStyle}){
                 <i onClick={()=> navigate('/wishlist')}>
                     <MdFavoriteBorder style={{fontSize:'25px'}}/>
                 </i>
+                <i onClick={()=> setOpenChatBox(true)}>
+                    <Headset className='w-[21px] h-[21px]'/>
+                </i>
                 {
                     (userToken && user)?<UserHead/> 
                              :<SiteButton customStyle={{marginLeft:'25px'}}> <Link to='/signin'> Sign In </Link></SiteButton>
@@ -86,6 +95,15 @@ export default function Header({customStyle}){
             </div>
                 
                 <CartSidebar isOpen={isCartOpen} onClose={()=> setIsCartOpen(false)} retractedView={true} />
+
+                {
+                    openChatBox &&
+                    <div className="fixed bottom-[2rem] right-[2rem] z-50">
+                  
+                        <TextChatBox closeable={true} onCloseChat={()=> setOpenChatBox(false)}/>
+                          
+                    </div>
+                }
 
         </div>
     )

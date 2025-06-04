@@ -22,6 +22,8 @@ export default function AdminSocketProvider() {
   const [typingUsers, setTypingUsers] = useState({})
   const [unreadCounts, setUnreadCounts] = useState({})
 
+  const [notifications, setNotifications] = useState([])
+
   const messagesEndRef = useRef(null)
   const adminName = "Support Agent"
 
@@ -100,6 +102,14 @@ export default function AdminSocketProvider() {
           ...prev,
           [message.sender]: [...(prev[message.sender] || []), message],
         }))
+        if(message.sender !== adminName && ( selectedUser == null || message.sender !== selectedUser.username)){
+          console.log("Setting notification....")
+          setNotifications(notification=> {
+            const requiredNotification = notification && notification.find(status=> status.sender === message.sender)
+            let msgCount = requiredNotification ? requiredNotification.msgCount : 0
+            return [...notification, {sender: message.sender, msgCount}]
+          })
+        } 
       // }
       // if(selectedUser){
       //   setMessages((prev) => ({
@@ -182,10 +192,10 @@ export default function AdminSocketProvider() {
       console.log("selectedUser.userId--->", selectedUser.userId)
       setLastSeen(selectedUser.lastSeen)
     }
-    if(activeUsers){
-      console.log("activeUsers--->", activeUsers)
+    if(notifications){
+      console.log("notifications--->", notifications)
     }
-  },[typingUsers, selectedUser, activeUsers])
+  },[typingUsers, selectedUser, activeUsers, notifications])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -254,6 +264,8 @@ export default function AdminSocketProvider() {
           newMessage, 
           typingUsers, 
           unreadCounts, 
+          notifications,
+          setNotifications,
           lastSeen,
           setLastSeen,
           setUnreadCounts,

@@ -27,6 +27,8 @@ export default function AdminTextChatSupportPage() {
       typingUsers, 
       unreadCounts,
       setUnreadCounts, 
+      notifications,
+      setNotifications,
       lastSeen,
       setLastSeen,
       messagesEndRef, 
@@ -40,10 +42,20 @@ export default function AdminTextChatSupportPage() {
   const handleUserSelect = (user) => {
     setSelectedUser(user)
     setLastSeen(user.lastSeen)
-    setUnreadCounts((prev) => ({
-      ...prev,
-      [user.socketId]: 0,
-    }))
+    // setUnreadCounts((prev) => ({
+    //   ...prev,
+    //   [user.socketId]: 0,
+    // }))
+    console.log("Clearing notifications....")
+    setNotifications(notifications=> {
+      notifications.map(statusObj=> {
+        if(statusObj.sender === user.username){
+          statusObj.msgCount = 0
+        }
+        return statusObj
+      })
+      return notifications
+    })
 
     // if (socket) {
     //   socket.emit("user-join-room", user.userId)
@@ -237,7 +249,7 @@ export default function AdminTextChatSupportPage() {
                 onClick={() => handleUserSelect(user)}
               >
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
+                  <div className="w-full flex items-center space-x-3">
                     <div className="relative">
                       <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
                         <User size={20} className="text-gray-600" />
@@ -249,14 +261,14 @@ export default function AdminTextChatSupportPage() {
                         }`}
                       />
                     </div>
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0 w-full">
                       <div className="font-medium text-gray-900 truncate flex items-center gap-[5px]">
                         <span> {user.username} </span>
                         <span className="text-[11px] text-green-500 italic">
                            {(user.username).startsWith('guest') ? '(Guest)' : null} 
                         </span>
                       </div>
-                      <div className="text-xs text-gray-500 flex items-center">
+                      <div className="w-full text-xs text-gray-500 flex items-center justify-between">
                         {!user.isOnline && <Clock size={12} className="mr-1" />}
                         {
                           user.isOnline && selectedUser && typingUsers[selectedUser?.userId] ? 
@@ -275,6 +287,17 @@ export default function AdminTextChatSupportPage() {
                             </motion.div>
                           )
                           : user.isOnline ? "Online" : formatLastSeen(user.lastSeen) 
+                        }
+                        {
+                          notifications.some(status=> status.sender === user.username) && (
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center"
+                          >
+                              { notifications.find(status=> status.sender === user.username).msgCount }
+                           </motion.div>
+                          )
                         }
                       </div>
                     </div>

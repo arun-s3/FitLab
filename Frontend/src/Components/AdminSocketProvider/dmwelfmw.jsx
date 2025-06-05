@@ -11,6 +11,7 @@ export default function AdminSocketProvider() {
   const [isConnected, setIsConnected] = useState(false)
     
   const [activeUsers, setActiveUsers] = useState([])
+  const [selectedUser, setSelectedUser] = useState(null)
  
   const [guestCount, setGuestCount] = useState(0)
 
@@ -26,19 +27,23 @@ export default function AdminSocketProvider() {
   const messagesEndRef = useRef(null)
   const adminName = "Support Agent"
 
+  const [textOrReply, setTextOrReply] = useState('Text')
 
-  // const handleUserSelect = (user)=> {
-  //   setSelectedUser(user)
-  //   setLastSeen(user.lastSeen)
-  //   setUnreadCounts((prev) => ({
-  //     ...prev,
-  //     [user.socketId]: 0,
-  //   }))
+  const [lastSeen, setLastSeen] = useState('')
+
+
+  const handleUserSelect = (user)=> {
+    setSelectedUser(user)
+    setLastSeen(user.lastSeen)
+    setUnreadCounts((prev) => ({
+      ...prev,
+      [user.socketId]: 0,
+    }))
 
     // if (socket) {
     //   socket.emit("user-join-room", user.userId)
     // }
-  // }
+  }
 
 
   useEffect(() => {
@@ -66,6 +71,12 @@ export default function AdminSocketProvider() {
       setActiveUsers(users)
     })
 
+    socket.on("updated-activeUsers", (updater) => {
+      console.log("Inside updated-activeUsers")
+      setActiveUsers(updater.users)
+      handleUserSelect(updater.user)
+    })
+
     // socket.on("user-selected", (user) => {
     //   if(!selectedUser){
     //     console.log("Inside on- user-selected")
@@ -91,6 +102,30 @@ export default function AdminSocketProvider() {
           ...prev,
           [message.sender]: [...(prev[message.sender] || []), message],
         }))
+        console.log(`Now message.sender is ${message.sender} and selectedUser.username is ${selectedUser?.username}`)
+        if(message.sender !== adminName && ( selectedUser == null || message.sender !== selectedUser.username)){
+          console.log("Setting notification....")
+          setNotifications(notifications=> {
+            const userExists = notifications.some(statusObj=> statusObj.sender === message.sender)
+            if(userExists){
+              return notifications.map(statusObj=> {
+                if(statusObj.sender === message.sender){
+                  return { ...statusObj, msgCount: statusObj.msgCount + 1 }
+                }
+                return statusObj
+              })
+            }else{
+              return [...notifications, {sender: message.sender, msgCount: 1}]
+            }
+          })
+        } 
+
+      if (!selectedUser || selectedUser.socketId !== message.socketId) {
+        setUnreadCounts((prev) => ({
+          ...prev,
+          [message.socketId]: (prev[message.socketId] || 0) + 1,
+        }))
+      }
     })
 
     socket.on("new-message-notification", (message) => {
@@ -118,6 +153,20 @@ export default function AdminSocketProvider() {
       setGuestCount(count)
     }) 
 
+    socket.on('reconnect-if-user-selected', (user)=> {
+      if(selectedUser.username === user.username){
+        handleUserSelect(user)
+      }
+    })
+
+    socket.on('update-last-seen', (user)=> {
+      console.log("Inside update-last-seen")
+      console.log("selectedUser--->", selectedUser)
+      if(selectedUser && selectedUser.username === user.username){
+        setLastSeen(user.lastSeen)
+      }
+    })
+
     setSocket(socket)
 
     return () => {
@@ -125,7 +174,36 @@ export default function AdminSocketProvider() {
     }
   }, [])
 
-  const handleSendMessage = (e, selectedUser) => {
+  useEffect(()=> {
+    scrollToBottom()
+
+    console.log("Messages--->", messages)
+    if(selectedUser && messages?.[selectedUser.username]?.length > 0){
+      console.log("messages[messages.length - 1]---->", messages[selectedUser.username][messages.length - 1])
+      const lastMsg = messages[selectedUser.username][messages[selectedUser.username].length - 1]
+      const isLastMsgByAdmin = lastMsg.isAdmin
+      if(!isLastMsgByAdmin){
+        setTextOrReply('Reply')
+      }else setTextOrReply('Text')
+    }
+  }, [messages, selectedUser])
+
+  useEffect(()=> {
+    console.log("typingUsers--->", typingUsers)
+    if(selectedUser){
+      console.log("selectedUser.username--->", selectedUser.username)
+      setLastSeen(selectedUser.lastSeen)
+    }
+    if(notifications){
+      console.log("notifications--->", notifications)
+    }
+  },[typingUsers, selectedUser, activeUsers, notifications])
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
+
+  const handleSendMessage = (e) => {
     e.preventDefault()
     if (!newMessage.trim() || !socket || !selectedUser) return
 
@@ -161,7 +239,7 @@ export default function AdminSocketProvider() {
       })
   }
 
-  const handleTyping = (e, selectedUser) => {
+  const handleTyping = (e) => {
     setNewMessage(e.target.value)
 
     if (socket && selectedUser) {
@@ -182,14 +260,19 @@ export default function AdminSocketProvider() {
           guestCount,
           activeUsers,
           setActiveUsers,
+          selectedUser,
+          setSelectedUser,
           messages, 
           newMessage, 
           typingUsers, 
           unreadCounts, 
           notifications,
           setNotifications,
+          lastSeen,
+          setLastSeen,
           setUnreadCounts,
           messagesEndRef, 
+          textOrReply,
           handleTyping,
           handleSendMessage,
         }}

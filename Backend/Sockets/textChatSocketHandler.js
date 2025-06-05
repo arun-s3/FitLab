@@ -201,20 +201,20 @@ async function textChatBoxSocket(server) {
         })
       })
 
-      socket.on("update-and-sort-activeUsers", (user)=> {
-        console.log("Inside update-and-sort-activeUsers")
-        const userData = activeUsers.get(user.socketId)
-        activeUsers.delete(user.socketId)
-        // const newActiveUsers = new Map()
-        // newActiveUsers.set(userSocketId, user)
-        reorderedActiveUsers = [[user.socketId, userData], ...activeUsers.entries()]
-        activeUsers.clear()
-        for(const [key, value] of reorderedActiveUsers){
-          activeUsers.set(key, value)
-        }
-        console.log("activeUsers--->", activeUsers)
-        io.to("admin-room").emit("updated-activeUsers", {user, users: Array.from(activeUsers.values())})
-      })
+      // socket.on("update-and-sort-activeUsers", (user)=> {
+      //   console.log("Inside update-and-sort-activeUsers")
+      //   const userData = activeUsers.get(user.socketId)
+      //   activeUsers.delete(user.socketId)
+      //   // const newActiveUsers = new Map()
+      //   // newActiveUsers.set(userSocketId, user)
+      //   reorderedActiveUsers = [[user.socketId, userData], ...activeUsers.entries()]
+      //   activeUsers.clear()
+      //   for(const [key, value] of reorderedActiveUsers){
+      //     activeUsers.set(key, value)
+      //   }
+      //   console.log("activeUsers--->", activeUsers)
+      //   io.to("admin-room").emit("updated-activeUsers", {user, users: Array.from(activeUsers.values())})
+      // })
 
       socket.on("disconnect", () => {
         console.log("User disconnected:", socket.id)

@@ -15,22 +15,13 @@ export default function AdminTextChatSupportPage() {
   const [totalUsers, setTotalUsers] = useState(null)
   const [usernameList, setUsernameList] = useState({searched: false, list: []})
 
-  const [selectedUser, setSelectedUser] = useState(null)
-  const selectedUserRef = useRef(null)
-
-  const [initialActiveUser, setInitialActiveUser] = useState({})
-
-  const [textOrReply, setTextOrReply] = useState('Text')
-  const [lastSeen, setLastSeen] = useState('')
-
-  const adminName = "Support Agent"
-
-
   const {
       isConnected,
       socket,
       guestCount,
       activeUsers,
+      selectedUser,
+      setSelectedUser,
       messages, 
       newMessage, 
       typingUsers, 
@@ -38,7 +29,10 @@ export default function AdminTextChatSupportPage() {
       setUnreadCounts, 
       notifications,
       setNotifications,
+      lastSeen,
+      setLastSeen,
       messagesEndRef, 
+      textOrReply,
       handleTyping,
       handleSendMessage
   } = useContext(AdminSocketContext)
@@ -48,7 +42,10 @@ export default function AdminTextChatSupportPage() {
   const handleUserSelect = (user) => {
     setSelectedUser(user)
     setLastSeen(user.lastSeen)
-
+    // setUnreadCounts((prev) => ({
+    //   ...prev,
+    //   [user.socketId]: 0,
+    // }))
     console.log("Clearing notifications....")
     const notificationForUserExists = notifications.length > 0 && notifications.some(statusObj=> statusObj.sender === user.username)
     if(notificationForUserExists){
@@ -62,6 +59,10 @@ export default function AdminTextChatSupportPage() {
       return notifications
     })
     }
+
+    // if (socket) {
+    //   socket.emit("user-join-room", user.userId)
+    // }
   }
 
   useEffect(()=> {
@@ -73,81 +74,6 @@ export default function AdminTextChatSupportPage() {
       fetchTotalUserCount()
     }
   },[])
-
-  useEffect(()=> {
-    if(socket){
-      // socket.on("updated-activeUsers", (updater) => {
-      //   console.log("Inside updated-activeUsers")
-      //   setActiveUsers(updater.users)
-      //   handleUserSelect(updater.user)
-      // })
-      socket.on("receive-message", (message) => {
-        const selected = selectedUserRef.current
-        console.log(`Now message.sender is ${message.sender} and selectedUser.username is ${selected?.username}`)
-        if(message.sender !== adminName && ( !selected || message.sender !== selected.username)){
-          console.log("Setting notification....")
-          setNotifications(notifications=> {
-            const userExists = notifications.some(statusObj=> statusObj.sender === message.sender)
-            if(userExists){
-              return notifications.map(statusObj=> {
-                if(statusObj.sender === message.sender){
-                  return { ...statusObj, msgCount: statusObj.msgCount + 1 }
-                }
-                return statusObj
-              })
-            }else{
-              return [...notifications, {sender: message.sender, msgCount: 1}]
-            }
-          })
-        } 
-      })
-      socket.on('reconnect-if-user-selected', (user)=> {
-        if(selectedUser.username === user.username){
-          handleUserSelect(user)
-        }
-      })
-      socket.on('update-last-seen', (user)=> {
-        console.log("Inside update-last-seen")
-        console.log("selectedUser--->", selectedUser)
-        if(selectedUser && selectedUser.username === user.username){
-          setLastSeen(user.lastSeen)
-        }
-      })
-    }
-  },[socket])
-
-  useEffect(()=> {
-    selectedUserRef.current = selectedUser
-  }, [selectedUser])
-
-  useEffect(()=> {
-    scrollToBottom()
-
-    console.log("Messages--->", messages)
-    if(selectedUser && messages?.[selectedUser.username]?.length > 0){
-      console.log("messages[messages.length - 1]---->", messages[selectedUser.username][messages.length - 1])
-      const lastMsg = messages[selectedUser.username][messages[selectedUser.username].length - 1]
-      const isLastMsgByAdmin = lastMsg.isAdmin
-      if(!isLastMsgByAdmin){
-        setTextOrReply('Reply')
-      }else setTextOrReply('Text')
-    }
-  }, [messages, selectedUser])
-
-  useEffect(()=> {
-    console.log("typingUsers--->", typingUsers)
-    if(selectedUser){
-      console.log("selectedUser.username--->", selectedUser.username)
-      setLastSeen(selectedUser.lastSeen)
-    }
-    if(notifications){
-      console.log("notifications--->", notifications)
-    }
-  },[typingUsers, selectedUser, activeUsers, notifications])
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
 
   const fetchUsernameList = (searchTerm)=> {
     async function fetchUsernames(){
@@ -174,6 +100,7 @@ export default function AdminTextChatSupportPage() {
   const searchUsernames = (e)=> {
     console.log("Inside searchUsernames")
     const searchTerm = e.target.value
+    // setSearchTerm(e.target.value)
     console.log('searchTerm--->', searchTerm)
     if(searchTerm.trim() !== ''){
         console.log("Getting searched usernames--")
@@ -188,11 +115,9 @@ export default function AdminTextChatSupportPage() {
     console.log("Insdie selectSearchedUser...")
     const user = activeUsers.find(user=> user.username === username && user.isOnline)
     if(user){
-      setInitialActiveUser(user)
-      handleUserSelect(user)
-      // if(socket){
-      //   socket.emit("update-and-sort-activeUsers", user)
-      // }
+      if(socket){
+        socket.emit("update-and-sort-activeUsers", user)
+      }
     }else{
       // sendOfflineMessage(username)
     }
@@ -215,7 +140,6 @@ export default function AdminTextChatSupportPage() {
     if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`
     return `${Math.floor(diffInMinutes / 1440)}d ago`
   }
-  
 
   return (
     <section id='AdminTextChatSupportPage'>
@@ -316,86 +240,79 @@ export default function AdminTextChatSupportPage() {
 
         <div className="flex-1 overflow-y-auto">
           <AnimatePresence>
-            {
-              [...activeUsers].sort((a, b) => {
-                  if (!initialActiveUser) return 0;
-                  if (a.userId === initialActiveUser.userId) return -1;
-                  if (b.userId === initialActiveUser.userId) return 1;
-                  return 0;
-                })
-                .map((user) => (
-                  <motion.div
-                    key={user.socketId}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
-                      selectedUser?.socketId === user.socketId ? "bg-blue-50 border-l-4 border-l-blue-500" : ""
-                    }`}
-                    onClick={() => handleUserSelect(user)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="w-full flex items-center space-x-3">
-                        <div className="relative">
-                          <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                            <User size={20} className="text-gray-600" />
-                          </div>
-                          <Circle
-                            size={12}
-                            className={`absolute -bottom-1 -right-1 ${
-                              user.isOnline ? "text-green-500 fill-green-500" : "text-gray-400 fill-gray-400"
-                            }`}
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0 w-full">
-                          <div className="font-medium text-gray-900 truncate flex items-center gap-[5px]">
-                            <span> {user.username} </span>
-                            <span className="text-[11px] text-green-500 italic">
-                               {(user.username).startsWith('guest') ? '(Guest)' : null} 
+            {activeUsers.map((user) => (
+              <motion.div
+                key={user.socketId}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
+                  selectedUser?.socketId === user.socketId ? "bg-blue-50 border-l-4 border-l-blue-500" : ""
+                }`}
+                onClick={() => handleUserSelect(user)}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="w-full flex items-center space-x-3">
+                    <div className="relative">
+                      <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                        <User size={20} className="text-gray-600" />
+                      </div>
+                      <Circle
+                        size={12}
+                        className={`absolute -bottom-1 -right-1 ${
+                          user.isOnline ? "text-green-500 fill-green-500" : "text-gray-400 fill-gray-400"
+                        }`}
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0 w-full">
+                      <div className="font-medium text-gray-900 truncate flex items-center gap-[5px]">
+                        <span> {user.username} </span>
+                        <span className="text-[11px] text-green-500 italic">
+                           {(user.username).startsWith('guest') ? '(Guest)' : null} 
+                        </span>
+                      </div>
+                      <div className="w-full text-xs text-gray-500 flex items-center justify-between">
+                        {
+                          user.isOnline ?  "Online" 
+                          : <span className="flex items-center gap-[5px]">
+                              <Clock size={12} className="mr-1" /> 
+                              <span> {formatLastSeen(user.lastSeen)} </span>
                             </span>
-                          </div>
-                          <div className="w-full text-xs text-gray-500 flex items-center justify-between">
-                            {
-                              user.isOnline ?  "Online" 
-                              : <span className="flex items-center gap-[5px]">
-                                  <Clock size={12} className="mr-1" /> 
-                                  <span> {formatLastSeen(user.lastSeen)} </span>
-                                </span>
-                            }
-                            {
-                              user.isOnline && selectedUser && typingUsers[selectedUser?.username] &&
-                              (
-                                <motion.div className="flex items-center gap-[5px]" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                                  <span className="text-xs text-green-500"> typing </span>
-                                  <motion.div
-                                    className="flex space-x-1 mt-[2px]"
-                                    animate={{ opacity: [0.5, 1, 0.5] }}
-                                    transition={{ repeat: Number.POSITIVE_INFINITY, duration: 1.5 }}
-                                  >
-                                    <div className="w-1 h-1 bg-gray-400 rounded-full" />
-                                    <div className="w-1 h-1 bg-gray-400 rounded-full" />
-                                    <div className="w-1 h-1 bg-gray-400 rounded-full" />
-                                  </motion.div>
-                                </motion.div>
-                              )
-                            }
-                            { notifications &&
-                              notifications.length > 0 && notifications.some(status=> status.sender === user.username) && (
-                                notifications.find(status=> status.sender === user.username).msgCount > 0 &&
+                        }
+                        {
+                          user.isOnline && selectedUser && typingUsers[selectedUser?.username] &&
+                          (
+                            <motion.div className="flex items-center gap-[5px]" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                              <span className="text-xs text-green-500"> typing </span>
                               <motion.div
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center"
+                                className="flex space-x-1 mt-[2px]"
+                                animate={{ opacity: [0.5, 1, 0.5] }}
+                                transition={{ repeat: Number.POSITIVE_INFINITY, duration: 1.5 }}
                               >
-                                  { notifications.find(status=> status.sender === user.username).msgCount }
-                               </motion.div>
-                              )
-                            }
-                          </div>
-                        </div>
+                                <div className="w-1 h-1 bg-gray-400 rounded-full" />
+                                <div className="w-1 h-1 bg-gray-400 rounded-full" />
+                                <div className="w-1 h-1 bg-gray-400 rounded-full" />
+                              </motion.div>
+                            </motion.div>
+                          )
+                        }
+                        { notifications &&
+                          notifications.length > 0 && notifications.some(status=> status.sender === user.username) && (
+                            notifications.find(status=> status.sender === user.username).msgCount > 0 &&
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center"
+                          >
+                              { notifications.find(status=> status.sender === user.username).msgCount }
+                           </motion.div>
+                          )
+                        }
                       </div>
                     </div>
-                  </motion.div>
+                  </div>
+                </div>
+              </motion.div>
             ))}
           </AnimatePresence>
 
@@ -489,12 +406,12 @@ export default function AdminTextChatSupportPage() {
               <div ref={messagesEndRef} />
             </div>
 
-            <form onSubmit={(e)=> handleSendMessage(e, selectedUser)} className="p-4 border-t border-gray-200 bg-white">
+            <form onSubmit={(e)=> handleSendMessage(e)} className="p-4 border-t border-gray-200 bg-white">
               <div className="flex space-x-3">
                 <input
                   type="text"
                   value={newMessage}
-                  onChange={(e)=> handleTyping(e, selectedUser)}
+                  onChange={(e)=> handleTyping(e)}
                   placeholder={` ${textOrReply === 'Text' ?
                                `Type a message for ${selectedUser.username}...` : `Reply to ${selectedUser.username}...`} `}
                   className="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-[13px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"

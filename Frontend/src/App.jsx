@@ -23,7 +23,7 @@ import OrderConfirmationPage from './Pages/User/OrderConfirmationPage/OrderConfi
 import OrderHistoryPage from './Pages/User/OrderHistoryPage/OrderHistoryPage'
 import WalletPage from './Pages/User/WalletPage/WalletPage'
 import CustomerSupportPage from './Pages/User/CustomerSupportPage/CustomerSupportPage'
-import VideoChatPage from './Pages/User/VideoChatPage/VideoChatPage'
+// import VideoChatPage from './Pages/User/VideoChatPage/VideoChatPage'
 
 import AdminSignInPage from './Pages/Admin/AdminSignInPage/AdminSignInPage'
 import AdminPageLayout from './Pages/Admin/AdminPageLayout/AdminPageLayout'
@@ -102,7 +102,7 @@ export default function App(){
                     </Route>
                     <Route path='orders' element={<OrderHistoryPage/>} />
                     <Route path='support' element={<CustomerSupportPage/>} />
-                    <Route path='video' element={<VideoChatPage/>} />
+                    {/* <Route path='video' element={<VideoChatPage/>} /> */}
                     {/* <Route path='wallet' element={<WalletPage/>} /> */}
                     <Route path='profile'> 
                     </Route>

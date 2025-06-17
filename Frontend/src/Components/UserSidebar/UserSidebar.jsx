@@ -3,7 +3,8 @@ import './UserSidebar.css'
 import {Link, useLocation, useNavigate} from 'react-router-dom'
 import {useSelector} from 'react-redux';
 
-import {Camera, ChevronsDown, Clock, CreditCard, Heart, BadgePercent, Home, Key, LogOut, MapPin, RefreshCw, ShoppingCart} from 'lucide-react'
+import {Camera, ChevronsDown, Clock, CreditCard, Heart, BadgePercent, Home, Key, LogOut, MapPin, RefreshCw,
+     ShoppingCart, Headset} from 'lucide-react'
 import {IoMdPerson} from "react-icons/io"
 import {IoBagCheckOutline} from "react-icons/io5"
 
@@ -27,6 +28,7 @@ export default function UserSidebar({currentPath, openMenuByDefault = true, flex
         { icon: RefreshCw, label: 'Compare', path: '/' },
         { icon: MapPin, label: 'Manage Addresses', path: '/account/addresses' },
         { icon: Key, label: 'Change Password', path: '' },
+        { icon: Headset, label: 'Support (Chat/Video)', path: '/support' },
         { icon: LogOut, label: 'Sign out', path: '/orders' },
     ]
 

@@ -4,6 +4,7 @@ import {motion} from 'framer-motion'
 
 import Header from '../../../Components/Header/Header'
 import TestimonialsSection from './TestimonialsSection'
+import UserSidebar from '../../../Components/UserSidebar/UserSidebar'
 import Footer from '../../../Components/Footer/Footer'
 
 
@@ -69,12 +70,22 @@ export default function CustomerSupportPage(){
                     </svg>
                 </div>
                         
-                <main>
+                <main className='-mt-[4rem]'>
 
-                    <div className='mt-8'>
-        
+                    <div className='w-full flex gap-[2rem] px-[4rem]'>   {/* mb-[10rem] */}
+
+                      <div className='basis-[15%]'>
+                                                                
+                        <UserSidebar currentPath='/support' />
+                                            
+                      </div>
+
+                    </div>
+
+                    <div className='mt-8 '>
+
                         <TestimonialsSection/>
-        
+
                     </div>
 
                 </main>

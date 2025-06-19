@@ -3,8 +3,12 @@ import './CustomerSupportPage.css'
 import {motion} from 'framer-motion'
 
 import Header from '../../../Components/Header/Header'
+import VideoSupportModule from './VideoSupportModule'
+import TextChatBox from '../../User/TextChatBox/TextChatBox'
 import TestimonialsSection from './TestimonialsSection'
+import MiniTestimonialCarousal from '../../../Components/MiniTestimonialCarousal/MiniTestimonialCarousal'
 import UserSidebar from '../../../Components/UserSidebar/UserSidebar'
+import FeaturesDisplay from '../../../Components/FeaturesDisplay/FeaturesDisplay'
 import Footer from '../../../Components/Footer/Footer'
 
 
@@ -63,21 +67,40 @@ export default function CustomerSupportPage(){
                                         
                 </header>
                 <div className="relative mt-[-13px] z-10">
-                    <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="w-full h-8 md:h-12 lg:h-16 fill-white block">
+                    <svg viewBox="0 0 1200 120" preserveAspectRatio="none" className="w-full h-8 md:h-12 lg:h-16 fill-gray-50 block">
                       <path d="M0,0 L48,8 L96,3 L144,12 L192,5 L240,15 L288,2 L336,18 L384,7 L432,22 L480,4 L528,16 L576,9 
                         L624,25 L672,6 L720,19 L768,11 L816,28 L864,8 L912,21 L960,13 L1008,30 L1056,10 L1104,24 L1152,14 L1200,32
                          L1200,120 L0,120 Z" />
                     </svg>
                 </div>
                         
-                <main className='-mt-[4rem]'>
+                <main className='-mt-[4rem] bg-gradient-to-b from-gray-50 to-gray-100'>
 
-                    <div className='w-full flex gap-[2rem] px-[4rem]'>   {/* mb-[10rem] */}
+                    <div className='w-full flex gap-4 pl-[4rem] pr-[2rem]'>   {/* mb-[10rem] */}
 
                       <div className='basis-[15%]'>
                                                                 
                         <UserSidebar currentPath='/support' />
-                                            
+                        
+                                     
+                      </div>
+
+                      <div className='mt-[4rem] flex justify-between'>
+
+                        <VideoSupportModule />
+
+                        <div className='mt-[3rem]'>
+
+                          <TextChatBox isStatic={true} boxHeight={517} boxWidth={25}/>
+
+                          <div className='mt-[1.7rem]'>
+
+                            <MiniTestimonialCarousal />
+
+                          </div>
+
+                        </div>
+
                       </div>
 
                     </div>
@@ -90,6 +113,14 @@ export default function CustomerSupportPage(){
 
                 </main>
 
+                {/* <FeaturesDisplay darkVariant={true} topRoom={false}/> */}
+                {/* <footer> */}
+
+                  <FeaturesDisplay topRoom={false}/>
+                                            
+                  <Footer />
+
+                {/* </footer> */}
             </section>
         </>
     )

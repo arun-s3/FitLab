@@ -7,6 +7,7 @@ export default function ScheduleForm({ onSchedule }) {
   const [selectedTime, setSelectedTime] = useState("")
   const [isSubmitted, setIsSubmitted] = useState(false)
 
+  // Generate next 7 days for date selection
   const availableDates = Array.from({ length: 7 }, (_, i) => {
     const date = new Date()
     date.setDate(date.getDate() + i)
@@ -17,6 +18,7 @@ export default function ScheduleForm({ onSchedule }) {
     }
   })
 
+  // Sample time slots
   const timeSlots = ["09:00 AM", "10:00 AM", "11:00 AM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM"]
 
   const handleSubmit = (e) => {
@@ -34,9 +36,11 @@ export default function ScheduleForm({ onSchedule }) {
         animate={{ opacity: 1, scale: 1 }}
         className="relative overflow-hidden"
       >
+        {/* Background gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 rounded-3xl"></div>
 
         <div className="relative bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/50 p-8 md:p-12 text-center">
+          {/* Success icon */}
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
@@ -48,6 +52,7 @@ export default function ScheduleForm({ onSchedule }) {
               <Check className="h-12 w-12 text-green-600" />
             </div>
 
+            {/* Success rings */}
             <motion.div
               animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0, 0.5] }}
               transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
@@ -86,9 +91,11 @@ export default function ScheduleForm({ onSchedule }) {
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="relative overflow-hidden">
+      {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-3xl"></div>
 
       <div className="relative bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/50 p-6 md:p-8">
+        {/* Header */}
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2 flex items-center justify-center">
             <Calendar className="mr-3 h-8 w-8 text-blue-600" />
@@ -98,6 +105,7 @@ export default function ScheduleForm({ onSchedule }) {
         </div>
 
         <form onSubmit={handleSubmit}>
+          {/* Date selection */}
           <div className="mb-8">
             <label className="block text-gray-800 font-semibold mb-4 text-lg">Select a Date</label>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -140,6 +148,7 @@ export default function ScheduleForm({ onSchedule }) {
             </div>
           </div>
 
+          {/* Time selection */}
           {selectedDate && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
@@ -185,6 +194,7 @@ export default function ScheduleForm({ onSchedule }) {
             </motion.div>
           )}
 
+          {/* Submit button */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{

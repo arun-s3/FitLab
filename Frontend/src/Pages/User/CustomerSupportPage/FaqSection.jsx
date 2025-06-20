@@ -4,11 +4,12 @@ import { motion, AnimatePresence } from "framer-motion"
 import {Plus, Minus} from "lucide-react"
 
 import FaqDatas from './FaqDatas'
+import ContactUsModule from "./ContactUsModule"
 
 
-export default function TestimonialsSection() {
+export default function FaqSection() {
 
-  const [selectedTopic, setSelectedTopic] = useState("Equipment & Training")
+  const [selectedTopic, setSelectedTopic] = useState("Strength Equipment")
   const [openQuestion, setOpenQuestion] = useState(null)
   const [hoveredTopic, setHoveredTopic] = useState(null)
   const [hoveredQuestion, setHoveredQuestion] = useState(null)
@@ -61,18 +62,18 @@ export default function TestimonialsSection() {
           </svg>
         </div> */}
         <div className="relative z-10" style={faqContainerEffectStyle}>
-        <svg
-          viewBox="0 0 1200 120"
-          preserveAspectRatio="none"
-          className="w-full h-8 md:h-12 lg:h-16 fill-black block"
-        >
-          <path d="M0,0 L48,8 L96,3 L144,12 L192,5 L240,15 L288,2 L336,18 L384,7 L432,22 L480,4 L528,16 L576,9 L624,25 L672,6 L720,19 L768,11 L816,28 L864,8 L912,21 L960,13 L1008,30 L1056,10 L1104,24 L1152,14 L1200,32 L1200,120 L0,120 Z" />
-        </svg>
-      </div>
+          <svg
+            viewBox="0 0 1200 120"
+            preserveAspectRatio="none"
+            className="w-full h-8 md:h-12 lg:h-16 fill-black block"
+          >
+            <path d="M0,0 L48,8 L96,3 L144,12 L192,5 L240,15 L288,2 L336,18 L384,7 L432,22 L480,4 L528,16 L576,9 L624,25 L672,6 L720,19 L768,11 L816,28 L864,8 L912,21 L960,13 L1008,30 L1056,10 L1104,24 L1152,14 L1200,32 L1200,120 L0,120 Z" />
+          </svg>
+        </div>
 
       {/* <div className="w-full h-4 bg-black backdrop-blur filter-blur-[1px]"></div> */}
 
-        <div ref={faqContainerRef} className="-mt-[3px] bg-black relative overflow-hidden" onMouseMove={handleMouseMove}>
+        <div ref={faqContainerRef} className="-mt-[3px] pb-8 bg-black relative overflow-hidden" onMouseMove={handleMouseMove}>
           {/* Base grid - more visible */}
           <div
             className="absolute inset-0 opacity-15"
@@ -99,22 +100,24 @@ export default function TestimonialsSection() {
             }}
           />
 
+          <div className="flex gap-4">
           <div className="relative z-10 container mx-auto px-4 pt-0 pb-12">
             {/* Header */}
+            
             <motion.div
               initial={{ opacity: 0, y: -30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, ease: "easeOut" }}
-              className="text-center mb-12"
+              className="pl-4 text-left mb-12"
             >
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
+              <h1 className="text-[30px] font-bold text-white">
                 Frequently
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-200 to-purple-700">
                   {" "}
                   Asked Questions
                 </span>
               </h1>
-              <p className="text-gray-300 text-base md:text-lg max-w-3xl mx-auto">
+              <p className="text-gray-300 text-[13px] max-w-3xl">
                 Welcome to our FAQ section, where you'll find answers to all your burning questions about our gym and
                 fitness services!
               </p>
@@ -139,7 +142,7 @@ export default function TestimonialsSection() {
                       return (
                         <motion.button
                           key={topic}
-                          className={`block w-full text-left py-2.5 px-4 rounded-lg transition-all duration-200 text-sm ${
+                          className={`block w-full text-left py-2.5 px-4 rounded-lg transition-all duration-200 text-[13px] ${
                             isSelected
                               ? "text-purple-400 bg-purple-500/10"
                               : isHovered
@@ -169,8 +172,8 @@ export default function TestimonialsSection() {
               >
                 {/* Section Header */}
                 <div className="mb-6">
-                  <h2 className="text-xl font-semibold text-white mb-2 flex items-center gap-3">
-                    <div className="w-5 h-5 grid grid-cols-2 gap-0.5">
+                  <h2 className="text-[17px] font-semibold text-white mb-2 flex items-center gap-3">
+                    <div className="w-4 h-4 grid grid-cols-2 gap-0.5">
                       <div className="w-2 h-2 bg-purple-400 rounded-sm"></div>
                       <div className="w-2 h-2 bg-purple-400 rounded-sm"></div>
                       <div className="w-2 h-2 bg-purple-400 rounded-sm"></div>
@@ -242,12 +245,12 @@ export default function TestimonialsSection() {
                               whileTap={{ scale: 0.99 }}
                             >
                               <div className="flex justify-between items-center">
-                                <h3 className="text-base font-semibold text-white pr-4">{faq.question}</h3>
+                                <h3 className="text-[14px] text-white pr-4">{faq.question}</h3>
                                 <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.3 }}>
                                   {isOpen ? (
-                                    <Minus className="w-5 h-5 text-purple-400" />
+                                    <Minus className="w-5 h-5 text-primary" />
                                   ) : (
-                                    <Plus className="w-5 h-5 text-purple-400" />
+                                    <Plus className="w-5 h-5 text-primary" />
                                   )}
                                 </motion.div>
                               </div>
@@ -264,7 +267,7 @@ export default function TestimonialsSection() {
                                   className="overflow-hidden"
                                 >
                                   <div className="p-4 bg-black border-t border-purple-500/20">
-                                    <p className="text-gray-300 leading-relaxed text-sm">{faq.answer}</p>
+                                    <p className="text-[12px] text-gray-300 leading-relaxed">{faq.answer}</p>
                                   </div>
                                 </motion.div>
                               )}
@@ -277,7 +280,13 @@ export default function TestimonialsSection() {
                 </AnimatePresence>
               </motion.div>
             </div>
+
           </div> 
+
+            <ContactUsModule/>
+
+          </div> {/* neww */}
+
         </div>
       </div>
     </div>

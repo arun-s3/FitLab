@@ -5,7 +5,7 @@ import {motion} from 'framer-motion'
 import Header from '../../../Components/Header/Header'
 import VideoSupportModule from './VideoSupportModule'
 import TextChatBox from '../../User/TextChatBox/TextChatBox'
-import TestimonialsSection from './TestimonialsSection'
+import FaqSection from './FaqSection'
 import MiniTestimonialCarousal from '../../../Components/MiniTestimonialCarousal/MiniTestimonialCarousal'
 import UserSidebar from '../../../Components/UserSidebar/UserSidebar'
 import FeaturesDisplay from '../../../Components/FeaturesDisplay/FeaturesDisplay'
@@ -105,22 +105,22 @@ export default function CustomerSupportPage(){
 
                     </div>
 
-                    <div className='mt-8 '>
+                    <div className='mt-8'>
 
-                        <TestimonialsSection/>
+                        <FaqSection/>
 
                     </div>
 
                 </main>
 
-                {/* <FeaturesDisplay darkVariant={true} topRoom={false}/> */}
-                {/* <footer> */}
+                  <div className=''>   
 
-                  <FeaturesDisplay topRoom={false}/>
+                    <FeaturesDisplay topRoom={false}/>
+
+                  </div>
                                             
                   <Footer />
 
-                {/* </footer> */}
             </section>
         </>
     )

@@ -7,37 +7,37 @@ const testimonials = [
   {
     id: 1,
     text: "The adjustable dumbbells I ordered are incredible! Perfect for my home gym setup. Great quality and the delivery was super fast. Highly recommend for anyone serious about strength training.",
-    author: "Marcus Johnson",
+    author: "Somnath Tp",
     role: "Fitness Enthusiast",
-    image: "/placeholder.svg?height=80&width=80",
+    image: "https://i.pravatar.cc/300?img=67",
   },
   {
     id: 2,
     text: "Amazing selection of cardio equipment! Got my treadmill at an unbeatable price. The customer service team helped me choose the perfect model for my space and budget.",
-    author: "Sarah Mitchell",
+    author: "Rohini Varma",
     role: "Home Gym Owner",
-    image: "/placeholder.svg?height=80&width=80",
+    image: "https://i.pravatar.cc/300?img=42",
   },
   {
     id: 3,
     text: "Best supplement store online! Their whey protein is top quality and the pre-workout gives me incredible energy. Fast shipping and authentic products every time.",
-    author: "David Rodriguez",
+    author: "Rahul Kp",
     role: "Personal Trainer",
-    image: "/placeholder.svg?height=80&width=80",
+    image: "https://i.pravatar.cc/300?img=68",
   },
   {
     id: 4,
     text: "Love the yoga mats and resistance bands I purchased. Perfect quality for my studio classes. The accessories section has everything I need at competitive prices.",
-    author: "Emma Thompson",
+    author: "Nikhila K",
     role: "Yoga Instructor",
-    image: "/placeholder.svg?height=80&width=80",
+    image: "https://i.pravatar.cc/300?img=49",
   },
   {
     id: 5,
     text: "Ordered a complete power rack setup and couldn't be happier. Professional grade equipment at home gym prices. This store has transformed my training routine completely.",
-    author: "Jake Williams",
+    author: "Mohit R",
     role: "Powerlifter",
-    image: "/placeholder.svg?height=80&width=80",
+    image: "https://i.pravatar.cc/300?img=56",
   },
 ]
 
@@ -57,7 +57,7 @@ export default function TestimonialCarousel() {
   useEffect(() => {
     const interval = setInterval(() => {
       nextTestimonial()
-    }, 5000) 
+    }, 500000) 
 
     return () => clearInterval(interval) 
   }, [currentIndex])
@@ -66,7 +66,7 @@ export default function TestimonialCarousel() {
 
   return (
     <div className="w-full max-w-md mx-auto">
-      <div className="relative bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+      <div className="h-[20.5rem] relative bg-white rounded-lg border border-[#f4ebc9] p-6 shadow-sm">
         <button
           onClick={prevTestimonial}
           className="absolute left-2 top-1/2 -translate-y-1/2 p-2 hover:bg-gray-100 rounded-full transition-colors duration-200 z-10"

@@ -32,7 +32,7 @@ export default function RequestForm({ onImmediateRequest, onScheduleRequest }) {
           <div className="absolute inset-0 opacity-0 transition-opacity duration-500 rounded-2xl"></div>
           <button
             onClick={onImmediateRequest}
-            className="relative w-full rounded-2xl border border-primary"
+            className="relative w-full rounded-2xl border border-primary border-t-[10px]"
             style={bgImg} 
           >
             <div className='transition-all duration-500 p-8 flex flex-col items-center justify-center rounded-2xl 
@@ -79,7 +79,10 @@ export default function RequestForm({ onImmediateRequest, onScheduleRequest }) {
           <div className="absolute inset-0 bg-gradient-to-br from-green-500 via-emerald-600 to-teal-700 opacity-0 transition-opacity duration-500 rounded-2xl"></div>
           <button
             onClick={onScheduleRequest}
-            className="relative w-full bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 p-8 flex flex-col items-center justify-center border border-gray-100 group-hover:border-transparent group-hover:text-primaryDark transform group-hover:scale-[1.02]"
+            className="relative w-full bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500
+             p-8 flex flex-col items-center justify-center border border-t-green-600 border-t-[10px] border-gray-100 
+             group-hover:border-transparent group-hover:border-t-green-600 group-hover:rounded-t-none
+              group-hover:text-primaryDark transform group-hover:scale-[1.02] "
           >
             <div className="relative mb-6">
               <div className="absolute inset-0 bg-green-500 rounded-full blur-xl opacity-30 transition-opacity duration-500"></div>

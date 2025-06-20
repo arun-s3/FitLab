@@ -15,6 +15,7 @@ export default function VideoChat({ sessionId, onEndCall }) {
   const remoteVideoRef = useRef(null)
   const peerConnectionRef = useRef(null)
 
+  // WebRTC configuration
   const configuration = {
     iceServers: [{ urls: "stun:stun.l.google.com:19302" }, { urls: "stun:stun1.l.google.com:19302" }],
   }
@@ -24,21 +25,26 @@ export default function VideoChat({ sessionId, onEndCall }) {
 
     const initializeMedia = async () => {
       try {
+        // Get local media stream
         localStream = await navigator.mediaDevices.getUserMedia({
           video: true,
           audio: true,
         })
 
+        // Display local video
         if (localVideoRef.current) {
           localVideoRef.current.srcObject = localStream
         }
 
+        // Initialize WebRTC peer connection
         peerConnectionRef.current = new RTCPeerConnection(configuration)
 
+        // Add local tracks to peer connection
         localStream.getTracks().forEach((track) => {
           peerConnectionRef.current.addTrack(track, localStream)
         })
 
+        // Handle remote tracks
         peerConnectionRef.current.ontrack = (event) => {
           if (remoteVideoRef.current) {
             remoteVideoRef.current.srcObject = event.streams[0]
@@ -46,9 +52,11 @@ export default function VideoChat({ sessionId, onEndCall }) {
           }
         }
 
+        // Connect to signaling server
         socket.connect()
         socket.emit("joinSession", { sessionId })
 
+        // Handle signaling
         socket.on("offer", async (offer) => {
           await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(offer))
           const answer = await peerConnectionRef.current.createAnswer()
@@ -64,18 +72,22 @@ export default function VideoChat({ sessionId, onEndCall }) {
           await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate))
         })
 
+        // Handle ICE candidates
         peerConnectionRef.current.onicecandidate = (event) => {
           if (event.candidate) {
             socket.emit("iceCandidate", { sessionId, candidate: event.candidate })
           }
         }
 
+        // Create and send offer (in a real app, this would be done by the admin side)
+        // This is just for demo purposes
         setTimeout(async () => {
           const offer = await peerConnectionRef.current.createOffer()
           await peerConnectionRef.current.setLocalDescription(offer)
           socket.emit("offer", { sessionId, offer })
         }, 2000)
 
+        // Handle chat messages
         socket.on("chatMessage", (msg) => {
           setMessages((prev) => [...prev, { sender: "admin", text: msg.text }])
         })
@@ -86,6 +98,7 @@ export default function VideoChat({ sessionId, onEndCall }) {
 
     initializeMedia()
 
+    // Cleanup function
     return () => {
       if (localStream) {
         localStream.getTracks().forEach((track) => track.stop())
@@ -125,6 +138,7 @@ export default function VideoChat({ sessionId, onEndCall }) {
   }
 
   const handleEndCall = () => {
+    // Close peer connection and stop tracks
     if (peerConnectionRef.current) {
       peerConnectionRef.current.close()
     }
@@ -149,9 +163,11 @@ export default function VideoChat({ sessionId, onEndCall }) {
 
   return (
     <div className="relative overflow-hidden rounded-3xl shadow-2xl bg-white">
+      {/* Background gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black opacity-95 rounded-3xl"></div>
 
       <div className="relative h-[60vh] bg-gradient-to-br from-gray-900 to-black rounded-t-3xl">
+        {/* Remote video (full size) */}
         <video ref={remoteVideoRef} autoPlay playsInline className="w-full h-full object-cover" />
 
         {!isConnected && (
@@ -166,6 +182,7 @@ export default function VideoChat({ sessionId, onEndCall }) {
           </div>
         )}
 
+        {/* Local video (picture-in-picture) */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -182,6 +199,7 @@ export default function VideoChat({ sessionId, onEndCall }) {
         </motion.div>
       </div>
 
+      {/* Chat panel */}
       <motion.div
         initial={{ height: 0 }}
         animate={{ height: isChatOpen ? "250px" : 0 }}
@@ -226,6 +244,7 @@ export default function VideoChat({ sessionId, onEndCall }) {
         </div>
       </motion.div>
 
+      {/* Controls */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

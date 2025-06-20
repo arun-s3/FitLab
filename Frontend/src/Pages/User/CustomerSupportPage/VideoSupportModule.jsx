@@ -6,7 +6,7 @@ import WaitingRoom from "./VideoSupport/WaitingRoom"
 import ScheduleForm from "./VideoSupport/ScheduleForm"
 
 export default function VideoSupportModule() {
-  const [requestType, setRequestType] = useState(null) 
+  const [requestType, setRequestType] = useState(null) // "immediate" or "scheduled"
   const [isWaiting, setIsWaiting] = useState(false)
   const [inCall, setInCall] = useState(false)
   const [callData, setCallData] = useState(null)
@@ -19,6 +19,7 @@ export default function VideoSupportModule() {
   const handleScheduleRequest = (scheduledTime) => {
     setRequestType("scheduled")
     setCallData(scheduledTime)
+    // Here you would typically save the scheduled time to your backend
   }
 
   const handleCallStart = (sessionId) => {

@@ -1,14 +1,17 @@
 import React from 'react'
 import './RequestForm.css'
 import { motion } from "framer-motion"
+
 import { Calendar, Video, Clock, Star } from "lucide-react"
 
+
+
 export default function RequestForm({ onImmediateRequest, onScheduleRequest }) {
+
 
   const bgImg = {
     backgroundImage:"url('/videoSupport-bg.jpg')",
     backgroundSize:"cover", 
-    // backgroundPositionY:"2.5%"
   }
   const container = {
     hidden: { opacity: 0 },
@@ -25,16 +28,14 @@ export default function RequestForm({ onImmediateRequest, onScheduleRequest }) {
     show: { opacity: 1, y: 0 },
   }
 
+
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-1 gap-8" id='RequestForm'>
       <motion.div variants={item} id='videoChat'>
         <div className="group relative overflow-hidden">
           <div className="absolute inset-0 opacity-0 transition-opacity duration-500 rounded-2xl"></div>
-          <button
-            onClick={onImmediateRequest}
-            className="relative w-full rounded-2xl border border-primary border-t-[10px]"
-            style={bgImg} 
-          >
+          <button onClick={onImmediateRequest} className="relative w-full rounded-2xl border border-primary border-t-[10px]"
+            style={bgImg}>
             <div className='transition-all duration-500 p-8 flex flex-col items-center justify-center rounded-2xl 
              z-20 group-hover:border-transparent group-hover:text-secondary transform group-hover:scale-[1.02]'>
             <div className="relative mb-6">
@@ -66,7 +67,7 @@ export default function RequestForm({ onImmediateRequest, onScheduleRequest }) {
                 <Star key={i} className="h-4 w-4 text-primaryDark fill-current" />
               ))}
               <span className="text-sm text-white ml-2 transition-colors duration-500">
-                4.9/5 rating
+                4.1/5 rating
               </span>
             </div>
             </div>
@@ -82,8 +83,7 @@ export default function RequestForm({ onImmediateRequest, onScheduleRequest }) {
             className="relative w-full bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500
              p-8 flex flex-col items-center justify-center border border-t-green-600 border-t-[10px] border-gray-100 
              group-hover:border-transparent group-hover:border-t-green-600 group-hover:rounded-t-none
-              group-hover:text-primaryDark transform group-hover:scale-[1.02] "
-          >
+              group-hover:text-primaryDark transform group-hover:scale-[1.02] ">
             <div className="relative mb-6">
               <div className="absolute inset-0 bg-green-500 rounded-full blur-xl opacity-30 transition-opacity duration-500"></div>
               <div className="relative bg-gradient-to-br from-green-100 to-emerald-200 p-6 rounded-full transition-all duration-500">

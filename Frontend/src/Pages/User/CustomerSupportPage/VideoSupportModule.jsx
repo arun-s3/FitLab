@@ -1,15 +1,22 @@
 import React, { useState } from "react"
 import { motion } from "framer-motion"
+
 import VideoChat from "./VideoSupport/VideoChat"
 import RequestForm from "./VideoSupport/RequestForm"
 import WaitingRoom from "./VideoSupport/WaitingRoom"
-import ScheduleForm from "./VideoSupport/ScheduleForm"
+import ScheduleModal from "./VideoSupport/ScheduleModal"
+
+
 
 export default function VideoSupportModule() {
-  const [requestType, setRequestType] = useState(null) // "immediate" or "scheduled"
+
+
+  const [requestType, setRequestType] = useState(null)
   const [isWaiting, setIsWaiting] = useState(false)
   const [inCall, setInCall] = useState(false)
   const [callData, setCallData] = useState(null)
+  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false)
+
 
   const handleImmediateRequest = () => {
     setRequestType("immediate")
@@ -17,9 +24,7 @@ export default function VideoSupportModule() {
   }
 
   const handleScheduleRequest = (scheduledTime) => {
-    setRequestType("scheduled")
     setCallData(scheduledTime)
-    // Here you would typically save the scheduled time to your backend
   }
 
   const handleCallStart = (sessionId) => {
@@ -33,6 +38,7 @@ export default function VideoSupportModule() {
     setRequestType(null)
     setCallData(null)
   }
+
 
   return (
     <div className="min-h-screen p-4 md:p-8" id='VideoSupportModule'>
@@ -62,17 +68,16 @@ export default function VideoSupportModule() {
         </header>
 
         {!requestType && !inCall && (
-          <RequestForm
-            onImmediateRequest={handleImmediateRequest}
-            onScheduleRequest={() => setRequestType("scheduled")}
-          />
+          <RequestForm onImmediateRequest={handleImmediateRequest} onScheduleRequest={()=> setIsScheduleModalOpen(true)} />
         )}
 
         {requestType === "immediate" && isWaiting && <WaitingRoom onCallStart={handleCallStart} />}
 
-        {requestType === "scheduled" && !inCall && <ScheduleForm onSchedule={handleScheduleRequest} />}
-
         {inCall && <VideoChat sessionId={callData?.sessionId} onEndCall={handleEndCall} />}
+
+        <ScheduleModal isOpen={isScheduleModalOpen} onClose={()=> setIsScheduleModalOpen(false)}
+          onSchedule={handleScheduleRequest} />
+
       </motion.div>
     </div>
   )

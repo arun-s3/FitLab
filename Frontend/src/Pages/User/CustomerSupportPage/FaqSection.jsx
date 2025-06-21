@@ -55,12 +55,6 @@ export default function FaqSection() {
 
       <div className="relative">
 
-        {/* Torn Paper Effect at Top - More detailed and precise */}
-        {/* <div className="relative z-10">
-          <svg className="w-full h-16 text-black" viewBox="0 0 1200 60" preserveAspectRatio="none" fill="currentColor">
-            <path d="M0,60 C50,45 100,55 150,40 C200,25 250,50 300,35 C350,20 400,45 450,30 C500,15 550,40 600,25 C650,10 700,35 750,20 C800,5 850,30 900,15 C950,0 1000,25 1050,10 C1100,5 1150,20 1200,5 L1200,0 L0,0 Z" />
-          </svg>
-        </div> */}
         <div className="relative z-10" style={faqContainerEffectStyle}>
           <svg
             viewBox="0 0 1200 120"
@@ -71,10 +65,8 @@ export default function FaqSection() {
           </svg>
         </div>
 
-      {/* <div className="w-full h-4 bg-black backdrop-blur filter-blur-[1px]"></div> */}
 
         <div ref={faqContainerRef} className="-mt-[3px] pb-8 bg-black relative overflow-hidden" onMouseMove={handleMouseMove}>
-          {/* Base grid - more visible */}
           <div
             className="absolute inset-0 opacity-15"
             style={{
@@ -85,7 +77,6 @@ export default function FaqSection() {
             }}
           />
 
-          {/* Interactive grid overlay with mouse-following glow */}
           <motion.div
             className="absolute inset-0 pointer-events-none"
             style={{
@@ -102,7 +93,6 @@ export default function FaqSection() {
 
           <div className="flex gap-4">
           <div className="relative z-10 container mx-auto px-4 pt-0 pb-12">
-            {/* Header */}
             
             <motion.div
               initial={{ opacity: 0, y: -30 }}
@@ -124,7 +114,6 @@ export default function FaqSection() {
             </motion.div>
 
             <div className="flex flex-col lg:flex-row gap-8">
-              {/* Simple Sidebar - matching the image */}
               <motion.div
                 initial={{ opacity: 0, x: -50 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -231,7 +220,6 @@ export default function FaqSection() {
                             }}
                             transition={{ duration: 0.15, ease: "easeOut" }}
                           >
-                            {/* Question button with top lighting */}
                             <motion.button
                               className="w-full p-4 text-left relative"
                               onClick={() => toggleQuestion(index)}

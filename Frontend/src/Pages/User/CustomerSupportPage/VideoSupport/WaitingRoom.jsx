@@ -1,38 +1,38 @@
 import React, { useState, useEffect } from "react"
 import { motion } from "framer-motion"
+
 import { Clock, Users, Wifi, CheckCircle } from "lucide-react"
-// import { socket } from "@/lib/socket"
+
+import {SocketContext} from '../../../../Components/SocketProvider/SocketProvider'
+
+
 
 export default function WaitingRoom({ onCallStart }) {
   const [waitTime, setWaitTime] = useState(0)
   const [queuePosition, setQueuePosition] = useState(null)
 
+  const {socket, isConnected, messages, newMessage, isTyping, messagesEndRef, handleSendMessage, handleTyping} = useContext(SocketContext)
+
+
   useEffect(() => {
-    // Connect to socket when entering waiting room
-    socket.connect()
 
-    // Request to join the queue
-    socket.emit("joinQueue", { userId: "user-123" }) // In a real app, use actual user ID
+    socket.emit("joinQueue", { userId: "user-123" })
 
-    // Listen for queue updates
     socket.on("queueUpdate", (data) => {
       setQueuePosition(data.position)
       setWaitTime(data.estimatedWaitTime)
     })
 
-    // Listen for call ready event
     socket.on("callReady", (data) => {
       onCallStart(data.sessionId)
     })
 
-    // Cleanup on unmount
     return () => {
       socket.off("queueUpdate")
       socket.off("callReady")
     }
   }, [onCallStart])
 
-  // For demo purposes, simulate a call after 10 seconds
   useEffect(() => {
     const timer = setTimeout(() => {
       onCallStart("demo-session-123")
@@ -47,16 +47,12 @@ export default function WaitingRoom({ onCallStart }) {
       animate={{ opacity: 1, scale: 1 }}
       className="relative overflow-hidden"
     >
-      {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-3xl"></div>
 
-      {/* Main content */}
       <div className="relative bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/50 p-8 md:p-12 text-center">
-        {/* Animated background elements */}
         <div className="absolute top-4 right-4 w-20 h-20 bg-blue-200/30 rounded-full blur-xl"></div>
         <div className="absolute bottom-4 left-4 w-16 h-16 bg-purple-200/30 rounded-full blur-xl"></div>
 
-        {/* Status indicator */}
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
@@ -73,7 +69,6 @@ export default function WaitingRoom({ onCallStart }) {
             </motion.div>
           </div>
 
-          {/* Pulse rings */}
           <motion.div
             animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
             transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
@@ -132,7 +127,6 @@ export default function WaitingRoom({ onCallStart }) {
           </motion.div>
         </div>
 
-        {/* Connection status */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -144,7 +138,6 @@ export default function WaitingRoom({ onCallStart }) {
           <CheckCircle className="h-5 w-5" />
         </motion.div>
 
-        {/* Cancel button */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

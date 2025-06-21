@@ -171,6 +171,7 @@ export default function SocketProvider(props) {
 
   return (
     <SocketContext.Provider value={{
+        socket,
         isConnected,
         messages,
         newMessage,

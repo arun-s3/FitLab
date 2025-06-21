@@ -44,6 +44,7 @@ import AdminCouponManagementPage from './Pages/Admin/AdminCouponManagementPage/A
 import AdminOfferManagementPage from './Pages/Admin/AdminOfferManagementPage/AdminOfferManagementPage'
 import AdminCreateOfferPage from './Pages/Admin/AdminCreateOfferPage/AdminCreateOfferPage'
 import AdminTextChatSupportPage from './Pages/Admin/AdminTextChatSupportPage/AdminTextChatSupportPage'
+import AdminVideoChatSupportPage from './Pages/Admin/AdminVideoChatSupportPage/AdminVideoChatSupportPage'
 
 
 import {ToastContainer} from 'react-toastify'
@@ -139,6 +140,7 @@ export default function App(){
                                     </Route>
                                     <Route path='support'>
                                         <Route path='text' element={<AdminTextChatSupportPage/>} />
+                                        <Route path='video' element={<AdminVideoChatSupportPage/>} />
                                     </Route>
                                 </Route>
                             </Route>

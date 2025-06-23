@@ -1,45 +1,57 @@
 import React, { useState, useEffect } from "react"
+import {useSelector} from 'react-redux'
 import { motion } from "framer-motion"
 
-import { Clock, Users, Wifi, CheckCircle } from "lucide-react"
-
-import {SocketContext} from '../../../../Components/SocketProvider/SocketProvider'
+import { Clock, Users, ChevronsLeftRightEllipsis, CheckCircle } from "lucide-react"
 
 
-
-export default function WaitingRoom({ onCallStart }) {
+export default function WaitingRoom({ socketContextItems, onCallStart, onEndCall}) {
   const [waitTime, setWaitTime] = useState(0)
   const [queuePosition, setQueuePosition] = useState(null)
 
-  const {socket, isConnected, messages, newMessage, isTyping, messagesEndRef, handleSendMessage, handleTyping} = useContext(SocketContext)
+  const [isConnected, setIsConnected] = useState(false)
+
+  const {userToken} = useSelector((state)=> state.user)
+
+  const {socket, userId, username, messages, newMessage, isTyping, messagesEndRef, handleSendMessage, handleTyping} = socketContextItems
+  console.log("socket--->", socket)
+
 
 
   useEffect(() => {
+    console.log("socket from WaitingRoom-->", socket)
+    if(socket){
 
-    socket.emit("joinQueue", { userId: "user-123" })
+      if(userId){
+        console.log("Emiting joinQueue,  userId-->", userId)
+        socket.emit("joinQueue", {userId, username})
 
-    socket.on("queueUpdate", (data) => {
-      setQueuePosition(data.position)
-      setWaitTime(data.estimatedWaitTime)
-    })
+        socket.on("JoinedQueue", ()=> setIsConnected(true))
 
-    socket.on("callReady", (data) => {
-      onCallStart(data.sessionId)
-    })
+        socket.on("queueUpdate", (data) => {
+          console.log("Inside on queueUpdate...")
+          setQueuePosition(data.position)
+          setWaitTime(data.estimatedWaitTime)
+        })
 
-    return () => {
-      socket.off("queueUpdate")
-      socket.off("callReady")
+        socket.on("callReady", (data) => {
+          console.log("Inside on callReady...")
+          onCallStart(data.sessionId)
+        })
+
+      }
+      return () => {
+        socket.off("queueUpdate")
+        socket.off("callReady")
+      }
     }
-  }, [onCallStart])
+  }, [onCallStart, socket])
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      onCallStart("demo-session-123")
-    }, 10000)
-
-    return () => clearTimeout(timer)
-  }, [onCallStart])
+  const cancelCall = ()=> {
+     socket.emit("leaveQueue")
+     onEndCall()
+  }
+  
 
   return (
     <motion.div
@@ -80,7 +92,7 @@ export default function WaitingRoom({ onCallStart }) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4"
+          className="text-[30px] font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4"
         >
           You're in the waiting room
         </motion.h2>
@@ -89,7 +101,7 @@ export default function WaitingRoom({ onCallStart }) {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="text-gray-600 mb-8 text-lg leading-relaxed"
+          className="text-gray-600 mb-8 text-[15px] leading-relaxed"
         >
           An expert will join you shortly. Please stay on this page while we connect you.
         </motion.p>
@@ -101,7 +113,7 @@ export default function WaitingRoom({ onCallStart }) {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.5 }}
-              className="bg-gradient-to-br from-blue-50 to-indigo-100 p-6 rounded-2xl border border-blue-200/50"
+              className="bg-gradient-to-br from-blue-50 to-indigo-100 px-6 py-4 rounded-2xl border border-blue-200/50"
             >
               <div className="flex items-center justify-center mb-3">
                 <Users className="h-6 w-6 text-blue-600 mr-2" />
@@ -116,7 +128,7 @@ export default function WaitingRoom({ onCallStart }) {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.6 }}
-            className="bg-gradient-to-br from-green-50 to-emerald-100 p-6 rounded-2xl border border-green-200/50"
+            className="bg-gradient-to-br from-green-50 to-emerald-100 px-6 py-4 rounded-2xl border border-green-200/50"
           >
             <div className="flex items-center justify-center mb-3">
               <Clock className="h-6 w-6 text-green-600 mr-2" />
@@ -127,26 +139,34 @@ export default function WaitingRoom({ onCallStart }) {
           </motion.div>
         </div>
 
+        {/* Connection status */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.7 }}
-          className="flex items-center justify-center space-x-2 mb-8 text-green-600"
+          className="flex items-center justify-center space-x-2 mb-[1.3rem] text-green-600"
         >
-          <Wifi className="h-5 w-5" />
-          <span className="font-medium">Connected and ready</span>
-          <CheckCircle className="h-5 w-5" />
+          <ChevronsLeftRightEllipsis className={`h-[27px] w-[27px] ${isConnected ? 'text-green-500' : 'text-red-500'}`} />
+          <span className="text-[14px] font-medium"> 
+            {isConnected ? 'Connected and ready' : 'Connection Error'} 
+          </span>
+          <CheckCircle className="h-[17px] w-[17px]" />
         </motion.div>
 
+        {/* Cancel button */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
           className="flex justify-center"
         >
-          <button className="group relative overflow-hidden bg-gradient-to-r from-red-50 to-pink-50 hover:from-red-500 hover:to-pink-500 text-red-600 hover:text-white py-3 px-8 rounded-full font-semibold border border-red-200 hover:border-transparent transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
-            <span className="relative z-10">Cancel Request</span>
-            <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <button className="group relative overflow-hidden bg-red-50 text-red-600 hover:bg-gradient-to-r
+             hover:from-red-500 hover:to-red-400 hover:text-white py-3 px-8 rounded-full font-semibold
+               border border-red-200 hover:border-transparent transition-all duration-300
+                transform hover:scale-105 shadow-lg hover:shadow-xl">
+
+            <span className="relative z-10" onClick={cancelCall}> Cancel Request </span>
+            {/* <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div> */}
           </button>
         </motion.div>
       </div>

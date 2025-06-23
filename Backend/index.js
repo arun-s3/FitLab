@@ -41,6 +41,24 @@ app.use(cors({
     credentials:true
 }))
 
+
+const Server = require("socket.io").Server
+
+let io = new Server(server, {
+      cors: {
+        origin: "http://localhost:5173",
+        methods: ["GET", "POST"],
+        credentials: true,
+      },
+    })
+
+const textChatBoxSocket = require('./Sockets/textChatSocketHandler.js')
+const videoChatSocket = require('./Sockets/videoChatSocketHandler.js')
+
+textChatBoxSocket(io)
+videoChatSocket(io)
+
+
 const userRoutes = require('./Routes/userRoutes.js')
 const addressRoutes = require('./Routes/userAddressRoutes.js')
 const userProductRoutes = require('./Routes/userProductRoutes.js')
@@ -58,9 +76,6 @@ const adminProductRoutes = require('./Routes/adminProductRoutes.js')
 const adminCategoryRoutes = require('./Routes/adminCategoryRoutes.js')
 const adminDashboardRoutes = require('./Routes/dashboardRoutes.js')
 const adminCustomerGeographyRoutes = require('./Routes/adminCustomerGeographyRoute.js')
-
-const textChatBoxSocket = require('./Sockets/textChatSocketHandler.js')
-textChatBoxSocket(server)
 
 
 app.use('/', userRoutes)

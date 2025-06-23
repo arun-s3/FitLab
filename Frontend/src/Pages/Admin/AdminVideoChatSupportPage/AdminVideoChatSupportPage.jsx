@@ -4,74 +4,103 @@ import {motion, AnimatePresence} from "framer-motion"
 import VideoChatDashboard from './VideoChatDashboard'
 import VideoChatSection from './VideoChatSection'
 import AdminHeader from '../../../Components/AdminHeader/AdminHeader'
+import {AdminSocketContext} from '../../../Components/AdminSocketProvider/AdminSocketProvider'
 
 
 
 export default function AdminVideoChatSupportPage() {
 
     const [currentSession, setCurrentSession] = useState(null)
-    const [waitingQueue, setWaitingQueue] = useState([
-        {
-          userId: "user-demo-1",
-          socketId: "socket-1",
-          joinTime: Date.now() - 120000,
-          requestType: "Immediate Support",
-        },
-        {
-          userId: "user-demo-2",
-          socketId: "socket-2",
-          joinTime: Date.now() - 300000,
-          requestType: "Workout Form Check",
-        },
-        {
-          userId: "user-demo-3",
-          socketId: "socket-3",
-          joinTime: Date.now() - 60000,
-          requestType: "Nutrition Consultation",
-        },
-    ])
-  const [activeSessions, setActiveSessions] = useState([
-        {
-          sessionId: "session-demo-1",
-          adminId: "admin-456",
-          userId: "user-789",
-          startTime: Date.now() - 600000,
-        },
-    ])
+    const [waitingQueue, setWaitingQueue] = useState([])
+  const [activeSessions, setActiveSessions] = useState([])
+
+  const adminId = 'admin-room'
   const [adminStatus, setAdminStatus] = useState("available")
 
+  const adminSocketContextItems = useContext(AdminSocketContext)
 
+  const {
+        isConnected,
+        socket,
+        guestCount,
+        activeUsers,
+        messages, 
+        newMessage, 
+        typingUsers, 
+        unreadCounts,
+        setUnreadCounts, 
+        notifications,
+        setNotifications,
+        messagesEndRef, 
+        handleTyping,
+        handleSendMessage
+    } = adminSocketContextItems
 
+    console.log("socket--->", socket)
 
+  useEffect(() => {
+    console.log("socket--->", socket)
+    if(socket){
+      socket.emit("adminJoin", {adminId})
 
+      socket.on("queueUpdate", (data) => {
+        console.log("Inside on queueUpdate....")
+        setWaitingQueue(data.queue || [])
+      })
 
+      socket.on("activeSessionsUpdate", (data) => {
+        setActiveSessions(data.sessions || [])
+      })
 
-  const handleAcceptCall = (userId) => {
-    const demoSession = {
-      sessionId: `session-${Date.now()}`,
-      adminId: "admin-123",
-      userId: userId,
-      startTime: Date.now(),
-      requestType: "Immediate Support",
+      socket.on("sessionStarted", (data) => {
+        setCurrentSession(data)
+        setAdminStatus("busy")
+      })
+
+      socket.on("sessionEnded", () => {
+        console.log("Inside on sessionEnded......")
+        setCurrentSession(null)
+        setAdminStatus("available")
+      })
+
+      return () => {
+        socket.off("queueUpdate")
+        socket.off("activeSessionsUpdate")
+        socket.off("sessionStarted")
+        socket.off("sessionEnded")
+      }
     }
+  }, [socket])
 
-    setCurrentSession(demoSession)
+  useEffect(()=> {
+    console.log("activeSessions--->", activeSessions)
+    console.log("currentSession--->", currentSession)
+    console.log("waitingQueue--->", waitingQueue)
+    console.log("adminStatus--->", adminStatus)
+  }, [activeSessions, currentSession, waitingQueue, adminStatus])
+
+  const handleAcceptCall = (userId, username) => {
+    console.log("Inside handleAcceptCall..")
     setAdminStatus("busy")
 
     setWaitingQueue((prev) => prev.filter((user) => user.userId !== userId))
 
+    console.log("Emiting acceptCall...")
+    socket.emit("acceptCall", { adminId, userId, username})
   }
 
   const handleDeclineCall = (userId) => {
     setWaitingQueue((prev) => prev.filter((user) => user.userId !== userId))
 
+    socket.emit("declineCall", { adminId: "admin-123", userId })
   }
 
   const handleEndSession = () => {
+    console.log("Inside handleEndSession() from AdminVideoChatSupportPage")
     if (currentSession) {
       setCurrentSession(null)
       setAdminStatus("available")
-
+      console.log("set curretSession to null")
     }
   }
 
@@ -79,11 +108,12 @@ export default function AdminVideoChatSupportPage() {
     const newStatus = adminStatus === "available" ? "offline" : "available"
     setAdminStatus(newStatus)
 
+    socket.emit("adminStatusChange", { adminId: "admin-123", status: newStatus })
   }
 
 
     return (
-        <section id='AdminVideoChatSupportPage'>
+        <section id='AdminVideoChatSupportPage' className="w-full -ml-[1.5rem] mb-[10rem]">
         
             <header>
     
@@ -96,9 +126,11 @@ export default function AdminVideoChatSupportPage() {
                 <div className="min-h-screen">
 
                     {currentSession ? (
-                      <VideoChatSection session={currentSession} onEndSession={handleEndSession} />
+                      <VideoChatSection adminSocketContextItems={adminSocketContextItems} session={currentSession} 
+                          onEndSession={handleEndSession} />
                     ) : (
-                      <VideoChatDashboard
+                      <VideoChatDashboard 
+                        adminSocketContextItems={adminSocketContextItems}
                         waitingQueue={waitingQueue}
                         activeSessions={activeSessions}
                         adminStatus={adminStatus}

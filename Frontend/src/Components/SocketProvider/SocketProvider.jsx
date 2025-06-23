@@ -173,6 +173,8 @@ export default function SocketProvider(props) {
     <SocketContext.Provider value={{
         socket,
         isConnected,
+        userId: roomId,
+        username,
         messages,
         newMessage,
         isTyping,

@@ -7,6 +7,7 @@ export default function ScheduleModal({ isOpen, onClose, onSchedule }) {
   const [selectedTime, setSelectedTime] = useState("")
   const [isSubmitted, setIsSubmitted] = useState(false)
 
+  // Generate next 7 days for date selection
   const availableDates = Array.from({ length: 7 }, (_, i) => {
     const date = new Date()
     date.setDate(date.getDate() + i)
@@ -17,8 +18,10 @@ export default function ScheduleModal({ isOpen, onClose, onSchedule }) {
     }
   })
 
+  // Sample time slots
   const timeSlots = ["09:00 AM", "10:00 AM", "11:00 AM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM"]
 
+  // Reset form when modal opens
   useEffect(() => {
     if (isOpen) {
       setSelectedDate("")
@@ -27,6 +30,7 @@ export default function ScheduleModal({ isOpen, onClose, onSchedule }) {
     }
   }, [isOpen])
 
+  // Handle escape key
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === "Escape" && isOpen) {
@@ -38,6 +42,7 @@ export default function ScheduleModal({ isOpen, onClose, onSchedule }) {
     return () => document.removeEventListener("keydown", handleEscape)
   }, [isOpen, onClose])
 
+  // Prevent body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden"
@@ -55,6 +60,7 @@ export default function ScheduleModal({ isOpen, onClose, onSchedule }) {
     if (selectedDate && selectedTime) {
       onSchedule({ date: selectedDate, time: selectedTime })
       setIsSubmitted(true)
+      // Close modal after 3 seconds
       setTimeout(() => {
         onClose()
       }, 3000)
@@ -118,9 +124,11 @@ export default function ScheduleModal({ isOpen, onClose, onSchedule }) {
               exit="exit"
               className="relative max-w-md w-full max-h-[90vh] overflow-hidden"
             >
+              {/* Background gradient */}
               <div className="absolute inset-0 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 rounded-3xl"></div>
 
               <div className="relative bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/50 p-8 text-center">
+                {/* Close button */}
                 <button
                   onClick={onClose}
                   className="absolute top-4 right-4 p-2 rounded-full bg-white/80 hover:bg-white transition-colors duration-200 shadow-lg"
@@ -128,6 +136,7 @@ export default function ScheduleModal({ isOpen, onClose, onSchedule }) {
                   <X className="h-5 w-5 text-gray-600" />
                 </button>
 
+                {/* Success icon */}
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
@@ -139,6 +148,7 @@ export default function ScheduleModal({ isOpen, onClose, onSchedule }) {
                     <Check className="h-8 w-8 text-green-600" />
                   </div>
 
+                  {/* Success rings */}
                   <motion.div
                     animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0, 0.5] }}
                     transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
@@ -200,9 +210,11 @@ export default function ScheduleModal({ isOpen, onClose, onSchedule }) {
             exit="exit"
             className="relative max-w-2xl w-full max-h-[90vh]"
           >
+            {/* Background gradient */}
             <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-3xl"></div>
 
             <div className="relative bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/50 p-6 md:p-8">
+              {/* Close button */}
               <button
                 onClick={onClose}
                 className="absolute top-4 right-4 p-2 rounded-full bg-white/80 hover:bg-white transition-colors duration-200 shadow-lg z-10"
@@ -210,6 +222,7 @@ export default function ScheduleModal({ isOpen, onClose, onSchedule }) {
                 <X className="h-5 w-5 text-gray-600" />
               </button>
 
+              {/* Header */}
               <div className="text-center mb-8">
                 <h2 className="text-[25px] text-secondary font-bold mb-2 flex items-center justify-center">
                   <Calendar className="mr-3 h-7 w-7 text-priaryDark" />
@@ -219,6 +232,7 @@ export default function ScheduleModal({ isOpen, onClose, onSchedule }) {
               </div>
 
               <form onSubmit={handleSubmit}>
+                {/* Date selection */}
                 <div className="mb-8">
                   <label className="block text-primaryDark font-semibold mb-4 text-[15px]">Select a Date</label>
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -266,6 +280,7 @@ export default function ScheduleModal({ isOpen, onClose, onSchedule }) {
                   </div>
                 </div>
 
+                {/* Time selection */}
                 {selectedDate && (
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
@@ -314,6 +329,7 @@ export default function ScheduleModal({ isOpen, onClose, onSchedule }) {
                   </motion.div>
                 )}
 
+                {/* Submit button */}
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{

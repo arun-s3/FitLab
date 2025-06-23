@@ -117,7 +117,7 @@ export default function AdminDashboard({
                     key={user.userId}
                     user={user}
                     position={index + 1}
-                    onAccept={() => onAcceptCall(user.userId)}
+                    onAccept={() => onAcceptCall(user.userId, user.username)}
                     onDecline={() => onDeclineCall(user.userId)}
                     disabled={adminStatus !== "available"}
                   />

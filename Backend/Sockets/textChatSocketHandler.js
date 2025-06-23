@@ -1,23 +1,12 @@
-const Server = require("socket.io").Server
-
 
 const activeUsers = new Map()
 const adminSessions = new Set() 
 
-let io
 
-async function textChatBoxSocket(server) {
-  if (!io) {
-    io = new Server(server, {
-      cors: {
-        origin: "http://localhost:5173",
-        methods: ["GET", "POST"],
-        credentials: true,
-      },
-    })
+async function textChatBoxSocket(io) {
+  if (io){
 
       io.on("connection", (socket) => {
-      // console.log("User connected:", socket.id)
 
       socket.on("admin-login", (adminData) => {
         adminSessions.add(socket.id)
@@ -79,11 +68,6 @@ async function textChatBoxSocket(server) {
             }
             activeUsers.set(socket.id, newUserData)
             io.to("admin-room").emit('reconnect-if-user-selected', newUserData)
-            // activeButOfflineUser.isOnline = true
-            // activeButOfflineUser.lastSeen = new Date().toISOString()
-            // activeButOfflineUser.socketId = socket.id
-            // console.log("Updating the online status of the active offline user....")
-            // activeUsers.set(socket.id, activeButOfflineUser)
           }
         }
         io.to("admin-room").emit("active-users-update", Array.from(activeUsers.values()))
@@ -178,11 +162,6 @@ async function textChatBoxSocket(server) {
       })
 
       socket.on("typing", (data) => {
-        // socket.to(data.roomId).emit("user-typing", {
-        //   userId: data.roomId,
-        //   isTyping: data.isTyping,
-        //   sender: data.sender,
-        // })
 
         console.log("Inside typing..data-->", data)
         io.to(data.roomId).emit("user-typing-admin", {
@@ -201,20 +180,6 @@ async function textChatBoxSocket(server) {
         })
       })
 
-      // socket.on("update-and-sort-activeUsers", (user)=> {
-      //   console.log("Inside update-and-sort-activeUsers")
-      //   const userData = activeUsers.get(user.socketId)
-      //   activeUsers.delete(user.socketId)
-      //   // const newActiveUsers = new Map()
-      //   // newActiveUsers.set(userSocketId, user)
-      //   reorderedActiveUsers = [[user.socketId, userData], ...activeUsers.entries()]
-      //   activeUsers.clear()
-      //   for(const [key, value] of reorderedActiveUsers){
-      //     activeUsers.set(key, value)
-      //   }
-      //   console.log("activeUsers--->", activeUsers)
-      //   io.to("admin-room").emit("updated-activeUsers", {user, users: Array.from(activeUsers.values())})
-      // })
 
       socket.on("disconnect", () => {
         console.log("User disconnected:", socket.id)

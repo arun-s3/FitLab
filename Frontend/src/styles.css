@@ -1508,6 +1508,10 @@ select{
   margin-top: 4rem !important;
 }
 
+.-ml-\[1\.5rem\]{
+  margin-left: -1.5rem;
+}
+
 .-mt-\[1rem\]{
   margin-top: -1rem;
 }
@@ -2483,6 +2487,14 @@ select{
   height: 100vh;
 }
 
+.h-\[\]{
+  height: ;
+}
+
+.h-\[17\]{
+  height: 17;
+}
+
 .max-h-\[19rem\]{
   max-height: 19rem;
 }
@@ -2983,6 +2995,18 @@ select{
 .w-max{
   width: -moz-max-content;
   width: max-content;
+}
+
+.w-\[\]{
+  width: ;
+}
+
+.w-\[27px\]{
+  width: 27px;
+}
+
+.w-\[27pxP\]{
+  width: 27pxP;
 }
 
 .min-w-0{
@@ -4844,12 +4868,6 @@ select{
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
 
-.from-red-50{
-  --tw-gradient-from: #fef2f2 var(--tw-gradient-from-position);
-  --tw-gradient-to: rgb(254 242 242 / 0) var(--tw-gradient-to-position);
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
-}
-
 .from-red-500{
   --tw-gradient-from: #ef4444 var(--tw-gradient-from-position);
   --tw-gradient-to: rgb(239 68 68 / 0) var(--tw-gradient-to-position);
@@ -4950,10 +4968,6 @@ select{
 
 .to-pink-100{
   --tw-gradient-to: #fce7f3 var(--tw-gradient-to-position);
-}
-
-.to-pink-50{
-  --tw-gradient-to: #fdf2f8 var(--tw-gradient-to-position);
 }
 
 .to-pink-500{
@@ -6474,6 +6488,11 @@ select{
   color: rgb(133 77 14 / var(--tw-text-opacity));
 }
 
+.text-green-50{
+  --tw-text-opacity: 1;
+  color: rgb(240 253 244 / var(--tw-text-opacity));
+}
+
 .line-through{
   text-decoration-line: line-through;
 }
@@ -7314,6 +7333,10 @@ select{
   background-color: rgb(245 245 245 / var(--tw-bg-opacity));
 }
 
+.hover\:bg-gradient-to-r:hover{
+  background-image: linear-gradient(to right, var(--tw-gradient-stops));
+}
+
 .hover\:from-blue-600:hover{
   --tw-gradient-from: #2563eb var(--tw-gradient-from-position);
   --tw-gradient-to: rgb(37 99 235 / 0) var(--tw-gradient-to-position);
@@ -7362,12 +7385,12 @@ select{
   --tw-gradient-to: #4b5563 var(--tw-gradient-to-position);
 }
 
-.hover\:to-pink-500:hover{
-  --tw-gradient-to: #ec4899 var(--tw-gradient-to-position);
-}
-
 .hover\:to-purple-700:hover{
   --tw-gradient-to: #7e22ce var(--tw-gradient-to-position);
+}
+
+.hover\:to-red-400:hover{
+  --tw-gradient-to: #f87171 var(--tw-gradient-to-position);
 }
 
 .hover\:to-red-700:hover{

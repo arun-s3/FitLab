@@ -13,7 +13,7 @@ export default function FaqSection() {
   const [openQuestion, setOpenQuestion] = useState(null)
   const [hoveredTopic, setHoveredTopic] = useState(null)
   const [hoveredQuestion, setHoveredQuestion] = useState(null)
-  const [mousePosition, setMousePosition] = useState({ x: 200, y: 200 })
+  const [mousePosition, setMousePosition] = useState({ x: 180, y: 210 })
   const [searchQuery, setSearchQuery] = useState("")
 
   const faqContainerRef = useRef(null)

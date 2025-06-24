@@ -7,10 +7,12 @@ import {MessageSquare, X, Send, User, Headphones, Minimize2, Maximize2} from "lu
 
 
 
-export default function TextChatBox({closeable, onCloseChat, boxHeight, boxWidth, isStatic = false}) {
+export default function TextChatBox({closeable, onCloseChat, boxHeight, boxWidth, focusByDefault = false, isStatic = false}) {
 
   const [isOpen, setIsOpen] = useState(false)
   const [isMinimized, setIsMinimized] = useState(false)
+
+  const inputRef = useRef(null)
 
   const {isConnected, messages, newMessage, isTyping, messagesEndRef, handleSendMessage, handleTyping} = useContext(SocketContext)
 
@@ -22,7 +24,10 @@ export default function TextChatBox({closeable, onCloseChat, boxHeight, boxWidth
     if(isStatic){
       setIsOpen(true)
     }
-  }, [isStatic])
+    if(focusByDefault){
+      inputRef.current.focus()
+    }
+  }, [isStatic, focusByDefault])
 
   const toggleChat = () => {
     setIsOpen(!isOpen)
@@ -177,6 +182,7 @@ export default function TextChatBox({closeable, onCloseChat, boxHeight, boxWidth
                       className={`flex-1 border border-gray-300 rounded-lg px-3 ${isStatic ? 'py-[9px]' : 'py-2'} text-[13px] text-black focus:outline-none focus:ring-2
                         ${isStatic ? 'placeholder:text-[13px]' : 'placeholder:text-[12px]'} focus:ring-blue-500 focus:border-transparent`}
                       disabled={!isConnected}
+                      ref={inputRef}
                     />
                     <motion.button
                       type="submit"

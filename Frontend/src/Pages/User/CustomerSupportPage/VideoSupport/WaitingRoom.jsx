@@ -5,7 +5,8 @@ import { motion } from "framer-motion"
 import { Clock, Users, ChevronsLeftRightEllipsis, CheckCircle } from "lucide-react"
 
 
-export default function WaitingRoom({ socketContextItems, onCallStart, onEndCall}) {
+export default function WaitingRoom({ socketContextItems, isAdminBusy, onCallStart, onEndCall}) {
+
   const [waitTime, setWaitTime] = useState(0)
   const [queuePosition, setQueuePosition] = useState(null)
 
@@ -23,6 +24,8 @@ export default function WaitingRoom({ socketContextItems, onCallStart, onEndCall
     if(socket){
 
       if(userId){
+        console.log("Emiting checkAdminStatus,  userId-->", userId)
+
         console.log("Emiting joinQueue,  userId-->", userId)
         socket.emit("joinQueue", {userId, username})
 
@@ -71,20 +74,39 @@ export default function WaitingRoom({ socketContextItems, onCallStart, onEndCall
           transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.2 }}
           className="relative w-32 h-32 mx-auto mb-8"
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-400 to-purple-600 rounded-full"></div>
+          <div className={`absolute inset-0 bg-gradient-to-br
+               ${
+                isConnected && !isAdminBusy ? 
+                  'from-blue-400 to-purple-600' 
+                  : isConnected && isAdminBusy ? 
+                  'from-yellow-500 to-orange-500'
+                  : 'from-red-100 to-red-400' 
+                } rounded-full`}>
+              
+          </div>
           <div className="absolute inset-2 bg-white rounded-full flex items-center justify-center">
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
             >
-              <Clock className="h-12 w-12 text-blue-600" />
+              <Clock className={`h-12 w-12 ${isConnected && !isAdminBusy ? 
+                                            ' text-blue-600'
+                                            : isConnected && isAdminBusy ?
+                                            'text-primryDark'
+                                            : 'text-red-500'}`
+              } />
             </motion.div>
           </div>
 
           <motion.div
             animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
             transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
-            className="absolute inset-0 bg-blue-400 rounded-full"
+            className={`absolute inset-0 
+              ${isConnected && !isAdminBusy ? 
+                'bg-blue-400 ' 
+                : isConnected && isAdminBusy ? 
+                'bg-yellow-300' 
+                : 'bg-red-200'} rounded-full`}
           ></motion.div>
         </motion.div>
 
@@ -94,7 +116,13 @@ export default function WaitingRoom({ socketContextItems, onCallStart, onEndCall
           transition={{ delay: 0.3 }}
           className="text-[30px] font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4"
         >
-          You're in the waiting room
+          {
+            isConnected && !isAdminBusy? 
+            "You're in the waiting room" 
+            : isConnected && isAdminBusy?
+            "Experts are busy right now! Please stay with us or do try after sometime!"
+            :"Error during connection. Please try after sometime!"
+          }
         </motion.h2>
 
         <motion.p
@@ -103,11 +131,16 @@ export default function WaitingRoom({ socketContextItems, onCallStart, onEndCall
           transition={{ delay: 0.4 }}
           className="text-gray-600 mb-8 text-[15px] leading-relaxed"
         >
-          An expert will join you shortly. Please stay on this page while we connect you.
+          {
+            isConnected && !isAdminBusy ?
+              "An expert will join you shortly. Please stay on this page while we connect you." 
+              : isConnected && isAdminBusy ?
+              "🕒 All our experts are currently assisting other customers.We will connect you as soon as someone is available."
+              :"We're having trouble connecting. Please check your internet connection and try again. If the issue persists, our support team will reach out shortly."
+          }
         </motion.p>
 
-        {/* Status cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 ${!isConnected && 'hidden'}`}>
           {queuePosition && (
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -134,12 +167,13 @@ export default function WaitingRoom({ socketContextItems, onCallStart, onEndCall
               <Clock className="h-6 w-6 text-green-600 mr-2" />
               <span className="text-green-800 font-semibold">Estimated Wait</span>
             </div>
-            <div className="text-3xl font-bold text-green-600">{waitTime || "~2"}</div>
+            <div className="text-3xl font-bold text-green-600">
+              {!isAdminBusy ? waitTime || "~2" : waitTime * 15}
+            </div>
             <p className="text-green-700/70 text-sm mt-1">minutes</p>
           </motion.div>
         </div>
 
-        {/* Connection status */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -147,13 +181,12 @@ export default function WaitingRoom({ socketContextItems, onCallStart, onEndCall
           className="flex items-center justify-center space-x-2 mb-[1.3rem] text-green-600"
         >
           <ChevronsLeftRightEllipsis className={`h-[27px] w-[27px] ${isConnected ? 'text-green-500' : 'text-red-500'}`} />
-          <span className="text-[14px] font-medium"> 
+          <span className={`text-[14px] font-medium ${!isConnected && 'text-muted'}`}> 
             {isConnected ? 'Connected and ready' : 'Connection Error'} 
           </span>
-          <CheckCircle className="h-[17px] w-[17px]" />
+          {isConnected && <CheckCircle className="h-[17px] w-[17px]" />}
         </motion.div>
 
-        {/* Cancel button */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -166,7 +199,6 @@ export default function WaitingRoom({ socketContextItems, onCallStart, onEndCall
                 transform hover:scale-105 shadow-lg hover:shadow-xl">
 
             <span className="relative z-10" onClick={cancelCall}> Cancel Request </span>
-            {/* <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div> */}
           </button>
         </motion.div>
       </div>

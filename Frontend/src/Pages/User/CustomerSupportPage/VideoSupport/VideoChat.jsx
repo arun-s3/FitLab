@@ -119,8 +119,8 @@ export default function VideoChat({ socketContextItems, sessionId, onEndCall }) 
     console.log("messages--->", messages)
     console.log("localVideoRef--->", localVideoRef)
     console.log("peerConnectionRef--->", peerConnectionRef)
-    console.log("remoteVideoRef--->", remoteVideoRef)
-  }, [isConnected, message, messages, localVideoRef, peerConnectionRef ])
+    console.log("isChatOpen--->", isChatOpen)
+  }, [isConnected, message, messages, localVideoRef, peerConnectionRef, isChatOpen])
 
   const toggleMute = () => {
     const localStream = localVideoRef.current?.srcObject
@@ -228,7 +228,7 @@ export default function VideoChat({ socketContextItems, sessionId, onEndCall }) 
               </motion.div>
             ))}
           </div>
-          <form onSubmit={sendMessage} className="flex gap-3">
+          <form onSubmit={sendMessage} className="flex gap-3 z-20">
             <input
               type="text"
               value={message}
@@ -251,7 +251,7 @@ export default function VideoChat({ socketContextItems, sessionId, onEndCall }) 
         animate={{ opacity: 1, y: 0 }}
         className="p-6 bg-gradient-to-r from-white to-gray-50 flex items-center justify-between rounded-b-3xl border-t border-gray-200"
       >
-        <div className="flex space-x-3">
+        <div className="flex space-x-3 z-20">
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}

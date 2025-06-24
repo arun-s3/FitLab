@@ -52,6 +52,12 @@ export default function AdminVideoChatSupportPage() {
         setActiveSessions(data.sessions || [])
       })
 
+      socket.on("checkAdminStatus", ({userId, socketId})=> {
+        console.log("status--->", adminStatus)
+        console.log("Inside on checkAdminStatus and emiting adminStatusChecked...")
+        socket.emit("adminStatusChecked", {userId, socketId, status: adminStatus})
+      })
+
       socket.on("sessionStarted", (data) => {
         setCurrentSession(data)
         setAdminStatus("busy")
@@ -66,11 +72,12 @@ export default function AdminVideoChatSupportPage() {
       return () => {
         socket.off("queueUpdate")
         socket.off("activeSessionsUpdate")
+        socket.off("checkAdminStatus")
         socket.off("sessionStarted")
         socket.off("sessionEnded")
       }
     }
-  }, [socket])
+  }, [socket, adminStatus])
 
   useEffect(()=> {
     console.log("activeSessions--->", activeSessions)
@@ -92,7 +99,7 @@ export default function AdminVideoChatSupportPage() {
   const handleDeclineCall = (userId) => {
     setWaitingQueue((prev) => prev.filter((user) => user.userId !== userId))
 
-    socket.emit("declineCall", { adminId: "admin-123", userId })
+    socket.emit("declineCall", { adminId: "admin-room", userId })
   }
 
   const handleEndSession = () => {
@@ -105,10 +112,12 @@ export default function AdminVideoChatSupportPage() {
   }
 
   const toggleAvailability = () => {
-    const newStatus = adminStatus === "available" ? "offline" : "available"
+    const newStatus = adminStatus === "available" ? "busy" : "available"
+    console.log('new status-->', newStatus)
     setAdminStatus(newStatus)
 
-    socket.emit("adminStatusChange", { adminId: "admin-123", status: newStatus })
+    console.log("Emiting adminStatusChange...")
+    socket.emit("adminStatusChange", { adminId: "admin-room", status: newStatus })
   }
 
 

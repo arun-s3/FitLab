@@ -151,7 +151,8 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
       console.log("localVideoRef--->", localVideoRef)
       console.log("peerConnectionRef--->", peerConnectionRef)
       console.log("remoteVideoRef--->", remoteVideoRef)
-    }, [isConnected, message, messages, localVideoRef, peerConnectionRef ])
+      console.log("isChatOpen--->", isChatOpen)
+    }, [isConnected, message, messages, localVideoRef, peerConnectionRef, isChatOpen])
 
   const toggleMute = () => {
     const localStream = localVideoRef.current?.srcObject

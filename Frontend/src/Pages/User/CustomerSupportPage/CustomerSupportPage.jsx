@@ -5,6 +5,7 @@ import {motion} from 'framer-motion'
 import Header from '../../../Components/Header/Header'
 import VideoSupportModule from './VideoSupportModule'
 import TextChatBox from '../../User/TextChatBox/TextChatBox'
+import ChatTooltip from './VideoSupport/ChatTooltip'
 import FaqSection from './FaqSection'
 import MiniTestimonialCarousal from '../../../Components/MiniTestimonialCarousal/MiniTestimonialCarousal'
 import UserSidebar from '../../../Components/UserSidebar/UserSidebar'
@@ -15,6 +16,9 @@ import Footer from '../../../Components/Footer/Footer'
 export default function CustomerSupportPage(){
 
 
+    const [showTooltip, setShowTooltip] = useState(false)
+
+    const [chatFocusInput, setChattFocusInput] = useState(false)
 
     const bgImg = {
         backgroundImage:"url('/SupportPageBg1.png')",
@@ -33,6 +37,21 @@ export default function CustomerSupportPage(){
         },
       },
     }
+
+    useEffect(() => {
+      window.showChatTooltip = () => {
+        setShowTooltip(true)
+        setTimeout(() => {
+          setShowTooltip(false)
+        }, 3000)
+        setChattFocusInput(true)
+      }
+    
+      return () => {
+        delete window.showChatTooltip
+      }
+    }, [])
+
 
 
     return (
@@ -76,7 +95,7 @@ export default function CustomerSupportPage(){
                         
                 <main className='-mt-[4rem] bg-gradient-to-b from-gray-50 to-gray-100'>
 
-                    <div className='w-full flex gap-4 pl-[4rem] pr-[2rem]'>   {/* mb-[10rem] */}
+                    <div className='w-full flex gap-4 pl-[4rem] pr-[2rem]'>
 
                       <div className='basis-[15%]'>
                                                                 
@@ -91,7 +110,9 @@ export default function CustomerSupportPage(){
 
                         <div className='mt-[3rem]'>
 
-                          <TextChatBox isStatic={true} boxHeight={517} boxWidth={25}/>
+                          <TextChatBox isStatic={true} boxHeight={517} boxWidth={25} focusByDefault={chatFocusInput}/>
+
+                          <ChatTooltip isVisible={showTooltip} onHide={()=> setShowTooltip(false)} />
 
                           <div className='mt-[1.7rem]'>
 

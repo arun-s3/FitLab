@@ -36,11 +36,11 @@ export default function AdminDashboard({
                   className={`flex items-center space-x-2 px-8 py-[11px] rounded-[11px] font-semibold transition-all duration-300 shadow-lg ${
                     adminStatus === "available"
                       ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700"
-                      : "bg-gradient-to-r from-gray-400 to-gray-500 text-white hover:from-gray-500 hover:to-gray-600"
+                      : "bg-gradient-to-r from-primary to-primaryDark text-white hover:from-yellow-300 hover:to-yellow-600"
                   }`}
                 >
                   {adminStatus === "available" ? <Power className="h-4 w-4" /> : <PowerOff className="h-4 w-4" />}
-                  <span className='text-[15px]'>{adminStatus === "available" ? "Available" : "Offline"}</span>
+                  <span className='text-[15px]'>{adminStatus === "available" ? "Available" : "Busy"}</span>
                 </motion.button>
 
               </motion.div>
@@ -117,8 +117,8 @@ export default function AdminDashboard({
                     key={user.userId}
                     user={user}
                     position={index + 1}
-                    onAccept={() => onAcceptCall(user.userId, user.username)}
-                    onDecline={() => onDeclineCall(user.userId)}
+                    onAccept={()=> onAcceptCall(user.userId, user.username)}
+                    onDecline={()=> onDeclineCall(user.userId)}
                     disabled={adminStatus !== "available"}
                   />
                 ))}

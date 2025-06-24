@@ -34,7 +34,7 @@ export default function RequestForm({ onImmediateRequest, onScheduleRequest }) {
       <motion.div variants={item} id='videoChat'>
         <div className="group relative overflow-hidden">
           <div className="absolute inset-0 opacity-0 transition-opacity duration-500 rounded-2xl"></div>
-          <button onClick={onImmediateRequest} className="relative w-full rounded-2xl border border-primary"
+          <button onClick={onImmediateRequest} className="relative w-full rounded-2xl border border-t-[10px] border-primary"
             style={bgImg}>
             <div className='transition-all duration-500 p-8 flex flex-col items-center justify-center rounded-2xl 
              z-20 group-hover:border-transparent group-hover:text-secondary transform group-hover:scale-[1.02]'>

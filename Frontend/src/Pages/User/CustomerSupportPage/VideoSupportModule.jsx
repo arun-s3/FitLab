@@ -5,6 +5,7 @@ import VideoChat from "./VideoSupport/VideoChat"
 import RequestForm from "./VideoSupport/RequestForm"
 import WaitingRoom from "./VideoSupport/WaitingRoom"
 import ScheduleModal from "./VideoSupport/ScheduleModal"
+import CallDeclinedModal from "./VideoSupport/CallDeclinedModal"
 import {SocketContext} from '../../../Components/SocketProvider/SocketProvider'
 
 
@@ -17,6 +18,10 @@ export default function VideoSupportModule() {
   const [inCall, setInCall] = useState(false)
   const [callData, setCallData] = useState(null)
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false)
+
+  const [isAdminBusy, setIsAdminBusy] = useState(false)
+
+  const [isCallDeclinedModalOpen, setIsCallDeclinedModalOpen] = useState(false)
 
   const socketContextItems = useContext(SocketContext)
   const {socket} = socketContextItems
@@ -44,6 +49,14 @@ export default function VideoSupportModule() {
     setCallData(null)
   }
 
+  const handleCallDeclined = () => {
+    setIsCallDeclinedModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsCallDeclinedModalOpen(false)
+  }
+
   useEffect(()=> {
     if(socket){
       socket.on("sessionEnded", () => {
@@ -51,11 +64,31 @@ export default function VideoSupportModule() {
         handleEndCall()
       })
 
+      socket.on("callDeclined", (message) => {
+        console.log("Inside on callDeclined....")
+        handleCallDeclined()
+        handleEndCall()
+      })
+
+      socket.on("currentAdminStatus", ({adminId, status})=> {
+        console.log("Inside on currentAdminStatus...")
+        console.log("status--->", status)
+        if(status === 'busy'){
+          console.log("Admin is busy!")
+          setIsAdminBusy(true)
+        }else setIsAdminBusy(false)
+      }) 
+
       return ()=> {
         socket.off("sessionEnded")
+        socket.off("currentAdminStatus")
       }
     }
   }, [socket])
+
+  useEffect(()=> {
+    console.log("isAdminBusy--->", isAdminBusy)
+  }, [isAdminBusy])
 
 
   return (
@@ -91,7 +124,7 @@ export default function VideoSupportModule() {
 
         {
           requestType === "immediate" && isWaiting && 
-          <WaitingRoom socketContextItems={socketContextItems} onCallStart={handleCallStart} onEndCall={handleEndCall} />
+          <WaitingRoom socketContextItems={socketContextItems} isAdminBusy={isAdminBusy} onCallStart={handleCallStart} onEndCall={handleEndCall} />
         }
 
         {
@@ -101,6 +134,8 @@ export default function VideoSupportModule() {
 
         <ScheduleModal isOpen={isScheduleModalOpen} onClose={()=> setIsScheduleModalOpen(false)}
           onSchedule={handleScheduleRequest} />
+
+        <CallDeclinedModal isOpen={isCallDeclinedModalOpen} onClose={handleCloseModal} />
 
       </motion.div>
     </div>

@@ -10,6 +10,10 @@ async function videoChatBoxSocket(io){
       console.log("Client for video chat connected:", socket.id);
       
       socket.on("joinQueue", ({ userId, username}) => {
+        
+        console.log("Emiting checkAdminStatus to admin...")
+        io.to("admin-room").emit("checkAdminStatus", {userId, socketId: socket.id})
+
         const isUserWaiting = waitingQueue.some(user=> user.userId === userId)
         const isUserInSession = Object.values(Object.fromEntries(activeSessions)).some(user=> user.userId === userId)
         if(!isUserWaiting && !isUserInSession){
@@ -27,6 +31,7 @@ async function videoChatBoxSocket(io){
 
           socket.emit("JoinedQueue")
 
+
           console.log("Emiting queueUpdate....")
           socket.emit("queueUpdate", {
             position: queuePosition,
@@ -35,6 +40,12 @@ async function videoChatBoxSocket(io){
 
           io.to("admin-room").emit("queueUpdate", { queue: waitingQueue })
         }
+      })
+
+      socket.on("adminStatusChecked", ({userId, socketId, status})=> {
+        console.log("Inside on adminStatusChecked and emiting currentAdminStatus to user...")
+        console.log("status---->", status)
+        io.to(socketId).emit("currentAdminStatus", {adminId: "admin-room", status})
       })
 
       socket.on("adminJoin", ({ adminId }) => {
@@ -108,7 +119,7 @@ async function videoChatBoxSocket(io){
           const user = waitingQueue[userIndex];
 
           io.to(user.socketId).emit("callDeclined", {
-            message: "Admin is currently busy. Please try again or schedule a session."
+            message: "Admin is currently busy. Please try again later or schedule a session."
           });
 
         }
@@ -125,11 +136,18 @@ async function videoChatBoxSocket(io){
       })
 
       socket.on("adminStatusChange", ({ adminId, status }) => {
+        console.log("Inside on adminStatusChange...")
         const adminData = adminSessions.get(adminId);
         if (adminData) {
           adminData.status = status;
+          console.log("Emiting currentAdminStatus...")
+          console.log("current status--->", status)
+          waitingQueue.forEach(queue=> {
+            io.to(queue.socketId).emit("currentAdminStatus", {adminId, status})
+          })
         }
-      });
+      }); 
+
 
       socket.on("joinSession", ({ sessionId }) => {
         console.log("Inside on joinSession")

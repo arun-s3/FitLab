@@ -24,16 +24,12 @@ export default function VideoSupportModule() {
   const [isCallDeclinedModalOpen, setIsCallDeclinedModalOpen] = useState(false)
 
   const socketContextItems = useContext(SocketContext)
-  const {socket} = socketContextItems
+  const {socket, userId} = socketContextItems
 
 
   const handleImmediateRequest = () => {
     setRequestType("immediate")
     setIsWaiting(true)
-  }
-
-  const handleScheduleRequest = (scheduledTime) => {
-    setCallData(scheduledTime)
   }
 
   const handleCallStart = (sessionId) => {
@@ -92,7 +88,7 @@ export default function VideoSupportModule() {
 
 
   return (
-    <div className="min-h-screen p-4 md:p-8" id='VideoSupportModule'>
+    <div className="min-h-screen w-[56rem] p-4 md:p-8" id='VideoSupportModule'>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -132,8 +128,7 @@ export default function VideoSupportModule() {
           <VideoChat socketContextItems={socketContextItems} sessionId={callData?.sessionId} onEndCall={handleEndCall} />
         }
 
-        <ScheduleModal isOpen={isScheduleModalOpen} onClose={()=> setIsScheduleModalOpen(false)}
-          onSchedule={handleScheduleRequest} />
+        <ScheduleModal userId={userId} isOpen={isScheduleModalOpen} onClose={()=> setIsScheduleModalOpen(false)} />
 
         <CallDeclinedModal isOpen={isCallDeclinedModalOpen} onClose={handleCloseModal} />
 

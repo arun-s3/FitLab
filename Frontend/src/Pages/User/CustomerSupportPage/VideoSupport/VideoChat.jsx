@@ -84,10 +84,14 @@ export default function VideoChat({ socketContextItems, sessionId, onEndCall }) 
           socket.emit("offer", { sessionId, offer })
         }, 2000)
 
+        socket.off("chatMessage")
         socket.on("chatMessage", (msg) => {
-          console.log("Inside on chatMessage, msg-->", msg)
-          setMessages((prev) => [...prev, { sender: "admin", text: msg.text }])
+          if(msg.sender !== 'user'){
+            console.log("Inside on chatMessage, msg-->", msg)
+            setMessages((prev) => [...prev, { sender: "admin", text: msg.text, timestamp: Date.now() }])
+          }
         })
+
       } catch (error) {
         console.error("Error accessing media devices:", error)
       }
@@ -111,7 +115,7 @@ export default function VideoChat({ socketContextItems, sessionId, onEndCall }) 
         socket.off("chatMessage")
       }
     }
-  }, [sessionId])
+  }, [sessionId, socket])
 
   useEffect(()=> {
     console.log("isConnected--->", isConnected)
@@ -161,8 +165,8 @@ export default function VideoChat({ socketContextItems, sessionId, onEndCall }) 
   const sendMessage = (e) => {
     e.preventDefault()
     if (message.trim()) {
-      socket.emit("chatMessage", { sessionId, text: message })
-      setMessages((prev) => [...prev, { sender: "user", text: message }])
+      socket.emit("chatMessage", { sessionId, text: message, timestamp: Date.now() })
+      setMessages((prev) => [...prev, { sender: "user", text: message, timestamp: Date.now()   }])
       setMessage("")
     }
   }
@@ -204,11 +208,11 @@ export default function VideoChat({ socketContextItems, sessionId, onEndCall }) 
 
       <motion.div
         initial={{ height: 0 }}
-        animate={{ height: isChatOpen ? "250px" : 0 }}
+        animate={{ height: isChatOpen ? "280px" : 0 }}
         className="bg-gradient-to-br from-gray-50 to-white overflow-hidden border-t border-gray-200"
       >
         <div className="h-full flex flex-col p-6">
-          <div className="flex-1 overflow-y-auto mb-4 space-y-3">
+          <div className="flex-1 overflow-y-auto mb-4 space-y-3 z-50">
             {messages.map((msg, index) => (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
@@ -217,13 +221,16 @@ export default function VideoChat({ socketContextItems, sessionId, onEndCall }) 
                 className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-xs px-4 py-2 rounded-2xl shadow-sm ${
+                  className={`max-w-xs px-4 py-2 text-[14px] border border-gray-300 rounded-[5px] shadow-sm ${
                     msg.sender === "user"
-                      ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white"
-                      : "bg-white border border-gray-200 text-gray-800"
+                      ? "bg-gray-200 text-black"
+                      : "bg-white text-gray-800"
                   }`}
                 >
-                  {msg.text}
+                  <p>{msg.text}</p>
+                  <p className="text-[10px] opacity-75 mt-1">
+                    {new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  </p>
                 </div>
               </motion.div>
             ))}
@@ -234,11 +241,11 @@ export default function VideoChat({ socketContextItems, sessionId, onEndCall }) 
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Type a message..."
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
+              className="flex-1 px-4 py-[10px] text-[14px] placeholder:text-[13px] border border-gray-300 rounded-[7px] focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent bg-white shadow-sm"
             />
             <button
               type="submit"
-              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-2xl hover:from-blue-600 hover:to-purple-700 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
+              className="bg-primary text-[#6C6C77] px-6 py-3 rounded-[7px] hover:bg-primaryDark transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
             >
               Send
             </button>

@@ -125,6 +125,10 @@ export default function AdminSocketProvider() {
     }
   }, [])
 
+  useEffect(()=> {
+    console.log("activeUsers--->", activeUsers)
+  }, [activeUsers])
+
   const handleSendMessage = (e, selectedUser) => {
     e.preventDefault()
     if (!newMessage.trim() || !socket || !selectedUser) return

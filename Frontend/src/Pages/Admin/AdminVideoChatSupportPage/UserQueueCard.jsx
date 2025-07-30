@@ -12,26 +12,33 @@ export default function UserQueueCard({ user, position, onAccept, onDecline, dis
       transition={{ duration: 0.3 }}
       className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 border border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300"
     >
+      {/* User Info */}
       <div className="flex items-center mb-4">
         <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center mr-4">
           <User className="h-6 w-6 text-white" />
         </div>
         <div>
-          <h3 className="font-semibold text-gray-800">User #{user.username}</h3>
+          <h3 className="font-semibold text-gray-800 flex items-center gap-[5px]">
+            <span> User #{user.username} </span>
+            {user.username.includes('guest') && <span className='italic text-[14px] text-secondary'> (Guest) </span>}
+          </h3>
           <p className="text-sm text-gray-500">Position #{position}</p>
         </div>
       </div>
 
+      {/* Wait Time */}
       <div className="flex items-center mb-4 text-sm text-gray-600">
         <Clock className="h-[14px] w-[14px] mr-2" />
         <span className='text-[13px]'>Waiting: {waitTime > 0 ? `${waitTime}m` : "Just joined"}</span>
       </div>
 
+      {/* User Request Info */}
       <div className="bg-blue-50 rounded-lg p-3 mb-4">
         <p className="text-sm text-purple-800 font-medium">Request Type:</p>
         <p className="text-sm text-purple-600">{user.requestType || "Immediate Support"}</p>
       </div>
 
+      {/* Action Buttons */}
       <div className="flex space-x-3">
         <motion.button
           whileHover={{ scale: disabled ? 1 : 1.05 }}
@@ -58,6 +65,7 @@ export default function UserQueueCard({ user, position, onAccept, onDecline, dis
         </motion.button>
       </div>
 
+      {/* Quick Actions */}
       <div className="mt-3 pt-3 border-t border-gray-200">
         <button className="flex items-center space-x-2 text-sm text-gray-500 hover:text-secondary transition-colors duration-200">
           <MessageSquare className="h-4 w-4" />

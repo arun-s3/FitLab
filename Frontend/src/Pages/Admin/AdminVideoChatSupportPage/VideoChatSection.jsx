@@ -20,6 +20,7 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
         socket,
         guestCount,
         activeUsers,
+        // messages, 
         newMessage, 
         typingUsers, 
         unreadCounts,
@@ -31,6 +32,7 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
         handleSendMessage
     } = adminSocketContextItems
 
+  // WebRTC configuration
   const configuration = {
     iceServers: [{ urls: "stun:stun.l.google.com:19302" }, { urls: "stun:stun1.l.google.com:19302" }],
   }
@@ -41,22 +43,27 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
 
     const initializeMedia = async () => {
       try {
+        // Get local media stream
         localStream = await navigator.mediaDevices.getUserMedia({
           video: true,
           audio: true,
         })
         console.log("localStream-->", localStream)
 
+        // Display local video
         if (localVideoRef.current) {
           localVideoRef.current.srcObject = localStream
         }
 
+        // Initialize WebRTC peer connection
         peerConnectionRef.current = new RTCPeerConnection(configuration)
 
+        // Add local tracks to peer connection
         localStream.getTracks().forEach((track) => {
           peerConnectionRef.current.addTrack(track, localStream)
         })
 
+        // Handle remote tracks
         peerConnectionRef.current.ontrack = (event) => {
           if (remoteVideoRef.current) {
             remoteVideoRef.current.srcObject = event.streams[0]
@@ -64,9 +71,12 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
           }
         }
 
+        // Connect to signaling server
+        // socket.connect()
         console.log("Emiting joinSession....")
         socket.emit("joinSession", { sessionId: session.sessionId })
 
+        // Handle signaling
         socket.on("offer", async (offer) => {
           console.log("Inside on offer....")
           await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(offer))
@@ -86,18 +96,23 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
           await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate))
         })
 
+        // Handle ICE candidates
         peerConnectionRef.current.onicecandidate = (event) => {
           if (event.candidate) {
              console.log("Emiting iceCandidate....")
-            socket.emit("iceCandidate", { sessionId: session.sessionId, candidate: event.candidate })
+             socket.emit("iceCandidate", { sessionId: session.sessionId, candidate: event.candidate })
           }
         }
 
+        socket.off("chatMessage")
         socket.on("chatMessage", (msg) => {
-          console.log("Inside on chatMessage, msg-->", msg)
-          setMessages((prev) => [...prev, { sender: "user", text: msg.text, timestamp: Date.now() }])
+          if(msg.sender !== 'admin'){
+            console.log("Inside on chatMessage, msg-->", msg)
+            setMessages((prev) => [...prev, { sender: "user", text: msg.text, timestamp: Date.now() }])
+          }
         })
 
+        // Get user info
         setUserInfo({
           userId: session.userId,
           username: session.username,
@@ -105,10 +120,12 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
           requestType: session.requestType || "Immediate Support",
         })
 
+        // Start session duration timer
         durationInterval = setInterval(() => {
           setSessionDuration((prev) => prev + 1)
         }, 1000)
 
+        // Auto-connect after 1 second (admin initiates)
         setTimeout(async () => {
           const offer = await peerConnectionRef.current.createOffer()
           await peerConnectionRef.current.setLocalDescription(offer)
@@ -123,6 +140,7 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
     if(socket && session){
       initializeMedia()
 
+    // Cleanup function
       return () => {
         if (localStream) {
           localStream.getTracks().forEach((track) => track.stop())
@@ -142,7 +160,7 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
         socket.off("chatMessage")
       }
     }
-  }, [session])
+  }, [session, socket])
 
     useEffect(()=> {
       console.log("isConnected--->", isConnected)
@@ -177,6 +195,7 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
   }
 
   const handleEndSession = () => {
+    // Close peer connection and stop tracks
     if (peerConnectionRef.current) {
       peerConnectionRef.current.close()
     }
@@ -195,7 +214,7 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
   const sendMessage = (e) => {
     e.preventDefault()
     if (message.trim()) {
-      socket.emit("chatMessage", { sessionId: session.sessionId, text: message })
+      socket.emit("chatMessage", { sessionId: session.sessionId, text: message, timestamp: Date.now() })
       setMessages((prev) => [...prev, { sender: "admin", text: message, timestamp: Date.now() }])
       setMessage("")
     }
@@ -208,7 +227,9 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
   }
 
   return (
-    <div className="h-screen flex flex-col bg-gray-900">
+    <div className={`${isChatOpen && 'flex gap-4'} h-full`}>
+    <div className={`h-screen flex flex-col bg-gray-900 ${isChatOpen && 'basis-[65%]'}`}>
+      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -219,14 +240,22 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
             <Users className="h-5 w-5 text-white" />
           </div>
           <div>
-            <h2 className="font-semibold text-gray-800">User #{userInfo?.username}</h2>
+            <h2 className="font-semibold text-gray-800 flex items-center gap-[5px]">
+              <span> User #{userInfo?.username} </span>
+              {
+                 userInfo?.username.includes('guest') && 
+                 <span className='text-[14px] italic text-secondary'> (Guest) </span> 
+              }
+            </h2>
             <p className="text-sm text-gray-500">{userInfo?.requestType}</p>
           </div>
         </div>
 
         <div className="flex items-center space-x-6">
           <div className="text-center">
-            <p className="text-sm text-gray-500">Session Duration</p>
+            <p className="text-sm text-gray-500">
+              { `${userInfo?.username.includes('guest') ? 'Guest' : ''} Session Duration` }
+            </p>
             <p className="font-semibold text-gray-800">{formatDuration(sessionDuration)}</p>
           </div>
 
@@ -239,7 +268,9 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
         </div>
       </motion.div>
 
+      {/* Video Area */}
       <div className="flex-1 relative bg-gray-900">
+        {/* Remote video (main) */}
         <video ref={remoteVideoRef} autoPlay playsInline className="w-full h-[600px] object-cover" />
 
         {!isConnected && (
@@ -254,11 +285,12 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
           </div>
         )}
 
+        {/* Local video (picture-in-picture) */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.5 }}
-          className="absolute top-4 right-4 w-1/4 h-1/4 rounded-lg overflow-hidden border-2 border-white shadow-lg"
+          className={`absolute top-4 right-4 w-1/4 h-1/4 rounded-lg overflow-hidden border-2 border-white shadow-lg`}
         >
           <video ref={localVideoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
 
@@ -269,6 +301,7 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
           )}
         </motion.div>
 
+        {/* Session Info Overlay */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -279,59 +312,8 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
         </motion.div>
       </div>
 
-      <motion.div
-        initial={{ height: 0 }}
-        animate={{ height: isChatOpen ? "300px" : 0 }}
-        className="bg-white overflow-hidden border-t border-gray-200"
-      >
-        <div className="h-full flex flex-col p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-gray-800">Session Chat</h3>
-            <span className="text-sm text-gray-500">{messages.length} messages</span>
-          </div>
-
-          <div className="flex-1 overflow-y-auto mb-4 space-y-3">
-            {messages.map((msg, index) => (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                key={index}
-                className={`flex ${msg.sender === "admin" ? "justify-end" : "justify-start"}`}
-              >
-                <div
-                  className={`max-w-xs px-4 py-2 rounded-2xl shadow-sm ${
-                    msg.sender === "admin"
-                      ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white"
-                      : "bg-gray-100 text-gray-800"
-                  }`}
-                >
-                  <p>{msg.text}</p>
-                  <p className="text-xs opacity-75 mt-1">
-                    {new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-
-          <form onSubmit={sendMessage} className="flex gap-3">
-            <input
-              type="text"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Type a message to the user..."
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white shadow-sm"
-            />
-            <button
-              type="submit"
-              className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-2xl hover:from-blue-600 hover:to-purple-700 transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
-            >
-              Send
-            </button>
-          </form>
-        </div>
-      </motion.div>
-
+      
+      {/* Controls */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -377,13 +359,13 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
             <MessageSquare className="h-5 w-5" />
           </motion.button>
 
-          <motion.button
+          {/* <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             className="p-4 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 text-gray-700 border border-gray-300 hover:from-gray-200 hover:to-gray-300 transition-all duration-300 shadow-lg hover:shadow-xl"
           >
             <Settings className="h-5 w-5" />
-          </motion.button>
+          </motion.button> */}
         </div>
 
         <motion.button
@@ -395,6 +377,63 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
           <Phone className="h-5 w-5 transform rotate-135" />
         </motion.button>
       </motion.div>
+    </div>
+
+        {/* Chat panel */}
+      <motion.div
+        initial={{ height: 0 }}
+        animate={{ height: isChatOpen ? '680px' : 0 }}
+        className="w-[35%] basis-[35%] h-full bg-white overflow-hidden rounded-[6px] border border-dropdownBorder"
+      >
+        <div className="h-full flex flex-col p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-[15px] text-gray-800">Session Chat</h3>
+            <span className="text-[13px] text-gray-500">{messages.length} messages</span>
+          </div>
+
+          <div className="flex-1 overflow-y-auto mb-4 space-y-3">
+            {messages.map((msg, index) => (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                key={index}
+                className={`flex ${msg.sender === "admin" ? "justify-end" : "justify-start"}`}
+              >
+                <div
+                  className={`max-w-xs px-4 py-2 text-[14px] border border-gray-300 rounded-[5px] shadow-sm ${
+                    msg.sender === "admin"
+                      ? "bg-gray-200 text-black"
+                      : "bg-white text-gray-800"
+                  }`}
+                >
+                  <p>{msg.text}</p>
+                  <p className="text-[10px] opacity-75 mt-1">
+                    {new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          <form onSubmit={sendMessage} className="flex gap-3">
+            <input
+              type="text"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Type a message to the user..."
+              className="flex-1 px-4 py-[10px] text-[14px] placeholder:text-[13px] border border-gray-300 rounded-[7px] focus:outline-none focus:ring-2 focus:ring-secondary focus:border-transparent bg-white shadow-sm"
+            />
+            <button
+              type="submit"
+              className="bg-primary text-[#6C6C77] px-6 py-3 rounded-[7px] hover:bg-primaryDark transition-all duration-300 font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
+            >
+              Send
+            </button>
+          </form>
+        </div>
+      </motion.div>
+
+
     </div>
   )
 }

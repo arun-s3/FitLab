@@ -59,6 +59,8 @@ async function videoChatBoxSocket(io){
           queue: waitingQueue,
         });
 
+        console.log("Object.values(Object.fromEntries(activeSessions))------>", Object.values(Object.fromEntries(activeSessions)))
+
         socket.emit("activeSessionsUpdate", {
           sessions: Array.from(activeSessions.values()),
         });
@@ -166,8 +168,8 @@ async function videoChatBoxSocket(io){
         socket.to(sessionId).emit("iceCandidate", candidate);
       });
 
-      socket.on("chatMessage", ({ sessionId, text }) => {
-        socket.to(sessionId).emit("chatMessage", { text });
+      socket.on("chatMessage", ({ sessionId, text, sender }) => {
+        socket.to(sessionId).emit("chatMessage", { text, sender });
       });
 
       socket.on("endSession", ({ sessionId }) => {
@@ -187,7 +189,7 @@ async function videoChatBoxSocket(io){
 
           console.log("activeSessions before deleting sessionId---->", activeSessions)
           activeSessions.delete(sessionId);
-                    console.log("activeSessions before deleting sessionId---->", activeSessions)
+          console.log("activeSessions before deleting sessionId---->", activeSessions)
 
           console.log("Emiting activeSessionsUpdate...")
           io.to("admin-room").emit("activeSessionsUpdate", {

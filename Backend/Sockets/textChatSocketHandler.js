@@ -70,9 +70,11 @@ async function textChatBoxSocket(io) {
             io.to("admin-room").emit('reconnect-if-user-selected', newUserData)
           }
         }
+        console.log("activeUsers--->", activeUsers)
+        console.log("activeUsers in array--->", Array.from(activeUsers.values()))
         io.to("admin-room").emit("active-users-update", Array.from(activeUsers.values()))
       })
-
+-
       socket.on("user-join-room", (roomId) => {
         console.log("Inside on user-join-room...")
         socket.join(roomId)
@@ -106,11 +108,13 @@ async function textChatBoxSocket(io) {
           const joinedUserDatas = Object.values(Object.fromEntries(activeUsers))
           const guestUser = joinedUserDatas.find(data=> (data.username === user.username))
           console.log("guestUser-->", guestUser)
-          activeUsers.delete(guestUser.socketId)
-          console.log("guestUser deleted")
-          const guestCount = guestCounter()
-          io.to("admin-room").emit('guest-counts', guestCount)
-          io.to("admin-room").emit("active-users-update", Array.from(activeUsers.values()))
+          if(guestUser?.socketId && activeUsers.has(guestUser.socketId)){
+            activeUsers.delete(guestUser.socketId)
+            console.log("guestUser deleted")
+            const guestCount = guestCounter()
+            io.to("admin-room").emit('guest-counts', guestCount)
+            io.to("admin-room").emit("active-users-update", Array.from(activeUsers.values()))
+          }
         }
       })
 

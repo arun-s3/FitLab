@@ -82,9 +82,10 @@ export default function AdminVideoChatSupportPage() {
   useEffect(()=> {
     console.log("activeSessions--->", activeSessions)
     console.log("currentSession--->", currentSession)
+    console.log("activeUsers--->", activeUsers)
     console.log("waitingQueue--->", waitingQueue)
     console.log("adminStatus--->", adminStatus)
-  }, [activeSessions, currentSession, waitingQueue, adminStatus])
+  }, [activeSessions, currentSession, activeUsers, waitingQueue, adminStatus])
 
   const handleAcceptCall = (userId, username) => {
     console.log("Inside handleAcceptCall..")
@@ -120,6 +121,19 @@ export default function AdminVideoChatSupportPage() {
     socket.emit("adminStatusChange", { adminId: "admin-room", status: newStatus })
   }
 
+  
+  const handleStartScheduledCall = (session) => {
+    const scheduledSession = {
+      sessionId: session.sessionId,
+      adminId: "admin-123",
+      userId: session.userId,
+      startTime: Date.now(),
+      requestType: session.sessionType,
+      isScheduled: true,
+      scheduledTime: session.scheduledTime,
+    }
+  }
+
 
     return (
         <section id='AdminVideoChatSupportPage' className="w-full -ml-[1.5rem] mb-[10rem]">
@@ -146,6 +160,7 @@ export default function AdminVideoChatSupportPage() {
                         onAcceptCall={handleAcceptCall}
                         onDeclineCall={handleDeclineCall}
                         onToggleAvailability={toggleAvailability}
+                        onStartScheduledCall={handleStartScheduledCall}
                       />
                     )}
 

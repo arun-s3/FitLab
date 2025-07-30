@@ -1,15 +1,22 @@
 import React from 'react'
 import { motion } from "framer-motion"
+
 import { Users, Clock, Video, Power, PowerOff, Bell, Settings } from "lucide-react"
+
 import UserQueueCard from "./UserQueueCard"
+import ScheduledSessions from './ScheduledSessions/ScheduledSessions'
+
+
 
 export default function AdminDashboard({
   waitingQueue,
   activeSessions,
+  activeUsers,
   adminStatus,
   onAcceptCall,
   onDeclineCall,
   onToggleAvailability,
+  onStartScheduledCall
 }) {
   const container = {
     hidden: { opacity: 0 },
@@ -88,7 +95,7 @@ export default function AdminDashboard({
           <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-6 md:p-8">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-gray-800 flex items-center">
-                <Bell className="mr-3 h-6 w-6 text-blue-600" />
+                <Bell className="mr-3 h-6 w-6 text-secondary" />
                 User Queue
               </h2>
               {waitingQueue.length > 0 && (
@@ -126,6 +133,11 @@ export default function AdminDashboard({
             )}
           </div>
         </motion.div>
+
+        <motion.div variants={item} className='mt-6'>
+          <ScheduledSessions onStartScheduledCall={onStartScheduledCall} />
+        </motion.div>
+
       </motion.div>
     </div>
   )

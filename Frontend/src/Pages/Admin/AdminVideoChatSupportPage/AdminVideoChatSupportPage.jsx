@@ -10,9 +10,11 @@ import {AdminSocketContext} from '../../../Components/AdminSocketProvider/AdminS
 
 export default function AdminVideoChatSupportPage() {
 
-    const [currentSession, setCurrentSession] = useState(null)
-    const [waitingQueue, setWaitingQueue] = useState([])
+  const [currentSession, setCurrentSession] = useState(null)
+  const [waitingQueue, setWaitingQueue] = useState([])
   const [activeSessions, setActiveSessions] = useState([])
+
+  const [currentScheduledSession, setCurrentScheduledSession] = useState(null)
 
   const adminId = 'admin-room'
   const [adminStatus, setAdminStatus] = useState("available")
@@ -59,6 +61,7 @@ export default function AdminVideoChatSupportPage() {
       })
 
       socket.on("sessionStarted", (data) => {
+        console.log("Inside on sessionStarted...")
         setCurrentSession(data)
         setAdminStatus("busy")
       })
@@ -68,6 +71,10 @@ export default function AdminVideoChatSupportPage() {
         setCurrentSession(null)
         setAdminStatus("available")
       })
+
+      // socket.on("startingScheduledSession", (data)=> {
+
+      // })
 
       return () => {
         socket.off("queueUpdate")
@@ -123,15 +130,26 @@ export default function AdminVideoChatSupportPage() {
 
   
   const handleStartScheduledCall = (session) => {
-    const scheduledSession = {
-      sessionId: session.sessionId,
-      adminId: "admin-123",
-      userId: session.userId,
-      startTime: Date.now(),
-      requestType: session.sessionType,
+    const scheduledSessionNow = {
+      // sessionId: session.sessionId,
+      adminId: "admin-room",
+      userId: session.userId._id,
+      username: session.userId.username,
+      // startTime: Date.now(),
+      requestType: "scheduled",
       isScheduled: true,
-      scheduledTime: session.scheduledTime,
+      scheduledTime: session.scheduledTime, 
     }
+    setCurrentScheduledSession(scheduledSessionNow)
+    console.log("Inside handleStartScheduledCall..")
+    setAdminStatus("busy")
+
+    setWaitingQueue((prev) => prev.filter((user) => user.userId !== session.userId._id))
+
+    console.log("Emiting acceptCall...")
+    // socket.emit("notifyUserForCall")
+    const userSocketId = activeUsers.find(user=> user.username === session.userId.username).socketId
+    socket.emit("startScheduledCall", { adminId, adminSocketId: socket.id, userSocketId, currentScheduledSession: scheduledSessionNow})
   }
 
 

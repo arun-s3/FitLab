@@ -8,11 +8,12 @@ import { io } from "socket.io-client"
 import axios from "axios"
 
 import {decryptData} from '../../Utils/decryption'
+import VideoCallCommonModal from '../../Pages/User/VideoCallCommonModal/VideoCallCommonModal'
 
 export const SocketContext = createContext();
 
 
-export default function SocketProvider(props) {
+export default function SocketProvider() {
 
     // const socket = useMemo(()=> io("http://localhost:3000"), [])
 
@@ -38,6 +39,8 @@ export default function SocketProvider(props) {
     const [newMessage, setNewMessage] = useState("")
     const [isTyping, setIsTyping] = useState(false)
 
+    const [openVideoCallModal, setOpenVideoCallModal] = useState(false)
+    const [scheduledVideoCallSessionId, setScheduledVideoCallSessionId] = useState(null)
 
     const messagesEndRef = useRef(null)             
     const typingTimeoutRef = useRef(null)
@@ -109,6 +112,13 @@ export default function SocketProvider(props) {
             setIsTyping(data.isTyping)
           }
         })
+
+        socket.on("notifySupportCalling", (sessionId)=> {
+          console.log("Inside on notifySupportCalling....")
+          setScheduledVideoCallSessionId(sessionId)
+          setOpenVideoCallModal(true)
+        })
+
         setSocket(socket)
 
         return () => {
@@ -181,7 +191,11 @@ export default function SocketProvider(props) {
         messagesEndRef,
         typingTimeoutRef,
         handleTyping,
-        handleSendMessage
+        handleSendMessage,
+        openVideoCallModal,
+        setOpenVideoCallModal,
+        scheduledVideoCallSessionId
+        // VideoCallCommonModal : <VideoCallCommonModal/>
       }}
     >
 

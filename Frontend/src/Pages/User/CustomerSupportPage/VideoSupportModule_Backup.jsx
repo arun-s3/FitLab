@@ -23,10 +23,10 @@ export default function VideoSupportModule() {
 
   const [isCallDeclinedModalOpen, setIsCallDeclinedModalOpen] = useState(false)
 
-  const [scheduledCallReceived, setScheduledCallReceived] = useState(false)
+  const [callReceived, setCallReceived] = useState(false)
 
   const socketContextItems = useContext(SocketContext)
-  const {socket, userId, openVideoCallModal, scheduledVideoCallSessionId} = socketContextItems
+  const {socket, userId, openVideoCallModal, videoCallSessionId} = socketContextItems
 
 
   const handleImmediateRequest = () => {
@@ -87,11 +87,10 @@ export default function VideoSupportModule() {
   useEffect(()=> {
     console.log("isAdminBusy--->", isAdminBusy)
     if(openVideoCallModal){
-      console.log("Inside VideoSupportModule page...openVideoCallModal is true")
-      setScheduledCallReceived(true)
+      setCallReceived(true)
     }
     // handleCallStart(videoCallSessionId)
-  }, [isAdminBusy, openVideoCallModal])
+  }, [isAdminBusy, openVideoCallModal, videoCallSessionId])
 
 
   return (
@@ -121,19 +120,18 @@ export default function VideoSupportModule() {
           </motion.p>
         </header>
 
-        {!requestType && !inCall && !scheduledCallReceived && (
+        {!requestType && !inCall && (
           <RequestForm onImmediateRequest={handleImmediateRequest} onScheduleRequest={()=> setIsScheduleModalOpen(true)} />
         )}
 
         {
-          requestType === "immediate" && isWaiting && !scheduledCallReceived &&
+          requestType === "immediate" && isWaiting && 
           <WaitingRoom socketContextItems={socketContextItems} isAdminBusy={isAdminBusy} onCallStart={handleCallStart} onEndCall={handleEndCall} />
         }
 
         {
-          (inCall || scheduledCallReceived) &&
-          <VideoChat socketContextItems={socketContextItems} ImmediateVideoCallsessionId={callData?.sessionId} scheduledCallReceived={scheduledCallReceived}
-            scheduledVideoCallSessionId={scheduledVideoCallSessionId} onEndCall={handleEndCall} />
+          inCall && 
+          <VideoChat socketContextItems={socketContextItems} sessionId={callData?.sessionId} onEndCall={handleEndCall} />
         }
 
         <ScheduleModal userId={userId} isOpen={isScheduleModalOpen} onClose={()=> setIsScheduleModalOpen(false)} />

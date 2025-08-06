@@ -1,15 +1,22 @@
-import React from 'react'
-import Header from '../../../Components/Header/Header'
-import Footer from '../../../Components/Footer/Footer'
-import {SiteButtonDark} from '../../../Components/SiteButtons/SiteButtons'
+import React, {useState, useEffect, useContext} from 'react'
+import { Outlet } from 'react-router-dom'
+
 import {FaFacebook, FaInstagramSquare, FaLinkedin} from "react-icons/fa";
 import {CiFacebook, CiInstagram, CiLinkedin} from "react-icons/ci";
 
+import Header from '../../../Components/Header/Header'
+import Footer from '../../../Components/Footer/Footer'
+import {SiteButtonDark} from '../../../Components/SiteButtons/SiteButtons'
+
+
+
 export default function HomePage(){
+
     const bgImg = {
         backgroundImage:"url('/Hero-section-bg2.png')",
         backgroundSize:"cover"
     }
+
 
     return(
       <>
@@ -34,6 +41,7 @@ export default function HomePage(){
             </aside> 
         </div>
         <Footer/>
+        {/* <Outlet/> */}
       </>
     )
 }

@@ -338,9 +338,11 @@ export default function ScheduleModal({ userId, isOpen, onClose }) {
             exit="exit"
             className="relative max-w-2xl w-full max-h-[90vh]"
           >
+            {/* Background gradient */}
             <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-3xl"></div>
 
             <div className="relative bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/50 p-6 md:p-8">
+              {/* Close button */}
               <button
                 onClick={onClose}
                 className="absolute top-4 right-4 p-2 rounded-full bg-white/80 hover:bg-white transition-colors duration-200 shadow-lg z-10"
@@ -348,6 +350,7 @@ export default function ScheduleModal({ userId, isOpen, onClose }) {
                 <X className="h-5 w-5 text-gray-600" />
               </button>
 
+              {/* Header */}
               <div className="text-center mb-[1.5rem]">
                 <h2 className="text-[25px] text-secondary font-bold mb-2 flex items-center justify-center">
                   <Calendar className="mr-3 h-7 w-7 text-priaryDark" />
@@ -356,6 +359,7 @@ export default function ScheduleModal({ userId, isOpen, onClose }) {
                 <p className="text-[15px] text-gray-600">Choose your preferred date and time for a personalized consultation</p>
               </div>
 
+              {/* Step indicator */}
               <div className="flex items-center justify-center mb-[10px]">
                 <div className="flex items-center space-x-4">
                   {[1, 2, 3].map((step) => (
@@ -381,6 +385,7 @@ export default function ScheduleModal({ userId, isOpen, onClose }) {
                 </div>
               </div>
 
+              {/* Step labels */}
               <div className="flex justify-center mb-8">
                 <div className="flex space-x-8 text-sm">
                   <span className={`font-medium ${currentStep >= 1 ? "text-blue-600" : "text-gray-400"}`}>
@@ -394,6 +399,7 @@ export default function ScheduleModal({ userId, isOpen, onClose }) {
               <form onSubmit={handleSubmit} className="h-[350px] px-[10px] overflow-y-scroll overflow-x-hidden">
                 {currentStep === 1 && (
                   <>
+                {/* Date selection */}
                 <div className="mb-8">
                   <label className="block text-primaryDark font-semibold mb-4 text-[15px]">Select a Date</label>
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -441,7 +447,8 @@ export default function ScheduleModal({ userId, isOpen, onClose }) {
                   </div>
                 </div>
 
-
+                {/* Time selection */}
+                {/* {selectedDate && ( */}
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
@@ -489,6 +496,7 @@ export default function ScheduleModal({ userId, isOpen, onClose }) {
                   </motion.div>
                 {/* )} */}
 
+                  {/* Next button for step 1 */}
                     {selectedDate && selectedTime && (
                       <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -508,6 +516,7 @@ export default function ScheduleModal({ userId, isOpen, onClose }) {
                 )}
 
 
+                {/* Step 2: Topic, Notes, and Summary */}
                 {currentStep === 2 && (
                   <motion.div
                     initial={{ opacity: 0, x: 20 }}
@@ -541,6 +550,7 @@ export default function ScheduleModal({ userId, isOpen, onClose }) {
                       </div>
                     </div> */}
 
+                    {/* Topic selection */}
                     <div className="mb-8">
                       <label className="block mb-[10px] text-gray-800 text-[16px] font-semibold flex items-center">
                         <Tag className="mr-2 h-[15px] w-[15px] text-purple-600" />
@@ -575,6 +585,7 @@ export default function ScheduleModal({ userId, isOpen, onClose }) {
                       )}
                     </div>
 
+                    {/* Notes section */}
                     <div className="mb-8">
                       <label className="block text-[16px] text-gray-800 font-semibold mb-[10px] flex items-center">
                         <MessageSquare className="mr-2 h-[15px] w-[15px] text-secondary" />
@@ -596,6 +607,7 @@ export default function ScheduleModal({ userId, isOpen, onClose }) {
                       </div>
                     </div>
 
+                    {/* Session summary */}
                     <div className="mb-8 bg-gradient-to-br from-gray-50 to-white p-6 rounded-2xl border border-primary">
                       <h3 className="font-semibold text-gray-800 mb-4 flex items-center">
                         <Star className="mr-2 h-5 w-5 text-[17px] text-yellow-500" />
@@ -647,6 +659,7 @@ export default function ScheduleModal({ userId, isOpen, onClose }) {
                       </div>
                     </div>
 
+                    {/* Navigation buttons */}
                     <div className="flex justify-between">
                       <button
                         type="button"
@@ -666,6 +679,7 @@ export default function ScheduleModal({ userId, isOpen, onClose }) {
                   </motion.div>
                 )}
 
+                {/* Step 3: Final Confirmation */}
                 {currentStep === 3 && (
                   <motion.div
                     initial={{ opacity: 0, x: 20 }}
@@ -677,6 +691,7 @@ export default function ScheduleModal({ userId, isOpen, onClose }) {
                       <p className="text-[14px] text-gray-600">Please review your session details before confirming</p>
                     </div>
 
+                    {/* Final summary card */}
                     <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 px-8 py-4 rounded-3xl border border-blue-200/50 mb-8">
                       <div className="text-center mb-6">
                         <div className="h-[3.5rem] w-[3.5rem] bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -727,6 +742,7 @@ export default function ScheduleModal({ userId, isOpen, onClose }) {
                       </div>
                     </div>
 
+                    {/* Navigation buttons */}
                     <div className="flex justify-between">
                       <button
                         type="button"

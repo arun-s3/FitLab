@@ -114,6 +114,63 @@ async function videoChatBoxSocket(io){
         }
       });
 
+      socket.on("startScheduledCall", ({ adminId, adminSocketId, userSocketId, currentScheduledSession }) => {
+        console.log("Inside startScheduledCall....")
+        const userIndex = waitingQueue.findIndex(user => user.userId === currentScheduledSession.userId);
+
+        // if (userIndex !== -1) {
+          const user = waitingQueue[userIndex];
+          const sessionId = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+          console.log("sessionId generated--->", sessionId)
+          waitingQueue.splice(userIndex, 1);
+
+          const sessionData = {
+            sessionId,
+            adminId,
+            userId: currentScheduledSession.userId,
+            username: currentScheduledSession.username,
+            adminSocketId,
+            userSocketId,
+            startTime: Date.now(),
+            requestType: currentScheduledSession.requestType
+          };
+
+          activeSessions.set(sessionId, sessionData);
+          console.log("activeSessions now--->", activeSessions)
+          const adminData = adminSessions.get(adminId);
+          if (adminData) {
+            adminData.status = "busy";
+            adminData.currentSession = sessionId;
+          }
+
+          console.log("Emiting notifySupportCalling....")
+          io.to(userSocketId).emit("notifySupportCalling", sessionId);
+
+          // console.log("Emiting callReady....")
+          // io.to(userSocketId).emit("callReady", { sessionId });
+
+          // console.log("Emiting sessionStarted....")
+          // socket.emit("sessionStarted", sessionData);
+
+          // socket.join(sessionId);
+          // io.sockets.sockets.get(userSocketId)?.join(sessionId);
+
+          // io.to("admin-room").emit("queueUpdate", {
+          //   queue: waitingQueue,
+          // });
+
+          // io.to("admin-room").emit("activeSessionsUpdate", {
+          //   sessions: Array.from(activeSessions.values()),
+          // });
+        // }
+      });
+
+      socket.on("startScheduledSession", (sessionId)=> {
+        console.log("Inside startScheduledSession...")
+        const sessionData = activeSessions.get(sessionId) 
+        io.to("admin-room").emit("sessionStarted", sessionData)
+      })
+
       socket.on("declineCall", ({ adminId, userId }) => {
         const userIndex = waitingQueue.findIndex(user => user.userId === userId);
 

@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect, useContext} from 'react'
 import './Header.css'
 import {Link, useNavigate} from 'react-router-dom'
 import {useSelector, useDispatch} from 'react-redux'
@@ -12,9 +12,11 @@ import {Headset} from "lucide-react"
 
 import Logo from '../Logo/Logo'
 import UserHead from '../UserHead/UserHead'
+import VideoCallCommonModal from '../../Pages/User/VideoCallCommonModal/VideoCallCommonModal'
 import {SiteButton} from '../SiteButtons/SiteButtons'
 import CartSidebar from '../../Components/CartSidebar/CartSidebar'
 import TextChatBox from '../../Pages/User/TextChatBox/TextChatBox'
+import {SocketContext} from '../../Components/SocketProvider/SocketProvider'
 
 
 
@@ -30,11 +32,32 @@ export default function Header({customStyle}){
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
+    // const {setOpenVideoCallModal, VideoCallCommonModal} = useContext(SocketContext)
+    // const {socket} = socketContextItems
+
+    // const [openVideoCallModal, setOpenVideoCallModal] = useState(false)
+
     const openCartSidebar = ()=> {
         if(cart?.products && cart.products.length > 0){
             setIsCartOpen(true)
         }
     }
+
+    console.log("SocketContext----->", SocketContext)
+
+    // useEffect(()=> {
+    //     if(socket){
+
+    //         socket.on("notifySupportCalling", (sessionId) => {
+    //             console.log("Inside on notifySupportCalling....")
+    //             setOpenVideoCallModal(true)
+    //         })
+
+    //       return ()=> {
+    //         socket.off("notifySupportCalling")
+    //       }
+    //     }
+    // }, [socket])
 
 
     return(
@@ -104,6 +127,18 @@ export default function Header({customStyle}){
                           
                     </div>
                 }
+
+                {/* { */}
+                    {/* openVideoCallModal && */}
+                    {/* <div className="fixed inset-0 bg-black bg-opacity-50 z-50 "> */}
+                       {/* {
+                         VideoCallCommonModal &&
+                        <VideoCallCommonModal/>
+                       } */}
+
+                    {/* </div> */}
+
+                {/* } */}
 
         </div>
     )

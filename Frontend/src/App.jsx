@@ -24,6 +24,9 @@ import OrderHistoryPage from './Pages/User/OrderHistoryPage/OrderHistoryPage'
 import WalletPage from './Pages/User/WalletPage/WalletPage'
 import CustomerSupportPage from './Pages/User/CustomerSupportPage/CustomerSupportPage'
 // import VideoChatPage from './Pages/User/VideoChatPage/VideoChatPage'
+import ModalContext from './Components/GlobalModals/ModalContext'
+import SocketListener from './Components/GlobalModals/SocketListener'
+import GlobalVideoCallModalLayout from './Pages/User/GlobalModalLayouts/GlobalVideoCallModalLayout'
 
 import AdminSignInPage from './Pages/Admin/AdminSignInPage/AdminSignInPage'
 import AdminPageLayout from './Pages/Admin/AdminPageLayout/AdminPageLayout'
@@ -52,6 +55,7 @@ import "react-toastify/dist/ReactToastify.css";
 import Header from './Components/Header/Header'
 import SocketProvider from './Components/SocketProvider/SocketProvider'
 import AdminSocketProvider from './Components/AdminSocketProvider/AdminSocketProvider'
+// import SocketListener from './Components/GlobalModals/SocketListener'
 
 
 export default function App(){
@@ -78,6 +82,7 @@ export default function App(){
                     <Route path='userPresent' element={<UserPresenceErrorPage/>}/>
                 </Route>
                 <Route element={<SocketProvider/>}>
+                    <Route element={<GlobalVideoCallModalLayout/>}>
                     <Route index element={<HomePage/>}/>
                     <Route path='shop'>
                         <Route index element={<ProductListPage/>}/>
@@ -106,6 +111,7 @@ export default function App(){
                     {/* <Route path='video' element={<VideoChatPage/>} /> */}
                     {/* <Route path='wallet' element={<WalletPage/>} /> */}
                     <Route path='profile'> 
+                    </Route>
                     </Route>
                 </Route>
 

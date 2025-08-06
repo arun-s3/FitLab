@@ -6,7 +6,7 @@ import { Mic, MicOff, Video, VideoOff, Phone, MessageSquare, Users } from "lucid
 import VideoChatInfoTab from './VideoChatInfoTab' 
 
 
-export default function VideoChat({ socketContextItems, ImmediateVideoCallsessionId = null, scheduledCallReceived = false, scheduledVideoCallSessionId = null, onEndCall }) {
+export default function VideoChat({ socketContextItems, sessionId, scheduledCallReceived = false, onEndCall }) {
 
   const [isMuted, setIsMuted] = useState(false)
   const [isVideoOff, setIsVideoOff] = useState(false)
@@ -15,13 +15,9 @@ export default function VideoChat({ socketContextItems, ImmediateVideoCallsessio
   const [messages, setMessages] = useState([])
   const [isChatOpen, setIsChatOpen] = useState(false)
 
-  const [sessionId, setSessionId] = useState(null)
-
   const localVideoRef = useRef(null)
   const remoteVideoRef = useRef(null)
   const peerConnectionRef = useRef(null)
-
-  // const [runWithSessionId, setRunWithSessionId] = useState(null)
 
   const {socket, newMessage, isTyping, messagesEndRef, handleSendMessage, handleTyping} = socketContextItems
 
@@ -29,16 +25,6 @@ export default function VideoChat({ socketContextItems, ImmediateVideoCallsessio
   const configuration = {
     iceServers: [{ urls: "stun:stun.l.google.com:19302" }, { urls: "stun:stun1.l.google.com:19302" }],
   }
-
-  useEffect(()=> {
-    console.log("Mounted.........")
-  }, [])
-
-  useEffect(()=> {
-    if(ImmediateVideoCallsessionId){
-      setSessionId(ImmediateVideoCallsessionId)
-    }
-  }, [ImmediateVideoCallsessionId])
 
   useEffect(() => {
     let localStream
@@ -144,10 +130,7 @@ export default function VideoChat({ socketContextItems, ImmediateVideoCallsessio
     console.log("peerConnectionRef--->", peerConnectionRef)
     console.log("isChatOpen--->", isChatOpen)
     console.log("scheduledCallReceived--->", scheduledCallReceived)
-    console.log("sessionId--->", sessionId)
-    console.log("ImmediateVideoCallsessionId--->", ImmediateVideoCallsessionId)
-    console.log("scheduledVideoCallSessionId--->", scheduledVideoCallSessionId)
-  }, [isConnected, message, messages, localVideoRef, peerConnectionRef, isChatOpen, scheduledCallReceived, ImmediateVideoCallsessionId, scheduledVideoCallSessionId, sessionId])
+  }, [isConnected, message, messages, localVideoRef, peerConnectionRef, isChatOpen, scheduledCallReceived])
 
   const toggleMute = () => {
     const localStream = localVideoRef.current?.srcObject
@@ -193,15 +176,6 @@ export default function VideoChat({ socketContextItems, ImmediateVideoCallsessio
       setMessage("")
     }
   }
-
-  const startScheduledVideoCall = ()=> {
-    if(scheduledVideoCallSessionId){
-      console.log("Starting scheduled video call with a session id")
-      socket.emit('startScheduledSession', scheduledVideoCallSessionId)
-      setSessionId(scheduledVideoCallSessionId)
-    }
-  }
-
 
   return (
     <div className="relative overflow-hidden rounded-3xl shadow-2xl bg-white">
@@ -352,7 +326,7 @@ export default function VideoChat({ socketContextItems, ImmediateVideoCallsessio
         // className="p-6 bg-gradient-to-r from-white to-gray-50 rounded-b-3xl border-t border-gray-200"
         >
 
-          <VideoChatInfoTab startVideoCall={()=> startScheduledVideoCall()}/>
+          <VideoChatInfoTab />
 
         </motion.div>
       }

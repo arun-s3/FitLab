@@ -73,8 +73,8 @@ export default function ScheduledSessionCard({ session, onStartCall }) {
 
   return (
     <motion.div
-      whileHover={{ scale: 1.02, y: -2 }}
-      transition={{ delay: 0.1 }}
+      whileHover={{ scale: 1.02 }}
+      transition={{ duration: 0.1 }}
       className={`bg-gradient-to-r from-white to-gray-50 rounded-2xl p-6 border-2 transition-all duration-300 ${
         isUrgent
           ? "border-orange-200 shadow-lg shadow-orange-100"
@@ -178,20 +178,22 @@ export default function ScheduledSessionCard({ session, onStartCall }) {
               <MessageSquare className="h-4 w-4" />
             </motion.button>
 
-            <motion.button
-              whileHover={{ scale: session.isUserActive && session.timeRemainingMs ? 1.05 : 1 }}
-              whileTap={{ scale: session.isUserActive && session.timeRemainingMs ? 0.95 : 1 }}
-              onClick={session.isUserActive && session.timeRemainingMs ? onStartCall : undefined}
-              disabled={!(session.isUserActive && session.timeRemainingMs)}
-              className={`flex items-center space-x-2 px-4 py-3 rounded-xl font-semibold transition-all duration-300 ${
-                session.isUserActive && session.timeRemainingMs
-                  ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-500 hover:to-emerald-600 shadow-lg hover:shadow-xl"
-                  : "bg-gray-200 text-gray-400 cursor-not-allowed"
-              }`}
-            >
-              <Video className="h-[23px] w-[23px]" />
-              <span className="hidden sm:inline text-[14px] tracking-[0.3px]">{session.isUserActive ? "Start Call" : "User Offline"}</span>
-            </motion.button>
+            {session.timeRemainingMs &&
+              <motion.button
+                whileHover={{ scale: session.isUserActive ? 1.05 : 1 }}
+                whileTap={{ scale: session.isUserActive ? 0.95 : 1 }}
+                onClick={session.isUserActive ? onStartCall : undefined}
+                disabled={!session.isUserActive}
+                className={`flex items-center space-x-2 px-4 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                  session.isUserActive
+                    ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-500 hover:to-emerald-600 shadow-lg hover:shadow-xl"
+                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                }`}
+              >
+                <Video className="h-[23px] w-[23px]" />
+                <span className="hidden sm:inline text-[14px] tracking-[0.3px]">{session.isUserActive ? "Start Call" : "User Offline"}</span>
+              </motion.button>
+            }
           </div>
         </div>
       </div>

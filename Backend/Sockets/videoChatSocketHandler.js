@@ -144,7 +144,7 @@ async function videoChatBoxSocket(io){
           }
 
           console.log("Emiting notifySupportCalling....")
-          io.to(userSocketId).emit("notifySupportCalling", sessionId);
+          io.to(userSocketId).emit("notifySupportCalling", sessionId, currentScheduledSession);
 
           // console.log("Emiting callReady....")
           // io.to(userSocketId).emit("callReady", { sessionId });

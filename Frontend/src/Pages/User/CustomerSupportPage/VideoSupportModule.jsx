@@ -45,6 +45,7 @@ export default function VideoSupportModule() {
     setInCall(false)
     setRequestType(null)
     setCallData(null)
+    setScheduledCallReceived(false)
   }
 
   const handleCallDeclined = () => {

@@ -22,6 +22,8 @@ export default function ScheduledSessions({ onStartScheduledCall }) {
   
   const { activeUsers } = adminSocketContextItems
 
+  const [updatedSessions, setUpdatedSessions] = useState([])
+
   const [scheduledSessions, setScheduledSessions] = useState([])
   const [filteredSessions, setFilteredSessions] = useState([])
 
@@ -69,9 +71,9 @@ export default function ScheduledSessions({ onStartScheduledCall }) {
               }
               return session
             })
-            setScheduledSessions(sessionsWithDetails)
+            setUpdatedSessions(sessionsWithDetails)
           }
-          else setScheduledSessions(sessions)
+          else setUpdatedSessions(sessions)
         }
       }
       catch(error){
@@ -83,8 +85,9 @@ export default function ScheduledSessions({ onStartScheduledCall }) {
 
   useEffect(()=> {
     console.log("activeUsers---->", activeUsers)
-    if(scheduledSessions && scheduledSessions?.length > 0 && activeUsers && activeUsers?.length > 0){
-      const updateSessions = scheduledSessions.map(session=> {
+    console.log("updatedSessions.length---->", updatedSessions?.length)
+    if(updatedSessions && updatedSessions?.length > 0 && activeUsers && activeUsers?.length > 0){
+      const updateSessions = updatedSessions.map(session=> {
         const isActive = checkUserActive(session.userId.username) 
         console.log("isActive---->", isActive)
         session.isUserActive = isActive
@@ -92,7 +95,7 @@ export default function ScheduledSessions({ onStartScheduledCall }) {
       })
       setScheduledSessions(updateSessions)
     }
-  }, [activeUsers])
+  }, [activeUsers, updatedSessions])
 
   const container = {
     hidden: { opacity: 0 },

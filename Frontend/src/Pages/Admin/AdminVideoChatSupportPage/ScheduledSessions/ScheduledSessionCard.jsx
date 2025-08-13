@@ -153,7 +153,7 @@ export default function ScheduledSessionCard({ session, onStartCall }) {
           {session.notes && (
             <div className="bg-gray-50 rounded-lg p-3 mb-4">
               <p className="text-[13px] text-gray-700">
-                <span className="font-medium">Notes:</span> {session.notes}
+                <span className="font-medium">Notes:</span> {session.notes.length > 60 ? session.notes.slice(0,50) + '...' : session.notes}
               </p>
             </div>
           )}

@@ -1,23 +1,34 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from "framer-motion"
 
-import { PhoneOff, Video, User, Clock, Calendar, X, Dumbbell, Heart } from "lucide-react"
+import { PhoneOff, Video, Headset, Clock, Calendar, X, Dumbbell, Weight } from "lucide-react"
 
 
 
-export default function VideoCallModal({onClose}) {
+export default function VideoCallModal({videoSessionInfo, onClose}) {
 
   const [isVisible, setIsVisible] = useState(true)
   const [callState, setCallState] = useState("incoming") // incoming, declined, hidden
   const [isScheduled, setIsScheduled] = useState(true)
-  const [callerInfo] = useState({
-    name: "Fitness Support",
-    department: "Personal Training & Equipment",
-    avatar: null,
-  })
+  const [callerInfo, setCallerInfo] = useState({})
 
   const navigate = useNavigate()
+
+  useEffect(()=> {
+    console.log("videoSessionInfo---->", videoSessionInfo)
+    if(videoSessionInfo && Object.keys(videoSessionInfo).length > 0){
+      setCallerInfo({
+        name: "Fitness Expert",
+        subjectLine: videoSessionInfo?.subjectLine || "",
+        customerNotes: videoSessionInfo?.notes || ""
+      })
+    }
+  }, [videoSessionInfo])
+
+  useEffect(()=> {
+    console.log("callerInfo--->", callerInfo)
+  }, [callerInfo])
 
   // Simulate incoming call
   const showIncomingCall = (scheduled = true) => {
@@ -27,8 +38,6 @@ export default function VideoCallModal({onClose}) {
   }
 
   const handleAcceptCall = () => {
-    // Redirect to video calling page
-    // window.location.href = "/video-call-room" // Replace with your actual video call page
     navigate('/support')
     onClose()
   }
@@ -88,7 +97,7 @@ export default function VideoCallModal({onClose}) {
                   )}
 
                   {/* Header with gradient */}
-                  <div className="bg-gradient-to-br from-blue-500 to-purple-600 px-6 pt-8 pb-6 text-white relative overflow-hidden">
+                  <div className="bg-gradient-to-br from-purple-500 to-purple-600 px-6 pt-8 pb-6 text-white relative overflow-hidden">
                     {/* Animated fitness elements */}
                     {/* Floating dumbbells */}
                     <motion.div
@@ -126,7 +135,7 @@ export default function VideoCallModal({onClose}) {
                     />
 
                     {/* Pulsing heart */}
-                    <motion.div
+                    {/* <motion.div
                       animate={{
                         scale: [1, 1.2, 1],
                         opacity: [0.1, 0.2, 0.1],
@@ -134,8 +143,8 @@ export default function VideoCallModal({onClose}) {
                       transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
                       className="absolute top-4 left-4 text-white opacity-10"
                     >
-                      <Heart className="w-8 h-8" />
-                    </motion.div>
+                      <Weight className="w-8 h-8" />
+                    </motion.div> */}
 
                     <div className="relative z-10 text-center">
                       <motion.div
@@ -144,7 +153,7 @@ export default function VideoCallModal({onClose}) {
                         className="relative inline-block mb-4"
                       >
                         <div className="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                          <User className="w-10 h-10 text-white" />
+                          <Headset className="w-10 h-10 text-white" />
                         </div>
                         {/* Pulsing ring with fitness theme */}
                         <motion.div
@@ -160,8 +169,13 @@ export default function VideoCallModal({onClose}) {
                         />
                       </motion.div>
 
-                      <h2 className="text-2xl font-bold mb-1">{callerInfo.name}</h2>
-                      <p className="text-blue-100 mb-3">{callerInfo.department}</p>
+                      {/* {
+                        callerInfo && Object.keys(callerInfo).length > 0 &&
+                        <> */}
+                          <h2 className="text-2xl font-bold mb-1">{callerInfo.name}</h2>
+                          <p className="text-blue-100 mb-3">{callerInfo.subjectLine}</p>
+                        {/* </>
+                      } */}
 
                       {/* Call type badge */}
                       <div className="inline-flex items-center space-x-1 bg-white bg-opacity-20 rounded-full px-3 py-1 backdrop-blur-sm">
@@ -184,13 +198,23 @@ export default function VideoCallModal({onClose}) {
                   <div className="px-6 py-4 bg-gray-50">
                     <div className="text-center">
                       <p className="text-gray-600 text-sm mb-1">
-                        {isScheduled
-                          ? "Your personal training consultation is ready to begin"
-                          : "Our fitness expert would like to help you with your workout goals"}
+                        {isScheduled 
+                          ? `Your scheduled call on ${callerInfo.subjectLine} is ready to begin`
+                          : "Our customer expert would like to help you with your concerns"
+                        }
                       </p>
                       {isScheduled && (
-                        <p className="text-xs text-gray-500">Get personalized advice on equipment and training plans</p>
-                      )}
+                        <div className={`${callerInfo.customerNotes ? 'flex flex-col gap-4' : 'mt-4'}`}>
+                          <p className={`text-xs text-muted`}>Get personalized advice for all your concerns!</p>
+                          {
+                            callerInfo?.customerNotes &&
+                            <p className="ml-[18px] text-left text-xs text-gray-400">
+                              <span className="text-secondary"> Your Notes: </span>
+                                 { callerInfo.customerNotes.length > 40 ? callerInfo.customerNotes.slice(0,40) + '...' : callerInfo.customerNotes } 
+                            </p> 
+                          }
+                        </div>
+                      )} 
                     </div>
                   </div>
 

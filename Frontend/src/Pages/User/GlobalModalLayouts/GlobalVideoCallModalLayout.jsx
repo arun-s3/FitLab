@@ -7,12 +7,12 @@ import VideoCallCommonModal from '../\/VideoCallCommonModal/VideoCallCommonModal
 
 export default function GlobalVideoCallModalLayout() {
     
-  const { openVideoCallModal, setOpenVideoCallModal } = useContext(SocketContext)
+  const { openVideoCallModal, setOpenVideoCallModal, videoSessionInfo } = useContext(SocketContext)
 
   return (
     <>
       {openVideoCallModal && (
-        <VideoCallCommonModal onClose={() => setOpenVideoCallModal(false)} />
+        <VideoCallCommonModal videoSessionInfo={videoSessionInfo} onClose={() => setOpenVideoCallModal(false)} />
       )}
       <Outlet />
     </>

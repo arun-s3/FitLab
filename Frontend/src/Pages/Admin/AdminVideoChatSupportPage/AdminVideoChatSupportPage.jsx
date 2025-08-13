@@ -139,6 +139,8 @@ export default function AdminVideoChatSupportPage() {
       requestType: "scheduled",
       isScheduled: true,
       scheduledTime: session.scheduledTime, 
+      subjectLine: session.subjectLine,
+      notes: session.notes
     }
     setCurrentScheduledSession(scheduledSessionNow)
     console.log("Inside handleStartScheduledCall..")

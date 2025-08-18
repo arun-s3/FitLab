@@ -20,7 +20,6 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
         socket,
         guestCount,
         activeUsers,
-        // messages, 
         newMessage, 
         typingUsers, 
         unreadCounts,
@@ -32,7 +31,6 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
         handleSendMessage
     } = adminSocketContextItems
 
-  // WebRTC configuration
   const configuration = {
     iceServers: [{ urls: "stun:stun.l.google.com:19302" }, { urls: "stun:stun1.l.google.com:19302" }],
   }
@@ -43,27 +41,22 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
 
     const initializeMedia = async () => {
       try {
-        // Get local media stream
         localStream = await navigator.mediaDevices.getUserMedia({
           video: true,
           audio: true,
         })
         console.log("localStream-->", localStream)
 
-        // Display local video
         if (localVideoRef.current) {
           localVideoRef.current.srcObject = localStream
         }
 
-        // Initialize WebRTC peer connection
         peerConnectionRef.current = new RTCPeerConnection(configuration)
 
-        // Add local tracks to peer connection
         localStream.getTracks().forEach((track) => {
           peerConnectionRef.current.addTrack(track, localStream)
         })
 
-        // Handle remote tracks
         peerConnectionRef.current.ontrack = (event) => {
           if (remoteVideoRef.current) {
             remoteVideoRef.current.srcObject = event.streams[0]
@@ -71,12 +64,9 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
           }
         }
 
-        // Connect to signaling server
-        // socket.connect()
         console.log("Emiting joinSession....")
         socket.emit("joinSession", { sessionId: session.sessionId })
 
-        // Handle signaling
         socket.on("offer", async (offer) => {
           console.log("Inside on offer....")
           await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(offer))
@@ -96,7 +86,6 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
           await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate))
         })
 
-        // Handle ICE candidates
         peerConnectionRef.current.onicecandidate = (event) => {
           if (event.candidate) {
              console.log("Emiting iceCandidate....")
@@ -112,7 +101,6 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
           }
         })
 
-        // Get user info
         setUserInfo({
           userId: session.userId,
           username: session.username,
@@ -120,12 +108,10 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
           requestType: session.requestType || "Immediate Support",
         })
 
-        // Start session duration timer
         durationInterval = setInterval(() => {
           setSessionDuration((prev) => prev + 1)
         }, 1000)
 
-        // Auto-connect after 1 second (admin initiates)
         setTimeout(async () => {
           const offer = await peerConnectionRef.current.createOffer()
           await peerConnectionRef.current.setLocalDescription(offer)
@@ -140,7 +126,6 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
     if(socket && session){
       initializeMedia()
 
-    // Cleanup function
       return () => {
         if (localStream) {
           localStream.getTracks().forEach((track) => track.stop())
@@ -195,7 +180,6 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
   }
 
   const handleEndSession = () => {
-    // Close peer connection and stop tracks
     if (peerConnectionRef.current) {
       peerConnectionRef.current.close()
     }
@@ -229,7 +213,6 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
   return (
     <div className={`${isChatOpen && 'flex gap-4'} h-full`}>
     <div className={`h-screen flex flex-col bg-gray-900 ${isChatOpen && 'basis-[65%]'}`}>
-      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -268,9 +251,7 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
         </div>
       </motion.div>
 
-      {/* Video Area */}
       <div className="flex-1 relative bg-gray-900">
-        {/* Remote video (main) */}
         <video ref={remoteVideoRef} autoPlay playsInline className="w-full h-[600px] object-cover" />
 
         {!isConnected && (
@@ -285,7 +266,6 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
           </div>
         )}
 
-        {/* Local video (picture-in-picture) */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -301,7 +281,6 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
           )}
         </motion.div>
 
-        {/* Session Info Overlay */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -313,7 +292,6 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
       </div>
 
       
-      {/* Controls */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -359,13 +337,6 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
             <MessageSquare className="h-5 w-5" />
           </motion.button>
 
-          {/* <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            className="p-4 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 text-gray-700 border border-gray-300 hover:from-gray-200 hover:to-gray-300 transition-all duration-300 shadow-lg hover:shadow-xl"
-          >
-            <Settings className="h-5 w-5" />
-          </motion.button> */}
         </div>
 
         <motion.button
@@ -379,7 +350,6 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
       </motion.div>
     </div>
 
-        {/* Chat panel */}
       <motion.div
         initial={{ height: 0 }}
         animate={{ height: isChatOpen ? '680px' : 0 }}

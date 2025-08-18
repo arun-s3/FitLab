@@ -202,6 +202,11 @@ export default function VideoChat({ socketContextItems, ImmediateVideoCallsessio
     }
   }
 
+  const declineScheduledVideoCall = ()=> {
+    socket.emit("leaveScheduledSession", { sessionId: scheduledVideoCallSessionId })
+    onEndCall()
+  }
+
 
   return (
     <div className="relative overflow-hidden rounded-3xl shadow-2xl bg-white">
@@ -352,7 +357,7 @@ export default function VideoChat({ socketContextItems, ImmediateVideoCallsessio
         // className="p-6 bg-gradient-to-r from-white to-gray-50 rounded-b-3xl border-t border-gray-200"
         >
 
-          <VideoChatInfoTab startVideoCall={()=> startScheduledVideoCall()}/>
+          <VideoChatInfoTab startVideoCall={()=> startScheduledVideoCall()} declineVideoCall={()=> declineScheduledVideoCall()}/>
 
         </motion.div>
       }

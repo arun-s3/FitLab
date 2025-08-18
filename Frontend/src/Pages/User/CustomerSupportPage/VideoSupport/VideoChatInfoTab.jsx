@@ -4,16 +4,15 @@ import { motion, AnimatePresence } from "framer-motion"
 import { PhoneOff, Video, VideoOff, Mic, MicOff, Minimize2, Maximize2, User, Clock } from "lucide-react"
 
 
-export default function VideoChatInfoTab({ startVideoCall }) {
+export default function VideoChatInfoTab({ startVideoCall, declineVideoCall }) {
 
-  const [callState, setCallState] = useState("incoming") // incoming, active, ended, hidden
+  const [callState, setCallState] = useState("incoming")
   const [isMinimized, setIsMinimized] = useState(false)
   const [callDuration, setCallDuration] = useState(0)
   const [isMuted, setIsMuted] = useState(false)
   const [isVideoOff, setIsVideoOff] = useState(false)
   const [isScheduled, setIsScheduled] = useState(true)
 
-  // Simulate call duration timer
   useEffect(() => {
     let interval
     if (callState === "active") {
@@ -24,7 +23,6 @@ export default function VideoChatInfoTab({ startVideoCall }) {
     return () => clearInterval(interval)
   }, [callState])
 
-  // Format duration to MM:SS
   const formatDuration = (seconds) => {
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
@@ -38,6 +36,7 @@ export default function VideoChatInfoTab({ startVideoCall }) {
   }
 
   const handleDeclineCall = () => {
+    declineVideoCall()
     setCallState("ended")
     setTimeout(() => setCallState("hidden"), 2000)
   }
@@ -51,7 +50,6 @@ export default function VideoChatInfoTab({ startVideoCall }) {
     setIsMinimized(!isMinimized)
   }
 
-  // Demo function to show notification
   const showIncomingCall = () => {
     setCallState("incoming")
     setCallDuration(0)
@@ -60,18 +58,6 @@ export default function VideoChatInfoTab({ startVideoCall }) {
     setIsVideoOff(false)
   }
 
-//   if (callState === "hidden") {
-//     return (
-//       <div className="fixed top-4 right-4 z-50">
-//         <button
-//           onClick={showIncomingCall}
-//           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow-lg transition-colors"
-//         >
-//           Simulate Incoming Call
-//         </button>
-//       </div>
-//     )
-//   }
 
   return (
     <AnimatePresence>
@@ -87,14 +73,11 @@ export default function VideoChatInfoTab({ startVideoCall }) {
             <motion.div
               animate={{ height: isMinimized ? 60 : "auto" }}
               transition={{ duration: 0.3 }}
-              // className="overflow-hidden"
             >
-              {/* Incoming Call State */}
               {callState === "incoming" && (
                 <div className="py-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
-                      {/* Pulsing Avatar */}
                       <motion.div
                         animate={{ scale: [1, 1.1, 1] }}
                         transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY }}
@@ -126,13 +109,12 @@ export default function VideoChatInfoTab({ startVideoCall }) {
                       </div>
                     </div>
 
-                    {/* Call Actions */}
                     <div className="flex items-center space-x-3">
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={handleDeclineCall}
-                        className="w-12 h-12 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors"
+                        className="w-12 h-12 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors z-[100]"
                       >
                         <PhoneOff className="w-5 h-5" />
                       </motion.button>
@@ -152,7 +134,6 @@ export default function VideoChatInfoTab({ startVideoCall }) {
                 </div>
               )}
 
-              {/* Active Call State */}
               {callState === "active" && (
                 <div className="py-3">
                   <div className="flex items-center justify-between">
@@ -177,61 +158,10 @@ export default function VideoChatInfoTab({ startVideoCall }) {
                       </div>
                     </div>
 
-                    {/* <div className="flex items-center space-x-2"> */}
-                      {/* Call Controls */}
-                      {/* {!isMinimized && (
-                        <>
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => setIsMuted(!isMuted)}
-                            className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-                              isMuted
-                                ? "bg-red-100 text-red-600 hover:bg-red-200"
-                                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                            }`}
-                          >
-                            {isMuted ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-                          </motion.button>
-
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => setIsVideoOff(!isVideoOff)}
-                            className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-                              isVideoOff
-                                ? "bg-red-100 text-red-600 hover:bg-red-200"
-                                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                            }`}
-                          >
-                            {isVideoOff ? <VideoOff className="w-4 h-4" /> : <Video className="w-4 h-4" />}
-                          </motion.button>
-                        </>
-                      )}
-
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={toggleMinimize}
-                        className="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center text-gray-600 transition-colors"
-                      >
-                        {isMinimized ? <Maximize2 className="w-4 h-4" /> : <Minimize2 className="w-4 h-4" />}
-                      </motion.button>
-
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={handleEndCall}
-                        className="w-10 h-10 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white transition-colors"
-                      >
-                        <PhoneOff className="w-4 h-4" />
-                      </motion.button>
-                    </div> */}
                   </div>
                 </div>
               )}
 
-              {/* Call Ended State */}
               {callState === "ended" && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-4">
                   <div className="flex items-center justify-center space-x-2">

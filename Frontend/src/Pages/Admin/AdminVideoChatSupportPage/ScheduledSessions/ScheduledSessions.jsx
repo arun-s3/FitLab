@@ -10,7 +10,7 @@ import {AdminSocketContext} from '../../../../Components/AdminSocketProvider/Adm
 
 
 
-export default function ScheduledSessions({ onStartScheduledCall }) {
+export default function ScheduledSessions({ currentScheduledSession, onStartScheduledCall, onEndScheduledCall }) {
 
 
   const [selectedDate, setSelectedDate] = useState("today")
@@ -20,7 +20,7 @@ export default function ScheduledSessions({ onStartScheduledCall }) {
 
   const adminSocketContextItems = useContext(AdminSocketContext)
   
-  const { activeUsers } = adminSocketContextItems
+  const { activeUsers, socket } = adminSocketContextItems
 
   const [updatedSessions, setUpdatedSessions] = useState([])
 
@@ -96,6 +96,10 @@ export default function ScheduledSessions({ onStartScheduledCall }) {
       setScheduledSessions(updateSessions)
     }
   }, [activeUsers, updatedSessions])
+
+  useEffect(()=> {
+    console.log("currentScheduledSession--->", currentScheduledSession)
+  }, [currentScheduledSession])
 
   const container = {
     hidden: { opacity: 0 },
@@ -266,7 +270,8 @@ export default function ScheduledSessions({ onStartScheduledCall }) {
           {filteredSessions && filteredSessions.length > 0 &&
             filteredSessions.map((session, index) => (
              <motion.div key={session.sessionId} variants={item} transition={{ delay: index * 0.1 }}>
-               <ScheduledSessionCard session={session} onStartCall={() => onStartScheduledCall(session)} />
+               <ScheduledSessionCard session={session} onStartCall={() => onStartScheduledCall(session)} onEndCall={()=> onEndScheduledCall(session)} socket={socket} 
+                   currentScheduledSession={currentScheduledSession}/>
              </motion.div>
           ))}
         </div>

@@ -1,17 +1,21 @@
 import React, {useState, useEffect} from "react"
 import { motion } from "framer-motion"
 
-import { User, Clock, Video, Circle, Phone, MessageSquare, Calendar, AlertCircle } from "lucide-react"
+import { User, Clock, Video, Circle, PhoneOff, MessageSquare, Calendar, AlertCircle } from "lucide-react"
 
 
 
-export default function ScheduledSessionCard({ session, onStartCall }) {
+export default function ScheduledSessionCard({ session, onStartCall, onEndCall, socket, currentScheduledSession }) {
 
 
   const [canStartCall, setCanStartCall] = useState(false)
   const [isUrgent, setIsUrgent] = useState(false)
 
   const [timeInfo, setTimeInfo] = useState({})
+
+  const [isCalling, setIsCalling] = useState(false) 
+
+  const [disableCall, setDisableCall] = useState(false)
 
   const formatDate = (date)=> {
     return new Date(date).toLocaleDateString([], {
@@ -37,6 +41,23 @@ export default function ScheduledSessionCard({ session, onStartCall }) {
   }
 
   useEffect(()=> {
+    if(socket){
+      socket.on("stoppedSupportCalling", ()=> {
+        console.log("Inside on stoppedSupportCalling....")
+        setIsCalling(false)
+      })
+      socket.on("userDeclinedScheduledSession", (sessionId) => {
+        console.log("Inside on userDeclinedScheduledSession in ScheduledCard......")
+        setIsCalling(false)
+      })
+    }
+    return ()=> {
+      socket.off("stoppedSupportCalling")
+      socket.off("userDeclinedScheduledSession")
+    }
+  }, [socket])
+
+  useEffect(()=> {
     if(Object.keys(session).length > 0){
       if(session?.timeRemaining){
         console.log(`${session.userId.username} has session on ${session.scheduledDate} at ${session.scheduledTime}`)
@@ -56,6 +77,17 @@ export default function ScheduledSessionCard({ session, onStartCall }) {
     return ()=> setTimeInfo({})
   }, [session.scheduledDate])
 
+  useEffect(()=> {
+    console.log("currentScheduledSession--->", currentScheduledSession)
+    if(currentScheduledSession && currentScheduledSession._id !== session._id){
+      setDisableCall(true)
+    }else setDisableCall(false)
+  }, [currentScheduledSession])
+
+  useEffect(()=> {
+    console.log("disableCall------>", disableCall)
+  }, [disableCall])
+
   const getStatusColor = () => {
     switch (session.status) {
       case "upcoming":
@@ -71,6 +103,18 @@ export default function ScheduledSessionCard({ session, onStartCall }) {
     }
   }
 
+  const startOrStopCall = ()=> {
+    console.log("Inside startOrStopCall")
+    if(!isCalling){
+      onStartCall()
+      setIsCalling(true)
+    }else{
+      onEndCall()
+    }
+  }
+
+
+
   return (
     <motion.div
       whileHover={{ scale: 1.02 }}
@@ -78,8 +122,8 @@ export default function ScheduledSessionCard({ session, onStartCall }) {
       className={`bg-gradient-to-r from-white to-gray-50 rounded-2xl p-6 border-2 transition-all duration-300 ${
         isUrgent
           ? "border-orange-200 shadow-lg shadow-orange-100"
-          : "border-gray-200 hover:border-purple-300 hover:shadow-lg"
-      }`}
+          : isCalling ? "border-green-300 shadow-green-100" : "border-gray-200 hover:border-purple-300 hover:shadow-lg"
+      } `}
     >
       <div className="flex flex-col lg:flex-row lg:items-center justify-between">
         <div className="flex-1">
@@ -182,16 +226,20 @@ export default function ScheduledSessionCard({ session, onStartCall }) {
               <motion.button
                 whileHover={{ scale: session.isUserActive ? 1.05 : 1 }}
                 whileTap={{ scale: session.isUserActive ? 0.95 : 1 }}
-                onClick={session.isUserActive ? onStartCall : undefined}
-                disabled={!session.isUserActive}
+                onClick={session.isUserActive ? startOrStopCall : undefined}
+                disabled={!session.isUserActive ? true : disableCall ? true : false}
                 className={`flex items-center space-x-2 px-4 py-3 rounded-xl font-semibold transition-all duration-300 ${
-                  session.isUserActive
-                    ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-500 hover:to-emerald-600 shadow-lg hover:shadow-xl"
-                    : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  !session.isUserActive
+                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    : disableCall 
+                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    : `bg-gradient-to-r ${isCalling ? 'from-red-400 to-red-500 hover:from-red-500 hover:to-red-600' : 'from-green-500 to-emerald-600 hover:from-green-500 hover:to-emerald-600'} text-white  shadow-lg hover:shadow-xl`
                 }`}
               >
-                <Video className="h-[23px] w-[23px]" />
-                <span className="hidden sm:inline text-[14px] tracking-[0.3px]">{session.isUserActive ? "Start Call" : "User Offline"}</span>
+                {
+                  isCalling ? <PhoneOff className="h-[23px] w-[23px]" /> : <Video className="h-[23px] w-[23px]" />
+                }
+                <span className="hidden sm:inline text-[14px] tracking-[0.3px]">{session.isUserActive && isCalling ? "End Call" : session.isUserActive ? "Start Call" : "User Offline"}</span>
               </motion.button>
             }
           </div>

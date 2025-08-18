@@ -43,6 +43,8 @@ export default function SocketProvider() {
     const [scheduledVideoCallSessionId, setScheduledVideoCallSessionId] = useState(null)
     const [videoSessionInfo, setVideoSessionInfo] = useState({})
 
+    const [forceEndScheduledSession, setForceEndScheduledSession] = useState(false)
+
     const messagesEndRef = useRef(null)             
     const typingTimeoutRef = useRef(null)
 
@@ -122,6 +124,15 @@ export default function SocketProvider() {
           setOpenVideoCallModal(true)
         })
 
+        socket.on("unNotifySupportCalling", ()=> {
+          console.log("Inside on unNotifySupportCalling...")
+          setScheduledVideoCallSessionId(null)
+          setVideoSessionInfo({})
+          setOpenVideoCallModal(false)
+          console.log("Emiting unNotifiedSupportCaling...")
+          socket.emit("unNotifiedSupportCalling")
+        })
+
         setSocket(socket)
 
         return () => {
@@ -198,7 +209,9 @@ export default function SocketProvider() {
         openVideoCallModal,
         setOpenVideoCallModal,
         scheduledVideoCallSessionId,
-        videoSessionInfo
+        videoSessionInfo,
+        forceEndScheduledSession,
+        setForceEndScheduledSession
         // VideoCallCommonModal : <VideoCallCommonModal/>
       }}
     >

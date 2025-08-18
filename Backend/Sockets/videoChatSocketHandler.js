@@ -281,6 +281,67 @@ async function videoChatBoxSocket(io){
         socket.leave(sessionId);
       });
 
+      socket.on("leaveScheduledSession", ({ sessionId }) => {
+        const session = activeSessions.get(sessionId);
+
+        if (session) {
+          socket.to(sessionId).emit("sessionEnded");
+
+          if (session.adminSocketId === socket.id) {
+            const adminData = adminSessions.get(session.adminId);
+            if (adminData) {
+              adminData.status = "available";
+              adminData.currentSession = null;
+            }
+          }
+
+          activeSessions.delete(sessionId);
+
+          io.to("admin-room").emit("userDeclinedScheduledSession", sessionId);
+
+          io.to("admin-room").emit("activeSessionsUpdate", {
+            sessions: Array.from(activeSessions.values()),
+          });
+        }
+
+        socket.leave(sessionId);
+      });
+
+      socket.on("adminStoppedScheduledSession", ({ userId }) => {
+        console.log("Inside adminStoppedScheduledSession....")
+        const currentsession = Array.from(activeSessions.values()).find(session=> session.userId === userId)
+        const sessionId = currentsession.sessionId
+        const session = activeSessions.get(sessionId);
+
+        if (session) {
+          socket.to(sessionId).emit("sessionEnded");
+
+          if (session.adminSocketId === socket.id) {
+            const adminData = adminSessions.get(session.adminId);
+            if (adminData) {
+              adminData.status = "available";
+              adminData.currentSession = null;
+            }
+          }
+
+          activeSessions.delete(sessionId);
+
+          io.to("admin-room").emit("activeSessionsUpdate", {
+            sessions: Array.from(activeSessions.values()),
+          });
+        }
+
+        console.log("Emiting unNotifySupportCalling....")
+        io.to(currentsession.userSocketId).emit("unNotifySupportCalling");
+
+        socket.leave(sessionId);
+      });
+
+      socket.on("unNotifiedSupportCalling", ()=>{
+        console.log("Inside on unNotifiedSupportCalling....")
+        io.to("admin-room").emit("stoppedSupportCalling") 
+      })
+
       socket.on("disconnect", () => {
         const queueIndex = waitingQueue.findIndex(user => user.socketId === socket.id);
         if (queueIndex !== -1) {

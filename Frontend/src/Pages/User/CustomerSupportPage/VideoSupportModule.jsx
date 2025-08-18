@@ -26,7 +26,7 @@ export default function VideoSupportModule() {
   const [scheduledCallReceived, setScheduledCallReceived] = useState(false)
 
   const socketContextItems = useContext(SocketContext)
-  const {socket, userId, openVideoCallModal, scheduledVideoCallSessionId} = socketContextItems
+  const {socket, userId, openVideoCallModal, scheduledVideoCallSessionId, forceEndScheduledSession, setForceEndScheduledSession} = socketContextItems
 
 
   const handleImmediateRequest = () => {
@@ -42,6 +42,7 @@ export default function VideoSupportModule() {
   }
 
   const handleEndCall = () => {
+    console.log("Inside handleEndCall()...")
     setInCall(false)
     setRequestType(null)
     setCallData(null)
@@ -87,12 +88,22 @@ export default function VideoSupportModule() {
 
   useEffect(()=> {
     console.log("isAdminBusy--->", isAdminBusy)
-    if(openVideoCallModal){
+    console.log("openVideoCallModal--->", openVideoCallModal)
+    if(scheduledVideoCallSessionId){
       console.log("Inside VideoSupportModule page...openVideoCallModal is true")
       setScheduledCallReceived(true)
-    }
+    }else setScheduledCallReceived(false)
     // handleCallStart(videoCallSessionId)
-  }, [isAdminBusy, openVideoCallModal])
+  }, [isAdminBusy, scheduledVideoCallSessionId])
+
+  useEffect(()=> {
+    console.log("forceEndScheduledSession--->", forceEndScheduledSession)
+    if(forceEndScheduledSession){
+      console.log("Calling handleEndCall()...")
+      handleEndCall()
+      setForceEndScheduledSession(false)
+    }
+  }, [forceEndScheduledSession])
 
 
   return (

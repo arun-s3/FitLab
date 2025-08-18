@@ -1,19 +1,26 @@
-import React, { useState, useEffect } from "react"
-import { useNavigate } from 'react-router-dom'
+import React, { useState, useEffect, useContext } from "react"
+import { useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from "framer-motion"
 
 import { PhoneOff, Video, Headset, Clock, Calendar, X, Dumbbell, Weight } from "lucide-react"
+
+import {SocketContext} from '../../../Components/SocketProvider/SocketProvider'
 
 
 
 export default function VideoCallModal({videoSessionInfo, onClose}) {
 
   const [isVisible, setIsVisible] = useState(true)
-  const [callState, setCallState] = useState("incoming") // incoming, declined, hidden
+  const [callState, setCallState] = useState("incoming")
   const [isScheduled, setIsScheduled] = useState(true)
   const [callerInfo, setCallerInfo] = useState({})
 
   const navigate = useNavigate()
+  const location = useLocation()
+
+  const socketContextItems = useContext(SocketContext)
+  const {socket, forceEndScheduledSession, setForceEndScheduledSession, scheduledVideoCallSessionId} = socketContextItems
+  
 
   useEffect(()=> {
     console.log("videoSessionInfo---->", videoSessionInfo)
@@ -28,9 +35,11 @@ export default function VideoCallModal({videoSessionInfo, onClose}) {
 
   useEffect(()=> {
     console.log("callerInfo--->", callerInfo)
-  }, [callerInfo])
+    if(location.pathname === '/support'){
+      onClose()
+    }
+  }, [callerInfo, location])
 
-  // Simulate incoming call
   const showIncomingCall = (scheduled = true) => {
     setIsScheduled(scheduled)
     setCallState("incoming")
@@ -43,8 +52,10 @@ export default function VideoCallModal({videoSessionInfo, onClose}) {
   }
 
   const handleDeclineCall = () => {
+    console.log("Emiting leaveScheduledSession...")
+    socket.emit("leaveScheduledSession", { sessionId: scheduledVideoCallSessionId })
+    setForceEndScheduledSession(true)
     setCallState("declined")
-    // Auto hide after 5 seconds
     setTimeout(() => {
       setIsVisible(false)
       setCallState("incoming")
@@ -53,8 +64,7 @@ export default function VideoCallModal({videoSessionInfo, onClose}) {
   }
 
   const handleScheduleCall = () => {
-    // Redirect to scheduling page
-    window.location.href = "/schedule-call" // Replace with your actual scheduling page
+    window.location.href = "/schedule-call"
   }
 
   const handleCloseModal = () => {
@@ -66,7 +76,6 @@ export default function VideoCallModal({videoSessionInfo, onClose}) {
     <AnimatePresence>
       {isVisible && (
         <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -74,7 +83,6 @@ export default function VideoCallModal({videoSessionInfo, onClose}) {
             className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
             onClick={callState === "declined" ? handleCloseModal : undefined}
           >
-            {/* Modal */}
             <motion.div
               initial={{ scale: 0.8, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -83,10 +91,8 @@ export default function VideoCallModal({videoSessionInfo, onClose}) {
               className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Incoming Call State */}
               {callState === "incoming" && (
                 <div className="relative">
-                  {/* Close button for unscheduled calls */}
                   {!isScheduled && (
                     <button
                       onClick={handleCloseModal}
@@ -96,10 +102,7 @@ export default function VideoCallModal({videoSessionInfo, onClose}) {
                     </button>
                   )}
 
-                  {/* Header with gradient */}
                   <div className="bg-gradient-to-br from-purple-500 to-purple-600 px-6 pt-8 pb-6 text-white relative overflow-hidden">
-                    {/* Animated fitness elements */}
-                    {/* Floating dumbbells */}
                     <motion.div
                       animate={{
                         y: [-10, 10, -10],
@@ -124,7 +127,6 @@ export default function VideoCallModal({videoSessionInfo, onClose}) {
                       <Dumbbell className="w-12 h-12" />
                     </motion.div>
 
-                    {/* Heartbeat line animation */}
                     <motion.div
                       className="absolute top-1/2 left-0 right-0 h-0.5 bg-white opacity-20"
                       animate={{
@@ -134,17 +136,6 @@ export default function VideoCallModal({videoSessionInfo, onClose}) {
                       transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
                     />
 
-                    {/* Pulsing heart */}
-                    {/* <motion.div
-                      animate={{
-                        scale: [1, 1.2, 1],
-                        opacity: [0.1, 0.2, 0.1],
-                      }}
-                      transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
-                      className="absolute top-4 left-4 text-white opacity-10"
-                    >
-                      <Weight className="w-8 h-8" />
-                    </motion.div> */}
 
                     <div className="relative z-10 text-center">
                       <motion.div
@@ -155,13 +146,11 @@ export default function VideoCallModal({videoSessionInfo, onClose}) {
                         <div className="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
                           <Headset className="w-10 h-10 text-white" />
                         </div>
-                        {/* Pulsing ring with fitness theme */}
                         <motion.div
                           animate={{ scale: [1, 1.4, 1], opacity: [0.6, 0, 0.6] }}
                           transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
                           className="absolute inset-0 border-2 border-white rounded-full"
                         />
-                        {/* Secondary pulse ring */}
                         <motion.div
                           animate={{ scale: [1, 1.6, 1], opacity: [0.4, 0, 0.4] }}
                           transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, delay: 0.5 }}
@@ -169,15 +158,9 @@ export default function VideoCallModal({videoSessionInfo, onClose}) {
                         />
                       </motion.div>
 
-                      {/* {
-                        callerInfo && Object.keys(callerInfo).length > 0 &&
-                        <> */}
                           <h2 className="text-2xl font-bold mb-1">{callerInfo.name}</h2>
                           <p className="text-blue-100 mb-3">{callerInfo.subjectLine}</p>
-                        {/* </>
-                      } */}
 
-                      {/* Call type badge */}
                       <div className="inline-flex items-center space-x-1 bg-white bg-opacity-20 rounded-full px-3 py-1 backdrop-blur-sm">
                         {isScheduled ? (
                           <>
@@ -194,7 +177,6 @@ export default function VideoCallModal({videoSessionInfo, onClose}) {
                     </div>
                   </div>
 
-                  {/* Call details */}
                   <div className="px-6 py-4 bg-gray-50">
                     <div className="text-center">
                       <p className="text-gray-600 text-sm mb-1">
@@ -218,7 +200,6 @@ export default function VideoCallModal({videoSessionInfo, onClose}) {
                     </div>
                   </div>
 
-                  {/* Action buttons */}
                   <div className="px-6 py-6 bg-white">
                     <div className="flex space-x-4">
                       <motion.button
@@ -253,7 +234,6 @@ export default function VideoCallModal({videoSessionInfo, onClose}) {
                 </div>
               )}
 
-              {/* Declined State */}
               {callState === "declined" && (
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="p-6 text-center">
                   <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">

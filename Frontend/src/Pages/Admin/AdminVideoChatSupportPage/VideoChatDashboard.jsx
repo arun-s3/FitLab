@@ -16,7 +16,9 @@ export default function AdminDashboard({
   onAcceptCall,
   onDeclineCall,
   onToggleAvailability,
-  onStartScheduledCall
+  currentScheduledSession,
+  onStartScheduledCall,
+  onEndScheduledCall
 }) {
   const container = {
     hidden: { opacity: 0 },
@@ -135,7 +137,7 @@ export default function AdminDashboard({
         </motion.div>
 
         <motion.div variants={item} className='mt-6'>
-          <ScheduledSessions onStartScheduledCall={onStartScheduledCall} />
+          <ScheduledSessions currentScheduledSession={currentScheduledSession} onStartScheduledCall={onStartScheduledCall} onEndScheduledCall={onEndScheduledCall}/>
         </motion.div>
 
       </motion.div>

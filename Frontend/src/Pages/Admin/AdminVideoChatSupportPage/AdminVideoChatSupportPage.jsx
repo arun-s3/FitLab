@@ -39,6 +39,12 @@ export default function AdminVideoChatSupportPage() {
     } = adminSocketContextItems
 
     console.log("socket--->", socket)
+  
+  const endCurrentSession = ()=> {
+    setCurrentSession(null)
+    setAdminStatus("available")
+    setCurrentScheduledSession(null)
+  }
 
   useEffect(() => {
     console.log("socket--->", socket)
@@ -68,8 +74,12 @@ export default function AdminVideoChatSupportPage() {
 
       socket.on("sessionEnded", () => {
         console.log("Inside on sessionEnded......")
-        setCurrentSession(null)
-        setAdminStatus("available")
+        endCurrentSession()
+      })
+
+      socket.on("userDeclinedScheduledSession", (sessionId) => {
+        console.log("Inside on userDeclinedScheduledSession......")
+        endCurrentSession()
       })
 
       // socket.on("startingScheduledSession", (data)=> {
@@ -115,6 +125,7 @@ export default function AdminVideoChatSupportPage() {
     if (currentSession) {
       setCurrentSession(null)
       setAdminStatus("available")
+      setCurrentScheduledSession(null)
       console.log("set curretSession to null")
     }
   }
@@ -142,7 +153,7 @@ export default function AdminVideoChatSupportPage() {
       subjectLine: session.subjectLine,
       notes: session.notes
     }
-    setCurrentScheduledSession(scheduledSessionNow)
+    setCurrentScheduledSession(session)
     console.log("Inside handleStartScheduledCall..")
     setAdminStatus("busy")
 
@@ -152,6 +163,12 @@ export default function AdminVideoChatSupportPage() {
     // socket.emit("notifyUserForCall")
     const userSocketId = activeUsers.find(user=> user.username === session.userId.username).socketId
     socket.emit("startScheduledCall", { adminId, adminSocketId: socket.id, userSocketId, currentScheduledSession: scheduledSessionNow})
+  }
+
+  const handleEndScheduledCall = (session)=> {
+    console.log("Emiting adminStoppedScheduledSession...")
+    socket.emit("adminStoppedScheduledSession", { userId: session.userId._id})
+    endCurrentSession()
   }
 
 
@@ -180,7 +197,9 @@ export default function AdminVideoChatSupportPage() {
                         onAcceptCall={handleAcceptCall}
                         onDeclineCall={handleDeclineCall}
                         onToggleAvailability={toggleAvailability}
+                        currentScheduledSession={currentScheduledSession}
                         onStartScheduledCall={handleStartScheduledCall}
+                        onEndScheduledCall={handleEndScheduledCall}
                       />
                     )}
 

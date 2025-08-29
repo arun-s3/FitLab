@@ -67,6 +67,8 @@ export default function OrderHistoryPage(){
     
     const navigate = useNavigate()
 
+    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+
   const [openDropdowns, setOpenDropdowns] = useState({durationDropdown: false, limitDropdown: false, sortDropdown: false})
   const dropdownRefs = {
     durationDropdown: useRef(null),
@@ -216,7 +218,7 @@ export default function OrderHistoryPage(){
 
     const viewProduct = async(id)=> {
       try{
-        const response = await axios.get(`http://localhost:3000/products/${id}`, { withCredentials: true } )
+        const response = await axios.get(`${baseApiUrl}/products/${id}`, { withCredentials: true } )
         console.log("product from response--->", response.data[0])
         navigate('/shop/product', {state: {product: response.data[0]}})
       }

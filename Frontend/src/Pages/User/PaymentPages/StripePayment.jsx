@@ -14,11 +14,13 @@ export default function StripePayment({ amount, onPayment, payButtonText = 'Pay 
 
   const [clientSecret, setClientSecret] = useState("")
 
+  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+
   console.log('import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY--->', import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
   console.log('stripePromise--->', stripePromise)
 
   useEffect(() => {
-    fetch("http://localhost:3000/payment/stripe/order", {
+    fetch(`${baseApiUrl}/payment/stripe/order`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ amount })

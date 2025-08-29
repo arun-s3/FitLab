@@ -15,7 +15,9 @@ export const SocketContext = createContext();
 
 export default function SocketProvider() {
 
-    // const socket = useMemo(()=> io("http://localhost:3000"), [])
+    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+
+    // const socket = useMemo(()=> io(baseApiUrl), [])
 
     const {userToken} = useSelector((state)=> state.user)
 
@@ -51,20 +53,20 @@ export default function SocketProvider() {
     
     useEffect(()=> { 
       async function fetchUserId(){
-        const guestVerificationRes = await axios.get('http://localhost:3000/guest-check', {withCredentials: true})
+        const guestVerificationRes = await axios.get(`${baseApiUrl}/guest-check`, {withCredentials: true})
         console.log("guestVerificationRes--->", guestVerificationRes.data)
         if(guestVerificationRes.data.wasGuest){
           const {userId, username} = guestVerificationRes.data.credentials
           setUserWasGuest({wasGuest: true, credentials: {userId, username}})
         }
-        const response = await axios.get('http://localhost:3000/getUserid', {withCredentials: true})
+        const response = await axios.get(`${baseApiUrl}/getUserid`, {withCredentials: true})
         console.log("response from fetchUserId--->", response)
         const decryptedUserId = decryptData(response.data.encryptedUserId)
         setRoomId(decryptedUserId)
         setUsername(response.data.username)
       } 
       async function fetchGuestId(){
-        const response = await axios.get('http://localhost:3000/guest', {withCredentials: true})
+        const response = await axios.get(`${baseApiUrl}/guest`, {withCredentials: true})
         console.log("response from fetchGuestId--->", response)
         setRoomId(response.data.userId)
         setUsername(response.data.username)
@@ -83,7 +85,7 @@ export default function SocketProvider() {
     },[username, roomId, userWasGuest])
 
     useEffect(() => {
-        const socket = io("http://localhost:3000")
+        const socket = io(baseApiUrl)
     
         socket.on("connect", () => {
           setIsConnected(true)

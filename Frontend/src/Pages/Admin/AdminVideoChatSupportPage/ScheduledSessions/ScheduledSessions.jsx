@@ -27,6 +27,8 @@ export default function ScheduledSessions({ currentScheduledSession, onStartSche
   const [scheduledSessions, setScheduledSessions] = useState([])
   const [filteredSessions, setFilteredSessions] = useState([])
 
+  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+
   const checkUserActive = (username)=> {
     console.log("Inside checkUserActive")
     return activeUsers.some(user=> user.username === username && user.isOnline)
@@ -35,7 +37,7 @@ export default function ScheduledSessions({ currentScheduledSession, onStartSche
   useEffect(()=> {
     async function fetchSessions(){
       try{
-        const response = await axios.get('http://localhost:3000/video-chat/sessions', {withCredentials: true})
+        const response = await axios.get(`${baseApiUrl}/video-chat/`, {withCredentials: true})
         if(response.status === 200){
           console.log("Fetched Session---->", response.data.sessions)
           const sessions = response.data.sessions

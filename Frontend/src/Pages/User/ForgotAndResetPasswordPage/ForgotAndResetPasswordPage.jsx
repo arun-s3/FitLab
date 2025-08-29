@@ -36,6 +36,8 @@ export default function ForgotAndResetPasswordPage(){
 
     const navigate = useNavigate()
 
+    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+
     useEffect(()=>{
         console.log("email is --->", email)
         console.log("Passwords--->",JSON.stringify(passwords))
@@ -90,7 +92,7 @@ export default function ForgotAndResetPasswordPage(){
             console.log('Password reset requested for:', email)
 
             try{
-              const response = await axios.post('http://localhost:3000/sendOtp', {email}, {withCredentials:true})
+              const response = await axios.post(`${baseApiUrl}/sendOt`, {email}, {withCredentials:true})
               if(response){
                   console.log("Timer Starting...")
                   setPhase({...phase, timerPhase: true})
@@ -152,7 +154,7 @@ export default function ForgotAndResetPasswordPage(){
       }else{
             console.log("Submitting Code.....")
             try{
-                const response = await axios.post('http://localhost:3000/verifyOtp', {otp: code, email, updateUser: false}, {withCredentials: true})
+                const response = await axios.post(`${baseApiUrl}/verifyOtp`, {otp: code, email, updateUser: false}, {withCredentials: true})
                 console.log("RESPONSE from verifyOtp---->", response)
                 console.log("RESPONSE from verifyOtp in JSON---->", JSON.stringify(response))
                 if(response.data.message.includes('success')){
@@ -205,7 +207,7 @@ export default function ForgotAndResetPasswordPage(){
         setVerificationError(false)
         setCodeBoxDisabled(false)
         setResendState(true)
-        const response = await axios.post('http://localhost:3000/sendOtp', {email}, {withCredentials:true});
+        const response = await axios.post(`${baseApiUrl}/sendOtp`, {email}, {withCredentials:true});
         if(response){
             console.log("Timer Restarting...")
             startTimer()
@@ -238,7 +240,7 @@ export default function ForgotAndResetPasswordPage(){
       else{
         try{
           console.log("{newPassword: passwords.newPass}--->", JSON.stringify({newPassword: passwords.newPass}))
-          const response = await axios.post('http://localhost:3000/password/reset', {newPassword: passwords.newPass}, {withCredentials:true})
+          const response = await axios.post(`${baseApiUrl}/password/reset`, {newPassword: passwords.newPass}, {withCredentials:true})
           if(response.data.message.includes('success')){
             setError('')
             setVerificationError(false)

@@ -23,6 +23,8 @@ export default function OrdersFulfillmentSection() {
   const [topProductDatas, setTopProductDatas] = useState([])
   const [orderStatusDistribution, setOrderStatusDistribution] = useState([])
 
+  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+
   const [loading, setLoading] = useState({
       totalOrders: false,
       pendingOrders: false,
@@ -45,10 +47,10 @@ export default function OrdersFulfillmentSection() {
         setLoading(status => ({...status, totalOrders: true, pendingOrders: true, fulfillmentRate: true})) 
     
         const [orderStatsResponse, ordersOverTimeResponse, topProductsResponse, orderStatusPercentRes] = await Promise.allSettled([
-          axios.get('http://localhost:3000/admin/dashboard/orders/stats', { withCredentials: true }), 
-          axios.get('http://localhost:3000/admin/dashboard/orders/stats/monthly', { withCredentials: true }),
-          axios.get('http://localhost:3000/admin/dashboard/products/top', { withCredentials: true }),
-          axios.get('http://localhost:3000/admin/dashboard/orders/status-percent', { withCredentials: true }),
+          axios.get(`${baseApiUrl}/admin/dashboard/orders/stats`, { withCredentials: true }), 
+          axios.get(`${baseApiUrl}/admin/dashboard/orders/stats/monthly`, { withCredentials: true }),
+          axios.get(`${baseApiUrl}/admin/dashboard/products/top`, { withCredentials: true }),
+          axios.get(`${baseApiUrl}/admin/dashboard/orders/status-percent`, { withCredentials: true }),
         ])
         
         if (orderStatsResponse.status === 'fulfilled'){

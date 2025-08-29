@@ -24,6 +24,8 @@ export default function CustomerInsightsSection() {
 
   const [loading, setLoading] = useState({vipCustomersDatas: false, userTypeDatas: false})
 
+  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+
 
   useEffect(() => {
         const fetchAllStats = async ()=> {
@@ -31,10 +33,10 @@ export default function CustomerInsightsSection() {
           setLoading(status=> ({...status, vipCustomersDatas: true}))
             
           const [usersMetricsResponse, userTypesResponse, userGrowthResponse, vipCustomersRes] = await Promise.allSettled([ 
-            axios.get('http://localhost:3000/admin/dashboard/customers/metrics', { withCredentials: true }), 
-            axios.get('http://localhost:3000/admin/dashboard/customers/types', { withCredentials: true }), 
-            axios.get('http://localhost:3000/admin/dashboard/customers/monthly', { withCredentials: true }), 
-            axios.get('http://localhost:3000/admin/dashboard/customers/vip', { withCredentials: true }), 
+            axios.get(`${baseApiUrl}/admin/dashboard/customers/metrics`, { withCredentials: true }), 
+            axios.get(`${baseApiUrl}/admin/dashboard/customers/types`, { withCredentials: true }), 
+            axios.get(`${baseApiUrl}/admin/dashboard/customers/monthly`, { withCredentials: true }), 
+            axios.get(`${baseApiUrl}/admin/dashboard/customers/vip`, { withCredentials: true }), 
           ])
           
           if (usersMetricsResponse.status === 'fulfilled'){

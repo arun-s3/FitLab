@@ -25,6 +25,7 @@ export default function AdminTextChatSupportPage() {
 
   const adminName = "Support Agent"
 
+  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
   const {
       isConnected,
@@ -66,7 +67,7 @@ export default function AdminTextChatSupportPage() {
 
   useEffect(()=> {
     async function fetchTotalUserCount(){
-      const response = await axios.get('http://localhost:3000/totalUsers', {withCredentials: true})
+      const response = await axios.get(`${baseApiUrl}/totalUsers`, {withCredentials: true})
       setTotalUsers(response.data.totalUsers)
     }
     if(!totalUsers){
@@ -151,7 +152,7 @@ export default function AdminTextChatSupportPage() {
 
   const fetchUsernameList = (searchTerm)=> {
     async function fetchUsernames(){
-      const response = await axios.get(`http://localhost:3000/search/${searchTerm}`, {withCredentials: true})
+      const response = await axios.get(`${baseApiUrl}/search/${searchTerm}`, {withCredentials: true})
       console.log("response from fetchUserId--->", response)
       const usernames = response.data.usernames
       if(usernames.length > 0){

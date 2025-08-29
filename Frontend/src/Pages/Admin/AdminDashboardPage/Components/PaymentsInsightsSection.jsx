@@ -41,6 +41,8 @@ export default function PaymentsInsightsSection() {
 
   const [locationDatas, setLocationDatas] = useState([])
 
+  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+
   const colorScale = scaleLinear()
     .domain([0, Math.max(...locationDatas.map((s) => s.customerCount)) || 1])
     .range(["#d4f0ff", "#084081"])
@@ -65,9 +67,9 @@ export default function PaymentsInsightsSection() {
             const newStats = []
 
             const [paymentStatsResponse, paymentMethodResponse, refundRequestRes] = await Promise.allSettled([
-              axios.get('http://localhost:3000/admin/dashboard/payments/stats', { withCredentials: true }), 
-              axios.get('http://localhost:3000/admin/dashboard/payments/methods', { withCredentials: true }), 
-              axios.get('http://localhost:3000/admin/dashboard/payments/refunds', { withCredentials: true }), 
+              axios.get(`${baseApiUrl}/admin/dashboard/payments/stats`, { withCredentials: true }), 
+              axios.get(`${baseApiUrl}/admin/dashboard/payments/methods`, { withCredentials: true }), 
+              axios.get(`${baseApiUrl}/admin/dashboard/payments/refunds`, { withCredentials: true }), 
             ])
   
             if (paymentStatsResponse.status === 'fulfilled'){
@@ -134,7 +136,7 @@ export default function PaymentsInsightsSection() {
               console.log("Error in refundRequestRes response:", refundRequestRes.reason.message)
             }
 
-            await axios.get("http://localhost:3000/admin/dashboard/payments/customers-by-state").then((res) => setLocationDatas(res.data)).catch((err) => console.error(err));
+            await axios.get(`${baseApiUrl}/admin/dashboard/payments/customers-by-state`).then((res) => setLocationDatas(res.data)).catch((err) => console.error(err));
           }
           
           fetchAllStats();

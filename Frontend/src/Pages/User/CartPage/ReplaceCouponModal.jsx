@@ -12,10 +12,12 @@ export default function ReplaceCouponModal({ isOpen, onClose, putOldCoupon, curr
   const [winnerCouponDiscount, setWinnerCouponDiscount] = useState(null)
   const {cart} = useSelector(state=> state.cart)
 
+  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+
   useEffect(()=> {
     async function compareCoupons(){
       try{
-        const response = await axios.post( "http://localhost:3000/coupons/compare", {newCoupon, currentCoupon}, { withCredentials: true } )
+        const response = await axios.post( `${baseApiUrl}/coupons/compare`, {newCoupon, currentCoupon}, { withCredentials: true } )
         console.log("response.data---->", response.data)
         console.log("response.data.winnerCoupon.code---->", response.data.winnerCoupon.code)
         if(currentCoupon === response.data.winnerCoupon.code){

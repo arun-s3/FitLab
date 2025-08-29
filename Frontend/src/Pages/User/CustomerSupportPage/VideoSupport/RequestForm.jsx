@@ -1,5 +1,4 @@
 import React from 'react'
-import './RequestForm.css'
 import { motion } from "framer-motion"
 
 import { Calendar, Video, Clock, Star } from "lucide-react"
@@ -30,12 +29,14 @@ export default function RequestForm({ onImmediateRequest, onScheduleRequest }) {
 
 
   return (
-    <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-1 gap-8" id='RequestForm'>
+    <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-1 gap-8" id='RequestForm-videochat'>
       <motion.div variants={item} id='videoChat'>
         <div className="group relative overflow-hidden">
           <div className="absolute inset-0 opacity-0 transition-opacity duration-500 rounded-2xl"></div>
-          <button onClick={onImmediateRequest} className="relative w-full rounded-2xl border border-t-[10px] border-primary"
-            style={bgImg}>
+          <button onClick={onImmediateRequest} className="relative w-full rounded-2xl border border-t-[10px] border-primary
+              before:content-[''] before:absolute before:top-0 before:left-0 before:h-full before:w-full before:rounded-2xl 
+                before:[background-image:linear-gradient(rgba(255,255,255,0.8),rgba(75,61,86,0.8))] before:backdrop-blur-[2px]" 
+                  style={bgImg}>
             <div className='transition-all duration-500 p-8 flex flex-col items-center justify-center rounded-2xl 
              z-20 group-hover:border-transparent group-hover:text-secondary transform group-hover:scale-[1.02]'>
             <div className="relative mb-6">

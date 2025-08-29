@@ -34,15 +34,17 @@ export default function CouponsOffersInsightsSection() {
   const [couponRedemptionsDatas, setCouponRedemptionsDatas] = useState([])
   const [discountImpactDatas, setDiscountImpactDatas] = useState([])
 
+  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+
   useEffect(() => {
           const fetchAllStats = async ()=> {
             const newStats = []
               
             const [couponRevenueResponse, couponStatsResponse, couponRedemptionRes, discountImpactRes] = await Promise.allSettled([ 
-              axios.get('http://localhost:3000/admin/dashboard/coupons/revenue', { withCredentials: true }), 
-              axios.get('http://localhost:3000/admin/dashboard/coupons/stats', { withCredentials: true }),
-              axios.get('http://localhost:3000/admin/dashboard/coupons/redemptions', { withCredentials: true }),
-              axios.get('http://localhost:3000/admin/dashboard/coupons/impact', { withCredentials: true })
+              axios.get(`${baseApiUrl}admin/dashboard/coupons/revenue`, { withCredentials: true }), 
+              axios.get(`${baseApiUrl}/admin/dashboard/coupons/stats`, { withCredentials: true }),
+              axios.get(`${baseApiUrl}/admin/dashboard/coupons/redemptions`, { withCredentials: true }),
+              axios.get(`${baseApiUrl}/admin/dashboard/coupons/impact`, { withCredentials: true })
             ])
             
             if (couponRevenueResponse.status === 'fulfilled'){

@@ -25,6 +25,8 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
 
     const dispatch = useDispatch()
 
+    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+
     useEffect(()=> {
       const script = document.createElement("script")
       script.src = "https://checkout.razorpay.com/v1/checkout.js"
@@ -58,7 +60,7 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
 
     const handlRazorpayPayment = async()=> {
       if(paymentMethod === 'razorpay'){
-        const response = await axios.post(`http://localhost:3000/payment/razorpay/order`,
+        const response = await axios.post(`${baseApiUrl}/payment/razorpay/order`,
           {amount: parseInt(amount).toFixed(2)}, { withCredentials: true }
         )
         console.log("razorpay created order--->", response.data.data)
@@ -67,7 +69,7 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
     }
 
     const handleRazorpayVerification = async (data) => {
-        const res = await axios.get('http://localhost:3000/payment/razorpay/key', { withCredentials: true })
+        const res = await axios.get(`${baseApiUrl}/payment/razorpay/key`, { withCredentials: true })
         console.log("Razorpay key --->", res.data.key)
         const options = {
             key: res.data.key,
@@ -84,7 +86,7 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
             handler: async (response) => {
                 console.log("response from handler-->", response)
                 try {
-                    const verifiedData = await axios.post('http://localhost:3000/payment/razorpay/verify', {
+                    const verifiedData = await axios.post(`${baseApiUrl}/payment/razorpay/verify`, {
                         razorpay_order_id: response.razorpay_order_id,
                         razorpay_payment_id: response.razorpay_payment_id,
                         razorpay_signature: response.razorpay_signature,

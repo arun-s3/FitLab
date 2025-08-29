@@ -19,6 +19,8 @@ export default function ChangePasswordBox({setOpenSecurityMenu}){
   const [error, setError] = useState({current: false, new: false, confirm: false, value:''})
   const [loading, setLoading] = useState(false)
 
+  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+
   const requirementSubtitles = [
     {value: 'At least 1 upper case letter (A-Z)', requirement: requirements.uppercase},
     {value: 'At least 1 special character(@#$%^&*,etc)', requirement: requirements.specialChars},
@@ -79,7 +81,7 @@ export default function ChangePasswordBox({setOpenSecurityMenu}){
       setError({new: false, confirm: false, value:''})
 
       try{
-        const response = await axios.post('http://localhost:3000/password/update', {
+        const response = await axios.post(`${baseApiUrl}/password/update`, {
           currentPassword: passwords.current, newPassword: passwords.new, confirmPassword: passwords.confirm
         }, {withCredentials:true})
         if(response.data.message.includes('success')){

@@ -59,6 +59,7 @@ const isLogout = (req,res,next)=>{
             next()
         }
         else{
+            console.log("Cookies exits, hence logged in!")
             res.status(400).json({message:"Bad request- User already logged in!"})
         }
    }

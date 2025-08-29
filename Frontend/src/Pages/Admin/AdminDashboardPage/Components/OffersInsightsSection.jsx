@@ -41,18 +41,20 @@ export default function OffersInsightsSection() {
 
   const radarColors = ["#8884d8", "#82ca9d", "#ffc658", "#ff7f50", "#00c49f", "#ff69b4"]
 
+  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
+  
   useEffect(()=> {
             const fetchAllStats = async ()=> {
               const newStats = []
                 
               const [offerRevenueResponse, offerStatsResponse, topOffersResponse, monthlyOffersStatsRes, offersUserTypeRes] = 
                 await Promise.allSettled([ 
-                  axios.get('http://localhost:3000/admin/dashboard/offers/revenue', { withCredentials: true }), 
-                  axios.get('http://localhost:3000/admin/dashboard/offers/stats', { withCredentials: true }), 
-                  axios.get('http://localhost:3000/admin/dashboard/offers/top', { withCredentials: true }),
-                  axios.get('http://localhost:3000/admin/dashboard/offers/monthly', { withCredentials: true }),
-                  axios.get('http://localhost:3000/admin/dashboard/offers/userGroup', { withCredentials: true })
+                  axios.get(`${baseApiUrl}/admin/dashboard/offers/revenue`, { withCredentials: true }), 
+                  axios.get(`${baseApiUrl}/admin/dashboard/offers/stats`, { withCredentials: true }), 
+                  axios.get(`${baseApiUrl}/admin/dashboard/offers/top`, { withCredentials: true }),
+                  axios.get(`${baseApiUrl}/admin/dashboard/offers/monthly`, { withCredentials: true }),
+                  axios.get(`${baseApiUrl}/admin/dashboard/offers/userGroup`, { withCredentials: true })
                 ])
               
               if (offerRevenueResponse.status === 'fulfilled'){

@@ -40,6 +40,8 @@ export default function SalesRevenueSection() {
 
   const COLORS = ["#8b5cf6", "#cb8ef5", "#f1c40f", "#d7f148"]
 
+  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+
   useEffect(() => {
     const fetchAllStats = async ()=> {
       const newStats = []
@@ -47,10 +49,10 @@ export default function SalesRevenueSection() {
       setLoading(status => ({...status, totalRevenue: true, avgOrders: true, totalOrders: true})) 
   
       const [revenueResponse, avgOrdersResponse, totalOrdersResponse, categoryDatasResponse] = await Promise.allSettled([
-        axios.get('http://localhost:3000/admin/dashboard/revenue/total', { withCredentials: true }),
-        axios.get('http://localhost:3000/admin/dashboard/orders/average', { withCredentials: true }),
-        axios.get('http://localhost:3000/admin/dashboard/orders/total', { withCredentials: true }),
-        axios.get('http://localhost:3000/admin/dashboard/revenue/category', { withCredentials: true })
+        axios.get(`${baseApiUrl}/admin/dashboard/revenue/total`, { withCredentials: true }),
+        axios.get(`${baseApiUrl}/admin/dashboard/orders/average`, { withCredentials: true }),
+        axios.get(`${baseApiUrl}/admin/dashboard/orders/total`, { withCredentials: true }),
+        axios.get(`${baseApiUrl}/admin/dashboard/revenue/category`, { withCredentials: true })
       ])
   
       if (revenueResponse.status === 'fulfilled'){
@@ -140,11 +142,11 @@ export default function SalesRevenueSection() {
         let response = null
         if(activeTab === 'monthly'){
           console.log("Inide activeTab === 'monthly'")
-          response = await axios.get('http://localhost:3000/admin/dashboard/revenue/monthly', { withCredentials: true })
+          response = await axios.get(`${baseApiUrl}/admin/dashboard/revenue/monthly`, { withCredentials: true })
         }
         if(activeTab === 'weekly'){
           console.log("Inide activeTab === 'weekly'")
-          response = await axios.get('http://localhost:3000/admin/dashboard/revenue/weekly', { withCredentials: true })
+          response = await axios.get(`${baseApiUrl}/admin/dashboard/revenue/weekly`, { withCredentials: true })
         }
         console.log("response.data---->", response.data)
         if(response?.data){
@@ -160,7 +162,7 @@ export default function SalesRevenueSection() {
     }
     const loadHourlyRevenue = async()=> {
       console.log("loadHourlyRevenue")
-      const response = await axios.get(`http://localhost:3000/admin/dashboard/revenue/hourly/:${salesDate}`, { withCredentials: true })
+      const response = await axios.get(`${baseApiUrl}/admin/dashboard/revenue/hourly/:${salesDate}`, { withCredentials: true })
       setHourlySalesDatas(response.data.daySalesDatas)
     }
     if(salesDate){

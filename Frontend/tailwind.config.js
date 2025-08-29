@@ -3,6 +3,11 @@ module.exports = {
   content: ["./src/**/*.{html,js,jsx}"],
   theme: {
     extend: {
+      safelist: [
+        'before:content-[""]', 
+        'before:absolute',
+        'before:bg-black'
+      ],
       colors:{
         primary:"rgba(215, 241, 72, 1)",
         primaryDark: "#f1c40f",

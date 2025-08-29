@@ -53,6 +53,8 @@ export default function CheckoutPage(){
 
     const navigate = useNavigate()
 
+    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+
     useEffect(()=> {
       dispatch(getTheCart())
       dispatch(getAllAddress())
@@ -131,7 +133,7 @@ export default function CheckoutPage(){
     const goToProductDetailPage = async(id)=> {
       try {
         console.log("Inside goToProductDetailPage")
-        const response = await axios.get(`http://localhost:3000/products/${id}`, { withCredentials: true })
+        const response = await axios.get(`${baseApiUrl}/products/${id}`, { withCredentials: true })
         console.log("Response from /products/:id", response.data[0])
         const product = response.data[0]
         console.log("Product received-->", product)
@@ -197,7 +199,7 @@ export default function CheckoutPage(){
         return
       }
       if(paymentMethod === 'razorpay'){
-        const response = await axios.post(`http://localhost:3000/payment/razorpay/order`,
+        const response = await axios.post(`${baseApiUrl}/payment/razorpay/order`,
           {amount: cart.absoluteTotalWithTaxes.toFixed(2)}, { withCredentials: true }
         )
         // const data = await response.json()
@@ -206,7 +208,7 @@ export default function CheckoutPage(){
       }
       else if(paymentMethod === 'wallet'){
         console.log('Paying with wallet...')
-        const response = await axios.post(`http://localhost:3000/wallet/order`,
+        const response = await axios.post(`${baseApiUrl}/wallet/order`,
           {amount: cart.absoluteTotalWithTaxes.toFixed(2)}, { withCredentials: true }
         )
         console.log('response.data--->', response.data)
@@ -231,7 +233,7 @@ export default function CheckoutPage(){
   }
 
   const handleRazorpayVerification = async (data) => {
-    const res = await axios.get('http://localhost:3000/payment/razorpay/key', { withCredentials: true })
+    const res = await axios.get(`${baseApiUrl}/payment/razorpay/key`, { withCredentials: true })
     console.log("Razorpay key --->", res.data.key)
     const options = {
         key: res.data.key,
@@ -248,7 +250,7 @@ export default function CheckoutPage(){
         handler: async (response) => {
             console.log("response from handler-->", response)
             try {
-                const verifiedData = await axios.post('http://localhost:3000/payment/razorpay/verify', {
+                const verifiedData = await axios.post(`${baseApiUrl}/payment/razorpay/verify`, {
                     razorpay_order_id: response.razorpay_order_id,
                     razorpay_payment_id: response.razorpay_payment_id,
                     razorpay_signature: response.razorpay_signature,

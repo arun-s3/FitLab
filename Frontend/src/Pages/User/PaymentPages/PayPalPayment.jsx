@@ -16,9 +16,10 @@ export default function PaypalPayment({amount, onPayment}) {
     const [clientId, setClientId] = useState(null)
 
     const currencyApiKey = import.meta.env.VITE_EXCHANGERATEAPI_KEY
+    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
     useEffect(() => {
-        axios.get('http://localhost:3000/payment/paypal/clientid', {withCredentials: true})
+        axios.get(`${baseApiUrl}/payment/paypal/clientid`, {withCredentials: true})
             .then(res=> setClientId(res.data.id))
             .catch(err=> setMessage("Could not load PayPal client ID"))
     }, [])
@@ -63,7 +64,7 @@ export default function PaypalPayment({amount, onPayment}) {
             
             const usdAmount = await findUsdAmount(amount)
             
-            const response = await fetch("http://localhost:3000/payment/paypal/order", {
+            const response = await fetch(`${baseApiUrl}/payment/paypal/order`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -97,7 +98,7 @@ export default function PaypalPayment({amount, onPayment}) {
         try {
             console.log('Inside onApprove')
             console.log("PayPal Approval Data:", data)
-            const response = await fetch("http://localhost:3000/payment/paypal/capture",
+            const response = await fetch(`${baseApiUrl}/payment/paypal/capture`,
                 {
                     method: "POST",
                     headers: {
@@ -128,7 +129,7 @@ export default function PaypalPayment({amount, onPayment}) {
                 const inrAmount = await findInrAmount(transaction.amount.value)
                 console.log("inrRate--->", inrAmount)
 
-                await axios.post('http://localhost:3000/payment/paypal/save', 
+                await axios.post(`${baseApiUrl}/payment/paypal/save`, 
                     {captureResult: orderData.captureResult, inrAmount}, 
                     {withCredentials: true}
                 )

@@ -38,6 +38,8 @@ export default function OtpVerificationPage(){
     const location = useLocation()
     const navigate = useNavigate()
 
+    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+
     useEffect(()=> {
         if(location){
             console.log("location.state.email---->", location?.state?.email)
@@ -162,7 +164,7 @@ export default function OtpVerificationPage(){
         }else{
             console.log("Submitting Otp.....")
             try{
-                const response = await axios.post('http://localhost:3000/verifyOtp', {otp, email: userEmail, updateUser: true}, {withCredentials: true})
+                const response = await axios.post(`${baseApiUrl}/verifyOtp`, {otp, email: userEmail, updateUser: true}, {withCredentials: true})
                 console.log("RESPONSE from verifyOtp---->", response)
                 console.log("RESPONSE from verifyOtp in JSON---->", JSON.stringify(response))
                 if(response.data.message.includes('success')){
@@ -214,7 +216,7 @@ export default function OtpVerificationPage(){
         setVerificationError(false)
         setOtpBoxDisabled(false)
         setResendState(true)
-        const response = await axios.post('http://localhost:3000/sendOtp', { email: userEmail }, {withCredentials:true});
+        const response = await axios.post(`${baseApiUrl}/sendOtp`, { email: userEmail }, {withCredentials:true});
         if(response){
             startTimer()
             setLoading(false)

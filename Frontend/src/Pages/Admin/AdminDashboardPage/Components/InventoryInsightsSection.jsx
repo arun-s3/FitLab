@@ -22,6 +22,8 @@ export default function InventoryInsightsSection() {
   const [categoryStockDatas, setCategoryStockDatas] = useState([])
 
   const [loading, setLoading] = useState({lowStockDatas: false})
+
+  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
   
 
   useEffect(()=> {
@@ -30,9 +32,9 @@ export default function InventoryInsightsSection() {
           setLoading(status=> ({...status, lowStockDatas: true}))
       
           const [productStockResponse, productLowStockResponse, categoryStockDatasResponse] = await Promise.allSettled([
-            axios.get('http://localhost:3000/admin/dashboard/products/stock', { withCredentials: true }), 
-            axios.get('http://localhost:3000/admin/dashboard/products/stock/low', { withCredentials: true }),
-            axios.get('http://localhost:3000/admin/dashboard/category/stock', { withCredentials: true })  
+            axios.get(`${baseApiUrl}/admin/dashboard/products/stock`, { withCredentials: true }), 
+            axios.get(`${baseApiUrl}/admin/dashboard/products/stock/low`, { withCredentials: true }),
+            axios.get(`${baseApiUrl}/admin/dashboard/category/stock`, { withCredentials: true })  
           ])
 
           if (productStockResponse.status === 'fulfilled'){

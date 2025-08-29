@@ -31,6 +31,8 @@ export default function SignUpAndInPage({type}){
  
     const dispatch = useDispatch()
     const {error, loading, success, userToken, googleSuccess} = useSelector((state)=>state.user)
+
+    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
      
     useEffect(()=>{
         console.log("Inside useEffect()")
@@ -39,7 +41,7 @@ export default function SignUpAndInPage({type}){
                 toast.success("Registered succesfully!")
                 console.log("Just after success toast!")
                 // const response = await axios.post('/sendOtp', formData.email)
-                const response = await axios.post('http://localhost:3000/sendOtp', { email: formData.email }, {withCredentials:true});
+                const response = await axios.post(`${baseApiUrl}/sendOtp`, { email: formData.email }, {withCredentials:true});
                 if(response){
                     console.log("Redirecting to OTP Verification page...")
                     navigate('/signup/otp-verify', {

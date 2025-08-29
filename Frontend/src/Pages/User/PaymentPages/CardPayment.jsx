@@ -17,6 +17,7 @@ export default function CardPayment({onPayment, payButtonText}){
   const stripe = useStripe()
   const elements = useElements()
 
+  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
   const handleElementChange = (e)=> {
     console.log("PaymentElement out of focus")
@@ -53,7 +54,7 @@ export default function CardPayment({onPayment, payButtonText}){
           paymentId: paymentIntent.id,
           paymentMethod: "stripe",
         }
-        await axios.post('http://localhost:3000/payment/stripe/save', {paymentDatas}, {withCredentials: true})
+        await axios.post(`${baseApiUrl}/payment/stripe/save`, {paymentDatas}, {withCredentials: true})
         onPayment(paymentIntent.id)
       }
     

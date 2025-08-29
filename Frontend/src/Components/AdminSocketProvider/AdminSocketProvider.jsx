@@ -26,6 +26,8 @@ export default function AdminSocketProvider() {
   const messagesEndRef = useRef(null)
   const adminName = "Support Agent"
 
+  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+
 
   // const handleUserSelect = (user)=> {
   //   setSelectedUser(user)
@@ -42,7 +44,7 @@ export default function AdminSocketProvider() {
 
 
   useEffect(() => {
-    const socket = io("http://localhost:3000")
+    const socket = io(baseApiUrl)
 
     socket.on("connect", () => {
       setIsConnected(true)

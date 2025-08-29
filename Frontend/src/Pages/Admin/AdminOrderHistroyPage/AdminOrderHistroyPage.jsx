@@ -51,7 +51,8 @@ export default function AdminOrderHistoryPage(){
 
   const {orders, orderCreated, orderMessage, orderError} = useSelector(state=> state.order)
   const dispatch = useDispatch()
-  
+
+  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
   const [openDropdowns, setOpenDropdowns] = useState({showTab: false, durationDropdown: false, sortDropdown: false, limitDropdown: false})
     const dropdownRefs = {
@@ -92,7 +93,7 @@ export default function AdminOrderHistoryPage(){
 
     useEffect(()=> {
       async function findStatus(){
-        const response = await axios.get('http://localhost:3000/order/statusCounts', {withCredentials: true})
+        const response = await axios.get(`${baseApiUrl}/order/statusCounts`, {withCredentials: true})
         console.log("Response from statusCounts", response.data)
         setStatusCounts(response.data.statusCounts) 
       }

@@ -24,9 +24,11 @@ export default function AdminDashboardHeatmapPage(){
   const [totalUsers, setTotalUsers] = useState(0);
   const [zoom, setZoom] = useState(6);
 
+  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+
   useEffect(()=> {
     axios
-      .get("http://localhost:3000/admin/locations/map", {withCredentials: true})
+      .get(`${baseApiUrl}/admin/locations/map`, {withCredentials: true})
       .then((res) => {
         const data = res.data.usersLocationData
         setStateData(data)
@@ -41,7 +43,7 @@ export default function AdminDashboardHeatmapPage(){
       })
       .catch((err) => console.error(err))
 
-      axios.get("http://localhost:3000/admin/locations/stats", {withCredentials: true}).then(res=> {
+      axios.get(`${baseApiUrl}/admin/locations/stats`, {withCredentials: true}).then(res=> {
          const newStats = []  
          newStats.push({
             name: "totalCustomers",

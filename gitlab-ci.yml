@@ -1,0 +1,75 @@
+stages: []  # I will run stages from next commits---> build_frontend, deploy_frontend, invalidate_cdn, build_backend, deploy_backend
+
+default:
+  image: node:18
+
+before_script:
+  - node -v && npm -v
+
+build_frontend:
+  stage: build_frontend
+  script:
+    - cd Frontend
+    - npm ci
+    - npm run build
+  artifacts:
+    paths: [Frontend/dist]
+  when: manual
+  allow_failure: false
+
+deploy_frontend:
+  stage: deploy_frontend
+  image: amazon/aws-cli:2.15.0
+  needs: [build_frontend]
+  script:
+    - aws s3 sync Frontend/dist/ s3://$S3_BUCKET/ --delete
+  when: manual
+  allow_failure: false
+
+invalidate_cdn:
+  stage: invalidate_cdn
+  image: amazon/aws-cli:2.15.0
+  needs: [deploy_frontend]
+  script:
+    - aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
+  when: manual
+  allow_failure: false
+
+build_backend:
+  stage: build_backend
+  script:
+    - echo "MONGOURI=$MONGOURI" >> .env
+    - echo "PORT=$PORT" >> .env
+    - echo "JWTSECRET=$JWTSECRET" >> .env
+    - echo "FITLABPASS=$FITLABPASS" >> .env
+    - echo "CLOUDINARY_CLOUD_NAME=$CLOUDINARY_CLOUD_NAME" >> .env
+    - echo "CLOUDINARY_API_KEY=$CLOUDINARY_API_KEY" >> .env
+    - echo "CLOUDINARY_API_SECRET=$CLOUDINARY_API_SECRET" >> .env
+    - echo "RAZORPAY_KEY_ID=$RAZORPAY_KEY_ID" >> .env
+    - echo "RAZORPAY_KEY_SECRET=$RAZORPAY_KEY_SECRET" >> .env
+    - echo "STRIPE_SECRET_KEY=$STRIPE_SECRET_KEY" >> .env
+    - echo "STRIPE_PUBLISHABLE_KEY=$STRIPE_PUBLISHABLE_KEY" >> .env
+    - echo "PAYPAL_CLIENT_ID=$PAYPAL_CLIENT_ID" >> .env
+    - echo "PAYPAL_CLIENT_SECRET=$PAYPAL_CLIENT_SECRET" >> .env
+    - echo "EXCHANGERATE_API_KEY=$EXCHANGERATE_API_KEY" >> .env
+    - echo "WALLET_SECRET_KEY=$WALLET_SECRET_KEY" >> .env
+  artifacts:
+    paths: [Backend/, .env, package.json, package-lock.json, ecosystem.config.js]
+  when: manual
+  allow_failure: false
+
+deploy_backend:
+  stage: deploy_backend
+  image: ubuntu:22.04
+  needs: [build_backend]
+  before_script:
+    - apt update && apt install -y openssh-client rsync
+    - eval $(ssh-agent -s)
+    - echo "$EC2_SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh && chmod 700 ~/.ssh
+    - ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
+  script:
+    - rsync -avz --delete Backend/ .env package.json package-lock.json ecosystem.config.js ubuntu@$EC2_HOST:/var/www/fitlab-api/
+    - ssh ubuntu@$EC2_HOST "cd /var/www/fitlab-api && npm ci --omit=dev && pm2 reload ecosystem.config.js --update-env"
+  when: manual
+  allow_failure: false

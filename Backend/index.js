@@ -36,7 +36,7 @@ app.use(cookieParser())
 
 const cors = require('cors')
 app.use(cors({
-    origin:'http://localhost:5173',
+    origin:['http://localhost:5173', 'https://fitlab.co.in', 'https://www.fitlab.co.in'],
     method:['GET','POST','PUT','PATCH','DELETE'],
     credentials:true
 }))
@@ -46,7 +46,7 @@ const Server = require("socket.io").Server
 
 let io = new Server(server, {
       cors: {
-        origin: "http://localhost:5173",
+        origin: ['http://localhost:5173', 'https://fitlab.co.in', 'https://www.fitlab.co.in'],
         methods: ["GET", "POST"],
         credentials: true,
       },

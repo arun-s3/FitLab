@@ -168,6 +168,7 @@ const createPaypalOrder = async (req, res)=> {
     }
 
     const request = new paypal.orders.OrdersCreateRequest()
+    const frontendUrl = process.env.FRONTEND_BASE_URL
 
     request.prefer("return=representation")
     request.requestBody({
@@ -179,8 +180,8 @@ const createPaypalOrder = async (req, res)=> {
         }
       }],
       application_context: {
-        return_url: "http://localhost:5173/order-confirm",
-        cancel_url: "http://localhost:5173/checkout"
+        return_url: `${frontendUrl}/order-confirm`,
+        cancel_url: `${frontendUrl}/checkout`
       }
     })
 

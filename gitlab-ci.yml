@@ -1,17 +1,20 @@
-stages: []  # I will run stages from next commits---> build_frontend, deploy_frontend, invalidate_cdn, build_backend, deploy_backend
-
+stages: [build_frontend, deploy_frontend, invalidate_cdn, build_backend, deploy_backend] 
 default:
   image: node:18
 
 before_script:
   - node -v && npm -v
+  # - npm install -g pnpm
 
 build_frontend:
   stage: build_frontend
   script:
     - cd Frontend
-    - npm ci
+    - rm -rf node_modules package-lock.json
+    - npm install
     - npm run build
+    - echo "S3_BUCKET = ${S3_BUCKET}" 
+    - echo "FRONTEND BUILD IS COMPLETED"
   artifacts:
     paths: [Frontend/dist]
   when: manual
@@ -19,19 +22,32 @@ build_frontend:
 
 deploy_frontend:
   stage: deploy_frontend
-  image: amazon/aws-cli:2.15.0
+  image:
+    name: amazon/aws-cli:2.15.0
+    entrypoint: [""]            
   needs: [build_frontend]
   script:
-    - aws s3 sync Frontend/dist/ s3://$S3_BUCKET/ --delete
+    - aws --version
+    - echo "S3_BUCKET=${S3_BUCKET}"
+    - ls -la Frontend/dist || true
+    - aws s3 ls "s3://${S3_BUCKET}"
+    - aws s3 sync Frontend/dist/ "s3://${S3_BUCKET}/" --delete
+    - echo "FRONTEND DEPLOYED IS SUCCESSFUL"
   when: manual
   allow_failure: false
 
 invalidate_cdn:
   stage: invalidate_cdn
-  image: amazon/aws-cli:2.15.0
+  image:
+    name: amazon/aws-cli:2.15.0
+    entrypoint: [""]          
   needs: [deploy_frontend]
+  before_script: []          
   script:
-    - aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
+    - aws --version
+    - echo "CLOUDFRONT_DISTRIBUTION_ID='${CLOUDFRONT_DISTRIBUTION_ID}'"
+    - aws cloudfront create-invalidation --distribution-id "${CLOUDFRONT_DISTRIBUTION_ID}" --paths '/*'
+    - echo "CLOUDFRONT INVALIDATION CREATED SUCCESSFULLY"
   when: manual
   allow_failure: false
 
@@ -53,6 +69,7 @@ build_backend:
     - echo "PAYPAL_CLIENT_SECRET=$PAYPAL_CLIENT_SECRET" >> .env
     - echo "EXCHANGERATE_API_KEY=$EXCHANGERATE_API_KEY" >> .env
     - echo "WALLET_SECRET_KEY=$WALLET_SECRET_KEY" >> .env
+    - echo "BACKEND BUILD SUCCESSFULLY"
   artifacts:
     paths: [Backend/, .env, package.json, package-lock.json, ecosystem.config.js]
   when: manual
@@ -68,8 +85,10 @@ deploy_backend:
     - echo "$EC2_SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
     - mkdir -p ~/.ssh && chmod 700 ~/.ssh
     - ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
+    - echo "SSH INTO EC2 DONE"
   script:
     - rsync -avz --delete Backend/ .env package.json package-lock.json ecosystem.config.js ubuntu@$EC2_HOST:/var/www/fitlab-api/
-    - ssh ubuntu@$EC2_HOST "cd /var/www/fitlab-api && npm ci --omit=dev && pm2 reload ecosystem.config.js --update-env"
+    - ssh ubuntu@$EC2_HOST "source ~/.nvm/nvm.sh && cd /var/www/fitlab-api && npm ci --omit=dev && pm2 reload ecosystem.config.js --update-env"
+    - echo "BACKEND DEPLOYED SUCCESSFULLY"
   when: manual
   allow_failure: false

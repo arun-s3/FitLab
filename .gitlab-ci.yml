@@ -17,8 +17,6 @@ build_frontend:
     - echo "FRONTEND BUILD IS COMPLETED"
   artifacts:
     paths: [Frontend/dist]
-  when: manual
-  allow_failure: false
 
 deploy_frontend:
   stage: deploy_frontend
@@ -33,8 +31,6 @@ deploy_frontend:
     - aws s3 ls "s3://${S3_BUCKET}"
     - aws s3 sync Frontend/dist/ "s3://${S3_BUCKET}/" --delete
     - echo "FRONTEND DEPLOYED IS SUCCESSFUL"
-  when: manual
-  allow_failure: false
 
 invalidate_cdn:
   stage: invalidate_cdn
@@ -48,8 +44,6 @@ invalidate_cdn:
     - echo "CLOUDFRONT_DISTRIBUTION_ID='${CLOUDFRONT_DISTRIBUTION_ID}'"
     - aws cloudfront create-invalidation --distribution-id "${CLOUDFRONT_DISTRIBUTION_ID}" --paths '/*'
     - echo "CLOUDFRONT INVALIDATION CREATED SUCCESSFULLY"
-  when: manual
-  allow_failure: false
 
 build_backend:
   stage: build_backend
@@ -72,8 +66,6 @@ build_backend:
     - echo "BACKEND BUILD SUCCESSFULLY"
   artifacts:
     paths: [Backend/, .env, package.json, package-lock.json, ecosystem.config.js]
-  when: manual
-  allow_failure: false
 
 deploy_backend:
   stage: deploy_backend
@@ -88,7 +80,6 @@ deploy_backend:
     - echo "SSH INTO EC2 DONE"
   script:
     - rsync -avz --delete Backend/ .env package.json package-lock.json ecosystem.config.js ubuntu@$EC2_HOST:/var/www/fitlab-api/
-    - ssh ubuntu@$EC2_HOST "source ~/.nvm/nvm.sh && cd /var/www/fitlab-api && npm ci --omit=dev && pm2 reload ecosystem.config.js --update-env"
+    - ssh ubuntu@$EC2_HOST "cd /var/www/fitlab-api && npm ci --omit=dev && pm2 reload ecosystem.config.js --update-env"
     - echo "BACKEND DEPLOYED SUCCESSFULLY"
-  when: manual
-  allow_failure: false
+

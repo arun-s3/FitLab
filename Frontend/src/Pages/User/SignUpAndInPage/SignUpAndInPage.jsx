@@ -41,7 +41,7 @@ export default function SignUpAndInPage({type}){
             console.log("Cookies cleared!")
             dispatch(signin(formData))
         }else{
-            toast.error("Internal Server Error!")
+            toast.error("Internal Server Error.Please try after sometime!")
         }
     }
      

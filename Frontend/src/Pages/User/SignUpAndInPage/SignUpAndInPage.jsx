@@ -33,6 +33,17 @@ export default function SignUpAndInPage({type}){
     const {error, loading, success, userToken, googleSuccess} = useSelector((state)=>state.user)
 
     const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+
+    const clearCookiesAndSignIn = async()=> {
+        console.log("Inside clearCookiesAndSignIn()")
+        const response = await axios.get(`${baseApiUrl}/clear-cookies`, {withCredentials:true})
+        if(response.status === 200){
+            console.log("Cookies cleared!")
+            dispatch(signin(formData))
+        }else{
+            toast.error("Internal Server Error!")
+        }
+    }
      
     useEffect(()=>{
         console.log("Inside useEffect()")
@@ -61,10 +72,17 @@ export default function SignUpAndInPage({type}){
             dispatch(resetStates())
         }
         if(error){
-            console.log("Just after before toast!-->"+error)
-            toast.error(error)
-            console.log("Just after error toast!")
-            dispatch(resetStates())
+            console.log("error---->", error)
+            if(error === 'Bad request- User already logged in!'){
+                if(userToken){
+                    navigate('/',{replace:true})
+                }else clearCookiesAndSignIn()
+            }else{
+                console.log("Just after before toast!-->"+error)
+                toast.error(error)
+                console.log("Just after error toast!")
+                dispatch(resetStates())
+            }
         }
         if(userToken){
             console.log("Cannot go coz u got token")

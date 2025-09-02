@@ -41,7 +41,7 @@ export default function CouponsOffersInsightsSection() {
             const newStats = []
               
             const [couponRevenueResponse, couponStatsResponse, couponRedemptionRes, discountImpactRes] = await Promise.allSettled([ 
-              axios.get(`${baseApiUrl}admin/dashboard/coupons/revenue`, { withCredentials: true }), 
+              axios.get(`${baseApiUrl}/admin/dashboard/coupons/revenue`, { withCredentials: true }), 
               axios.get(`${baseApiUrl}/admin/dashboard/coupons/stats`, { withCredentials: true }),
               axios.get(`${baseApiUrl}/admin/dashboard/coupons/redemptions`, { withCredentials: true }),
               axios.get(`${baseApiUrl}/admin/dashboard/coupons/impact`, { withCredentials: true })

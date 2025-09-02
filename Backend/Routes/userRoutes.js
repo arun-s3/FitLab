@@ -1,16 +1,17 @@
 const express = require('express')
 const userRouter = express.Router()
 const {isLogin, isLogout} = require('../Middlewares/Authentication')
-const {tester, createUser, sendOtp, verifyOtp, loginUser, updateForgotPassword, resetPassword, updateUserDetails, googleSignin,
+const {tester, createUser, sendOtp, verifyOtp, loginUser, clearAllCookies, updateForgotPassword, resetPassword, updateUserDetails, googleSignin,
      signout, getUserId,searchUsernames, totalUsersCount, generateUniqueGuestUser, verifyAndDeleteGuestUser,
      googleSignout} = require('../Controllers/userController')
 
 userRouter.get('/test', tester)
 
-userRouter.post('/signup', isLogout, createUser)
+userRouter.post('/signup', isLogout, createUser)    
 userRouter.post('/sendOtp', sendOtp)                                                                                                         //isLogout, 
 userRouter.post('/verifyOtp', verifyOtp)                                                                                                     //isLogout,
 userRouter.post('/signin', isLogout, loginUser)
+userRouter.get('/clear-cookies', clearAllCookies)
 userRouter.post('/update', isLogin, updateUserDetails)
 userRouter.post('/password/reset', isLogin, updateForgotPassword)
 userRouter.post('/password/update', isLogin, resetPassword)

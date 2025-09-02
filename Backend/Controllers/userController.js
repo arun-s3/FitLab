@@ -351,6 +351,25 @@ const googleSignin = async(req,res,next)=>{
     }
 }
 
+
+const clearAllCookies = async(req, res, next)=> {
+    try {
+        console.log("Inside clearAllCookies..")
+        res.cookie("jwt", "", {
+            httpOnly: true,
+            sameSite: "strict",
+            expires: new Date(0) 
+        })
+
+        return res.status(200).json({ message: "Logged out successfully" })
+    }
+    catch(error){
+        console.error("Logout error:", error)
+        next(error)
+    }
+}
+
+
 const getUserId = async(req, res, next)=> {
     try{
         console.log("Inside getUserId..")
@@ -469,5 +488,5 @@ const signout = (req,res,next)=>{
 }
 
 
-module.exports = {tester, createUser, sendOtp, verifyOtp, loginUser, updateUserDetails, updateForgotPassword, resetPassword,
+module.exports = {tester, createUser, sendOtp, verifyOtp, loginUser, clearAllCookies, updateUserDetails, updateForgotPassword, resetPassword,
      googleSignin, getUserId, searchUsernames, totalUsersCount, generateUniqueGuestUser, verifyAndDeleteGuestUser, signout}

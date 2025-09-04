@@ -26,14 +26,12 @@
     color:#fff;
 }
 #signup-and-in>main input{
+    width:100%;
     border:2px solid #fff;
     border-radius:8px;
     padding:10px;
     padding-left:20px;
     margin-left: 0px; 
-}
-#signup-and-in>main #email, #signup-and-in>main #password{
-    width:31.5rem;
 }
 #signup-and-in>main input::placeholder{
     font-size:12px;

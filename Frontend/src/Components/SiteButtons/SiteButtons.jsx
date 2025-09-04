@@ -2,11 +2,14 @@ import React from 'react'
 import './SiteButtons.css'
 import {useSelector} from 'react-redux'
 
-export function SiteButton({customStyle, children, shouldSubmit = false}){
+export function SiteButton({customStyle, children, className, shouldSubmit = false}){
     
     return(
-        <button type={shouldSubmit?"submit":"button"} className="bg-primary text-black text-descReg1 site-button" 
-                style={customStyle}>{children}</button>
+        <button type={shouldSubmit?"submit":"button"} 
+            className={`bg-primary text-black text-descReg1 hover:bg-green-500 transition duration-300 ${className} site-button`} 
+            style={customStyle}>
+                {children}
+        </button>
     )
 }
 

@@ -23,7 +23,7 @@ export default function UserHead(){
 
     const menuItems = [
         { icon: Home, label: 'Account', path: '/account'},
-        { icon: CreditCard, label: 'Wallet', path: '' },
+        { icon: CreditCard, label: 'Wallet', path: '/wallet' },
         { icon: BadgePercent, label: 'Coupons', path: '/coupons' },
         { icon: IoBagCheckOutline, label: 'Checkout', path: '/checkout' },
         { icon: Clock, label: 'Order History', path: '/orders' },

@@ -8,6 +8,9 @@ module.exports = {
         'before:absolute',
         'before:bg-black'
       ],
+      screens: {
+        'x-xl': '1350px' 
+      },
       colors:{
         primary:"rgba(215, 241, 72, 1)",
         primaryDark: "#f1c40f",

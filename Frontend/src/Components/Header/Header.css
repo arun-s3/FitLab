@@ -3,10 +3,14 @@
     cursor:pointer;
 }
 
+#headerMenu #icons #signup-icon{
+    box-shadow: 0px 0px 6px var(--INPUT-BORDER-SECONDARY);
+}
+
 #headerMenu i svg:hover{
     color: var(--PRIMARYDARK);
     transform: scale(110%);
     transition-property: transform;
     transition-delay: 0.1s;
-    transition-duration: 0.2s;
+    transition-duration: 0.2s; 
 }

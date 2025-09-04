@@ -15,6 +15,7 @@ import {CustomHashLoader, CustomScaleLoader} from '../../../Components/Loader/Lo
 
 
 export default function SignUpAndInPage({type}){
+
     const bgImg = {
         backgroundImage:"url('/SignIn-bg.png')",
         backgroundSize:"cover"
@@ -241,75 +242,107 @@ export default function SignUpAndInPage({type}){
                 
             </header>
         
-            <main className='transform translate-x-[-50%] translate-y-[-50%] absolute top-[50%] left-[50%] w-[40%]
-                             rounded-[22px] px-[50px] ' style={ type=='signup'? {marginBlock:'10%'}:{marginBlock:'2%'} }>
-                <h1 className='text-secondary font-funCity text-[35px] mb-[60px] text-left my-[50px]'>
-                    SIGN<span className='font-funCity'> {type.slice(4).toUpperCase()} </span></h1>
+            <main className='-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 w-[90%] sm:w-[70%] md:w-[50%] lg:w-[40%]
+                    rounded-[22px] px-[50px] sm:px-10' 
+                style={ type=='signup'? {marginBlock:'10%'}:{marginBlock:'2%'} }>
+                    
+                <h1 className='text-secondary font-funCity text-3xl sm:text-4xl mb-[60px] text-left my-[50px]'>
+                    SIGN
+                    <span className='font-funCity'> {type.slice(4).toUpperCase()} </span>
+                </h1>
 
                 <form className='flex flex-col gap-[15px] text-descReg1 items-start' onSubmit={(e)=>submitData(e)} >
-                    <div>
+                    <div className="w-full">
                     {type=='signup'? <>
-                                        <label htmlFor='email'>Enter your email address</label>
-                                        <input type="email" placeholder="Email Address" id="email" onChange={(e)=>handleChange(e)} autoFocus
-                                                             onBlur={(e)=>{handleInput(e)}} value={formData.email}/>
+                                        <label htmlFor='email'> Enter your email address </label>
+                                        <input type="email" 
+                                            placeholder="Email Address"
+                                            id="email" 
+                                            onChange={(e)=>handleChange(e)} 
+                                            autoFocus
+                                            onBlur={(e)=>{handleInput(e)}} value={formData.email}
+                                        />
                                     </>
                                     :<> 
                                         <label htmlFor='identifier'>Enter your username or email address</label>
-                                        <input type="text" placeholder="Username or email address" id="identifier" className='w-[31.5rem]' autoComplete="off" ref={identifierRef}
-                                                onChange={(e)=>handleChange(e)} onBlur={(e)=>{handleInput(e)}} />
+                                        <input type="text"
+                                            placeholder="Username or email address" 
+                                            id="identifier"  
+                                            autoComplete="off" 
+                                            ref={identifierRef}
+                                            onChange={(e)=>handleChange(e)} onBlur={(e)=>{handleInput(e)}} 
+                                        />
                                      </>
                         }
                         <p className='error'></p>
                     </div>
                     {
                         type==="signup"? 
-                                        (<div className='flex gap-[20px]'>
-                                            <div>
-                                                <label htmlFor='username'>User Name</label>
-                                                <input type="text" placeholder="Username" id="username" onChange={(e)=>handleChange(e)} 
-                                                                        onBlur={(e)=>{handleInput(e)}} value={formData.username} />
+                                        (<div className='flex flex-col sm:flex-row gap-[20px] w-full'>
+                                            <div className="flex-1">
+                                                <label htmlFor='username'> User Name </label>
+                                                <input type="text" 
+                                                    placeholder="Username"
+                                                    id="username"
+                                                    className='w-full'
+                                                    onChange={(e)=>handleChange(e)} 
+                                                    onBlur={(e)=>{handleInput(e)}} value={formData.username} 
+                                                />
                                                 <p className='error'></p>
                                             </div>
-                                            <div>
+                                            <div className="flex-1">
                                                 <label htmlFor='mobile'>Contact Number</label>
-                                                <input type="text" placeholder="Contact Number" id="mobile" onChange={(e)=>handleChange(e)} 
-                                                                        onBlur={(e)=>{handleInput(e)}} value={formData.mobile}/>
+                                                <input type="text" 
+                                                    placeholder="Contact Number"
+                                                    id="mobile" 
+                                                    onChange={(e)=>handleChange(e)} 
+                                                    className='w-full' 
+                                                    onBlur={(e)=>{handleInput(e)}} value={formData.mobile}
+                                                />
                                                 <p className='error'></p>
                                             </div>
                                         </div>)
                                       : <></>
                     }
                     
-                    <div className='flex flex-col gap-[15px]'>
+                    <div className='flex flex-col gap-[15px] w-full'>
                         <div>
                             <label htmlFor='password'>Enter your Password</label>
-                            <input type="password" placeholder="Password" id="password" onChange={(e)=>handleChange(e)} 
-                                                autoComplete="off" ref={passwordRef}  onBlur={(e)=>{handleInput(e)}} />
+                            <input type="password" 
+                                placeholder="Password"
+                                id="password"
+                                onChange={(e)=>handleChange(e)} 
+                                autoComplete="off" ref={passwordRef}  
+                                onBlur={(e)=>{handleInput(e)}}
+                            />
                             <p className='error' ></p>
                         </div>
                         
                         {
                             type==="signup"?
-                                            (<>
+                                            (
                                                 <div>   {/*className='mt-[15px]'*/}
-                                                    <label htmlFor='confirmPassword'>Confirm your Password</label>
-                                                    <input type="password" placeholder="Password" id="confirmPassword" className='w-[31.5rem]'
-                                                        onBlur={(e)=>{handleInput(e)}} onChange={(e)=>handleChange(e)}/>
+                                                    <label htmlFor='confirmPassword'> Confirm your Password </label>
+                                                    <input type="password" 
+                                                        placeholder="Password"
+                                                        id="confirmPassword" 
+                                                        onBlur={(e)=>{handleInput(e)}} onChange={(e)=>handleChange(e)}
+                                                    />
                                                     <p className='error'></p>
 
-                                                    <p className='text-white mt-[1rem] text-subtitleSmall1 ml-[4px]'>Already have an account?
+                                                    <p className='text-white mt-[1rem] text-subtitleSmall1 ml-[4px]'>
+                                                        Already have an account?
                                                         <Link to={"/signin"} className='text-secondary ml-[10px] cursor-pointer font-medium'>
-                                                          Sign In</Link>
+                                                          Sign In
+                                                          </Link>
                                                     </p>
                                                 </div>
-                                                
-                                             </>
                                              )
 
-                                          :(<div className='text-white mt-[5px] flex justify-between text-subtitleSmall1'>
+                                          :(
+                                            <div className='text-white mt-[5px] flex flex-col sm:flex-row justify-between text-subtitleSmall1'>
                                                 <p className='ml-[4px]'>Don’t have an account yet?
-                                                    <Link to={"/signup"} className='text-secondary ml-[10px] cursor-pointer 
-                                                    font-medium'>
+                                                    <Link to={"/signup"} className='text-secondary ml-[10px] cursor-pointer font-medium'>
                                                       Sign Up</Link>
                                                 </p>
                                                 <Link to=""> Forgot Password</Link>
@@ -319,9 +352,10 @@ export default function SignUpAndInPage({type}){
                     
                     </div>   
                     <SiteButtonSquare shouldSubmit={true}
-                         customStyle={ type=='signup'?{width:'31.5rem', display: 'flex', justifyContent:'center', alignItems:'center'}:{width:'31.5rem',marginBottom:'60px'} } >
+                         customStyle={{ width:'100%', display: 'flex', justifyContent:'center', alignItems:'center', 
+                            marginBottom: type ==='signup' ? '10px': '3rem'}} >
                         { 
-                            loading? <CustomHashLoader loading={loading}/> : otpPageLoading? 
+                            loading? <CustomHashLoader loading={loading}/> : otpPageLoading ? 
                                         <span className='flex justify-center items-center gap-[5px]'>  
                                             <span className='text-secondary text-[11px] tracking-[0.3px] mb-[3px]'> 
                                                 Redirecting to OTP Verification Page 
@@ -333,11 +367,13 @@ export default function SignUpAndInPage({type}){
                     </SiteButtonSquare>
                     {
                         type=="signup"? 
-                        <SiteSecondaryBorderButtonSquare customStyle={{marginBottom:'60px', width:'31.5rem', display:'flex',
-                                justifyContent:'center', alignItems:'center'}} clickHandler={()=>{ setGooglePromptLoading(true); googleLogin()}}>
-                            <img src="/google.png" alt="" className='mr-[15px] inline-block'/> 
+                        <SiteSecondaryBorderButtonSquare customStyle={{marginBottom:'60px', width:'100%', display:'flex',
+                                justifyContent:'center', alignItems:'center'}} 
+                            clickHandler={()=>{ setGooglePromptLoading(true); googleLogin()}}>
+                            <img src="/google.png" 
+                                 alt="" className='mr-[15px] inline-block'/> 
                             { 
-                                (loading||googlePromptLoading)? <CustomHashLoader loading={googlePromptLoading||loading}/>: "Continue with Google" 
+                                (loading||googlePromptLoading) ? <CustomHashLoader loading={googlePromptLoading||loading}/> : "Continue with Google" 
                             }
                         </SiteSecondaryBorderButtonSquare>: <></>
                     }

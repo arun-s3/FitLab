@@ -1,6 +1,6 @@
 import React, {useState, useEffect, useRef} from "react"
 import {useSelector, useDispatch} from 'react-redux'
-import {Link} from 'react-router-dom'
+import {Link, useNavigate} from 'react-router-dom'
 import {motion, AnimatePresence, useScroll, useSpring} from "framer-motion"
 
 import {Menu, ArrowUpRight, Home, LineChart, Info, BookText, PhoneCall, ShoppingCart, Bookmark, UserIcon, ChevronRight, LogIn, UserPlus,
@@ -8,6 +8,8 @@ import {Menu, ArrowUpRight, Home, LineChart, Info, BookText, PhoneCall, Shopping
   MessageSquare, LogOut} from "lucide-react"
 import {IoBagCheckOutline} from "react-icons/io5"
 
+import CartSidebar from '../../Components/CartSidebar/CartSidebar'
+import TextChatBox from '../../Pages/User/TextChatBox/TextChatBox'
 import {signout} from '../../Slices/userSlice'
 
 
@@ -22,9 +24,19 @@ export default function MobileSidebar() {
 
   const [showOptions, setShowOptions] = useState({menu: true, browse: false, support: true, notice: true})
 
+  const [openChatBox, setOpenChatBox] = useState(false)
+  const [isCartOpen, setIsCartOpen] = useState(false)
+
   const {user} = useSelector((state)=> state.user)
   const dispatch = useDispatch()
 
+  const navigate = useNavigate()
+
+  const topBarIcons = [
+    {Icon: Home, label:'Home', path: '/'},
+    {Icon: ShoppingCart, label:'Shopping Cart', path: null},
+    {Icon: User, label:'User Profile', path: '/account'} ,
+  ]
 
   useEffect(()=> {
     const onKey = (e)=> e.key === "Escape" && setOpen(false)
@@ -52,6 +64,7 @@ export default function MobileSidebar() {
   return (
     <>
       <header className="lg:mt-0 absolute sm:sticky right-[5px] sm:right-0 top-[25px] z-40">
+
         <nav
           className="mx-auto flex items-center justify-between rounded-full px-4  text-white lg:px-6"
           aria-label="Primary"
@@ -62,7 +75,8 @@ export default function MobileSidebar() {
             onClick={() => setOpen(true)}
             aria-label="Open menu"
             aria-expanded={open}
-            className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 p-2 text-white hover:bg-white/10 lg:hidden"
+            className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 p-2 text-white
+             hover:bg-white/10 lg:hidden"
           >
             <Menu className="h-5 w-5" />
           </motion.button>
@@ -106,24 +120,26 @@ export default function MobileSidebar() {
                   <div className="flex items-center justify-between bg-neutral-900/95 px-4 py-3 backdrop-blur
                   supports-[backdrop-filter]:bg-neutral-900/75">
                     <div className="flex items-center gap-3">
-                      <span className="grid h-8 w-8 place-items-center rounded-full bg-white/5 ring-1 ring-white/10">
-                        <Home className="h-4 w-4" />
-                      </span>
-                      <span className="grid h-8 w-8 place-items-center rounded-full bg-white/5 ring-1 ring-white/10">
-                        <ShoppingCart className="h-4 w-4" />
-                      </span>
-                      <span className="grid h-8 w-8 place-items-center rounded-full bg-white/5 ring-1 ring-white/10">
-                        <User className="h-4 w-4" />
-                      </span>
-                      <span className="grid h-8 w-8 place-items-center rounded-full bg-white/5 ring-1 ring-white/10">
-                        <Search className="h-4 w-4" />
-                      </span>
+                      {
+                        topBarIcons &&
+                        topBarIcons.map(item=> (
+                          <span className="grid h-8 w-8 place-items-center rounded-full bg-white/5 ring-1 ring-white/10 cursor-pointer">
+                            <item.Icon className="h-4 w-4" 
+                              onClick={()=> {
+                                item?.path && navigate(item.path)
+                                if(item.label === 'Shopping Cart') setIsCartOpen(true)
+                                setOpen(false)
+                              }}/>
+                          </span>
+                        ))
+                      }
                     </div>
 
                     <button
                       onClick={()=> setOpen(false)}
                       aria-label="Close menu"
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-neutral-800 ring-1 ring-white/10 transition hover:bg-neutral-700"
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-neutral-800 ring-1
+                       ring-white/10 transition hover:bg-neutral-700"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -162,7 +178,8 @@ export default function MobileSidebar() {
                           <span className="font-medium">Subscribe</span>
                           <ChevronRight size={18} className="text-white/50" />
                         </button>
-                        <button className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 font-semibold text-black ring-1 ring-black/10 transition hover:bg-amber-300">
+                        <button className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 font-semibold
+                         text-black ring-1 ring-black/10 transition hover:bg-amber-300">
                           Order now <ArrowUpRight size={16} />
                         </button>
                       </div>
@@ -194,11 +211,11 @@ export default function MobileSidebar() {
                         <div className="flex items-center gap-3">
                           <button className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-white/5 px-3 py-2 text-sm
                            ring-1 ring-white/10 transition hover:bg-white/10">
-                            <LogIn size={18} /> Login
+                            <Link to='/signin'> <LogIn size={18} /> Login </Link>
                           </button>
                           <button className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-white px-3 py-2 text-sm
                            font-medium text-black ring-1 ring-black/10 transition hover:bg-white/90">
-                            <UserPlus size={18} /> Sign up
+                            <Link to='/signup'> <UserPlus size={18} /> Sign up </Link>
                           </button>
                         </div>
                     }
@@ -210,7 +227,7 @@ export default function MobileSidebar() {
                         <p className="text-xs font-medium uppercase tracking-wide text-white/60"> Browse </p>
                         <span className="text-white/40 cursor-pointer"
                           onClick={()=> setShowOptions(options=> ({...options, browse: !options.browse}))}>
-                            {showOptions.browse ? '+' : '-'}
+                            {showOptions.browse ? '-' : '+'}
                         </span>
                       </div>
                        
@@ -238,14 +255,15 @@ export default function MobileSidebar() {
                               variants={{ hidden: { opacity: 0, x: 16 }, show: { opacity: 1, x: 0 } }}
                             >
                               <button
-                                className="group flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-sm hover:bg-white/5"
-                                onClick={() => setOpen(false)}
+                                className="group flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-sm
+                                 hover:bg-white/5"
+                                onClick={()=> {navigate(path);  setOpen(false)}}
                               >
                                 <span className="flex items-center gap-3 text-white/90">
                                   <span className="grid h-8 w-8 place-items-center rounded-md bg-white/5 ring-1 ring-white/10 text-white/80">
                                     <Icon size={18} />
                                   </span>
-                                    <Link to={path}> {label} </Link>
+                                    {label} 
                                 </span>
                                 <ChevronRight className="text-white/30 group-hover:text-white/60" size={18} />
                               </button>
@@ -263,7 +281,7 @@ export default function MobileSidebar() {
                         <p className="text-xs font-medium uppercase tracking-wide text-white/60">Menu</p>
                         <span className="text-white/40 cursor-pointer"
                           onClick={()=> setShowOptions(options=> ({...options, menu: !options.menu}))}>
-                            {showOptions.menu ? '+' : '-'}
+                            {showOptions.menu ? '-' : '+'}
                         </span>
                       </div>
                     {
@@ -289,14 +307,15 @@ export default function MobileSidebar() {
                               variants={{ hidden: { opacity: 0, x: 16 }, show: { opacity: 1, x: 0 } }}
                             >
                               <button
-                                className="group flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-sm hover:bg-white/5"
-                                onClick={() => setOpen(false)}
+                                className="group flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-sm
+                                 hover:bg-white/5"
+                                onClick={()=> {navigate(path); setOpen(false)}}
                               >
                                 <span className="flex items-center gap-3 text-white/90">
                                   <span className="grid h-8 w-8 place-items-center rounded-md bg-white/5 ring-1 ring-white/10 text-white/80">
                                     <Icon size={18} />
                                   </span>
-                                    <Link to={path}> {label} </Link>
+                                    {label} 
                                 </span>
                                 <ChevronRight className="text-white/30 group-hover:text-white/60" size={18} />
                               </button>
@@ -313,7 +332,7 @@ export default function MobileSidebar() {
                         <p className="text-xs font-medium uppercase tracking-wide text-white/60"> Support </p>
                         <span className="text-white/60 cursor-pointer"
                           onClick={()=> setShowOptions(options=> ({...options, support: !options.support}))}>
-                            {showOptions.support ? '+' : '-'}
+                            {showOptions.support ? '-' : '+'}
                         </span>
                       </div>
                     {
@@ -325,7 +344,14 @@ export default function MobileSidebar() {
                           <button
                             key={label}
                             className="group flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-sm hover:bg-white/5"
-                            onClick={() => setOpen(false)}
+                            onClick={()=> {
+                              if(label === 'Text Chat'){
+                                setOpenChatBox(true)
+                              }else{
+                                navigate('/support')
+                              }
+                              setOpen(fale)
+                            }}
                           >
                             <span className="flex items-center gap-3 text-white/90">
                               <span className="grid h-8 w-8 place-items-center rounded-md bg-white/5 ring-1 ring-white/10 text-white/80">
@@ -346,7 +372,7 @@ export default function MobileSidebar() {
                         <p className="text-xs font-medium uppercase tracking-wide text-white/60"> Notice </p>
                         <span className="text-white/60 cursor-pointer"
                           onClick={()=> setShowOptions(options=> ({...options, notice: !options.notice}))}>
-                            {showOptions.notice ? '+' : '-'}
+                            {showOptions.notice ? '-' : '+'}
                         </span>
                       </div>
                     {
@@ -379,6 +405,18 @@ export default function MobileSidebar() {
             </motion.aside>
           </>
         )}
+
+        <CartSidebar isOpen={isCartOpen} onClose={()=> setIsCartOpen(false)} retractedView={true} />
+        
+        {
+            openChatBox &&
+            <div className="fixed bottom-[2rem] right-[2rem] z-50">
+          
+                <TextChatBox closeable={true} onCloseChat={()=> setOpenChatBox(false)}/>
+                  
+            </div>
+        }
+
       </AnimatePresence>
     </>
   )

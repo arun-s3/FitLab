@@ -51,8 +51,10 @@ export default function CartSidebar({ isOpen, onClose, retractedView }) {
 
   useEffect(()=> {
     if(packedupCart){
-      console.log("packedupCart--->", packedupCart)
+      console.log("packedupCart--->", packedupCart) 
     }
+    console.log("packedupCart?.products?.length !== 0", packedupCart?.products?.length !== 0)
+    console.log("scaleDownSidebar---->", scaleDownSidebar)
     if(packedupCart?.products && packedupCart.products.length <= 0){
       console.log("Closing sidebar...")
       onClose()
@@ -130,8 +132,10 @@ export default function CartSidebar({ isOpen, onClose, retractedView }) {
         {
           !scaleDownSidebar &&
           <div className={`flex-1 relative ${packedupCart?.products?.length > 4 ? 'overflow-y-scroll' : 'overflow-y-auto'} p-4 space-y-4`}>
-          { packedupCart?.products ? packedupCart?.products?.length === 0 ? (
-            <p className="h-full w-full text-muted capitalize flex items-center justify-center"> Your cart is empty </p>
+          {  Object.keys(packedupCart).length === 0 || (packedupCart?.products && packedupCart.products.length === 0) ? (
+            <p className={`h-full w-full text-muted capitalize flex items-center justify-center ${retractedView && 'text-[14px]'}`}>
+               Your cart is empty 
+            </p>
           ) : (
             packedupCart?.products.map((product)=> (
               <div key={product.productId._id} id='cart-product' className={`flex ${retractedView && 'flex-col gap-[10px]'} items-center
@@ -207,10 +211,10 @@ export default function CartSidebar({ isOpen, onClose, retractedView }) {
                    </i>
               </div>
             ))
-          ) : null}
+          )}
         </div>
         }
-        { packedupCart?.products?.length !== 0 && !scaleDownSidebar &&
+        { Object.keys(packedupCart).length > 0 && packedupCart?.products && packedupCart.products.length > 0 && !scaleDownSidebar &&
            <div className="border-t p-4 bg-white sticky bottom-0">
              <div className={`flex justify-between items-center font-bold ${retractedView ? 'text-[11px]' : 'text-lg'} text-gray-800`}>
                <span>Total:</span>

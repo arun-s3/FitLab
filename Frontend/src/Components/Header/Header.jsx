@@ -82,7 +82,8 @@ export default function Header({customStyle}){
                     </li>
                 </ul>
             </nav>
-            <div className="hidden sm:inline-flex sm:gap-[20px] lg:gap-[12px] x-xl:gap-[15px] sm:ml-[20rem] lg:ml-0 mt-[25px] lg:mt-0 items-center" 
+            <div className="hidden sm:inline-flex sm:gap-[20px] md:gap-[2.5rem] lg:gap-[12px] x-xl:gap-[15px] sm:ml-[20rem] lg:ml-0 mt-[25px] 
+             lg:mt-0 items-center" 
                 id="icons">
                 <i>
                     <IoIosSearch className='h-[23px] w-[23px] lg:h-[20px] lg:w-[20px] xl:h-[22px] xl:w-[22px] s-xl:h-[23px] s-xl:w-[23px]'/>
@@ -135,7 +136,7 @@ export default function Header({customStyle}){
                               className='px-[22px] lg:px-[13px] xl:px-[22px] py-[9px] lg:py-[6px] x-xl:py-[9px] bg-white text-[15px]
                                 text-secondary font-medium tracking-[0.2px] rounded-[19px] lg:rounded-[10px] xl:rounded-[19px] hover:bg-purple-500
                                hover:text-white transition duration-300'>
-                              <Link to='/signin'> Sign Up </Link>
+                              <Link to='/signup'> Sign Up </Link>
                            </button>
                         </div>
                   }

@@ -9,6 +9,8 @@ module.exports = {
         'before:bg-black'
       ],
       screens: {
+        'x-md': '840px',
+        'x-lg': '1150px',
         'x-xl': '1350px' 
       },
       colors:{

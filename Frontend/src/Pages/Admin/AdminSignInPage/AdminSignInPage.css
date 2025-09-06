@@ -30,7 +30,7 @@
     padding:10px;
     padding-left:20px;
     margin-left: 0px; 
-    width:31.5rem;
+    /* width:31.5rem; */
 }
 #admin-signin>main input::placeholder{
     font-size:12px;

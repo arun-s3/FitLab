@@ -2865,6 +2865,10 @@ select{
   width: 24px;
 }
 
+.w-\[24rem\]{
+  width: 24rem;
+}
+
 .w-\[25px\]{
   width: 25px;
 }
@@ -2899,10 +2903,6 @@ select{
 
 .w-\[30rem\]{
   width: 30rem;
-}
-
-.w-\[31\.5rem\]{
-  width: 31.5rem;
 }
 
 .w-\[32px\]{
@@ -6222,6 +6222,14 @@ select{
   line-height: 1rem;
 }
 
+.text-\[21px\]{
+  font-size: 21px;
+}
+
+.text-\[1px\]{
+  font-size: 1px;
+}
+
 .\!font-medium{
   font-weight: 500 !important;
 }
@@ -6815,6 +6823,26 @@ select{
 .text-yellow-800{
   --tw-text-opacity: 1;
   color: rgb(133 77 14 / var(--tw-text-opacity));
+}
+
+.text-\[\]{
+  color: ;
+}
+
+.text-\[1\]{
+  color: 1;
+}
+
+.text-\[21p\]{
+  color: 21p;
+}
+
+.text-\[15\]{
+  color: 15;
+}
+
+.text-\[11\]{
+  color: 11;
 }
 
 .line-through{
@@ -8395,8 +8423,36 @@ select{
     margin-left: 4px;
   }
 
+  .s-sm\:w-\[29rem\]{
+    width: 29rem;
+  }
+
   .s-sm\:flex-row{
     flex-direction: row;
+  }
+
+  .s-sm\:text-\[27px\]{
+    font-size: 27px;
+  }
+
+  .s-sm\:text-\[13px\]{
+    font-size: 13px;
+  }
+
+  .s-sm\:text-subtitleSmall1{
+    font-size: 13px;
+  }
+
+  .s-sm\:text-descReg1{
+    font-size: 15px;
+  }
+
+  .s-sm\:text-\[\]{
+    color: ;
+  }
+
+  .s-sm\:text-\[13\]{
+    color: 13;
   }
 }
 
@@ -8442,8 +8498,16 @@ select{
     width: 300px;
   }
 
+  .sm\:w-\[31\.5rem\]{
+    width: 31.5rem;
+  }
+
   .sm\:w-\[70\%\]{
     width: 70%;
+  }
+
+  .sm\:w-auto{
+    width: auto;
   }
 
   .sm\:grid-cols-2{
@@ -8760,6 +8824,10 @@ select{
 }
 
 @media (min-width: 1150px){
+  .x-lg\:inline-block{
+    display: inline-block;
+  }
+
   .x-lg\:w-\[40\%\]{
     width: 40%;
   }

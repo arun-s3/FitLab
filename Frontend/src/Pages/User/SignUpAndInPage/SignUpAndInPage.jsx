@@ -234,7 +234,9 @@ export default function SignUpAndInPage({type}){
 
     return(
        <>
-        <section style={bgImg} className='h-[130vh]' id="signup-and-in">
+        <section style={bgImg}
+            className={`${type=='signup'? 'h-[165vh] sm:h-[145vh] before:h-[165vh] sm:before:h-[145vh]' : 'h-[120vh] before:h-[120vh]'}`}
+            id="signup-and-in">
 
             <header>
 
@@ -242,16 +244,20 @@ export default function SignUpAndInPage({type}){
                 
             </header>
         
-            <main className='-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 w-[90%] sm:w-[70%] md:w-[50%] lg:w-[40%]
-                    rounded-[22px] px-[50px] sm:px-10' 
-                style={ type=='signup'? {marginBlock:'10%'}:{marginBlock:'2%'} }>
-                    
+            <main className={`-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2
+                rounded-[22px] px-[50px] sm:px-10 border-secondary 
+                ${type=='signup'? 'w-[90%] sm:w-[70%] md:w-[50%] lg:w-[40%] my-[16rem] sm:my-[12rem] sm:border' 
+                    : 'w-[90%] x-md:w-[65%] lg:w-[50%] x-lg:w-[40%] my-[2%] border before:h-[120vh]'}`}
+            >
+
                 <h1 className='text-secondary font-funCity text-3xl sm:text-4xl mb-[60px] text-left my-[50px]'>
                     SIGN
                     <span className='font-funCity'> {type.slice(4).toUpperCase()} </span>
                 </h1>
 
-                <form className='flex flex-col gap-[15px] text-descReg1 items-start' onSubmit={(e)=>submitData(e)} >
+                <form className='flex flex-col gap-[15px] text-descReg1 items-start'
+                     onSubmit={(e)=>submitData(e)} >
+
                     <div className="w-full">
                     {type=='signup'? <>
                                         <label htmlFor='email'> Enter your email address </label>
@@ -340,8 +346,8 @@ export default function SignUpAndInPage({type}){
                                              )
 
                                           :(
-                                            <div className='text-white mt-[5px] flex flex-col sm:flex-row justify-between text-subtitleSmall1'>
-                                                <p className='ml-[4px]'>Don’t have an account yet?
+                                            <div className='text-white mt-[5px] flex flex-col s-sm:flex-row justify-between text-subtitleSmall1'>
+                                                <p className='ml-0 s-sm:ml-[4px] mb-0 s-sm:mb-[5px]'>Don’t have an account yet?
                                                     <Link to={"/signup"} className='text-secondary ml-[10px] cursor-pointer font-medium'>
                                                       Sign Up</Link>
                                                 </p>

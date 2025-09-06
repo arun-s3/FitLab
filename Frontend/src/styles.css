@@ -1464,11 +1464,6 @@ select{
   margin-right: auto;
 }
 
-.my-10{
-  margin-top: 2.5rem;
-  margin-bottom: 2.5rem;
-}
-
 .my-3{
   margin-top: 0.75rem;
   margin-bottom: 0.75rem;
@@ -1477,6 +1472,11 @@ select{
 .my-\[10px\]{
   margin-top: 10px;
   margin-bottom: 10px;
+}
+
+.my-\[16rem\]{
+  margin-top: 16rem;
+  margin-bottom: 16rem;
 }
 
 .my-\[2\%\]{
@@ -1554,12 +1554,12 @@ select{
   margin-top: -4rem;
 }
 
-.mb-1{
-  margin-bottom: 0.25rem;
+.mb-0{
+  margin-bottom: 0px;
 }
 
-.mb-10{
-  margin-bottom: 2.5rem;
+.mb-1{
+  margin-bottom: 0.25rem;
 }
 
 .mb-12{
@@ -1688,6 +1688,10 @@ select{
 
 .mb-\[8px\]{
   margin-bottom: 8px;
+}
+
+.ml-0{
+  margin-left: 0px;
 }
 
 .ml-1{
@@ -2244,6 +2248,10 @@ select{
   height: 120px;
 }
 
+.h-\[120vh\]{
+  height: 120vh;
+}
+
 .h-\[122px\]{
   height: 122px;
 }
@@ -2278,6 +2286,10 @@ select{
 
 .h-\[15x\]{
   height: 15x;
+}
+
+.h-\[165vh\]{
+  height: 165vh;
 }
 
 .h-\[16px\]{
@@ -4551,10 +4563,6 @@ select{
 .bg-black{
   --tw-bg-opacity: 1;
   background-color: rgb(0 0 0 / var(--tw-bg-opacity));
-}
-
-.bg-black\/40{
-  background-color: rgb(0 0 0 / 0.4);
 }
 
 .bg-black\/50{
@@ -7064,12 +7072,6 @@ select{
   backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
 }
 
-.backdrop-blur-md{
-  --tw-backdrop-blur: blur(12px);
-  -webkit-backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
-  backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
-}
-
 .backdrop-blur-sm{
   --tw-backdrop-blur: blur(4px);
   -webkit-backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
@@ -7162,6 +7164,12 @@ select{
   width: 100%;
 }
 
+@media (min-width: 570px){
+  .container{
+    max-width: 570px;
+  }
+}
+
 @media (min-width: 640px){
   .container{
     max-width: 640px;
@@ -7201,6 +7209,12 @@ select{
 @media (min-width: 1350px){
   .container{
     max-width: 1350px;
+  }
+}
+
+@media (min-width: 1420px){
+  .container{
+    max-width: 1420px;
   }
 }
 
@@ -7375,9 +7389,19 @@ select{
   z-index: -1;
 }
 
+.before\:h-\[120vh\]::before{
+  content: var(--tw-content);
+  height: 120vh;
+}
+
 .before\:h-\[149\%\]::before{
   content: var(--tw-content);
   height: 149%;
+}
+
+.before\:h-\[165vh\]::before{
+  content: var(--tw-content);
+  height: 165vh;
 }
 
 .before\:h-full::before{
@@ -8362,6 +8386,20 @@ select{
   }
 }
 
+@media (min-width: 570px){
+  .s-sm\:mb-\[5px\]{
+    margin-bottom: 5px;
+  }
+
+  .s-sm\:ml-\[4px\]{
+    margin-left: 4px;
+  }
+
+  .s-sm\:flex-row{
+    flex-direction: row;
+  }
+}
+
 @media (min-width: 640px){
   .sm\:sticky{
     position: sticky;
@@ -8369,6 +8407,11 @@ select{
 
   .sm\:right-0{
     right: 0px;
+  }
+
+  .sm\:my-\[12rem\]{
+    margin-top: 12rem;
+    margin-bottom: 12rem;
   }
 
   .sm\:ml-\[20rem\]{
@@ -8389,6 +8432,10 @@ select{
 
   .sm\:inline-flex{
     display: inline-flex;
+  }
+
+  .sm\:h-\[145vh\]{
+    height: 145vh;
   }
 
   .sm\:w-\[300px\]{
@@ -8423,6 +8470,10 @@ select{
     gap: 20px;
   }
 
+  .sm\:border{
+    border-width: 1px;
+  }
+
   .sm\:px-10{
     padding-left: 2.5rem;
     padding-right: 2.5rem;
@@ -8440,6 +8491,11 @@ select{
 
   .sm\:text-\[13px\]{
     font-size: 13px;
+  }
+
+  .sm\:before\:h-\[145vh\]::before{
+    content: var(--tw-content);
+    height: 145vh;
   }
 }
 
@@ -8517,6 +8573,10 @@ select{
 @media (min-width: 840px){
   .x-md\:ml-0{
     margin-left: 0px;
+  }
+
+  .x-md\:w-\[65\%\]{
+    width: 65%;
   }
 }
 
@@ -8603,6 +8663,10 @@ select{
 
   .lg\:w-\[400px\]{
     width: 400px;
+  }
+
+  .lg\:w-\[50\%\]{
+    width: 50%;
   }
 
   .lg\:min-w-\[12rem\]{
@@ -8692,6 +8756,12 @@ select{
 
   .lg\:text-\[15px\]{
     font-size: 15px;
+  }
+}
+
+@media (min-width: 1150px){
+  .x-lg\:w-\[40\%\]{
+    width: 40%;
   }
 }
 

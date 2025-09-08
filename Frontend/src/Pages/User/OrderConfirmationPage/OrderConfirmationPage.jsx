@@ -23,7 +23,7 @@ export default function OrderConfirmationPage(){
   return (
 
     <section id='CheckoutPage'>
-      <header style={headerBg}>
+      <header style={headerBg} className='h-[5rem]'>
                     
         <Header />
                     

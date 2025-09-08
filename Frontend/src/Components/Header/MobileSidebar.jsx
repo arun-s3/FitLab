@@ -162,10 +162,10 @@ export default function MobileSidebar() {
                     <div className="overflow-hidden rounded-xl bg-gradient-to-br from-neutral-800 to-neutral-900 ring-1 ring-white/10">
                       <div className="flex items-stretch gap-4 p-4">
                         <div className="min-w-0">
-                          <p className="text-xs font-medium text-white/60">Frequently ordered</p>
-                          <h3 className="mt-1 text-base font-semibold tracking-tight">Gym product of the month</h3>
-                          <p className="mt-1 text-xs text-white/70">Creatine Monohydrate 100g • 30 servings</p>
-                          <p className="mt-1 text-xs text-white/50">4.8 • Free delivery for members</p>
+                          <p className="text-xs font-medium text-white/60"> Frequently ordered </p>
+                          <h3 className="mt-1 text-base font-semibold tracking-tight"> Gym product of the month </h3>
+                          <p className="mt-1 text-xs text-white/70"> Creatine Monohydrate 100g • 30 servings </p>
+                          <p className="mt-1 text-xs text-white/50"> 4.8 • Free delivery for members </p>
                         </div>
                         <img src="/creatine.jpg"
                           alt="Creatine Monohydrate thumbnail"
@@ -406,13 +406,18 @@ export default function MobileSidebar() {
           </>
         )}
 
-        <CartSidebar isOpen={isCartOpen} onClose={()=> setIsCartOpen(false)} retractedView={true} />
+        <CartSidebar isOpen={isCartOpen}
+          onClose={()=> setIsCartOpen(false)}
+          retractedView={true} 
+        />
         
         {
             openChatBox &&
             <div className="fixed bottom-[2rem] right-[2rem] z-50">
           
-                <TextChatBox closeable={true} onCloseChat={()=> setOpenChatBox(false)}/>
+                <TextChatBox closeable={true} 
+                  onCloseChat={()=> setOpenChatBox(false)}
+                />
                   
             </div>
         }

@@ -303,7 +303,7 @@ export default function OrderHistoryPage(){
 
     return(
         <section id='OrderHistoryPage'>
-            <header style={headerBg}>
+            <header style={headerBg} className='h-[5rem]'>
                 
                 <Header />
                 

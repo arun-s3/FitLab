@@ -10,7 +10,6 @@ import {MdFavoriteBorder} from "react-icons/md"
 import {HiOutlineMenu, HiOutlineX} from "react-icons/hi"
 import {User, Heart, Headset, LogIn} from "lucide-react"
 
-
 import Logo from '../Logo/Logo'
 import UserHead from '../UserHead/UserHead'
 import VideoCallCommonModal from '../../Pages/User/VideoCallCommonModal/VideoCallCommonModal'
@@ -27,8 +26,6 @@ export default function Header({customStyle}){
     const [isCartOpen, setIsCartOpen] = useState(false)
 
     const [openChatBox, setOpenChatBox] = useState(false)
-
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
     
     const {userToken,user} = useSelector((state)=>state.user)
     const {cart} = useSelector(state=> state.cart)    
@@ -149,13 +146,16 @@ export default function Header({customStyle}){
 
             </div>
                 
-                <CartSidebar isOpen={isCartOpen} onClose={()=> setIsCartOpen(false)} retractedView={true} />
+                <CartSidebar isOpen={isCartOpen} 
+                    onClose={()=> setIsCartOpen(false)}
+                    retractedView={true} />
 
                 {
                     openChatBox &&
                     <div className="fixed bottom-[2rem] right-[2rem] z-50">
                   
-                        <TextChatBox closeable={true} onCloseChat={()=> setOpenChatBox(false)}/>
+                        <TextChatBox closeable={true} 
+                            onCloseChat={()=> setOpenChatBox(false)}/>
                           
                     </div>
                 }

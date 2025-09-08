@@ -186,7 +186,7 @@ export default function ProductDetailPage(){
 
   return (
     <section id='ProductDetailPage'>
-        <header style={headerBg}>
+        <header style={headerBg} className='h-[5rem]'>
 
             <Header />
 

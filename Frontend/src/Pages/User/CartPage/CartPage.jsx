@@ -179,7 +179,7 @@ export default function ShoppingCartPage(){
 
   return (
     <section id='ShoppingCartPage'>
-      <header style={headerBg}>
+      <header style={headerBg} className='h-[5rem]'>
     
         <Header />
     

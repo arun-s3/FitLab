@@ -1,6 +1,7 @@
 import React,{useState, useEffect, useRef} from 'react'
 import './PriceSliderAndFilter.css'
 import {useSelector, useDispatch} from 'react-redux'
+import {motion, AnimatePresence} from "framer-motion"
 
 import {SiteSecondaryButtonSquare} from '../SiteButtons/SiteButtons'
 import {RiArrowDropUpLine, RiArrowDropDownLine} from "react-icons/ri";
@@ -257,27 +258,35 @@ export default function PriceSliderAndFilter({priceGetter, priceSetter, firstSli
      }
 
      return(
-        <div id='price-filter-component' className='h-auto' onDrop={(e)=> { 
-            e.preventDefault()
-            console.log("CURSOR Changing...")
-            e.dataTransfer.dropEffect = 'move'
-            if(dragCursor.current){
-                e.target.style.cursor = 'grabbing' 
-            }
-        }} onDragEnter={(e)=>{
-            console.log("CURSOR Changing...")
-            e.dataTransfer.dropEffect = 'move'
-            if(dragCursor.current){
-                e.target.style.cursor = 'grabbing' 
-            } 
-        }} onDragOver={(e)=>{
-            e.preventDefault()
-            console.log("CURSOR Changing...")
-            e.dataTransfer.dropEffect = 'move'
-            if(dragCursor.current){
-                e.target.style.cursor = 'grabbing' 
-            }
-        }}>
+        <div id='price-filter-component' className='h-auto' 
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onDrop={(e)=> { 
+                e.preventDefault()
+                console.log("CURSOR Changing...")
+                e.dataTransfer.dropEffect = 'move'
+                if(dragCursor.current){
+                    e.target.style.cursor = 'grabbing' 
+                }
+            }} 
+            onDragEnter={(e)=>{
+                console.log("CURSOR Changing...")
+                e.dataTransfer.dropEffect = 'move'
+                if(dragCursor.current){
+                    e.target.style.cursor = 'grabbing' 
+                } 
+            }} 
+            onDragOver={(e)=>{
+                e.preventDefault()
+                console.log("CURSOR Changing...")
+                e.dataTransfer.dropEffect = 'move'
+                if(dragCursor.current){
+                    e.target.style.cursor = 'grabbing' 
+                }
+            }}
+        >
             <p className={`${(mountingComponent=='AdminProductListPage'? 'text-[13px] ':'text-[15px] ') + 'text-secondary text-center'}`}>
                 {minPrice} - { maxPrice 
     ? (maxPrice !== maxPriceRupee.current 

@@ -28,7 +28,7 @@ export default function UserPageLayout(){
     return(
         <UserPageLayoutContext.Provider value={{breadcrumbHeading, setBreadcrumbHeading, setContentTileClasses, setPageLocation}} >
             <section id='UserPageLayout'>
-                <header style={headerBg}>
+                <header style={headerBg} className='h-[5rem]'>
 
                     <Header />
 

@@ -4,7 +4,7 @@ import {Link,useNavigate} from 'react-router-dom'
 import {useSelector,useDispatch} from 'react-redux'
 
 import {toast} from 'react-toastify'
-import {RiAdminLine} from "react-icons/ri";
+import {RiAdminLine} from "react-icons/ri"
 
 import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
 import {CustomHashLoader} from '../../../Components/Loader/Loader'
@@ -172,6 +172,7 @@ export default function AdminSignInPage(){
                                 { adminLoading? <CustomHashLoader adminLoading={adminLoading}/>: "Sign In" }
                             </SiteButtonSquare>
                         </form>
+
                     </div>
                     
                 </main>

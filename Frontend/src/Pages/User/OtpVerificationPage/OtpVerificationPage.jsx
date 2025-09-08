@@ -237,7 +237,7 @@ export default function OtpVerificationPage(){
         <>
         <section style={bgImg} className='h-[130vh]' id="otp-verify">
 
-            <header>
+            <header className='h-[5rem]'>
             
                 <Header/>
                             

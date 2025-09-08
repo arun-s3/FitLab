@@ -4,7 +4,7 @@ import {Link, useNavigate} from 'react-router-dom'
 import {useDispatch, useSelector} from 'react-redux'
 
 import {toast} from 'react-toastify'
-import {useGoogleLogin} from '@react-oauth/google';
+import {useGoogleLogin} from '@react-oauth/google'
 import axios from 'axios'
 
 import {SiteButtonSquare, SiteSecondaryBorderButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
@@ -358,8 +358,8 @@ export default function SignUpAndInPage({type}){
                     
                     </div>   
                     <SiteButtonSquare shouldSubmit={true}
-                         customStyle={{ width:'100%', display: 'flex', justifyContent:'center', alignItems:'center', 
-                            marginBottom: type ==='signup' ? '10px': '3rem'}} >
+                        customStyle={{ width:'100%', display: 'flex', justifyContent:'center', alignItems:'center', 
+                        marginBottom: type ==='signup' ? '10px': '3rem'}} >
                         { 
                             loading? <CustomHashLoader loading={loading}/> : otpPageLoading ? 
                                         <span className='flex justify-center items-center gap-[5px]'>  

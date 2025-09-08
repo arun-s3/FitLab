@@ -33,13 +33,20 @@ export default function BreadcrumbBar({heading}){
     })
 
     return(
-        <div style={barBg} className='mt-[5px] h-[5rem] pl-[60px] flex flex-col items-start justify-center relative' id='breadcrumb-bar'>
-            <nav className='text-[13px] z-[5]'>
+        <div style={barBg}
+            className='mt-[5px] h-[5rem] pl-[60px] flex flex-col items-start justify-center relative'
+            id='breadcrumb-bar'
+        >
+            <nav className='text-[15px] sm:text-[13px] z-[5]'>
                 {breadcrumbPath}
             </nav>
-            <h1 className='text-breadcrumbTitle capitalize trackig-[0.5px] text-white z-[5]' style={{wordSpacing: '1px'}}> 
+
+            <h1 className='hidden sm:inline-block text-[18px] font-[600] xx-sm:text-breadcrumbTitle capitalize trackig-[0.5px] text-white z-[5]' 
+                style={{wordSpacing: '1px'}}
+                > 
                 {heading? heading : 'No Heading'}
             </h1>
         </div>
-    )
+    ) 
 }
+

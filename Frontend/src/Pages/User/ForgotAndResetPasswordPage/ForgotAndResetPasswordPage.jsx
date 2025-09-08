@@ -264,7 +264,7 @@ export default function ForgotAndResetPasswordPage(){
         <>
             <section style={bgImg} className='h-[130vh] pt-[1rem]' id="ForgotAndResetPasswordPage">
 
-                <header>
+                <header className='h-[5rem]'>
                 
                   <Header/>
                                 

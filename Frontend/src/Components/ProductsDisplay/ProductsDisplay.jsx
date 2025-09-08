@@ -1,35 +1,34 @@
-import React, {useState, useEffect} from 'react';
-import './ProductsDisplay.css';
+import React, {useState, useEffect} from 'react'
+import './ProductsDisplay.css'
 import {useNavigate} from 'react-router-dom'
 import {useDispatch, useSelector} from 'react-redux'
 
-import axios from 'axios';
+import axios from 'axios'
 import {toast} from 'react-toastify'
-import {MdFavorite, MdFavoriteBorder} from "react-icons/md";
-import {RiFileEditLine} from "react-icons/ri";
-import {MdBlock} from "react-icons/md";
-import {LuBadgeAlert} from "react-icons/lu";
-import {Calendar, Tag, NotebookPen, ShieldAlert} from 'lucide-react';
+import {MdFavorite, MdFavoriteBorder} from "react-icons/md"
+import {RiFileEditLine} from "react-icons/ri"
+import {MdBlock} from "react-icons/md"
+import {LuBadgeAlert} from "react-icons/lu"
+import {Calendar, Tag, NotebookPen, ShieldAlert} from 'lucide-react'
 import {format} from "date-fns"
 
 import {getAllProducts, toggleProductStatus} from '../../Slices/productSlice'
 import {addProductToList, removeProductFromList, getUserWishlist, getAllWishlistProducts, resetWishlistStates} from '../../Slices/wishlistSlice'
 import WishlistModal from '../../Pages/User/WishlistPage/WishlistModal'
 import WishlistOptionsModal from '../WishlistModals/WishlistOptionsModal'
-import RemoveWishlistItemModal from '../WishlistModals/RemoveWishlistItemModal';
+import RemoveWishlistItemModal from '../WishlistModals/RemoveWishlistItemModal'
 import Pagination from '../Pagination/Pagination'
-import StarGenerator from '../StarGenerator/StarGenerator';
-import {SiteButtonSquare} from '../SiteButtons/SiteButtons';
+import StarGenerator from '../StarGenerator/StarGenerator'
+import {SiteButtonSquare} from '../SiteButtons/SiteButtons'
 import {capitalizeFirstLetter} from '../../Utils/helperFunctions'
 import {addToCart} from '../../Slices/cartSlice'
-import ProductsTableView from './ProductsTableView';
+import ProductsTableView from './ProductsTableView'
+
 
 export default function ProductsDisplay({gridView, showByTable, pageReader, limiter, queryOptions, showTheseProducts, admin, wishlistDisplay, currentList}) {
 
   const {currentPage, setCurrentPage} = pageReader
 
-  // const [products, setProducts] = useState([]);             //Use this for dummy data
-  // const [productCounts, setProductCounts] = useState(null)  //Use this for dummy data
   const dispatch = useDispatch()
   const {products:items, productCounts} = useSelector(state=> state.productStore)
   const [products, setProducts] = useState([])
@@ -48,25 +47,6 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
   const [removeProductFromWishlist, setRemoveProductFromWishlist] = useState('')
 
   const [selectedList, setSelectedList] = useState(null)
-
-
-  // useEffect(() => {
-  //     FOR DUMMY PRODUCTS------>
-  //   // const getDummyProducts = async () => {
-  //   //   try {
-  //   //     const response = await axios.get('https://dummyjson.com/products');
-  //   //     setProducts(response.data.products); 
-  //   //     setProductCounts(response.data.total)
-  //   //     console.log("PRODUCTS-->", JSON.stringify(response.data.products));
-  //   //     console.log("TOTAL COUNTS-->"+ response.data.total)
-  //   //     console.log("TAGS-->"+ response.data.products[0].tags[0])
-  //   //   } catch (error) {
-  //   //     console.log("ERROR IN PRODUCTLISTING-->", error.message);
-  //   //   }
-  //   // };
-  //   console.log("PRODUCTS----",JSON.stringify(products))
-  //   // getDummyProducts();
-  // }, []);
 
   useEffect(()=> {
     dispatch(getUserWishlist())
@@ -211,38 +191,62 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
           )
         }) ()
       }
-     <div className={`${gridView ? 'grid grid-cols-3 gap-y-[2rem]' : showByTable ? '' : 'flex flex-col gap-[2rem]'}
-       ${wishlistDisplay && 'ml-[1.5rem]'}`} id="products-display" style={admin ? { justifyItems: 'center' } : {}}>
+      
+     <div 
+      className={`${gridView ?
+       'w-full grid gap-y-8 x-sm:grid-cols-2 xx-md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 x-xl:grid-cols-3 gap-x-[4rem] x-sm:gap-x-[4rem] xx-md:gap-x-[10rem] lg:gap-x-[9rem] xl:gap-x-[2rem]' 
+       : showByTable 
+       ? '' 
+       : 'flex flex-col gap-[2rem]'}
+       ${wishlistDisplay && 'ml-[1.5rem]'}`} 
+        id="products-display" 
+        style={admin ? { justifyItems: 'center' } : {}}
+      >  
 
       { !showByTable && products.length > 0 ?
         products.map((product)=> (
-          <div key={product._id} className={` ${gridView ? 'w-[275px]' : 'flex gap-[1rem] w-full'}`}
-                    onMouseEnter={()=> setProductIsHovered(product._id)} 
-                      onMouseLeave={()=> setProductIsHovered('')}>
-            <figure className={`relative h-auto rounded-[10px] thumbnail cursor-pointer ${(wishlistDisplay && !gridView) ? 'h-[300px]' : wishlistDisplay ? 'h-[250px]' : 'h-[275px]'} ${productIsHovered === product._id && 'shadow-lg'}`}>
-              <img src={product?.thumbnail.url || product?.thumbnail || "/placeholder.svg" } alt={product.title} 
-                className={`rounded-[10px] ${(wishlistDisplay && !gridView) ? 'h-[300px]' : wishlistDisplay ? 'h-[250px]' : 'h-[275px]'} object-cover`}
-                  onClick={()=> !admin && navigate('/shop/product', {state: {product}})}/> 
+          <div key={product._id} 
+            className={` ${gridView ? 'w-[275px] xx-md:w-[200px] lg:w-[275px]' : 'flex gap-[1rem] w-full'}`}
+            onMouseEnter={()=> setProductIsHovered(product._id)} 
+            onMouseLeave={()=> setProductIsHovered('')}
+          >
+            <figure className={`relative h-auto rounded-[10px] thumbnail cursor-pointer ${(wishlistDisplay && !gridView) 
+              ? 'h-[300px]' : wishlistDisplay ? 'h-[250px]' : gridView ? 'h-[275px] xx-md:h-[200px] lg:h-[275px]' 
+              : 'h-[275px]'} ${productIsHovered === product._id && 'shadow-lg'}`}
+            >
+              <img src={product?.thumbnail.url || product?.thumbnail || "/placeholder.svg" } 
+                alt={product.title} 
+                className={`rounded-[10px] 
+                  ${(wishlistDisplay && !gridView) 
+                    ? 'h-[300px]' 
+                    : wishlistDisplay ? 'h-[250px]' 
+                    : gridView ? 'h-[275px] xx-md:h-[200px] xx-md:w-[200px] lg:h-[275px] lg:w-[275px]' 
+                    : 'h-[275px] w-[350px]'} object-cover`}
+                onClick={()=> !admin && navigate('/shop/product', {state: {product}})}
+              /> 
               <figcaption className={`${admin ? 'top-[2px] left-[-40px]' : 'bottom-[12px]'} absolute w-full text-center`}>
                 {
                  admin ?
                   <div className='w-[35px] flex flex-col gap-[1rem] text-secondary'>
-                    <span data-label='Edit' className='w-[30px] p-[5px] border rounded-[20px] z-[2] flex items-center justify-center 
-                          relative cursor-pointer admin-control' onClick={()=> navigate('../edit', {state: {product}})}>
+                    <span data-label='Edit' 
+                      className='w-[30px] p-[5px] border rounded-[20px] z-[2] flex items-center justify-center 
+                          relative cursor-pointer admin-control' 
+                      onClick={()=> navigate('../edit', {state: {product}})}
+                    >
                       <i> <RiFileEditLine/> </i>
                     </span>
-                    <span data-label='Block' className='w-[30px] p-[5px] border rounded-[20px] z-[2] flex items-center justify-center
-                         relative cursor-pointer admin-control' onClick={()=> dispatch(toggleProductStatus(product._id))}>
+                    <span data-label='Block' 
+                      className='w-[30px] p-[5px] border rounded-[20px] z-[2] flex items-center justify-center
+                         relative cursor-pointer admin-control' 
+                      onClick={()=> dispatch(toggleProductStatus(product._id))}>
                       <i> <MdBlock/> </i>
                     </span>
                   </div>
-                  // <div className='flex justify-around'>
-                  //   <SiteButtonSquare customStyle={{paddingBlock:'6px', paddingInline:'22px', fontWeight:'430', borderRadius:'6px'}}> Edit </SiteButtonSquare>
-                  //   <SiteButtonSquare customStyle={{paddingBlock:'6px', paddingInline:'22px', fontWeight:'430', borderRadius:'6px'}}> Block </SiteButtonSquare>
-                  // </div> 
                   :
                   <SiteButtonSquare clickHandler={()=> handleAddToCart(product._id)} 
-                    customStyle={{width:'12rem', paddingBlock:'8px', fontSize:'13px'}}>
+                      customStyle={{paddingBlock: '8px'}}
+                      tailwindClasses='w-[12rem] xx-md:w-[9rem] lg:w-[12rem] text-[15px] xx-md:text-[14px] lg:text-[15px]'
+                  >
                        Add to Cart 
                   </SiteButtonSquare>
                 }
@@ -264,7 +268,7 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
             </figure>
             <div className={` ${gridView? 'mt-[10px] w-full flex flex-col gap-[5px] pl-[10px] py-[15px] rounded-[10px] product-infos' 
                                  : 'inline-flex flex-col gap-[10px] justify-between px-[1rem] py-[2rem] rounded-[10px] ml-[1rem] product-infos w-full'} 
-                                      ${ wishlistDisplay && 'mr-[1rem]' } ${productIsHovered === product._id && 'shadow-lg'} cursor-pointer`}
+                                    ${ wishlistDisplay && 'mr-[1rem]' } ${productIsHovered === product._id && 'shadow-lg'} cursor-pointer`}
                 onClick={()=> !admin && navigate('/shop/product', {state: {product}})}>
               <div>
               {product?.reviews ? 
@@ -274,10 +278,10 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
 
                     <span className='text-[13px]'> ({ product.reviews.length }) </span> 
                   </p>)
-                : ( <p className='text-secondary'>No rating available!</p> )
+                : ( <p className='text-secondary'> No rating available! </p> )
 
                 }
-                <p className= {(gridView ? 'text-[15px]' : (admin && !gridView)? 'text-[15px]' 
+                <p className= {(gridView ? 'text-[15px] xx-md:text-[14px] lg:text-[15px]' : (admin && !gridView)? 'text-[15px]' 
                     : wishlistDisplay ? 'text-[16px] font-[500]' : 'text-[18px]')  
                       + ' mt-[10px] capitalize font-[450] line-clamp-2 hover:text-secondary hover:underline'} style={{wordBreak: 'break-word'}}>
                 {product.title}
@@ -299,8 +303,10 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
                   </p>
                 }
 
-                <p className={`${(admin && !gridView)? 'text-[16px]' : (gridView) 
-                    ? 'text-[16px]' : wishlistDisplay ? 'text-[17px]' : 'text-[18px]'} font-[500] tracking-[0.5px]`}> 
+                <p className={`${(admin && !gridView)
+                  ? 'text-[16px]' 
+                  : (gridView) 
+                  ? 'text-[16px] xx-md:text-[15px] lg:text-[16px]' : wishlistDisplay ? 'text-[17px]' : 'text-[18px]'} font-[500] tracking-[0.5px]`}> 
                       &#8377; {product.price}
                 </p>
                 {
@@ -362,20 +368,34 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
       selectedProductForWishlist &&
       <>
 
-        <WishlistOptionsModal isOpen={isWishlistOptionsModalOpen} onClose={()=> setIsWishlistOptionsModalOpen(false)} 
-          product={selectedProductForWishlist} setIsWishlistModalOpen={setIsWishlistModalOpen} wishlist={wishlist}/>
+        <WishlistOptionsModal isOpen={isWishlistOptionsModalOpen} 
+          onClose={()=> setIsWishlistOptionsModalOpen(false)} 
+          product={selectedProductForWishlist} 
+          setIsWishlistModalOpen={setIsWishlistModalOpen} 
+          wishlist={wishlist}
+        />
       
-        <RemoveWishlistItemModal isOpen={isRemoveModalOpen} onClose={()=> setIsRemoveModalOpen(false)} product={selectedProductForWishlist}
-          listName={selectedList} removeProductFromWishlist={removeProductFromWishlist} />
+        <RemoveWishlistItemModal isOpen={isRemoveModalOpen} 
+          onClose={()=> setIsRemoveModalOpen(false)} 
+          product={selectedProductForWishlist}
+          listName={selectedList} 
+          removeProductFromWishlist={removeProductFromWishlist} 
+        />
 
       </>
     }
 
-    <WishlistModal isOpen={isWishlistModalOpen} onClose={()=> setIsWishlistModalOpen(false)} />
+    <WishlistModal isOpen={isWishlistModalOpen} 
+      onClose={()=> setIsWishlistModalOpen(false)} 
+    />
 
     <div className={` ${wishlistDisplay && 'ml-[1.5rem]'} `}>
 
-      <Pagination productCounts={productCounts} currentPage={currentPage} currentPageChanger={currentPageChanger} limiter={limiter} />
+      <Pagination productCounts={productCounts} 
+        currentPage={currentPage} 
+        currentPageChanger={currentPageChanger} 
+        limiter={limiter} 
+      />
 
     </div>
     <div className='h-[7rem] w-full'></div>

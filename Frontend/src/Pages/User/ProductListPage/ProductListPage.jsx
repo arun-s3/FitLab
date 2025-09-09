@@ -15,7 +15,7 @@ import CartSidebar from '../../../Components/CartSidebar/CartSidebar'
 import {getAllProducts, toggleProductStatus} from '../../../Slices/productSlice'
 import {getTheCart, resetCartStates} from '../../../Slices/cartSlice'
 import ProductFilterSidebar from '../../../Components/ProductFilterSidebar/ProductFilterSidebar'
-import FilterSection from './FilterSection'
+import FilterModule from './FilterModule'
 
 
 
@@ -144,7 +144,7 @@ export default function ProductList({admin}){
                   transition={{ duration: 0.5, ease: "easeOut" }}
                 >
                 
-                    <FilterSection filter={filter} 
+                    <FilterModule filter={filter} 
                         setFilter={setFilter} 
                         rating={rating} 
                         setRating={setRating}

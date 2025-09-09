@@ -10,7 +10,7 @@ import RatingSlider from '../../../Components/RatingSlider/RatingSlider'
 import {capitalizeFirstLetter} from '../../../Utils/helperFunctions'
 
 
-export default function FilterSection({filter, setFilter, rating, setRating}){
+export default function FilterModule({filter, setFilter, rating, setRating}){
 
     const [showFilter, setShowFilter] = useState({
             category: true,

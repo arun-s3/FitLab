@@ -2,6 +2,7 @@ import React, {useState, useEffect} from 'react'
 import './ProductsDisplay.css'
 import {useNavigate} from 'react-router-dom'
 import {useDispatch, useSelector} from 'react-redux'
+import {motion, AnimatePresence} from 'framer-motion'
 
 import axios from 'axios'
 import {toast} from 'react-toastify'
@@ -99,6 +100,26 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
     {name: 'low', value: 3, color: 'text-green-500', bg: 'bg-green-200'}
   ]
 
+  const container = {
+    hidden: { opacity: 0, height: 0 },
+    show: {
+      opacity: 1,
+      height: "auto",
+      transition: {
+        duration: 0.3,
+        when: "beforeChildren",
+        staggerChildren: 0.1,
+      },
+    },
+    exit: { opacity: 0, height: 0 },
+  }
+
+  const child = {
+    hidden: { opacity: 0, x: -20 },
+    show: { opacity: 1, x: 0, transition: { duration: 0.2 } },
+    exit: { opacity: 0, x: 20, transition: { duration: 0.2 } }
+  }
+
   const currentPageChanger = (page)=>{
     setCurrentPage(page)
   }
@@ -192,20 +213,24 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
         }) ()
       }
       
-     <div 
-      className={`${gridView ?
-       'w-full grid gap-y-8 x-sm:grid-cols-2 xx-md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 x-xl:grid-cols-3 gap-x-[4rem] x-sm:gap-x-[4rem] xx-md:gap-x-[10rem] lg:gap-x-[9rem] xl:gap-x-[2rem]' 
-       : showByTable 
-       ? '' 
-       : 'flex flex-col gap-[2rem]'}
-       ${wishlistDisplay && 'ml-[1.5rem]'}`} 
+     <motion.div 
+        variants={container}
+        initial="hidden"
+        animate="show"
+        className={`${gridView ?
+          'w-full grid gap-y-8 x-sm:grid-cols-2 xx-md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 x-xl:grid-cols-3 gap-x-[4rem] x-sm:gap-x-[4rem] xx-md:gap-x-[10rem] lg:gap-x-[9rem] xl:gap-x-[2rem]' 
+          : showByTable 
+          ? '' 
+          : 'flex flex-col gap-[2rem]'}
+          ${wishlistDisplay && 'ml-[1.5rem]'}`} 
         id="products-display" 
         style={admin ? { justifyItems: 'center' } : {}}
       >  
 
       { !showByTable && products.length > 0 ?
         products.map((product)=> (
-          <div key={product._id} 
+          <motion.div key={product._id} 
+            variants={child}
             className={` ${gridView ? 'w-[275px] xx-md:w-[200px] lg:w-[275px]' : 'flex gap-[1rem] w-full'}`}
             onMouseEnter={()=> setProductIsHovered(product._id)} 
             onMouseLeave={()=> setProductIsHovered('')}
@@ -351,11 +376,11 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
               </div>
             </div>
            
-          </div> 
+          </motion.div> 
         ))
         : <h3 className='text-[17px] text-muted text-center tracking-[0.5px]'> No Products Available! </h3>
       }
-    </div>
+    </motion.div>
     { showByTable &&
       <div>
 

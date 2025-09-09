@@ -3344,6 +3344,10 @@ select{
   cursor: grab;
 }
 
+.cursor-grabbing{
+  cursor: grabbing;
+}
+
 .cursor-not-allowed{
   cursor: not-allowed;
 }
@@ -9307,6 +9311,11 @@ select{
   border-width: 0px;
 }
 
+.\[\&\:\:-moz-range-thumb\]\:bg-muted::-moz-range-thumb{
+  --tw-bg-opacity: 1;
+  background-color: rgb(125 124 140 / var(--tw-bg-opacity));
+}
+
 .\[\&\:\:-moz-range-thumb\]\:bg-secondary::-moz-range-thumb{
   background-color: rgba(159, 42, 240, 1);
 }
@@ -9322,6 +9331,11 @@ select{
   --tw-scale-x: 1.1;
   --tw-scale-y: 1.1;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+.\[\&\:\:-webkit-slider-thumb\]\:bg-muted::-webkit-slider-thumb{
+  --tw-bg-opacity: 1;
+  background-color: rgb(125 124 140 / var(--tw-bg-opacity));
 }
 
 .\[\&\:\:-webkit-slider-thumb\]\:bg-secondary::-webkit-slider-thumb{

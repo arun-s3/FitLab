@@ -60,25 +60,4 @@
 #productlist aside #filter-body::marker{
     color: var(--SECONDARY);
 }
-/* #productlist aside .price-buttons input[type="number"]{
-    -moz-appearance: textfield;
-}
-#productlist aside .price-buttons input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button{
-    -webkit-appearance: none;
-    margin: 0;
-}
-#productlist aside .price-buttons input[type="number"]::placeholder{
-    font-size:14px;
-    color:var(--SECONDARY);
-}
-#productlist aside .price-buttons button{
-    background: var(--PRIMARY);
-    height: 2rem;
-    width: 1rem;
-    color: var(--SECONDARY);
-    font-weight: 550;
-    box-shadow: 2px 2px 7px rgb(194, 190, 198);
-}   
-#productlist aside .price-buttons .incdec-btn{
-    font-size: 17px;
-} */
+

@@ -31,8 +31,7 @@ export default function ProductFilterSidebar({isOpen, onClose, popularProducts, 
   const [maxPrice, setMaxPrice] = useState(3750)
   let firstSlideRef = useRef(false)
 
-  const [rating, setRating] = useState(4.5)
-  const [highestRating, setHighestRating] = useState(0)
+  const [rating, setRating] = useState(0)
 
   const [morePopularProducts, setMorePopularProducts] = useState(0)
   const [popularProductsShowLabel, setPopularProductsShowLabel] = useState('See more')
@@ -96,7 +95,7 @@ export default function ProductFilterSidebar({isOpen, onClose, popularProducts, 
             appliedFilters = {minPrice, maxPrice}
         }
         appliedFilters.targetMuscles = 
-        appliedFilters = {...appliedFilters, ...selectedFilters, rating, highestRating, categories: categoryFilter.categories}
+        appliedFilters = {...appliedFilters, ...selectedFilters, rating, categories: categoryFilter.categories}
         applySidebarFilters(appliedFilters)
         onClose()
     }
@@ -108,7 +107,6 @@ export default function ProductFilterSidebar({isOpen, onClose, popularProducts, 
         targetMuscles: [],
       })
       setRating(0)
-      setHighestRating(0)
       setCategoryFilter({categories: []})
     }
 
@@ -373,7 +371,9 @@ export default function ProductFilterSidebar({isOpen, onClose, popularProducts, 
                     {
                         <div className="mt-[5px] w-[90%]">
 
-                            <RatingSlider rating={rating} setRating={setRating} highestRating={highestRating} setHighestRating={setHighestRating} indentSlider='10px'/>
+                            <RatingSlider rating={rating} 
+                              setRating={setRating} 
+                              indentSlider='10px'/>
 
                         </div>
                     }

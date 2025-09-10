@@ -4,20 +4,20 @@ import {useNavigate} from 'react-router-dom'
 import {useSelector, useDispatch} from 'react-redux'
 
 import {toast} from 'react-toastify'
-import {LiaSlidersHSolid} from "react-icons/lia";
-import {FiDownload} from "react-icons/fi";
-import {RiArrowDropDownLine} from "react-icons/ri";
-import {IoMdAdd} from "react-icons/io";
-import {BsFillGrid3X3GapFill} from "react-icons/bs";
-import {FaList} from "react-icons/fa";
-import {CiViewTable} from "react-icons/ci";
-import {VscTable} from "react-icons/vsc";
+import {LiaSlidersHSolid} from "react-icons/lia"
+import {FiDownload} from "react-icons/fi"
+import {RiArrowDropDownLine} from "react-icons/ri"
+import {IoMdAdd} from "react-icons/io"
+import {BsFillGrid3X3GapFill} from "react-icons/bs"
+import {FaList} from "react-icons/fa"
+import {CiViewTable} from "react-icons/ci"
+import {VscTable} from "react-icons/vsc"
 
 import {resetStates} from '../../../Slices/productSlice'
 import ProductListingTools from '../../../Components/ProductListingTools/ProductListingTools'
 import {SitePrimaryButtonWithShadow} from '../../../Components/SiteButtons/SiteButtons'
-import ProductsDisplay from '../../../Components/ProductsDisplay/ProductsDisplay';
-import ProductFilterForAdmin from '../../../Components/ProductFilterForAdmin/ProductFilterForAdmin';
+import ProductsDisplay from '../../../Components/ProductsDisplay/ProductsDisplay'
+import ProductFilterForAdmin from '../../../Components/ProductFilterForAdmin/ProductFilterForAdmin'
 
 
 
@@ -179,7 +179,12 @@ export default function AdminProductListPage(){
                 </div>
                 <div className='absolute right-[5px] top-[-30px] flex items-center gap-[7px] view-type'>
                     <span data-label='Table View' onClick={()=> setShowByTable(!showByTable)}> <VscTable/> </span>
-                    <span data-label='List View' onClick={()=> {setShowByTable(false); setShowByGrid(false)}}> <FaList/> </span>
+                    <span data-label='List View' 
+                        className='hidden xx-lg:inline-block'
+                        onClick={()=> {setShowByTable(false); setShowByGrid(false)}}
+                    > 
+                        <FaList/> 
+                    </span>
                     <span data-label='Grid View' onClick={()=> {setShowByTable(false); setShowByGrid(true)}}>  <BsFillGrid3X3GapFill/> </span>
                 </div>
                 <div className='border py-[1rem] px-[2rem] bg-white'>

@@ -218,7 +218,8 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
         initial="hidden"
         animate="show"
         className={`${gridView ?
-          'w-full grid gap-y-8 x-sm:grid-cols-2 xx-md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 x-xl:grid-cols-3 gap-x-[4rem] x-sm:gap-x-[4rem] xx-md:gap-x-[10rem] lg:gap-x-[9rem] xl:gap-x-[2rem]' 
+          `w-full grid gap-y-8 x-sm:grid-cols-2 xx-md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 x-xl:grid-cols-3 
+            gap-x-[4rem] x-sm:gap-x-[4rem] xx-md:gap-x-[10rem] lg:gap-x-[9rem] ${admin ? 'xl:gap-x-[4rem]' : 'xl:gap-x-[2rem]'}` 
           : showByTable 
           ? '' 
           : 'flex flex-col gap-[2rem]'}
@@ -249,13 +250,14 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
                     : 'h-[275px] w-[350px]'} object-cover`}
                 onClick={()=> !admin && navigate('/shop/product', {state: {product}})}
               /> 
-              <figcaption className={`${admin ? 'top-[2px] left-[-40px]' : 'bottom-[12px]'} absolute w-full text-center`}>
+              <figcaption className={`${admin ? 'top-[2px] left-[-40px] xx-lg:left-[10px] x-xl:left-[-40px]' : 'bottom-[12px]'} absolute w-full text-center`}>
                 {
                  admin ?
-                  <div className='w-[35px] flex flex-col gap-[1rem] text-secondary'>
+                  <div className='w-[35px] xx-lg:w-[92%] x-xl:w-[35px] flex flex-col xx-lg:flex-row x-xl:flex-col gap-[1rem] 
+                     xx-lg:justify-between x-xl:justify-normal text-secondary'>
                     <span data-label='Edit' 
-                      className='w-[30px] p-[5px] border rounded-[20px] z-[2] flex items-center justify-center 
-                          relative cursor-pointer admin-control' 
+                      className='w-[30px] xx-lg:bg-white x-xl:bg-transparent p-[5px] border rounded-[20px] z-[2] flex items-center justify-center 
+                          relative cursor-pointer xx-lg:border-mutedDashedSeperation x-xl:border-inputBorderLow admin-control' 
                       onClick={()=> navigate('../edit', {state: {product}})}
                     >
                       <i> <RiFileEditLine/> </i>

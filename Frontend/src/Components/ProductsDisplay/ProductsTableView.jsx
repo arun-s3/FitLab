@@ -20,7 +20,7 @@ export default function ProductsTableView({products}){
 
 
   return(
-    <div id='ProductsTableView'>
+    <div id='ProductsTableView' className=''>
         <table cellSpacing={10} cellPadding={10} className='border-spacing-[24px] w-full'>
         <thead>
             <tr className='secondaryLight-box border border-[rgb(220, 230, 166)] font-[500] text-secondary table-header'>

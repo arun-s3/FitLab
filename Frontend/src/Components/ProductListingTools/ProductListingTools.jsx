@@ -36,7 +36,7 @@ export default function ProductListingTools({admin, showByGrid, setShowByGrid, s
                 setShowByGrid(true)
             }
         }
-        handleResizing()
+        setShowByGrid && handleResizing()
         window.addEventListener('resize', handleResizing)
 
         return ()=> window.removeEventListener('resize', handleResizing)

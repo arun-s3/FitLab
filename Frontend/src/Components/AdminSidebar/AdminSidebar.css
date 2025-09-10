@@ -1,0 +1,57 @@
+
+#admin-sidebar nav aside ul li{
+    width: 100%;
+    border-radius: 5px;
+    z-index: 10;
+}
+#admin-sidebar nav aside ul li>div{
+    position: relative;
+    width: 100%;
+    border-radius: 5px;
+    z-index: 10;
+}
+#admin-sidebar nav aside ul li>div:hover{
+    color: #f1c40f;
+}
+#admin-sidebar nav aside ul li>.option:hover::after{
+    content: '';
+    height: 190%;
+    width: 124%;
+    position: absolute;
+    top: -8px;
+    left: -27%;
+    border-radius: 6px;
+    z-index: -1;
+    background: linear-gradient(to right, rgb(43, 13, 63), transparent);
+    border-left: 2px solid var(--PRIMARY);
+    box-shadow: 2px 2px 61px rgb(63, 26, 88);
+}
+.toggleSublist-custom-after::after{
+    content: '';
+    height: 190%;
+    width: 124%;
+    position: absolute;
+    top: -8px;
+    left: -27%;
+    border-radius: 6px;
+    z-index: -1;
+    background: linear-gradient(to right, rgb(43, 13, 63), transparent);
+    border-left: 2px solid var(--PRIMARY);
+    box-shadow: 2px 2px 61px rgb(63, 26, 8);
+}
+#admin-sidebar nav aside ul li a>:first-child, #admin-sidebar nav aside ul li .list-dropdown>.list-name svg{
+    display:inline-block;
+    color:var(--PRIMARY);
+    margin-right:7px;
+}
+#admin-sidebar nav aside ul li .list-dropdown svg:last-child{ 
+    height: 20px;
+    width: 20px;
+    color: var(--PRIMARY);
+    cursor: pointer;
+}
+#admin-sidebar nav aside ul li .sublist li svg{
+    height: 20px;
+    width: 20px;
+}
+

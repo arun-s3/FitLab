@@ -11,7 +11,7 @@ import {MdSort} from "react-icons/md"
 import {format} from "date-fns"
 import axios from 'axios'
 
-import AdminHeader from '../../../Components/AdminHeader/AdminHeader'
+import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
 import {DateSelector} from '../../../Components/Calender/Calender'
 import Modal from '../../../Components/Modal/Modal'
 import CancelForm from '../../../Components/CancelForm/CancelForm'
@@ -310,7 +310,7 @@ export default function AdminOrderHistoryPage(){
       <header className='mb-[2.5rem] flex justify-between items-center'>
           <div className='basis-[40%]'>
 
-            <AdminHeader heading='Orders' subHeading="Detailed records of every users' orders, enabling you to track and manage order statuses and
+            <AdminTitleSection heading='Orders' subHeading="Detailed records of every users' orders, enabling you to track and manage order statuses and
                history seamlessly."/>
 
           </div>

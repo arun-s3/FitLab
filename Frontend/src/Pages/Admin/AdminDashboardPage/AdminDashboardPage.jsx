@@ -12,7 +12,7 @@ import OffersInsightsSection from './Components/OffersInsightsSection'
 import PaymentsInsightsSection from './Components/PaymentsInsightsSection'
 import DateRangePicker from "./Components/DateRangePicker"
 
-import AdminHeader from '../../../Components/AdminHeader/AdminHeader'
+import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
 
 export const BusinessAnalyticsContext = createContext()
 export const OperationsAnalyticsContext = createContext()
@@ -40,7 +40,7 @@ export default function AdminDashboardPage({ insightType }){
                   (()=> {
                     const header = insightType === 'business' ? businessOverviewHeader : operationsOverviewHeader
                     const subheader = insightType === 'business' ? businessOverviewSubHeader : operationsOverviewSubHeader
-                    return <AdminHeader heading={header} subHeading={subheader}/>
+                    return <AdminTitleSection heading={header} subHeading={subheader}/>
                   }
                   )()
                 }

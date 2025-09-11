@@ -8,7 +8,7 @@ import {interpolateYlGnBu} from "d3-scale-chromatic"
 import {Users, MapPinHouse, LocateFixed, Plus, Minus} from "lucide-react"
 import axios from "axios";
 
-import AdminHeader from '../../../Components/AdminHeader/AdminHeader'
+import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
 
 const INDIA_TOPO_JSON = "https://raw.githubusercontent.com/markmarkoh/datamaps/master/src/js/data/ind.topo.json";
 
@@ -114,7 +114,7 @@ const colorRanges = generateColorBuckets();
 
       <header>
                 
-          <AdminHeader heading="Customer Location Heatmap" subHeading="Visualize customer distribution across different states with an interactive heatmap to identify regional engagement"/>
+          <AdminTitleSection heading="Customer Location Heatmap" subHeading="Visualize customer distribution across different states with an interactive heatmap to identify regional engagement"/>
 
       </header>
 

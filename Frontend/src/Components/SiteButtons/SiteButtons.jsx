@@ -1,6 +1,7 @@
 import React from 'react'
 import './SiteButtons.css'
 import {useSelector} from 'react-redux'
+import {motion} from 'framer-motion'
 
 
 export function SiteButton({customStyle, children, className, shouldSubmit = false}){
@@ -80,13 +81,43 @@ export function SitePrimaryWhiteTextButton({customStyle, tailwindClasses, light,
     )
 }
 
-export function SitePrimaryButtonWithShadow({customStyle, tailwindClasses, light, lowFont, children, clickHandler, shouldSubmit = false}){
+export function SitePrimaryButtonWithShadow({customStyle, tailwindClasses, animated, noHover = false, light, lowFont, children, clickHandler, shouldSubmit = false}){
     return(
-        <button type={shouldSubmit?"submit":"button"}
-            className={`inline-flex justify-center items-center gap-[5px] py-[4px] px-[15px] rounded-[8px]
-                text-[14px] text-[#332929] tracking-[0.2px] bg-primary cursor-pointer ${tailwindClasses? tailwindClasses:''} ${light ? 'font-[480]' : ''}`} 
-            style={lowFont? {...customStyle, fontSize:'14px'} : customStyle} onClick={clickHandler ? ()=> clickHandler() : undefined}
-            id='SitePrimaryButtonWithShadow'> {children} </button>
+        <>
+        {
+            animated ?
+                <motion.button type={shouldSubmit ? "submit" : "button"}
+                    className={`inline-flex justify-center items-center gap-[5px] py-[4px] px-[15px] rounded-[8px]
+                        text-[14px] text-[#332929] tracking-[0.2px] bg-primary ${!noHover && 'hover:bg-primaryDark'} cursor-pointer 
+                        ${tailwindClasses? tailwindClasses:''} ${light ? 'font-[480]' : ''}`} 
+                    style={lowFont? {...customStyle, fontSize:'14px'} : customStyle} onClick={clickHandler ? ()=> clickHandler() : undefined}
+                    id='SitePrimaryButtonWithShadow'
+                    whileHover={{
+                      scale: 1.004,
+                      y: -0.5,
+                    //   boxShadow: "0px 8px 20px rgba(0,0,0,0.15)",
+                    }}
+                    whileTap={{
+                      scale: 0.99,
+                      y: 0,
+                    //   boxShadow: "0px 4px 10px rgba(0,0,0,0.2)",
+                    }}
+                    transition={{ type: "spring", stiffness: 600, damping: 17 }}
+                >
+                    {children} 
+                 </motion.button>
+                :
+                <button type={shouldSubmit ? "submit" : "button"}
+                    className={`inline-flex justify-center items-center gap-[5px] py-[4px] px-[15px] rounded-[8px]
+                        text-[14px] text-[#332929] tracking-[0.2px] bg-primary cursor-pointer ${tailwindClasses? tailwindClasses:''} ${light ? 'font-[480]' : ''}`} 
+                    style={lowFont? {...customStyle, fontSize:'14px'} : customStyle} onClick={clickHandler ? ()=> clickHandler() : undefined}
+                    id='SitePrimaryButtonWithShadow'
+                >
+                    {children} 
+                </button>
+
+        }
+        </>
     )
 }
 

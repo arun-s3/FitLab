@@ -14,7 +14,7 @@ import {SlBadge} from "react-icons/sl";
 import {IoIosClose} from "react-icons/io";
 import {toast} from 'react-toastify';
 
-import AdminHeader from '../../../Components/AdminHeader/AdminHeader';
+import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection';
 import FileUpload from '../../../Components/FileUpload/FileUpload';
 import CategoryDisplay from '../../../Components/CategoryDisplay/CategoryDisplay';
 import { SiteButtonSquare } from '../../../Components/SiteButtons/SiteButtons';
@@ -302,7 +302,7 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
             <header>
                     {/* <input type='search' placeholder='Search Categories' className='w-[12rem] h-[35px] border-dotted bg-[#fefff8]
                              rounded-[7px] placeholder:text-[11px]' /> */}
-                <AdminHeader heading={ editCategory ? 'Edit Category' : 'Add Category'} 
+                <AdminTitleSection heading={ editCategory ? 'Edit Category' : 'Add Category'} 
                         subHeading={ editCategory ? "Update the Category information" : "Create and organize categories here"}/>
             </header>
 

@@ -173,7 +173,6 @@ const getOrCreateWallet = async (req, res, next)=> {
 }
 
 
-
 const addFundsToWallet = async (req, res, next)=> {
     try {
       console.log("Inside addFundsToWallet controller")

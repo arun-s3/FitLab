@@ -3,7 +3,7 @@ import {motion, AnimatePresence} from "framer-motion"
 
 import VideoChatDashboard from './VideoChatDashboard'
 import VideoChatSection from './VideoChatSection'
-import AdminHeader from '../../../Components/AdminHeader/AdminHeader'
+import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
 import {AdminSocketContext} from '../../../Components/AdminSocketProvider/AdminSocketProvider'
 
 
@@ -177,7 +177,7 @@ export default function AdminVideoChatSupportPage() {
         
             <header>
     
-                <AdminHeader heading='Video Chat Support' subHeading="Real-time video assistance allows you to connect face-to-face with customers and resolve their queries."/>
+                <AdminTitleSection heading='Video Chat Support' subHeading="Real-time video assistance allows you to connect face-to-face with customers and resolve their queries."/>
     
             </header>
     

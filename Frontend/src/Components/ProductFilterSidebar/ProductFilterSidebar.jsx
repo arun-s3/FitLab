@@ -1,16 +1,18 @@
 import React, {useState, useEffect, useRef} from "react"
 import {motion, AnimatePresence} from "framer-motion"
 
-import {X, Filter, SlidersHorizontal, ChevronDown, ChevronUp, Star, Zap} from "lucide-react"
+import {X, Filter, SlidersHorizontal, ChevronDown, ChevronUp, Clock, CheckCircle, XCircle, Shield} from "lucide-react"
+import {MdOutlineArrowDropDownCircle} from "react-icons/md"
 
 import CategoryDisplay from '../CategoryDisplay/CategoryDisplay'
 import PriceSliderAndFilter from '../PriceSliderAndFilter/PriceSliderAndFilter'
 import RatingSlider from '../RatingSlider/RatingSlider'
 import {capitalizeFirstLetter} from '../../Utils/helperFunctions'
+import {DateSelector} from '../Calender/Calender'
 
 
 
-export default function ProductFilterSidebar({isOpen, onClose, popularProducts, muscleGroups, brands, applySidebarFilters}){
+export default function ProductFilterSidebar({isOpen, onClose, popularProducts, muscleGroups, brands, isAdmin = false, applySidebarFilters}){
 
   const [expandedSections, setExpandedSections] = useState({
     category: true,
@@ -18,6 +20,8 @@ export default function ProductFilterSidebar({isOpen, onClose, popularProducts, 
     price: true,
     brand: true,
     muscle: true,
+    productStatus: true,
+    dateRange: true,
     rating: true,
   })
 
@@ -25,11 +29,17 @@ export default function ProductFilterSidebar({isOpen, onClose, popularProducts, 
     popularProducts: [],
     brands: [],
     targetMuscles: [],
+    productStatus: "all",
+    startDate: "",
+    endDate: ""
   })
 
   const [minPrice, setMinPrice] = useState(0)
   const [maxPrice, setMaxPrice] = useState(3750)
   let firstSlideRef = useRef(false)
+
+  const [startDate, setStartDate] = useState(null)
+  const [endDate, setEndDate] = useState(null)
 
   const [rating, setRating] = useState(0)
 
@@ -37,12 +47,45 @@ export default function ProductFilterSidebar({isOpen, onClose, popularProducts, 
   const [popularProductsShowLabel, setPopularProductsShowLabel] = useState('See more')
 
   const [categoryFilter, setCategoryFilter] = useState({categories: []})
-  const [clearCategoryFilter, setClearCategoryFilter] = useState(false)
+
+  // const {startDate, endDate} = dateGetter
+  // const {setStartDate, setEndDate} = dateSetter
+
+  const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false)
+  const productStatusOptions = [
+    { value: "all", label: "All Products", icon: Clock, color: "text-neutral-400" },
+    { value: "active", label: "Active Products", icon: CheckCircle, color: "text-green-400" },
+    { value: "blocked", label: "Blocked Products", icon: XCircle, color: "text-red-400" },
+  ]
+  
+  // const [showStatus, setShowStatus] = useState(false)
 
   useEffect(()=> {
     console.log('Opened ProductFilterSidebar....')
     console.log("isOpen--->", isOpen)
   }, [isOpen])
+
+  useEffect(()=> {
+    console.log("startDate---->", startDate)
+    if(startDate){
+      setSelectedFilters((filters) => ({
+        ...filters, startDate: startDate.toDateString()
+      }))
+    }else{
+      setSelectedFilters((filters) => ({
+        ...filters, startDate: ""
+      }))
+    }
+    if(endDate){
+      setSelectedFilters((filters) => ({
+        ...filters, endDate: endDate.toDateString()
+      }))
+    }else{
+      setSelectedFilters((filters) => ({
+        ...filters, endDate: ""
+      }))
+    }
+  }, [startDate, endDate])
 
   const toggleSection = (section) => {
     setExpandedSections((prev) => ({
@@ -89,12 +132,20 @@ export default function ProductFilterSidebar({isOpen, onClose, popularProducts, 
       }))
     }
 
+    const handleStatusChange = (status) => {
+      setSelectedFilters((prev) => ({
+        ...prev,
+        productStatus: status,
+      }))
+      setIsStatusDropdownOpen(false)
+    }
+
     const applyFilters = ()=> {
       let appliedFilters = {}
         if(firstSlideRef.current){
             appliedFilters = {minPrice, maxPrice}
         }
-        appliedFilters.targetMuscles = 
+        // appliedFilters.targetMuscles = 
         appliedFilters = {...appliedFilters, ...selectedFilters, rating, categories: categoryFilter.categories}
         applySidebarFilters(appliedFilters)
         onClose()
@@ -105,6 +156,9 @@ export default function ProductFilterSidebar({isOpen, onClose, popularProducts, 
         popularProducts: [],
         brands: [],
         targetMuscles: [],
+        productStatus: "all",
+        startDate: "",
+        endDate: ""
       })
       setRating(0)
       setCategoryFilter({categories: []})
@@ -189,6 +243,215 @@ export default function ProductFilterSidebar({isOpen, onClose, popularProducts, 
                 }
               </div>
 
+              {
+                isAdmin &&
+                <>
+                <div className="space-y-3 relative">
+                  <button
+                    onClick={() => toggleSection("productStatus")}
+                    className="flex items-center justify-between w-full text-left"
+                  >
+                    <h3 className="text-[15px] font-medium tracking-[0.5px] text-gray-900 dark:text-white"> Product Status </h3>
+                    {expandedSections.productStatus ? (
+                      <ChevronUp className="w-4 h-4 text-gray-500" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-gray-500" />
+                    )}
+                </button>
+
+                <AnimatePresence>
+                  {expandedSections.productStatus && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.5, ease: "easeInOut" }}
+                      className="space-y-3 pl-2"
+                    >
+                      <div className="">
+                        <motion.button
+                          whileHover={{ scale: 1.02, y: -1 }}
+                          whileTap={{ scale: 0.98 }}
+                          transition={{ duration: 0.15, ease: "easeInOut" }}
+                          onClick={()=> setIsStatusDropdownOpen(!isStatusDropdownOpen)}
+                          className="w-full flex items-center justify-between px-3 py-[8px] bg-whitesmoke border border-dropdownBorder
+                           rounded-lg text-white hover:border-purple-400/50 transition-all duration-200"
+                        >
+                          <div className="flex items-center gap-2">
+                            {(() => {
+                              const selectedOption = productStatusOptions.find(
+                                (option) => option.value === selectedFilters.productStatus,
+                              )
+                              const IconComponent = selectedOption?.icon || Clock
+                              return (
+                                <>
+                                  <div>
+                                    <IconComponent
+                                      className={`w-4 h-4 ${selectedOption?.color || "text-neutral-400"}`}
+                                    />
+                                  </div>
+                                  <span className="text-[14px] text-secondary font-medium">{selectedOption?.label || "Select Status"}</span>
+                                </>
+                              )
+                            })()}
+                          </div>
+                          <motion.div
+                            animate={{ rotate: isStatusDropdownOpen ? 180 : 0 }}
+                            transition={{ duration: 0.3, type: "spring", stiffness: 300 }}
+                          >
+                            <ChevronDown className="w-4 h-4 text-secondary" />
+                          </motion.div>
+                        </motion.button>
+
+                        <AnimatePresence>
+                          {isStatusDropdownOpen && (
+                            <motion.div
+                              initial={{ opacity: 0, y: -5, scale: 0.95 }}
+                              animate={{ opacity: 1, y: 0, scale: 1 }}
+                              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                              transition={{ duration: 0.1, ease: 'easeOut' }}
+                              className="absolute top-full left-0 right-0 w-full mt-2 bg-whitesmoke text-[13px] border 
+                                border-dropdownBorder rounded-lg shadow-xl z-50 overflow-hidden"
+                            >
+                              {productStatusOptions.map((option, index) => {
+                                const IconComponent = option.icon
+                                return (
+                                  <motion.button
+                                    key={option.value}
+                                    initial={{ x: -10 }}
+                                    animate={{ x: 0 }}
+                                    transition={{ duration: 0.1, ease: 'circInOut' }}
+                                    whileTap={{ scale: 0.98 }}
+                                    onClick={() => handleStatusChange(option.value)}
+                                    className={`w-full flex items-center gap-3 px-3 py-[10px] text-left transition-all duration-200 cursor-pointer ${
+                                      selectedFilters.productStatus === option.value
+                                        ? "bg-purple-500/20 border-l-4 border-purple-400"
+                                        : "hover:bg-inputBorderLow"
+                                    }`}
+                                  >
+                                      <IconComponent className={`w-4 h-4 ${option.color}`} />
+                                    <span
+                                      className={`font-medium ${
+                                        selectedFilters.productStatus === option.value
+                                          ? "text-secondary"
+                                          : "text-muted"
+                                      }`}
+                                    >
+                                      {option.label}
+                                    </span>
+                                    {selectedFilters.productStatus === option.value && (
+                                      <div
+                                        className="ml-auto w-2 h-2 bg-purple-400 rounded-full"
+                                      />
+                                    )}
+                                  </motion.button>
+                                )
+                              })}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              <div className="space-y-3 relative">
+                  <button
+                    onClick={() => toggleSection("dateRange")}
+                    className="flex items-center justify-between w-full text-left"
+                  >
+                    <h3 className="text-[15px] font-medium tracking-[0.5px] text-gray-900 dark:text-white"> Date Range </h3>
+                    {expandedSections.dateRange ? (
+                      <ChevronUp className="w-4 h-4 text-gray-500" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-gray-500" />
+                    )}
+                </button>
+
+                <AnimatePresence>
+                  {expandedSections.dateRange && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -5, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      transition={{ duration: 0.3, ease: 'easeOut' }}
+                      className="space-y-4 pl-2"
+                    >
+                      <motion.div
+                        initial={{ y: 15, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ duration: 0.3, ease: 'easeOut'  }}
+                        className="space-y-3"
+                      >
+                        {/* <div>
+                          <label className="block text-xs text-secondary font-bold mb-2 uppercase">Start Date</label>
+                          <motion.input
+                            whileFocus={{ scale: 1.02, borderColor: "#60a5fa" }}
+                            type="date"
+                            value={selectedFilters.startDate}
+                            onChange={(e) =>
+                              setSelectedFilters((prev) => ({
+                                ...prev,
+                                startDate: e.target.value,
+                              }))
+                            }
+                            className="w-full px-3 py-2 bg-neutral-800 border border-neutral-600 rounded-lg text-sm text-white focus:border-blue-400 focus:ring-1 focus:ring-blue-400 transition-all duration-200"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-secondary font-bold mb-2 uppercase">End Date</label>
+                          <motion.input
+                            whileFocus={{ scale: 1.02, borderColor: "#60a5fa" }}
+                            type="date"
+                            value={selectedFilters.endDate}
+                            onChange={(e) =>
+                              setSelectedFilters((prev) => ({
+                                ...prev,
+                                endDate: e.target.value,
+                              }))
+                            }
+                            className="w-full px-3 py-2 bg-neutral-800 border border-neutral-600 rounded-lg text-sm text-white focus:border-blue-400 focus:ring-1 focus:ring-blue-400 transition-all duration-200"
+                          />
+                        </div> */}
+
+                        <DateSelector 
+                          dateGetter={{startDate, endDate}} 
+                          dateSetter={{setStartDate, setEndDate}} 
+                          className="!h-[2.2rem] !border-inputBorderLow !rounded-[6px] !focus:ring-secondary"
+                          iconClassName="!text-[#b46fe3] !ml-[3px]"
+                          calendarClassName="!bg-white !rounded-lg !shadow-lg !p-2 !border !border-dropdownBorder"
+                          // strokeColor="text-[#b46fe3] ml-[2px]"
+                        />
+                        
+                        {(selectedFilters.startDate || selectedFilters.endDate) && (
+                          <motion.div
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ delay: 0.1, type: "spring", stiffness: 200 }}
+                            className="text-center px-3 py-[4px] bg-whitesmoke rounded-lg border border-blue-400/20"
+                          >
+                            <span className="text-secondary font-bold text-[12px]">
+                              {
+                                selectedFilters.startDate && selectedFilters.endDate 
+                                  ? `${selectedFilters.startDate} → ${selectedFilters.endDate}`
+                                  : selectedFilters.startDate 
+                                  ? `From ${selectedFilters.startDate}`
+                                  : selectedFilters.endDate
+                                  ? `Till ${selectedFilters.endDate}`
+                                  : null
+                              }
+                            </span>
+                          </motion.div>
+                        )}
+                      </motion.div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+              </>
+              }
+
               <div className="space-y-3">
                 <button
                   onClick={() => toggleSection("popularProducts")}
@@ -232,8 +495,7 @@ export default function ProductFilterSidebar({isOpen, onClose, popularProducts, 
                     </span>
                 </ul>
                 }
-                </div>
-
+              </div>
                 
               <div className="space-y-3">
                 <button

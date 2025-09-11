@@ -10,7 +10,7 @@ import RatingSlider from '../../../Components/RatingSlider/RatingSlider'
 import {capitalizeFirstLetter} from '../../../Utils/helperFunctions'
 
 
-export default function FilterModule({filter, setFilter, rating, setRating}){
+export default function FilterModule({filter, setFilter, rating, setRating, popularProducts, muscleGroups, brands}){
 
     const [showFilter, setShowFilter] = useState({
             category: true,
@@ -33,17 +33,7 @@ export default function FilterModule({filter, setFilter, rating, setRating}){
 
     const [popularProductsShowLabel, setPopularProductsShowLabel] = useState('See more')
     const [morePopularProducts, setMorePopularProducts] = useState(0)
-
-    const popularProducts = [
-        'benches', 'gymbell', 'treadmill', 'Ellipticals', 'bikes', 'proteinPowders', 'mutistationMachines', 'resistanceBands', 'yogaMats'
-    ]
-
-    const brands = ["Nike", "Adidas", "Under Armour", "Reebok", "Puma", "Gymshark"]
-
-    const muscleGroups = ["Chest", "Back", "Shoulders", "Biceps", "Triceps", "Forearms", "Quadriceps", "Hamstrings", "Glutes", "Calves",
-        "Core/Abs", "Full Body", "Cardio"]
         
-
     const container = {
       hidden: { opacity: 0, height: 0 },
       show: {

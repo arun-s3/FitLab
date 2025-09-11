@@ -1,10 +1,9 @@
 import React, {useEffect, useState} from 'react'
 import  './AdminPageLayout.css'
-import {Link, useNavigate, Outlet} from 'react-router-dom'
-import {useSelector, useDispatch} from 'react-redux'
+import {Link, Outlet} from 'react-router-dom'
+import {useDispatch} from 'react-redux'
 import {motion, AnimatePresence} from 'framer-motion'
 
-import {FaRegBell} from "react-icons/fa"
 import {MdOutlineDashboardCustomize, MdLogout} from "react-icons/md"
 import {BsCart3} from "react-icons/bs"
 import {HiOutlineUsers} from "react-icons/hi"
@@ -15,10 +14,10 @@ import {RiDiscountPercentLine} from "react-icons/ri"
 import {GrGallery} from "react-icons/gr"
 import {RiArrowDropDownLine} from "react-icons/ri"
 import {CiSquareChevRight} from "react-icons/ci"
-import {Menu, MapPinned, Headset} from "lucide-react"
+import {MapPinned, Headset} from "lucide-react"
 
+import AdminHeader from '../../../Components/AdminHeader/AdminHeader'
 import {adminSignout} from '../../../Slices/adminSlice'
-import AdminSidebar from '../../../Components/AdminSidebar/AdminSidebar'
 
 
 export default function AdminPageLayout(){
@@ -26,20 +25,13 @@ export default function AdminPageLayout(){
     const asideBgImg={
         backgroundImage:"linear-gradient(to bottom,black,var(--SECONDARY) 400%)"
     }
-    const headerBgImg = {
-        backgroundImage: "linear-gradient(to right, black, var(--SECONDARY) 400%)"
-    }
     const adminContentBgImg = {
         backgroundImage: "linear-gradient(to right,rgba(255,255,255,0.9),rgba(255,255,255,0.9)), url('/admin-bg.jpg')"
     }
 
-    const {admin} = useSelector(state=> state.admin)
     const dispatch = useDispatch()
-    const navigate = useNavigate()
 
     const [headerZIndex, setHeaderZIndex] = useState(10)
-
-    const [isDashboardOpen, setIsDashboardOpen] = useState(false)
 
     const [compressList, setCompressList] = useState(false)
 
@@ -192,46 +184,8 @@ export default function AdminPageLayout(){
 
     return(
         <div id='admin-wrapper'>
-            <header className='bg-black h-[5rem] w-full flex justify-between items-center px-[33px] fixed top-0'
-              id='admin-wrapper-header' 
-              style={{...headerBgImg, zIndex: headerZIndex}} >
 
-                <div className="xx-md:hidden mt-[15p] p-[5px] bg-transparent border border-[#7f7d8085] rounded-[7px] shadow-sm">
-                    <button
-                      onClick={()=> setSidebarOpen(true)}
-                      className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors"
-                    >
-                      <Menu size={22} className='text-primary'/>
-                    </button>
-                </div>
-
-                <AdminSidebar isOpen={sidebarOpen} onClose={()=> setSidebarOpen(false)} />
-
-                <img src="/Logo_main.png"
-                    alt="Fitlab" 
-                    className="h-[5rem] mt-[5px] xx-md:mt-[15px] ml-[-13rem] xx-md:ml-0"
-                /> 
-
-\                <div className='flex gap-[15px] justify-between items-center'>
-                    <i className='relative'>
-                        <FaRegBell className='h-[15px] w-[24px] text-secondary mt-[2px]'/>
-                        <span className='h-[5px] w-[5px] rounded-[10px] bg-gray-500 absolute top-[15%] right-[19%]'></span>
-                    </i>
-                    <div className='flex gap-[5px] justify-center items-center'>
-                        <span className='w-[30px] h-auto rounded-[20px] relative'>
-                            <img alt='admin-dp' 
-                                src={admin.profilePic} 
-                                className='w-[30px] h-auto rounded-[20px]'
-                            /> 
-                            <span className='h-[8px] w-[8px] rounded-[10px] bg-green-400 absolute bottom-0 right-0'></span>
-                        </span>
-                        <div className='flex flex-col'>
-                            <span className='text-[13px] font-bold text-white'> {admin.username} </span>
-                            <span className='text-[12px] text-[#b2afaf]'> Admin </span>
-                        </div>
-                    </div>
-                </div>
-            </header>
+            <AdminHeader headerZIndex={headerZIndex} />
 
             <div className='flex fixed top-[5rem] w-full'>
             

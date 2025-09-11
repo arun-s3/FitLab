@@ -3,7 +3,7 @@ import './AdminCustomersPage.css'
 import axios from '../../../Utils/axiosConfig'
 import {useSelector, useDispatch} from 'react-redux'
 
-import AdminHeader from '../../../Components/AdminHeader/AdminHeader'
+import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
 import Modal from '../../../Components/Modal/Modal'
 import {SitePrimaryMinimalButtonWithShadow} from '../../../Components/SiteButtons/SiteButtons'
 import {showUsers, showUsersofStatus, toggleBlockUser, deleteUser, deleteUsersList, resetStates} from '../../../Slices/adminSlice'
@@ -214,7 +214,7 @@ export default function AdminCustomersPageV1() {
         <section className='h-screen z-[-1]' id='AdminCustomersPage'>
             {/* <h1 className='text-h3Semibold mb-[2rem]'>Customers</h1> */}
             <header>
-                <AdminHeader heading='Customers' subHeading='View, Update, and Oversee Customer accounts'/>
+                <AdminTitleSection heading='Customers' subHeading='View, Update, and Oversee Customer accounts'/>
             </header>
             <main className='p-[1rem] border border-secondary flex items-center justify-center w-[80%] 
                                     rounded-[9px] gap-[5px]' style={mainBgImg}>

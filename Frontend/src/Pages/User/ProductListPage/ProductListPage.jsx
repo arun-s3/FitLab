@@ -48,6 +48,7 @@ export default function ProductList({admin}){
 
     const {cart, productAdded, productRemoved, loading, error, message} = useSelector(state=> state.cart)    
 
+
     const sortMenu = [
         {name: 'Price: High to Low', value:'price', order:'-1', invisibleOnTable: true},
         {name: 'Price: Low to High', value:'price', order:'1', invisibleOnTable: true},
@@ -55,6 +56,16 @@ export default function ProductList({admin}){
         {name: 'Featured', value:'featured'},
         {name: 'Best Sellers', value:'bestSellers'}, {name: 'Newest Arrivals', value:'newestArrivals'}
     ]
+
+    const popularProducts = [
+        'benches', 'gymbell', 'treadmill', 'Ellipticals', 'bikes', 'proteinPowders', 'mutistationMachines', 'resistanceBands', 'yogaMats'
+    ]
+
+    const brands = ["Nike", "Adidas", "Under Armour", "Reebok", "Puma", "Gymshark"]
+
+    const muscleGroups = ["Chest", "Back", "Shoulders", "Biceps", "Triceps", "Forearms", "Quadriceps", "Hamstrings", "Glutes", "Calves",
+        "Core/Abs", "Full Body", "Cardio"]
+
 
     const dispatch = useDispatch()
 
@@ -148,6 +159,9 @@ export default function ProductList({admin}){
                         setFilter={setFilter} 
                         rating={rating} 
                         setRating={setRating}
+                        popularProducts={popularProducts}
+                        muscleGroups={muscleGroups}
+                        brands={brands}
                     />
 
                 </motion.div>

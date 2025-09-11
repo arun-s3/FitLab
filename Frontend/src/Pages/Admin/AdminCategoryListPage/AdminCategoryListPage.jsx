@@ -6,7 +6,7 @@ import {useDispatch, useSelector} from 'react-redux'
 import {getAllCategories, getCategoriesOfType, getSingleCategory, toggleCategoryStatus, resetSubcategories, resetStates} 
                 from '../../../Slices/categorySlice'
 import {SearchInput} from '../../../Components/FromComponents/FormComponents'
-import AdminHeader from '../../../Components/AdminHeader/AdminHeader'
+import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
 
 import {toast} from 'react-toastify'
 import {IoArrowBackSharp} from "react-icons/io5";
@@ -317,7 +317,7 @@ const tableBodyGenerator = (categories, isSubcategory, parentLevelCount)=> {
   return(
    <section id='AdminCategoryListPage'>
     <header>
-        <AdminHeader heading='Category List' subHeading='View, Edit and Organize all Categories seamlessly'/>
+        <AdminTitleSection heading='Category List' subHeading='View, Edit and Organize all Categories seamlessly'/>
     </header>
     <main>
         <div className='relative mt-[4.3rem]'>

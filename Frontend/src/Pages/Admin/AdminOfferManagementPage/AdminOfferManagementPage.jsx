@@ -13,7 +13,7 @@ import {RiUserReceived2Line} from "react-icons/ri"
 import {GrUserNew} from "react-icons/gr"
 import {FaUsersViewfinder} from "react-icons/fa6"
 
-import AdminHeader from '../../../Components/AdminHeader/AdminHeader'
+import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
 import OfferList from "./OfferList"
 import OfferModal from "./OfferModal"
 import OfferDeleteModal from "./OfferDeleteModal"
@@ -178,7 +178,7 @@ export default function AdminOfferManagementPage(){
 
             <header>
 
-                <AdminHeader heading='Offer Management' subHeading="Create, Track, and Optimize Offers, Recurring Deals, Targeted
+                <AdminTitleSection heading='Offer Management' subHeading="Create, Track, and Optimize Offers, Recurring Deals, Targeted
                      Promotions, and Analytics Efficiently."/>
 
             </header>

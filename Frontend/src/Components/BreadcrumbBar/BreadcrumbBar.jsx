@@ -41,7 +41,7 @@ export default function BreadcrumbBar({heading}){
                 {breadcrumbPath}
             </nav>
 
-            <h1 className='hidden sm:inline-block text-[18px] font-[600] xx-sm:text-breadcrumbTitle capitalize trackig-[0.5px] text-white z-[5]' 
+            <h1 className='hidden sm:inline-block text-[18px] font-[600] l-md:text-breadcrumbTitle capitalize trackig-[0.5px] text-white z-[5]' 
                 style={{wordSpacing: '1px'}}
                 > 
                 {heading? heading : 'No Heading'}

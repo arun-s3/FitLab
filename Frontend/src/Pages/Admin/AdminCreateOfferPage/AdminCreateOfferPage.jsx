@@ -13,7 +13,7 @@ import {TbShoppingCartDiscount} from "react-icons/tb"
 import {GoDotFill} from "react-icons/go"
 import {toast} from 'react-toastify'
 
-import AdminHeader from "../../../Components/AdminHeader/AdminHeader"
+import AdminTitleSection from "../../../Components/AdminTitleSection/AdminTitleSection"
 import PlaceholderIcon from '../../../Components/PlaceholderIcon/PlaceholderIcon'
 import CategoryDisplay from "../../../Components/CategoryDisplay/CategoryDisplay"
 import FileUpload from '../../../Components/FileUpload/FileUpload'
@@ -477,7 +477,7 @@ export default function AdminCreateOfferPage(){
         <header>
                 {/* <input type='search' placeholder='Search Categories' className='w-[12rem] h-[35px] border-dotted bg-[#fefff8]
                          rounded-[7px] placeholder:text-[11px]' /> */}
-            <AdminHeader heading='Create Offer' subHeading="Create and configure offers, user targeting, recurring options, banners 
+            <AdminTitleSection heading='Create Offer' subHeading="Create and configure offers, user targeting, recurring options, banners 
               and other options for better sales."/>
 
         </header>

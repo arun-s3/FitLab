@@ -9,10 +9,12 @@ module.exports = {
         'before:bg-black'
       ],
       screens: {
+        't': '300px',
+        'xxs-sm': '400px',
         'xs-sm': '500px',
         's-sm': '570px',
         'x-sm': '700px',
-        'xx-sm': '800px',
+        'l-md': '800px',
         'x-md': '840px',
         'xx-md': '900px',
         'x-lg': '1150px',

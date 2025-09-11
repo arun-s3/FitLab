@@ -6,7 +6,7 @@ import {Users, Send, Search, Clock, User, Headphones, Circle, MessageSquare, Set
 import axios from 'axios'
 
 import {AdminSocketContext} from '../../../Components/AdminSocketProvider/AdminSocketProvider'
-import AdminHeader from '../../../Components/AdminHeader/AdminHeader'
+import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
 import useFlexiDropdown from '../../../Hooks/FlexiDropdown'
 
 
@@ -223,7 +223,7 @@ export default function AdminTextChatSupportPage() {
     
         <header>
 
-            <AdminHeader heading='Text Chat Support' subHeading="Manage and respond to customer inquiries in real-time through text chat for user satisfaction."/>
+            <AdminTitleSection heading='Text Chat Support' subHeading="Manage and respond to customer inquiries in real-time through text chat for user satisfaction."/>
 
         </header>
 

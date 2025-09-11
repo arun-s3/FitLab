@@ -10,7 +10,7 @@ import {MdSort} from "react-icons/md"
 import {toast} from 'react-toastify'
 // import {IconFilePercent, IconRosetteDiscount, IconRosetteDiscountCheck, IconRosetteDiscountOff} from "@tabler/icons-react"
 
-import AdminHeader from '../../../Components/AdminHeader/AdminHeader'
+import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
 import CouponList from "./CouponList"
 import CouponModal from "./CouponModal"
 import CouponDeleteModal from "./CouponDeleteModal"
@@ -166,7 +166,7 @@ export default function AdminCouponManagementPage(){
 
             <header>
 
-                <AdminHeader heading='Coupon Management' subHeading="Manage and track Coupons with Advanced controls and Analytics"/>
+                <AdminTitleSection heading='Coupon Management' subHeading="Manage and track Coupons with Advanced controls and Analytics"/>
 
             </header>
 

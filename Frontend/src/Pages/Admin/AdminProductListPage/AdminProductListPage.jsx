@@ -9,6 +9,7 @@ import {LiaSlidersHSolid} from "react-icons/lia"
 import {FiDownload} from "react-icons/fi"
 import {RiArrowDropDownLine} from "react-icons/ri"
 import {IoMdAdd} from "react-icons/io"
+import axios from 'axios'
 
 import {resetStates} from '../../../Slices/productSlice'
 import ProductListingTools from '../../../Components/ProductListingTools/ProductListingTools'
@@ -16,8 +17,8 @@ import {SitePrimaryButtonWithShadow} from '../../../Components/SiteButtons/SiteB
 import {getAllProducts} from '../../../Slices/productSlice'
 import ListingTabs from './ListingTabs'
 import ProductsDisplay from '../../../Components/ProductsDisplay/ProductsDisplay'
-import ProductFilterForAdmin from '../../../Components/ProductFilterForAdmin/ProductFilterForAdmin'
 import ProductFilterSidebar from '../../../Components/ProductFilterSidebar/ProductFilterSidebar'
+import ExportFileModal from './ExportFileModal'
 
 
 
@@ -31,7 +32,7 @@ export default function AdminProductListPage(){
     const [showTheseProducts, setShowTheseProducts] = useState([])
 
     const [minPrice, setMinPrice] = useState(0)
-    const [maxPrice, setMaxPrice] = useState(3750)
+    const [maxPrice, setMaxPrice] = useState(null)
 
     const [showFilter, setShowFilter] = useState(false)
     const [filter, setFilter] = useState({status: 'all', categories: [], brands: []})
@@ -45,12 +46,16 @@ export default function AdminProductListPage(){
 
     const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(false)
 
+    const [isExportModalOpen, setIsExportModalOpen] = useState(false)
+
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
     const {products, message} = useSelector(state=> state.productStore)
 
     const {setHeaderZIndex} = useOutletContext()
+
+    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
     const popularProducts = [
         'benches', 'gymbell', 'treadmill', 'Ellipticals', 'bikes', 'proteinPowders', 'mutistationMachines', 'resistanceBands', 'yogaMats'
@@ -125,6 +130,36 @@ export default function AdminProductListPage(){
         setFilter({...filter, categories, brands, targetMuscles, products, startDate, endDate, status, averageRating: rating})
     }
 
+    const exportFile = async (type) => {
+        setHeaderZIndex(10)
+        if(products && products.length > 0){
+            try {
+                console.log(`Exporting products in ${type}----> ${JSON.stringify(products)}`)
+                const response = await axios.post(`${baseApiUrl}/admin/products/export/${type}`,
+                    {products}, {withCredentials: true, responseType: 'blob'})
+
+                const fileBlob = new Blob([response.data], { type: type === 'csv' ? 'text/csv' : 'application/pdf'})
+
+                const url = window.URL.createObjectURL(fileBlob)
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = type === "csv" ? "products.csv" : "products.pdf"
+                document.body.appendChild(link)
+                link.click()
+
+                link.remove()
+                window.URL.revokeObjectURL(url)
+
+                }
+            catch (error) {
+              console.error("Error exporting file:", error.message)
+            }
+        }else{
+            toast.error("Sorry.There is no available product in the store to export details!")
+        }
+    }
+
+
 
 
     return(
@@ -154,6 +189,7 @@ export default function AdminProductListPage(){
                             xx-md:py-[3px] lg:py-[4px] x-md:py-[4px] xxs-sm:rounded-[6px] xx-md:rounded-[6px] lg:rounded-[8px] x-md:rounded-[8px]"
                         className='chip' 
                         animated={true}
+                        clickHandler={()=> {setHeaderZIndex(0); setIsExportModalOpen(true)}}
                     >
                         <i>
                             <FiDownload/>
@@ -221,6 +257,16 @@ export default function AdminProductListPage(){
                             muscleGroups={muscleGroups}
                             brands={brands}
                             applySidebarFilters={applySidebarFilters}
+                        />
+                }
+
+                {
+                    isExportModalOpen &&
+                        <ExportFileModal
+                            isOpen={isExportModalOpen}
+                            onClose={()=> setIsExportModalOpen(false)}
+                            onExport={exportFile}
+                            productCount={products.length}
                         />
                 }
 

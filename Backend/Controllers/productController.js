@@ -1,8 +1,20 @@
 const Product = require('../Models/productModel')
 const cloudinary = require('../Utils/cloudinary')
+
+const {Parser} = require("json2csv")
+const PDFDocument = require("pdfkit")
+require("pdfkit-table")
+
+const jsPDF = require('jspdf').jsPDF;
+require('jspdf-autotable');
+
+const path = require("path")
+
+
 const {errorHandler} = require('../Utils/errorHandler')
 
 const MAXPRICE = 500000
+
 
 const packProductData = async (req)=>{
     try{
@@ -211,10 +223,11 @@ const getAllProducts = async (req, res, next)=> {
         { $group: { _id: null, maxPrice: { $max: "$price" } } },
       ])
 
-    const maxPriceAvailable = maxPriceAggregation[0]?.maxPrice || 100000;
+      const maxPriceAvailable = maxPriceAggregation[0]?.maxPrice || 100000;
   
       res.status(200).json({ productBundle, productCounts, maxPriceAvailable })
-    }catch (error){
+    }
+    catch (error){
       console.log("Error in productController-getProducts -->", error.message)
       next(error)
     }
@@ -300,4 +313,126 @@ const updateProduct = async (req, res, next) => {
     } 
   }
 
-module.exports = {createProduct, getSingleProduct, getAllProducts, searchProduct, updateProduct, toggleProductStatus}
+
+  const exportProductsAsCsv = async (req, res, next)=> {
+    try {
+      console.log("Inside exportProductsAsCsv in productController--")
+      const {products} = req.body
+      if (!products || products.length === 0) {
+        return next(errorHandler(404, "No products found"))
+      }
+
+      const fields = [
+        { label: "Name", value: "title" },
+        { label: "Category", value: "category" },
+        { label: "Weights", value: "weights" },
+        { label: "Price", value: "price" },
+        { label: "Discount-Type", value: "discountType" },
+        { label: "Discunt-value", value: "discountValue" },
+        { label: "Stock", value: "stock" },
+        { label: "Block-status", value: "isBlocked" },
+        { label: "Created On", value: "createdAt" },
+      ]
+
+      const json2csv = new Parser({fields})
+      const csv = json2csv.parse(products) 
+
+      res.header("Content-Type", "text/csv")
+      res.attachment("products.csv")
+
+      return res.send(csv);
+    }
+    catch (error){
+      console.error("Error exporting products:", error.message)
+      next(error)
+    }
+  }
+
+
+  const exportProductsAsPdf = async (req, res, next) => {
+    try {
+      const { products } = req.body
+      if (!products || products.length === 0) {
+        return next(errorHandler(404, "No products found"))
+      }
+
+      const doc = new PDFDocument({ margin: 30, size: "A4" })
+      res.setHeader("Content-Type", "application/pdf")
+      res.setHeader("Content-Disposition", "attachment; filename=products.pdf")
+
+      doc.pipe(res)
+
+      doc.fontSize(16).text("Product List", { align: "center" })
+      doc.moveDown(0.5)
+      doc.fontSize(10).text(`Total products: ${products.length}`)
+      doc.moveDown(1)
+
+      const colConfig = [
+        { name: "Title", width: 90, x: 30 },
+        { name: "Category", width: 80, x: 130 },
+        { name: "Weight", width: 60, x: 220 },
+        { name: "Price", width: 50, x: 290 },
+        { name: "Disc Type", width: 50, x: 340 },
+        { name: "Disc Value", width: 50, x: 390 },
+        { name: "Stock", width: 40, x: 440 },
+        { name: "Blocked", width: 40, x: 480 },
+        { name: "Created", width: 50, x: 520 }
+      ];
+
+      doc.font("Helvetica-Bold").fontSize(9)
+      const startY = doc.y
+
+      colConfig.forEach(col => {
+        doc.text(col.name, col.x, startY)
+      })
+
+      doc.moveTo(30, startY + 15).lineTo(570, startY + 15).stroke()
+      doc.y = startY + 20
+
+      doc.font("Helvetica").fontSize(8)
+
+      products.forEach((product, index)=> {
+        const rowY = doc.y
+        if (index % 2 === 0) {
+          doc.rect(30, rowY - 3, 540, 15).fill('#f5f5f5')
+        }
+        doc.fillColor('#000000')
+
+        const rowData = [
+          product.title ? String(product.title).length > 25 ? String(product.title).substring(0, 25) + '...' : String(product.title) : "N/A",
+          product.category ? String(product.category).length > 32 ? String(product.category).substring(0, 32) + '...' : String(product.category) : "N/A",
+          product.weights ? String(product.weights).length > 32 ? String(product.weights).substring(0, 32) + '...' : String(product.weights) : "N/A",
+          product.price ? String(product.price) : "N/A",
+          product.discountType ? String(product.discountType) : "N/A",
+          product.discountValue ? String(product.discountValue) : "N/A",
+          product.stock ? String(product.stock) : "N/A",
+          product.isBlocked ? String(product.isBlocked) === 'true' ? 'Yes' : 'No' : "N/A",
+          product.createdAt ? new Date(product.createdAt).toLocaleDateString() : "N/A"
+        ]
+
+        colConfig.forEach((col, i) => {
+          doc.text(rowData[i], col.x, rowY, { width: col.width })
+        })
+
+        doc.moveDown(1)
+        if (doc.y > 700) {
+          doc.addPage();
+          doc.y = 30;
+        }
+      })
+
+      doc.end()
+
+    }
+    catch (error){
+      console.error("Error exporting products to PDF:", error.message)
+      if (!res.headersSent){
+        return next(error)
+      }else{
+        console.error("Headers already sent, cannot send error response")
+      }
+    }
+  }
+
+
+module.exports = {createProduct, getSingleProduct, getAllProducts, searchProduct, updateProduct, toggleProductStatus, exportProductsAsCsv, exportProductsAsPdf}

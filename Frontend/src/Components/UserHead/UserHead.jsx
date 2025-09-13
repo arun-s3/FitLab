@@ -1,25 +1,31 @@
 import React,{useState, useEffect, useRef} from 'react'
 import './UserHead.css'
-import {Link} from 'react-router-dom'
+import {Link, useNavigate, useLocation} from 'react-router-dom'
 import {useSelector, useDispatch} from 'react-redux'
 
 import {Clock, CreditCard, BadgePercent, Home, LogOut, MapPin} from 'lucide-react'
 import {IoMdArrowDropdown, IoMdArrowDropup} from "react-icons/io"
 import {IoBagCheckOutline} from "react-icons/io5"
+import {toast} from 'react-toastify'
 import axios from 'axios'
 
 import {signout} from '../../Slices/userSlice'
+import {resetStore} from "../../Store/resetActions"
+import {persistor} from "../../Store/reduxStore"
 
 
 export default function UserHead(){
 
-    const {user, userToken} = useSelector((state)=>state.user)
+    const {user, userToken} = useSelector((state)=> state.user)
     const dispatch = useDispatch()
     console.log("Userdata from UserHead-->"+JSON.stringify(user))
     console.log("UserToken from UserHead-->"+JSON.stringify(userToken))
 
     const listRef = useRef(null)
     const [beVisible, setBeVisible] = useState(false)
+
+    const location = useLocation()
+    const navigate = useNavigate()
 
     const menuItems = [
         { icon: Home, label: 'Account', path: '/account'},
@@ -69,6 +75,38 @@ export default function UserHead(){
         }
     },[])
 
+    // useEffect(()=> {
+    //     if(!user){
+    //         const location = useLocation()
+    //         if(location.pathname !== '/')
+    //     }
+    // }, [user])
+
+    const handleSignout = async()=> {
+      try {
+        console.log("Inside handleSignout")
+        let result = null
+        if(user.googleId){
+            result = await dispatch(signout(user.googleId)).unwrap()
+        }else{
+            result = await dispatch(signout()).unwrap()
+        }
+        console.log("Signout success:", result)
+        if(result){
+            await persistor.purge()
+            localStorage.clear()
+            sessionStorage.clear()
+            dispatch(resetStore())
+
+            localStorage.setItem("completeLogout", Date.now())
+        }
+      }catch(error){
+        console.error("Signout failed:", error)
+        toast.error("Internal server error. Please try again later!")
+      }
+    }
+
+
     return(
             <div className='ml-[70px] relative' onMouseEnter={toggleList.showList} onMouseLeave={mouseLeaveHandler} onClick={clickHandler}> 
                 <div className='flex' onMouseEnter={toggleList.showList}>  
@@ -96,7 +134,7 @@ export default function UserHead(){
                         }
                         <li className='ml-[3px] pt-[12px] text-red-500 hover:text-[15px] hover:font-[500] border-t-[1px] 
                             border-dotted border-secondary'>
-                            <Link onClick={()=>{ user.googleId ? dispatch(signout(user.googleId)) : dispatch(signout()) }} 
+                            <Link onClick={handleSignout}
                                className='flex items-center gap-[10px]'>
                                 <LogOut className='h-[15px] w-[15px]' />  
                                 <span> Sign Out </span>

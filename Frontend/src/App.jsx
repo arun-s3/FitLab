@@ -27,6 +27,7 @@ import CustomerSupportPage from './Pages/User/CustomerSupportPage/CustomerSuppor
 import ModalContext from './Components/GlobalModals/ModalContext'
 import SocketListener from './Components/GlobalModals/SocketListener'
 import GlobalVideoCallModalLayout from './Pages/User/GlobalModalLayouts/GlobalVideoCallModalLayout'
+import UserRoutesWrapper from './Components/UserRoutesWrapper/UserRoutesWrapper'
 
 import AdminSignInPage from './Pages/Admin/AdminSignInPage/AdminSignInPage'
 import AdminPageLayout from './Pages/Admin/AdminPageLayout/AdminPageLayout'
@@ -66,53 +67,58 @@ export default function App(){
             <ToastContainer theme='dark' autoClose={1500} style={{fontSize:'12px'}} hideProgressBar />
             
             <Routes path="/">
-                {/* <Route path='test' element={AdminCategoryListPage} /> */}
-                <Route path='test-cropper' element={<TestImageCropper/>}/>
-                <Route path='test-address' element={<TestAddressPage/>}/>
-                <Route path='test' element={<TestRandomPage/>}/>
-                <Route element={<PrivateUserRoutes/>}>
-                </Route>
-                <Route path='signup'>
-                    <Route index element={<SignUpAndInPage type='signup' />} />
-                    <Route path='otp-verify' element={<OtpVerificationPage/>}/>
-                </Route>
-                <Route path='signin' element={<SignUpAndInPage type='signin' />}/>
-                <Route path='forgot-password' element={<ForgotAndResetPasswordPage/>}/>
-                <Route path='error'>
-                    <Route path='userPresent' element={<UserPresenceErrorPage/>}/>
-                </Route>
-                <Route element={<SocketProvider/>}>
-                    <Route element={<GlobalVideoCallModalLayout/>}>
-                    <Route index element={<HomePage/>}/>
-                    <Route path='shop'>
-                        <Route index element={<ProductListPage/>}/>
-                        <Route path='product' element={<ProductDetailPage/>} />
+
+                <Route element={<UserRoutesWrapper />} >
+
+                    {/* <Route path='test' element={AdminCategoryListPage} /> */}
+                    <Route path='test-cropper' element={<TestImageCropper/>}/>
+                    <Route path='test-address' element={<TestAddressPage/>}/>
+                    <Route path='test' element={<TestRandomPage/>}/>
+                    <Route element={<PrivateUserRoutes/>}>
                     </Route>
-                    <Route path='cart' element={<CartPage/>} />
-                    <Route path='checkout' element={<CheckoutPage/>} />
-                    <Route path='order-confirm' element={<OrderConfirmationPage/>} />
-                    {/* <Route path='order-completed' element={<OrderCompletedPage/>}  /> */}
-                    <Route element={<UserPageLayout/>} >
-                        <Route path='account'>
-                            <Route index element={<UserAccountPage/>}/>
-                            <Route path='addresses'>
-                                <Route index element={<AddressListingPage/>}/>
-                                <Route path='add' element={<AddressManagementPage/>}/>
-                                <Route path='edit' element={<AddressManagementPage editAddresses={true}/>}/>
-                            </Route>   
+                    <Route path='signup'>
+                        <Route index element={<SignUpAndInPage type='signup' />} />
+                        <Route path='otp-verify' element={<OtpVerificationPage/>}/>
+                    </Route>
+                    <Route path='signin' element={<SignUpAndInPage type='signin' />}/>
+                    <Route path='forgot-password' element={<ForgotAndResetPasswordPage/>}/>
+                    <Route path='error'>
+                        <Route path='userPresent' element={<UserPresenceErrorPage/>}/>
+                    </Route>
+                    <Route element={<SocketProvider/>}>
+                        <Route element={<GlobalVideoCallModalLayout/>}>
+                        <Route index element={<HomePage/>}/>
+                        <Route path='shop'>
+                            <Route index element={<ProductListPage/>}/>
+                            <Route path='product' element={<ProductDetailPage/>} />
                         </Route>
-                        <Route path='wishlist' element={<WishlistPage/>} />
-                        <Route path='coupons' element={<CouponPage/>} />
-                        <Route path='wallet' element={<WalletPage/>} />
-                        {/* <Route path='wishlist-test' element={<WishlistPage/>} /> */}
+                        <Route path='cart' element={<CartPage/>} />
+                        <Route path='checkout' element={<CheckoutPage/>} />
+                        <Route path='order-confirm' element={<OrderConfirmationPage/>} />
+                        {/* <Route path='order-completed' element={<OrderCompletedPage/>}  /> */}
+                        <Route element={<UserPageLayout/>} >
+                            <Route path='account'>
+                                <Route index element={<UserAccountPage/>}/>
+                                <Route path='addresses'>
+                                    <Route index element={<AddressListingPage/>}/>
+                                    <Route path='add' element={<AddressManagementPage/>}/>
+                                    <Route path='edit' element={<AddressManagementPage editAddresses={true}/>}/>
+                                </Route>   
+                            </Route>
+                            <Route path='wishlist' element={<WishlistPage/>} />
+                            <Route path='coupons' element={<CouponPage/>} />
+                            <Route path='wallet' element={<WalletPage/>} />
+                            {/* <Route path='wishlist-test' element={<WishlistPage/>} /> */}
+                        </Route>
+                        <Route path='orders' element={<OrderHistoryPage/>} />
+                        <Route path='support' element={<CustomerSupportPage/>} />
+                        {/* <Route path='video' element={<VideoChatPage/>} /> */}
+                        {/* <Route path='wallet' element={<WalletPage/>} /> */}
+                        <Route path='profile'> 
+                        </Route>
+                        </Route>
                     </Route>
-                    <Route path='orders' element={<OrderHistoryPage/>} />
-                    <Route path='support' element={<CustomerSupportPage/>} />
-                    {/* <Route path='video' element={<VideoChatPage/>} /> */}
-                    {/* <Route path='wallet' element={<WalletPage/>} /> */}
-                    <Route path='profile'> 
-                    </Route>
-                    </Route>
+
                 </Route>
 
 

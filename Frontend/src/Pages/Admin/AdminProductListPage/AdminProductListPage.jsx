@@ -161,7 +161,6 @@ export default function AdminProductListPage(){
 
 
 
-
     return(
 
         <section id='AdminProductList' >

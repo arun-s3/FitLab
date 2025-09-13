@@ -1,6 +1,6 @@
 import React,{useState, useEffect, useLayoutEffect, useRef} from 'react'
 import './SignUpAndInPage.css'
-import {Link, useNavigate} from 'react-router-dom'
+import {Link, useNavigate, useLocation} from 'react-router-dom'
 import {useDispatch, useSelector} from 'react-redux'
 
 import {toast} from 'react-toastify'
@@ -27,6 +27,8 @@ export default function SignUpAndInPage({type}){
     const navigate = useNavigate()
     const identifierRef = useRef(null)
     const passwordRef = useRef(null)
+
+    const location = useLocation()
 
     const [otpPageLoading, setOtpPageLoading] = useState(false)
  
@@ -69,7 +71,13 @@ export default function SignUpAndInPage({type}){
             checkSuccessAndSendOtp();
         }
         if(type=='signin' && success){
-            navigate('/',{replace:true})
+            if(location && location.state?.currentPath){
+                const redirectingtPath = location.state.currentPath 
+                console.log("redirectingtPath---->", redirectingtPath)
+                navigate(`${redirectingtPath}`, {replace:true})
+            }else{
+                navigate('/', {replace:true})
+            }
             dispatch(resetStates())
         }
         if(error){
@@ -85,10 +93,10 @@ export default function SignUpAndInPage({type}){
                 dispatch(resetStates())
             }
         }
-        if(userToken){
-            console.log("Cannot go coz u got token")
-            navigate('/',{replace:true})
-        } 
+        // if(userToken){
+        //     console.log("Cannot go coz u got token")
+        //     navigate('/',{replace:true})
+        // } 
         dispatch(resetStates())
     })
     
@@ -99,6 +107,12 @@ export default function SignUpAndInPage({type}){
         if(identifierRef.current) identifierRef.current.value=""
         passwordRef.current.value=""
     },[type])
+
+    useEffect(()=> {
+        if(location){
+            console.log("location----->", location)
+        }
+    }, [location])
 
     const handleChange = (e)=>{
         setFormData({...formData, [e.target.id.toString()]:e.target.value})

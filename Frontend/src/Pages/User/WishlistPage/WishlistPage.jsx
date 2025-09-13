@@ -16,6 +16,7 @@ import ListDeletionModal from './ListDeletionModal'
 import {getAllWishlistProducts, getUserWishlist, searchList, resetWishlistStates} from '../../../Slices/wishlistSlice'
 import {getTheCart, resetCartStates} from '../../../Slices/cartSlice'
 import CartSidebar from '../../../Components/CartSidebar/CartSidebar'
+import AuthModal from '../../../Components/AuthModal/AuthModal'
 import {UserPageLayoutContext} from '../UserPageLayout/UserPageLayout'
 
 
@@ -51,9 +52,12 @@ export default function WishlistPage(){
     const [listToDelete, setListToDelete] = useState(null)
 
     const [isCartOpen, setIsCartOpen] = useState(false)
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState({status: false, accessFor: 'whishlist'})
 
     const {cart, productAdded, productRemoved, error, message} = useSelector(state=> state.cart) 
     const {wishlist, listCreated, listRemoved, listUpdated, loading, wishlistError, wishlistSuccess} = useSelector(state=> state.wishlist) 
+    const {user} = useSelector((state)=> state.user)
+    
 
     const dispatch = useDispatch()
     
@@ -94,7 +98,7 @@ export default function WishlistPage(){
     },[currentList, sorts, currentPage, limit])
 
     useEffect(()=>{
-        console.log('OUERYOPTIONS--------->', JSON.stringify(queryOptions))
+        console.log('WISHLIST OUERYOPTIONS--------->', JSON.stringify(queryOptions))
         if(Object.keys(queryOptions).length){
             dispatch( getAllWishlistProducts({queryOptions}))
         }
@@ -174,7 +178,8 @@ export default function WishlistPage(){
                             rounded-[7px] ${isSearchListHovered && 'opacity-100'}`}></div>
                     </h2>
                     <div className={`w-full pr-[5px] flex flex-col gap-[10px]`}>
-                        {
+                        { 
+                         wishlist && wishlist.list && wishlist.list.length > 0 &&
                            [...wishlist.lists].sort((a,b)=>{
                             const priorityA = a.priority.toString()
                             const priorityB = b.priority.toString()
@@ -231,11 +236,18 @@ export default function WishlistPage(){
                     </div>
                 </div>
 
-                <div className='mb-[2rem] w-full h-[3rem] pl-[1rem] flex items-center gap-[10px] cursor-pointer'>
+                <div className='mb-[2rem] w-full h-[3rem] pl-[1rem] flex items-center gap-[10px] cursor-pointer'
+                    onClick={()=> {
+                            if(user){
+                                setIsWishlistModalOpen(true)
+                            }else{
+                                setIsAuthModalOpen({status: true, accessFor: 'whishlist'})
+                            }
+                    }   }
+                >
 
                     <Plus className='text-secondary w-[20px] h-[20px]'/>
-                    <span className='text-[14px] text-muted font-[500] tracking-[0.5px] capitalize' 
-                        onClick={()=> setIsWishlistModalOpen(true)}>
+                    <span className='text-[14px] text-muted font-[500] tracking-[0.5px] capitalize'>
                              Add New List 
                     </span>
                     
@@ -261,7 +273,19 @@ export default function WishlistPage(){
 
                     </div>
 
-                    <CartSidebar isOpen={isCartOpen} onClose={()=> setIsCartOpen(false)} retractedView={true} />
+                    <CartSidebar isOpen={isCartOpen} 
+                        onClose={()=> setIsCartOpen(false)} 
+                        retractedView={true} 
+                    />
+
+                    {
+                        isAuthModalOpen.status &&
+                            <AuthModal
+                                isOpen={isAuthModalOpen.status}
+                                accessFor={isAuthModalOpen.accessFor}
+                                onClose={()=> setIsAuthModalOpen({status: false, accessFor: 'whishlist'})}
+                            />
+                    }
                         
                 </div>
 

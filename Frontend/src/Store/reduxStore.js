@@ -17,13 +17,15 @@ import cartReducer from '../Slices/cartSlice'
 import orderReducer from '../Slices/orderSlice'
 import walletReducer from '../Slices/walletSlice'
 
+import {resetStore} from "../Store/resetActions"
+
 
 const walletPersistConfig = {
     key: 'wallet',
     storage: sessionStorage,
 }
 
-const rootReducer = combineReducers({
+const appReducer = combineReducers({
     user: userReducer,
     admin: adminReducer,
     address: addressReducer,
@@ -36,6 +38,15 @@ const rootReducer = combineReducers({
     order: orderReducer,
     wallet: persistReducer(walletPersistConfig, walletReducer)
 })
+
+
+const rootReducer = (state, action) => {
+  if (action.type === resetStore.type) {
+    state = undefined
+  }
+  return appReducer(state, action)
+}
+
 
 const persistConfig = {
     key: 'root',

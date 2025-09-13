@@ -85,7 +85,8 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
         dispatch( getAllWishlistProducts({queryOptions}) )
       }
     }
-    if(wishlistError){
+    if(wishlistError && !wishlistError.includes('Unauthorized')){
+      console.log("wishlistError--->", wishlistError)
       toast.error(wishlistError)
       dispatch(resetWishlistStates())
     }

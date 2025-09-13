@@ -193,6 +193,9 @@ const userSlice = createSlice({
                 console.log("inside signout.fulfilled, action.payload"+JSON.stringify(action.payload))
                 state.userToken = null
                 state.user = null
+                state.error = null,
+                state.loading = false
+                state.success = false
                 console.log("state.userToken now-->"+state.userToken )
         })
         .addCase(googleSignin.pending, (state,action)=>{

@@ -79,7 +79,23 @@ deploy_backend:
     - ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
     - echo "SSH INTO EC2 DONE"
   script:
-    - rsync -avz --delete Backend/ .env package.json package-lock.json ecosystem.config.js ubuntu@$EC2_HOST:/var/www/fitlab-api/
-    - ssh ubuntu@$EC2_HOST "cd /var/www/fitlab-api && npm ci --omit=dev && pm2 reload ecosystem.config.js --update-env"
-    - echo "BACKEND DEPLOYED SUCCESSFULLY"
+    - rsync -avz --delete-before \
+        --exclude 'Public/Images/**' \
+        --exclude 'node_modules/**' \
+        --exclude '.git' \
+        Backend/ .env package.json package-lock.json ecosystem.config.js \
+        ubuntu@$EC2_HOST:/var/www/fitlab-api/
+    - ssh ubuntu@$EC2_HOST "
+        cd /var/www/fitlab-api && \
+        npm ci --omit=dev && \
+        pm2 reload ecosystem.config.js --update-env && \
+        echo 'Cleaning old logs and temp files...' && \
+        sudo apt-get clean && \
+        sudo journalctl --vacuum-time=2d && \
+        pm2 flush && \
+        rm -rf ~/.pm2/logs/* && \
+        sudo rm -rf /tmp/*
+      "
+    - echo "BACKEND DEPLOYED SUCCESSFULLY AND CLEANUP DONE"
+
 

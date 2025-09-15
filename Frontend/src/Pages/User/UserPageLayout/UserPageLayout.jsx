@@ -1,5 +1,6 @@
 import React, {createContext, useState} from 'react'
 import {Outlet} from 'react-router-dom'
+import {useSelector, useDispatch} from 'react-redux'
 
 import Header from '../../../Components/Header/Header'
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
@@ -20,6 +21,8 @@ export default function UserPageLayout(){
     // const [contentSectionStyles, setContentSectionStyles] = useState('')
     // const [outletSectionStyles, setOutletSectionStyles] = useState('')
 
+    const {user} = useSelector((state)=> state.user)
+
     const headerBg = {
         backgroundImage: "url('/header-bg.png')",
         backgrounSize: 'cover'
@@ -36,13 +39,16 @@ export default function UserPageLayout(){
 
                 <BreadcrumbBar heading={ breadcrumbHeading && breadcrumbHeading } />
 
-                <main className='flex gap-[2rem] px-[4rem] mb-[10rem]'>
+                <main className={`${user ? 'flex gap-[2rem]' : ''} gap-[2rem] px-[4rem] mb-[10rem]`}>
                 
-                    <div className={`basis-[15%]`}>
+                    {
+                        user &&
+                        <div className={`basis-[15%]`}>
                                             
-                        <UserSidebar currentPath={pageLocation}/>
+                            <UserSidebar currentPath={pageLocation}/>
                         
-                    </div>
+                        </div>
+                    }
 
                     <div className={` ${contentTileClasses ? contentTileClasses : 'basis-[75%] mt-[2rem] content-tile'} `}>
                         

@@ -32,7 +32,6 @@ import UserRoutesWrapper from './Components/UserRoutesWrapper/UserRoutesWrapper'
 import AdminSignInPage from './Pages/Admin/AdminSignInPage/AdminSignInPage'
 import AdminPageLayout from './Pages/Admin/AdminPageLayout/AdminPageLayout'
 import PrivateAdminRoutes from './Components/PrivateAdminRoutes/PrivateAdminRoutes'
-import UserPresenceErrorPage from './Pages/Admin/AdminErrorPages/UserPresenceErrorPage'
 import AdminCustomersPage from './Pages/Admin/AdminCustomersPage/AdminCustomersPage'
 // import AdminCustomersPageV2 from './Pages/Admin/TesterPages/TesterV2AdminCustomersPage' //For Testing Purpose
 // import AdminCustomersPageV3 from './Pages/Admin/TesterPages/TesterV3AdminCustomersPage'  //For Testing Purpose
@@ -49,6 +48,9 @@ import AdminOfferManagementPage from './Pages/Admin/AdminOfferManagementPage/Adm
 import AdminCreateOfferPage from './Pages/Admin/AdminCreateOfferPage/AdminCreateOfferPage'
 import AdminTextChatSupportPage from './Pages/Admin/AdminTextChatSupportPage/AdminTextChatSupportPage'
 import AdminVideoChatSupportPage from './Pages/Admin/AdminVideoChatSupportPage/AdminVideoChatSupportPage'
+import AdminRoutesWrapper from './Components/UserRoutesWrapper/AdminRoutesWrapper/AdminRoutesWrapper'
+
+import ErrorPage403 from './Pages/Errors/403ErrorPage'
 
 
 import {ToastContainer} from 'react-toastify'
@@ -82,9 +84,6 @@ export default function App(){
                     </Route>
                     <Route path='signin' element={<SignUpAndInPage type='signin' />}/>
                     <Route path='forgot-password' element={<ForgotAndResetPasswordPage/>}/>
-                    <Route path='error'>
-                        <Route path='userPresent' element={<UserPresenceErrorPage/>}/>
-                    </Route>
                     <Route element={<SocketProvider/>}>
                         <Route element={<GlobalVideoCallModalLayout/>}>
                         <Route index element={<HomePage/>}/>
@@ -122,7 +121,9 @@ export default function App(){
                 </Route>
 
 
-                <Route path="admin/">
+                <Route element={<AdminRoutesWrapper/>}>
+
+                    <Route path="admin/">
                     <Route path="signin" element={<AdminSignInPage/>}/>
                         <Route element={<AdminSocketProvider/>}>
                             <Route element={<PrivateAdminRoutes/>}>
@@ -157,7 +158,15 @@ export default function App(){
                                 </Route>
                             </Route>
                     </Route>
+
                 </Route>
+
+                </Route>
+
+                <Route>
+                    <Route path='403' element={<ErrorPage403/>} />
+                </Route>    
+
             </Routes>
         </BrowserRouter>
     )

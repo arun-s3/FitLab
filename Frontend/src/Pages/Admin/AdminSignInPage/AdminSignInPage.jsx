@@ -25,7 +25,9 @@ export default function AdminSignInPage(){
     const navigate = useNavigate()
 
     const dispatch = useDispatch()
-    const {adminError, adminLoading, adminSuccess, adminToken,admin} = useSelector((state)=>state.admin)
+
+    const {adminError, adminLoading, adminSuccess, adminToken,admin} = useSelector((state)=> state.admin)
+    const {user} = useSelector(state=> state.user)
 
     useEffect(() => {
         console.log("Inside useEffect()")

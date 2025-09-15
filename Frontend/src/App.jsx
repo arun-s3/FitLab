@@ -51,6 +51,8 @@ import AdminVideoChatSupportPage from './Pages/Admin/AdminVideoChatSupportPage/A
 import AdminRoutesWrapper from './Components/UserRoutesWrapper/AdminRoutesWrapper/AdminRoutesWrapper'
 
 import ErrorPage403 from './Pages/Errors/403ErrorPage'
+import ErrorPage401 from './Pages/Errors/401ErrorPage'
+import NotFound from './Pages/Errors/404ErrorPage'
 
 
 import {ToastContainer} from 'react-toastify'
@@ -165,6 +167,8 @@ export default function App(){
 
                 <Route>
                     <Route path='403' element={<ErrorPage403/>} />
+                    <Route path='401' element={<ErrorPage401/>} />
+                    <Route path='404' element={<NotFound/>} />
                 </Route>    
 
             </Routes>

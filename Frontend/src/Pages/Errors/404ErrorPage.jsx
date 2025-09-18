@@ -4,13 +4,13 @@ import {motion} from "framer-motion"
 import {Home} from "lucide-react"
 
 
-export default function NotFoundPage() {
+export default function ErrorPage404() {
 
     
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 bg-[#F9FADE] relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
-        {/* {[...Array(12)].map((_, i) => (
+        {[...Array(12)].map((_, i) => (
           <motion.div
             key={i}
             className={`absolute ${
@@ -37,7 +37,7 @@ export default function NotFoundPage() {
               delay: Math.random() * 2,
             }}
           />
-        ))} */}
+        ))}
       </div>
 
       <div className="min-h-screen flex items-center justify-center px-6 relative z-10">
@@ -79,11 +79,11 @@ export default function NotFoundPage() {
             </motion.div>
 
             <motion.figure 
-                className='w-[37rem] h-[16rem]'
+                className='ml-8 xs-sm:ml-0 w-[20rem] h-[8rem] xxs-sm:w-[25rem] xxs-sm:h-[8rem] xs-sm:w-[32rem] xs-sm:h-[12rem] sm:w-[35rem] sm:h-[16rem] lg:w-[32rem] lg:h-[12rem] x-lg:w-[37rem] x-lg:h-[16rem] lg:ml-[-2rem] x-lg:ml-[-5rem] xl:ml-0'
             >
                 <motion.img alt='Error 403' 
                     src='/404Error.png' 
-                    className='w-[37rem] h-[16rem]'
+                    className='w-full h-full'
                 />
             </motion.figure>
 

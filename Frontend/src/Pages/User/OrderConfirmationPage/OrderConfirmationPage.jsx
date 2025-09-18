@@ -11,7 +11,7 @@ import {SiteButtonSquare, SiteButton, SiteSecondaryFillImpButton} from '../../..
 
 export default function OrderConfirmationPage(){
 
-  const {user} = useSelector((state)=>state.user)
+  const {user} = useSelector((state)=> state.user)
 
   const navigate = useNavigate()
 

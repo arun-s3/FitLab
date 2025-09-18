@@ -12,6 +12,7 @@ import {toast} from "react-toastify"
 import {format} from "date-fns"
 
 import {UserPageLayoutContext} from '../UserPageLayout/UserPageLayout'
+import {ProtectedUserContext} from '../../../Components/ProtectedUserRoutes/ProtectedUserRoutes'
 import {getAllCoupons, searchCoupons, resetCouponStates} from '../../../Slices/couponSlice'
 import {applyCoupon, removeCoupon, resetCartStates} from '../../../Slices/cartSlice'
 import useFlexiDropdown from '../../../Hooks/FlexiDropdown'
@@ -22,6 +23,9 @@ export default function CouponPage(){
 
   const {setBreadcrumbHeading, setPageLocation} = useContext(UserPageLayoutContext)
   setBreadcrumbHeading('Coupons')
+
+  const {setIsAuthModalOpen, checkAuthOrOpenModal} = useContext(ProtectedUserContext)
+  // setIsAuthModalOpen({status: false, accessFor: 'coupon features'})
   
   const location = useLocation()
   setPageLocation(location.pathname)
@@ -129,6 +133,9 @@ export default function CouponPage(){
   }
 
   const couponAction = (coupon)=> {
+    console.log("Bfore checkAuthOrOpenModal()----")
+    if(checkAuthOrOpenModal("coupon features")) return
+    console.log("After checkAuthOrOpenModal()----")
     if(cart?.couponUsed?._id === coupon._id){
       dispatch(removeCoupon())
     }else{

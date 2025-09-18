@@ -22,6 +22,7 @@ import {getBestCoupon, resetCouponStates} from '../../../Slices/couponSlice'
 
 import {CustomHashLoader, CustomScaleLoader} from '../../../Components/Loader//Loader'
 import Footer from '../../../Components/Footer/Footer'
+import AuthPrompt from '../../../Components/AuthPrompt/AuthPrompt';
 
 export default function ShoppingCartPage(){
 
@@ -37,6 +38,7 @@ export default function ShoppingCartPage(){
 
   const {cart, productAdded, productRemoved, loading, error, message, couponApplied} = useSelector(state=> state.cart)
   const {bestCoupon, couponMessage} = useSelector(state=> state.coupons)
+  const {user} = useSelector(state=> state.user)
 
   const dispatch = useDispatch()
 
@@ -298,6 +300,15 @@ export default function ShoppingCartPage(){
               to search for products
             </h2>
           </div>
+        }
+
+        {
+          !user &&
+            <div className='mt-16 '>
+
+              <AuthPrompt />
+              
+            </div>
         }
 
       </div>

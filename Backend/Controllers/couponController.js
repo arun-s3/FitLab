@@ -252,13 +252,13 @@ const getAllCoupons = async (req, res, next) => {
     if (applicableType && applicableType !== 'all'){
         filterConditions.applicableType = applicableType
     }
-    if (minimumOrderValue){
+    if (minimumOrderValue !== undefined && minimumOrderValue !== null){
         filterConditions.minimumOrderValue = { $lte: minimumOrderValue }
     }
-    if (usedCount){
+    if (usedCount !== undefined && usedCount !== null){
         filterConditions.usedCount = { $lte: usedCount }
     }
-    if (status !== 'all'){
+    if (status && status !== 'all'){
       filterConditions.status = status
     }
     if (searchData) {
@@ -271,6 +271,8 @@ const getAllCoupons = async (req, res, next) => {
     } else {
       sortOptions.createdAt = sort
     }
+
+    console.log("Final filterConditions:", filterConditions)
 
     const coupons = await Coupon.find(filterConditions)
       .skip(skip)

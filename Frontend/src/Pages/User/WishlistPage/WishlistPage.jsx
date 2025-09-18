@@ -16,8 +16,9 @@ import ListDeletionModal from './ListDeletionModal'
 import {getAllWishlistProducts, getUserWishlist, searchList, resetWishlistStates} from '../../../Slices/wishlistSlice'
 import {getTheCart, resetCartStates} from '../../../Slices/cartSlice'
 import CartSidebar from '../../../Components/CartSidebar/CartSidebar'
-import AuthModal from '../../../Components/AuthModal/AuthModal'
+import AuthPrompt from '../../../Components/AuthPrompt/AuthPrompt'
 import {UserPageLayoutContext} from '../UserPageLayout/UserPageLayout'
+import {ProtectedUserContext} from '../../../Components/ProtectedUserRoutes/ProtectedUserRoutes'
 
 
 
@@ -25,6 +26,9 @@ export default function WishlistPage(){
 
     const {setBreadcrumbHeading, setContentTileClasses, setPageLocation} = useContext(UserPageLayoutContext)
     setBreadcrumbHeading('Wishlist')
+    
+    const {setIsAuthModalOpen, checkAuthOrOpenModal} = useContext(ProtectedUserContext)
+    setIsAuthModalOpen({status: false, accessFor: 'wishlist'})
               
     const location = useLocation()
     setPageLocation(location.pathname)
@@ -52,7 +56,6 @@ export default function WishlistPage(){
     const [listToDelete, setListToDelete] = useState(null)
 
     const [isCartOpen, setIsCartOpen] = useState(false)
-    const [isAuthModalOpen, setIsAuthModalOpen] = useState({status: false, accessFor: 'whishlist'})
 
     const {cart, productAdded, productRemoved, error, message} = useSelector(state=> state.cart) 
     const {wishlist, listCreated, listRemoved, listUpdated, loading, wishlistError, wishlistSuccess} = useSelector(state=> state.wishlist) 
@@ -238,12 +241,12 @@ export default function WishlistPage(){
 
                 <div className='mb-[2rem] w-full h-[3rem] pl-[1rem] flex items-center gap-[10px] cursor-pointer'
                     onClick={()=> {
-                            if(user){
+                                if(checkAuthOrOpenModal()){
+                                  return
+                                }
                                 setIsWishlistModalOpen(true)
-                            }else{
-                                setIsAuthModalOpen({status: true, accessFor: 'whishlist'})
-                            }
-                    }   }
+                                }           
+                            }           
                 >
 
                     <Plus className='text-secondary w-[20px] h-[20px]'/>
@@ -272,22 +275,22 @@ export default function WishlistPage(){
                             queryOptions={queryOptions} wishlistDisplay={true} currentList={currentList}/>
 
                     </div>
-
-                    <CartSidebar isOpen={isCartOpen} 
-                        onClose={()=> setIsCartOpen(false)} 
-                        retractedView={true} 
-                    />
-
-                    {
-                        isAuthModalOpen.status &&
-                            <AuthModal
-                                isOpen={isAuthModalOpen.status}
-                                accessFor={isAuthModalOpen.accessFor}
-                                onClose={()=> setIsAuthModalOpen({status: false, accessFor: 'whishlist'})}
-                            />
-                    }
+                    
                         
                 </div>
+                {
+                  !user &&
+                    <div className='mt-4'>
+                    
+                      <AuthPrompt />
+
+                    </div>
+                }
+
+                <CartSidebar isOpen={isCartOpen} 
+                    onClose={()=> setIsCartOpen(false)} 
+                    retractedView={true} 
+                />
 
             </section>
 

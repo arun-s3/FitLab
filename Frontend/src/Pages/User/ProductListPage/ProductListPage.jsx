@@ -1,4 +1,4 @@
-import React,{useState, useEffect, useRef} from 'react'
+import React,{useState, useEffect, useRef, useContext} from 'react'
 import './ProductListPage.css'
 import {useDispatch, useSelector} from 'react-redux'
 import {debounce} from 'lodash'
@@ -14,6 +14,7 @@ import ProductListingTools from '../../../Components/ProductListingTools/Product
 import CartSidebar from '../../../Components/CartSidebar/CartSidebar'
 import {getAllProducts, toggleProductStatus} from '../../../Slices/productSlice'
 import {getTheCart, resetCartStates} from '../../../Slices/cartSlice'
+import {ProtectedUserContext} from '../../../Components/ProtectedUserRoutes/ProtectedUserRoutes'
 import ProductFilterSidebar from '../../../Components/ProductFilterSidebar/ProductFilterSidebar'
 import FilterModule from './FilterModule'
 
@@ -21,11 +22,10 @@ import FilterModule from './FilterModule'
 
 export default function ProductList({admin}){
 
-    const headerBg = {
-        backgroundImage: "url('/header-bg.png')",
-        backgrounSize: 'cover'
-    }
 
+    const {setIsAuthModalOpen, checkAuthOrOpenModal} = useContext(ProtectedUserContext)
+    setIsAuthModalOpen({status: false, accessFor: 'shopping'})
+    
     const [minPrice, setMinPrice] = useState(0)
     const [maxPrice, setMaxPrice] = useState(3750)
     let firstSlideRef = useRef(false)
@@ -47,6 +47,11 @@ export default function ProductList({admin}){
     const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(false)
 
     const {cart, productAdded, productRemoved, loading, error, message} = useSelector(state=> state.cart)    
+
+    const headerBg = {
+        backgroundImage: "url('/header-bg.png')",
+        backgrounSize: 'cover'
+    }
 
 
     const sortMenu = [
@@ -189,6 +194,7 @@ export default function ProductList({admin}){
                             pageReader={{currentPage, setCurrentPage}}
                             limiter={{limit, setLimit}}
                             queryOptions={queryOptions}
+                            checkAuthOrOpenModal={checkAuthOrOpenModal}
                         />
 
                     </div>

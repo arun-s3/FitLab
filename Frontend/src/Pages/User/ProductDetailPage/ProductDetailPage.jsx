@@ -1,9 +1,10 @@
-import React, {useEffect, useState, useRef} from 'react'
-import {useLocation} from 'react-router-dom'
+import React, {useEffect, useState, useRef, useContext} from 'react'
+import {useLocation, useSearchParams} from 'react-router-dom'
 import {useDispatch, useSelector} from 'react-redux'
 
 import {Star, Minus, Plus, Heart, ChevronLeft, ChevronRight, BadgePlus, Check} from 'lucide-react'
 import {toast} from 'react-toastify'
+import axios from 'axios'
 
 import Header from '../../../Components/Header/Header'
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
@@ -13,6 +14,8 @@ import {getBestOffer} from '../../../Slices/offerSlice'
 import {CustomHashLoader, CustomScaleLoader} from '../../../Components/Loader//Loader'
 import StarGenerator from '../../../Components/StarGenerator/StarGenerator'
 import CartSidebar from '../../../Components/CartSidebar/CartSidebar'
+import AuthPrompt from '../../../Components/AuthPrompt/AuthPrompt'
+import {ProtectedUserContext} from '../../../Components/ProtectedUserRoutes/ProtectedUserRoutes'
 import Footer from '../../../Components/Footer/Footer'
 
 
@@ -21,6 +24,10 @@ const Card = ({children, className})=> (
 )
 
 export default function ProductDetailPage(){
+
+  const {setIsAuthModalOpen, checkAuthOrOpenModal} = useContext(ProtectedUserContext)
+  setIsAuthModalOpen({status: false, accessFor: 'shopping features'})
+
   const [quantity, setQuantity] = useState(1)
   const [selectedWeight, setSelectedWeight] = useState(null)
   const [activeTab, setActiveTab] = useState("description")
@@ -36,26 +43,42 @@ export default function ProductDetailPage(){
   const thumbnailRef = useRef(null)
 
   const location = useLocation()
+  const [searchParam, setSearchParam] = useSearchParams()
+  const currentProductId = searchParam.get('id')
 
   const {cart, productAdded, loading, error} = useSelector(state=> state.cart)
   const {bestOffer} = useSelector(state=> state.offers)
+  const {user} = useSelector(state=> state.user)
+
   const dispatch = useDispatch()
+
+  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
   // useEffect(()=> {
   //     dispatch(getTheCart())
   // },[])
 
   useEffect(()=> {
-    if(location?.state?.product){
-        console.log("location.state.product-->", location.state.product)
-        setProductDetails(location.state.product)
-        setSelectedWeight(location.state.product.weights[0])
-        const thumbnailIndex = location.state.product.images.findIndex(img=> img.isThumbnail)
+    const fetchProduct = async()=> {
+      const response = await axios.get(`${baseApiUrl}/products/${currentProductId}`, {withCredentials:true})
+      console.log('response---->', response)
+      return response.data[0] 
+    }
+    const loadProduct = async()=> {
+      if(currentProductId){
+        const product = await fetchProduct()
+        console.log("location.state.product-->", product)
+        setProductDetails(product)
+        setSelectedWeight(product.weights[0])
+        const thumbnailIndex = product.images.findIndex(img=> img.isThumbnail)
         setCurrentImageIndex(thumbnailIndex)
 
-        dispatch( getBestOffer({productId: location.state.product._id, quantity}) )
+        dispatch( getBestOffer({productId: product._id, quantity}) )
+      }
     }
-  },[location])
+    dispatch(resetCartStates())
+    loadProduct()
+  },[currentProductId])
 
   useEffect(()=> {
     if(cart?.products && cart.products.length > 0){
@@ -169,6 +192,7 @@ export default function ProductDetailPage(){
   }
   
   const handleAddToCart = (product) => {
+    if(checkAuthOrOpenModal()) return
     console.log("Inside handleAddToCart()--")
     dispatch( addToCart({productId: product._id, quantity}) )
     console.log("Dispatched successfully")
@@ -180,6 +204,11 @@ export default function ProductDetailPage(){
     // }
     // setCartItems([...cartItems, newItem])
     // setIsCartOpen(true)
+  }
+
+  const submitReviewHandler = ()=> {
+    if(checkAuthOrOpenModal()) return
+    console.log('Submitting reveiw...')
   }
 
 
@@ -229,7 +258,7 @@ export default function ProductDetailPage(){
                     <div className="flex items-center gap-[1rem]">
                       <div className="flex flex-col text-[24px] font-bold">
                         <p className={` ${bestOffer && bestOffer.bestDiscount > 0 && 'line-through decoration-[2px] decoration-red-500'}`}>
-                          &#8377; {productDetails.price}  
+                          &#8377; {productDetails.price * quantity}  
                         </p>
                         { bestOffer && bestOffer.bestDiscount > 0 && 
                           <span className='mt-[-5px] text-green-500'> 
@@ -403,13 +432,22 @@ export default function ProductDetailPage(){
                             <textarea id="comment" name="comment" rows={3} className="mt-[4px] block w-full text-[14px]
                                border-gray-300 rounded-md" placeholder="Write your review here..."/>
                           </div>
-                          <SiteSecondaryFillButton type="submit">Submit Review</SiteSecondaryFillButton>
+                          <SiteSecondaryFillButton type="submit" clickHandler={()=> submitReviewHandler()}>Submit Review</SiteSecondaryFillButton>
                         </div>
                       </form>
                     </div>
                   )}
                 </div>
               </div>
+
+              {
+                !user &&
+                  <div className='mt-8 flex justify-center'>
+                  
+                    <AuthPrompt />
+
+                  </div>
+              }
               
               <div className="mt-[64px] relative">
                 <h2 className="text-[24px] font-bold mb-[32px]">Similar Products</h2>

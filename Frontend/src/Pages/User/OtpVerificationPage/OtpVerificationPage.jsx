@@ -12,12 +12,8 @@ import {CustomHashLoader, CustomPacmanLoader} from '../../../Components/Loader/L
 import Header from '../../../Components/Header/Header'
 import Footer from '../../../Components/Footer/Footer'
 
-export default function OtpVerificationPage(){
 
-    const bgImg = {
-        backgroundImage:"url('/otp-bg.png')",
-        backgroundSize:"cover"
-    }
+export default function OtpVerificationPage(){
 
     const [values, setvalues] = useState({})
     const [otp, setOtp] = useState(null)
@@ -39,6 +35,11 @@ export default function OtpVerificationPage(){
     const navigate = useNavigate()
 
     const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+
+    const bgImg = {
+        backgroundImage:"url('/otp-bg.png')",
+        backgroundSize:"cover"
+    }
 
     useEffect(()=> {
         if(location){

@@ -26,7 +26,7 @@ import {addToCart} from '../../Slices/cartSlice'
 import ProductsTableView from './ProductsTableView'
 
 
-export default function ProductsDisplay({gridView, showByTable, pageReader, limiter, queryOptions, showTheseProducts, admin, wishlistDisplay, currentList}) {
+export default function ProductsDisplay({gridView, showByTable, pageReader, limiter, queryOptions, showTheseProducts, admin, wishlistDisplay, currentList, checkAuthOrOpenModal}) {
 
   const {currentPage, setCurrentPage} = pageReader
 
@@ -126,6 +126,8 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
   }
 
   const handleAddToCart = (id)=> {
+     if(checkAuthOrOpenModal()) return
+     
      console.log("Inside handleAddToCart()--")
      dispatch( addToCart({productId: id, quantity: 1}) )
      console.log("Dispatched successfully")
@@ -155,6 +157,7 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
   }
 
   const addToWishlist = (product)=> {
+    if(checkAuthOrOpenModal()) return
     const userCreatedListsExists = Object.keys(wishlist).length && wishlist?.lists.some(list=> list.name === 'Default Shopping List') 
                                     && wishlist?.lists.length > 1
     if(userCreatedListsExists){
@@ -166,6 +169,7 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
   }
 
   const deleteFromWishlist = (product)=> {
+    if(checkAuthOrOpenModal()) return
     const productOfDefaultList = Object.keys(wishlist).length && wishlist?.lists.some(list=> {
        list.name === 'Default Shopping List' && list.products.some(item=> item.product === product._id)
     }) 
@@ -249,7 +253,12 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
                     : wishlistDisplay ? 'h-[250px]' 
                     : gridView ? 'h-[275px] xx-md:h-[200px] xx-md:w-[200px] lg:h-[275px] lg:w-[275px]' 
                     : 'h-[275px] w-[350px]'} object-cover`}
-                onClick={()=> !admin && navigate('/shop/product', {state: {product}})}
+                onClick={()=> !admin && navigate({
+                    pathname: '/shop/product', 
+                    search: `?id=${product._id}`
+                  }, 
+                  {state: {product}}
+                )}
               /> 
               <figcaption 
                 className={`${admin 
@@ -264,7 +273,12 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
                       className='w-[30px] md:bg-white l-md:bg-transparent xx-lg:bg-white x-xl:bg-transparent p-[5px] border rounded-[20px]
                         z-[2] flex items-center justify-center relative cursor-pointer md:border-mutedDashedSeperation
                         l-md:border-inputBorderLow xx-lg:border-mutedDashedSeperation x-xl:border-inputBorderLow admin-control' 
-                      onClick={()=> navigate('../edit', {state: {product}})}
+                      onClick={()=> !admin && navigate({
+                          pathname: '../edit', 
+                          search: `?id=${product._id}`
+                        }, 
+                        {state: {product}}
+                      )}
                     >
                       <i> <RiFileEditLine/> </i>
                     </span>
@@ -303,7 +317,13 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
             <div className={` ${gridView? 'mt-[10px] w-full flex flex-col gap-[5px] pl-[10px] py-[15px] rounded-[10px] product-infos' 
                                  : 'inline-flex flex-col gap-[10px] justify-between px-[1rem] py-[2rem] rounded-[10px] ml-[1rem] product-infos w-full'} 
                                     ${ wishlistDisplay && 'mr-[1rem]' } ${productIsHovered === product._id && 'shadow-lg'} cursor-pointer`}
-                onClick={()=> !admin && navigate('/shop/product', {state: {product}})}>
+                onClick={()=> !admin && navigate({
+                          pathname: '/shop/product', 
+                          search: `?id=${product._id}`
+                        }, 
+                        {state: {product}}
+                )}
+            >
               <div>
               {product?.reviews ? 
                 ( <p className='text-secondary flex items-center gap-[10px]'> 

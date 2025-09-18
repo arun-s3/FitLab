@@ -11,6 +11,7 @@ import ProductRemovalModal from '../ProductRemovalModal/ProductRemovalModal'
 import {addToCart, reduceFromCart, removeFromCart, getTheCart, resetCartStates} from '../../Slices/cartSlice'
 
 
+
 export default function CartSidebar({ isOpen, onClose, retractedView }) {
 
   const [packedupCart, setPackedupCart] = useState({})

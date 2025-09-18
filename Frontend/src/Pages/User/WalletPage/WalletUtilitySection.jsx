@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react'
+import {useDispatch, useSelector} from 'react-redux'
 
 import { Plus, CreditCard, Download } from "lucide-react"
 
@@ -8,7 +9,7 @@ export default function WalletUtilitySection({membershipCredits}){
 
     return(
         <section className="mx-[1.5rem] flex justify-between gap-[1rem]">
-
+          
             <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
               <div className="flex flex-col space-y-1.5 p-6 pb-2">
                 <p className="text-sm text-muted-foreground">Membership Credits</p>

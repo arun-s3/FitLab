@@ -15,6 +15,7 @@ import TransactionDetailsSection from "./TransactionDetailsSection"
 import AutoRechargeFeature from "./AutoRechargeFeature"
 import AutoRechargeModal from "./AutoRechargeModal"
 import WalletUtilitySection from "./WalletUtilitySection"
+import {ProtectedUserContext} from '../../../Components/ProtectedUserRoutes/ProtectedUserRoutes'
 import {UserPageLayoutContext} from '../UserPageLayout/UserPageLayout'
 import {decryptData} from '../../../Utils/decryption'
 import {getOrCreateWallet, resetWalletStates} from '../../../Slices/walletSlice'
@@ -24,6 +25,9 @@ export default function WalletPage() {
 
     const {setBreadcrumbHeading, setContentTileClasses, setPageLocation} = useContext(UserPageLayoutContext)
     setBreadcrumbHeading('Wallet')
+
+    const {setIsAuthModalOpen, checkAuthOrOpenModal} = useContext(ProtectedUserContext)
+    setIsAuthModalOpen({status: false, accessFor: 'wallet'})
 
     const location = useLocation()
     setPageLocation(location.pathname)
@@ -65,6 +69,7 @@ export default function WalletPage() {
     const requestMoneyRef = useRef(null) 
 
     const {safeWallet, walletLoading, walletError, walletMessage} = useSelector(state=> state.wallet)
+    const {user} = useSelector((state)=>state.user)
 
     const membershipCredits = 3
 
@@ -133,6 +138,9 @@ export default function WalletPage() {
 
     const openFundingModal = () => {
       console.log("Opening funding modal...")
+      if(checkAuthOrOpenModal()){
+        return
+      }
       setShowFundingModal(true)
     }
   
@@ -140,9 +148,17 @@ export default function WalletPage() {
       setShowFundingModal(false)
     }  
 
+    const openAutoRechargeModal = ()=> {
+      console.log("Opening autoRechargeModal modal...")
+      if(checkAuthOrOpenModal()){
+        return
+      }
+      setIsAutoRechargeModalOpen(true)
+    } 
+
     const walletActionButtons = [
       {name: 'Add Money', Icon: PlusCircle, clickHandler: ()=> openFundingModal()},
-      {name: 'Auto-recharge', Icon: Lightning, clickHandler: ()=> setIsAutoRechargeModalOpen(true)},
+      {name: 'Auto-recharge', Icon: Lightning, clickHandler: ()=> openAutoRechargeModal()},
       {name: 'Wallet-only deals', Icon: Tag},
       {name: 'Refer', Icon: Users}
     ]
@@ -162,6 +178,9 @@ export default function WalletPage() {
     }
 
     const validateAccountNumber = (type, accountNumberGiven)=> {
+      if(checkAuthOrOpenModal()){
+        return
+      }
       console.log("Inside validateAccountNumber..")
       const errorMessage = "Please enter a valid account number"
 
@@ -210,6 +229,9 @@ export default function WalletPage() {
     }
 
     const handlePasteFromClipboard = async (type)=> {
+      if(checkAuthOrOpenModal()){
+        return
+      }
       try {
         const text = await navigator.clipboard.readText()
         console.log("Clipboard text--->", text)
@@ -246,6 +268,9 @@ export default function WalletPage() {
     }
 
     const openSimpleMoneyTransferModal = (type)=> {
+      if(checkAuthOrOpenModal()){
+        return
+      }
       console.log('Inside openSimpleMoneyTransferModal(), type-->', type)
       const errorExists = validateAccountNumber(type)
       if(errorExists){
@@ -288,6 +313,9 @@ export default function WalletPage() {
     }
 
     const openComplexMoneyTransferModal = (type)=> {
+      if(checkAuthOrOpenModal()){
+        return
+      }
       type === 'sendMoney' ? setIsRequester(false) : setIsRequester(true)
       setComplexModal(true)
       setIsTransferModalOpen(true)
@@ -327,18 +355,23 @@ export default function WalletPage() {
                         <div className="mb-1 text-sm opacity-80">Total Balance</div>
                         {/* <img src="/Logo_main.png" alt="Fitlab" className="absolute bottom-[5px] right-0 h-[2rem]"/> */}
                         <img src="/Logo_main_light1.png" alt="Fitlab" className="absolute bottom-[-18px] right-0 h-[4rem]"/>
-                        <div className="text-4xl font-bold mb-2"> ₹ {safeWallet && decryptData(safeWallet)?.balance} </div>
+                        <div className="text-4xl font-bold mb-2"> ₹ {user && safeWallet ? decryptData(safeWallet)?.balance : !user ? 0 : null} </div>
                         <div className="flex items-center gap-[10px]">
                           <pre className="text-sm opacity-80">
                             {
-                              safeWallet && showAcNumber ? 
-                              formatAccountNumber( decryptData(safeWallet)?.accountNumber ) : hiddenAccountNo
+                              user && safeWallet && showAcNumber ? 
+                              formatAccountNumber( decryptData(safeWallet)?.accountNumber ) 
+                              : !user ?
+                              '**** **** **** ****'
+                              :user && safeWallet && !showAcNumber ?
+                              hiddenAccountNo
+                              : null
                             } 
                           </pre>
                           {
-                            showAcNumber ?
+                            user && showAcNumber ?
                             <Eye className="w-[12px] h-[12px] cursor-pointer" onClick={()=> setShowAcNumber(status=> !status)}/>
-                            : <EyeOff className="w-[12px] h-[12px] cursor-pointer" onClick={()=> setShowAcNumber(status=> !status)}/>
+                            : <EyeOff className="w-[12px] h-[12px] cursor-pointer" onClick={()=> user && setShowAcNumber(status=> !status)}/>
                           }
                         </div>
                       </div>
@@ -476,7 +509,7 @@ export default function WalletPage() {
 
                 <WalletUtilitySection membershipCredits={membershipCredits}/>
 
-                <AutoRechargeFeature />
+                {/* <AutoRechargeFeature /> */}
 
                 </div>
 

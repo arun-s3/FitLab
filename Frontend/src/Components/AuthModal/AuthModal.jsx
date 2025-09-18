@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useEffect} from 'react'
 import {useNavigate, useLocation} from 'react-router-dom'
 import {motion, AnimatePresence} from "framer-motion"
 
@@ -20,6 +20,10 @@ export default function AuthModal({isOpen, onClose, accessFor = "this feature"})
         navigate('/signup', {replace: true, state: {currentPath: currentLocation.pathname}})
         onClose()
     }   
+
+    useEffect(()=> {
+      console.log("Is AuthModal Open------------>", isOpen)
+    }, [isOpen])
 
 
     return (
@@ -46,13 +50,13 @@ export default function AuthModal({isOpen, onClose, accessFor = "this feature"})
                 damping: 25,
                 stiffness: 300,
               }}
-              className="relative w-full max-w-md bg-whitesmoke border border-border rounded-[9px] shadow-2xl overflow-hidden
+              className="relative w-full max-w-md bg-whitesmoke border border-primary rounded-[9px] shadow-2xl overflow-hidden
                backdrop-blur-sm"
               onClick={(e)=> e.stopPropagation()}
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none" />
+              <div className="absolute inset-0 bg-neutral-900 bg-gradient-to-br from-neutral-700 via-neutral-800 to-[#2c0f4a] pointer-events-none -z-10" />
 
-              <div className="relative px-8 pt-8 pb-6">
+              <div className="relative px-8 pt-10 pb-6">
                 <button
                   onClick={onClose}
                   className="absolute top-6 right-6 p-2 text-muted-foreground hover:text-foreground transition-colors
@@ -66,21 +70,22 @@ export default function AuthModal({isOpen, onClose, accessFor = "this feature"})
                   transition={{ duration: 0.4, ease: "easeOut" }}
                   className="space-y-4 text-center"
                 >
-                  <div className="flex justify-center">
+                  <div className="flex justify-center items-center gap-[10px]">
                     <div className="p-3  rounded-2xl">
-                      <Lock className="w-8 h-8 text-muted" />
+                      <Lock className="w-8 h-8 text-primary" />
                     </div>
+                    <img src="/Logo_main.png" alt="Fitlab" className="mt-[7px] h-[5rem] "/>
                   </div>
                   <div className="space-y-2">
-                    <h2 className="text-2xl text-secondary font-bold text-foreground tracking-[0.5px]"> Welcome to Fitlab </h2>
-                    <p className="text-muted-foreground text-[15px] leading-relaxed">
+                    <h2 className="text-2xl text-white font-bold text-foreground tracking-[0.7px]"> Welcome to Fitlab </h2>
+                    <p className="text-white text-[15px] leading-relaxed">
                       You need to sign in to access {accessFor}. Join thousands of users enjoying our platform.
                     </p>
                   </div>
                 </motion.div>
               </div>    
 
-              <div className="px-8 pb-8 space-y-4">
+              <div className="px-8 pb-12 space-y-4">
                 <motion.button
                   onClick={handleSignIn}
                   whileHover={{ scale: 1.02, y: -2 }}
@@ -94,11 +99,10 @@ export default function AuthModal({isOpen, onClose, accessFor = "this feature"})
                   <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform duration-200" />
                 </motion.button>    
                 <div className="relative my-6">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-border"></div>
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-4 bg-card text-muted-foreground font-medium"> or </span>
+                  <div className='w-full flex justify-center items-center'>
+                    <div className='w-[45%] h-[1px] border-t border-dashed border-whitesmoke'></div>
+                    <span className="px-[10px] text-primary font-medium"> or </span>
+                    <div className='w-[45%] h-[1px] border-t border-dashed border-whitesmoke'></div>
                   </div>
                 </div>  
                 <motion.button
@@ -106,7 +110,7 @@ export default function AuthModal({isOpen, onClose, accessFor = "this feature"})
                   whileHover={{ scale: 1.02, y: -1 }}
                   whileTap={{ scale: 0.98 }}
                   transition={{ type: "spring", stiffness: 400, damping: 17 }}
-                  className="w-full flex items-center justify-center px-6 py-[13px] border border-border rounded-[7px]
+                  className="w-full flex items-center justify-center px-6 py-[13px] rounded-[7px]
                      text-foreground text-white bg-purple-600 hover:bg-purple-700 transition-all duration-200 font-medium
                      shadow-sm hover:shadow-md gap-2 group"
                 >
@@ -114,7 +118,7 @@ export default function AuthModal({isOpen, onClose, accessFor = "this feature"})
                   Create New Account
                 </motion.button>    
                 <div className="mt-6 text-center">
-                  <p className="text-[12px] text-muted-foreground leading-relaxed">
+                  <p className="text-[12px] text-inputBgSecondary leading-relaxed">
                     By continuing, you agree to our Terms of Service and Privacy Policy
                   </p>
                 </div>

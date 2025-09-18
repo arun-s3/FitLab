@@ -11,6 +11,7 @@ import useFlexiDropdown from '../../../Hooks/FlexiDropdown'
 import TransactionFilters from './TransactionFilters'
 import {confirmMoneyRequest, declineMoneyRequest, resetWalletStates} from '../../../Slices/walletSlice'
 import {capitalizeFirstLetter} from '../../../Utils/helperFunctions'
+import AuthPrompt from '../../../Components/AuthPrompt/AuthPrompt'
 import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
 
 
@@ -32,6 +33,7 @@ export default function TransactionDetailsSection({transactions, queryOptions, s
 
     const dispatch = useDispatch()
     const {moneyRequestConfirmed, moneyRequestDeclined} = useSelector(state=> state.wallet)
+    const {user} = useSelector((state)=> state.user)
 
     const sortTypes = [
       {name: 'Recent to Oldest Transactions', value: '-1', sortBy: 'createdAt'}, {name: 'Oldest to Recent Transactions', value: '1', sortBy: 'createdAt'},
@@ -303,6 +305,15 @@ export default function TransactionDetailsSection({transactions, queryOptions, s
                   </p>
               } 
             </div>
+            
+            {
+              !user &&
+                <div className='flex justify-center'>
+                
+                  <AuthPrompt />
+
+                </div>
+            }
 
             <div className='mb-[1rem]'>
             

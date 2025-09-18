@@ -8,7 +8,7 @@ import {CiUser} from "react-icons/ci"
 import {IoCartOutline} from "react-icons/io5"
 import {MdFavoriteBorder} from "react-icons/md"
 import {HiOutlineMenu, HiOutlineX} from "react-icons/hi"
-import {User, Heart, Headset, LogIn} from "lucide-react"
+import {User, Heart, Headset, CreditCard, LogIn} from "lucide-react"
 
 import Logo from '../Logo/Logo'
 import UserHead from '../UserHead/UserHead'
@@ -39,9 +39,7 @@ export default function Header({customStyle}){
     // const [openVideoCallModal, setOpenVideoCallModal] = useState(false)
 
     const openCartSidebar = ()=> {
-        if(cart?.products && cart.products.length > 0){
             setIsCartOpen(true)
-        }
     }
 
 
@@ -105,6 +103,9 @@ export default function Header({customStyle}){
                 <i onClick={()=> navigate('/wishlist')}>
                     {/* <MdFavoriteBorder style={{fontSize:'25px'}}/> */}
                     <Heart className='w-[20px] h-[20px] lg:w-[19px] lg:h-[19px] x-xl:h-[20px] x-xl:w-[20px]'/>
+                </i>
+                <i onClick={()=> navigate('/wallet')}>
+                    <CreditCard className='w-[23px] h-[23px] lg:w-[21px] lg:h-[21px] xl:w-[22px] xl:h-[22px] x-xl:w-[23px] x-xl:h-[23px]'/>
                 </i>
                 <i onClick={()=> setOpenChatBox(true)}>
                     <Headset className='w-[21px] h-[21px] lg:w-[19px] lg:h-[19px] xl:w-[20px] xl:h-[20px] x-xl:w-[21px] x-xl:h-[21px]'/>

@@ -11,6 +11,7 @@ import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
 import {capitalizeFirstLetter} from '../../../Utils/helperFunctions'
 import {createNewAddress, editAddress, resetStates} from '../../../Slices/addressSlice'
 import {CustomHashLoader} from '../../../Components/Loader/Loader'
+import AuthPrompt from '../../../Components/AuthPrompt/AuthPrompt'
 
 
 export default function AddressManagementPage({editAddresses}){
@@ -144,88 +145,100 @@ export default function AddressManagementPage({editAddresses}){
     return(
         
         <section className='basis-[75%] mt-[2rem]' id='AddressManagementPage'>
-            <div className='text-center'>
-                <h1 className='text-[20px] font-[500] capitalize'>  {`${editAddresses? 'Edit address' : 'Add New Address'}`} </h1>
-                <h2 className='text-[12px] font-[450] tracking-[0.2px] text-secondary'> {`Fill in the below fields to ${editAddresses? 'edit the' : 'add an'} address`}</h2>
-            </div>
-            <div id='address-content'>
-                <div className='address-fields'>
-                    <InputAndLabelGenerator key='firstName' name='firstName' dataObj={addressData} setDataObj={setAddressData}
-                         primaryColor={primaryColor} onChange={inputChangeHandler}/>
-                    <InputAndLabelGenerator  key='lastName' name='lastName' onChange={inputChangeHandler} dataObj={addressData}
-                         setDataObj={setAddressData} primaryColor={primaryColor} />
+            {
+              !user ?
+                <div className='flex justify-center items-center mt-12'>
+                
+                  <AuthPrompt />
+
                 </div>
-                <div className='address-fields'>
-                    <div className='basis-1/2'>   
-                        <InputAndLabelGenerator key='nickName' name='nickName' onChange={inputChangeHandler} optionalField={true} optionalMsg= "(Optional- Keeping Nickname would give a personal touch, if it's a Gift Address)"
-                            dataObj={addressData} setDataObj={setAddressData} primaryColor={primaryColor} />
-                        {/* <p className='mt-[2px] text-[11px] text-muted tracking-[0.2px]'> (Optional- Keeping Nickname would give a personal touch, if it's a Gift Address) </p> */}
+                :
+                <>
+                    <div className='text-center'>
+                        <h1 className='text-[20px] font-[500] capitalize'>  {`${editAddresses? 'Edit address' : 'Add New Address'}`} </h1>
+                        <h2 className='text-[12px] font-[450] tracking-[0.2px] text-secondary'> {`Fill in the below fields to ${editAddresses? 'edit the' : 'add an'} address`}</h2>
                     </div>
-                    <InputAndLabelGenerator/>
-                </div>
-                <div className='address-fields'>
-                    <InputAndLabelGenerator key='district' name='district' onChange={inputChangeHandler} dataObj={addressData} 
-                        setDataObj={setAddressData} primaryColor={primaryColor} />
-                    <InputAndLabelGenerator key='state' name='state' onChange={inputChangeHandler} 
-                        dataObj={addressData} setDataObj={setAddressData} primaryColor={primaryColor} />
-                </div>
-                <div className='address-fields'>
-                    <InputAndLabelGenerator key='street' name='street' fieldType='textarea' parentStyles="w-full" rows={3}
-                         onChange={inputChangeHandler} dataObj={addressData} setDataObj={setAddressData} primaryColor={primaryColor}/>
-                </div>
-                <div className='address-fields justify-start items-baseline'>
-                    <InputAndLabelGenerator key='pincode' name='pincode' parentStyles="basis-[30%]" onChange={inputChangeHandler} 
-                            dataObj={addressData} setDataObj={setAddressData} primaryColor={primaryColor} />
-                    <div>
-                        <h5 className='text-[13.5px] tracking-[0.3px]'> Address Type </h5>
-                        <div className='mt-[10px] flex items-center gap-[1rem] address-types'>
-                                {
-                                    addressTypes.map(type=> (
-                                        <div>
-                                            <input type='radio' id={type} onClick={(e)=> radioClickHandler(e)} 
-                                                onChange={(e)=> radioChangeHandler(e)} checked={radioCheckedAddressType === type}/>
-                                            <label htmlFor={type}> { capitalizeFirstLetter(type) } </label>
-                                        </div>
-                                    ))
-                                }
+                    <div id='address-content'>
+                        <div className='address-fields'>
+                            <InputAndLabelGenerator key='firstName' name='firstName' dataObj={addressData} setDataObj={setAddressData}
+                                 primaryColor={primaryColor} onChange={inputChangeHandler}/>
+                            <InputAndLabelGenerator  key='lastName' name='lastName' onChange={inputChangeHandler} dataObj={addressData}
+                                 setDataObj={setAddressData} primaryColor={primaryColor} />
+                        </div>
+                        <div className='address-fields'>
+                            <div className='basis-1/2'>   
+                                <InputAndLabelGenerator key='nickName' name='nickName' onChange={inputChangeHandler} optionalField={true} optionalMsg= "(Optional- Keeping Nickname would give a personal touch, if it's a Gift Address)"
+                                    dataObj={addressData} setDataObj={setAddressData} primaryColor={primaryColor} />
+                                {/* <p className='mt-[2px] text-[11px] text-muted tracking-[0.2px]'> (Optional- Keeping Nickname would give a personal touch, if it's a Gift Address) </p> */}
+                            </div>
+                            <InputAndLabelGenerator/>
+                        </div>
+                        <div className='address-fields'>
+                            <InputAndLabelGenerator key='district' name='district' onChange={inputChangeHandler} dataObj={addressData} 
+                                setDataObj={setAddressData} primaryColor={primaryColor} />
+                            <InputAndLabelGenerator key='state' name='state' onChange={inputChangeHandler} 
+                                dataObj={addressData} setDataObj={setAddressData} primaryColor={primaryColor} />
+                        </div>
+                        <div className='address-fields'>
+                            <InputAndLabelGenerator key='street' name='street' fieldType='textarea' parentStyles="w-full" rows={3}
+                                 onChange={inputChangeHandler} dataObj={addressData} setDataObj={setAddressData} primaryColor={primaryColor}/>
+                        </div>
+                        <div className='address-fields justify-start items-baseline'>
+                            <InputAndLabelGenerator key='pincode' name='pincode' parentStyles="basis-[30%]" onChange={inputChangeHandler} 
+                                    dataObj={addressData} setDataObj={setAddressData} primaryColor={primaryColor} />
+                            <div>
+                                <h5 className='text-[13.5px] tracking-[0.3px]'> Address Type </h5>
+                                <div className='mt-[10px] flex items-center gap-[1rem] address-types'>
+                                        {
+                                            addressTypes.map(type=> (
+                                                <div>
+                                                    <input type='radio' id={type} onClick={(e)=> radioClickHandler(e)} 
+                                                        onChange={(e)=> radioChangeHandler(e)} checked={radioCheckedAddressType === type}/>
+                                                    <label htmlFor={type}> { capitalizeFirstLetter(type) } </label>
+                                                </div>
+                                            ))
+                                        }
+                                </div>
+                            </div>
+                            <div className='basis-[50%]'>
+                                <InputAndLabelGenerator key='landmark' name='landmark' optionalField={true} onChange={inputChangeHandler} 
+                                    dataObj={addressData} setDataObj={setAddressData} primaryColor={primaryColor} optionalMsg='(Optional)'/>
+                                {/* <p className='mt-[2px] text-[11px] text-muted tracking-[0.2px]'> (Optional) </p> */}
+                            </div>
+                        </div>
+                        <div className='address-fields'>
+                            <InputAndLabelGenerator key='deliveryInstr' name='deliveryInstructions' fieldType='textarea' parentStyles="w-full" 
+                                onChange={inputChangeHandler} dataObj={addressData} setDataObj={setAddressData} primaryColor={primaryColor}
+                                    optionalField={true} optionalMsg="Example- 'Leave at the front door. @123 (Optional)'" rows={4}/>
+                        </div>  
+                                    
+                        <div className='mt-[1rem] w-[40%] h-[2px] border-b-[1px] border-dashed border-mutedDashedSeperation'></div>
+                        <h3 className='mt-[-10px] text-[15px] text-secondary font-[550] capitalize'> Contact Information </h3>
+                        <div className='address-fields'>
+                            <InputAndLabelGenerator key='mobileNumber' name='mobile' label='mobileNumber' onChange={inputChangeHandler} 
+                                dataObj={addressData} setDataObj={setAddressData} primaryColor={primaryColor} />
+                            <InputAndLabelGenerator key='email' name='email' onChange={inputChangeHandler} dataObj={addressData} 
+                                setDataObj={setAddressData} primaryColor={primaryColor} />
+                        </div>
+                        <div className='address-fields'>
+                            <div className='basis-1/2'>   
+                                <InputAndLabelGenerator key='alternateMobileNumber' name='alternateMobile' label='alternateMobileNumber'
+                                     optionalField={true} optionalMsg="(Optional)" onChange={inputChangeHandler} dataObj={addressData}
+                                         setDataObj={setAddressData} primaryColor={primaryColor} />
+                                {/* <p className='mt-[2px] text-[11px] text-muted tracking-[0.2px]'> (Optional) </p> */}
+                            </div>
+                            <InputAndLabelGenerator/>
+                        </div>
+                        <div className='text-center'>
+                            <SiteButtonSquare customStyle={{fontWeight:'600', paddingInline:'50px', paddingBlock:'9px', borderRadius:'7px'}} 
+                                    clickHandler={()=> submitAddress()}>
+                                {loading? <CustomHashLoader loading={loading}/> : 'Add Address'}   
+                            </SiteButtonSquare>
                         </div>
                     </div>
-                    <div className='basis-[50%]'>
-                        <InputAndLabelGenerator key='landmark' name='landmark' optionalField={true} onChange={inputChangeHandler} 
-                            dataObj={addressData} setDataObj={setAddressData} primaryColor={primaryColor} optionalMsg='(Optional)'/>
-                        {/* <p className='mt-[2px] text-[11px] text-muted tracking-[0.2px]'> (Optional) </p> */}
-                    </div>
-                </div>
-                <div className='address-fields'>
-                    <InputAndLabelGenerator key='deliveryInstr' name='deliveryInstructions' fieldType='textarea' parentStyles="w-full" 
-                        onChange={inputChangeHandler} dataObj={addressData} setDataObj={setAddressData} primaryColor={primaryColor}
-                            optionalField={true} optionalMsg="Example- 'Leave at the front door. @123 (Optional)'" rows={4}/>
-                </div>  
-                        
-                <div className='mt-[1rem] w-[40%] h-[2px] border-b-[1px] border-dashed border-mutedDashedSeperation'></div>
-                <h3 className='mt-[-10px] text-[15px] text-secondary font-[550] capitalize'> Contact Information </h3>
-                <div className='address-fields'>
-                    <InputAndLabelGenerator key='mobileNumber' name='mobile' label='mobileNumber' onChange={inputChangeHandler} 
-                        dataObj={addressData} setDataObj={setAddressData} primaryColor={primaryColor} />
-                    <InputAndLabelGenerator key='email' name='email' onChange={inputChangeHandler} dataObj={addressData} 
-                        setDataObj={setAddressData} primaryColor={primaryColor} />
-                </div>
-                <div className='address-fields'>
-                    <div className='basis-1/2'>   
-                        <InputAndLabelGenerator key='alternateMobileNumber' name='alternateMobile' label='alternateMobileNumber'
-                             optionalField={true} optionalMsg="(Optional)" onChange={inputChangeHandler} dataObj={addressData}
-                                 setDataObj={setAddressData} primaryColor={primaryColor} />
-                        {/* <p className='mt-[2px] text-[11px] text-muted tracking-[0.2px]'> (Optional) </p> */}
-                    </div>
-                    <InputAndLabelGenerator/>
-                </div>
-                <div className='text-center'>
-                    <SiteButtonSquare customStyle={{fontWeight:'600', paddingInline:'50px', paddingBlock:'9px', borderRadius:'7px'}} 
-                            clickHandler={()=> submitAddress()}>
-                        {loading? <CustomHashLoader loading={loading}/> : 'Add Address'}   
-                    </SiteButtonSquare>
-                </div>
-            </div>
+                </>
+            }
+            
         </section>
 
     )

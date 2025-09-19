@@ -124,6 +124,10 @@ const userSlice = createSlice({
         changePath: (state, action)=> {
             console.log("changePage reducer")
             state.currentPath = action.payload.path
+        },
+        makeUserVerified: (state, action)=> {
+            console.log("Making user verified....")
+            state.user.isVerified = true
         }
     },
     extraReducers:(builder)=>{
@@ -229,4 +233,4 @@ const userSlice = createSlice({
 })
 
 export default userSlice.reducer
-export const {resetStates} = userSlice.actions
+export const {resetStates, makeUserVerified} = userSlice.actions

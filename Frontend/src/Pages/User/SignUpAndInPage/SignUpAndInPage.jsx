@@ -58,9 +58,9 @@ export default function SignUpAndInPage({type}){
                 const response = await axios.post(`${baseApiUrl}/sendOtp`, { email: formData.email }, {withCredentials:true});
                 if(response){
                     console.log("Redirecting to OTP Verification page...")
-                    navigate('/signup/otp-verify', {
+                    navigate('/otp-verify', {
                         replace:true, 
-                        state:{email: formData.email, NoDirectAccess: true}
+                        state:{email: formData.email, from: 'signup', NoDirectAccess: true}
                     }) 
                     setOtpPageLoading(false)
                 }

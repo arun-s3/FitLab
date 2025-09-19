@@ -11,8 +11,12 @@ export default function RestrictedEntryRoutes({redirectTo = null}){
     const redirectToPage = redirectTo ? `/${redirectTo}` : '/403'
 
     useEffect(()=> {
-        if(!location.state?.NoDirectAccesss){
-            navigate(redirectToPage, {replace: true})
+        console.log('location.state?.NoDirectAccess----->', location.state.NoDirectAccess)
+        if(!location.state?.NoDirectAccess){
+            navigate(redirectToPage, {
+                replace: true, 
+                state: {NoDirectAccess: true}
+            })
         }
     }, [location])
 

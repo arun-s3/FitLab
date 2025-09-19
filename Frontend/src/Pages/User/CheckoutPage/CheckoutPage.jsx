@@ -191,9 +191,9 @@ export default function CheckoutPage(){
       })
     }
 
-  const checkoutHandler= async()=> {
+  const placeOrder= async()=> {
     try{
-      console.log("Inside checkoutHandler")
+      console.log("Inside placeOrder")
       if(paymentMethod === ''){
         toast.error('Please select a payment Method!')
         return
@@ -227,7 +227,7 @@ export default function CheckoutPage(){
       }
     }
     catch(error){
-      console.log('Error in checkoutHandler:', error.response.data?.message || error.message)
+      console.log('Error in placeOrder:', error.response.data?.message || error.message)
       if (error.response && error.response.status !== 500){
         toast.error(error.response.data?.message || error.message)
       }else{
@@ -634,7 +634,7 @@ const handleStripeOrPaypalPayment = (paymentGateway, paymentId)=> {
                           {
                             paymentMethod !== 'paypal' ?
                             <SiteSecondaryFillImpButton className={`px-[50px] py-[9px] rounded-[7px] 
-                              ${paymentMethod === 'cards' && 'hidden'}`} clickHandler={()=> checkoutHandler()}>
+                              ${paymentMethod === 'cards' && 'hidden'}`} clickHandler={()=> placeOrder()}>
                                 {
                                   paymentMethod === 'cashOnDelivery' || paymentMethod === '' ? 'Place Order' : 'Pay and Place Order'
                                 }

@@ -1,27 +1,68 @@
-import React, {useState} from 'react'
+import React, {forwardRef, useImperativeHandle, useState, useCallback} from 'react'
 import {useNavigate} from 'react-router-dom'
 import {useDispatch, useSelector} from 'react-redux'
 
 import {Minus, X} from 'lucide-react'
+import axios from 'axios'
 
 import RemoveCouponModal from './RemoveCouponModal'
 import {removeCoupon} from '../../../Slices/cartSlice'
 import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
+import {CustomScaleLoader} from '../../../Components/Loader/Loader'
+import { toast } from 'react-toastify'
 
 
-export default function PaymentSummary({heading, absoluteTotal, absoluteTotalWithTaxes, deliveryCharge, couponDiscount, gst, couponCode}){
+const PaymentSummary = forwardRef((
+  {heading, absoluteTotal, absoluteTotalWithTaxes, deliveryCharge, couponDiscount, gst, couponCode}, ref
+)=> {
 
 
   const [isRemoveModalOpen, setIsRemoveModalOpen] = useState(false)
 
+  const [otpPageLoading, setOtpPageLoading] = useState(false)
+
   const {cart} = useSelector(state=> state.cart)
+  const {user} = useSelector(state=> state.user)
 
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
+  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+
   const removeTheCoupon = ()=> {
     dispatch(removeCoupon())
   }
+
+  const handleCheckout = useCallback( async ()=> {
+    if(user.isVerified){
+      console.log("Going to checkout page...")
+      navigate('/checkout')
+    }
+    else{
+      setOtpPageLoading(true)
+      try{
+        const response = await axios.post(`${baseApiUrl}/sendOtp`, {email: user.email}, {withCredentials:true})
+        if(response && response.status === 200){
+          console.log("Redirecting to OTP Verification page...")
+          setOtpPageLoading(false)
+          navigate('/otp-verify', {
+              replace:true, 
+              state:{email: user.email, from: 'cart', NoDirectAccess: true}
+          }) 
+        }
+      }
+      catch(error){
+        console.log("Error in handleCheckout", error.message)
+        toast.error(error.message)
+      }
+    }
+  }, [user, navigate, baseApiUrl])
+
+  useImperativeHandle(ref, () => ({
+    clickCheckout: () => {
+      handleCheckout()
+    }
+  }), [handleCheckout])
 
 
     return(
@@ -71,9 +112,20 @@ export default function PaymentSummary({heading, absoluteTotal, absoluteTotalWit
               Checkout
             </button> */}
             <SiteButtonSquare tailwindClasses='mt-[1rem] w-full hover:bg-primaryDark transition-colors' 
-              clickHandler={()=> navigate('/checkout')}>
-                Checkout
+              clickHandler={()=> handleCheckout()}>
+                { 
+                    otpPageLoading ? 
+                      <span className='flex justify-center items-center gap-[5px]'>  
+                          <span className='text-secondary text-[11px] tracking-[0.3px] mb-[3px]'> 
+                              Redirecting to OTP Verification Page 
+                          </span>
+                          <CustomScaleLoader loading={true}/>
+                      </span>
+                      : 'Checkout' 
+                }
             </SiteButtonSquare>
         </div>
     )
-}
+  }
+)
+export default PaymentSummary

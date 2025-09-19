@@ -1,6 +1,6 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import './CartPage.css'
-import {useNavigate} from 'react-router-dom'
+import {useNavigate, useLocation} from 'react-router-dom'
 import {useDispatch, useSelector} from 'react-redux'
 
 import {Trash2, Plus, Minus, Star, ChevronLeft, ChevronRight, BadgePlus, Check, ShoppingCart} from 'lucide-react';
@@ -43,6 +43,9 @@ export default function ShoppingCartPage(){
   const dispatch = useDispatch()
 
   const navigate = useNavigate()
+  const location = useLocation()
+
+  const makeCheckoutRef = useRef()
 
   const headerBg = {
      backgroundImage: "url('/header-bg.png')",
@@ -63,6 +66,15 @@ export default function ShoppingCartPage(){
       console.log("Cart---->", cart)
     }
   },[cart])
+
+  useEffect(()=> {
+    if(location){
+      if(location.state?.OtpVerified){
+        toast.success("Your OTP Verification is successful!")
+        makeCheckoutRef.current.clickCheckout()
+      }
+    }
+  },[location])
 
   // useEffect(() => {
   //   async function loadCharges() {
@@ -290,7 +302,8 @@ export default function ShoppingCartPage(){
           </div>
 
           <PaymentSummary heading='Order Summary' absoluteTotal={cart.absoluteTotal} absoluteTotalWithTaxes={cart.absoluteTotalWithTaxes}
-               deliveryCharge={cart.deliveryCharge} couponDiscount={cart?.couponDiscount} gst={cart.gst} couponCode={cart?.couponUsed?.code} />
+               deliveryCharge={cart.deliveryCharge} couponDiscount={cart?.couponDiscount} gst={cart.gst} couponCode={cart?.couponUsed?.code} 
+                ref={makeCheckoutRef}/>
 
         </div>
         : <div className='flex flex-col justify-center items-center gap-[1rem]'>

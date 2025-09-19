@@ -9,6 +9,7 @@ import {IoMail} from "react-icons/io5";
 
 import {SiteButtonSquare, SiteSecondaryBorderButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
 import {CustomHashLoader, CustomPacmanLoader} from '../../../Components/Loader/Loader'
+import {makeUserVerified} from '../../../Slices/userSlice'
 import Header from '../../../Components/Header/Header'
 import Footer from '../../../Components/Footer/Footer'
 
@@ -20,6 +21,8 @@ export default function OtpVerificationPage(){
     const [error, setError] = useState('')
     const [verificationError, setVerificationError] = useState(false)
     const [otpBoxDisabled, setOtpBoxDisabled] = useState(false)
+
+    const [cancelAllowed, setCancelAllowed] = useState(true)
 
     const [resendState, setResendState] = useState(false)
 
@@ -33,6 +36,7 @@ export default function OtpVerificationPage(){
 
     const location = useLocation()
     const navigate = useNavigate()
+    const dispatch = useDispatch()
 
     const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
@@ -42,9 +46,14 @@ export default function OtpVerificationPage(){
     }
 
     useEffect(()=> {
+        console.log("Inside OtpVerificationPage")
+    }, [])
+
+    useEffect(()=> {
         if(location){
             console.log("location.state.email---->", location?.state?.email)
             setUserEmail(location?.state?.email)
+            setCancelAllowed(location.state?.from === 'signup' ? true : false)
             startTimer()
         }
         if(timerId.current) return () => clearInterval(timerId.current)
@@ -71,7 +80,7 @@ export default function OtpVerificationPage(){
     },[otp])
 
     const startTimer = ()=> {
-        setTimer(5 * 60 * 1000)
+        setTimer(300 * 60 * 1000)
         timerId.current = setInterval(() => {
             setTimer(prevCount => {
                 if (prevCount <= 1000) {
@@ -174,7 +183,12 @@ export default function OtpVerificationPage(){
                     setVerificationError(false)
                     setOtpBoxDisabled(false)
                     toast.success("You are successfully verified!")
-                    navigate('/signin',{replace:true})
+                    dispatch(makeUserVerified())
+                    location.state?.from === 'signup' 
+                        ? navigate('/signin',{replace:true}) 
+                        : navigate('/cart',{
+                            replace:true, state: {OtpVerified: true}
+                        }) 
                     setLoading(false)
                 }
             }
@@ -273,9 +287,12 @@ export default function OtpVerificationPage(){
                             <SiteButtonSquare customStyle={ {width:'25rem', marginTop:'1.5rem'} } clickHandler={(e)=> submitOtp(e)}>
                                 { loading ? <CustomHashLoader loading={loading}/> : 'Verify Email '}
                             </SiteButtonSquare>
-                            <SiteSecondaryBorderButtonSquare customStyle={ {width:'25rem', marginTop:'1.5rem'} } clickHandler={(e)=> cancelVerification(e)}>
-                                Cancel and Verify Later
-                            </SiteSecondaryBorderButtonSquare>
+                            {
+                                cancelAllowed &&
+                                <SiteSecondaryBorderButtonSquare customStyle={ {width:'25rem', marginTop:'1.5rem'} } clickHandler={(e)=> cancelVerification(e)}>
+                                    Cancel and Verify Later
+                                </SiteSecondaryBorderButtonSquare>
+                            }
                         </div>
                         {   
                             loading ? null :

@@ -2,7 +2,7 @@ import React, {useEffect} from 'react'
 import {Outlet, useNavigate} from "react-router-dom"
 import {useDispatch, useSelector} from "react-redux"
 
-import {resetStore} from "../../../Store/resetActions"
+import {resetStore} from "../../Store/resetActions"
 
 
 export default function AdminRoutesWrapper(){
@@ -26,12 +26,6 @@ export default function AdminRoutesWrapper(){
           window.removeEventListener("storage", syncLogout)
         }
     }, [dispatch])
-
-    useEffect(()=> {
-        if(user){
-            navigate('/403')
-        }
-    }, [user])
 
 
     return (

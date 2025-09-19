@@ -13,7 +13,6 @@ import TestAddressPage from './Pages/User/TesterPages/TestAddressPage'
 import TestRandomPage from './Pages/User/TesterPages/TestRandomPage'
 import AddressManagementPage from './Pages/User/AddressManagementPage/AddressManagementPage'
 import AddressListingPage from './Pages/User/AddressListingPage/AddressListingPage'
-import UserPageLayout from './Pages/User/UserPageLayout/UserPageLayout'
 import ProductDetailPage from './Pages/User/ProductDetailPage/ProductDetailPage'
 import WishlistPage from './Pages/User/WishlistPage/WishlistPage'
 import CartPage from './Pages/User/CartPage/CartPage'
@@ -23,12 +22,12 @@ import OrderConfirmationPage from './Pages/User/OrderConfirmationPage/OrderConfi
 import OrderHistoryPage from './Pages/User/OrderHistoryPage/OrderHistoryPage'
 import WalletPage from './Pages/User/WalletPage/WalletPage'
 import CustomerSupportPage from './Pages/User/CustomerSupportPage/CustomerSupportPage'
-// import VideoChatPage from './Pages/User/VideoChatPage/VideoChatPage'
-import ModalContext from './Components/GlobalModals/ModalContext'
-import SocketListener from './Components/GlobalModals/SocketListener'
+
+import UserPageLayout from './Pages/User/UserPageLayout/UserPageLayout'
 import GlobalVideoCallModalLayout from './Pages/User/GlobalModalLayouts/GlobalVideoCallModalLayout'
 import UserRoutesWrapper from './Components/UserRoutesWrapper/UserRoutesWrapper'
 import ProtectedUserRoutes from './Components/ProtectedUserRoutes/ProtectedUserRoutes'
+import RestrictedEntryRoutes from './Components/RestrictedEntryRoutes/RestrictedEntryRoutes'
 
 import AdminSignInPage from './Pages/Admin/AdminSignInPage/AdminSignInPage'
 import AdminPageLayout from './Pages/Admin/AdminPageLayout/AdminPageLayout'
@@ -49,11 +48,12 @@ import AdminOfferManagementPage from './Pages/Admin/AdminOfferManagementPage/Adm
 import AdminCreateOfferPage from './Pages/Admin/AdminCreateOfferPage/AdminCreateOfferPage'
 import AdminTextChatSupportPage from './Pages/Admin/AdminTextChatSupportPage/AdminTextChatSupportPage'
 import AdminVideoChatSupportPage from './Pages/Admin/AdminVideoChatSupportPage/AdminVideoChatSupportPage'
-import AdminRoutesWrapper from './Components/UserRoutesWrapper/AdminRoutesWrapper/AdminRoutesWrapper'
+import AdminRoutesWrapper from './Components/AdminRoutesWrapper/AdminRoutesWrapper'
 
 import ErrorPage403 from './Pages/Errors/403ErrorPage'
 import ErrorPage401 from './Pages/Errors/401ErrorPage'
 import ErrorPage404 from './Pages/Errors/404ErrorPage'
+import UserBlockedPage from './Pages/Errors/UserBlockedPage'
 
 
 import {ToastContainer} from 'react-toastify'
@@ -81,40 +81,43 @@ export default function App(){
                     <Route path='test' element={<TestRandomPage/>}/>
                     <Route path='signup'>
                         <Route index element={<SignUpAndInPage type='signup' />} />
-                        <Route path='otp-verify' element={<OtpVerificationPage/>}/>
                     </Route>
                     <Route path='signin' element={<SignUpAndInPage type='signin' />}/>
                     <Route path='forgot-password' element={<ForgotAndResetPasswordPage/>}/>
+
                     <Route element={<SocketProvider/>}>
                         <Route element={<GlobalVideoCallModalLayout/>}>
-                        <Route index element={<HomePage/>}/>
-                        <Route path='cart' element={<CartPage/>} />
-                        <Route path='order-confirm' element={<OrderConfirmationPage/>} />
-                        {/* <Route path='order-completed' element={<OrderCompletedPage/>}  /> */}
-                        <Route element={<ProtectedUserRoutes/>}>
-                            <Route path='shop'>
-                                <Route index element={<ProductListPage/>}/>
-                                <Route path='product' element={<ProductDetailPage/>} />
-                            </Route>
-                            <Route element={<UserPageLayout/>} >
-                                <Route path='wishlist' element={<WishlistPage/>} />
-                                <Route path='wallet' element={<WalletPage/>} />
-                                <Route path='account'>
-                                    <Route index element={<UserAccountPage/>}/>
-                                    <Route path='addresses'>
-                                        <Route index element={<AddressListingPage/>}/>
-                                        <Route path='add' element={<AddressManagementPage/>}/>
-                                        <Route path='edit' element={<AddressManagementPage editAddresses={true}/>}/>
-                                    </Route>   
+                            <Route index element={<HomePage/>}/>
+                            <Route path='cart' element={<CartPage/>} />
+                            <Route element={<ProtectedUserRoutes/>}>
+                                <Route path='shop'>
+                                    <Route index element={<ProductListPage/>}/>
+                                    <Route path='product' element={<ProductDetailPage/>} />
                                 </Route>
-                                <Route path='coupons' element={<CouponPage/>} />
+                                <Route element={<UserPageLayout/>} >
+                                    <Route path='wishlist' element={<WishlistPage/>} />
+                                    <Route path='wallet' element={<WalletPage/>} />
+                                    <Route path='account'>
+                                        <Route index element={<UserAccountPage/>}/>
+                                        <Route path='addresses'>
+                                            <Route index element={<AddressListingPage/>}/>
+                                            <Route path='add' element={<AddressManagementPage/>}/>
+                                            <Route path='edit' element={<AddressManagementPage editAddresses={true}/>}/>
+                                        </Route>   
+                                    </Route>
+                                    <Route path='coupons' element={<CouponPage/>} />
+                                </Route>
                             </Route>
-                        </Route>
-                        <Route element={<PrivateUserRoutes/>}>
-                            <Route path='orders' element={<OrderHistoryPage/>} />
-                            <Route path='checkout' element={<CheckoutPage/>} />
-                        </Route>
-                        <Route path='support' element={<CustomerSupportPage/>} />
+                            <Route element={<PrivateUserRoutes/>}>
+                                <Route path='orders' element={<OrderHistoryPage/>} />
+                                <Route path='checkout' element={<CheckoutPage/>} />
+                            </Route>
+                            <Route element={<RestrictedEntryRoutes/>}>
+                                <Route path='blocked' element={<UserBlockedPage/>} />
+                                <Route path='otp-verify' element={<OtpVerificationPage/>}/>
+                                <Route path='order-confirm' element={<OrderConfirmationPage/>} />
+                            </Route>
+                            <Route path='support' element={<CustomerSupportPage/>} />
                         </Route>
                     </Route>
 
@@ -164,8 +167,10 @@ export default function App(){
                 </Route>
 
                 <Route>
-                    <Route path='403' element={<ErrorPage403/>} />
-                    <Route path='401' element={<ErrorPage401/>} />
+                    <Route element={<RestrictedEntryRoutes redirectTo={404}/>}>
+                        <Route path='401' element={<ErrorPage401/>} />
+                        <Route path='403' element={<ErrorPage403/>} />
+                    </Route>
                     <Route path='404' element={<ErrorPage404/>} />
                 </Route>    
 

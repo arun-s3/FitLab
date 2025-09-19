@@ -7,7 +7,7 @@ import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
 import OrderStepper from '../../../Components/OrderStepper/OrderStepper'
 import FeaturesDisplay from '../../../Components/FeaturesDisplay/FeaturesDisplay'
 import Footer from '../../../Components/Footer/Footer'
-import {SiteButtonSquare, SiteButton, SiteSecondaryFillImpButton} from '../../../Components/SiteButtons/SiteButtons'
+import {SiteButtonSquare, SiteButton} from '../../../Components/SiteButtons/SiteButtons'
 
 export default function OrderConfirmationPage(){
 
@@ -56,7 +56,7 @@ export default function OrderConfirmationPage(){
                 Your order <span className="text-purple-600 font-medium">#62-745890</span> has been placed!
               </p>
               <p className="text-gray-600 mb-[2rem]">
-                {`We sent an email to ${user.email} with your order confirmation and receipt. If the email hasn't arrived within two
+                {`We sent an email ${user && user.email ? `to ${user.email}` : ''} with your order confirmation and receipt. If the email hasn't arrived within two
                 minutes, please do check your spam folder for the mail`}
               </p>
                 <SiteButtonSquare clickHandler={()=> navigate('/shop')}>

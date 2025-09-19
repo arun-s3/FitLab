@@ -213,6 +213,9 @@ const loginUser = async(req,res,next)=>{
                     const token = generateToken(res,userData._id)
                     console.log("token inside signinControllr-->"+token)
                     console.log("userData from backend-->"+userData)
+                    if(userData.isBlocked){
+                        next(errorHandler(401, `${userData.username} is Blocked!`))
+                    }
                     // console.log("from signin controller--JWT Cookie inserted-->"+res.cookies)
                     res.status(200).json({message:"Logged in successfully!",token:token, user:userData})
                   }

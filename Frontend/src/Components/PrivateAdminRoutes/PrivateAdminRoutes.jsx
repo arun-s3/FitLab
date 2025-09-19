@@ -1,28 +1,21 @@
-import React, { useEffect } from'react'
+import React from'react'
 import {useSelector} from 'react-redux'
-import { Navigate, Outlet, useNavigate } from 'react-router-dom'
+import { Navigate, Outlet } from 'react-router-dom'
 
 
 export default function PrivateAdminRoutes(){
 
-    const {adminToken, admin} = useSelector(state=> state.admin)
-    const {userToken, user} = useSelector(state=> state.user)
+    const {admin} = useSelector(state=> state.admin)
+    const {user} = useSelector(state=> state.user)
+    
+    console.log("Inside PrivateAdminRoutes", user && !user.isAdmin)
 
-    const navigate = useNavigate()
+    return  (
 
-    useEffect(()=>{
-        console.log("Inside PrivateAdminRoutes")
-    })
-    // useEffect(()=> {
-    //     console.log("Inside useEffect of PrivateAdminRoutes")
-    //     if(userToken && !user.isAdmin){
-    //         console.log("Inside useEffect of PrivateAdminRoutes, userToken && !user.isAdmin")
-    //         navigate(<UserPresenceErrorPage/>, {replace: true})
-    //     }
-    // },[userToken, user, adminToken, admin])
-    console.log("UserToken available?-->", userToken)
-    console.log("adminToken inside PrivateAdminRoutes-->"+adminToken)
-
-
-    return (adminToken && admin.isAdmin)? <Outlet/> : <Navigate to="/admin/signin"/> 
+       user && !user.isAdmin ? 
+            <Navigate to="/401"/>
+            : user && user.isAdmin && user.isVerified && !user.isBlocked || admin && admin.isAdmin && admin.isVerified && !admin.isBlocked
+            ? <Outlet/> 
+            : <Navigate to="/admin/signin"/> 
+    )
 }

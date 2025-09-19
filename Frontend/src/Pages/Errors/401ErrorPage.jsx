@@ -109,7 +109,7 @@ export default function ErrorPage401() {
                     duration-200 shadow-lg hover:shadow-xl w-full sm:w-auto border-nonw"
                 whileHover={{ scale: 1.08 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={()=> window.history.back()}
+                onClick={()=> navigate(-1, {replace: true})}
               >
                 <ArrowLeft className="h-5 w-5" />
                 Go Back

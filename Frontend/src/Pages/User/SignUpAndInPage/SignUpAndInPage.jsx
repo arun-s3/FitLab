@@ -60,7 +60,7 @@ export default function SignUpAndInPage({type}){
                     console.log("Redirecting to OTP Verification page...")
                     navigate('/signup/otp-verify', {
                         replace:true, 
-                        state:{email: formData.email}
+                        state:{email: formData.email, NoDirectAccess: true}
                     }) 
                     setOtpPageLoading(false)
                 }
@@ -75,7 +75,8 @@ export default function SignUpAndInPage({type}){
                 const redirectingtPath = location.state.currentPath 
                 console.log("redirectingtPath---->", redirectingtPath)
                 navigate(`${redirectingtPath}`, {replace:true})
-            }else{
+            }
+            else{
                 navigate('/', {replace:true})
             }
             dispatch(resetStates())
@@ -86,17 +87,21 @@ export default function SignUpAndInPage({type}){
                 if(userToken){
                     navigate('/',{replace:true})
                 }else clearCookiesAndSignIn()
-            }else{
-                console.log("Just after before toast!-->"+error)
+            }
+            else if(error.includes('is Blocked')){
                 toast.error(error)
+                navigate('/blocked', {
+                    replace: true, 
+                    state: {NoDirectAccesss: true}
+                })
+            }
+            else{
+                console.log("Just after before toast!-->"+error)
+                toast.error(error || "Something went wrong.")
                 console.log("Just after error toast!")
                 dispatch(resetStates())
             }
         }
-        // if(userToken){
-        //     console.log("Cannot go coz u got token")
-        //     navigate('/',{replace:true})
-        // } 
         dispatch(resetStates())
     })
     

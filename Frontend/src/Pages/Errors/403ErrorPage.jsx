@@ -33,7 +33,7 @@ export default function ErrorPage403({message = null}){
                         <motion.img alt='Error 403' 
                             src='/Error403Img.jpg' 
                             className='h-full w-auto md:h-[90%] md:w-[87%] xx-md:h-full xx-md:w-auto xx-md:ml-[-30px] lg:ml-0'
-                            animate={{ y: [0, -12, 0] }}
+                            animate={{ y: [0, -4, 0] }}
                             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                         />
                     </motion.figure>
@@ -51,7 +51,7 @@ export default function ErrorPage403({message = null}){
                          Forbidden Error 
                     </h2>
                     <h3 className='w-dull xs-sm:w-[30rem] text-[13px] xs-sm:text-[14px] xx-md:text-[18px] text-white md:text-black'>
-                        {message ? message : "You don’t have the permission to view this page. Please check your account or go back to the homepage!"}
+                        {message ? message : "Oops! You’re not allowed to view this page. Please check your account or head back to the home page to continue shopping!"}
                     </h3>
                     <div className='w-full mt-[2rem] flex items-center justify-between'>
                         <motion.button 
@@ -60,7 +60,7 @@ export default function ErrorPage403({message = null}){
                             style={{wordSpacing: '0.5px'}}
                             whileHover={{ scale: 1.08 }}
                             whileTap={{ scale: 0.95 }}
-                            onClick={()=> navigate(-1)}
+                            onClick={()=> navigate(-1, {replace: true})}
                         > 
                             <FaArrowLeftLong/> Go Back 
                         </motion.button>

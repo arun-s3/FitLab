@@ -94,7 +94,11 @@ export default function CheckoutPage(){
     useEffect(()=> {
       if(orderCreated){
         toast.success(orderMessage)
-        navigate('/order-confirm')
+        navigate('/order-confirm', 
+          {state: {
+            NoDirectAccess: true
+          }}
+        )
         dispatch(resetOrderStates())
       }
       if(orderReviewError){

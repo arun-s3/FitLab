@@ -6,13 +6,10 @@ import {useSelector} from 'react-redux'
 export default function PrivateUserRoutes(){
 
     const {user} = useSelector((state)=> state.user)
-
-    console.log("userToken inside PrivateRoutes-->"+userToken)
-
     
     return ( 
         user ? 
             <Outlet/>
-            :<Navigate to="/signin"/>
+            :<Navigate to="/signin" replace={true}/>
      )
 }

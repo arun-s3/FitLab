@@ -76,29 +76,6 @@ export default function ShoppingCartPage(){
     }
   },[location])
 
-  // useEffect(() => {
-  //   async function loadCharges() {
-  //     try {
-  //       const response = await axios.post("http://localhost:3000/cart/calculate-charges", {absoluteTotal: cart.absoluteTotal, products: cart.products},
-  //         { withCredentials: true }
-  //       )
-  //       console.log("Response from calculate-charges", response.data)
-  //       const {deliveryCharges, gstCharge, absoluteTotalWithTaxes} = response.data.rates
-
-  //       setShipping(deliveryCharges)
-  //       setGst(gstCharge)
-  //       setAbsoluteTotalWithTaxes(absoluteTotalWithTaxes)
-  //     }catch(error){
-  //       console.error("Error in loadCharges -->", error.message);
-  //     }
-  //   }
-
-  //   if (cart.products.length > 0) {
-  //     setAbsoluteTotalWithTaxes(cart.absoluteTotal)
-  //     loadCharges()
-  //   }
-  // }, [cart])
-
   useEffect(()=> {
     if(bestCoupon && couponApplied && couponMessage && couponMessage?.includes('Best')){
       toast.success(couponMessage + ' and applied to the cart!')

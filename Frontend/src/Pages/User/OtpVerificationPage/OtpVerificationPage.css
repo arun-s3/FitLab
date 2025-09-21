@@ -1,5 +1,5 @@
 
-#otp-verify::before{
+#otp-verify #otp-verify-bg::before{
     content:"";
     position:absolute;
     top:0;
@@ -8,32 +8,31 @@
     height:130vh;
     /* border: 1px solid red; */
     background-image: linear-gradient(rgba(0,0,0,0.3),rgba(0,0,0,0.3));
-    backdrop-filter:blur(2px);
+    backdrop-filter:blur(2.5px);
 }
-#otp-verify>main{
+#otp-verify>main>div{
     /* background-image: linear-gradient(rgba(255,255,255,0.5),rgba(255,255,255,0.5)); */
     background-image: linear-gradient(rgba(0,0,0,0.3),rgba(0,0,0,0.3));
-    border:1px solid var(--SECONDARY)
+    /* border:1px solid var(--SECONDARY) */
     /* box-shadow: 0px 0px 15px rgb(215, 241, 72); */
 }
-#otp-verify>main h1{
+#otp-verify>main>div h1{
    color:#fff; 
 }
-#otp-verify>main h2{
+#otp-verify>main>div h2{
     display:block;
     margin-bottom:5px;
     color:#fff;
 }
-#otp-verify>main div .check-mail span{
-    padding: 14px;
+#otp-verify>main>div div .check-mail span{
     border-radius: 58px;
     background: rgba(240, 255, 160, 0.21);
 }
-#otp-verify>main div .check-mail span>svg{
+/* #otp-verify>main>div div .check-mail span>svg{
     height: 35px;
     width: 35px;
     color: var(--PRIMARY);
-}
+} */
 /* #otp-verify>main input{
     width: 2.5rem;
     border:2px solid #fff;
@@ -41,20 +40,20 @@
     padding:10px;
     /* padding-left:20px; */
  */
-#otp-verify>main #email, #otp-verify>main #password{
+#otp-verify>main>div #email, #otp-verify>main #password{
     width:31.5rem;
 }
-#otp-verify>main input::placeholder{
+#otp-verify>main>div input::placeholder{
     font-size:12px;
 }
-#otp-verify>main input:focus{
+#otp-verify>main>div input:focus{
     border-color: var(--SECONDARY);
 }
-#otp-verify>main input:focus-visible{
+#otp-verify>main>div input:focus-visible{
     border-color: var(--SECONDARY);
     outline:none;
 }
-#otp-verify>main form .error{
+#otp-verify>main>div form .error{
     visibility:hidden;
     font-size: 11px;
     margin-left: 5px;

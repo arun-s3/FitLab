@@ -3,6 +3,7 @@ import './BreadcrumbBar.css'
 import {useLocation, Link} from 'react-router-dom'
 
 import {RiArrowDropRightLine} from "react-icons/ri"
+import {House} from 'lucide-react'
 
 
 export default function BreadcrumbBar({heading}){
@@ -23,9 +24,16 @@ export default function BreadcrumbBar({heading}){
     const breadcrumbPath = pathArray.map(currentCrumb=>{
         currentCrumb=='Home'? breadCrumb+='/' : breadCrumb+=currentCrumb
         return(
-            <Link to={breadCrumb} key={currentCrumb}> 
-                <h4 className="text-white inline-block capitalize hover:text-primary hover:font-[500] hover:underline">
+            <Link to={breadCrumb} key={currentCrumb} className='flex items-center'> 
+                <h4 className="hidden xs-sm:inline-block text-white capitalize hover:text-primary hover:font-[500] hover:underline">
                     {currentCrumb}
+                </h4>
+                <h4 className="inline-block xs-sm:hidden text-white capitalize hover:text-primary hover:font-[500] hover:underline">
+                    {
+                        currentCrumb == 'Home' ?
+                            <House className='w-[20px] h-[20px]'/>
+                            : currentCrumb
+                    }
                 </h4>
                 { pathArray.indexOf(currentCrumb) == pathArray.length-1? null : <RiArrowDropRightLine className='text-white inline-block h-[26px] w-[26px]'/> }
             </Link>
@@ -37,7 +45,7 @@ export default function BreadcrumbBar({heading}){
             className='mt-[5px] h-[5rem] pl-[60px] flex flex-col items-start justify-center relative'
             id='breadcrumb-bar'
         >
-            <nav className='text-[15px] sm:text-[13px] z-[5]'>
+            <nav className='text-[15px] sm:text-[13px] flex justify-center items-center z-[5]'>
                 {breadcrumbPath}
             </nav>
 

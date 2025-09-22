@@ -61,25 +61,37 @@ export default function CouponCodeInput({couponCode, setCouponCode}){
   }
 
     return(
-        <div className="mt-[5rem] w-[75%]" id='CouponCodeInput'>
-          <h3 className="font-medium mb-[8px]"> Have a coupon? </h3>
-          <p className="text-[14px] text-gray-500 mb-[8px]"> Add your code for an instant cart discount </p>
-          <div id='input-box'>
-            <div className='flex-1 flex justify-between items-center p-[8px] h-[2.7rem] border border-secondaryLight2 rounded-[5px] 
-                focus:ring-0 focus:border-0 focus:outline-0'>
-              <RiCoupon4Line className='w-[18px] h-[18px] text-muted'/>
-              <input type="text" placeholder="Coupon Code" className="ml-[-20px] w-[80%] h-[10px] border-0 outline-0 placeholder:text-[13px]
+        <div className="mt-[5rem] ml-0 sm:ml-20 lg:ml-0 s-sm:mt-[4rem] x-sm:mt-[5rem] w-full xs-sm:w-[85%] 
+           s-sm:w-[80%] x-sm:w-[75%]" 
+          id='CouponCodeInput'>
+          <h3 className="font-medium mb-[6px] s-sm:mb-[8px]"> Have a coupon? </h3>
+          <p className="text-[13px] xs-sm:text-[14px] text-gray-500 mb-[8px]"> Add your code for an instant cart discount </p>
+          <div id='input-box'> 
+            <div className='relative flex-1 flex justify-between items-center p-[8px] pl-12 h-[2.7rem] border
+            border-secondaryLight2 rounded-[5px] focus:ring-0 focus:border-0 focus:outline-0'>
+              <RiCoupon4Line className='w-[18px] h-[18px] text-muted absolute left-[9px]'/>
+              <input type="text" 
+                placeholder="Coupon Code" 
+                className="ml-[-20px] w-[80%] h-[10px] border-0 outline-0 placeholder:text-[12px] xxs-sm:placeholder:text-[13px]
                  placeholder:tracking-[0.1px] text-primaryDark caret-primaryDark" 
-                  value={couponCode || cart?.couponUsed?.code} onChange={(e)=> couponInputHandler(e)}/>
+                value={couponCode || cart?.couponUsed?.code} 
+                onChange={(e)=> couponInputHandler(e)}
+              />
               <button className="px-[1.5rem] py-[8px] text-[15px] text-purple-600 font-medium" onClick={()=> applyTheCoupon()}>
                 Apply
               </button> 
 
-              <ReplaceCouponModal isOpen={isReplaceModalOpen} onClose={()=> setIsReplaceModalOpen(false)} putOldCoupon={putOldCoupon}
-                currentCoupon={cart?.couponUsed?.code} newCoupon={couponCode} onConfirm={applyNewCoupon} />
+              <ReplaceCouponModal 
+                isOpen={isReplaceModalOpen} 
+                onClose={()=> setIsReplaceModalOpen(false)} 
+                putOldCoupon={putOldCoupon}
+                currentCoupon={cart?.couponUsed?.code} 
+                newCoupon={couponCode} onConfirm={applyNewCoupon} 
+              />
 
             </div>
           </div>
-        </div>    
+        </div> 
+
     )
 }

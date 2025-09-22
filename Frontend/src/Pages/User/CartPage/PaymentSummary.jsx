@@ -1,6 +1,7 @@
 import React, {forwardRef, useImperativeHandle, useState, useCallback} from 'react'
 import {useNavigate} from 'react-router-dom'
 import {useDispatch, useSelector} from 'react-redux'
+import {motion} from 'framer-motion'
 
 import {Minus, X} from 'lucide-react'
 import axios from 'axios'
@@ -64,29 +65,71 @@ const PaymentSummary = forwardRef((
     }
   }), [handleCheckout])
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2, 
+        delayChildren: 0.1,  
+      },
+    },
+  }
+  
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { 
+      opacity: 1, 
+      y: 0, 
+      transition: { type: "spring", stiffness: 100, damping: 15 } 
+    },
+  }
+  
+  const highlightVariants = {
+    hidden: { opacity: 0, scale: 0.9 },
+    show: { 
+      opacity: 1, 
+      scale: 1, 
+      transition: { type: "spring", stiffness: 120, damping: 12 } 
+    },
+  }
+
 
     return(
-        <div className="h-fit  bg-whitesmoke rounded-[8px] p-[1.5rem] border border-dropdownBorder shadow-md" id='order-summary'>
+        <motion.div className="h-fit  bg-whitesmoke rounded-[8px] p-[1.5rem] border border-dropdownBorder shadow-md" 
+          id='order-summary'
+          variants={containerVariants}
+          initial="hidden"
+          animate="show"
+        >
             <h2 className="mb-[1.5rem] text-[20px] font-bold tracking-[0.5px]"> {heading} </h2>
-            <div className="space-y-[1rem]">
-              <div className="flex justify-between">
+            <motion.div className="space-y-[1rem]"
+              variants={containerVariants}
+            >
+              <motion.div className="flex justify-between" 
+                variants={itemVariants}
+              >
                 <span className='order-title'> Subtotal </span>
                 <span className='order-value tracking-[0.5px]'> ₹{absoluteTotal.toFixed(2).toLocaleString()} </span>
-              </div>
-              <div className="flex justify-between">
+              </motion.div>
+              <motion.div className="flex justify-between"
+                variants={itemVariants}
+              >
                 <span className='order-title'>Shipping Cost</span>
                 <span className='order-value'> ₹{deliveryCharge} </span>
-              </div>
-              <div className="flex justify-between">
+              </motion.div>
+              <motion.div className="flex justify-between"
+                variants={itemVariants}
+              >
                 <span className='order-title flex flex-col'>
                   <span> GST (12-18%) </span>
                   <span className='text-[10px] text-muted'>  (12% for supplements and 18% for others are added to each item) </span>
                 </span>
                 <span className='order-value'> ₹{gst} </span>
-              </div>
+              </motion.div>
               {
                 couponDiscount && couponDiscount > 0 ?
-                <div>
+                <motion.div variants={itemVariants}>
                   <div className="relative flex justify-between !mt-[2rem]">
                     <span className='order-title !text-green-500'> Coupon Discount </span>
                     <span className='order-value flex items-center gap-[5px]'>
@@ -96,21 +139,24 @@ const PaymentSummary = forwardRef((
                       onClick={()=> setIsRemoveModalOpen(true)}></X>
                   </div> 
                   <p className='mt-[-5px] text-[12px] !text-muted font-[450] uppercase'> { `( ${cart?.couponUsed?.code} )` } </p>
-                </div>: null
+                </motion.div>: null
               }
 
-              <RemoveCouponModal isOpen={isRemoveModalOpen} onClose={()=> setIsRemoveModalOpen(false)} couponCode={cart?.couponUsed?.code}
-                onConfirm={removeTheCoupon} />
+              <RemoveCouponModal 
+                isOpen={isRemoveModalOpen} 
+                onClose={()=> setIsRemoveModalOpen(false)} 
+                couponCode={cart?.couponUsed?.code}
+                onConfirm={removeTheCoupon} 
+              />
 
-              <div className="flex justify-between font-bold pt-[1rem] border-t border-dashed border-mutedDashedSeperation">
+              <motion.div 
+                className="flex justify-between font-bold pt-[1rem] border-t border-dashed border-mutedDashedSeperation"
+                variants={highlightVariants}
+              >
                 <span> Order Total </span>
                 <span> ₹{absoluteTotalWithTaxes.toFixed(2)} </span>
-              </div>
-            </div>
-            {/* <button className="w-full bg-[#E6FF00] text-black font-bold py-[12px] rounded-[8px] mt-[1.5rem]
-               hover:bg-[#E6FF00]/90 transition-colors">
-              Checkout
-            </button> */}
+              </motion.div>
+            </motion.div>
             <SiteButtonSquare tailwindClasses='mt-[1rem] w-full hover:bg-primaryDark transition-colors' 
               clickHandler={()=> handleCheckout()}>
                 { 
@@ -124,7 +170,7 @@ const PaymentSummary = forwardRef((
                       : 'Checkout' 
                 }
             </SiteButtonSquare>
-        </div>
+        </motion.div>
     )
   }
 )

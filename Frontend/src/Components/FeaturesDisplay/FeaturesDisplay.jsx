@@ -40,7 +40,7 @@ export default function FeaturesDisplay({darkVariant = false, topRoom = true}){
                   </svg>
                 </div>
                 <h3 className={`font-bold mb-[8px] ${darkVariant ? 'text-white' : 'text-black'}`}> {feature.title} </h3>
-                <p className={`text-[14px] ${darkVariant ? 'text-[#cdc8c8]' : 'text-gray-600'}`}>
+                <p className={`text-[12px] xs-sm:text-[14px] ${darkVariant ? 'text-[#cdc8c8]' : 'text-gray-600'}`}>
                  {feature.description}
                 </p>
               </div>

@@ -98,8 +98,9 @@ export default function MobileSidebar() {
 
             <motion.aside
               ref={scrollRef}
-              className="fixed right-0 top-0 z-50 h-dvh w-[88%] max-w-sm overflow-hidden rounded-l-[12px] bg-neutral-900 text-white 
-                shadow-2xl bg-gradient-to-br from-neutral-900 via-neutral-950 to-[#2c0f4a]"    
+              className="fixed right-0 top-0 z-50 h-dvh max-xxs-sm:w-[85%] max-xs-sm2:w-[75%] max-xs-sm:w-[80%] w-[88%] max-w-sm
+               overflow-hidden rounded-l-[12px] bg-neutral-900 text-white shadow-2xl bg-gradient-to-br from-neutral-900
+              via-neutral-950 to-[#2c0f4a]"    
               role="dialog"
               aria-modal="true"
               aria-label="Mobile Menu"

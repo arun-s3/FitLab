@@ -49,7 +49,7 @@ export default function Header({customStyle}){
             style={customStyle}>
             {/* <Logo/> */}
             
-            <Link to='/' className='absolute top-[5px] lg:static'>
+            <Link to='/' className='absolute top-[5px] max-xs-sm:left-0 lg:static'>
                 <img src="/Logo_main.png" alt="Fitlab" className="h-[5rem] "/>   {/*mt-[10px]*/}
             </Link>
 

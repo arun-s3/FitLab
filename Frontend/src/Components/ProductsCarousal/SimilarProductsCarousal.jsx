@@ -4,7 +4,7 @@ import {motion, AnimatePresence} from 'framer-motion'
 import {Star, ChevronLeft, ChevronRight} from 'lucide-react'
 
 
-export default function SimilarProductsCarousal(){
+export default function SimilarProductsCarousal({titleColor = null}){
 
     const [currentProductIndex, setCurrentProductIndex] = useState(0)
     const [direction, setDirection] = useState(0)
@@ -109,8 +109,8 @@ export default function SimilarProductsCarousal(){
 
 
     return(
-      <div className="mt-[2rem] mx-[3rem]">
-        <h2 className="text-[1.5rem] text-secondary font-bold mb-[2rem]">
+      <section>
+        <h2 className={`text-[1.5rem] ${titleColor ? `text-${titleColor}` : 'text-secondary'} font-bold mb-[2rem]`}>
           Similar Products
         </h2>
 
@@ -195,6 +195,6 @@ export default function SimilarProductsCarousal(){
             <ChevronRight className="w-[1.5rem] h-[1.5rem]" />
           </motion.button>
         </div>
-      </div>
+      </section>
     )
 }

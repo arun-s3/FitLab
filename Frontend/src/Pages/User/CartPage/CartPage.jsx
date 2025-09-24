@@ -4,7 +4,7 @@ import {useNavigate, useLocation} from 'react-router-dom'
 import {useDispatch, useSelector} from 'react-redux'
 import {motion, AnimatePresence} from 'framer-motion'
 
-import {Trash2, Plus, Minus, Star, ChevronLeft, ChevronRight, BadgePlus, Check, ShoppingCart} from 'lucide-react';
+import {Trash2, Plus, Minus, BadgePlus} from 'lucide-react'
 import {toast} from 'react-toastify'
 import axios from 'axios'
 
@@ -14,7 +14,7 @@ import OrderStepper from '../../../Components/OrderStepper/OrderStepper'
 import FeaturesDisplay from '../../../Components/FeaturesDisplay/FeaturesDisplay'
 import PaymentSummary from './PaymentSummary'
 import CouponCodeInput from './CouponCodeInput'
-import SimilarProductsCarousal from './SimilarProductsCarousal'
+import SimilarProductsCarousal from '../../../Components/ProductsCarousal/SimilarProductsCarousal'
 import TextChatBox from '../TextChatBox/TextChatBox'
 import {capitalizeFirstLetter} from '../../../Utils/helperFunctions'
 import ProductRemovalModal from '../../../Components/ProductRemovalModal/ProductRemovalModal'
@@ -324,7 +324,11 @@ export default function ShoppingCartPage(){
 
       </div>
 
-      <SimilarProductsCarousal />
+      <div className="mt-[2rem] mx-[3rem]">
+
+          <SimilarProductsCarousal />
+
+      </div>
 
       <div className="fixed bottom-[2rem] right-[2rem] z-50">
         

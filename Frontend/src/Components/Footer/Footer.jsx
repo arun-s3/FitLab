@@ -10,7 +10,7 @@ import { SiteButtonSquare } from '../SiteButtons/SiteButtons'
 export default function Footer() {
     
   return (
-    <footer className="padding-main py-[2.3rem] text-white">
+    <footer className="padding-main py-[2.3rem] text-white max-xs-sm2:overflow-x-hidden">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-14 items-start">
         <div className="space-y-4 w-[380px]">
           <figure>
@@ -18,7 +18,8 @@ export default function Footer() {
                alt="Fitlab"
                className="h-[5rem]" />
           </figure>
-          <p className="ml-[28px] mt-[-2px] capitalize text-small font-sairaCondensed text-muted font-medium"
+          <p className="ml-[28px] mt-[-2px] capitalize text-small font-sairaCondensed text-muted font-medium 
+           max-xxs-sm:w-[75%] max-xs-sm2:w-[85%]"
             style={{ wordSpacing: '0.5px' }}
           >
             Sparking up fitness passion with the best workout gear. We're really pros at making gyms and CrossFit spaces

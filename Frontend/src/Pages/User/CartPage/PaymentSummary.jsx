@@ -6,7 +6,7 @@ import {motion} from 'framer-motion'
 import {Minus, X} from 'lucide-react'
 import axios from 'axios'
 
-import RemoveCouponModal from './RemoveCouponModal'
+import RemoveCouponModal from './Modals/RemoveCouponModal'
 import {removeCoupon} from '../../../Slices/cartSlice'
 import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
 import {CustomScaleLoader} from '../../../Components/Loader/Loader'

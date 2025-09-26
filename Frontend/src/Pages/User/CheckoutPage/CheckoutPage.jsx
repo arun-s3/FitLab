@@ -1,46 +1,31 @@
 import React, {useState, useEffect} from 'react'
 import './CheckoutPage.css'
-import {useNavigate} from 'react-router-dom'
+import {useNavigate, Link} from 'react-router-dom'
 import {useDispatch, useSelector} from 'react-redux'
+import {motion} from 'framer-motion'
 
-import {Check, Plus, Minus, X, CreditCard, Lock, MapPin} from 'lucide-react'
-import {BsFillCreditCard2BackFill} from "react-icons/bs"
-import {SiRazorpay} from "react-icons/si"
-import {IoWallet} from "react-icons/io5"
-import {GiTakeMyMoney} from "react-icons/gi"
 import {toast} from 'react-toastify'
 import axios from 'axios'
 
 import Header from '../../../Components/Header/Header'
+import OrderManager from './OrderManager'
+import AddressManager from './AddressManager'
+import PaymentsManager from './PaymentsManager'
+import OrderSummary from './OrderSummary'
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
 import OrderStepper from '../../../Components/OrderStepper/OrderStepper'
 import FeaturesDisplay from '../../../Components/FeaturesDisplay/FeaturesDisplay'
-import StripePayment from '../PaymentPages/StripePayment'
-import PaypalPayment from '../PaymentPages/PayPalPayment'
-// import StripeCheckout from './StripePayment'
-// import CardPayment from './CardPayment'
 import Footer from '../../../Components/Footer/Footer'
-import {addToCart, reduceFromCart, removeFromCart, getTheCart, resetCartStates} from '../../../Slices/cartSlice'
+import {getTheCart} from '../../../Slices/cartSlice'
 import {createOrder, resetOrderStates} from '../../../Slices/orderSlice'
 import {getAllAddress} from '../../../Slices/addressSlice'
-import {SiteButtonSquare, SiteSecondaryFillImpButton} from '../../../Components/SiteButtons/SiteButtons'
-import {camelToCapitalizedWords, capitalizeFirstLetter, convertToCamelCase} from '../../../Utils/helperFunctions'
 
 
 export default function CheckoutPage(){
     
-    const [currentProductIndex, setCurrentProductIndex] = useState(0)
-
     const [shippingAddress, setShippingAddress] = useState({})
 
     const [paymentMethod, setPaymentMethod] = useState('')
-
-    const [cardsEnterError, setCardsEnterError] = useState('')
-
-    const [couponCode, setCouponCode] = useState('')
-    const [appliedDiscount, setAppliedDiscount] = useState('')
-    const [discountAmount, setDiscountAmount] = useState(0)
-    const [isCouponFocused, setIsCouponFocused] = useState(false)
 
     const [orderDetails, setOrderDetails] = useState({})
 
@@ -49,8 +34,8 @@ export default function CheckoutPage(){
     const {cart, productAdded, productRemoved, loading, error, message} = useSelector(state=> state.cart)
     const {addresses} = useSelector(state=> state.address)
     const {orders, orderCreated, orderMessage, orderError} = useSelector(state=> state.order)
-    const dispatch = useDispatch()
 
+    const dispatch = useDispatch()
     const navigate = useNavigate()
 
     const baseApiUrl = import.meta.env.VITE_API_BASE_URL
@@ -95,8 +80,9 @@ export default function CheckoutPage(){
       if(orderCreated){
         toast.success(orderMessage)
         navigate('/order-confirm', 
-          {state: {
-            NoDirectAccess: true
+          { replace: true,
+            state: {
+              NoDirectAccess: true
           }}
         )
         dispatch(resetOrderStates())
@@ -111,58 +97,23 @@ export default function CheckoutPage(){
         backgrounSize: 'cover'
     }
 
-    const paymentOptions = [
-      {
-        name: 'razorpay',
-        icon: './razorpay.png'
+    const containerVariants = {
+      hidden: { opacity: 0 },
+      show: {
+        opacity: 1,
+        transition: {
+          staggerChildren: 0.25
+        },
       },
-      {
-        name: 'wallet',
-        icon: '/wallet.png'
-      },
-      {
-        name: 'paypal',
-        icon: '/paypal.png'
-      },
-      {
-        name: 'cashOnDelivery',
-        icon: '/cod.png'
-      },
-      {
-        name: 'cards',
-        icon: '/card3.png',
-      }
-    ]
-
-    const goToProductDetailPage = async(id)=> {
-      try {
-        console.log("Inside goToProductDetailPage")
-        const response = await axios.get(`${baseApiUrl}/products/${id}`, { withCredentials: true })
-        console.log("Response from /products/:id", response.data[0])
-        const product = response.data[0]
-        console.log("Product received-->", product)
-        if(product) navigate('/shop/product', {state: {product}})
-      }catch(error){
-        console.error("Error in goToProductDetailPage -->", error.message)
-      }
     }
 
-    const addQuantity = (id, quantity)=> {
-      console.log("Inside addQuantity")
-      dispatch( addToCart({productId: id, quantity}) )
-    }
-    
-    const lessenQuantity = (id, quantity, currentQuantity)=> {
-      console.log("Inside lessenQuantity")
-      if(currentQuantity > 1){
-        dispatch( reduceFromCart({productId: id, quantity}) )
-      }else{
-        setOrderReviewError('There must be atleast 1 item to ship!')
-      }
-    }
-        
-    const removeFromTheCart = (id) => {
-      dispatch(removeFromCart({productId: id}))
+    const stepVariants = {
+      hidden: { opacity: 0, y: 20 },
+      show: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.4, ease: "easeOut" },
+      },
     }
 
     const radioClickHandler = (e, type, value)=>{
@@ -185,7 +136,7 @@ export default function CheckoutPage(){
     }
 
     
-    const handleApplyDiscount = () => {
+    const handleApplyDiscount = (couponCode) => {
       setOrderDetails(orderDetails=> {
         return {...orderDetails, couponCode}
       })
@@ -311,351 +262,132 @@ const handleStripeOrPaypalPayment = (paymentGateway, paymentId)=> {
             <main className='mb-[7rem]'>
                 <div className='my-[4rem]'>
 
-                  <OrderStepper stepNumber={2}/>
-
+                  {
+                    cart?.products && cart.products.length > 0 ?
+                      <OrderStepper stepNumber={2}/>
+                      : null
+                  }
+                  
                 </div>
-                <div className='px-[2rem] flex items-center gap-[2rem]'>
-                    <div className='basis-[70%]'>
-                        <div className='flex flex-col gap-[20px]'>
-                            <div id='checkout-step'>
-                                <div className='checkout-step-header'>
-                                    <h4> 01 </h4>
-                                    <h2> Review Your Orders </h2>
-                                </div>
-                                <div className='mt-[30px] grid grid-cols-2 gap-x-[3rem] gap-y-[1rem]'>
+                
+                {
+                  cart?.products && cart.products.length > 0 ?
+                    <motion.div 
+                      className='px-[2rem] flex items-center flex-col lg:flex-row lg:items-start gap-[2rem]'
+                      variants={containerVariants}
+                      initial="hidden"
+                      animate="show"
+                    >
+                        <div className='basis-[70%]'>
 
-                                  {cart.products &&
-                                  cart.products.map((product) => (
-                                  <div key={product.productId}>
-                                    <div className="flex cursor-pointer">
-                                      <img src={product.thumbnail} alt={product.title} className="w-20 h-20 object-cover rounded"
-                                        onClick={()=> goToProductDetailPage(product.productId)}/>
-                                      <div className="flex-1 flex flex-col justify-between ml-4">
-                                        <div className="flex justify-between">
-                                          <div>
-                                            <h3 className="text-[15px] font-[450] uppercase" onClick={()=> goToProductDetailPage(product.productId)}> 
-                                              {!product.title.length > 22 ? product.title : product.title.slice(0,15) + '...'}
-                                            </h3>
-                                            {
-                                              product?.weight? 
-                                              <p className="text-sm text-[13px] text-gray-500">Weight: { product.weight }</p>
-                                              : null
-                                            }
-                                          </div>
-                                        </div>
-                                        <div className="flex justify-between items-center gap-[30px] mt-2">
-                                          <div className="flex items-center space-x-2">
-                                            <button className="w-[20px] h-[20px] flex items-center justify-center
-                                                 border-primaryDark border rounded" onClick={()=> lessenQuantity(product.productId._id, 1, product.quantity)}>
-                                              <Minus size={14} className='text-primaryDark'/>
-                                            </button>
-                                            <span className="w-8 text-center text-[14px]">{product.quantity}</span>
-                                            <button className="w-[20px] h-[20px] flex items-center justify-center border-primaryDark
-                                                 border rounded" onClick={()=> addQuantity(product.productId._id, 1)}>
-                                              <Plus size={14} className='text-primaryDark'/>
-                                            </button>
-                                          </div> 
-                                          <span className="text-[14px] font-[450] flex flex-col">
-                                            <span className={`${ product?.offerApplied && 'line-through decoration-[1.6px] decoration-red-500'}`}>
-                                              &#8377; {(product.price).toFixed(2)} 
-                                            </span>
-                                            { product?.offerApplied && product?.offerDiscount &&
-                                              <span>
-                                                ₹{(product.price - product.offerDiscount).toFixed(2)}
-                                              </span>
-                                            }
-                                          </span>
-                                        </div>
-                                      </div>
+                            <motion.div className='flex flex-col gap-[20px]' variants={containerVariants}>
+
+                                <motion.div id='checkout-step' 
+                                  className='!flex-col !gap-0 x-lg:!flex-row x-lg:!gap-20'
+                                  variants={stepVariants}
+                                >
+                                    <div className='checkout-step-header'>
+                                        <h4> 01 </h4>
+                                        <h2> Review Your Orders </h2>
                                     </div>
-                                    <p className='mt-[5px] h-[5px] text-[10px] text-red-500 tracking-[0.3px]'> {orderReviewError} </p>
-                                  </div>
-                                  ))}
-                                </div>
 
-                            </div>
-                            <div id='checkout-step' style={{paddingBottom: '1rem'}}>
-                                <div className='checkout-step-header'>
-                                    <h4> 02 </h4>
-                                    <h2> Choose Your Delivery Address </h2>
-                                </div>
-                                <div>
-                                <div className='mt-[30px] grid grid-cols-2 gap-x-[3rem] gap-y-[1rem]'>
-                                {/* <div className='flex flex-col justify-center gap-[2rem] address-content'> */}
-                                {
-                                  [...addresses].sort((a, b)=> {
-                                    if (b.defaultAddress && !a.defaultAddress){
-                                      return 1
-                                    }else if(a.defaultAddress && !b.defaultAddress){
-                                      return -1
-                                    }
-                                    return 0
-                                  }).map(address=> (
-                                            <div key={address._id} id='checkout-address' className={`flex justify-between pl-[10px] py-[5px] rounded-[6px] 
-                                                ${shippingAddress && (shippingAddress._id === address._id) ? 'outline outline-[2px] outline-primary outline-offset-2' : ''}`}
-                                                    onClick={()=> setShippingAddress(address)}>
-                                              <div className='flex gap-[5px]'>
-                                                <input type='radio' onClick={(e)=> radioClickHandler(e, "address", address)}
-                                                   onChange={(e)=> radioChangeHandler(e, "address", address)} checked={shippingAddress && shippingAddress._id === address._id}/>
-                                                <address className='not-italic flex flex-col justify-center text-[12px] text-[#3C3D37] capitalize cursor-pointer'>
-                                                      <span className='mb-[5px] flex items-center justify-between'>
-                                                          <span className='px-[6px] w-fit text-[11px] text-white capitalize bg-secondary
-                                                               rounded-[5px] '>
-                                                                  {address.type}
-                                                          </span>
-                                                          {address.defaultAddress &&
-                                                              <span className='flex items-center'>
-                                                                  <Check className='px-[1px] h-[15px] w-[15px] text-white bg-primary rounded-[10px]'/>
-                                                                  <span className='ml-[-7px] pl-[12px] pr-[15px] text-[11px] text-[rgb(239, 68, 68)]
-                                                                     text-primaryDark font-[550] tracking-[0.2px] rounded-[6px] z-[-1]'>
-                                                                      Default 
-                                                                  </span>
-                                                              </span> 
-                                                          }
-                                                      </span>
-                                                      <span className='flex items-center gap-[2px]'> 
-                                                          <span>
-                                                              {address.firstName + ' ' + address.lastName} 
-                                                          </span>
-                                                          {
-                                                              address.nickName && 
-                                                                  <span className='ml-[1px] text-muted text-[12px] tracking-[0.2px]'>
-                                                                      {`(${address.nickName})`}
-                                                                  </span>
-                                                          }
-                                                      </span>
-                                                      <span> {address.street} </span>
-                                                      <span> {address.district} </span>
-                                                      <span> {address.state} </span>
-                                                      <span> {address.pincode} </span>
-                                                      {/* <span> {address._id} </span> */}
-                                                      {
-                                                          address.landmark &&
-                                                              <span> {`(${address.landmark})`} </span>
-                                                      }
-                                                      <span className='inner-fields'>
-                                                          <span className='field-name'>
-                                                              Mobile:
-                                                          </span>
-                                                          <span className='ml-[2px]'>
-                                                              {address.mobile}
-                                                          </span>
-                                                      </span>
-                                                      {
-                                                          address.alternateMobile &&
-                                                              <span className='inner-fields'>
-                                                                  <span className='field-name'>
-                                                                      Alternate Mobile:
-                                                                  </span>
-                                                                  <span className='ml-[2px]'>
-                                                                      {address.alternateMobile}
-                                                                  </span>
-                                                              </span>
-                                                      }
-                                                      <span className='inner-fields'>
-                                                          <span className='field-name'>
-                                                              Email:
-                                                          </span>
-                                                          <span className='ml-[2px]'>
-                                                              {address.email}
-                                                          </span>
-                                                      </span>
-                                                      {
-                                                          address.deliveryInstructions &&
-                                                              <span className='inner-fields'>
-                                                                  <span className='field-name'>
-                                                                      Delivery Instructions:
-                                                                  </span>
-                                                                  <span className='ml-[2px]'>
-                                                                      {address.deliveryInstructions}
-                                                                  </span>
-                                                              </span>
-                                                      }
-                                                  </address>
-                                                </div>
-                                            </div>
-                                    ))
-                                }
-                                </div>
-                                <p className='mt-[1rem] bottom-[10px] flex items-center gap-[10px] uppercase cursor-pointer'
-                                    onClick={()=> navigate('/profile/addresses')}> 
-                                  <Plus className='h-[22px] w-[22px] text-primaryDark'/>
-                                  <span className='text-[12px] tracking-[0.5px] text-secondary' style={{wordSpacing: '1px'}}>
-                                     Add New Address / Manage All Addresses 
-                                  </span>
-                                </p>
-                                </div>
-                            </div>
-                            <div id='checkout-step' style={{borderBottom: '0'}}>
-                                <div className='checkout-step-header'>
-                                    <h4> 03 </h4>
-                                    <h2> Choose Your Payment Method </h2>
-                                </div>
-                                <div className='mt-[30px] grid grid-cols-2 gap-x-[3rem] gap-y-[1rem]'>
-                                {
-                                  paymentOptions.map(option=> (
-                                      <div className={`px-[15px] py-[10px] ${option.name === 'cards' ? 'col-span-2 w-[102%]' : 'w-[20rem]'}
-                                         flex items-center justify-between flex-wrap rounded-[5px] cursor-pointer
-                                           hover:border-primaryDark hover:bg-primaryLight
-                                               ${paymentMethod === option.name ? 'border-2 border-primaryDark bg-primaryLight': 
-                                                    'border border-mutedDashedSeperation'}`} id='checkout-payment-methods'
-                                                        onClick={()=> setPaymentMethod(option.name)}>
-                                        <div className='flex items-center gap-[10px]'>
-                                          {/* <option.icon className='text-muted'/> */}
-                                          <img src={option.icon} className='w-[20px] h-[20px]'/>
-                                          <span className={`text-[15px] flex items-center 
-                                              ${paymentMethod === option.name && 'text-secondary font-medium'}`}>
-                                          { camelToCapitalizedWords(option.name) } 
-                                          {
-                                              option.name === 'cards' &&
-                                              <span className='ml-[5px] mt-[1px] text-[12px] text-muted font-normal'> 
-                                                  (All global cards accepted - Visa, Mastercard, American Express, Discover, JCB, etc)
-                                              </span>
-                                          }
-                                          </span>
-                                        </div>
-                                        <input type='radio' className='border border-primaryDark cursor-pointer checked:bg-primaryDark' 
-                                            onClick={(e)=> radioClickHandler(e, "paymentOption", option.name)} 
-                                                onChange={(e)=> radioChangeHandler(e, "paymentOption", option.name)}
-                                                    checked={paymentMethod === option.name}/>
-                                        {
-                                          option.name === 'cards' &&
-                                            <div className='relative w-full'>
-                                                <p className='absolute top-[5px] text-[10px] text-red-500 font-medium tracking-[0.3px] z-[30]'>
-                                                  {cardsEnterError && cardsEnterError} 
-                                                </p>
+                                      <OrderManager
+                                        products={cart.products} 
+                                        orderReviewError={orderReviewError} 
+                                        setOrderReviewError={setOrderReviewError}
+                                      />
 
-                                                {
-                                                  cart && cart?.absoluteTotalWithTaxes &&
-                                                  <StripePayment amount={cart.absoluteTotalWithTaxes.toFixed(2)} 
-                                                    onPayment={(id)=> handleStripeOrPaypalPayment('stripe', id)}/>
-                                                }
+                                </motion.div>
 
-                                               {
-                                                 paymentMethod !== 'cards' &&
-                                                 <div className='absolute top-[1.5rem] left-[1.5rem] right-[1.5rem] bottom-[1.5rem]
-                                                   cursor-not-allowed z-[10]' 
-                                                    style={{background: 'rgba(255,255,255,0.3)'}} 
-                                                      onMouseEnter={()=> setCardsEnterError("Please select the cards' radiobutton first!")}
-                                                        onMouseLeave={()=> setCardsEnterError('')}/>
-                                               }
-                                            </div>
-                                        }
-                                      </div>
-                                  ))
-                                }
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                   {
-                    cart?.products &&
-                    <div className='self-baseline mt-[-20px]'>
-                    <div id='checkout-payment' className="w-[400px] bg-white rounded-lg shadow-lg p-6" style={{boxShadow: '2px 2px 25px rgba(0,0,0,0.1)'}}>
-                        <h2 className="text-[20px ] text-secondary font-[650] tracking-[0.5px] mb-6">ORDER SUMMARY</h2>
+                                <motion.div id='checkout-step' 
+                                  style={{paddingBottom: '1rem'}} 
+                                  className='!flex-col !gap-0 xx-xl:!flex-row xx-xl:!gap-20'
+                                  variants={stepVariants}
+                                >
+                                    <div className='checkout-step-header'>
+                                        <h4> 02 </h4>
+                                        <h2> Choose Your Delivery Address </h2>
+                                    </div>
+                                    <div className='x-lg:!self-end xx-xl:self-auto'> 
 
-                        <div className="mb-6 p-4 border border-primary rounded-lg">
-                          <div className="flex items-center mb-2">
-                            <MapPin className="w-5 h-5 text-gray-500 mr-2" />
-                            <h3 className="font-semibold text-[16px]">Delivery Address</h3>
-                          </div>
-                          {
-                            shippingAddress &&
-                            <div className="text-[14px] text-gray-700 capitalize">
-                            <p>{shippingAddress.firstName + ' ' + shippingAddress.lastName}</p>
-                            <p>{shippingAddress.street}</p>
-                            <p>{shippingAddress.district}, {shippingAddress.state}</p>
-                            <p>{shippingAddress.pincode}</p>
-                            <p>{shippingAddress?.landmark ? shippingAddress.landmark : null}</p>
-                          </div>
-                          }
-                        </div>
+                                      <AddressManager 
+                                        addresses={addresses} 
+                                        shippingAddress={shippingAddress} 
+                                        setShippingAddress={setShippingAddress} 
+                                        onAddressClick={radioClickHandler} 
+                                        onAddresChange={radioChangeHandler}
+                                      />
 
-                        {
-                          !cart.couponDiscount &&
-                          <div className="mb-4 relative">
-                          <label htmlFor="couponCode" 
-                            className={`absolute ${isCouponFocused || couponCode ? '-top-2 left-2 px-1 bg-white text-xs' : 'top-2 left-2 text-gray-500'} 
-                              transition-all duration-200 pointer-events-none`}>
-                            Coupon code
-                          </label>
-                          <div className="flex items-center">
-                            <input type="text" id="couponCode" value={couponCode} onChange={(e) => setCouponCode(e.target.value)}
-                                onFocus={(e)=> setIsCouponFocused(true)} onBlur={() => setIsCouponFocused(false)}
-                                    className="flex-1 p-2 border border-[#e5e7eb] border-r-0 rounded-l-md focus:border-primary focus:outline-none
-                                         focus:ring-0 focus:ring-primary caret-primaryDark"/>
-                            <button className={`text-orange-500 px-4 py-[0.55rem] border border-l-0 rounded-r-md ${isCouponFocused ? 'border-primary' : ''}
-                               hover:text-orange-600 transition-colors`}
-                              onClick={handleApplyDiscount}>
-                              Apply
-                            </button>
-                          </div>
-                        </div>
-                        }
+                                    </div>
+                                </motion.div>
+                                <motion.div 
+                                  id='checkout-step' 
+                                  style={{borderBottom: '0'}} 
+                                  className='!flex-col !gap-0 x-xl:!flex-row x-xl:!gap-20'
+                                  variants={stepVariants}
+                                >
+                                    <div className='checkout-step-header'>
+                                        <h4> 03 </h4>
+                                        <h2> Choose Your Payment Method </h2>
+                                    </div>
 
-                        {appliedDiscount && (
-                          <div className="flex justify-between items-center mb-4 text-sm">
-                            <div className="flex-1">
-                              <p className="text-gray-600">Discount</p>
-                              <p className="text-gray-500">{appliedDiscount}</p>
-                            </div>
-                            <span className="text-red-500">-{discountAmount.toFixed(2)}</span>
-                          </div>
-                        )}
+                                    <PaymentsManager 
+                                      paymentMethod={paymentMethod} 
+                                      setPaymentMethod={setPaymentMethod} 
+                                      optionClickHandler={radioClickHandler} 
+                                      optionChangeHandler={radioChangeHandler} 
+                                      cartTotal={cart && cart.absoluteTotalWithTaxes ? cart.absoluteTotalWithTaxes : null} 
+                                      stripeOrPaypalPayment={handleStripeOrPaypalPayment}
+                                    />
 
-                        <div className="space-y-2 text-sm border-t pt-4">
-                          <div className="flex justify-between">
-                            <span className="text-gray-600"> Subtotal </span>
-                            <span> ₹{cart.absoluteTotal.toFixed(2)} </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600"> Shipping Cost </span>
-                            <span> {cart.deliveryCharge === 0 ? 'Free' : `₹${cart.deliveryCharge}`} </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600"> GST </span>
-                            <span> {cart.deliveryCharge === 0 ? 'Free' : `₹${cart.gst}`} </span>
-                          </div>
-                          {
-                            cart?.couponDiscount ?
-                            <div className="flex justify-between !mt-[2rem]">
-                              <span className="text-green-600"> Coupon Discount </span>
-                              <span className='flex items-center gap-[5px]'>
-                                <Minus className='w-[13px]'/> ₹{cart.couponDiscount.toFixed(2)}
-                              </span>
-                            </div> : null
-                          }
-                          <div className="flex justify-between text-lg font-bold pt-2">
-                            <span> Total </span>
-                            <span> ₹{cart.absoluteTotalWithTaxes.toFixed(2)} </span>
-                          </div>
-                        </div>
-                      
-                          {
-                            paymentMethod !== 'paypal' ?
-                            <SiteSecondaryFillImpButton className={`px-[50px] py-[9px] rounded-[7px] 
-                              ${paymentMethod === 'cards' && 'hidden'}`} clickHandler={()=> placeOrder()}>
-                                {
-                                  paymentMethod === 'cashOnDelivery' || paymentMethod === '' ? 'Place Order' : 'Pay and Place Order'
-                                }
-                            </SiteSecondaryFillImpButton>
-                            :
-                            (cart && cart?.absoluteTotalWithTaxes) ?
-
-                            <div className='mt-[1rem]'>
-
-                                <PaypalPayment amount={cart.absoluteTotalWithTaxes.toFixed(2)} 
-                                    onPayment={(id)=> handleStripeOrPaypalPayment('paypal', id)} />
-
-                            </div>
-                            :null
-                          }
-
-                    </div>
-
-                    </div>
-                   }
-                </div>
+                                </motion.div>
+                            </motion.div>
+                        </div> 
+                       {
+                        cart?.products && 
+                          (
+                            <motion.div
+                              variants={stepVariants}
+                              initial="hidden"
+                              animate="show"
+                            >
+                                <OrderSummary 
+                                  shippingAddress={shippingAddress} 
+                                  paymentMethod={paymentMethod} 
+                                  onApplyDiscount={handleApplyDiscount}
+                                  placeOrder={placeOrder}
+                                />
+                            </motion.div>
+                          )
+                       }
+                    </motion.div>
+                    :
+                    <motion.div 
+                      className='px-[2rem] flex items-center justify-center h-[15vh] xs-sm:h-[25vh]'
+                      variants={containerVariants}
+                      initial="hidden"
+                      animate="show"
+                    >
+                      <p className='hidden xx-md:inline-block text-[17px] text-muted capitalize tracking-[0.5px]'>
+                        No products available for checkout. Click  
+                        <Link to='/shop' className='mx-[5px] text-secondary hover:underline transition duration-300 cursor-pointer'>
+                          here 
+                        </Link> 
+                        to return to the shop and continue shopping!
+                      </p>
+                      <div className='xx-md:hidden text-muted capitalize tracking-[0.5px]'>
+                        <p className='text-center text-[15px] s-sm:text-[17px]'> No products available for checkout.  </p>
+                        <p className='mt-4 max-mob:ml-auto max-mob:w-auto ml-[-24px] s-sm:ml-auto w-[118%] s-sm:w-auto text-[12px] 
+                          s-sm:text-[17px]'> 
+                          Click 
+                          <Link to='/shop' className='mx-[5px] text-secondary hover:underline transition duration-300 cursor-pointer'>
+                          here 
+                          </Link> 
+                          to return to the shop and continue shopping! 
+                        </p>
+                      </div>
+                    </motion.div>
+                }
 
             </main>
 

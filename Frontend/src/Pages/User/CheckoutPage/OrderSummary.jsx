@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import {useSelector} from 'react-redux'
 import {motion, AnimatePresence} from "framer-motion"
 
@@ -6,9 +6,10 @@ import {MapPin, Minus} from 'lucide-react'
 
 import PaypalPayment from '../PaymentPages/PayPalPayment'
 import {SiteSecondaryFillImpButton} from '../../../Components/SiteButtons/SiteButtons'
+import {CustomHashLoader} from '../../../Components/Loader/Loader'
 
 
-export default function OrderSummary({shippingAddress, paymentMethod, onApplyDiscount, placeOrder}){
+export default function OrderSummary({shippingAddress, paymentMethod, onApplyDiscount, placeOrder, onPaymentError, isLoading}){
 
     const [couponCode, setCouponCode] = useState('')
     const [appliedDiscount, setAppliedDiscount] = useState('')
@@ -16,7 +17,12 @@ export default function OrderSummary({shippingAddress, paymentMethod, onApplyDis
 
     const [isCouponFocused, setIsCouponFocused] = useState(false)
 
+    const {loading} = useSelector(state=> state.order)
     const {cart} = useSelector(state=> state.cart)
+
+    useEffect(()=> {
+      console.log("loading---->", loading)
+    }, [loading])
     
 
     return (
@@ -178,10 +184,16 @@ export default function OrderSummary({shippingAddress, paymentMethod, onApplyDis
                             className={`px-[50px] py-[9px] rounded-[7px] ${paymentMethod === 'cards' && 'hidden'}`} 
                             clickHandler={()=> placeOrder()}
                           >
-                              {
-                                paymentMethod === 'cashOnDelivery' || paymentMethod === '' ? 'Place Order' : 'Pay and Place Order'
+
+                              { isLoading 
+                                ? <CustomHashLoader loading={isLoading} color="#fff" />
+                                : (paymentMethod === 'cashOnDelivery' || paymentMethod === '')
+                                ? 'Place Order'
+                                : 'Pay and Place Order'
                               }
+
                           </SiteSecondaryFillImpButton>
+
                         </motion.div>
                         :
                         (cart && cart?.absoluteTotalWithTaxes) 
@@ -194,6 +206,7 @@ export default function OrderSummary({shippingAddress, paymentMethod, onApplyDis
                             <PaypalPayment 
                               amount={cart.absoluteTotalWithTaxes.toFixed(2)} 
                               onPayment={(id)=> handleStripeOrPaypalPayment('paypal', id)} 
+                              onError={(msg = null)=> onPaymentError(msg)}
                             />
                         </motion.div>
                         : null

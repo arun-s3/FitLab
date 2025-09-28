@@ -101,7 +101,6 @@ export const setAsDefaultAddress = createAsyncThunk('setAsDefaultAddress', async
 
 
 const initialState = {
-    addresses: [],
     currentDefaultAddress: {},
     addressCreated: false,
     addressUpdated: false,

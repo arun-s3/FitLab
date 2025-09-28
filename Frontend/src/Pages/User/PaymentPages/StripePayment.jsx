@@ -1,7 +1,9 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, forwardRef, useImperativeHandle, useRef} from 'react'
 
 import { loadStripe } from "@stripe/stripe-js"
 import { Elements } from "@stripe/react-stripe-js"
+
+import {toast} from 'react-toastify'
 
 import CardPayment from "./CardPayment"
 
@@ -9,15 +11,22 @@ import CardPayment from "./CardPayment"
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
 
 
-export default function StripePayment({ amount, onPayment, payButtonText = 'Pay and Place Order' }){
+const StripePayment = forwardRef( ({ amount, onPayment, payButtonText = 'Pay and Place Order', onError }, ref)=> {
 
 
   const [clientSecret, setClientSecret] = useState("")
 
   const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
-  console.log('import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY--->', import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
-  console.log('stripePromise--->', stripePromise)
+  const clickStripePayment = useRef()
+
+  const tryStripePaymentAgain = ()=> clickStripePayment.current.clickStripePaymentAgain()
+
+  useImperativeHandle(ref, () => ({
+      retryStripePayment: () => {
+        tryStripePaymentAgain()
+      }
+  }), [tryStripePaymentAgain])
 
   useEffect(() => {
     fetch(`${baseApiUrl}/payment/stripe/order`, {
@@ -27,6 +36,7 @@ export default function StripePayment({ amount, onPayment, payButtonText = 'Pay 
     })
       .then(res=> res.json())
       .then(data=> setClientSecret(data.clientSecret))
+      .catch(error=> toast.error(error.message))
   }, [amount])
 
   const options = {
@@ -63,9 +73,19 @@ export default function StripePayment({ amount, onPayment, payButtonText = 'Pay 
     <>
       {clientSecret ? (
         <Elements stripe={stripePromise} options={options}>
-          <CardPayment onPayment={(id)=> onPayment(id)} payButtonText={payButtonText}/>
+
+          <CardPayment 
+            onPayment={(id)=> onPayment(id)} 
+            payButtonText={payButtonText} 
+            displayError={onError} 
+            ref={clickStripePayment}
+          />
+
         </Elements>
+
       ) : 'Loading.....'}
     </>
   );
 }
+)
+export default StripePayment

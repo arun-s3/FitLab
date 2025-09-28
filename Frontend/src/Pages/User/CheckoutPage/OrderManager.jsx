@@ -1,19 +1,15 @@
 import React from 'react'
 import {useNavigate} from 'react-router-dom'
-import {useDispatch} from 'react-redux'
 import {motion} from 'framer-motion'
 
-import {Plus, Minus} from 'lucide-react'
+import {Plus, Minus, AlertCircle} from 'lucide-react'
 import axios from 'axios'
 
-import {addToCart, reduceFromCart} from '../../../Slices/cartSlice'
 
-
-export default function OrderManager({products, orderReviewError, setOrderReviewError}){
+export default function OrderManager({products, orderReviewError, onIncQuantity, onDecQuantity}){
 
     const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
-    const dispatch = useDispatch()
     const navigate = useNavigate()
  
     const containerVariants = {
@@ -54,24 +50,10 @@ export default function OrderManager({products, orderReviewError, setOrderReview
       }
     }
 
-    const addQuantity = (id, quantity)=> {
-      console.log("Inside addQuantity")
-      dispatch( addToCart({productId: id, quantity}) )
-    }
-    
-    const lessenQuantity = (id, quantity, currentQuantity)=> {
-      console.log("Inside lessenQuantity")
-      if(currentQuantity > 1){
-        dispatch( reduceFromCart({productId: id, quantity}) )
-      }else{
-        setOrderReviewError('There must be atleast 1 item to ship!')
-      }
-    }
-
 
     return(
-        <motion.div className='mt-[30px] grid grid-cols-1 x-sm:grid-cols-2 lg:grid-cols-1 xx-xl:grid-cols-2 gap-x-6 xx-xl:gap-x-[3rem] 
-           gap-y-[1rem] overflow-y-scroll overflow-x-hidden'
+        <motion.div className={`mt-[30px] grid grid-cols-1 x-sm:grid-cols-2 lg:grid-cols-1 xx-xl:grid-cols-2 gap-x-6 xx-xl:gap-x-[3rem] 
+           gap-y-[1rem] ${products.length > 4 ? 'overflow-y-scroll' : 'overflow-y-auto'} overflow-x-hidden max-h-[40rem]`}
           variants={containerVariants}
           initial="hidden"
           animate="show"
@@ -84,7 +66,7 @@ export default function OrderManager({products, orderReviewError, setOrderReview
                       whileHover={{ scale: 1.01 }}
                       transition={{ type: "spring", stiffness: 500, damping: 12 }}
                     >
-                      <div className="flex cursor-pointer bg-[#f9f4fb] p-[14px] rounded-[7px] hover:shadow-md
+                      <div className="m-[5px] flex cursor-pointer bg-[#f9f4fb] p-[14px] rounded-[7px] hover:shadow-md
                        transition duration-300">
                         <img 
                           src={product.thumbnail} 
@@ -112,7 +94,7 @@ export default function OrderManager({products, orderReviewError, setOrderReview
                               <motion.button 
                                 className="w-[20px] h-[20px] flex items-center justify-center
                                  border-primaryDark border rounded hover:bg-[#f1f7cf] transition duration-300" 
-                                onClick={()=> lessenQuantity(product.productId._id, 1, product.quantity)}
+                                onClick={()=> onDecQuantity(product.productId._id, 1, product.quantity)}
                                 variants={buttonVariants}
                                 whileTap="tap"
                                 initial="rest"
@@ -124,7 +106,7 @@ export default function OrderManager({products, orderReviewError, setOrderReview
                               <motion.button 
                                 className="w-[20px] h-[20px] flex items-center justify-center border-primaryDark border rounded
                                   hover:border-primaryDark hover:bg-[#f1f7cf] transition duration-300" 
-                                onClick={()=> addQuantity(product.productId._id, 1)}
+                                onClick={()=> onIncQuantity(product.productId._id, 1)}
                                 variants={buttonVariants}
                                 whileTap="tap"
                                 initial="rest"
@@ -146,6 +128,28 @@ export default function OrderManager({products, orderReviewError, setOrderReview
                           </div>
                         </div>
                       </div>
+                      {
+                        (product.productId.isBlocked || product.productId.stock < product.quantity) &&
+                          <motion.div 
+                            className=" flex items-center gap-1 mt-1"
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                          >
+                            <AlertCircle className="w-3 h-3 text-red-500 flex-shrink-0" />
+                            <span className="text-xs text-red-600"> 
+                              {   
+                                !product?.productId 
+                                  ? 'This product is unavailable!'
+                                  : product.productId.isBlocked 
+                                  ? 'This product is Blocked!'
+                                  : product.productId.stock < product.quantity
+                                  ? 'This product is out of stock!'
+                                  : null
+                              }
+                            </span>
+                          </motion.div>
+                      }
                       <p className='mt-[5px] h-[5px] text-[10px] text-red-500 tracking-[0.3px]'> {orderReviewError} </p>
                     </motion.div>
                 )

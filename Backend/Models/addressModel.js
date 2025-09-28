@@ -60,7 +60,7 @@ const addressSchema = mongoose.Schema({
         enum: ["home", "work", "temporary", "gift"],
         default: "home",
     } 
-})
+}, {timestamps: true})
 
 const address = mongoose.model('Address', addressSchema)
 

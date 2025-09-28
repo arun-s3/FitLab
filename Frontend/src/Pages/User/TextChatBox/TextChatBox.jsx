@@ -7,7 +7,7 @@ import {MessageSquare, X, Send, User, Headphones, Minimize2, Maximize2} from "lu
 
 
 
-export default function TextChatBox({closeable, onCloseChat, boxHeight, boxWidth, focusByDefault = false, isStatic = false}) {
+export default function TextChatBox({closeable, onCloseChat, boxHeight, boxWidth, focusByDefault = false, isStatic = false, openChats = false}){
 
   const [isOpen, setIsOpen] = useState(false)
   const [isMinimized, setIsMinimized] = useState(false)
@@ -21,13 +21,13 @@ export default function TextChatBox({closeable, onCloseChat, boxHeight, boxWidth
   },[newMessage])
 
   useEffect(()=> {
-    if(isStatic){
+    if(isStatic || openChats){
       setIsOpen(true)
     }
     if(focusByDefault){
       inputRef.current.focus()
     }
-  }, [isStatic, focusByDefault])
+  }, [isStatic, focusByDefault, openChats])
 
   const toggleChat = () => {
     setIsOpen(!isOpen)

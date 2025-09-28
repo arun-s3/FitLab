@@ -10,7 +10,7 @@ import {CustomHashLoader} from '../../../Components/Loader/Loader'
 
 
 
-export default function PaypalPayment({amount, onPayment}) {
+export default function PaypalPayment({amount, onPayment, onError}) {
 
     const [message, setMessage] = useState("")
     const [clientId, setClientId] = useState(null)
@@ -21,7 +21,10 @@ export default function PaypalPayment({amount, onPayment}) {
     useEffect(() => {
         axios.get(`${baseApiUrl}/payment/paypal/clientid`, {withCredentials: true})
             .then(res=> setClientId(res.data.id))
-            .catch(err=> setMessage("Could not load PayPal client ID"))
+            .catch(err=> {
+                setMessage("Could not load PayPal client ID") 
+                onError("Invalid credentials or network error!")
+            })
     }, [])
 
     useEffect(()=> {
@@ -84,6 +87,7 @@ export default function PaypalPayment({amount, onPayment}) {
                     : JSON.stringify(orderData)
 
                 toast.error(errorMessage)
+                onError(errorMessage)
                 return
             }
         }
@@ -91,6 +95,7 @@ export default function PaypalPayment({amount, onPayment}) {
             console.error(error)
             setMessage(`Could not initiate PayPal Checkout...${error}`)
             toast.error(`Could not initiate PayPal Checkout...${error}`)
+            onError(`Could not initiate PayPal Checkout...${error}`)
         }
     }
 
@@ -115,6 +120,7 @@ export default function PaypalPayment({amount, onPayment}) {
                 return actions.restart()
             } else if (errorDetail) {
                 toast.error(`${errorDetail.description} (${orderData.debug_id})`)
+                onError(errorDetail.description)
                 return
             } else {
                 const transaction = orderData.captureResult.purchase_units[0].payments.captures[0]
@@ -140,6 +146,7 @@ export default function PaypalPayment({amount, onPayment}) {
         catch (error){
             console.error(error)
             setMessage(`Sorry, your transaction could not be processed...${error}`)
+            onError(`Sorry, your transaction could not be processed...${error}`)
             toast.error(`Sorry, your transaction could not be processed...${error}`)
         }
     }

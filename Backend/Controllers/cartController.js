@@ -353,7 +353,7 @@ const getTheCart = async (req, res, next)=> {
     // const cart = await Cart.findOne({ userId }).populate("couponUsed", "products products.")
     const cart = await Cart.findOne({ userId })
                           .populate("couponUsed").populate("products.productId").populate("products.offerApplied")
-    console.log("cart---->", cart)
+    console.log("cart---->", JSON.stringify(cart))
     if (!cart || cart.products.length === 0) {
       return res.status(200).json({message: 'Your cart is empty', cart: []})
     }

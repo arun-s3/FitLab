@@ -1,13 +1,26 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect, useRef} from 'react'
 import {motion, AnimatePresence} from 'framer-motion'
 
 import StripePayment from '../PaymentPages/StripePayment'
 import {camelToCapitalizedWords} from '../../../Utils/helperFunctions'
 
 
-export default function PaymentManager({paymentMethod, setPaymentMethod, optionClickHandler, optionChangeHandler, cartTotal, stripeOrPaypalPayment}){
+export default function PaymentManager({paymentMethod, setPaymentMethod, optionClickHandler, optionChangeHandler, 
+  cartTotal, stripeOrPaypalPayment, onPaymentError, retryStripePaymentStatus, setRetryStripePaymentStatus}){
 
     const [cardsEnterError, setCardsEnterError] = useState('')
+    
+    const retryStripePaymentRef = useRef()
+
+    // const makeStripePaymentAgain =  retryStripePaymentRef.current.retryStripePayment()
+
+    useEffect(()=> {
+      if(retryStripePaymentStatus && retryStripePaymentRef.current){
+        // makeStripePaymentAgain()
+        retryStripePaymentRef.current.retryStripePayment()
+        setRetryStripePaymentStatus(false)
+      }
+    }, [retryStripePaymentStatus])
 
     const paymentOptions = [
       {
@@ -113,6 +126,8 @@ export default function PaymentManager({paymentMethod, setPaymentMethod, optionC
                                     <StripePayment 
                                       amount={cartTotal.toFixed(2)} 
                                       onPayment={(id)=> stripeOrPaypalPayment('stripe', id)}
+                                      ref={retryStripePaymentRef}
+                                      onError={onPaymentError}
                                     />
                                   </motion.div>
                                 }

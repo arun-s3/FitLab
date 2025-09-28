@@ -91,60 +91,47 @@ export default function AddressListingPage(){
                                                 <span>
                                                     {address.firstName + ' ' + address.lastName} 
                                                 </span>
-                                                {
-                                                    address.nickName && 
-                                                        <span className='ml-[1px] text-muted text-[12px] tracking-[0.2px] italic'>
-                                                            {`(${address.nickName})`}
-                                                        </span>
-                                                }
+                                                <span className='ml-[1px] text-muted text-[12px] tracking-[0.2px]'>
+                                                    {`(${address?.nickName ? address.nickName : 'Nickname: N/A'})`}
+                                                </span>
                                             </span>
                                             <span> {address.street} </span>
                                             <span> {address.district} </span>
                                             <span> {address.state} </span>
                                             <span> {address.pincode} </span>
-                                            {/* <span> {address._id} </span> */}
-                                            {
-                                                address.landmark &&
-                                                    <span> {`(${address.landmark})`} </span>
-                                            }
+                                            <span> {`(${address.landmark ? address.landmark : 'Landmark: N/A'})`} </span>
                                             <span className='inner-fields'>
-                                                <span className='field-name'>
+                                                <span className='field-name text-muted'>
                                                     Mobile:
                                                 </span>
-                                                <span className='ml-[2px]'>
+                                                <span className='ml-[5px]'>
                                                     {address.mobile}
                                                 </span>
                                             </span>
-                                            {
-                                                address.alternateMobile &&
-                                                    <span className='inner-fields'>
-                                                        <span className='field-name'>
-                                                            Alternate Mobile:
-                                                        </span>
-                                                        <span className='ml-[2px]'>
-                                                            {address.alternateMobile}
-                                                        </span>
-                                                    </span>
-                                            }
                                             <span className='inner-fields'>
-                                                <span className='field-name'>
+                                                <span className='field-name text-muted whitespace-nowrap'>
+                                                    Alternate Mobile:
+                                                </span>
+                                                <span className='ml-[5px]'>
+                                                    {address.alternateMobile ? address.alternateMobile : 'N/A'}
+                                                </span>
+                                            </span>
+                                            <span className='inner-fields'>
+                                                <span className='field-name text-muted'>
                                                     Email:
                                                 </span>
-                                                <span className='ml-[2px]'>
+                                                <span className='ml-[5px]'>
                                                     {address.email}
                                                 </span>
                                             </span>
-                                            {
-                                                address.deliveryInstructions &&
-                                                    <span className='inner-fields'>
-                                                        <span className='field-name'>
-                                                            Delivery Instructions:
-                                                        </span>
-                                                        <span className='ml-[2px]'>
-                                                            {address.deliveryInstructions}
-                                                        </span>
-                                                    </span>
-                                            }
+                                            <span className='inner-fields'>
+                                                <span className='field-name text-muted whitespace-nowrap'>
+                                                    Delivery Instructions:
+                                                </span>
+                                                <span className='ml-[5px]'>
+                                                    {address.deliveryInstructions ? address.deliveryInstructions : 'N/A'}
+                                                </span>
+                                            </span>
                                         </address>
                                         <div className={`flex flex-col ${!address.defaultAddress? 'justify-between':'justify-end'} items-end`}>
                                             {!address.defaultAddress &&

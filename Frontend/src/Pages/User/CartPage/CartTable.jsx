@@ -42,7 +42,8 @@ export default function CartTable({products, omIncQuantity, onDecQuantity, onRem
               <div className="text-center truncate">QTY</div>
               <div className="text-center truncate">SUBTOTAL</div>
             </motion.div>
-            <div className="border rounded-b-[8px] overflow-y-scroll overflow-x-hidden"
+            <div className={`border rounded-b-[8px] max-h-[40rem]
+             ${products.length > 4 ? 'overflow-y-scroll' : 'overflow-y-auto'} overflow-x-hidden`}
               variants={containerVariants}
             >
               <AnimatePresence>
@@ -59,7 +60,8 @@ export default function CartTable({products, omIncQuantity, onDecQuantity, onRem
                           <div className="flex items-center space-x-[0.5rem] s-sm:space-x-[1rem]">
                             <img src={product.thumbnail} 
                               alt={product.title} 
-                              className="w-[4rem] h-[4rem] mob:w-[5rem] mob:h-[5rem] s-sm:w-[6rem] s-sm:h-[6rem] object-cover rounded"/>
+                              className="w-[4rem] h-[4rem] mob:w-[5rem] mob:h-[5rem] s-sm:w-[6rem] s-sm:h-[6rem] object-cover rounded
+                                transition hover:scale-105 duration-150 cursor-pointer"/>
                             <div className="min-w-0 hidden xs-sm:inline-block">
                               <h3 className="text-[13px] s-sm:text-[15px] text-secondary font-medium capitalize truncate"> 
                                 {product.title}

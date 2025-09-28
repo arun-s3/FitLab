@@ -151,11 +151,11 @@ const createOrder = async (req, res, next)=> {
 
         for (const item of cart.products){
             const product = await Product.findById(item.productId)
-            if (!product || product.blocked) {
-                return next(errorHandler(403, `Product ${item.title} is not available for purchase.`))
+            if (!product || product.isBlocked) {
+                return next(errorHandler(403, `Some of the Products are not available for purchase.`))
             }
             if (item.quantity > product.stock) {
-                return next(errorHandler(400, `Insufficient stock for ${item.title}. Only ${product.stock} items available.`))
+                return next(errorHandler(400, `Insufficient stock for some products! Please check again.`))
             }
             product.stock -= item.quantity
             await product.save()

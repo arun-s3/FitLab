@@ -12,18 +12,22 @@ import OrderManager from './OrderManager'
 import AddressManager from './AddressManager'
 import PaymentsManager from './PaymentsManager'
 import OrderSummary from './OrderSummary'
+import TextChatBox from '../TextChatBox/TextChatBox'
+import PaymentFailedModal from './Modals/PaymentFailedModal'
+import CheckoutPausedModal from './Modals/CheckoutPausedModal'
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
 import OrderStepper from '../../../Components/OrderStepper/OrderStepper'
 import FeaturesDisplay from '../../../Components/FeaturesDisplay/FeaturesDisplay'
 import Footer from '../../../Components/Footer/Footer'
-import {getTheCart} from '../../../Slices/cartSlice'
+import {getTheCart, addToCart, reduceFromCart, removeFromCart} from '../../../Slices/cartSlice'
 import {createOrder, resetOrderStates} from '../../../Slices/orderSlice'
-import {getAllAddress} from '../../../Slices/addressSlice'
+import {getAllAddress, resetStates} from '../../../Slices/addressSlice'
 
 
 export default function CheckoutPage(){
     
     const [shippingAddress, setShippingAddress] = useState({})
+    const [deliverAddressMade, setDeliverAddressMade] = useState(false)
 
     const [paymentMethod, setPaymentMethod] = useState('')
 
@@ -31,9 +35,21 @@ export default function CheckoutPage(){
 
     const [orderReviewError, setOrderReviewError] = useState('')
 
-    const {cart, productAdded, productRemoved, loading, error, message} = useSelector(state=> state.cart)
+    const [isLoading, setIsLoading] = useState(false)
+
+    const [openChatBox, setOpenChatBox] = useState(false)
+    const [isPaymentFailedModalOpen, setIsPaymentFailedModalOpen] = useState({status: false, msg: null})
+    const [isCheckoutPauseModalOpen, setIsCheckoutPauseModalOpen] = useState(false)
+
+    const [checkoutBlockedProducts, setCheckoutBlockedProducts] = useState([])
+    
+    const [orderFreshSources, setOrderFreshSources] = useState(false)
+
+    const [retryStripePaymentStatus, setRetryStripePaymentStatus] = useState(false)
+
+    const {cart, productRemoved} = useSelector(state=> state.cart)
     const {addresses} = useSelector(state=> state.address)
-    const {orders, orderCreated, orderMessage, orderError} = useSelector(state=> state.order)
+    const {orderCreated, orderMessage, orderError} = useSelector(state=> state.order)
 
     const dispatch = useDispatch()
     const navigate = useNavigate()
@@ -51,10 +67,24 @@ export default function CheckoutPage(){
     },[])
 
     useEffect(()=> {
-      const defaultAddress = addresses.find(address=> address.defaultAddress)
-      setShippingAddress(defaultAddress)
-    },[addresses])
-  
+      if(orderFreshSources){
+        console.log("cart--->", cart)
+        placeOrder()
+        setOrderFreshSources(false)
+      }
+    }, [cart, orderFreshSources])
+
+    useEffect(()=> {
+      if(addresses && !deliverAddressMade){
+        const defaultAddress = addresses.find(address=> address.defaultAddress)
+        setShippingAddress(defaultAddress)
+      }
+      if(addresses && deliverAddressMade){
+        setNewAddressAsShippingAddress()
+        dispatch(resetStates())
+      }
+    },[addresses, deliverAddressMade])
+
     useEffect(()=> {
       if(paymentMethod){
         let paymentDetails = {paymentMethod, paymentStatus: 'pending'}
@@ -66,6 +96,7 @@ export default function CheckoutPage(){
         })
       }
       if(shippingAddress){
+        console.log("shippingAddress----->", shippingAddress)
         setOrderDetails(orderDetails=> {
           return {...orderDetails, shippingAddressId: shippingAddress._id}
         })
@@ -78,6 +109,7 @@ export default function CheckoutPage(){
 
     useEffect(()=> {
       if(orderCreated){
+        setIsLoading(false)
         toast.success(orderMessage)
         navigate('/order-confirm', 
           { replace: true,
@@ -90,7 +122,30 @@ export default function CheckoutPage(){
       if(orderReviewError){
         setTimeout(()=> setOrderReviewError(''), 2500)
       }
+      if(orderError){
+        setIsLoading(false)
+        console.log("orderError--->", orderError)
+        toast.error(orderError)
+        dispatch(resetOrderStates())
+      }
+      if(orderMessage){
+        console.log("orderMessage--->", orderMessage)
+        toast.error(orderMessage)
+        dispatch(resetOrderStates())
+      }
     },[orderCreated, orderMessage, orderError, orderReviewError])
+
+    useEffect(()=> {
+      console.log("productRemoved--->", productRemoved)
+      if(productRemoved){
+        console.log("Inside useEffect for if(productRemoved && checkoutBlockedProducts && checkoutBlockedProducts.length > 0)")
+        const unavailableProducts = cart.products.filter(product=> 
+          !product.productId || product.productId.isBlocked || product.productId.stock < product.quantity
+        )
+        setCheckoutBlockedProducts(unavailableProducts)
+        dispatch(resetOrderStates())
+      }
+    }, [productRemoved])
 
     const headerBg = {
         backgroundImage: "url('/header-bg.png')",
@@ -114,6 +169,25 @@ export default function CheckoutPage(){
         y: 0,
         transition: { duration: 0.4, ease: "easeOut" },
       },
+    }
+
+    const addQuantity = (id, quantity)=> {
+      console.log("Inside addQuantity")
+      dispatch( addToCart({productId: id, quantity}) )
+    }
+    
+    const lessenQuantity = (id, quantity, currentQuantity)=> {
+      console.log("Inside lessenQuantity")
+      if(currentQuantity > 1){
+        dispatch( reduceFromCart({productId: id, quantity}) )
+      }else{
+        setOrderReviewError('There must be atleast 1 item to ship!')
+      }
+    }
+
+    const removeProduct = (id)=> {
+        console.log("Inside removeProduct()")
+        dispatch(removeFromCart({productId: id}))
     }
 
     const radioClickHandler = (e, type, value)=>{
@@ -142,35 +216,94 @@ export default function CheckoutPage(){
       })
     }
 
+    const setNewAddressAsShippingAddress = ()=> {
+      console.log('addresses now------>', addresses)
+      console.log("Inside setNewAddressAsShippingAddress")
+      const today = new Date().toISOString().split("T")[0]
+      console.log("today-->", today)
+
+      const latestTodayAddress = addresses
+        .filter(addr=> addr?.createdAt && new Date(addr.createdAt).toISOString().split("T")[0] === today)
+        .sort((a, b)=> new Date(b.createdAt) - new Date(a.createdAt)) 
+      console.log("latestTodayAddress-->", latestTodayAddress)
+
+      if(latestTodayAddress && latestTodayAddress.length > 0){
+        const newlyCreatedAddress = latestTodayAddress[0]
+        console.log("newlyCreatedAddress-->", newlyCreatedAddress)
+        setShippingAddress(newlyCreatedAddress)
+      }
+    }
+
+  const checkProductsAvailability = () => {
+    return cart.products.every(product => {
+      return (
+        product.productId && 
+        !product.productId.isBlocked && 
+        product.productId.stock >= product.quantity
+      )
+    })
+  }
+
+  const sourceItAgainAndOrder = async()=> {
+    await dispatch(getTheCart()).unwrap()
+    setOrderFreshSources(true)
+  }
+
   const placeOrder= async()=> {
+    setIsLoading(true)
+    if(!checkProductsAvailability()){
+      const unavailableProducts = cart.products.filter(product=> 
+        !product.productId || product.productId.isBlocked || product.productId.stock < product.quantity
+      )
+      setCheckoutBlockedProducts(unavailableProducts)
+      setIsLoading(false)
+      setIsCheckoutPauseModalOpen(true)
+      return
+    } 
     try{
       console.log("Inside placeOrder")
       if(paymentMethod === ''){
         toast.error('Please select a payment Method!')
+        setIsLoading(false)
         return
       }
       if(Object.keys(shippingAddress).length === 0){
         toast.error('Please select a delivery address!')
+        setIsLoading(false)
         return
       }
       if(paymentMethod === 'razorpay'){
-        const response = await axios.post(`${baseApiUrl}/payment/razorpay/order`,
-          {amount: cart.absoluteTotalWithTaxes.toFixed(2)}, { withCredentials: true }
-        )
-        // const data = await response.json()
-        console.log("razorpay created order--->", response.data.data)
-        handleRazorpayVerification(response.data.data)
+        try{
+            const response = await axios.post(`${baseApiUrl}/payment/razorpay/order`,
+              {amount: cart.absoluteTotalWithTaxes.toFixed(2)}, { withCredentials: true }
+            )
+            console.log("razorpay created order--->", response.data.data)
+            handleRazorpayVerification(response.data.data)
+            setIsLoading(false)
+        }
+        catch(error){
+          console.log(error)
+          setIsPaymentFailedModalOpen({status: true, msg: 'Network Error'})
+          setIsLoading(false)
+        }
       }
       else if(paymentMethod === 'wallet'){
         console.log('Paying with wallet...')
-        const response = await axios.post(`${baseApiUrl}/wallet/order`,
-          {amount: cart.absoluteTotalWithTaxes.toFixed(2)}, { withCredentials: true }
-        )
-        console.log('response.data--->', response.data)
-        if(response.data.transactionId){ 
-          toast.success("Payment via Wallet successfull!")
-          const paymentDetails = {paymentMethod: 'wallet', paymentStatus: 'completed', transactionId: response.data.transactionId}
-          dispatch( createOrder({orderDetails: {...orderDetails, paymentDetails}}) ) 
+        try{  
+           const response = await axios.post(`${baseApiUrl}/wallet/order`,
+              {amount: cart.absoluteTotalWithTaxes.toFixed(2)}, { withCredentials: true }
+            )
+          console.log('response.data--->', response.data)
+          if(response.data.transactionId){ 
+            toast.success("Payment via Wallet successfull!")
+            const paymentDetails = {paymentMethod: 'wallet', paymentStatus: 'completed', transactionId: response.data.transactionId}
+            dispatch( createOrder({orderDetails: {...orderDetails, paymentDetails}}) ) 
+          }
+        }
+        catch(error){
+          toast.error(error.message)
+          setIsPaymentFailedModalOpen({status: true, msg: 'Network Error'})
+          setIsLoading(false)
         }
       }
       else{
@@ -178,6 +311,7 @@ export default function CheckoutPage(){
       }
     }
     catch(error){
+      setIsLoading(false)
       console.log('Error in placeOrder:', error.response.data?.message || error.message)
       if (error.response && error.response.status !== 500){
         toast.error(error.response.data?.message || error.message)
@@ -188,7 +322,13 @@ export default function CheckoutPage(){
   }
 
   const handleRazorpayVerification = async (data) => {
-    const res = await axios.get(`${baseApiUrl}/payment/razorpay/key`, { withCredentials: true })
+    let res = null
+    try{
+      res = await axios.get(`${baseApiUrl}/payment/razorpay/key`, { withCredentials: true })
+    }catch(error){
+      console.log(error)
+      setIsPaymentFailedModalOpen({status: true, msg: "Internal Server Error. Please try again later!"})
+    }
     console.log("Razorpay key --->", res.data.key)
     const options = {
         key: res.data.key,
@@ -199,7 +339,7 @@ export default function CheckoutPage(){
         order_id: data.id,
         modal: {
           ondismiss: function() {
-            alert("Payment was not completed!")
+            setIsPaymentFailedModalOpen({status: true, msg: "You closed the Razorpay gateway!"})
           }
         },
         handler: async (response) => {
@@ -215,6 +355,7 @@ export default function CheckoutPage(){
                 )
                 console.log("verifiedData--->", verifiedData)
                 if (verifiedData.data.message.toLowerCase().includes('success')) {
+                    setIsLoading(true)
                     toast.success(verifiedData.data.message)
                     dispatch( createOrder({
                       orderDetails: {
@@ -224,9 +365,11 @@ export default function CheckoutPage(){
                     }) ) 
                 }else{
                     toast.error('Payment Failed! Try again later!')
+                    setIsPaymentFailedModalOpen({status: true, msg: "Payment Failed! Try again later!"})
                 }
             } catch (error) {
                 console.log(error)
+                setIsPaymentFailedModalOpen({status: true, msg: "Unexpected error, Please try again!"})
             }
         },
         theme: {
@@ -238,6 +381,7 @@ export default function CheckoutPage(){
 }
 
 const handleStripeOrPaypalPayment = (paymentGateway, paymentId)=> {
+  setIsLoading(true)
   toast.success("Payment Successfull!")
   const paymentMethod = paymentGateway
   dispatch( createOrder({
@@ -246,6 +390,24 @@ const handleStripeOrPaypalPayment = (paymentGateway, paymentId)=> {
       paymentDetails: {paymentMethod, transactionId: paymentId, paymentStatus: 'completed'}
     }
   }) ) 
+}
+
+const handleRetryCheckout = ()=> {
+  console.log("Inside handleRetryCheckout()...")
+  sourceItAgainAndOrder()
+}
+
+const handleRetryPayment = ()=> {
+  console.log('Retrying Payment....')
+  if(paymentMethod === 'cards'){
+    setRetryStripePaymentStatus(true)
+  }
+  else if(paymentMethod === 'paypal'){
+    setIsPaymentFailedModalOpen({status: false, msg: null})
+  }
+  else{
+    placeOrder()
+  } 
 }
 
 
@@ -289,12 +451,13 @@ const handleStripeOrPaypalPayment = (paymentGateway, paymentId)=> {
                                     <div className='checkout-step-header'>
                                         <h4> 01 </h4>
                                         <h2> Review Your Orders </h2>
-                                    </div>
+                                    </div> 
 
                                       <OrderManager
                                         products={cart.products} 
+                                        onIncQuantity={addQuantity}
+                                        onDecQuantity={lessenQuantity}
                                         orderReviewError={orderReviewError} 
-                                        setOrderReviewError={setOrderReviewError}
                                       />
 
                                 </motion.div>
@@ -309,11 +472,12 @@ const handleStripeOrPaypalPayment = (paymentGateway, paymentId)=> {
                                         <h2> Choose Your Delivery Address </h2>
                                     </div>
                                     <div className='x-lg:!self-end xx-xl:self-auto'> 
-
+ 
                                       <AddressManager 
                                         addresses={addresses} 
                                         shippingAddress={shippingAddress} 
                                         setShippingAddress={setShippingAddress} 
+                                        setDeliverAddressMade={setDeliverAddressMade}
                                         onAddressClick={radioClickHandler} 
                                         onAddresChange={radioChangeHandler}
                                       />
@@ -338,6 +502,9 @@ const handleStripeOrPaypalPayment = (paymentGateway, paymentId)=> {
                                       optionChangeHandler={radioChangeHandler} 
                                       cartTotal={cart && cart.absoluteTotalWithTaxes ? cart.absoluteTotalWithTaxes : null} 
                                       stripeOrPaypalPayment={handleStripeOrPaypalPayment}
+                                      retryStripePaymentStatus={retryStripePaymentStatus} 
+                                      setRetryStripePaymentStatus={setRetryStripePaymentStatus}
+                                      onPaymentError={(msg)=> setIsPaymentFailedModalOpen({status: true, msg})}
                                     />
 
                                 </motion.div>
@@ -355,7 +522,9 @@ const handleStripeOrPaypalPayment = (paymentGateway, paymentId)=> {
                                   shippingAddress={shippingAddress} 
                                   paymentMethod={paymentMethod} 
                                   onApplyDiscount={handleApplyDiscount}
-                                  placeOrder={placeOrder}
+                                  placeOrder={sourceItAgainAndOrder}
+                                  onPaymentError={(msg)=> setIsPaymentFailedModalOpen({status: true, msg})}
+                                  isLoading={isLoading}
                                 />
                             </motion.div>
                           )
@@ -388,6 +557,43 @@ const handleStripeOrPaypalPayment = (paymentGateway, paymentId)=> {
                       </div>
                     </motion.div>
                 }
+
+              {
+                isCheckoutPauseModalOpen && checkoutBlockedProducts &&
+                  <CheckoutPausedModal
+                    isOpen={isCheckoutPauseModalOpen}
+                    onClose={()=> setIsCheckoutPauseModalOpen(false)}
+                    products={checkoutBlockedProducts}
+                    onDecQuantity={lessenQuantity}
+                    onRemoveProduct={removeProduct}
+                    onRetryCheckout={handleRetryCheckout}
+                  />
+              }
+              
+              {
+                isPaymentFailedModalOpen.status &&
+                  <PaymentFailedModal
+                    isOpen={isPaymentFailedModalOpen.status} 
+                    message={isPaymentFailedModalOpen.msg}
+                    onClose={()=> setIsPaymentFailedModalOpen({status: false, msg: null})}
+                    onRetry={handleRetryPayment}
+                    paymentMethod={paymentMethod} 
+                    onContactSupport={()=> setOpenChatBox(true)}
+                  />
+              }
+
+              {
+                  openChatBox &&
+                  <div className="fixed bottom-[2rem] right-[2rem] z-50">
+                
+                      <TextChatBox 
+                        closeable={true} 
+                        openChats={true}
+                        onCloseChat={()=> setOpenChatBox(false)}
+                      />
+                        
+                  </div>
+              }
 
             </main>
 

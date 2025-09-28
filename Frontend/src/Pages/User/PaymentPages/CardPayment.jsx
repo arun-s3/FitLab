@@ -1,14 +1,15 @@
 
-import React, {useState, useEffect} from "react"
+import React, {useState, forwardRef, useImperativeHandle} from "react"
 import './CardPayment.css'
 
 import axios from 'axios'
+import {toast} from 'react-toastify'
 
 import { useStripe, useElements, PaymentElement } from "@stripe/react-stripe-js"
 
 
 
-export default function CardPayment({onPayment, payButtonText}){
+const CardPayment = forwardRef( ({onPayment, payButtonText, displayError}, ref)=> {
 
   const [message, setMessage] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -43,7 +44,9 @@ export default function CardPayment({onPayment, payButtonText}){
       if (error){
         console.log(error)
         setMessage(error.message)
+        toast.error(error.message)
         setIsLoading(false)
+        displayError("Only Test Cards Allowed as of now via Stripe!")
         return
       }
     
@@ -64,9 +67,11 @@ export default function CardPayment({onPayment, payButtonText}){
       if (error.type === "card_error" || error.type === "validation_error") {
         setMessage(error.message)
         toast.error(error.message)
+        displayError(error.message)
       } else {
         setMessage("An unexpected error occurred.")
         toast.error("An unexpected error occurred.")
+        displayError("An unexpected error occurred.")
       }
   
       setIsLoading(false)
@@ -76,9 +81,16 @@ export default function CardPayment({onPayment, payButtonText}){
         toast.error(error.message)
       }else{
         toast.error("An unexpected error occurred.")
+        displayError("An unexpected error occurred.")
       }
     }
   }
+
+  useImperativeHandle(ref, () => ({
+    clickStripePaymentAgain: () => {
+      handleSubmit()
+    }
+  }), [handleSubmit])
 
 
   return (
@@ -88,10 +100,14 @@ export default function CardPayment({onPayment, payButtonText}){
         
         <PaymentElement onChange={handleElementChange}/> 
 
-          <button type="submit" disabled={isLoading || !stripe || !elements || isDisabled} className={`w-full bg-secondary
-             text-white py-3 px-4 rounded-md font-medium hover:bg-purple-800 transition-colors 
-                ${ (isLoading || !stripe || !elements || isDisabled) && 'cursor-not-allowed'}`} onClick={handleSubmit}>
-           {isLoading ? "Processing..." : payButtonText}
+          <button 
+            type="submit" 
+            disabled={isLoading || !stripe || !elements || isDisabled} 
+            className={`w-full bg-secondary text-white py-3 px-4 rounded-md font-medium hover:bg-purple-800 transition-colors 
+              ${ (isLoading || !stripe || !elements || isDisabled) && 'cursor-not-allowed'}`} onClick={handleSubmit}>
+
+                {isLoading ? "Processing..." : payButtonText}
+                
           </button>
 
       </form>
@@ -99,4 +115,6 @@ export default function CardPayment({onPayment, payButtonText}){
     </div>
   )
 }
+)
 
+export default CardPayment

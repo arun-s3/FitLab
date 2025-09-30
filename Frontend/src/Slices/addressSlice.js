@@ -104,6 +104,7 @@ const initialState = {
     currentDefaultAddress: {},
     addressCreated: false,
     addressUpdated: false,
+    addressDeleted: false,
     loading: false,
     error: null,
     success:false,
@@ -121,6 +122,7 @@ const addressSlice = createSlice({
             state.success = false
             state.addressCreated = false
             state.addressUpdated = false
+            state.addressDeleted = false
         }
     },
     extraReducers: (builder)=>{
@@ -159,6 +161,7 @@ const addressSlice = createSlice({
             console.log("action.payload.address-->",action.payload.addresses)
             state.error = null
             state.loading = false
+            state.addressDeleted = true
             state.message = action.payload.message
             state.addresses = state.addresses.filter(address=> address._id !== action.payload.addressId)
         })

@@ -14,8 +14,9 @@ export default function UserPageLayout(){
 
     const [breadcrumbHeading, setBreadcrumbHeading] = useState('')
     const [pageLocation, setPageLocation] = useState('')
-    const [contentTileClasses, setContentTileClasses] = useState('')
+    const [contentTileClasses, setContentTileClasses] = useState('') 
     const [sidebarTileClasses, setSidebarTileClasses] = useState('')
+    const [pageWrapperClasses, setPageWrapperClasses] = useState('')
 
     // const [mainElementStyles, setMainElementStyles ] = useState('')
     // const [sideBarSectionStyles, setSideBarSectionStyles] = useState('')
@@ -30,7 +31,9 @@ export default function UserPageLayout(){
     }
 
     return(
-        <UserPageLayoutContext.Provider value={{breadcrumbHeading, setBreadcrumbHeading, setContentTileClasses, setSidebarTileClasses, setPageLocation}} >
+        <UserPageLayoutContext.Provider value={{breadcrumbHeading, setBreadcrumbHeading, setContentTileClasses, setSidebarTileClasses, 
+          setPageWrapperClasses, setPageLocation}} >
+
             <section id='UserPageLayout'>
                 <header style={headerBg} className='h-[5rem]'>
 
@@ -40,7 +43,8 @@ export default function UserPageLayout(){
 
                 <BreadcrumbBar heading={ breadcrumbHeading && breadcrumbHeading } />
 
-                <main className={`${user ? 'flex gap-[2rem]' : ''} gap-[2rem] px-[4rem] mb-[10rem]`}>
+                <main className={`${user ? 'flex gap-[2rem]' : ''} ${pageWrapperClasses ? pageWrapperClasses : null} 
+                  gap-[2rem] px-[4rem] mb-[10rem]`}>
                 
                     {
                         user &&
@@ -62,6 +66,7 @@ export default function UserPageLayout(){
                 <Footer />
 
             </section>
+
         </UserPageLayoutContext.Provider>
     )
 }

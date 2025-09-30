@@ -2,28 +2,34 @@ import React, {useState, useEffect, useContext} from 'react'
 import './AddressListingPage.css'
 import {useNavigate, useLocation} from 'react-router-dom'
 import {useSelector, useDispatch} from 'react-redux'
+import {motion} from 'framer-motion'
 
+import {HousePlus} from 'lucide-react'
 import {toast} from 'react-toastify'
-import {SquarePlus, MapPinPlus, HousePlus, Check, Trash} from 'lucide-react'
-import {MdBlock} from 'react-icons/md'
-import {RiFileEditLine} from "react-icons/ri"
 
+import AddressLists from './AddressLists'
+import DeleteAddressModal from './DeleteAddressModal'
 import {UserPageLayoutContext} from '../UserPageLayout/UserPageLayout'
 import {SitePrimaryButtonWithShadow} from '../../../Components/SiteButtons/SiteButtons'
-import {getAllAddress, setAsDefaultAddress, deleteAddress} from '../../../Slices/addressSlice'
+import {getAllAddress, setAsDefaultAddress, deleteAddress, resetStates} from '../../../Slices/addressSlice'
 import AuthPrompt from '../../../Components/AuthPrompt/AuthPrompt'
 
  
 
 export default function AddressListingPage(){
 
-    const {setBreadcrumbHeading, setPageLocation} = useContext(UserPageLayoutContext)
+    const {setBreadcrumbHeading, setSidebarTileClasses, setPageWrapperClasses, setPageLocation} = useContext(UserPageLayoutContext)
     setBreadcrumbHeading('Manage Addresses')
+    setPageWrapperClasses('justify-center xx-md:justify-normal')
+    setSidebarTileClasses('hidden xx-md:inline-block')
       
     const location = useLocation()
     setPageLocation(location.pathname)
 
-    const {addresses, message} = useSelector(state=> state.address)
+    const [openDeleteModal, setOpenDeleteModal] = useState(false)
+    const [deleteAddressId, setDeleteAddressId] = useState('')
+
+    const {addresses,loading, error, addressDeleted} = useSelector(state=> state.address)
     const {user} = useSelector((state)=> state.user)
     const dispatch = useDispatch()  
 
@@ -34,15 +40,25 @@ export default function AddressListingPage(){
     },[])
 
     useEffect(()=> {
-        if(message && message.includes('deleted')){
+        if(addressDeleted){
             toast.success('Deleted the address successfully!')
+            dispatch(resetStates())
         }
-    },[message])
+        if(error){
+            toast.error(error)
+            dispatch(resetStates())
+        }
+        if(addresses){
+            console.log("addresses--->", addresses)
+        }
+    },[addressDeleted, error, addresses])
 
-    const headerBg = {
-        backgroundImage: "url('/header-bg.png')",
-        backgrounSize: 'cover'
+    const onDeleteConfirm = async ()=> {
+        console.log("Address deleting..")
+        dispatch(deleteAddress({ addressId: deleteAddressId }))
+        setOpenDeleteModal(false)
     }
+
 
     return(
 
@@ -56,107 +72,72 @@ export default function AddressListingPage(){
                  </div>
                 :
                 <>
-                    <div className='text-center mb-[3rem]'>
-                        <h1 className='text-[20px] font-[500] capitalize'> Manage Addresses </h1>
-                        <h2 className='text-[12px] font-[450] tracking-[0.2px] text-secondary'> Easily view, edit, delete, or set your default address from your list of saved addresses </h2>
-                    </div>
-                    <div className='mb-[2rem] w-full h-[3rem] pl-[1rem] border border-dashed border-primaryDark rounded-[5px] flex
-                         items-center gap-[10px] cursor-pointer' onClick={()=> navigate('/account/addresses/add')}>
-                        {/* <SquarePlus className='text-secondary w-[20px] h-[20px]'/> */}
-                        {/* <MapPinPlus className='text-secondary w-[20px] h-[20px]'/> */}
-                        <HousePlus className='text-secondary w-[20px] h-[20px]'/>
-                        <span className='text-[13px] font-[400] tracking-[0.5px] capitalize'> Add New Address </span>
-                    </div>
-                    <div className='flex flex-col justify-center gap-[2rem] address-content'>
-                        {
-                            addresses.map(address=> (
-                                    <div className='flex justify-between pl-[10px] py-[5px] border-l-[4px] border-primary rounded-[6px]'>
-                                        <address className='not-italic flex flex-col justify-center text-[13px] text-[#3C3D37]'>
-                                            <span className='mb-[5px] flex items-center justify-between'>
-                                                <span className='px-[6px] w-fit text-[11px] text-white capitalize bg-secondary
-                                                     rounded-[5px] '>
-                                                        {address.type}
-                                                </span>
-                                                {address.defaultAddress &&
-                                                    <span className='flex items-center'>
-                                                        <Check className='px-[4px] h-[23px] w-[23px] text-white bg-primary rounded-[10px]'/>
-                                                        <span className='ml-[-7px] pl-[12px] pr-[15px] text-[11px] text-[rgb(239, 68, 68)] 
-                                                                tracking-[0.2px] bg-primary rounded-[6px] z-[-1]'>
-                                                            Default 
-                                                        </span>
-                                                    </span> 
-                                                }
-                                            </span>
-                                            <span className='flex items-center gap-[2px]'> 
-                                                <span>
-                                                    {address.firstName + ' ' + address.lastName} 
-                                                </span>
-                                                <span className='ml-[1px] text-muted text-[12px] tracking-[0.2px]'>
-                                                    {`(${address?.nickName ? address.nickName : 'Nickname: N/A'})`}
-                                                </span>
-                                            </span>
-                                            <span> {address.street} </span>
-                                            <span> {address.district} </span>
-                                            <span> {address.state} </span>
-                                            <span> {address.pincode} </span>
-                                            <span> {`(${address.landmark ? address.landmark : 'Landmark: N/A'})`} </span>
-                                            <span className='inner-fields'>
-                                                <span className='field-name text-muted'>
-                                                    Mobile:
-                                                </span>
-                                                <span className='ml-[5px]'>
-                                                    {address.mobile}
-                                                </span>
-                                            </span>
-                                            <span className='inner-fields'>
-                                                <span className='field-name text-muted whitespace-nowrap'>
-                                                    Alternate Mobile:
-                                                </span>
-                                                <span className='ml-[5px]'>
-                                                    {address.alternateMobile ? address.alternateMobile : 'N/A'}
-                                                </span>
-                                            </span>
-                                            <span className='inner-fields'>
-                                                <span className='field-name text-muted'>
-                                                    Email:
-                                                </span>
-                                                <span className='ml-[5px]'>
-                                                    {address.email}
-                                                </span>
-                                            </span>
-                                            <span className='inner-fields'>
-                                                <span className='field-name text-muted whitespace-nowrap'>
-                                                    Delivery Instructions:
-                                                </span>
-                                                <span className='ml-[5px]'>
-                                                    {address.deliveryInstructions ? address.deliveryInstructions : 'N/A'}
-                                                </span>
-                                            </span>
-                                        </address>
-                                        <div className={`flex flex-col ${!address.defaultAddress? 'justify-between':'justify-end'} items-end`}>
-                                            {!address.defaultAddress &&
-                                               <SitePrimaryButtonWithShadow tailwindClasses='hover:bg-green-500' customStyle={{fontSize:'11px'}}
-                                                    clickHandler={()=> dispatch( setAsDefaultAddress({addressId: address._id}) )}>
-                                                 Set this as Default
-                                               </SitePrimaryButtonWithShadow>
-                                            }
-                                            <div className='w-[35px] flex flex-col gap-[2rem] text-secondary address-options'>
-                                                <span data-label='Edit' className='w-[30px] p-[5px] border rounded-[20px] z-[2] flex items-center justify-center 
-                                                      relative cursor-pointer address-control' 
-                                                        onClick={()=> navigate('./edit', {state: {address}})}>    
-                                                  <i> <RiFileEditLine/> </i>  
-                                                </span>
-                                                <span data-label='Delete' className='w-[30px] p-[5px] border rounded-[20px] z-[2] flex items-center justify-center
-                                                     relative cursor-pointer address-control' 
-                                                        onClick={()=> dispatch( deleteAddress({addressId: address._id}) )}>  
-                                                  <i> <Trash className='w-[15px] h-[15px]'/> </i>           
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                            ))
-                        }
-                    </div>
+
+                    <motion.div
+                      className="text-center mb-[3rem] px-2"
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6, ease: "easeOut" }}
+                    >
+                      <h1 className="text-[18px] mob:text-[19px] xs-sm:text-[20px] x-md:text-[22px] font-[500] capitalize">
+                        Manage Addresses
+                      </h1>
+                      <h2 className="text-[11px] w-[80%] xxs-sm:w-auto ml-12 xxs-sm:ml-auto xxs-sm:text-[12px] xs-sm:text-[13px]
+                       x-md:text-[14px] font-[450] tracking-[0.2px] text-secondary mt-1">
+                        Easily view, edit, delete, or set your default address from your list of saved addresses
+                      </h2>
+                    </motion.div>
+
+                    <motion.div
+                      className="mb-[2rem] ml-12 xxs-sm:ml-8 xs-sm2:ml-auto w-[75%] xxs-sm:w-[80%] xs-sm2:w-full h-[3rem] pl-[0.75rem]
+                       sm:pl-[1rem] border border-dashed border-primaryDark rounded-[5px] 
+                       flex items-center gap-[8px] sm:gap-[10px] cursor-pointer hover:bg-primary/5 transition"
+                      onClick={() => navigate("/account/addresses/add")}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.2, delay: 0.2, ease: 'easeInOut' }}
+                      whileHover={{ scale: 1.02 }}
+                    >
+                      <HousePlus className="text-secondary w-[18px] h-[18px] mob:w-[20px] mob:h-[20px]" />
+                      <span className="text-[12px] mob:text-[13px] font-[400] tracking-[0.5px] capitalize">
+                        Add New Address
+                      </span>
+                    </motion.div> 
+
+                    {
+                        addresses && addresses.length > 0 ?
+
+                            <AddressLists 
+                                addresses={addresses} 
+                                setOpenDeleteModal={setOpenDeleteModal} 
+                                setDeleteAddressId={setDeleteAddressId}
+                            />
+                            :
+                             <motion.div
+                                className="w-full h-auto flex items-center justify-center flex-col l-md:flex-row 
+                                  text-[12px] l-md:text-[13px] xx-md:text-[14px] lg:text-[17px] text-muted tracking-[0.3px]"
+                                initial={{ opacity: 0, y: -20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.6, ease: "easeOut" }}
+                            >
+                               <img src='/address.png' className='w-[22rem] md:w-[45%] h-auto'/> 
+                               <p className='whitespace-normal xs-sm:whitespace-nowrap md:whitespace-normal'> 
+                                    You don’t have any saved addresses yet. Add one to make checkout faster! 
+                               </p>
+
+                            </motion.div>
+                    }
+
+                    
+                    {
+                        openDeleteModal &&
+                            <DeleteAddressModal
+                              open={openDeleteModal}
+                              onClose={() => setOpenDeleteModal(false)}
+                              onConfirm={onDeleteConfirm}
+                              loading={loading}
+                            />
+                    }
 
                 </>
              }

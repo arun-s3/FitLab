@@ -2,10 +2,6 @@ const crypto = require('crypto')
 
 const Payment = require('../Models/paymentModel')
 const Razorpay = require('../Utils/razorpay')
-const Order = require('../Models/orderModel')
-const Cart = require('../Models/cartModel')
-const Product = require('../Models/productModel')
-
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 const {paypal, client} = require('../Utils/paypal')
 

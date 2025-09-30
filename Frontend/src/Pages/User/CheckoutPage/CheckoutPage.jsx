@@ -138,7 +138,6 @@ export default function CheckoutPage(){
     useEffect(()=> {
       console.log("productRemoved--->", productRemoved)
       if(productRemoved){
-        console.log("Inside useEffect for if(productRemoved && checkoutBlockedProducts && checkoutBlockedProducts.length > 0)")
         const unavailableProducts = cart.products.filter(product=> 
           !product.productId || product.productId.isBlocked || product.productId.stock < product.quantity
         )

@@ -5,7 +5,7 @@ import {motion, AnimatePresence} from "framer-motion"
 import {Check, Plus} from 'lucide-react'
 import {toast} from 'react-toastify'
 
-import NewAddressModal from './Modals/NewAddressModal'
+import NewAddressModal from './Modals/NewAddressModal/NewAddressModal'
 import {createNewAddress, getAllAddress, resetStates} from '../../../Slices/addressSlice'
 
 

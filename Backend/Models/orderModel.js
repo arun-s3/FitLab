@@ -6,6 +6,11 @@ const orderSchema = new mongoose.Schema({
         ref: 'User',
         required: true,
     },
+    fitlabOrderId: {
+        type: String,
+        required: true, 
+        unique: true
+    },
     products: [
         {
             productId: {
@@ -66,7 +71,7 @@ const orderSchema = new mongoose.Schema({
             },
             productStatus: {
                 type: String,   
-                enum: ['processing', 'confirmed', 'shipped', 'delivered', 'cancelled', 'returning', 'refunded'],
+                enum: ['processing', 'confirmed', 'shipped', 'cancelled', 'returning', 'refunded'],
                 default: 'processing'
             },
             productCancelReason: {
@@ -148,6 +153,10 @@ const orderSchema = new mongoose.Schema({
         default: Date.now,
         required: true
     }, 
+    estimtatedDeliveryDate: {
+        type: Date,
+        default: null
+    },
     deliveryDate: {
         type: Date,
         default: null

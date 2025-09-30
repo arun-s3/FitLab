@@ -142,7 +142,7 @@ export default function AdminOrderHistoryPage(){
   const orderStatusStyles = [
     {status:'processing', textColor:'text-orange-300', bg:'bg-orange-300', lightBg:'bg-orange-50', border:'border-orange-300', shadow: '#fdba74'},
     {status:'confirmed', textColor:'text-yellow-500', bg:'bg-yellow-500', lightBg:'bg-yellow-50', border:'border-yellow-300', shadow: '#fde047'},
-    {status:'shipped', textColor:'text-green-300', bg:'bg-green-300', lightBg:'bg-green-50', border:'border-green-100', shadow: '#86efac'},  
+    {status:'shipped', textColor: 'text-blue-500', bg: 'bg-blue-500', lightBg: 'bg-blue-50', border: 'border-blue-300', shadow: '#93c5fd'},
     {status:'delivered', textColor:'text-green-500', bg:'bg-green-500', lightBg:'bg-green-50', border:'border-green-300', shadow: '#86efac'}, 
     {status:'cancelled', textColor:'text-red-700', bg:'bg-red-700', lightBg:'bg-red-50', border:'border-red-300', shadow: '#fca5a5'},
     {status:'returning', textColor:'text-red-500', bg:'bg-red-500', lightBg:'bg-red-50', border:'border-red-300', shadow: '#fca5a5'},
@@ -607,7 +607,7 @@ export default function AdminOrderHistoryPage(){
                              </button>
                           }
                           { 
-                            !['delivered', 'cancelled', 'refunded'].includes(product.productStatus) &&
+                            !['cancelled', 'refunded'].includes(product.productStatus) &&
                             <SiteSecondaryFillImpButton className="text-[11px] capitalize" 
                                 clickHandler={(e)=> changeTheProductStatus(order._id, product.productId, changeStatus(product.productStatus).status)}
                                   customStyle={{width:'auto',marginTop:'0', paddingBlock:'4px', borderRadius:'6px'}}> 
@@ -617,7 +617,7 @@ export default function AdminOrderHistoryPage(){
                                 return(
                                   <span className='flex items-center gap-[10px]'>
                                       <span className='capitalize'> 
-                                        {status !== 'delivered' ? status + '  Product' : 'Product  ' + status} 
+                                        {status + '  Product' } 
                                       </span>
                                       {Icon && <Icon className="w-4 h-4"/>} 
                                   </span>

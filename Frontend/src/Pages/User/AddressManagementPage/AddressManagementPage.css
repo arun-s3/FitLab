@@ -25,7 +25,7 @@
 #AddressManagementPage #address-content .address-types>div input[type= 'radio']:checked{
     background-color: var(--PRIMARYDARK);
 }
-#AddressManagementPage #address-content .address-types>div label{
+/* #AddressManagementPage #address-content .address-types>div label{
     font-size: 12.5px;
     color: var(--SECONDARY);
-}
+} */

@@ -2,7 +2,7 @@ import React from 'react'
 
 import {AlertCircle} from "lucide-react"
 
-import {camelToCapitalizedWords} from '../../../../Utils/helperFunctions'
+import {camelToCapitalizedWords} from '../../../../../Utils/helperFunctions'
 
 
 export default function AddressField({infoArray, fieldType='input', formData, onChange, onBlur, errors}){

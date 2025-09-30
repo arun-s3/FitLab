@@ -15,6 +15,7 @@ export default function UserPageLayout(){
     const [breadcrumbHeading, setBreadcrumbHeading] = useState('')
     const [pageLocation, setPageLocation] = useState('')
     const [contentTileClasses, setContentTileClasses] = useState('')
+    const [sidebarTileClasses, setSidebarTileClasses] = useState('')
 
     // const [mainElementStyles, setMainElementStyles ] = useState('')
     // const [sideBarSectionStyles, setSideBarSectionStyles] = useState('')
@@ -29,7 +30,7 @@ export default function UserPageLayout(){
     }
 
     return(
-        <UserPageLayoutContext.Provider value={{breadcrumbHeading, setBreadcrumbHeading, setContentTileClasses, setPageLocation}} >
+        <UserPageLayoutContext.Provider value={{breadcrumbHeading, setBreadcrumbHeading, setContentTileClasses, setSidebarTileClasses, setPageLocation}} >
             <section id='UserPageLayout'>
                 <header style={headerBg} className='h-[5rem]'>
 
@@ -43,7 +44,7 @@ export default function UserPageLayout(){
                 
                     {
                         user &&
-                        <div className={`basis-[15%]`}>
+                        <div className={`${sidebarTileClasses ? sidebarTileClasses : null} basis-[15%]`}>
                                             
                             <UserSidebar currentPath={pageLocation}/>
                         

@@ -143,7 +143,8 @@ export default function OrderHistoryPage(){
 
     const orderStatusStyles = [
       {status:'processing', textColor:'text-orange-500', bg:'bg-orange-500', lightBg:'bg-orange-50', border:'border-orange-300', shadow: '#fdba74'},
-      {status:'confirmed', textColor:'text-yellow-500', bg:'bg-yellow-500', lightBg:'bg-yellow-50', border:'border-yellow-300', shadow: '#fde047'}, 
+      {status:'confirmed', textColor:'text-yellow-500', bg:'bg-yellow-500', lightBg:'bg-yellow-50', border:'border-yellow-300', shadow: '#fde047'},
+      {status:'shipped', textColor: 'text-blue-500', bg: 'bg-blue-500', lightBg: 'bg-blue-50', border: 'border-blue-300', shadow: '#93c5fd'},
       {status:'delivered', textColor:'text-green-500', bg:'bg-green-500', lightBg:'bg-green-50', border:'border-green-300', shadow: '#86efac'}, 
       {status:'cancelled', textColor:'text-red-700', bg:'bg-red-700', lightBg:'bg-red-50', border:'border-red-300', shadow: '#fca5a5'},
       {status:'returning', textColor:'text-red-500', bg:'bg-red-500', lightBg:'bg-red-50', border:'border-red-300', shadow: '#fca5a5'},
@@ -477,9 +478,15 @@ export default function OrderHistoryPage(){
                                       order.orderStatus === 'confirmed' ? 'Estimated Delivery Date:' : null
                                   }
                                 </span>
-                                <span className='ml-[5px] font-[550] tracking-[0.5px]'>
-                                  { format(new Date(order.deliveryDate), "MMMM dd, yyyy" ) } 
-                                </span>
+                                {/* <span className='ml-[5px] font-[550] tracking-[0.5px]'>
+                                  { 
+                                    order.orderStatus === 'delivered' ? 
+                                      format(new Date(order.deliveryDate), "MMMM dd, yyyy" ) 
+                                    : order.orderStatus === 'confirmed' 
+                                    ? format(new Date(order.estimtatedDeliveryDate), "MMMM dd, yyyy" ) 
+                                    : null
+                                  } 
+                                </span> */}
                               </h3>
                               }
                               <h3 className={`px-[5px] py-[3px] w-[23%] flex gap-[15px] justify-center items-center

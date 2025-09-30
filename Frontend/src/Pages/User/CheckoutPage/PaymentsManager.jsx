@@ -12,11 +12,8 @@ export default function PaymentManager({paymentMethod, setPaymentMethod, optionC
     
     const retryStripePaymentRef = useRef()
 
-    // const makeStripePaymentAgain =  retryStripePaymentRef.current.retryStripePayment()
-
     useEffect(()=> {
       if(retryStripePaymentStatus && retryStripePaymentRef.current){
-        // makeStripePaymentAgain()
         retryStripePaymentRef.current.retryStripePayment()
         setRetryStripePaymentStatus(false)
       }

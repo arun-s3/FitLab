@@ -17,13 +17,7 @@ export default function OrderSummary({shippingAddress, paymentMethod, onApplyDis
 
     const [isCouponFocused, setIsCouponFocused] = useState(false)
 
-    const {loading} = useSelector(state=> state.order)
     const {cart} = useSelector(state=> state.cart)
-
-    useEffect(()=> {
-      console.log("loading---->", loading)
-    }, [loading])
-    
 
     return (
         <motion.div 
@@ -180,7 +174,7 @@ export default function OrderSummary({shippingAddress, paymentMethod, onApplyDis
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.96 }}
                         >
-                          <SiteSecondaryFillImpButton 
+                          <SiteSecondaryFillImpButton
                             className={`px-[50px] py-[9px] rounded-[7px] ${paymentMethod === 'cards' && 'hidden'}`} 
                             clickHandler={()=> placeOrder()}
                           >

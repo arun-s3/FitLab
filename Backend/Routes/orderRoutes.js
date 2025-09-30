@@ -1,7 +1,7 @@
 const express = require('express')
 const orderRouter = express.Router()
 const {createOrder, applyCoupon, getOrders, getAllUsersOrders, cancelOrderProduct, cancelOrder, deleteProductFromOrderHistory, changeProductStatus,
-     changeOrderStatus, getOrderCounts} = require('../Controllers/orderController')
+     changeOrderStatus, getOrderCounts, getTodaysLatestOrder} = require('../Controllers/orderController')
 const {isLogin, isLogout} = require('../Middlewares/Authentication')
 
 
@@ -15,5 +15,6 @@ orderRouter.patch('/cancel', isLogin, cancelOrderProduct)
 orderRouter.patch('/cancel/:orderId', cancelOrder)
 orderRouter.post('/delete/:orderId', deleteProductFromOrderHistory)
 orderRouter.get('/statusCounts', getOrderCounts)
+orderRouter.get('/latest', getTodaysLatestOrder)
 
 module.exports = orderRouter

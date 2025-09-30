@@ -7,7 +7,7 @@ import {Minus, Plus, Heart} from 'lucide-react'
 import StarGenerator from '../../../Components/StarGenerator/StarGenerator'
 import {capitalizeFirstLetter} from '../../../Utils/helperFunctions'
 import {SiteSecondaryFillButton} from '../../../Components/SiteButtons/SiteButtons'
-import {CustomHashLoader} from '../../../Components/Loader//Loader'
+import {CustomHashLoader} from '../../../Components/Loader/Loader'
 
 
 export default function ProductDetail({product = null, quantity, setQuantity, onAddToCart, isLoading}){
@@ -89,12 +89,6 @@ export default function ProductDetail({product = null, quantity, setQuantity, on
               className="border rounded-lg p-[12px] xs-sm:p-[16px] bg-white"
               variants={itemVariants}
             >
-              {/* <img 
-                src={Object.keys(product).length ? product?.thumbnail.url : ''} 
-                alt="Product Tumbnail"
-                className="w-full h-auto" 
-                ref={thumbnailRef}
-              /> */}
               <div className="w-full h-auto overflow-hidden rounded">
                 <AnimatePresence mode="wait">
                   {mainImageUrl ? (
@@ -130,17 +124,6 @@ export default function ProductDetail({product = null, quantity, setQuantity, on
               className="flex gap-[12px] xs-sm:gap-[16px] overflow-x-visible pb-2"
               variants={sectionVariants}
             >
-              {/* { Object.keys(product).length &&
-                  product.images.map((image, index) => (
-                    <img 
-                      key={image.url} 
-                      src={image.url} 
-                      alt={`Product view ${image.name}`}
-                      className={`flex-shrink-0 border rounded-lg w-[80px] h-[80px] xs-sm:w-[96px] xs-sm:h-[96px] object-cover cursor-pointer
-                        ${currentImageIndex === index? 'outline outline-2 outline-secondary outline-offset-[2px]' : ''}`} 
-                      onClick={()=> selectImage(index)}
-                    />
-              ))} */}
               {Object.keys(product).length === 0 ? null : (
                 <AnimatePresence>
                   {product.images.map((image, index) => (

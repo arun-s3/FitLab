@@ -8,7 +8,7 @@ export function SiteButton({customStyle, children, className, shouldSubmit = fal
     
     return(
         <button type={shouldSubmit?"submit":"button"} 
-            className={`bg-primary text-black text-descReg1 hover:bg-green-500 transition duration-300 ${className} site-button`} 
+            className={`bg-primary text-black text-descReg1 hover:bg-yellow-300 transition duration-300 ${className} site-button`} 
             style={customStyle}
         >
                 {children}

@@ -8,7 +8,7 @@ import axios from 'axios'
 
 import Header from '../../../Components/Header/Header'
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
-import ProductDetailSection from './ProductDetailSection'
+import ProductDetailSection from './ProductDetail'
 import ReviewSystem from './ReviewSystem'
 import SimilarProductsCarousal from '../../../Components/ProductsCarousal/SimilarProductsCarousal'
 import {capitalizeFirstLetter} from '../../../Utils/helperFunctions'

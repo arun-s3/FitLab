@@ -17,7 +17,7 @@ import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
 import OrderStepper from '../../../Components/OrderStepper/OrderStepper'
 import FeaturesDisplay from '../../../Components/FeaturesDisplay/FeaturesDisplay'
 import {addToCart, reduceFromCart, removeFromCart, getTheCart, resetCartStates} from '../../../Slices/cartSlice'
-import {getBestCoupon, resetCouponStates} from '../../../Slices/couponSlice'
+import {getBestCoupon} from '../../../Slices/couponSlice'
 
 import Footer from '../../../Components/Footer/Footer'
 import AuthPrompt from '../../../Components/AuthPrompt/AuthPrompt'
@@ -30,7 +30,7 @@ export default function ShoppingCartPage(){
   const [isProductRemovalModalOpen, setIsProductRemovalModalOpen] = useState(false)
   const [productToRemove, setProductToRemove] = useState({})
 
-  const {cart, productAdded, productRemoved, loading, error, message, couponApplied} = useSelector(state=> state.cart)
+  const {cart, error, couponApplied} = useSelector(state=> state.cart)
   const {bestCoupon, couponMessage} = useSelector(state=> state.coupons)
   const {user} = useSelector(state=> state.user)
 

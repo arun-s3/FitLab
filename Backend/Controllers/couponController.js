@@ -294,6 +294,83 @@ const getAllCoupons = async (req, res, next) => {
 }
 
 
+const getEligibleCoupons = async (req, res, next)=> {
+  try {
+    console.log("Inside getEligibleCoupons")
+
+    const userId = req.user._id
+    const { queryOptions = {} } = req.body
+
+    const {
+      page = 1,
+      limit = 6,
+      sort = -1,
+      sortBy = "createdAt",
+      searchData,
+    } = queryOptions
+
+    const skip = (page - 1) * limit
+    let filterConditions = { status: "active" }
+    if (searchData) {
+      filterConditions.code = { $regex: searchData, $options: "i" }
+    }
+
+    let sortOptions = {}
+    if (["code", "startDate", "createdAt"].includes(sortBy)) {
+      sortOptions[sortBy] = sort
+    } else {
+      sortOptions.createdAt = sort
+    }
+
+    let coupons = await Coupon.find(filterConditions)
+      .sort(sortOptions)
+      .skip(skip)
+      .limit(parseInt(limit))
+      .populate("applicableProducts", "title price category thumbnail")
+      .populate("applicableCategories", "name")
+      .populate("assignedCustomers", "_id");
+
+    const now = new Date()
+    coupons = coupons.filter((coupon)=> {
+      if (now < coupon.startDate || now > coupon.endDate) return false
+
+      if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit)
+        return false
+
+      const userUsage = coupon.usedBy.find((u) => u.userId.toString() === userId.toString())
+      if (coupon.oneTimeUse && userUsage) return false
+      if ( coupon.usageLimitPerCustomer !== null && userUsage && userUsage.count >= coupon.usageLimitPerCustomer) return false
+      if ( coupon.customerSpecific && !coupon.assignedCustomers.some((u) => u._id.equals(userId))){
+        return false
+      }
+      return true
+    })
+    console.log("coupons---->", coupons)
+
+    const allCoupons = await Coupon.find(filterConditions).populate("assignedCustomers", "_id")
+
+    const totalEligibleCoupons = allCoupons.filter((coupon) => {
+      const now = new Date()
+      if (now < coupon.startDate || now > coupon.endDate) return false
+      if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) return false
+      const userUsage = coupon.usedBy.find((u) => u.userId.toString() === userId.toString())
+      if (coupon.oneTimeUse && userUsage) return false
+      if (coupon.usageLimitPerCustomer !== null && userUsage && userUsage.count >= coupon.usageLimitPerCustomer) return false
+      if (coupon.customerSpecific && !coupon.assignedCustomers.some((u) => u._id.equals(userId))) return false
+      return true
+    }).length
+    console.log("totalEligibleCoupons---->", totalEligibleCoupons)
+
+
+    res.status(200).json({ success: true, coupons, totalCoupons: totalEligibleCoupons })
+  } 
+  catch(error){
+    console.error("Error in getEligibleCouponsForUser:", error.message)
+    next(error)
+  }
+}
+
+
 const deleteCoupon = async (req, res, next)=> {
   try {
     console.log("Inside deleteCoupon of couponController")
@@ -604,4 +681,5 @@ const toggleCouponStatus = async (req, res, next)=> {
 
 
 
-module.exports = {createCoupon, updateCoupon, getAllCoupons, deleteCoupon, searchCoupons, getBestCoupon, compareCoupons, toggleCouponStatus}
+module.exports = {createCoupon, updateCoupon, getAllCoupons, getEligibleCoupons, deleteCoupon, searchCoupons, getBestCoupon,
+   compareCoupons, toggleCouponStatus}

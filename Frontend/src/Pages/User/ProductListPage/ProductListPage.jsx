@@ -1,4 +1,5 @@
 import React,{useState, useEffect, useRef, useContext} from 'react'
+import {useLocation} from 'react-router-dom'
 import './ProductListPage.css'
 import {useDispatch, useSelector} from 'react-redux'
 import {debounce} from 'lodash'
@@ -12,6 +13,7 @@ import TestPriceFilter from '../../../Components/PriceSliderAndFilter/TestPriceS
 import ProductsDisplay from '../../../Components/ProductsDisplay/ProductsDisplay'
 import ProductListingTools from '../../../Components/ProductListingTools/ProductListingTools'
 import CartSidebar from '../../../Components/CartSidebar/CartSidebar'
+import CouponApplicableModal from './CouponApplicableModal'
 import {getAllProducts, toggleProductStatus} from '../../../Slices/productSlice'
 import {getTheCart, resetCartStates} from '../../../Slices/cartSlice'
 import {ProtectedUserContext} from '../../../Components/ProtectedUserRoutes/ProtectedUserRoutes'
@@ -46,7 +48,18 @@ export default function ProductList({admin}){
 
     const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(false)
 
+    const [openCouponApplicableModal, setOpenCouponApplicableModal] = useState({status: false, code: '', products: []})
+
     const {cart, productAdded, productRemoved, loading, error, message} = useSelector(state=> state.cart)    
+    
+    const location = useLocation()
+
+    useEffect(()=> {
+        if(location && location.state.showCouponApplicableModal){
+            const {couponCode, products} = location.state
+            setTimeout(()=> setOpenCouponApplicableModal({status: true, code: couponCode, products}), 1500)
+        }
+    }, [location])
 
     const headerBg = {
         backgroundImage: "url('/header-bg.png')",
@@ -120,7 +133,10 @@ export default function ProductList({admin}){
           setIsCartOpen(true)
           dispatch(resetCartStates())
         }
-    },[error, productAdded, cart])
+        if(message && message.includes("Coupon is not applicable to the selected products")){
+            toast.warn(message, {autoClose: 5000})
+        }
+    },[error, productAdded, message, cart])
 
 
     const applySidebarFilters = (appliedFilters)=> {
@@ -213,6 +229,16 @@ export default function ProductList({admin}){
                                     brands={brands}
                                     applySidebarFilters={applySidebarFilters}
                                 />
+                        }
+
+                        { 
+                            openCouponApplicableModal.status &&
+                              <CouponApplicableModal
+                                open={openCouponApplicableModal.status}
+                                onClose={()=> setOpenCouponApplicableModal({status: false, code:'', products: []})}
+                                couponLabel={openCouponApplicableModal.code}
+                                products={openCouponApplicableModal.products}
+                              />
                         }
 
                 </section>

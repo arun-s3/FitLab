@@ -25,7 +25,23 @@ export const getAllCoupons = createAsyncThunk('coupon/list', async ({queryOption
     console.log('Returning success response from getAllCoupons...', JSON.stringify(response.data))
     return response.data
   }catch(error){
-    console.log('Inside catch of averageRating')
+    console.log('Inside catch of getAllCoupons')
+    const errorMessage = error.response?.data?.message
+    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
+    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
+    return thunkAPI.rejectWithValue(errorMessage)
+  }
+})
+
+export const getEligibleCoupons = createAsyncThunk('coupon/list-eligible', async ({queryOptions}, thunkAPI)=> {
+  try {
+    console.log('Inside getEligibleCoupons createAsyncThunk')
+    console.log("couponDetails from couponSlice---->", queryOptions)
+    const response = await axios.post('/coupons/list-eligible', {queryOptions}, {withCredentials: true})
+    console.log('Returning success response from getEligibleCoupons...', JSON.stringify(response.data))
+    return response.data
+  }catch(error){
+    console.log('Inside catch of getEligibleCoupons')
     const errorMessage = error.response?.data?.message
     console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
     console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
@@ -167,6 +183,21 @@ const couponSlice = createSlice({
       })
       .addCase(getAllCoupons.rejected, (state, action) => {
         console.log('getAllCoupons rejected:', action.payload)
+        state.loading = false
+        state.couponError = action.payload
+      })
+      .addCase(getEligibleCoupons.fulfilled, (state, action)=> {
+        console.log('getEligibleCoupons fulfilled:', action.payload)
+        state.couponError = null
+        state.loading = false
+        state.coupons = action.payload.coupons
+      })
+      .addCase(getEligibleCoupons.pending, (state)=> {
+        state.loading = true
+        state.couponError = null
+      })
+      .addCase(getEligibleCoupons.rejected, (state, action) => {
+        console.log('getEligibleCoupons rejected:', action.payload)
         state.loading = false
         state.couponError = action.payload
       })

@@ -6,11 +6,13 @@ const {errorHandler} = require("../../Utils/errorHandler")
 
 
 
-const recalculateAndValidateCoupon = async(req, res, next, userId, coupon, absoluteTotal, deliveryCharge, gstCharge)=> {
+const recalculateAndValidateCoupon = async(req, res, next, userId, coupon, absoluteTotal, deliveryCharge, gstCharge, fetchErrors = false)=> {
   try{
-    console.log("Inside recalculateAndValidateCoupon--")
+      console.log("Inside recalculateAndValidateCoupon--")
       console.log("coupon inside recalculateAndValidateCoupon-->", coupon)
       console.log(`${typeof absoluteTotal}....${typeof deliveryCharge}.....${typeof deliveryCharge}`)
+
+      let sendResponse = '';
   
       if (!coupon || coupon.status !== "active"){
         errorHandler(400, "Invalid or expired coupon code.")
@@ -62,10 +64,14 @@ const recalculateAndValidateCoupon = async(req, res, next, userId, coupon, absol
   
       let isCouponApplicable = false
       for (const item of cart.products){
+          console.log("Checking coupon applicability in this product--->", item.productId.title)
+          console.log(`Product categories--> ${JSON.stringify(item.productId.category)}`)
+          console.log(`CouponApplicableCategories---> ${JSON.stringify(coupon.applicableCategories.map(cat=> cat.name))}`)
           const product = item.productId
           if(coupon.applicableType === "allProducts" ||
               (coupon.applicableType === "products" && coupon.applicableProducts.includes(product._id)) ||
-              (coupon.applicableType === "categories" && product.category.some(catId=> coupon.applicableCategories.includes(catId)))
+              (coupon.applicableType === "categories" && 
+                product.category.some(catName => coupon.applicableCategories.some(cat=> cat.name === catName)))
             ){
               isCouponApplicable = true
               break;
@@ -73,51 +79,55 @@ const recalculateAndValidateCoupon = async(req, res, next, userId, coupon, absol
       }
   
       if (!isCouponApplicable) {
-        errorHandler(400, "Coupon is not applicable to selected products.")
+        if(fetchErrors) return next(errorHandler(400, "Coupon is not applicable to selected products."))
+        sendResponse = "Coupon is not applicable to the selected products. "
       }
   
-      if (coupon.discountType === "percentage") {
-          discountAmount = Math.min(absoluteTotal * (coupon.discountValue / 100), coupon.maxDiscount || absoluteTotal)
-      } else if (coupon.discountType === "fixed") {
-          discountAmount = Math.min(coupon.discountValue, absoluteTotal)
-      } else if (coupon.discountType === "freeShipping") {
-          deliveryCharge = 0
-      } else if (coupon.discountType === "buyOneGetOne") {
-          if(!cart?.offerApplied || (cart?.offerApplied && cart?.offerDiscountType !== "buyOneGetOne")){
-            let eligibleProducts = []
-            for (const item of cart.products) {
-                const product = item.productId
-                if (
-                    coupon.applicableType === "allProducts" ||
-                    (coupon.applicableType === "products" && coupon.applicableProducts.includes(product._id)) ||
-                    (coupon.applicableType === "categories" && product.category.some(catId => coupon.applicableCategories.includes(catId)))
-                ) {
-                    eligibleProducts.push(item)
-                }
-            }
-            if (eligibleProducts.length >= 2) {
-              eligibleProducts.sort((a, b)=> a.price - b.price)
-            
-              let freeItemsCount = 0
-              let totalBOGODiscount = 0
-            
-              for (let i = 1; i < eligibleProducts.length; i += 2) {
-                  totalBOGODiscount += eligibleProducts[i].price
-                  freeItemsCount++
+      if(isCouponApplicable){
+          if (coupon.discountType === "percentage") {
+            discountAmount = Math.min(absoluteTotal * (coupon.discountValue / 100), coupon.maxDiscount || absoluteTotal)
+        } else if (coupon.discountType === "fixed") {
+            discountAmount = Math.min(coupon.discountValue, absoluteTotal)
+        } else if (coupon.discountType === "freeShipping") {
+            deliveryCharge = 0
+        } else if (coupon.discountType === "buyOneGetOne") {
+            if(!cart?.offerApplied || (cart?.offerApplied && cart?.offerDiscountType !== "buyOneGetOne")){
+              let eligibleProducts = []
+              for (const item of cart.products) {
+                  const product = item.productId
+                  if (
+                      coupon.applicableType === "allProducts" ||
+                      (coupon.applicableType === "products" && coupon.applicableProducts.includes(product._id)) ||
+                      (coupon.applicableType === "categories" && 
+                        product.category.some(catName => coupon.applicableCategories.some(cat=> cat.name === catName)))
+                  ) {
+                      eligibleProducts.push(item)
+                  }
               }
-              discountAmount = totalBOGODiscount;
-            }else {
-              errorHandler(400, "BOGO coupon requires at least two eligible products.")
+              if (eligibleProducts.length >= 2) {
+                eligibleProducts.sort((a, b)=> a.price - b.price)
+              
+                let freeItemsCount = 0
+                let totalBOGODiscount = 0
+              
+                for (let i = 1; i < eligibleProducts.length; i += 2) {
+                    totalBOGODiscount += eligibleProducts[i].price
+                    freeItemsCount++
+                }
+                discountAmount = totalBOGODiscount;
+              }else {
+                if(fetchErrors) errorHandler(400, "BOGO coupon requires at least two eligible products.")
+                sendResponse = "BOGO coupon requires at least two eligible products."
+              }
             }
-          }
-          
+        }
       }
   
       const finalTotal = (absoluteTotal - discountAmount) + gstCharge + deliveryCharge
   
       console.log(`finalTotal-----${finalTotal},discountAmount------> ${discountAmount}, deliveryCharge------>${deliveryCharge}`)
   
-      return {absoluteTotalWithTaxes: finalTotal, couponDiscount: discountAmount, deliveryCharge}
+      return {absoluteTotalWithTaxes: finalTotal, couponDiscount: discountAmount, deliveryCharge, sendResponse}
   }
   catch(error){
     console.error("Error in recalculateAndValidateCoupon:", error.message)

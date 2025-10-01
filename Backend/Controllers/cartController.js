@@ -36,7 +36,7 @@ const addToCart = async (req, res, next)=> {
     if (!product) {
       return next(errorHandler(404, "Product not found!"))
     }
-    if (product.blocked) {
+    if (product.isBlocked) {
       return next(errorHandler(403, "This product is currently blocked and cannot be added to the cart."))
     }
     if (quantity > product.stock) {
@@ -119,17 +119,19 @@ const addToCart = async (req, res, next)=> {
     console.log('absoluteTotal after calculating taxes and charges-->', cart.absoluteTotal)
     // cart.deliveryCharge = deliveryCharges
     // cart.absoluteTotalWithTaxes = absoluteTotalWithTaxes
-
+    let couponMessages = ''
     if(cart.couponUsed){
       console.log("Inside if cart.couponUsed")
-      const coupon = await Coupon.findOne({ _id: cart.couponUsed })
+      const coupon = await Coupon.findOne({ _id: cart.couponUsed }).populate("applicableCategories", "name")
       console.log("couponUsed found inside cart-->", coupon)
-      const {absoluteTotalWithTaxes, couponDiscount, deliveryCharge} =
+      const {absoluteTotalWithTaxes, couponDiscount, deliveryCharge, sendResponse} =
          await recalculateAndValidateCoupon(req, res, next, userId, coupon, cart.absoluteTotal, parseInt(deliveryCharges), parseInt(gstCharge))
 
       console.log(`absoluteTotalWithTaxes-----${absoluteTotalWithTaxes},couponDiscount------> ${couponDiscount}, deliveryCharge------>${deliveryCharge}`)
       console.log('absoluteTotal after processsing recalculateAndValidateCoupon-->', cart.absoluteTotal)
-
+      if(sendResponse){
+        couponMessages = sendResponse
+      }
       cart.couponDiscount = parseInt(couponDiscount)
       cart.deliveryCharge = parseInt(deliveryCharge)
       cart.absoluteTotalWithTaxes = parseInt(absoluteTotalWithTaxes)
@@ -149,7 +151,7 @@ const addToCart = async (req, res, next)=> {
     const updatedCart = await Cart.findOne({ userId })
                           .populate("couponUsed").populate("products.productId").populate("products.offerApplied")
     console.log("updatedCart---->", updatedCart)
-    res.status(200).json({ message: "Product added to cart successfully", cart: updatedCart })
+    res.status(200).json({ message: couponMessages + "Product added to cart successfully", cart: updatedCart })
   }catch (error){
     console.log("Error in cartController-addToCart-->" + error.message)
     next(error)
@@ -377,7 +379,7 @@ const applyCoupon = async (req, res, next)=> {
       }
 
       const coupon = await Coupon.findOne({ code: couponCode.toUpperCase() })
-      const cart = await Cart.findOne({ userId }).populate("products.productId")
+      let cart = await Cart.findOne({ userId }).populate("products.productId")
 
       if (!coupon || coupon.status !== "active"){
           return next(errorHandler(400, "Invalid or expired coupon code."))
@@ -411,9 +413,32 @@ const applyCoupon = async (req, res, next)=> {
           return next(errorHandler(400, "You have already used this coupon the maximum allowed times."))
       }
 
-      if (!cart || cart.products.length === 0) {
-        console.log("Creating new cart...")
-        cart = new Cart({userId, couponUsed: coupon._id})
+      // if (!cart) {
+      //   console.log("Creating new cart...")
+      //   cart = new Cart({userId, couponUsed: coupon._id})
+      //   return res.status(200).json({ message: "Coupon applied successfully!" })
+      // }
+      if (!cart) {
+  console.log("Creating new cart and saving applied coupon...");
+  cart = new Cart({
+    userId,
+    products: [],
+    absoluteTotal: 0,
+    gst: 0,
+    deliveryCharge: 0,
+    absoluteTotalWithTaxes: 0,
+    couponUsed: coupon._id,
+    couponDiscount: 0,
+  })
+  await cart.save();
+
+  return res.status(200).json({
+    message: "Coupon applied successfully!",
+  });
+}
+      if(cart.products.length === 0){
+        cart.couponUsed = coupon._id
+        await cart.save()
         return res.status(200).json({ message: "Coupon applied successfully!" })
       }
 
@@ -432,12 +457,15 @@ const applyCoupon = async (req, res, next)=> {
           return next(errorHandler(400, `Your order must be at least ₹ ${coupon.minimumOrderValue} to use this coupon.`))
       }
 
+      await coupon.populate("applicableCategories", "name")
+
       let isCouponApplicable = false
       for (const item of cart.products){
           const product = item.productId
           if(coupon.applicableType === "allProducts" ||
               (coupon.applicableType === "products" && coupon.applicableProducts.includes(product._id)) ||
-              (coupon.applicableType === "categories" && product.category.some(catId=> coupon.applicableCategories.includes(catId)))
+              (coupon.applicableType === "categories" && 
+                product.category.some(catName => coupon.applicableCategories.some(cat => cat.name === catName)))
             ){
               isCouponApplicable = true
               break;
@@ -461,7 +489,8 @@ const applyCoupon = async (req, res, next)=> {
               if (
                   coupon.applicableType === "allProducts" ||
                   (coupon.applicableType === "products" && coupon.applicableProducts.includes(product._id)) ||
-                  (coupon.applicableType === "categories" && product.category.some(catId => coupon.applicableCategories.includes(catId)))
+                  (coupon.applicableType === "categories" && 
+                    product.category.some(catName => coupon.applicableCategories.some(cat => cat.name === catName)))
               ) {
                   eligibleProducts.push(item)
               }

@@ -2174,10 +2174,6 @@ select{
   display: inline-block;
 }
 
-.inline{
-  display: inline;
-}
-
 .flex{
   display: flex;
 }
@@ -3269,10 +3265,6 @@ select{
   width: max-content;
 }
 
-.w-\[\]{
-  width: ;
-}
-
 .min-w-0{
   min-width: 0px;
 }
@@ -3335,6 +3327,10 @@ select{
 
 .max-w-full{
   max-width: 100%;
+}
+
+.max-w-lg{
+  max-width: 32rem;
 }
 
 .max-w-md{
@@ -6965,6 +6961,10 @@ select{
   font-style: normal;
 }
 
+.leading-6{
+  line-height: 1.5rem;
+}
+
 .leading-\[0\.5px\]{
   line-height: 0.5px;
 }
@@ -7516,10 +7516,6 @@ select{
   color: rgb(133 77 14 / var(--tw-text-opacity));
 }
 
-.text-\[12\]{
-  color: 12;
-}
-
 .line-through{
   text-decoration-line: line-through;
 }
@@ -7745,6 +7741,15 @@ select{
 
 .ring-black\/10{
   --tw-ring-color: rgb(0 0 0 / 0.1);
+}
+
+.ring-black\/5{
+  --tw-ring-color: rgb(0 0 0 / 0.05);
+}
+
+.ring-gray-200{
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(229 231 235 / var(--tw-ring-opacity));
 }
 
 .ring-secondary\/20{
@@ -9176,6 +9181,11 @@ select{
   --tw-ring-color: rgba(210, 199, 215, 0.52);
 }
 
+.focus-visible\:ring-purple-500:focus-visible{
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(168 85 247 / var(--tw-ring-opacity));
+}
+
 .focus-visible\:ring-red-200:focus-visible{
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(254 202 202 / var(--tw-ring-opacity));
@@ -9183,6 +9193,10 @@ select{
 
 .focus-visible\:ring-offset-2:focus-visible{
   --tw-ring-offset-width: 2px;
+}
+
+.focus-visible\:ring-offset-white:focus-visible{
+  --tw-ring-offset-color: #fff;
 }
 
 .active\:border-primary:active{
@@ -10829,6 +10843,10 @@ select{
     width: 150px;
   }
 
+  .md\:w-\[45\%\]{
+    width: 45%;
+  }
+
   .md\:w-\[50\%\]{
     width: 50%;
   }
@@ -10845,20 +10863,8 @@ select{
     width: auto;
   }
 
-  .md\:w-\[35\%\]{
-    width: 35%;
-  }
-
-  .md\:w-\[3\%\]{
-    width: 3%;
-  }
-
-  .md\:w-\[\%\]{
-    width: %;
-  }
-
-  .md\:w-\[45\%\]{
-    width: 45%;
+  .md\:max-w-xl{
+    max-width: 36rem;
   }
 
   .md\:basis-1\/2{
@@ -11003,10 +11009,6 @@ select{
     display: inline-block;
   }
 
-  .l-md\:flex{
-    display: flex;
-  }
-
   .l-md\:w-\[-13rem\]{
     width: -13rem;
   }
@@ -11040,21 +11042,13 @@ select{
     background-color: transparent;
   }
 
-  .l-md\:text-\[12px\]{
-    font-size: 12px;
+  .l-md\:text-\[13px\]{
+    font-size: 13px;
   }
 
   .l-md\:text-breadcrumbTitle{
     font-size: 23px;
     font-weight: 600;
-  }
-
-  .l-md\:text-\[1px\]{
-    font-size: 1px;
-  }
-
-  .l-md\:text-\[13px\]{
-    font-size: 13px;
   }
 }
 
@@ -11370,6 +11364,10 @@ select{
 
   .lg\:min-w-\[12rem\]{
     min-width: 12rem;
+  }
+
+  .lg\:max-w-2xl{
+    max-width: 42rem;
   }
 
   .lg\:max-w-md{

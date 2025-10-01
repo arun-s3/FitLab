@@ -11,9 +11,10 @@ import {MdSort} from "react-icons/md"
 import {toast} from "react-toastify"
 import {format} from "date-fns"
 
+import CouponApplicableModal from '../ProductListPage/CouponApplicableModal'
 import {UserPageLayoutContext} from '../UserPageLayout/UserPageLayout'
 import {ProtectedUserContext} from '../../../Components/ProtectedUserRoutes/ProtectedUserRoutes'
-import {getAllCoupons, searchCoupons, resetCouponStates} from '../../../Slices/couponSlice'
+import {getEligibleCoupons, searchCoupons, resetCouponStates} from '../../../Slices/couponSlice'
 import {applyCoupon, removeCoupon, resetCartStates} from '../../../Slices/cartSlice'
 import useFlexiDropdown from '../../../Hooks/FlexiDropdown'
 import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
@@ -24,9 +25,7 @@ export default function CouponPage(){
   const {setBreadcrumbHeading, setPageLocation} = useContext(UserPageLayoutContext)
   setBreadcrumbHeading('Coupons')
 
-  const {setIsAuthModalOpen, checkAuthOrOpenModal} = useContext(ProtectedUserContext)
-  // setIsAuthModalOpen({status: false, accessFor: 'coupon features'})
-  
+  const {setIsAuthModalOpen, checkAuthOrOpenModal} = useContext(ProtectedUserContext)  
   const location = useLocation()
   setPageLocation(location.pathname)
 
@@ -39,6 +38,8 @@ export default function CouponPage(){
   const [limit, setLimit] = useState(6) 
   const [currentPage, setCurrentPage] = useState(1)
   const totalPages = 20
+
+  const [couponApplicableModal, setCouponApplicableModal] = useState({code: '', products: []})
 
   const [queryOptions, setQueryOptions] = useState({page: 1, limit: 6})
 
@@ -67,7 +68,7 @@ export default function CouponPage(){
   useEffect(() => {
     console.log("queryOptions----->", queryOptions)
     if(Object.keys(queryOptions).length > 0){
-      dispatch( getAllCoupons({queryOptions}) )
+      dispatch( getEligibleCoupons({queryOptions}) )
     }
   }, [queryOptions])
 
@@ -75,7 +76,9 @@ export default function CouponPage(){
     if(couponApplied){
       toast.success("Coupon applied successfully!")
       dispatch(resetCartStates())
-      navigate('/shop')
+      navigate('/shop', {
+        state: {showCouponApplicableModal: true, couponCode: couponApplicableModal.code, products: couponApplicableModal.products}
+      })
     }
     if(couponRemoved){
       toast.success("Coupon removed successfully!")
@@ -139,6 +142,9 @@ export default function CouponPage(){
     if(cart?.couponUsed?._id === coupon._id){
       dispatch(removeCoupon())
     }else{
+      if(coupon?.applicableProducts && coupon.applicableProducts.length > 0){
+        setCouponApplicableModal({code: coupon.code, products: coupon.applicableProducts})
+      }
       dispatch( applyCoupon({couponCode: coupon.code}) )
     }
   }
@@ -276,7 +282,7 @@ export default function CouponPage(){
                     <span className="ml-[5px]">
                       {
                         coupon.applicableType === 'allProducts' ? 'All' :  coupon.applicableType === 'products' ?
-                          'Products -'  : 'Categories -'
+                          'Certain Products -'  : 'Categories -'
                       } 
                       &nbsp;
                     </span>

@@ -10,8 +10,7 @@ import {toast} from 'react-toastify'
 import AddressLists from './AddressLists'
 import DeleteAddressModal from './DeleteAddressModal'
 import {UserPageLayoutContext} from '../UserPageLayout/UserPageLayout'
-import {SitePrimaryButtonWithShadow} from '../../../Components/SiteButtons/SiteButtons'
-import {getAllAddress, setAsDefaultAddress, deleteAddress, resetStates} from '../../../Slices/addressSlice'
+import {getAllAddress, deleteAddress, resetStates} from '../../../Slices/addressSlice'
 import AuthPrompt from '../../../Components/AuthPrompt/AuthPrompt'
 
  
@@ -29,7 +28,7 @@ export default function AddressListingPage(){
     const [openDeleteModal, setOpenDeleteModal] = useState(false)
     const [deleteAddressId, setDeleteAddressId] = useState('')
 
-    const {addresses,loading, error, addressDeleted} = useSelector(state=> state.address)
+    const {addresses, loading, error, addressDeleted} = useSelector(state=> state.address)
     const {user} = useSelector((state)=> state.user)
     const dispatch = useDispatch()  
 
@@ -72,7 +71,6 @@ export default function AddressListingPage(){
                  </div>
                 :
                 <>
-
                     <motion.div
                       className="text-center mb-[3rem] px-2"
                       initial={{ opacity: 0, y: -20 }}

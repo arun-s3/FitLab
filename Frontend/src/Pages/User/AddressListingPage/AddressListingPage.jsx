@@ -19,7 +19,7 @@ export default function AddressListingPage(){
 
     const {setBreadcrumbHeading, setSidebarTileClasses, setPageWrapperClasses, setPageLocation} = useContext(UserPageLayoutContext)
     setBreadcrumbHeading('Manage Addresses')
-    setPageWrapperClasses('justify-center xx-md:justify-normal')
+    setPageWrapperClasses('gap-[2rem] px-[4rem] mb-[10rem] justify-center xx-md:justify-normal')
     setSidebarTileClasses('hidden xx-md:inline-block')
       
     const location = useLocation()

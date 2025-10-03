@@ -10,10 +10,18 @@ export default function ReplaceCouponModal({ isOpen, onClose, putOldCoupon, curr
 
   if (!isOpen) return null
   
-  const [winnerCouponDiscount, setWinnerCouponDiscount] = useState(null)
+  const [winnerCouponDiscount, setWinnerCouponDiscount] = useState({currentCoupon: false, newCoupon: false})
+  const [winnerDiscountValue, setWinnerDiscountValue] = useState(null)
+  const [couponError, setCouponError] = useState(null)
   const {cart} = useSelector(state=> state.cart)
 
   const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+
+  useEffect(()=> {
+    if(currentCoupon.trim() === newCoupon.trim()){
+      onClose()
+    }
+  }, [currentCoupon, newCoupon])
 
   useEffect(()=> {
     async function compareCoupons(){
@@ -21,18 +29,31 @@ export default function ReplaceCouponModal({ isOpen, onClose, putOldCoupon, curr
         const response = await axios.post( `${baseApiUrl}/coupons/compare`, {newCoupon, currentCoupon}, { withCredentials: true } )
         console.log("response.data---->", response.data)
         console.log("response.data.winnerCoupon.code---->", response.data.winnerCoupon.code)
-        if(currentCoupon === response.data.winnerCoupon.code){
-          setWinnerCouponDiscount(response.data.winnerCoupon.discount)
+        if(response.status === 200){
+          setWinnerDiscountValue(response.data.winnerCoupon.discount)
+          if(currentCoupon === response.data.winnerCoupon.code) setWinnerCouponDiscount({currentCoupon: true, newCoupon: false})
+          else setWinnerCouponDiscount({currentCoupon: false, newCoupon: true})
         }
       }
       catch(error){
         console.log("Error in compareCoupons:", error.message)
+        if (error.response && error.response.status === 404) {
+          toast.error(error.response.data.message || "Coupon not found!", {autoClose: 4000});
+          setCouponError(true)
+        }
       }
     }
     if(newCoupon){
       compareCoupons()
     }   
   },[newCoupon])
+
+  useEffect(()=> {
+    if(couponError){
+      onClose()
+      setCouponError(false)
+    }
+  }, [couponError])
 
   const backdropVariants = {
     hidden: { opacity: 0 },
@@ -96,7 +117,7 @@ export default function ReplaceCouponModal({ isOpen, onClose, putOldCoupon, curr
                 <div className="p-6">
 
                     <p className="text-gray-600 text-[14px] mb-4">
-                      { !winnerCouponDiscount ?
+                      {  !couponError && winnerCouponDiscount.newCoupon ?
                         <div>
                           <span>
                             You already have a coupon applied to your order. Do you want to replace it with the new coupon?
@@ -105,12 +126,16 @@ export default function ReplaceCouponModal({ isOpen, onClose, putOldCoupon, curr
                             The New Coupon provides Higher Discount value!
                           </p>
                         </div>
-                        : <span>
-                            <span> You already have a coupon with a better discount value providing you a discount of </span>
+                        : !couponError && winnerCouponDiscount.currentCoupon ?
+                          <span>
+                            <span> You already have a coupon with a better discount value providing you a discount</span>
+                            {
+                              cart?.couponUsed?.discountType !== 'buyOneGetOne' &&
+                              <span> of </span>
+                            }
                             <span className='text-red-500 font-[480]'>
-                              { 
-                                `₹ ${winnerCouponDiscount.toFixed(2)}
-                                  ${cart?.couponUsed?.discountType !== 'buyOneGetOne' &&
+                              { cart?.couponUsed?.discountType !== 'buyOneGetOne' &&
+                                `${
                                     `( ${cart?.couponUsed?.discountType === 'percentage' ? 
                                       cart?.couponUsed?.discountValue + '%' + ' Off' : cart?.couponUsed?.discountType === 'fixed' ?
                                        '₹' + cart?.couponUsed?.discountValue + ' Off' : null
@@ -122,6 +147,7 @@ export default function ReplaceCouponModal({ isOpen, onClose, putOldCoupon, curr
                             </span> 
                             <p className='mt-[10px]'> Do you want to replace it with the new coupon with a lesser discount value? </p>
                           </span>
+                          : null
                       }
                     </p>
                     

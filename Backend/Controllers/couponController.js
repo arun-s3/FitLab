@@ -298,8 +298,7 @@ const getEligibleCoupons = async (req, res, next)=> {
   try {
     console.log("Inside getEligibleCoupons")
 
-    const userId = req.user._id
-    const { queryOptions = {} } = req.body
+    const { userId, queryOptions = {} } = req.body
 
     const {
       page = 1,
@@ -327,7 +326,7 @@ const getEligibleCoupons = async (req, res, next)=> {
       .skip(skip)
       .limit(parseInt(limit))
       .populate("applicableProducts", "title price category thumbnail")
-      .populate("applicableCategories", "name")
+      .populate("applicableCategories", "name image")
       .populate("assignedCustomers", "_id");
 
     const now = new Date()
@@ -337,11 +336,13 @@ const getEligibleCoupons = async (req, res, next)=> {
       if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit)
         return false
 
-      const userUsage = coupon.usedBy.find((u) => u.userId.toString() === userId.toString())
-      if (coupon.oneTimeUse && userUsage) return false
-      if ( coupon.usageLimitPerCustomer !== null && userUsage && userUsage.count >= coupon.usageLimitPerCustomer) return false
-      if ( coupon.customerSpecific && !coupon.assignedCustomers.some((u) => u._id.equals(userId))){
-        return false
+      if(userId){
+        const userUsage = coupon.usedBy.find((u) => u.userId.toString() === userId.toString())
+        if (coupon.oneTimeUse && userUsage) return false
+        if ( coupon.usageLimitPerCustomer !== null && userUsage && userUsage.count >= coupon.usageLimitPerCustomer) return false
+        if ( coupon.customerSpecific && !coupon.assignedCustomers.some((u) => u._id.equals(userId))){
+          return false
+        }
       }
       return true
     })
@@ -353,10 +354,12 @@ const getEligibleCoupons = async (req, res, next)=> {
       const now = new Date()
       if (now < coupon.startDate || now > coupon.endDate) return false
       if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) return false
-      const userUsage = coupon.usedBy.find((u) => u.userId.toString() === userId.toString())
-      if (coupon.oneTimeUse && userUsage) return false
-      if (coupon.usageLimitPerCustomer !== null && userUsage && userUsage.count >= coupon.usageLimitPerCustomer) return false
-      if (coupon.customerSpecific && !coupon.assignedCustomers.some((u) => u._id.equals(userId))) return false
+      if(userId){
+        const userUsage = coupon.usedBy.find((u) => u.userId.toString() === userId.toString())
+        if (coupon.oneTimeUse && userUsage) return false
+        if (coupon.usageLimitPerCustomer !== null && userUsage && userUsage.count >= coupon.usageLimitPerCustomer) return false
+        if (coupon.customerSpecific && !coupon.assignedCustomers.some((u) => u._id.equals(userId))) return false
+      }
       return true
     }).length
     console.log("totalEligibleCoupons---->", totalEligibleCoupons)
@@ -454,9 +457,9 @@ const getBestCoupon = async (req, res, next) => {
               await coupon.save()
               continue
           }
-    
-          if(coupon.customerSpecific && !coupon.assignedCustomers.some(user=> user.equals(new mongoose.Types.ObjectId(userId)))){
-            continue
+
+          if (coupon.customerSpecific && !coupon.assignedCustomers.some(user => user.equals(userId))) {
+              continue
           }
     
           const userOrderCount = await Order.countDocuments({ userId, couponUsed: coupon._id })

@@ -90,7 +90,7 @@ export default function RemoveCouponModal({isOpen, onClose, couponCode, onConfir
 
                   <p className="text-[13px] text-gray-500 mb-[1rem]">
                     Removing this coupon will cancel any discounts it provides. You can apply it again later if it hasn’t 
-                    expired or been fully used.
+                    expired or been fully used by other customers.
                   </p>
 
                   <div className="flex xxs-sm:flex-row flex-col justify-center xxs-sm:justify-end items-center gap-4 space-x-3">

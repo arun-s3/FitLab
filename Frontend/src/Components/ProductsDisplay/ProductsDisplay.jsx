@@ -26,7 +26,8 @@ import {addToCart} from '../../Slices/cartSlice'
 import ProductsTableView from './ProductsTableView'
 
 
-export default function ProductsDisplay({gridView, showByTable, pageReader, limiter, queryOptions, showTheseProducts, admin, wishlistDisplay, currentList, checkAuthOrOpenModal}) {
+export default function ProductsDisplay({gridView, showByTable, pageReader, limiter, queryOptions, showTheseProducts, admin, 
+  wishlistDisplay, currentList, couponApplicableItems = null, checkAuthOrOpenModal}) {
 
   const {currentPage, setCurrentPage} = pageReader
 
@@ -254,11 +255,12 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
                     : gridView ? 'h-[275px] xx-md:h-[200px] xx-md:w-[200px] lg:h-[275px] lg:w-[275px]' 
                     : 'h-[275px] w-[350px]'} object-cover`}
                 onClick={()=> !admin && navigate({
-                    pathname: '/shop/product', 
-                    search: `?id=${product._id}`
-                  }, 
-                  {state: {product}}
-                )}
+                      pathname: '/shop/product', 
+                      search: `?id=${product._id}`
+                    }, 
+                    {state: {product}}
+                  )
+                }
               /> 
               <figcaption 
                 className={`${admin 
@@ -363,6 +365,21 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
                   ? 'text-[16px] xx-md:text-[15px] lg:text-[16px]' : wishlistDisplay ? 'text-[17px]' : 'text-[18px]'} font-[500] tracking-[0.5px]`}> 
                       &#8377; {product.price}
                 </p>
+
+                 {
+                    (
+                      couponApplicableItems && couponApplicableItems?.categories?.length > 0 &&
+                      couponApplicableItems.categories.some(category=> product.category.includes(category.name)) 
+                    ) ||
+                    ( couponApplicableItems && couponApplicableItems?.products?.length > 0 &&
+                      couponApplicableItems.products.some(item=> item._id === product._id) 
+                    ) &&
+                        <p className='mt-[10px] w-fit px-[7px] py-[3px] text-[13px] text-secondary font-medium italic
+                         bg-secondaryLight2 border rounded-[4px]'>
+                          Coupon Eligible Product
+                        </p>
+                 } 
+
                 {
                   wishlistDisplay && 
                   <div>

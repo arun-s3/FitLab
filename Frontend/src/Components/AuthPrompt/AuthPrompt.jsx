@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react'
 import {useLocation, useNavigate} from 'react-router-dom'
 import {motion} from "framer-motion"
 
-import {ShoppingCart, Heart, User, MapPin, MapPinPlus, CreditCard, ShoppingBag, ArrowRight} from "lucide-react"
+import {ShoppingCart, Heart, User, MapPin, MapPinPlus, CreditCard, TicketPercent, ShoppingBag, ArrowRight} from "lucide-react"
 
 
 
@@ -49,6 +49,11 @@ export default function AuthPrompt(){
         icon: CreditCard,
         title: "Your Digital Wallet",
         description: "Securely store funds, track transactions, and make payments",
+      },
+      coupons: {
+        icon: TicketPercent,
+        title: "Exclusive Coupons",
+        description: "View, apply, and manage discount coupons to save more on your purchases"
       }
     }
     return configs[pageName] || configs.cart
@@ -134,7 +139,7 @@ export default function AuthPrompt(){
               variants={containerVariants}
               initial="hidden"
               animate="visible"
-              className="w-full max-w-[25rem] bg-white rounded-2xl shadow-lg border border-dropdownBorder overflow-hidden"
+              className="w-full max-w-[31rem] bg-white rounded-2xl shadow-lg border border-dropdownBorder overflow-hidden"
             >
               <div className="bg-purple-50 px-[8px] py-[12px] text-center">
                 <motion.div

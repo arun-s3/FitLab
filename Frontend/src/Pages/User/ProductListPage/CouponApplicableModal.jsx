@@ -5,7 +5,7 @@ import {AnimatePresence, motion } from "framer-motion"
 import {X, Tag } from "lucide-react"
 
 
-export default function CouponApplicableModal({open, onClose, couponLabel = "Selected Coupon", products = []}){
+export default function CouponApplicableModal({open, onClose, couponLabel = "Selected Coupon", products = [], categories=[]}){
 
   const panelRef = useRef(null)
 
@@ -14,6 +14,13 @@ export default function CouponApplicableModal({open, onClose, couponLabel = "Sel
   useEffect(()=> {
     console.log("CouponApplicableModal opens...")
   }, [])
+
+  useEffect(()=> {
+    if(products.length === 0 && categories.length === 0){
+      console.log('Closing modal coz no produts/categories listed...')
+      onClose()
+    }
+  }, [products, categories])
 
   
   function useLockBodyScroll(lock) {
@@ -77,7 +84,7 @@ export default function CouponApplicableModal({open, onClose, couponLabel = "Sel
   }
 
   if (typeof document === "undefined") return null
-  
+
 
   return createPortal(
 
@@ -113,10 +120,11 @@ export default function CouponApplicableModal({open, onClose, couponLabel = "Sel
                 </span>
                 <div className="min-w-0">
                   <h2 id="coupon-modal-title" className="text-[20px] text-secondary capitalize font-semibold leading-6 text-gray-900">
-                    Coupon applicability
+                    Coupon Eligibility
                   </h2>
                   <p id="coupon-modal-desc" className="mt-0.5 text-xs text-gray-500">
-                    Showing products eligible for: <span className="font-medium text-gray-800">{couponLabel}</span>
+                    {`Showing ${products.length > 0 ? 'products' : 'categories'} eligible for:`} 
+                    <span className="font-medium text-gray-800">{couponLabel}</span>
                   </p>
                 </div>
               </div>
@@ -131,46 +139,80 @@ export default function CouponApplicableModal({open, onClose, couponLabel = "Sel
               </button>
             </div>
 
-            <div className="px-5 py-4">
-              {products?.length > 0 ? (
-                <motion.ul
-                  className="divide-y divide-gray-200 border border-gray-200 rounded-[12px]"
-                  variants={listContainer}
-                  initial="hidden"
-                  animate="visible"
-                >
-                  {products.map((product, index) => (
-                    <motion.li
-                      key={product._id}
-                      className="flex items-center justify-between gap-4 px-4 py-3 bg-white"
-                      variants={listItem}
+            <div className={`px-5 py-4 ${products.length > 3 ? 'overflow-y-scroll' : categories.length > 2 ? 'overflow-scroll' : null}`}>
+                {
+                  products.length > 0 &&
+                    <motion.ul
+                      className="divide-y divide-gray-200 border border-gray-200 rounded-[12px]"
+                      variants={listContainer}
+                      initial="hidden"
+                      animate="visible"
                     >
-                      <div className="flex min-w-0 items-center gap-3">
-                        <img
-                          src={product.thumbnail.url || "/placeholder.svg?height=48&width=48&query=product-thumbnail"}
-                          alt={product.title ? `${product.title} thumbnail` : "Product thumbnail"}
-                          className="h-12 w-12 flex-shrink-0 rounded-md object-cover ring-1 ring-gray-200"
-                          loading="lazy"
-                          width={48}
-                          height={48}
-                        />
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-medium capitalize text-gray-900">{product.title}</p>
-                          <p className="mt-0.5 text-xs text-gray-500">Eligible with {couponLabel}</p>
-                        </div>
-                      </div>
-                      <p className="text-sm font-semibold text-gray-900">
-                        {'₹' + product.price}
-                      </p>
-                    </motion.li>
-                  ))}
-                </motion.ul>
-              ) : (
-                <div className="flex items-center gap-3 rounded-lg border border-dashed border-gray-300 bg-gray-50 px-4 py-6">
-                  <Tag className="h-4 w-4 text-gray-400"/>
-                  <p className="text-sm text-gray-600">No products eligible for this coupon.</p>
-                </div>
-              )}
+                        {
+                          products.map(product => (
+                            <motion.li
+                              key={product._id}
+                              className="flex items-center justify-between gap-4 px-4 py-3 bg-white"
+                              variants={listItem}
+                            >
+                              <div className="flex min-w-0 items-center gap-3">
+                                <img
+                                  src={product.thumbnail.url || "/placeholder.svg?height=48&width=48&query=product-thumbnail"}
+                                  alt={product.title ? `${product.title} thumbnail` : "Product thumbnail"}
+                                  className="h-12 w-12 flex-shrink-0 rounded-md object-cover ring-1 ring-gray-200"
+                                  loading="lazy"
+                                  width={48}
+                                  height={48}
+                                />
+                                <div className="min-w-0">
+                                  <p className="truncate text-sm font-medium capitalize text-gray-900">{product.title}</p>
+                                  <p className="mt-0.5 text-xs text-gray-500">Eligible with {couponLabel}</p>
+                                </div>
+                              </div>
+                              <p className="text-sm font-semibold text-gray-900">
+                                {'₹' + product.price}
+                              </p>
+                            </motion.li>
+                          ))
+                        }
+                    </motion.ul>
+                  }
+
+                  {
+                    categories.length > 0 &&
+                     <motion.ul
+                        role="list"
+                        className="grid grid-cols-2 gap-5 sm:grid-cols-2 md:grid-cols-3"
+                        variants={listContainer}
+                        initial="hidden"
+                        animate="visible"
+                      >
+                        {categories.map(category => (
+                          <motion.li
+                            key={category._id}
+                            className="group overflow-hidden rounded-xl ring-1 ring-gray-200 bg-gray-50 shadow-sm
+                             transition-all hover:shadow-md"
+                            variants={listItem}
+                          >
+                            <div className="aspect-square w-full overflow-hidden bg-white">
+                              <img
+                                src={category.image.url || "/placeholder.svg?height=256&width=256&query=category-thumbnail"}
+                                alt={category.name ? `${category.name} thumbnail` : "Category thumbnail"}
+                                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                loading="lazy"
+                                width={256}
+                                height={256}
+                              />
+                            </div>
+                            <div className="p-3">
+                              <p className="line-clamp-1 text-sm capitalize font-semibold text-gray-900">{category.name}</p>
+                              <p className="mt-0.5 text-xs text-gray-500">Eligible with {couponLabel}</p>
+                            </div>
+                          </motion.li>
+                        ))}
+                      </motion.ul>
+                  }
+              
             </div>
 
             <div className="flex items-center justify-end gap-2 px-5 py-4">

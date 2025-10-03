@@ -13,10 +13,12 @@ import CouponCodeInput from './CouponCodeInput'
 import SimilarProductsCarousal from '../../../Components/ProductsCarousal/SimilarProductsCarousal'
 import TextChatBox from '../TextChatBox/TextChatBox'
 import ProductRemovalModal from '../../../Components/ProductRemovalModal/ProductRemovalModal'
+import BestCouponModal from './Modals/BestCouponModal'
+import RemoveCouponModal from './Modals/RemoveCouponModal'
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
 import OrderStepper from '../../../Components/OrderStepper/OrderStepper'
 import FeaturesDisplay from '../../../Components/FeaturesDisplay/FeaturesDisplay'
-import {addToCart, reduceFromCart, removeFromCart, getTheCart, resetCartStates} from '../../../Slices/cartSlice'
+import {addToCart, reduceFromCart, removeFromCart, getTheCart, removeCoupon, resetCartStates} from '../../../Slices/cartSlice'
 import {getBestCoupon} from '../../../Slices/couponSlice'
 
 import Footer from '../../../Components/Footer/Footer'
@@ -28,7 +30,11 @@ export default function ShoppingCartPage(){
   const [couponCode, setCouponCode] = useState('')
 
   const [isProductRemovalModalOpen, setIsProductRemovalModalOpen] = useState(false)
+  const [openBestCouponModal, setOpenBestCouponModal] = useState({dispatched: false, applied: false})
+
   const [productToRemove, setProductToRemove] = useState({})
+
+  const [isRemoveModalOpen, setIsRemoveModalOpen] = useState(false)
 
   const {cart, error, couponApplied} = useSelector(state=> state.cart)
   const {bestCoupon, couponMessage} = useSelector(state=> state.coupons)
@@ -48,7 +54,7 @@ export default function ShoppingCartPage(){
   useEffect(()=> {
     dispatch(getTheCart())
     console.log("bestCoupon--->", bestCoupon)
-    if(bestCoupon && Object.keys(bestCoupon).length <= 0){
+    if(!bestCoupon && Object.keys(bestCoupon).length === 0){
       console.log("Getting the best coupon...")
       dispatch(getBestCoupon())
     }
@@ -112,6 +118,10 @@ export default function ShoppingCartPage(){
   const cancelProductRemoval = ()=> {
     setIsProductRemovalModalOpen(false)
     setProductToRemove({})
+  }
+
+  const removeTheCoupon = ()=> {
+    dispatch(removeCoupon())
   }
 
   const containerVariants = {
@@ -187,6 +197,8 @@ export default function ShoppingCartPage(){
                       <CouponCodeInput 
                         couponCode={couponCode} 
                         setCouponCode={setCouponCode}
+                        bestCouponAppliedStatus={openBestCouponModal}
+                        setBestCouponAppliedStatus={setOpenBestCouponModal}
                       />
                   </motion.div>
                     
@@ -201,6 +213,7 @@ export default function ShoppingCartPage(){
                       couponDiscount={cart?.couponDiscount} 
                       gst={cart.gst} 
                       couponCode={cart?.couponUsed?.code} 
+                      setIsRemoveModalOpen={setIsRemoveModalOpen}
                       ref={makeCheckoutRef}/>
                       
                 </motion.div>
@@ -223,6 +236,26 @@ export default function ShoppingCartPage(){
               </motion.div>
           }
 
+          <ProductRemovalModal 
+            isOpen={isProductRemovalModalOpen} 
+            productToRemove={productToRemove} 
+            onConfirm={confirmProductRemoval} 
+            onCancel={cancelProductRemoval}
+          />
+
+          <BestCouponModal 
+            open={openBestCouponModal.applied && openBestCouponModal.dispatched} 
+            onClose={()=> setOpenBestCouponModal({dispatched: false, applied: false})} 
+            coupon={bestCoupon} 
+          />
+
+          <RemoveCouponModal 
+            isOpen={isRemoveModalOpen} 
+            onClose={()=> setIsRemoveModalOpen(false)} 
+            couponCode={cart?.couponUsed?.code}
+            onConfirm={removeTheCoupon} 
+          />
+
           {
             !user &&
               <div className='mt-16 '>
@@ -233,13 +266,6 @@ export default function ShoppingCartPage(){
           }
 
         </div>
-
-        <ProductRemovalModal 
-          isOpen={isProductRemovalModalOpen} 
-          productToRemove={productToRemove} 
-          onConfirm={confirmProductRemoval} 
-          onCancel={cancelProductRemoval}
-        />
 
         <div className="mt-[2rem] mx-[3rem]">
 

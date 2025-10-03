@@ -125,7 +125,7 @@ const addToCart = async (req, res, next)=> {
       const coupon = await Coupon.findOne({ _id: cart.couponUsed }).populate("applicableCategories", "name")
       console.log("couponUsed found inside cart-->", coupon)
       const {absoluteTotalWithTaxes, couponDiscount, deliveryCharge, sendResponse} =
-         await recalculateAndValidateCoupon(req, res, next, userId, coupon, cart.absoluteTotal, parseInt(deliveryCharges), parseInt(gstCharge))
+         await recalculateAndValidateCoupon(req, res, next, userId, cart, coupon, cart.absoluteTotal, parseInt(deliveryCharges), parseInt(gstCharge))
 
       console.log(`absoluteTotalWithTaxes-----${absoluteTotalWithTaxes},couponDiscount------> ${couponDiscount}, deliveryCharge------>${deliveryCharge}`)
       console.log('absoluteTotal after processsing recalculateAndValidateCoupon-->', cart.absoluteTotal)
@@ -228,7 +228,7 @@ const reduceFromCart = async (req, res, next)=> {
         const coupon = await Coupon.findOne({ _id: cart.couponUsed })
         console.log("couponUsed found inside cart-->", coupon)
         const {absoluteTotalWithTaxes, couponDiscount, deliveryCharge} =
-           await recalculateAndValidateCoupon(req, res, next, userId, coupon, cart.absoluteTotal, parseInt(deliveryCharges), parseInt(gstCharge))
+           await recalculateAndValidateCoupon(req, res, next, userId, cart, coupon, cart.absoluteTotal, parseInt(deliveryCharges), parseInt(gstCharge))
 
         console.log(`absoluteTotalWithTaxes-----${absoluteTotalWithTaxes},couponDiscount------> ${couponDiscount}, deliveryCharge------>${deliveryCharge}`)
 
@@ -308,7 +308,7 @@ const removeFromCart = async (req, res, next)=> {
         const coupon = await Coupon.findOne({ _id: cart.couponUsed })
         console.log("cart.gst--->", cart.gst)
         const {absoluteTotalWithTaxes, couponDiscount, deliveryCharge} =
-          await recalculateAndValidateCoupon(req, res, next, userId, coupon, cart.absoluteTotal, parseInt(deliveryCharges), parseInt(gstCharge))
+          await recalculateAndValidateCoupon(req, res, next, userId, cart, coupon, cart.absoluteTotal, parseInt(deliveryCharges), parseInt(gstCharge))
         console.log("cart.gst recalculateAndValidateCoupon--->", cart.gst)
 
 
@@ -352,11 +352,10 @@ const getTheCart = async (req, res, next)=> {
     const userId = req.user._id
     console.log("Fetching cart for user:", userId)
 
-    // const cart = await Cart.findOne({ userId }).populate("couponUsed", "products products.")
     const cart = await Cart.findOne({ userId })
                           .populate("couponUsed").populate("products.productId").populate("products.offerApplied")
     console.log("cart---->", JSON.stringify(cart))
-    if (!cart || cart.products.length === 0) {
+    if (!cart) {
       return res.status(200).json({message: 'Your cart is empty', cart: []})
     }
     return res.status(200).json({ message: 'Products fetched successfully!', cart})
@@ -404,7 +403,7 @@ const applyCoupon = async (req, res, next)=> {
           return next(errorHandler(400, "Coupon usage limit reached."))
       }
 
-      if(coupon.customerSpecific && !coupon.assignedCustomers.some(user=> user.equals(new mongoose.Types.ObjectId(userId)))){
+      if(coupon.customerSpecific && !coupon.assignedCustomers.some(user=> user.equals(userId))){
         return next(errorHandler(400, "This is a restricted users' coupon and cannot be applied to your account!"))
       }
 

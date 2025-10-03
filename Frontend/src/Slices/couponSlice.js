@@ -33,11 +33,11 @@ export const getAllCoupons = createAsyncThunk('coupon/list', async ({queryOption
   }
 })
 
-export const getEligibleCoupons = createAsyncThunk('coupon/list-eligible', async ({queryOptions}, thunkAPI)=> {
+export const getEligibleCoupons = createAsyncThunk('coupon/list-eligible', async ({userId, queryOptions}, thunkAPI)=> {
   try {
     console.log('Inside getEligibleCoupons createAsyncThunk')
     console.log("couponDetails from couponSlice---->", queryOptions)
-    const response = await axios.post('/coupons/list-eligible', {queryOptions}, {withCredentials: true})
+    const response = await axios.post('/coupons/list-eligible', {userId, queryOptions}, {withCredentials: true})
     console.log('Returning success response from getEligibleCoupons...', JSON.stringify(response.data))
     return response.data
   }catch(error){
@@ -131,6 +131,7 @@ export const toggleCouponStatus = createAsyncThunk('coupon/toggleCouponStatus', 
 const initialState = {
     coupons: [], 
     bestCoupon: {},
+    totalCoupons: null,
     couponCreated: false,
     couponRemoved: false,
     couponUpdated: false,
@@ -191,6 +192,7 @@ const couponSlice = createSlice({
         state.couponError = null
         state.loading = false
         state.coupons = action.payload.coupons
+        state.totalCoupons = action.payload.totalCoupons
       })
       .addCase(getEligibleCoupons.pending, (state)=> {
         state.loading = true

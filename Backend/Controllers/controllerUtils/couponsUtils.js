@@ -6,7 +6,7 @@ const {errorHandler} = require("../../Utils/errorHandler")
 
 
 
-const recalculateAndValidateCoupon = async(req, res, next, userId, coupon, absoluteTotal, deliveryCharge, gstCharge, fetchErrors = false)=> {
+const recalculateAndValidateCoupon = async(req, res, next, userId, cart, coupon, absoluteTotal, deliveryCharge, gstCharge, fetchErrors = false)=> {
   try{
       console.log("Inside recalculateAndValidateCoupon--")
       console.log("coupon inside recalculateAndValidateCoupon-->", coupon)
@@ -48,11 +48,6 @@ const recalculateAndValidateCoupon = async(req, res, next, userId, coupon, absol
           errorHandler(400, "You have already used this coupon the maximum allowed times.")
       }
   
-      const cart = await Cart.findOne({ userId }).populate("products.productId")
-      // if (!cart || cart.products.length === 0) {
-      //     return
-      // }
-  
       let discountAmount = 0;
   
       // for (const item of cart.products){
@@ -63,6 +58,7 @@ const recalculateAndValidateCoupon = async(req, res, next, userId, coupon, absol
       }
   
       let isCouponApplicable = false
+      console.log(" cart.products now just before coupon Application--->", JSON.stringify(cart.products))
       for (const item of cart.products){
           console.log("Checking coupon applicability in this product--->", item.productId.title)
           console.log(`Product categories--> ${JSON.stringify(item.productId.category)}`)

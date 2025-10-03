@@ -48,16 +48,16 @@ export default function ProductList({admin}){
 
     const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(false)
 
-    const [openCouponApplicableModal, setOpenCouponApplicableModal] = useState({status: false, code: '', products: []})
+    const [openCouponApplicableModal, setOpenCouponApplicableModal] = useState({status: false, code: '', products: [], categories: []})
 
     const {cart, productAdded, productRemoved, loading, error, message} = useSelector(state=> state.cart)    
     
     const location = useLocation()
 
     useEffect(()=> {
-        if(location && location.state.showCouponApplicableModal){
-            const {couponCode, products} = location.state
-            setTimeout(()=> setOpenCouponApplicableModal({status: true, code: couponCode, products}), 1500)
+        if(location && location.state?.showCouponApplicableModal){
+            const {couponCode, products, categories} = location.state
+            setTimeout(()=> setOpenCouponApplicableModal({status: true, code: couponCode, products, categories}), 1500)
         }
     }, [location])
 
@@ -210,6 +210,7 @@ export default function ProductList({admin}){
                             pageReader={{currentPage, setCurrentPage}}
                             limiter={{limit, setLimit}}
                             queryOptions={queryOptions}
+                            couponApplicableItems={openCouponApplicableModal}
                             checkAuthOrOpenModal={checkAuthOrOpenModal}
                         />
 
@@ -235,9 +236,10 @@ export default function ProductList({admin}){
                             openCouponApplicableModal.status &&
                               <CouponApplicableModal
                                 open={openCouponApplicableModal.status}
-                                onClose={()=> setOpenCouponApplicableModal({status: false, code:'', products: []})}
+                                onClose={()=> setOpenCouponApplicableModal(modal=> ({...modal, status: false, code:''}))}
                                 couponLabel={openCouponApplicableModal.code}
                                 products={openCouponApplicableModal.products}
+                                categories={openCouponApplicableModal.categories}
                               />
                         }
 

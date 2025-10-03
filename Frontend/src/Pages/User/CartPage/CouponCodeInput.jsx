@@ -9,9 +9,8 @@ import ReplaceCouponModal from './Modals/ReplaceCouponModal'
 
 
 
-export default function CouponCodeInput({couponCode, setCouponCode}){
+export default function CouponCodeInput({couponCode, setCouponCode, bestCouponAppliedStatus, setBestCouponAppliedStatus}){
 
-  const [hasNewValue, setHasNewValue] = useState(false)
   const [isReplaceModalOpen, setIsReplaceModalOpen] = useState(false)
 
   const {cart, couponApplied} = useSelector(state=> state.cart)
@@ -21,16 +20,20 @@ export default function CouponCodeInput({couponCode, setCouponCode}){
 
   useEffect(()=> {
     console.log("bestCoupon from CouponCodeInput--->", bestCoupon)
-    if(bestCoupon && Object.keys(bestCoupon).length > 0 && !couponCode && !cart.couponUsed){
+    if(bestCoupon && Object.keys(bestCoupon).length > 0 && !couponCode && cart && !cart.couponUsed){
       console.log("Inside useEffect of CouponCodeInput for bestCoupon")
       setCouponCode(bestCoupon.code)
       console.log("Dispatching applyCoupon the best coupon...")
       dispatch( applyCoupon({couponCode: bestCoupon.code}) )
+      setBestCouponAppliedStatus({dispatched: true, applied: false})
     }
   }, [bestCoupon])
 
   useEffect(()=> {
     if(couponApplied){
+      if(bestCoupon && bestCouponAppliedStatus.dispatched){
+        setBestCouponAppliedStatus({dispatched: true, applied: true})
+      }
       console.log("Inside useEffect when couponApplied is true")
       setCouponCode(cart?.couponUsed?.code.toUpperCase())
     }
@@ -41,7 +44,7 @@ export default function CouponCodeInput({couponCode, setCouponCode}){
   }
 
   const applyTheCoupon = ()=> {
-    if(cart?.couponUsed && cart.couponUsed.code !== couponCode){
+    if(couponCode.trim() !== '' && cart?.couponUsed && cart.couponUsed.code !== couponCode){
       console.log("No coupon code applied, hence replacing...")
       setIsReplaceModalOpen(true)
     }else{
@@ -74,7 +77,7 @@ export default function CouponCodeInput({couponCode, setCouponCode}){
                 placeholder="Coupon Code" 
                 className="ml-[-20px] w-[80%] h-[10px] border-0 outline-0 placeholder:text-[12px] xxs-sm:placeholder:text-[13px]
                  placeholder:tracking-[0.1px] text-primaryDark caret-primaryDark" 
-                value={couponCode || cart?.couponUsed?.code} 
+                value={couponCode} 
                 onChange={(e)=> couponInputHandler(e)}
               />
               <button className="px-[1.5rem] py-[8px] text-[15px] text-purple-600 font-medium" onClick={()=> applyTheCoupon()}>

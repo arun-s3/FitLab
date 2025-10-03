@@ -40,8 +40,7 @@ export default function UserPageLayout(){
                 <BreadcrumbBar heading={ breadcrumbHeading && breadcrumbHeading } />
 
                 <main 
-                    className={`${user ? 'flex gap-[2rem]' : ''} ${pageWrapperClasses ? pageWrapperClasses : null} 
-                      gap-[2rem] px-[4rem] mb-[10rem]`}>
+                    className={`${user ? 'flex gap-[2rem]' : ''} ${pageWrapperClasses ? pageWrapperClasses : 'gap-[2rem] px-[4rem] mb-[10rem]'} `}>
                 
                     {
                         user &&

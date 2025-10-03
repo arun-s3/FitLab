@@ -1,4 +1,4 @@
-import React, {forwardRef, useImperativeHandle, useState, useCallback} from 'react'
+import React, {forwardRef, useImperativeHandle, useState, useEffect, useCallback} from 'react'
 import {useNavigate} from 'react-router-dom'
 import {useDispatch, useSelector} from 'react-redux'
 import {motion} from 'framer-motion'
@@ -6,19 +6,16 @@ import {motion} from 'framer-motion'
 import {Minus, X} from 'lucide-react'
 import axios from 'axios'
 
-import RemoveCouponModal from './Modals/RemoveCouponModal'
-import {removeCoupon} from '../../../Slices/cartSlice'
 import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
 import {CustomScaleLoader} from '../../../Components/Loader/Loader'
 import { toast } from 'react-toastify'
 
 
 const PaymentSummary = forwardRef((
-  {heading, absoluteTotal, absoluteTotalWithTaxes, deliveryCharge, couponDiscount, gst, couponCode}, ref
+  {heading, absoluteTotal, absoluteTotalWithTaxes, deliveryCharge, couponDiscount, gst, setIsRemoveModalOpen}, ref
 )=> {
 
-
-  const [isRemoveModalOpen, setIsRemoveModalOpen] = useState(false)
+  const [couponCode, setCouponCode] = useState('')
 
   const [otpPageLoading, setOtpPageLoading] = useState(false)
 
@@ -30,9 +27,11 @@ const PaymentSummary = forwardRef((
 
   const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
-  const removeTheCoupon = ()=> {
-    dispatch(removeCoupon())
-  }
+  useEffect(()=> {
+    if(cart && cart?.couponUsed?.code){
+      setCouponCode(cart.couponUsed.code)
+    }
+  }, [cart])
 
   const handleCheckout = useCallback( async ()=> {
     if(user.isVerified){
@@ -138,16 +137,11 @@ const PaymentSummary = forwardRef((
                     <X className='absolute top-[5px] right-[-19px] w-[15px] h-[15px] text-red-500 cursor-pointer'
                       onClick={()=> setIsRemoveModalOpen(true)}></X>
                   </div> 
-                  <p className='mt-[-5px] text-[12px] !text-muted font-[450] uppercase'> { `( ${cart?.couponUsed?.code} )` } </p>
+                  <p className='mt-[-5px] text-[12px] !text-muted font-[450] uppercase'>
+                     { couponCode ? `( ${couponCode} )` : null } 
+                  </p>
                 </motion.div>: null
               }
-
-              <RemoveCouponModal 
-                isOpen={isRemoveModalOpen} 
-                onClose={()=> setIsRemoveModalOpen(false)} 
-                couponCode={cart?.couponUsed?.code}
-                onConfirm={removeTheCoupon} 
-              />
 
               <motion.div 
                 className="flex justify-between font-bold pt-[1rem] border-t border-dashed border-mutedDashedSeperation"

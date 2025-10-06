@@ -1,11 +1,12 @@
 import React, {useState, useEffect} from 'react'
 import {useDispatch, useSelector} from 'react-redux'
+import {motion} from "framer-motion"
 
 import { CreditCard, BanknoteArrowUp, HeartPlus, Plus, User, ArrowRight, AlertCircle, X, Check, IndianRupee, BanknoteArrowDown, } from "lucide-react" 
 import {toast} from 'react-toastify'
 
-import {addPeerAccount, sendMoneyToUser, requestMoneyFromUser, resetWalletStates} from '../../../Slices/walletSlice'
-import {decryptData} from '../../../Utils/decryption'
+import {addPeerAccount, sendMoneyToUser, requestMoneyFromUser, resetWalletStates} from '../../../../Slices/walletSlice'
+import {decryptData} from '../../../../Utils/decryption'
 
 
     
@@ -26,14 +27,7 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
     const [error, setError] = useState(false)
 
     const dispatch = useDispatch()
-    const {safeWallet, walletLoading, walletError, walletMessage, peerAccountAdded, moneySent
-      , moneyRequested} = useSelector(state=> state.wallet)
-
-    const savedRecipients = [
-        { id: 1, name: "Jane Smith", accountNumber: "9876 5432 1098 7654", recent: true },
-        { id: 2, name: "Robert Johnson", accountNumber: "5678 9012 3456 7890", recent: true },
-        { id: 3, name: "Sarah Williams", accountNumber: "1234 5678 9012 3456", recent: false },
-    ]
+    const {safeWallet, walletLoading, walletError, peerAccountAdded, moneySent, moneyRequested} = useSelector(state=> state.wallet)
 
     useEffect(()=> {
       if(complexModal){
@@ -77,7 +71,6 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
 
     const handleTransferAmountChange = (e) => {
         const value = e.target.value
-        // Only allow numbers and decimals
         if (value === "" || /^\d+(\.\d{0,2})?$/.test(value)) {
           setTransferAmount(value)
           setError(false)
@@ -177,9 +170,20 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
 
 
     return (
-        
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-        <div className="relative bg-white dark:bg-gray-900 rounded-lg shadow-xl w-full max-w-md">
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.25 }}
+          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+        >
+        <motion.div 
+          initial={{ opacity: 0, y: 40, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 40, scale: 0.95 }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
+          className="relative bg-white dark:bg-gray-900 rounded-lg shadow-xl w-full max-w-md"
+        >
 
           <div className="flex items-center justify-between p-4 border-b dark:border-gray-700">
             <h2 className="flex items-center gap-[10px] text-xl font-semibold">
@@ -189,7 +193,9 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
               }
               { !isRequester ? 'Send Money' : 'Request Money' }
             </h2>
-            <button
+            <motion.button
+              whileHover={{ scale: 1.1, rotate: 90 }}
+              whileTap={{ scale: 0.9, rotate: -90 }}
               onClick={() => {
                 console.log('Closing Modal.....')
                 setIsTransferModalOpen(false)
@@ -202,11 +208,22 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
                hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
               <X className="h-5 w-5" />
               <span className="sr-only"> Close </span>
-            </button>
+            </motion.button>
           </div>
-
+          
+          <motion.div
+            className="max-h-[80vh] overflow-y-auto custom-scrollbar"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+          >
           {transferSuccess ? (
-            <div className="p-6 flex flex-col items-center justify-center">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="p-6 flex flex-col items-center justify-center"
+            >
               <div className="w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center mb-4">
                 <Check className="h-8 w-8 text-green-600 dark:text-green-400" />
               </div>
@@ -215,7 +232,9 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
                 You have successfully sent ₹{Number.parseFloat(transferAmount).toFixed(2)} to{" "}
                 {selectedPeerAccount?.name}.
               </p>
-              <button
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => {
                   setTransferSuccess(false)
                   setIsTransferModalOpen(false)
@@ -228,12 +247,18 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
                 className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background
                  transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
                   focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary
-                   text-primary-foreground hover:bg-green-400 h-10 px-4 py-2">
-                Done
-              </button>
-            </div>
+                   text-primary-foreground hover:bg-green-400 h-10 px-4 py-2"
+                >
+                  Done
+              </motion.button>
+            </motion.div>
           ) : (
-            <form onSubmit={handleTransferSubmit}>
+            <motion.form 
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35, ease: "easeOut" }}
+              onSubmit={handleTransferSubmit}
+            >
               <div className="p-4 space-y-4">
 
                 { !selectedPeerAccount ? (
@@ -478,14 +503,22 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
                     className="px-4 py-2 text-sm font-medium text-white bg-secondary rounded-md hover:bg-purple-700
                      focus:outline-none focus:ring-2 focus:ring-purple-700 disabled:opacity-50 disabled:cursor-not-allowed
                       disabled:hover:bg-purple-400">
-                     { !isRequester ? 'Send Money' : 'Request Money' }
+                     { walletLoading ? 
+                        !isRequester  
+                        ?'Sending Money...' 
+                        : 'Requesting Money...' 
+                      : !isRequester ? 
+                      'Send Money' 
+                      : 'Request Money' 
+                      }
                   </button>
                 )}
               </div>
-            </form>
+            </motion.form>
           )}
-        </div>
-      </div>
+          </motion.div>
+        </motion.div>
+      </motion.div>
     )
 }
 

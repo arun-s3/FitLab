@@ -1,6 +1,6 @@
 import React, { useState } from "react"
 import { Wallet, RefreshCw } from "lucide-react"
-import AutoRechargeModal from "./AutoRechargeModal"
+import AutoRechargeModal from "./Modals/AutoRechargeModal"
 
 export default function AutoRechargeFeature() {
   const [isModalOpen, setIsModalOpen] = useState(false)

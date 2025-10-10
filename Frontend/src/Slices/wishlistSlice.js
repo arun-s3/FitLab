@@ -5,7 +5,7 @@ export const createList = createAsyncThunk('wishlist/add', async ({wishlistDetai
   try {
     console.log('Inside createList createAsyncThunk')
     console.log("wishlistDetails from wishlistSlice---->", wishlistDetails)
-    const response = await axios.post('/wishlist/add', {wishlistDetails}, {withCredentials: true})
+    const response = await axios.post('/wishlist/add', wishlistDetails, {withCredentials: true, headers: {'Content-Type': 'multipart/form-data'}})
     console.log('Returning success response from createList...', JSON.stringify(response.data))
     return response.data
   }catch(error){
@@ -86,9 +86,10 @@ export const updateList = createAsyncThunk('updateList', async ({updateListDetai
   try {
     console.log('Inside updateList createAsyncThunk')
     console.log('updateListDetails from updateList---->', updateListDetails)
-    const response = await axios.put('/wishlist/list/update', {updateListDetails}, {withCredentials: true})
+    const response = await axios.put('/wishlist/list/update', 
+        updateListDetails, {withCredentials: true, headers: {'Content-Type': 'multipart/form-data'}})
     console.log('Returning success response from updateList...', JSON.stringify(response.data))
-    return {updateListDetails}
+    return response.data
 
   }catch(error){
     console.log('Inside catch of updateList')
@@ -287,27 +288,7 @@ const wishlistSlice = createSlice({
         state.loading = false
         state.wishlistError = null
         state.listUpdated = true
-      
-        // const { updateListDetails } = action.payload.updateListDetails
-        const { listId, name, description, isPublic, sharedWith, reminderDate, expiryDate, priority } = action.payload.updateListDetails
-      
-        if (!state.wishlist || !state.wishlist.lists){
-          return
-        }
-        const listIndex = state.wishlist.lists.findIndex(list => list._id === listId)
-        if (listIndex !== -1){
-          const updatedList = state.wishlist.lists[listIndex]
-      
-          if (name) updatedList.name = name
-          if (description) updatedList.description = description
-          if (typeof isPublic !== "undefined") updatedList.isPublic = isPublic
-          if (sharedWith) updatedList.sharedWith = sharedWith
-          if (reminderDate) updatedList.reminderDate = reminderDate
-          if (expiryDate) updatedList.expiryDate = expiryDate
-          if (priority) updatedList.priority = priority
-      
-          state.wishlist.lists[listIndex] = updatedList
-        }
+        state.wishlist.lists[action.payload.listIndex] = action.payload.updatedList
       })
       .addCase(updateList.pending, (state)=> {
         state.loading = true

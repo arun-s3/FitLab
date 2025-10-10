@@ -152,7 +152,7 @@ export default function ProductListingTools({admin, showByGrid, setShowByGrid, s
 
             <div className='flex items-center sort-by relative sort-dropdown cursor-pointer'
                  onClick={(e)=> toggleStickyDropdown(e, 'sortDropdown')}>
-                    <span className='text-[12px] xs-sm:text-[13px] font-[500]' > Sort By </span>
+                    <span className='text-[12px] xs-sm:text-[13px] font-[500] whitespace-nowrap' > Sort By </span>
                     <RiArrowDropDownLine/>
                     {openStickyDropdowns.sortDropdown && 
                     <ul className='list-none cursor-pointer absolute top-[22px] flex flex-col gap-[10px] justify-center 

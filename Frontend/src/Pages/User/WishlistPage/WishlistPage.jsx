@@ -3,37 +3,36 @@ import './WishlistPage.css'
 import {useLocation} from 'react-router-dom'
 import {useSelector, useDispatch} from 'react-redux'
 import {debounce} from 'lodash'
+import {motion} from 'framer-motion'
 
-import {Search, MoreVertical, ChevronRight, Trash, ArrowRight, Plus} from "lucide-react"
-import {CiEdit} from "react-icons/ci";
-import {toast} from 'react-toastify'
-import {format} from "date-fns"
+import {TbShoppingCartHeart} from "react-icons/tb"
 
+import ListBoard from './ListBoard'
 import ProductsDisplay from '../../../Components/ProductsDisplay/ProductsDisplay'
 import ProductListingTools from '../../../Components/ProductListingTools/ProductListingTools'
-import WishlistModal from './WishlistModal'
-import ListDeletionModal from './ListDeletionModal'
-import {getAllWishlistProducts, getUserWishlist, searchList, resetWishlistStates} from '../../../Slices/wishlistSlice'
-import {getTheCart, resetCartStates} from '../../../Slices/cartSlice'
+import WishlistModal from './Modals/WishlistModal'
+import ListDeletionModal from './Modals/ListDeletionModal'
+import {getAllWishlistProducts, getUserWishlist, searchList} from '../../../Slices/wishlistSlice'
+import {getTheCart} from '../../../Slices/cartSlice'
 import CartSidebar from '../../../Components/CartSidebar/CartSidebar'
 import AuthPrompt from '../../../Components/AuthPrompt/AuthPrompt'
 import {UserPageLayoutContext} from '../UserPageLayout/UserPageLayout'
 import {ProtectedUserContext} from '../../../Components/ProtectedUserRoutes/ProtectedUserRoutes'
 
 
-
 export default function WishlistPage(){
 
-    const {setBreadcrumbHeading, setContentTileClasses, setPageLocation} = useContext(UserPageLayoutContext)
+    const {setBreadcrumbHeading, setPageWrapperClasses, setContentTileClasses, setSidebarTileClasses, setPageLocation} = useContext(UserPageLayoutContext)
     setBreadcrumbHeading('Wishlist')
+    setPageWrapperClasses('gap-[2rem] pr-0 pl-6 xx-md:pl-[4rem] mb-[10rem]')
+    setContentTileClasses('basis-full w-full x-xl:basis-[75%] mt-[2rem] mr-8 x-xl:mr-auto content-tile')
+    setSidebarTileClasses('hidden x-xl:inline-block')
     
     const {setIsAuthModalOpen, checkAuthOrOpenModal} = useContext(ProtectedUserContext)
     setIsAuthModalOpen({status: false, accessFor: 'wishlist'})
               
     const location = useLocation()
     setPageLocation(location.pathname)
-
-    setContentTileClasses('basis-[85%] mt-[2rem]')
 
     const [currentList, setCurrentList] = useState('')
 
@@ -45,12 +44,11 @@ export default function WishlistPage(){
     
     const [queryOptions, setQueryOptions] = useState({})
 
-    const [isSearchListHovered, setIsSearchListHovered] = useState(false)
-    const [searchFocused, setSearchFocused] = useState(false)
-
     const [isWishlistModalOpen, setIsWishlistModalOpen] = useState(false)
 
-    const [updateTheList, setUpdateTheList] = useState('')
+    const [updateListDetails, setUpdateListDetails] = useState(null)
+
+    const [loadingListCard, setLoadingListCard] = useState({})
 
     const [isDeleteListModalOpen, setIsDeleteListModalOpen] = useState(false)
     const [listToDelete, setListToDelete] = useState(null)
@@ -58,17 +56,10 @@ export default function WishlistPage(){
     const [isCartOpen, setIsCartOpen] = useState(false)
 
     const {cart, productAdded, productRemoved, error, message} = useSelector(state=> state.cart) 
-    const {wishlist, listCreated, listRemoved, listUpdated, loading, wishlistError, wishlistSuccess} = useSelector(state=> state.wishlist) 
+    const {wishlist} = useSelector(state=> state.wishlist) 
     const {user} = useSelector((state)=> state.user)
-    
 
     const dispatch = useDispatch()
-    
-
-    const listNames = [
-        {name:'SupplementList', createdAt: '23 January 2025', thumbnail: 'https://pixabay.com/photos/man-treadmill-run-training-gym-8545861/'},
-        {name:'ChestMuscle', createdAt: '17 January 2025'}, {name:'LatestMachines', createdAt: '15 December 2024'},
-    ]
 
     const sortMenu = [
         {name: 'Priority: High to Low', value:'priority', order:'-1'}, {name: 'Priority: Low to High', value:'priority', order:'1'},
@@ -77,50 +68,32 @@ export default function WishlistPage(){
         {name: 'Newest First', value:'addedAt', order:'-1'}, {name: 'Oldest First', value:'addedAt', order:'1'}
     ]
 
-    const priorityDetails = [
-        {name: 'high', value: 1, color: 'text-red-500', bg: 'bg-red-50'},
-        {name: 'medium', value: 2, color: 'text-yellow-500', bg: 'bg-red-50'},
-        {name: 'low', value: 3, color: 'text-green-500', bg: 'bg-red-50'}
-    ]
-
-    const headerBg = {
-        backgroundImage: "url('/header-bg.png')",
-        backgrounSize: 'cover'
-    }
+    const gridViewStyles = `w-full grid gap-y-8 grid-cols-1 xx-md:grid-cols-2 gap-x-[4rem] xx-md:gap-x-0 justify-items-center 
+                    lg:justify-items-start max-lg:!ml-0`
 
     useEffect(()=> {
         dispatch(getTheCart())
+        dispatch(getUserWishlist())
     },[])
 
+    useEffect(()=> {
+        console.log("wishlist--------->", wishlist)
+    }, [wishlist])
+
     useEffect(()=>{
-        console.log("currentListName-->", currentList)
         console.log("SORTS-->", JSON.stringify(sorts))
         setQueryOptions(queryOptions=> (
             {...queryOptions, listName: currentList, sort: sorts, page: currentPage, limit}
         ))
-    },[currentList, sorts, currentPage, limit])
+    },[sorts, currentPage, limit])
 
     useEffect(()=>{
         console.log('WISHLIST OUERYOPTIONS--------->', JSON.stringify(queryOptions))
         if(Object.keys(queryOptions).length){
             dispatch( getAllWishlistProducts({queryOptions}))
         }
-    },[queryOptions])
-
-    useEffect(()=> {
-        if(listCreated){
-            toast.success("Created wishlist successfully!")
-            dispatch(resetWishlistStates())
-        }
-        if(listUpdated){
-            toast.success("Updated wishlist successfully!")
-            dispatch(resetWishlistStates())
-        }
-        if(listRemoved){
-            toast.success("Deleted wishlist successfully!")
-            dispatch(resetWishlistStates())
-        }
-    },[listCreated, listUpdated, listRemoved])
+        console.log('updateListDetails--->', updateListDetails)
+    },[queryOptions, updateListDetails])
 
     useEffect(()=> {
         if(cart?.products && cart.products.length > 0){
@@ -131,6 +104,18 @@ export default function WishlistPage(){
     const openDeleteListModal = ({listId, listName})=> {
         setIsDeleteListModalOpen(true)
         setListToDelete({listId, listName})
+    }
+
+    const updateListHandler = (listDetails)=> {
+        setUpdateListDetails(listDetails)
+        setIsWishlistModalOpen(true) 
+    }
+
+    const checkAuthAndOpenListModal = ()=> {
+        if(checkAuthOrOpenModal()){
+          return
+        }
+        setIsWishlistModalOpen(true)
     }
 
     const debouncedSearch = useRef(
@@ -153,126 +138,94 @@ export default function WishlistPage(){
         } 
     }
 
-
     
     return(
 
-            <section id='WishlistPage' className='flex gap-[13px]'>
+            <section id='WishlistPage' className='flex gap-[13px] flex-col md:flex-row'>
 
-                <div className='mt-[1rem] basis-[20%]'>
-                <div className={`p-[12px] h-fit bg-[rgba(246,239,252)] border border-dashed border-secondary rounded-[7px]`}>
-                    <h2 className={`mb-[1.3rem] mx-[3px] w-full flex items-center justify-between ${isSearchListHovered && 'relative'}`}
-                        onMouseLeave={()=> !searchFocused && setIsSearchListHovered(false)}>
-                        <span className={`text-[17px] text-secondary font-[550] uppercase
-                             tracking-[0.2px] ${isSearchListHovered && 'hidden transition duration-300 ease-out'} `} 
-                                style={{wordSpacing: '6px'}}> 
-                            All Lists 
-                        </span>
-                        <input type='text' className={`relative mx-[5px] w-[0%] left-[170px] h-[2rem] text-[13px] text-secondary border
-                         border-dropdownBorder border-r-white rounded-tr-[0px] rounded-br-[0px] rounded-[7px] opacity-0 
-                            ${isSearchListHovered && 'opacity-100 transition duration-700 ease-in-out search-input'}
-                                focus:ring-0 focus:border-dropdownBorder`} onFocus={()=> setSearchFocused(true)}
-                                    onBlur={()=> { setSearchFocused(false); setIsSearchListHovered(false) }} 
-                                        onChange={(e)=> searchHandler(e)}/>    
-                        <Search className={`w-[20px] h-[20px] text-gray-400 cursor-pointer z-[5] ${isSearchListHovered && 'absolute right-[10px] scale-[85%]'}`} 
-                            onMouseEnter={()=> setIsSearchListHovered(true)}/>
-                        <div className={` absolute bg-white opacity-0 left-[169px] w-[32px] h-[2rem] border border-dropdownBorder border-l-white
-                          rounded-tl-[0px] rounded-bl-[0px] 
-                            rounded-[7px] ${isSearchListHovered && 'opacity-100'}`}></div>
-                    </h2>
-                    <div className={`w-full pr-[5px] flex flex-col gap-[10px]`}>
-                        { 
-                         wishlist && wishlist.list && wishlist.list.length > 0 &&
-                           [...wishlist.lists].sort((a,b)=>{
-                            const priorityA = a.priority.toString()
-                            const priorityB = b.priority.toString()
+                <div className='mt-[1rem] basis-[25%] lg:basis-[20%]'>
+                    <motion.div
+                      className="flex md:hidden flex-col items-center text-center mb-[3rem] px-2"
+                      initial={{ opacity: 0, y: -20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6, ease: "easeOut" }}
+                    >
+                      <div className='flex gap-[10px] items-center'>
+                        <TbShoppingCartHeart size={32} className='text-muted w-[28px] h-[28px] xxs-sm:w-[32px] xxs-sm:h-[32px]'/>
+                        <h1 className="text-[22px] xxs-sm:text-[24px] font-[500] capitalize">
+                          Wishlist
+                        </h1>
+                      </div>
+                      <h2 className="hidden mob:inline-block text-[8px] xxs-sm:text-[10px] xs-sm:text-[12px] text-secondary mt-1">
+                        Create and organize your Wishlist to save favorite gym products for later
+                      </h2>
+                    </motion.div>     
+                
+                    { 
+                        wishlist &&
 
-                            if (priorityA === '1') return -1
-                            if (priorityB === '1') return 1
-                            if (priorityA === '2') return -1
-                            if (priorityB === '2') return 1
-                            return 0
-                           }).map(list=> (
-                            <div key={list.name} className={`w-full px-[12px] py-[10px]
-                                 ${currentList === list.name ? 'bg-whitesmoke shadow-lg' : 'bg-white shadow-sm'} flex 
-                                    items-center justify-between border border-dropdownBorder rounded-[5px] cursor-pointer
-                                        hover:bg-whitesmoke hover:shadow-md`} id='list'>
-                                <div className='flex flex-col justify-between gap-[10px]' 
-                                    onClick={()=> setCurrentList(prev=> (prev === list.name ? '' : list.name))}>
-                                    <div>
-                                        <figure className='w-[20px] h-[20px] rounded-[10px]'>
-                                            <img src={list?.thumbnail || "/placeholder.svg"} className='w-[20px] h-[20px] rounded-[10px]'/>
-                                        </figure>
-                                        <div className='flex gap-[10px]'>
-                                            <h4 className='mt-[5px] text-[13px] font-[450] capitalize'> {list.name} </h4>
-                                            <CiEdit className='self-end h-[13px] w-[13px] text-secondary cursor-pointer' 
-                                                onClick={()=> { setUpdateTheList(list._id); setIsWishlistModalOpen(true) }}/>
-                                        </div>
-                                        <h5 className='text-[11px] text-muted font-[450] capitalize'> 
-                                            { ` (${list.products.length} ${list.products.length === 1 ? 'item' : 'items'}) ` }
-                                        </h5>
-                                    </div>
-                                    <h3 className='text-[11px]'>
-                                        <span className='text-muted'>  Priority: </span>
-                                        <span className={`ml-[3px] ${priorityDetails.find(status=> status.value === list.priority).color}
-                                            font-[450] capitalize`}>
-                                                { priorityDetails.find(status=> status.value === list.priority).name 
-                                        }</span> 
-                                    </h3>
-                                    <h5 className='text-[11px] text-muted'> Created: {format( new Date(list.createdAt), "MMM dd, yyyy" )} </h5>
-                                </div>
-                                <div className='h-[7rem] flex flex-col justify-between controls'>
-                                    {/* <i className='p-[3px] border border-dropdownBorder rounded-[2px]'> */}
-                                        <Trash className='w-[15px] h-[15px] text-muted hover:scale-110 hover:text-red-500 transition
-                                            ease-in-out duration-300' 
-                                                onClick={()=> openDeleteListModal({listId: list._id, listName: list.name})}/>
-                                    {/* </i> */}
-                                    {/* <i className='p-[3px] border border-dropdownBorder rounded-[2px]'> */}
-                                        <ArrowRight className='w-[15px] h-[15px] text-muted hover:text-green-500 hover:translate-x-2
-                                            hover:scale-110 transition duration-300 ease-in-out'
-                                            onClick={()=> setCurrentList(prev=> (prev === list.name ? '' : list.name))}/>
-                                    {/* </i> */}
-                                </div>
-                            </div>
-                           )) 
-                        }
-                    </div>
-                </div>
+                            <ListBoard 
+                                lists={wishlist?.lists || []} 
+                                currentList={currentList}
+                                onNewCurrenList={setCurrentList}
+                                onSearch={searchHandler}
+                                onUpdateList={updateListHandler}
+                                onDeleteList={openDeleteListModal}
+                                setLoadingListCard={setLoadingListCard}
+                                isListCardLoading={loadingListCard}
+                                onOpenNewListModal={checkAuthAndOpenListModal}
+                            />
+                    }
 
-                <div className='mb-[2rem] w-full h-[3rem] pl-[1rem] flex items-center gap-[10px] cursor-pointer'
-                    onClick={()=> {
-                                if(checkAuthOrOpenModal()){
-                                  return
-                                }
-                                setIsWishlistModalOpen(true)
-                                }           
-                            }           
-                >
-
-                    <Plus className='text-secondary w-[20px] h-[20px]'/>
-                    <span className='text-[14px] text-muted font-[500] tracking-[0.5px] capitalize'>
-                             Add New List 
-                    </span>
-                    
-                    <WishlistModal isOpen={isWishlistModalOpen} onClose={()=> setIsWishlistModalOpen(false)} shouldUpdateThisId={updateTheList}/>
-                    
-                    <ListDeletionModal isOpen={isDeleteListModalOpen} onClose={() => setIsDeleteListModalOpen(false)}
-                        listDetails={listToDelete} setListDetails={setListToDelete}/>
-
-                </div>
-
-                </div>
-
-                <div className='mt-[1rem] pt-[2rem] basis-[80%] bg-white border border-dropdownBorder rounded-[7px]' id='wishlist-products'>
+                    <WishlistModal 
+                        isOpen={isWishlistModalOpen} 
+                        onClose={()=> {
+                            setUpdateListDetails(null)
+                            setIsWishlistModalOpen(false)
+                        }} 
+                        listDetails={updateListDetails}
+                        setLoadingListCard={setLoadingListCard}
+                    />
                             
-                    <ProductListingTools showByGrid={showByGrid} setShowByGrid={setShowByGrid} sortHandlers={{sorts, setSorts}}
-                        sortMenu={sortMenu} limiter={{limit, setLimit}} queryOptions={queryOptions} setQueryOptions={setQueryOptions}
-                         wishlistDisplay={true}/>
+                    <ListDeletionModal 
+                        isOpen={isDeleteListModalOpen} 
+                        onClose={() => setIsDeleteListModalOpen(false)}
+                        listDetails={listToDelete} 
+                        setListDetails={setListToDelete}
+                    />
+
+
+                </div>
+                
+                <h3 className='inline-block md:hidden text-[17px] text-secondary font-[600] tracking-[0.3px]'> Saved Products </h3>
+                <div 
+                    className='mt-[1rem] pt-[2rem] basis-[65%] lg:basis-[80%] bg-white border border-dropdownBorder rounded-[7px]'
+                    id='wishlist-products'
+                >
+                      
+                    <ProductListingTools 
+                        showByGrid={showByGrid} 
+                        setShowByGrid={setShowByGrid} 
+                        sortHandlers={{sorts, setSorts}}
+                        sortMenu={sortMenu} 
+                        limiter={{limit, setLimit}} 
+                        queryOptions={queryOptions} 
+                        setQueryOptions={setQueryOptions}
+                        wishlistDisplay={true}
+                    />
                                                          
                     <div className='mt-[2rem]'>
-
-                        <ProductsDisplay gridView={showByGrid} pageReader={{currentPage, setCurrentPage}} limiter={{limit, setLimit}}
-                            queryOptions={queryOptions} wishlistDisplay={true} currentList={currentList}/>
+                        
+                        <ProductsDisplay 
+                            gridView={showByGrid} 
+                            customGridViewStyles={gridViewStyles} 
+                            pageReader={{currentPage, setCurrentPage}} 
+                            limiter={{limit, setLimit}}
+                            queryOptions={queryOptions} 
+                            wishlistDisplay={true} 
+                            currentList={currentList}
+                            checkAuthOrOpenModal={checkAuthOrOpenModal}
+                        />
 
                     </div>
                     
@@ -293,6 +246,5 @@ export default function WishlistPage(){
                 />
 
             </section>
-
     )
 }

@@ -29,7 +29,8 @@ const ImageCropper = ({ images, onCropComplete, imageCropperState, setImageCropp
   const [endIndex, setEndIndex] = useState(() => Math.min(3, images.length))
 
   useEffect(()=> {
-    setImageCropperError("Crop every Images!")
+    if (images.length > 1) setImageCropperError("Crop every Images!")
+    if (images.length === 1) setImageCropperError("Crop the Image!")
   },[])
 
   useEffect(()=> {
@@ -143,9 +144,12 @@ const ImageCropper = ({ images, onCropComplete, imageCropperState, setImageCropp
       {modalIsOpen && (
         <main id="image-cropper-container" className={`fixed flex flex-col justify-center items-center gap-[16px] inset-0 
             ${positionFromTop? positionFromTop : 'top-[3rem]'} ${bgBlur && 'backdrop-blur-[5px]'} z-[5]`}>
-          <div id="image-cropper-content" className={`w-[400px] max-w-[90%] text-center p-[20px] bg-white rounded-[8px] border
-           border-secondary`} style={containerHeight ? {height: containerHeight} : {height: '89%'}}>
-          <div className='flex items-center gap-[30px] flex-wrap my-[10px]' id='image-section'>
+          <div id="image-cropper-content" className={`w-[400px]  ${images.length > 1 ? 'max-w-[90%]' : '!max-w-[68%]'} text-center 
+            p-[20px] bg-white rounded-[8px] border border-secondary`} 
+            style={containerHeight ? {height: containerHeight} : images.length > 1 ? {height: '89%'} : {height: '68%'}}>
+          {
+            images.length > 1 &&
+            <div className='flex items-center gap-[30px] flex-wrap my-[10px]' id='image-section'>
               <i className="mr-[-20px] px-[2px] py-[4px] rounded-[4px] bg-primary border-[2px] border-[#e6c5fd] cursor-pointer"
                   onClick={()=> showLessImages()}>
                 <FaArrowLeft className="text-secondary"/>
@@ -180,7 +184,8 @@ const ImageCropper = ({ images, onCropComplete, imageCropperState, setImageCropp
                       onClick={()=> showMoreImages()}>
                   <FaArrowRight className="text-secondary"/>
                 </i>
-            </div>
+            </div> 
+          }
             {images[currentImageIndex] && (
               <>
                 <div className="relative w-full h-[300px] bg-[#333] border-[2px] border-[#ddd] rounded-[6px]">
@@ -188,20 +193,23 @@ const ImageCropper = ({ images, onCropComplete, imageCropperState, setImageCropp
                   <Cropper image={images[currentImageIndex].url} crop={crop} zoom={zoom} aspect={1} onCropChange={setCrop}
                       onZoomChange={setZoom} onCropComplete={onCropCompleteHandler} />
 
-                  <div className="w-full absolute top-[22rem] left-[5%] flex flex-col gap-[1rem] mt-[20px]" 
+                  <div className={`w-full absolute ${images.length > 1 ? 'top-[22rem]' : 'top-[19rem]'} left-[5%] flex flex-col gap-[1rem] mt-[20px]`}
                     style={controllerStyle ? controllerStyle : {}}>
                     <div className="flex items-center gap-[1rem]">
                       <label htmlFor="zoom-range" className="text-[13px] text-secondary font-[500] tracking-[0.7px]" 
                             style={{color: 'rgba(159, 42, 240, 1)'}}> Zoom: </label>
 
                       <input type="range" id="zoom-range" min="1" max="3" step="0.1" value={zoom} 
-                             onChange={(e) => setZoom(Number(e.target.value))} className="w-[200px] h-[3px]" />
+                        onChange={(e) => setZoom(Number(e.target.value))} className={` ${images.length > 1 ? 'w-[200px]' : 'w-[250px]'} h-[3px]`} />
 
                     </div>
-                    <div className="flex gap-[10px]">
-                      <SiteButtonSquare clickHandler={()=> skipCrop(currentImageIndex)} tailwindClasses='!text-[13px]' customStyle={{paddingBlock: '7px', borderRadius: '7px', fontSize: '13px'}}>
-                        Skip this Image for now
-                      </SiteButtonSquare>
+                    <div className={`flex gap-[10px] ${images.length === 1 && 'justify-center'}`}>
+                      {
+                        images.length > 1 &&
+                          <SiteButtonSquare clickHandler={()=> skipCrop(currentImageIndex)} tailwindClasses='!text-[13px]' customStyle={{paddingBlock: '7px', borderRadius: '7px', fontSize: '13px'}}>
+                            Skip this Image for now
+                          </SiteButtonSquare>
+                      }
                       <SiteButtonSquare clickHandler={handleCrop} tailwindClasses='!text-[13px]' customStyle={{paddingBlock: '7px', borderRadius: '7px', fontSize: '13px'}}>
                         Crop Image
                       </SiteButtonSquare>
@@ -211,7 +219,7 @@ const ImageCropper = ({ images, onCropComplete, imageCropperState, setImageCropp
                 </div>
               </>
             )}
-            {currentImageIndex < images.length  && currentImageIndex >= 0 && (
+            {images.length > 1 && currentImageIndex < images.length  && currentImageIndex >= 0 && (
               <>
               <div className="flex justify-between items-center mt-[10px]">
                 <SitePrimaryButtonWithShadow tailwindClasses='text-secondary flex flex-row-reverse items-center gap-[5px] bg-primaryDark hover:bg-green-500'

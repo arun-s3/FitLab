@@ -17,7 +17,7 @@ const packCategoryData = async (req)=>{
             name: req.file.originalname,
             url: result.secure_url,
             size: result.bytes,
-          }
+        }
         console.log("uploadedImages-->", JSON.stringify(uploadedImage))
 
         const categoryDatas = {

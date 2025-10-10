@@ -15,7 +15,7 @@ import {format} from "date-fns"
 
 import {getAllProducts, toggleProductStatus} from '../../Slices/productSlice'
 import {addProductToList, removeProductFromList, getUserWishlist, getAllWishlistProducts, resetWishlistStates} from '../../Slices/wishlistSlice'
-import WishlistModal from '../../Pages/User/WishlistPage/WishlistModal'
+import WishlistModal from '../../Pages/User/WishlistPage/Modals/WishlistModal'
 import WishlistOptionsModal from '../WishlistModals/WishlistOptionsModal'
 import RemoveWishlistItemModal from '../WishlistModals/RemoveWishlistItemModal'
 import Pagination from '../Pagination/Pagination'
@@ -26,8 +26,8 @@ import {addToCart} from '../../Slices/cartSlice'
 import ProductsTableView from './ProductsTableView'
 
 
-export default function ProductsDisplay({gridView, showByTable, pageReader, limiter, queryOptions, showTheseProducts, admin, 
-  wishlistDisplay, currentList, couponApplicableItems = null, checkAuthOrOpenModal}) {
+export default function ProductsDisplay({gridView, showByTable, customGridViewStyles, pageReader, limiter, queryOptions, showTheseProducts, admin, 
+  wishlistDisplay, currentList, couponApplicableItems = null, checkAuthOrOpenModal = null}) {
 
   const {currentPage, setCurrentPage} = pageReader
 
@@ -127,7 +127,7 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
   }
 
   const handleAddToCart = (id)=> {
-     if(checkAuthOrOpenModal()) return
+     if(checkAuthOrOpenModal && checkAuthOrOpenModal()) return
      
      console.log("Inside handleAddToCart()--")
      dispatch( addToCart({productId: id, quantity: 1}) )
@@ -158,7 +158,7 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
   }
 
   const addToWishlist = (product)=> {
-    if(checkAuthOrOpenModal()) return
+    if(checkAuthOrOpenModal && checkAuthOrOpenModal()) return
     const userCreatedListsExists = Object.keys(wishlist).length && wishlist?.lists.some(list=> list.name === 'Default Shopping List') 
                                     && wishlist?.lists.length > 1
     if(userCreatedListsExists){
@@ -170,7 +170,7 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
   }
 
   const deleteFromWishlist = (product)=> {
-    if(checkAuthOrOpenModal()) return
+    if(checkAuthOrOpenModal && checkAuthOrOpenModal()) return
     const productOfDefaultList = Object.keys(wishlist).length && wishlist?.lists.some(list=> {
        list.name === 'Default Shopping List' && list.products.some(item=> item.product === product._id)
     }) 
@@ -224,12 +224,15 @@ export default function ProductsDisplay({gridView, showByTable, pageReader, limi
         initial="hidden"
         animate="show"
         className={`${gridView ?
-          `w-full grid gap-y-8 ${admin ? 'md:grid-cols-2' : 'x-sm:grid-cols-2'} xx-md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 x-xl:grid-cols-3 
-            gap-x-[4rem] x-sm:gap-x-[4rem] xx-md:gap-x-[10rem] lg:gap-x-[9rem] ${admin ? 'xl:gap-x-[4rem]' : 'xl:gap-x-[2rem]'}` 
+          customGridViewStyles
+          ? customGridViewStyles
+          :`w-full grid gap-y-8 ${admin ? 'md:grid-cols-2' : 'x-sm:grid-cols-2'} xx-md:grid-cols-2 lg:grid-cols-2 
+            xl:grid-cols-3 x-xl:grid-cols-3 gap-x-[4rem] x-sm:gap-x-[4rem] xx-md:gap-x-[10rem] lg:gap-x-[9rem] 
+            ${admin ? 'xl:gap-x-[4rem]' : 'xl:gap-x-[2rem]'}` 
           : showByTable 
           ? '' 
           : 'flex flex-col gap-[2rem]'}
-          ${wishlistDisplay && 'ml-[1.5rem]'}`} 
+          ${wishlistDisplay && 'ml-[15px] xx-lg:ml-[1.5rem]'}`} 
         id="products-display" 
         style={admin ? { justifyItems: 'center' } : {}}
       >  

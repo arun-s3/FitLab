@@ -2,6 +2,7 @@ const Wishlist = require('../Models/wishlistModel')
 const Order = require('../Models/orderModel')
 const Cart = require('../Models/cartModel')
 const Product = require('../Models/productModel')
+const cloudinary = require('../Utils/cloudinary')
 const {errorHandler} = require('../Utils/errorHandler') 
 
 
@@ -9,10 +10,10 @@ const {errorHandler} = require('../Utils/errorHandler')
 const createList = async (req, res, next)=> {
   try { 
         console.log("Inside createList of wishlistController")
-        const {name, description, isPublic, sharedWith, reminderDate, expiryDate, priority} = req.body.wishlistDetails
+        // const {name, description, isPublic, thumbnail, sharedWith, reminderDate, expiryDate, priority} = req.body.wishlistDetails
         const userId = req.user.id
 
-        if (!name){
+        if (!req.body.name){
           return next(errorHandler(400, "List name is required!"))
         }
 
@@ -20,23 +21,39 @@ const createList = async (req, res, next)=> {
         if (!wishlist){
           wishlist = new Wishlist({userId, lists: [] })
         }
-        const existingList = wishlist.lists.find(list=> list.name.toLowerCase() === name.toLowerCase())
+        const existingList = wishlist.lists.find(list=> list.name.toLowerCase() === req.body.name.toLowerCase())
         if (existingList) {
           return next(errorHandler(400, "List name already exists!"))
         }
 
+        let uploadedImage = null
+        if(req.file.path){
+          const result = await cloudinary.uploader.upload(req.file.path, {
+            folder: 'wishlist/thumbnails',
+            resource_type: 'image',
+          }) 
+          uploadedImage = {
+            public_id: result.public_id,
+            name: req.file.originalname,
+            url: result.secure_url,
+            size: result.bytes,
+          }
+          console.log("uploadedImages-->", JSON.stringify(uploadedImage))
+        }
+
         const newList = {
-          name,
-          description,
-          thumbnail: '/placeholder.svg',
-          isPublic: isPublic || false,
-          sharedWith: sharedWith || [],
-          reminderDate: reminderDate || '',
-          expiryDate: expiryDate || '',
-          priority: priority || 2,
+          name: req.body.name || '',
+          description: req.body.description || '',
+          thumbnail: uploadedImage,
+          isPublic: req.body.isPublic || false,
+          sharedWith: req.body.sharedWith || [],
+          reminderDate: req.body.reminderDate || '',
+          expiryDate: req.body.expiryDate || '',
+          priority: req.body.priority || 2,
           products: [],
           createdAt: new Date()
         }
+        console.log("newList--------->", JSON.stringify(newList))
 
         wishlist.lists.push(newList)
         await wishlist.save();
@@ -248,10 +265,9 @@ const getAllWishlistProducts = async (req, res, next)=> {
 const updateList = async (req, res, next)=> {
   try {
     console.log("Inside updateList of wishlistController")
-    const { listId, name, description, isPublic, sharedWith, reminderDate, expiryDate, priority } = req.body.updateListDetails
+    const listId = req.body.listId
     const userId = req.user.id
 
-    console.log("updateListDetails---->", JSON.stringify(req.body.updateListDetails))
     if (!listId) {
       return next(errorHandler(400, "List ID is required!"))
     }
@@ -265,26 +281,43 @@ const updateList = async (req, res, next)=> {
       return next(errorHandler(404, "List not found!"))
     }
 
-    const nameExists = wishlist.lists.some(
-      list => list._id.toString() !== listId && list.name.toLowerCase() === name.toLowerCase()
-    )
-    if(nameExists){
-      return next(errorHandler(400, "List name already exists!"))
+    if(req.body.name){
+      const nameExists = wishlist.lists.some(
+        list => list._id.toString() !== listId && list.name.toLowerCase() === req.body.name.toLowerCase()
+      )
+      if(nameExists){
+        return next(errorHandler(400, "List name already exists!"))
+      }
     }
+    
+    const updatedList = wishlist.lists[listIndex]
+    if (req.body.name) updatedList.name = req.body.name
+    if (req.body.description) updatedList.description = req.body.description
+    if (typeof req.body.isPublic !== "undefined") updatedList.isPublic = req.body.isPublic
+    if (req.body.sharedWith) updatedList.sharedWith = req.body.sharedWith
+    if (req.body.reminderDate) updatedList.reminderDate = req.body.reminderDate
+    if (req.body.expiryDate) updatedList.expiryDate = req.body.expiryDate
+    if (req.body.priority) updatedList.priority = req.body.priority
 
-    const updatedList = wishlist.lists[listIndex];
-    if (name) updatedList.name = name;
-    if (description) updatedList.description = description;
-    if (typeof isPublic !== "undefined") updatedList.isPublic = isPublic;
-    if (sharedWith) updatedList.sharedWith = sharedWith;
-    if (reminderDate) updatedList.reminderDate = reminderDate;
-    if (expiryDate) updatedList.expiryDate = expiryDate;
-    if (priority) updatedList.priority = priority;
+    if (req.file.path){
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        folder: 'wishlist/thumbnails',
+        resource_type: 'image',
+      }) 
+      const uploadedImage = {
+        public_id: result.public_id,
+        name: req.file.originalname,
+        url: result.secure_url,
+        size: result.bytes,
+      }
+      console.log("uploadedImages-->", JSON.stringify(uploadedImage))
+      updatedList.thumbnail = uploadedImage
+    } 
     
     wishlist.lists[listIndex] = updatedList
     await wishlist.save()
 
-    return res.status(200).json({ success: true, message: "List updated successfully", wishlist })
+    return res.status(200).json({ success: true, message: "List updated successfully", updatedList, listIndex})
   }
   catch(error){
     console.error("Error updating wishlist:", error.message)

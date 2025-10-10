@@ -4,29 +4,30 @@
 #WishlistPage #wishlist-products #ProductListingTools{
     margin-inline: 1.5rem;
 }
-#WishlistPage h2:first-of-type > input[class ~= 'search-input'] {
-    width: 100%;
-    left: -14px;
-    transition-property: width, left;
-    transition-duration: 0.3s;
-    transition-delay: 0.1s;
-    transition-timing-function: ease-in-out;
-}
+
 #WishlistPage h2:first-of-type > input.search-input:focus,
 #WishlistPage h2:first-of-type > input.search-input:hover {
-    left: -14px;
-    width: 100%;
+  width: 100%;
+  right: 0;
+  opacity: 1;
 }
-/* @keyframes stretch-it {
-    from {
-      left: 170px;
-      width: 1%;
-    }
-    to {
-      left: 0px;
-      width: 100%;
-    }
-} */
+
+#WishlistPage h2:first-of-type svg {
+  position: absolute;
+  right: 10px;
+  top: 7px;
+  width: 20px;
+  height: 20px;
+  color: gray;
+  cursor: pointer;
+  z-index: 3;
+  transition: transform 0.25s ease;
+}
+
+#WishlistPage h2:first-of-type svg:hover {
+  transform: scale(1.1);
+}
+
 #WishlistPage #list .controls svg:first-of-type:hover{
     animation-name: wiggle-icon;
     animation-duration: 0.3s;
@@ -47,3 +48,24 @@
         transform: rotate(-5deg);
     }
 }
+
+.skeleton-loader {
+    background: linear-gradient(
+      90deg,
+      #f0f0f0 25%,
+      #e0e0e0 37%,
+      #f0f0f0 63%
+    );
+    background-size: 400% 100%;
+    animation: shimmer 1.2s ease-in-out infinite;
+    border-radius: 4px;
+  }
+  
+  @keyframes shimmer {
+    0% {
+      background-position: -400px 0;
+    }
+    100% {
+      background-position: 400px 0;
+    }
+  }

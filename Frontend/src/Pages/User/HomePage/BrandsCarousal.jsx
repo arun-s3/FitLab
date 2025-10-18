@@ -1,7 +1,10 @@
 import React, { useState } from "react"
+
 import { motion } from "framer-motion"
 
-const BrandsCarousal = () => {
+
+export default function BrandsCarousal(){
+  
   const logos = [
     {
       id: 1,
@@ -112,4 +115,3 @@ const BrandsCarousal = () => {
   )
 }
 
-export default BrandsCarousal

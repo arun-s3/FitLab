@@ -2,6 +2,8 @@ import React, {useState, useEffect, useContext} from 'react'
 import './Header.css'
 import {Link, useNavigate} from 'react-router-dom'
 import {useSelector, useDispatch} from 'react-redux'
+import {motion} from "framer-motion"
+
 
 import {IoIosSearch} from "react-icons/io"
 import {CiUser} from "react-icons/ci"
@@ -42,44 +44,95 @@ export default function Header({customStyle}){
             setIsCartOpen(true)
     }
 
+    const menuItems = [
+        {label: 'Home', path: '/'},
+        {label: 'Shop By Categories', path: '/shop', mobileLabel: 'Shop', className: 'hidden lg:hidden xl:inline-block', mobileClassName: 'xl:hidden'},
+        {label: 'Products', path: '/shop'},
+        {label: 'Support', path: '/support'},
+        {label: 'About Us', path: '/about'}
+    ]
+
 
     return(
-        <div className="flex justify-between items-center relative lg:sticky text-white padding-main z-10" 
+        <motion.div className="flex justify-between items-center relative lg:sticky text-white padding-main z-10" 
             id='headerMenu'  
-            style={customStyle}>
+            style={customStyle}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+        >
             {/* <Logo/> */}
-            
-            <Link to='/' className='absolute top-[5px] max-xs-sm:left-0 lg:static'>
-                <img src="/Logo_main.png" alt="Fitlab" className="h-[5rem] "/>   {/*mt-[10px]*/}
-            </Link>
+            <motion.div
+                initial={{ opacity: 0, x: -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4, duration: 0.8, ease: "easeOut" }}
+            >
+                <Link to='/' className='absolute top-[5px] max-xs-sm:left-0 lg:static'>
+                    <img src="/Logo_main.png" alt="Fitlab" className="h-[5rem] "/>   {/*mt-[10px]*/}
+                </Link>
+            </motion.div>
 
-            <nav className='hidden lg:block lg:ml-[-50px] xl:ml-[-20px] x-xl:ml-0'>
-                <ul className="inline-flex items-center lg:gap-[15px] xl:gap-[22px] x-xl:gap-[30px] list-none lg:text-[14px] x-xl:text-descReg1 
-                    tracking-[0.2px]"> 
-                    <li>
-                        <Link to='/'> Home </Link>
-                    </li>
-                    <li>
-                        <Link className='xl:hidden'> Shop </Link>
-                        <Link className='hidden lg:hidden xl:inline-block'> Shop By Categories</Link>
-                    </li>
-                    <li>
-                        <Link to='/shop'> Products </Link>
-                    </li>
-                    <li>
-                        <Link to='/support'> Support </Link>
-                    </li>
-                    <li>
-                        <Link> Blogs </Link>
-                    </li>
-                    <li>
-                        <Link> About Us </Link> 
-                    </li>
-                </ul>
-            </nav>
-            <div className="hidden sm:inline-flex sm:gap-[20px] md:gap-[2.5rem] lg:gap-[12px] x-xl:gap-[15px] sm:ml-[20rem] lg:ml-0 mt-[25px] 
-             lg:mt-0 items-center" 
-                id="icons">
+            <motion.nav 
+                className='hidden lg:block lg:ml-[-50px] xl:ml-[-20px] x-xl:ml-0'
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7, duration: 0.8, ease: "easeOut" }}
+            >
+                <motion.ul 
+                    className="inline-flex items-center lg:gap-[15px] xl:gap-[22px] x-xl:gap-[30px] list-none 
+                      lg:text-[14px] x-xl:text-descReg1 tracking-[0.2px]" 
+                    id='menu'
+                    initial="hidden"
+                    animate="visible"
+                    variants={{
+                      hidden: {},
+                      visible: {
+                        transition: {staggerChildren: 0.12, delayChildren: 0.8},
+                      },
+                    }}
+                > 
+                    {
+                        menuItems.map((item, i)=> (
+                            <motion.li
+                                key={i}
+                                variants={{
+                                  hidden: { opacity: 0, y: -8 },
+                                  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+                                }}
+                            >
+                                {
+                                    item?.mobileLabel &&
+                                        <Link 
+                                            className={`${item?.mobileClassName ? item.mobileClassName : ''}`}
+                                            to={item.path}
+                                        > 
+                                            {item.mobileLabel} 
+                                        </Link>
+                                }
+                                <Link 
+                                    className={`${item?.className ? item.className : ''}`}
+                                    to={item.path}
+                                > 
+                                    {item.label} 
+                                </Link>
+                            </motion.li>
+                        ))
+                    }
+                </motion.ul>
+            </motion.nav>
+            <motion.div 
+                className="hidden sm:inline-flex sm:gap-[20px] md:gap-[2.5rem] lg:gap-[12px] x-xl:gap-[15px] sm:ml-[20rem] lg:ml-0 mt-[25px] 
+                    lg:mt-0 items-center" 
+                id="icons"
+                initial="hidden"
+                animate="visible"
+                variants={{
+                  hidden: {},
+                  visible: {
+                    transition: { staggerChildren: 0.1, delayChildren: 1 },
+                  },
+                }}
+            >
                 <i>
                     <IoIosSearch className='h-[23px] w-[23px] lg:h-[20px] lg:w-[20px] xl:h-[22px] xl:w-[22px] s-xl:h-[23px] s-xl:w-[23px]'/>
                 </i>
@@ -110,7 +163,12 @@ export default function Header({customStyle}){
                 <i onClick={()=> setOpenChatBox(true)}>
                     <Headset className='w-[21px] h-[21px] lg:w-[19px] lg:h-[19px] xl:w-[20px] xl:h-[20px] x-xl:w-[21px] x-xl:h-[21px]'/>
                 </i>
-                <div className='hidden lg:inline-block'>
+                <motion.div 
+                    className='hidden lg:inline-block'
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 1.4, duration: 0.6, ease: "easeOut" }}
+                >
                   {
                     (userToken && user) ?
                         <UserHead/> 
@@ -138,8 +196,8 @@ export default function Header({customStyle}){
                            </button>
                         </div>
                   }
-                </div>
-            </div>
+                </motion.div>
+            </motion.div>
 
             <div className='mt-[25px] lg:hidden'>
 
@@ -173,6 +231,6 @@ export default function Header({customStyle}){
 
                 {/* } */}
 
-        </div>
+        </motion.div>
     )
 }

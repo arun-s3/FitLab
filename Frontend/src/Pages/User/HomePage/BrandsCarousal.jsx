@@ -68,7 +68,7 @@ export default function BrandsCarousal(){
   const [isHovered, setIsHovered] = useState(false)
 
   return (
-    <div className="w-full bg-white px-8 py-8 md:py-8 overflow-hidden">
+    <div className="w-full bg-white px-8 py-[5px] xxs-sm:py-4 md:py-8 overflow-hidden">
       <div className="relative w-full">
         <div className="absolute left-0 top-0 bottom-0 w-12 md:w-24 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
 

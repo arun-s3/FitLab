@@ -36,6 +36,8 @@ export default function ShoppingCartPage(){
 
   const [isRemoveModalOpen, setIsRemoveModalOpen] = useState(false)
 
+  const [cartProductIds, setCartProductIds] = useState([])
+
   const {cart, error, couponApplied} = useSelector(state=> state.cart)
   const {bestCoupon, couponMessage} = useSelector(state=> state.coupons)
   const {user} = useSelector(state=> state.user)
@@ -63,6 +65,11 @@ export default function ShoppingCartPage(){
   useEffect(()=> {
     if(cart){
       console.log("Cart---->", cart)
+      if(cart.products && cart.products.length > 0){
+        const productIds = cart.products.map(product=> product.productId)
+        console.log("productIds---->", productIds)
+        setCartProductIds(productIds)
+      }
     }
   },[cart])
 
@@ -269,7 +276,9 @@ export default function ShoppingCartPage(){
 
         <div className="mt-[2rem] mx-[3rem]">
 
-            <SimilarProductsCarousal />
+            { cartProductIds && cartProductIds.length > 0 &&
+                <SimilarProductsCarousal referenceProductIds={cartProductIds}/>
+            }
 
         </div>
 

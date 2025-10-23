@@ -2,12 +2,14 @@ import React, {useState, useEffect, useRef} from 'react'
 
 import Header from '../../../Components/Header/Header'
 import HeroSection from './HeroSection'
-import ProductCarousel from './ProductCarousel'
+import PopularProductsCarousal from './PopularProductsCarousal'
+import LatestProductsCarousel from './LatestProductsCarousel'
 import BrandsCarousal from './BrandsCarousal'
 import FitnessQuoteSection from './FitnessQuoteSection'
 import ShopByCategories from './ShopByCategories'
 import FitlabHighlights from './FitlabHighlights'
 import SpecialOfferSection from './SpecialOfferSection'
+import TestimonialSection from './TestimonialSection'
 import Footer from '../../../Components/Footer/Footer'
 
 
@@ -43,23 +45,29 @@ export default function HomePage(){
     return(
       <section id='homePage' className="bg-gray-100">
 
-        <div className="h-[70rem]" style={bgImg}>
+        <div 
+          className="h-[48rem] l-md:h-[62rem] bg-black l-md:bg-gray-100 bg-[position:80%_center] 
+            xx-md:bg-[position:3%_center] lg:bg-[position:initial]" 
+          style={bgImg}
+        >
 
             <Header />
 
             <HeroSection />
 
         </div>
+
+        <PopularProductsCarousal />
           
-        <FitnessQuoteSection />
+        <div className='mb-8'>
+            <FitnessQuoteSection />
+        </div>
         
         <div className='w-full py-8'>
-
-          <ProductCarousel />
-
+          <LatestProductsCarousel />
         </div>
 
-        <div className='w-full'>
+        <div className='w-full mt-8'>
 
           <BrandsCarousal />
 
@@ -67,13 +75,15 @@ export default function HomePage(){
 
         <ShopByCategories />
 
-        <div ref={highlightsRef}>
+        <div ref={highlightsRef} className='mt-8'>
 
           {showHighlights && <FitlabHighlights />}
 
         </div>
 
         <SpecialOfferSection />    
+
+        <TestimonialSection />
         
         <Footer/>
         

@@ -14,3 +14,40 @@
     transition-delay: 0.1s;
     transition-duration: 0.2s; 
 }
+
+#headerMenu #menu a {
+  position: relative;
+  text-decoration: none;
+  color: inherit;
+}
+
+#headerMenu #menu a:before,
+#headerMenu #menu a:after {
+  content: "";
+  position: absolute;
+  height: 1px;
+  width: 0;
+  background-color: var(--PRIMARY);
+  transition: 0.5s;
+}
+
+#headerMenu #menu a:after {
+  left: 0;
+  bottom: -10px;
+}
+
+#headerMenu #menu a:before {
+  right: 0;
+  top: -10px;
+}
+
+#headerMenu #menu a:hover {
+  color: var(--PRIMARYDARK);
+  /* transform: scale(105%);
+  transition: 0.5s; */
+}
+
+#headerMenu #menu a:hover:after,
+#headerMenu #menu a:hover:before {
+  width: 100%;
+}

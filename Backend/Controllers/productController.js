@@ -234,6 +234,126 @@ const getAllProducts = async (req, res, next)=> {
 }
 
 
+const getLatestProducts = async (req, res, next)=> {
+  try {
+    console.log("Inside getLatestProducts of productController")
+
+    const products = await Product.find({})
+      .sort({ createdAt: -1 })
+      .limit(8)
+      .select("_id title subtitle thumbnail")
+
+    const formattedProducts = products.map((product)=> ({
+      id: product._id,
+      image: product.thumbnail?.url || "",  
+      title: product.title,
+      subtitle: product.subtitle,
+    }))
+
+    console.log("Latest products---->", formattedProducts)
+    res.status(200).json({latestProducts: formattedProducts});
+  }
+  catch (error){
+    console.log("Error in productController-getLatestProducts -->", error.message)
+    next(error)
+  }
+}
+
+
+const getPopularProducts = async (req, res, next)=> {
+  try {
+    console.log("Inside getPopularProducts of productController")
+
+    const products = await Product.find({ isBlocked: false })
+      .sort({ ratings: -1, totalReviews: -1 }) 
+      .limit(9)
+      .select("_id title price thumbnail")
+
+    const formattedProducts = products.map((product) => ({
+      id: product._id,
+      name: product.title,
+      price: product.price.toString(), 
+      image: product.thumbnail?.url || ""
+    }))
+
+    console.log("Popular products →", formattedProducts)
+    res.status(200).json({popularProducts: formattedProducts})
+  }
+  catch (error) {
+    console.log("Error in productController-getPopularProducts -->", error.message)
+    next(error)
+  }
+}
+
+
+
+const getSimilarProducts = async (req, res, next)=> {
+  try {
+    console.log("Inside getSimilarProducts of productController")
+    console.log('req.body-------->', req.body)
+    const { productIds } = req.body
+
+    if (!Array.isArray(productIds) || productIds.length === 0) {
+      return next(errorHandler(400, "Please provide an array of product IDs"))
+    }
+
+    console.log("productIds---->", productIds)
+
+    const referenceProducts = await Product.find({ _id: { $in: productIds } })
+
+    if (referenceProducts.length === 0) {
+      return next(errorHandler(404, "No reference products found"))
+    }
+
+    const allCategories = new Set()
+    const allTags = new Set()
+
+    referenceProducts.forEach((prod) => {
+      prod.category?.forEach((c)=> allCategories.add(c))
+      prod.tags?.forEach((t)=> allTags.add(t))
+    })
+
+    const similarProducts = await Product.find({
+      isBlocked: false,
+      _id: { $nin: productIds }, 
+      $or: [
+        { category: { $in: Array.from(allCategories) } },
+        { tags: { $in: Array.from(allTags) } },
+      ],
+    })
+      .limit(12)
+      .select("_id title price thumbnail discountType discountValue")
+
+    const formattedSimilarProducts = similarProducts.map((product)=> {
+      let discountLabel = null
+
+      if (product.discountType === "percentage") {
+        discountLabel = `-${product.discountValue}%`
+      } else if (product.discountType === "fixed" && product.discountValue > 0) {
+        discountLabel = `-₹${product.discountValue}`
+      }
+
+      return {
+        id: product._id,
+        name: product.title,
+        price: `Rs ${product.price}`,
+        image: product.thumbnail?.url || "",
+        rating: 5, 
+        ...(discountLabel && { discount: discountLabel }),
+      }
+    }); 
+
+    console.log("Similar products--->", formattedSimilarProducts)
+
+    res.status(200).json({similarProducts: formattedSimilarProducts});
+  } 
+  catch (error){
+    console.log("Error in productController-getSimilarProducts ---->", error.message)
+    next(error)
+  }
+}
+
+
 const searchProduct = async (req, res, next)=> {
   try {
     console.log("Inside searchProduct of productController")
@@ -435,4 +555,5 @@ const updateProduct = async (req, res, next) => {
   }
 
 
-module.exports = {createProduct, getSingleProduct, getAllProducts, searchProduct, updateProduct, toggleProductStatus, exportProductsAsCsv, exportProductsAsPdf}
+module.exports = {createProduct, getSingleProduct, getAllProducts, getLatestProducts, getPopularProducts, getSimilarProducts, 
+  searchProduct, updateProduct, toggleProductStatus, exportProductsAsCsv, exportProductsAsPdf}

@@ -227,9 +227,10 @@ export default function ProductDetailPage(){
               }
               
               <div className="mt-[4rem]">
-        
-                  <SimilarProductsCarousal titleColor='black'/>
-        
+                {
+                  productDetails &&
+                    <SimilarProductsCarousal titleColor='black' referenceProductIds={[currentProductId]}/>
+                }
               </div>
 
               <div className='max-md:hidden'> 

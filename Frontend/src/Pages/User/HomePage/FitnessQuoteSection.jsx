@@ -78,7 +78,8 @@ export default function FitnessQuoteSection() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="bg-primary hover:bg-lime-400 text-black font-semibold px-8 py-3 rounded-[8px] transition-colors duration-300 flex items-center gap-2"
+              className="bg-primary hover:bg-lime-400 text-black font-semibold px-8 py-3 rounded-[8px] transition-colors 
+                duration-300 flex items-center gap-2"
             >
               Register Now!
               <ArrowRight size={18} />

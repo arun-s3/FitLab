@@ -16,11 +16,11 @@ export function SiteButton({customStyle, children, className, shouldSubmit = fal
     )
 }
 
-export function SiteButtonDark({customStyle, children, shouldSubmit = false}){
+export function SiteButtonDark({customStyle, children, className = '', shouldSubmit = false}){
     return(
         <button 
             type={shouldSubmit?"submit":"button"} 
-            className='bg-black text-white text-descReg1 site-button-dark'
+            className={`bg-black text-white text-descReg1 site-button-dark ${className}`}
             style={customStyle}
         >
                 {children}

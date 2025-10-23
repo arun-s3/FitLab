@@ -9,28 +9,36 @@ const categories = [
     id: 1,
     title: "Strength",
     description:
-      "Building muscle requires strength and power. Free weights and other weight equipment are crucial. They assist you gain muscle mass and strength by providing resistance exercise. Exercising with weights improves your range of motion while also increasing your balance and stability.",
+      `Building muscle requires strength and power. Free weights and other weight equipment are crucial. 
+       They assist you gain muscle mass and strength by providing resistance exercise. 
+       Exercising with weights improves your range of motion while also increasing your balance and stability.`,
     image: "./StrengthCategoryPic.png"
   },
   {
     id: 2,
     title: "Cardio",
     description:
-      "Cardio exercises are a great way to lose weight. They can be used in the comfort of your own home, and they allow you to customize your workout to suit your needs. These exercise helps spend up on your metabolism and burning calories more quickly.",
+      `Cardio exercises are a great way to lose weight. 
+      They can be used in the comfort of your own home, and they allow you to customize your workout to suit your needs. 
+      These exercise helps spend up on your metabolism and burning calories more quickly.`,
     image: "./CardioCategoryPic.png"
   },
   {
     id: 3,
     title: "Supplements",
     description:
-      "Muscle-building supplements can improve physical performance during resistance training and help stimulate muscle growth. To maximize muscle growth and development, a process known as muscle hypertrophy, it's important to maintain a balanced diet and an exercise routine featuring resistance training.",
+      `Muscle-building supplements can improve physical performance during resistance training and help stimulate muscle growth. 
+      To maximize muscle growth and development, a process known as muscle hypertrophy, 
+      it's important to maintain a balanced diet and an exercise routine featuring resistance training.`,
     image: "./SupplementsCategoryPic.png"
   },
   {
     id: 4,
     title: "Accessories",
     description:
-      "By having your workout gear right, you'll be set for a productive, safe and effective workout. Improve your performance and comfort with the right accessories. Invest time to research workout gear and equipment. Before making a purchase, take time to research workout gear to find the best for your goals and specific needs.",
+      `By having your workout gear right, you'll be set for a productive, safe and effective workout. 
+      Improve your performance and comfort with the right accessories. Invest time to research workout gear and equipment. 
+      Before making a purchase, take time to research workout gear to find the best for your goals and specific needs.`,
     image: "./AccessoriesCategoryPic.png.png"
   },
 ]
@@ -69,14 +77,15 @@ const CategoryCard = ({ category, index }) => {
   return (
     <motion.div
       variants={cardVariants}
-      className={` h-[300px] rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex 
-        ${ isEven ? "flex-row" : "flex-row-reverse"} ${isBlackBg ? "bg-black" : "bg-white"}`}
+      className={` h-auto md:h-[300px] rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 
+        flex flex-col md:flex-row ${ !isEven ? "md:flex-row-reverse" : ""} ${isBlackBg ? "bg-black" : "bg-white"}`}
     >
       <motion.div 
         variants={imageVariants} 
-        className={`w-full md:w-2/5 
+        className={`w-full md:w-2/5
           ${category.title === 'Supplements' ? 'h-48 md:h-[335px] -mt-[28px]' : 'h-48 md:h-[300px]'} flex-shrink-0 overflow-hidden
-          ${ !isEven && "mt-[7px] mr-[8px]"} 
+          ${ !isEven && "mt-0 md:mt-[7px] mr-[8px]"} 
+           h-52 sm:h-60
         `}
      >
         <img 
@@ -87,7 +96,7 @@ const CategoryCard = ({ category, index }) => {
 
       <motion.div
         variants={contentVariants}
-        className={`w-full md:w-3/5 p-6 md:p-8 self-center space-y-4 flex flex-col justify-center ${
+        className={`w-full p-6 md:p-8 self-center space-y-4 flex flex-col justify-center ${
           isBlackBg ? "text-white" : "text-black"
         }`}
       >
@@ -144,7 +153,7 @@ export default function ShopByCategories() {
         viewport={{ once: true, amount: 0.2 }}
       >
         <motion.div variants={headerVariants} className="text-center mb-12 md:mb-8">
-          <h2 className="text-[20px] md:text-[22px] lg:text-[30px] font-bold text-black mb-[5px]">Shop By Categories</h2>
+          <h2 className="text-[26px] xs-sm2:text-[28px] xs-sm:text-[30px] font-bold text-black mb-[5px]">Shop By Categories</h2>
           <p className="text-gray-600 text-sm md:text-base">Pick a category you need to explore the products</p>
         </motion.div>
 

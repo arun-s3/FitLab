@@ -42,10 +42,10 @@ const productSchema = mongoose.Schema({
         type: String,
         required: [true, "Must enter the brand name"]
      },
-     ratings: {
-       type: Number,
-       default: 0,
-     },
+    //  ratings: {
+    //    type: Number,
+    //    default: 0,
+    //  },
      category: {
         type: [String],
         required: [true, "Must enter the category the product belongs to"]
@@ -59,10 +59,10 @@ const productSchema = mongoose.Schema({
         type: [String],
         default: []  
      },
-     totalReviews: {
-       type: Number,
-       default: 0,
-     },
+    //  totalReviews: {
+    //    type: Number,
+    //    default: 0,
+    //  },
      images:{
         type: [{
           name: {
@@ -120,35 +120,35 @@ const productSchema = mongoose.Schema({
     //     ref: "User",
     //     // required: true,
     //   },
-     reviews: [
-       {
-         user: {
-           type: mongoose.Schema.ObjectId,
-           ref: "User",
-           required: true
-         },
-         name: {
-           type: String,
-           required: true
-         },
-         email: {
-            type: String,
-            required: true
-         },
-         date: {
-            type: Date,
-            default: Date.now()
-         },
-         rating: {
-           type: Number,
-           required: true
-         },
-         comment: {
-           type: String,
-           required: true
-         },
-       },
-     ],
+    //  reviews: [
+    //    {
+    //      user: {
+    //        type: mongoose.Schema.ObjectId,
+    //        ref: "User",
+    //        required: true
+    //      },
+    //      name: {
+    //        type: String,
+    //        required: true
+    //      },
+    //      email: {
+    //         type: String,
+    //         required: true
+    //      },
+    //      date: {
+    //         type: Date,
+    //         default: Date.now()
+    //      },
+    //      rating: {
+    //        type: Number,
+    //        required: true
+    //      },
+    //      comment: {
+    //        type: String,
+    //        required: true
+    //      },
+    //    },
+    //  ],
     }, {timestamps:true});
 
 const product = mongoose.model('Product', productSchema)

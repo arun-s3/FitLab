@@ -1,0 +1,152 @@
+/* 
+h1 {
+  font-size: 35px;
+} */
+
+@media (max-width: 1150px) {
+  h1 {
+    font-size: 32px;
+  }
+}
+
+@media (max-width: 900px) {
+  h1 {
+    font-size: 30px;
+  }
+}
+
+@media (max-width: 640px) {
+  h1 {
+    font-size: 26px;
+  }
+}
+
+@media (max-width: 500px) {
+  h1 {
+    font-size: 23px;
+  }
+}
+
+@media (max-width: 450px) {
+  h1 {
+    font-size: 20px;
+  }
+}
+
+/* ===============================
+   Hero Section Animations
+   =============================== */
+
+/* Fade-in base animation */
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Typewriter Effect - Only for last word */
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes blink {
+  50% {
+    border-color: transparent;
+  }
+}
+
+/* Subtitle animation */
+.hero-subtitle {
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+/* Entire heading fades in first */
+.hero-heading {
+  opacity: 0;
+  animation: fadeInUp 0.8s ease-out 0.4s forwards;
+}
+
+/* Typewriter only on the last word */
+.hero-heading .typewriter {
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 2px solid var(--SECONDARY);
+  /* instead of width: 0 → 100%, use ch-based steps */
+  width: 0ch;
+  animation: typing 2.8s steps(20, end) forwards, blink 0.8s step-end infinite alternate;
+  animation-delay: 1s;
+}
+
+/* Typewriter animation tuned to text length */
+@keyframes typing {
+  from {
+    width: 0ch;
+  }
+  to {
+    width: 11ch; /* “Fitness Zone” = ~11 visible characters */
+  }
+}
+
+/* Paragraph, Button, and Socials */
+.hero-paragraph {
+  opacity: 0;
+  animation: fadeInUp 0.8s ease-out 3.5s forwards;
+}
+
+.hero-button {
+  opacity: 0;
+  transform: scale(0.9);
+  animation: fadeInUp 0.8s ease-out 4.3s forwards;
+}
+
+#socials {
+  opacity: 0;
+  animation: fadeInAside 0.8s ease-out forwards;
+  animation-delay: 2.5s; /* adjust so it starts right after typewriter ends */
+}
+
+/* Each child inside aside will appear one after another */
+#socials > * {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeInStagger 0.6s ease-out forwards;
+}
+
+/* Stagger delays for each item */
+#socials > *:nth-child(1) {
+  animation-delay: 2.7s;
+}
+#socials > *:nth-child(2) {
+  animation-delay: 2.9s;
+}
+#socials > *:nth-child(3) {
+  animation-delay: 3.1s;
+}
+#socials > *:nth-child(4) {
+  animation-delay: 3.3s;
+}
+
+/* Animations */
+@keyframes fadeInAside {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInStagger {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

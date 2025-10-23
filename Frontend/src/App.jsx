@@ -30,7 +30,7 @@ import ProtectedUserRoutes from './Components/ProtectedUserRoutes/ProtectedUserR
 import RestrictedEntryRoutes from './Components/RestrictedEntryRoutes/RestrictedEntryRoutes'
 
 import AdminSignInPage from './Pages/Admin/AdminSignInPage/AdminSignInPage'
-import AdminPageLayout from './Pages/Admin/AdminPageLayout/AdminPageLayout'
+import AdminPageLayout from './Components/AdminPageLayout/AdminPageLayout'
 import PrivateAdminRoutes from './Components/PrivateAdminRoutes/PrivateAdminRoutes'
 import AdminCustomersPage from './Pages/Admin/AdminCustomersPage/AdminCustomersPage'
 // import AdminCustomersPageV2 from './Pages/Admin/TesterPages/TesterV2AdminCustomersPage' //For Testing Purpose

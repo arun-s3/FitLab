@@ -77,7 +77,8 @@ export default function SpecialOfferSection() {
             </motion.p>
 
             <motion.button
-              className="w-fit px-8 py-3 md:px-10 md:py-4 bg-primary text-black font-semibold rounded-full hover:bg-yellow-300 transition-colors duration-300 flex items-center gap-2 group"
+              className="w-fit px-8 py-3 md:px-10 md:py-4 bg-primary text-black font-semibold rounded-full
+                hover:bg-yellow-300 transition-colors duration-300 flex items-center gap-2 group"
               whileHover="hover"
               variants={buttonHoverVariants}
             >

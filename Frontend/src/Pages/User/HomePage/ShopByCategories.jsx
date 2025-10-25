@@ -1,4 +1,5 @@
 import React from 'react'
+import {useNavigate} from 'react-router-dom'
 import { motion } from "framer-motion"
 
 import { ArrowRight } from "lucide-react"
@@ -44,8 +45,11 @@ const categories = [
 ]
 
 const CategoryCard = ({ category, index }) => {
+
   const isEven = index % 2 === 0
   const isBlackBg = index === 1 || index === 3
+
+  const navigate = useNavigate()
 
   const cardVariants = {
     hidden: { opacity: 0, y: 30 },
@@ -108,6 +112,7 @@ const CategoryCard = ({ category, index }) => {
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.95 }}
           transition={{ease: 'easeIn', duration: 0.1}}
+          onClick={()=> navigate('/shop', {state: {category: category.title.toLowerCase()}})}
           className={`border-2 font-semibold px-6 py-2 rounded-lg transition-all duration-300 flex items-center gap-2 w-fit ${
             isBlackBg
               ? "border-primary text-primary hover:bg-yellow-300 hover:border-yellow-300 hover:text-black"

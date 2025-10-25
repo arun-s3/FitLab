@@ -61,3 +61,33 @@
     height:17px;
     color:yellow;
 }
+
+@keyframes draw-border {
+  0% {
+    border-width: 0 0 0 1px;
+    border-color: transparent transparent transparent var(--SECONDARY);
+  }
+  25% {
+    border-width: 1px 0 0 1px;
+    border-color: var(--SECONDARY) transparent transparent var(--SECONDARY);
+  }
+  50% {
+    border-width: 1px 1px 0 1px;
+    border-color: var(--SECONDARY) var(--SECONDARY) transparent var(--SECONDARY);
+  }
+  75% {
+    border-width: 1px 1px 1px 1px;
+    border-color: var(--SECONDARY) var(--SECONDARY) var(--SECONDARY) var(--SECONDARY);
+  }
+  100% {
+    border-width: 1px 1px 1px 1px;
+    border-color: var(--SECONDARY);
+  }
+}
+
+#otp-verify>main .animate-border {
+  border-style: solid;
+  border-color: var(--SECONDARY);
+  animation: draw-border 1.5s ease-in-out forwards;
+}
+

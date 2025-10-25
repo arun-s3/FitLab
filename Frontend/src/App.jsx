@@ -114,10 +114,11 @@ export default function App(){
                             </Route>
                             <Route element={<RestrictedEntryRoutes/>}>
                                 <Route path='blocked' element={<UserBlockedPage/>} />
-                                <Route path='otp-verify' element={<OtpVerificationPage/>}/>
+                                {/* <Route path='otp-verify' element={<OtpVerificationPage/>}/> */}
                             </Route>
                             <Route path='support' element={<CustomerSupportPage/>} />
                             <Route path='order-confirm' element={<OrderConfirmationPage/>} />
+                            <Route path='otp-verify' element={<OtpVerificationPage/>}/>
                         </Route>
                     </Route>
 

@@ -46,6 +46,8 @@ export default function ProductList({admin}){
 
     const [isCartOpen, setIsCartOpen] = useState(false)
 
+    const [showCategoryTypeOf, setShowCategoryTypeOf] = useState(null)
+
     const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(false)
 
     const [openCouponApplicableModal, setOpenCouponApplicableModal] = useState({status: false, code: '', products: [], categories: []})
@@ -58,6 +60,10 @@ export default function ProductList({admin}){
         if(location && location.state?.showCouponApplicableModal){
             const {couponCode, products, categories} = location.state
             setTimeout(()=> setOpenCouponApplicableModal({status: true, code: couponCode, products, categories}), 1500)
+        }
+        if(location && location.state?.category){
+            const {category} = location.state
+            setShowCategoryTypeOf(category)
         }
     }, [location])
 
@@ -180,6 +186,7 @@ export default function ProductList({admin}){
                         setFilter={setFilter} 
                         rating={rating} 
                         setRating={setRating}
+                        categoryType={showCategoryTypeOf}
                         popularProducts={popularProducts}
                         muscleGroups={muscleGroups}
                         brands={brands}

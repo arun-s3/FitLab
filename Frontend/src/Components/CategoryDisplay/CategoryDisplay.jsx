@@ -1,12 +1,16 @@
-import React, {useState, useEffect} from 'react';
-import {useSelector, useDispatch} from 'react-redux';
-import {unwrapResult} from '@reduxjs/toolkit';
-import {getAllCategories, getSingleCategory, resetSubcategories} from '../../Slices/categorySlice';
-import './CategoryDisplay.css';
-import {MdOutlineArrowDropDownCircle} from 'react-icons/md';
-import {GoPlus} from "react-icons/go";
+import React, {useState, useEffect} from 'react'
+import './CategoryDisplay.css'
+import {useSelector, useDispatch} from 'react-redux'
+import {unwrapResult} from '@reduxjs/toolkit'
+import {motion, AnimatePresence} from "framer-motion"
 
-export default function CategoryDisplay({type, filter, setFilter, radioCheckedCategory, setRadioCheckedCategory, manualCheckCategory, 
+import {MdOutlineArrowDropDownCircle} from 'react-icons/md'
+import {GoPlus} from "react-icons/go"
+
+import {getAllCategories, getSingleCategory, resetSubcategories} from '../../Slices/categorySlice'
+
+
+export default function CategoryDisplay({type, filter, setFilter, categoryType, radioCheckedCategory, setRadioCheckedCategory, manualCheckCategory, 
                       setManualCheckCategory, setRelatedCategoryError, storeCheckedCategories, styler}) {
   const [subCategories, setSubCategories] = useState({});
   const [openSubcategories, setOpenSubcategories] = useState({});
@@ -25,7 +29,6 @@ export default function CategoryDisplay({type, filter, setFilter, radioCheckedCa
     }
     fetchCategories();
   }, [dispatch]);
-
 
   useEffect(() => {
     if (populatedSubCategories && !loadingSubCategories) {
@@ -118,8 +121,8 @@ const checkNestedSubcategories = async (id, isChecked) => {
 };
 
   const checkboxHandler = async (e, catId, subCategory) => {
-    const categoryId = e.target.id;
-    const isChecked = e.target.checked;
+    const categoryId = e ? e.target.id : catId;
+    const isChecked = e ? e.target.checked: true;
   
     setOpenSubcategories((prevOpenSubcategories) => ({
       ...prevOpenSubcategories,
@@ -155,7 +158,17 @@ const checkNestedSubcategories = async (id, isChecked) => {
       const updatedCategories = prevCategories.filter((cat) => cat.name !== categoryId);
       return isChecked ? [...updatedCategories, { name: categoryId, status: true }] : updatedCategories;
     });
-  };
+  }
+
+  useEffect(()=> {
+    async function checkRequestedCategory(){
+      if(categoryType){
+        console.log("categoryType wanted---->", categoryType)
+        await checkboxHandler(null, categoryType.id, categoryType.subCategory)
+      }
+    }
+    checkRequestedCategory()
+  }, [categoryType])
 
   const radioClickHandler = (name)=>{
     const checkStatus = radioCheckedCategory === name
@@ -223,7 +236,6 @@ const checkNestedSubcategories = async (id, isChecked) => {
     }
   }
 
-  
   const CategoryListGenerator = (categories, isSubcategory, parentLevelCount) => (
     <>
       {categories && categories.length > 0 && categories.map((category, index) => {
@@ -231,59 +243,120 @@ const checkNestedSubcategories = async (id, isChecked) => {
         const subCategoryPadding = isSubcategory ? { paddingLeft: `${parentLevelCount * 10}px` } : {};
 
         return (
-          <div key={category._id}>
-            <ul id='category-content' className={` ${!category.parentCategory && (index!==categories.length-1) && !styler?.['borderBottomNone'] && 'border-b border-dotted border-[#C9CBCE] border-primary'}`}>
-              <li className='py-[5px]' style={subCategoryPadding}>
-                <div className={`flex items-center justify-between ${category.parentCategory && 'pr-[7px]'}
-                           ${(type == 'radioType' || type == 'manualCheckboxType') && 'justify-start gap-[3rem]'}`}>
-                  <div className={`flex items-center category-name ${(type == 'radioType' || type == 'manualCheckboxType')  && 'gap-[5px]'}`}> 
-                    {
-                      type == 'checkboxType'?
-                        <input type='checkbox' id={category.name} key={`${category._id}-${openSubcategories[category._id]?.checked}`}
-                          onChange={(e)=>checkboxHandler(e, category._id, category.subCategory)} 
-                          checked={ openSubcategories?.[category._id]?.['checked'] || checkedCategories.some(cat=> cat.name===category.name)?.['checked'] || openSubcategories?.[category.parentCategory]?.['checked'] }
-                          className={`${!category.parentCategory ? 'hidden' : 'inline-block'} h-[13px] w-[13px] rounded-[3px] border-primary`}/>
-                        : type == 'manualCheckboxType'?
-                            <input type='checkbox' id={category.name} onChange={(e)=> manualCheckboxHandler(e, category.name)} key={`${category._id}-${manualCheckCategory?.[category.name]}`}
-                                checked={manualCheckCategory?.[category.name]} />                     
-                        :
-                          <input type='radio' id='radioType-input' onClick={()=> radioClickHandler(category.name)} 
-                              onChange={()=> radioChangeHandler(category.name)} checked={radioCheckedCategory === category.name}/>
-                    }
-                    <span className={`capitalize text-[#505050] cursor-pointer ${!category.parentCategory ? 'text-[14px]':'text-[12.5px]'}`}> 
+          <motion.div
+            key={category._id}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: index * 0.05, ease: "easeOut" }}
+          >
+            <ul
+              id="category-content"
+              className={`${
+                !category.parentCategory &&
+                index !== categories.length - 1 &&
+                !styler?.["borderBottomNone"] &&
+                "border-b border-dotted border-[#C9CBCE] border-primary"
+              }`}
+            >
+              <li className="py-[5px]" style={subCategoryPadding}>
+                <div
+                  className={`flex items-center justify-between ${
+                    category.parentCategory && "pr-[7px]"
+                  } ${(type == "radioType" || type == "manualCheckboxType") && "justify-start gap-[3rem]"}`}
+                >
+                  <div
+                    className={`flex items-center category-name ${
+                      (type == "radioType" || type == "manualCheckboxType") && "gap-[5px]"
+                    }`}
+                  >
+                    {type == "checkboxType" ? (
+                      <input
+                        type="checkbox"
+                        id={category.name}
+                        key={`${category._id}-${openSubcategories[category._id]?.checked}`}
+                        onChange={(e) => checkboxHandler(e, category._id, category.subCategory)}
+                        checked={
+                          openSubcategories?.[category._id]?.["checked"] ||
+                          checkedCategories.some((cat) => cat.name === category.name)?.["checked"] ||
+                          openSubcategories?.[category.parentCategory]?.["checked"]
+                        }
+                        className={`h-[13px] w-[13px] rounded-[3px] border-primary`}
+                      />
+                    ) : type == "manualCheckboxType" ? (
+                      <input
+                        type="checkbox"
+                        id={category.name}
+                        onChange={(e) => manualCheckboxHandler(e, category.name)}
+                        key={`${category._id}-${manualCheckCategory?.[category.name]}`}
+                        checked={manualCheckCategory?.[category.name]}
+                      />
+                    ) : (
+                      <input
+                        type="radio"
+                        id="radioType-input"
+                        onClick={() => radioClickHandler(category.name)}
+                        onChange={() => radioChangeHandler(category.name)}
+                        checked={radioCheckedCategory === category.name}
+                      />
+                    )}
+
+                    <span
+                      className={`capitalize text-[#505050] cursor-pointer ${
+                        !category.parentCategory ? "text-[14px]" : "text-[12.5px]"
+                      }`}
+                    >
                       {category.name}
                     </span>
                   </div>
-                  <div className='flex'>
-                    { type == 'checkboxType' && category?.badge && (
-                      <span className='border border-[#eae0f0] px-[10px] rounded-[7px] text-[10px] tracking-[0.3px] text-[#07bc0c]'>
+
+                  <div className="flex">
+                    {type == "checkboxType" && category?.badge && (
+                      <span className="border border-[#eae0f0] px-[10px] rounded-[7px] text-[10px] tracking-[0.3px] text-[#07bc0c]">
                         {category.badge}
                       </span>
                     )}
-                    {category?.subCategory && category?.subCategory.length ? 
-                      ( <i className='ml-[5px] cursor-pointer text-secondary' onClick={() => showSubcategories(category._id, category.name)}
-                             data-label={isSubcategoryOpen ? 'Close Subcategories' : 'Show Subcategories'} >
-                        { (type == 'checkboxType')? <MdOutlineArrowDropDownCircle /> : <GoPlus/>}
+                    {category?.subCategory && category?.subCategory.length ? (
+                      <i
+                        className="ml-[5px] cursor-pointer text-secondary"
+                        onClick={() => showSubcategories(category._id, category.name)}
+                        data-label={isSubcategoryOpen ? "Close Subcategories" : "Show Subcategories"}
+                      >
+                        {type == "checkboxType" ? <MdOutlineArrowDropDownCircle /> : <GoPlus />}
                       </i>
                     ) : null}
                   </div>
                 </div>
               </li>
             </ul>
-            {isSubcategoryOpen && subCategories && Object.keys(subCategories).length > 1 &&
-              CategoryListGenerator( subCategories[category._id], true, openSubcategories[category._id]?.parentLevelCount )}
-          </div>
-        );
+
+            <AnimatePresence>
+              {isSubcategoryOpen && subCategories && Object.keys(subCategories).length > 1 && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.4, ease: "easeInOut" }}
+                >
+                  {CategoryListGenerator(
+                    subCategories[category._id],
+                    true,
+                    openSubcategories[category._id]?.parentLevelCount
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        )
       })}
     </>
-  );
+  )
 
   return (
-          <main id='categoryDisplay' className='w-full'>
-            {
-              CategoryListGenerator(categories)
-            }
-          </main>
-  )
-}
+    <main id="categoryDisplay" className="w-full">
 
+      {CategoryListGenerator(categories)}
+
+    </main>
+  )
+
+}

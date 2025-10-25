@@ -18,6 +18,8 @@ export default function HomePage(){
     const [showHighlights, setShowHighlights] = useState(false)
     const highlightsRef = useRef(null)
 
+    const shopByCategoryRef = useRef(null)
+
     useEffect(() => {
       const observer = new IntersectionObserver(
         (entries) => {
@@ -51,7 +53,7 @@ export default function HomePage(){
           style={bgImg}
         >
 
-            <Header />
+            <Header goToShopByCategorySec={()=> shopByCategoryRef.current?.scrollIntoView({ behavior: "smooth" })}/>
 
             <HeroSection />
 
@@ -73,7 +75,11 @@ export default function HomePage(){
 
         </div>
 
-        <ShopByCategories />
+        <div ref={shopByCategoryRef}>
+
+          <ShopByCategories />
+
+        </div>
 
         <div ref={highlightsRef} className='mt-8'>
 

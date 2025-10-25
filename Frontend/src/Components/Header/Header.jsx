@@ -23,7 +23,7 @@ import {SocketContext} from '../../Components/SocketProvider/SocketProvider'
 
 
 
-export default function Header({customStyle}){
+export default function Header({customStyle, goToShopByCategorySec}){
 
     const [isCartOpen, setIsCartOpen] = useState(false)
 
@@ -46,7 +46,8 @@ export default function Header({customStyle}){
 
     const menuItems = [
         {label: 'Home', path: '/'},
-        {label: 'Shop By Categories', path: '/shop', mobileLabel: 'Shop', className: 'hidden lg:hidden xl:inline-block', mobileClassName: 'xl:hidden'},
+        {label: 'Shop By Categories', handleClick: goToShopByCategorySec,
+             mobileLabel: 'Explore', className: 'hidden lg:hidden xl:inline-block', mobileClassName: 'xl:hidden'},
         {label: 'Products', path: '/shop'},
         {label: 'Support', path: '/support'},
         {label: 'About Us', path: '/about'}
@@ -104,14 +105,16 @@ export default function Header({customStyle}){
                                     item?.mobileLabel &&
                                         <Link 
                                             className={`${item?.mobileClassName ? item.mobileClassName : ''}`}
-                                            to={item.path}
+                                            to={!item.handleClick && item.path}
+                                            onClick={()=> item.handleClick && item.handleClick()}
                                         > 
                                             {item.mobileLabel} 
                                         </Link>
                                 }
                                 <Link 
                                     className={`${item?.className ? item.className : ''}`}
-                                    to={item.path}
+                                    to={!item.handleClick && item.path}
+                                    onClick={()=> item.handleClick && item.handleClick()}
                                 > 
                                     {item.label} 
                                 </Link>

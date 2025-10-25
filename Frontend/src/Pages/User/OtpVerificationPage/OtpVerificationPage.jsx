@@ -284,9 +284,9 @@ export default function OtpVerificationPage(){
                         </header>
 
                         <main className='flex justify-center items-center'>
-
-                            <motion.div className='mt-[2.5rem] w-[18rem] xs-sm:w-[26rem] s-sm:w-[30rem] sm:w-[33rem] rounded-[22px]
-                              px-[50px] border border-secondary z-50'
+                            
+                            <motion.div className='animate-border mt-[2.5rem] w-[18rem] xs-sm:w-[26rem] s-sm:w-[30rem] sm:w-[33rem] 
+                              rounded-[22px] px-[50px] border-l border-secondary z-50'
                                 variants={container}
                                 initial="hidden"
                                 animate="enter"

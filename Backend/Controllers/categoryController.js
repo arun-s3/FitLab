@@ -119,6 +119,34 @@ const findCategoryById = async (req, res, next) => {
     }
 }
 
+
+const getCategoryIdByName = async (req, res, next)=> {
+  try {
+    const {name} = req.params
+    console.log("Inside getCategoryIdByName, received category name-->", name)
+
+    if (!name || !name.trim()) {
+      next(errorHandler(400, "Category name is required"))
+    }
+
+    const category = await Category.findOne({
+      name: { $regex: new RegExp(`^${name}$`, "i") }}).select("_id name subCategory")
+
+    if (!category) {
+      next(errorHandler(404, "Category not found"))
+    }
+
+    console.log("Required category id----->", category._id)
+    res.status(200).json({id: category._id, name: category.name, subCategory: category.subCategory})
+  }
+  catch (error) {
+    console.error("Error fetching category ID:", error);
+    next(error)
+  }
+}
+
+
+
 const getAllCategories = async(req,res,next)=>{
     try{
         if(Object.keys(req.query).length > 0){
@@ -457,5 +485,5 @@ const updateCategory = async (req, res, next) => {
   }
 
 
-module.exports = {createCategory, getAllCategories, getFirstLevelCategories, findCategoryById, 
+module.exports = {createCategory, getAllCategories, getFirstLevelCategories, findCategoryById, getCategoryIdByName,
             getCategoryNames, getNestedSubcategoryNames, toggleCategoryStatus, updateCategory}

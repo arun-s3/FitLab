@@ -3,6 +3,7 @@ import {motion, AnimatePresence} from 'framer-motion'
 
 import {VscSettings} from "react-icons/vsc"
 import {RiArrowDropUpLine} from "react-icons/ri"
+import axios from 'axios'
 
 import CategoryDisplay from '../../../Components/CategoryDisplay/CategoryDisplay'
 import PriceSliderAndFilter from '../../../Components/PriceSliderAndFilter/PriceSliderAndFilter'
@@ -10,7 +11,7 @@ import RatingSlider from '../../../Components/RatingSlider/RatingSlider'
 import {capitalizeFirstLetter} from '../../../Utils/helperFunctions'
 
 
-export default function FilterModule({filter, setFilter, rating, setRating, popularProducts, muscleGroups, brands}){
+export default function FilterModule({filter, setFilter, rating, setRating, popularProducts, muscleGroups, brands, categoryType}){
 
     const [showFilter, setShowFilter] = useState({
             category: true,
@@ -25,11 +26,32 @@ export default function FilterModule({filter, setFilter, rating, setRating, popu
     const [maxPrice, setMaxPrice] = useState(3750)
     let firstSlideRef = useRef(false)
 
+    const [showSubcategoriesOf, setShowSubcategoriesOf] = useState(null)
+
+    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+
     useEffect(()=>{
         if(firstSlideRef.current){
             setFilter({...filter, minPrice, maxPrice})
         }
     },[minPrice, maxPrice])
+
+    useEffect(()=> {
+        async function getCategoryName(){
+            try{
+                const response = await axios.get(`${baseApiUrl}/admin/products/category/id/${categoryType}`, {withCredentials: true})
+                console.log("Category id asked--->", response.data.id) 
+                setShowSubcategoriesOf({id: response.data.id, subCategory: response.data.subCategory})
+              }
+              catch(error){
+                console.log("error from  getCategoryName--->", error.message)
+              }  
+        }
+        if(categoryType){
+          console.log("categoryType---->", categoryType)
+          getCategoryName()
+        }
+    }, [categoryType])
 
     const [popularProductsShowLabel, setPopularProductsShowLabel] = useState('See more')
     const [morePopularProducts, setMorePopularProducts] = useState(0)
@@ -132,7 +154,12 @@ export default function FilterModule({filter, setFilter, rating, setRating, popu
                                 animate={{ height: "auto", opacity: 1 }}
                                 exit={{ height: 0, opacity: 0 }}
                             >
-                                <CategoryDisplay type='checkboxType' filter={filter} setFilter={setFilter}/>
+                                <CategoryDisplay 
+                                    type='checkboxType' 
+                                    categoryType={categoryType ? showSubcategoriesOf : null} 
+                                    filter={filter} 
+                                    setFilter={setFilter}
+                                />
                             </motion.ul>
                         }
                     </AnimatePresence>

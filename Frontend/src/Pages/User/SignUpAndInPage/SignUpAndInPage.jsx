@@ -2,6 +2,7 @@ import React,{useState, useEffect, useLayoutEffect, useRef} from 'react'
 import './SignUpAndInPage.css'
 import {Link, useNavigate, useLocation} from 'react-router-dom'
 import {useDispatch, useSelector} from 'react-redux'
+import {motion} from "framer-motion"
 
 import {toast} from 'react-toastify'
 import {useGoogleLogin} from '@react-oauth/google'
@@ -251,11 +252,41 @@ export default function SignUpAndInPage({type}){
     console.log("Store states from signUpAndInPage- loading-->"+loading)
     console.log("Success before JSX"+success)
 
+    const sectionVariants = {
+      hidden: { opacity: 0,},
+      visible: { opacity: 1, transition: { duration: 0.8, ease: "easeOut" } }
+    }
+
+    const mainVariants = {
+      hidden: { opacity: 0, scale: 0.97 },
+      visible: {
+        opacity: 1,
+        scale: 1,
+        transition: {
+          duration: 0.7,
+          ease: "easeOut",
+          when: "beforeChildren",
+          staggerChildren: 0.12,
+        },
+      }
+    }
+
+    const childVariants = {
+      hidden: { opacity: 0, y: 10 },
+      visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } }
+    }
+
+
     return(
        <>
-        <section style={bgImg}
+        <motion.section 
+            style={bgImg}
             className={`${type=='signup'? 'h-[165vh] sm:h-[145vh] before:h-[165vh] sm:before:h-[145vh]' : 'h-[120vh] before:h-[120vh]'}`}
-            id="signup-and-in">
+            id="signup-and-in"
+            variants={sectionVariants}
+            initial="hidden"
+            animate="visible"
+        >
 
             <header>
 
@@ -263,21 +294,33 @@ export default function SignUpAndInPage({type}){
                 
             </header>
         
-            <main className={`-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2
-                rounded-[22px] px-[50px] sm:px-10 border-secondary 
-                ${type=='signup'? 'w-[90%] sm:w-[70%] md:w-[50%] lg:w-[40%] my-[16rem] sm:my-[12rem] sm:border' 
-                    : 'w-[90%] x-md:w-[65%] lg:w-[50%] x-lg:w-[40%] my-[2%] border before:h-[120vh]'}`}
+            <main 
+                className={`-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2
+                    rounded-[22px] px-[50px] sm:px-10
+                    ${type=='signup'? 'w-[90%] sm:w-[70%] md:w-[50%] lg:w-[40%] my-[16rem] sm:my-[12rem] sm:border' 
+                        : 'w-[90%] x-md:w-[65%] lg:w-[50%] x-lg:w-[40%] my-[2%] before:h-[120vh]'}`}
             >
-
-                <h1 className='text-secondary font-funCity text-3xl sm:text-4xl mb-[60px] text-left my-[50px]'>
-                    SIGN
+                 <motion.div
+                   className="absolute inset-0 border border-secondary rounded-[22px] pointer-events-none"
+                   initial={{ clipPath: "inset(0 100% 100% 0)" }}
+                   animate={{ clipPath: "inset(0 0% 0% 0)" }}
+                   transition={{ duration: 1.6, ease: "easeInOut" }}
+                 />
+                <motion.h1 
+                    className='text-secondary font-funCity text-3xl sm:text-4xl mb-[60px] text-left my-[50px]'
+                    variants={childVariants}
+                >
+                        SIGN
                     <span className='font-funCity'> {type.slice(4).toUpperCase()} </span>
-                </h1>
+                </motion.h1>
 
-                <form className='flex flex-col gap-[15px] text-descReg1 items-start'
-                     onSubmit={(e)=>submitData(e)} >
+                <motion.form 
+                    className='flex flex-col gap-[15px] text-descReg1 items-start'
+                    onSubmit={(e)=>submitData(e)}
+                    variants={mainVariants}
+                >
 
-                    <div className="w-full">
+                    <motion.div className="w-full" variants={childVariants}>
                     {type=='signup'? <>
                                         <label htmlFor='email'> Enter your email address </label>
                                         <input type="email" 
@@ -300,10 +343,10 @@ export default function SignUpAndInPage({type}){
                                      </>
                         }
                         <p className='error'></p>
-                    </div>
+                    </motion.div>
                     {
                         type==="signup"? 
-                                        (<div className='flex flex-col sm:flex-row gap-[20px] w-full'>
+                                        (<motion.div className='flex flex-col sm:flex-row gap-[20px] w-full' variants={childVariants}>
                                             <div className="flex-1">
                                                 <label htmlFor='username'> User Name </label>
                                                 <input type="text" 
@@ -326,11 +369,11 @@ export default function SignUpAndInPage({type}){
                                                 />
                                                 <p className='error'></p>
                                             </div>
-                                        </div>)
+                                        </motion.div>)
                                       : <></>
                     }
                     
-                    <div className='flex flex-col gap-[15px] w-full'>
+                    <motion.div className='flex flex-col gap-[15px] w-full' variants={childVariants}>
                         <div>
                             <label htmlFor='password'>Enter your Password</label>
                             <input type="password" 
@@ -375,36 +418,46 @@ export default function SignUpAndInPage({type}){
                                            )
                         }
                     
-                    </div>   
-                    <SiteButtonSquare shouldSubmit={true}
-                        customStyle={{ width:'100%', display: 'flex', justifyContent:'center', alignItems:'center', 
-                        marginBottom: type ==='signup' ? '10px': '3rem'}} >
-                        { 
-                            loading? <CustomHashLoader loading={loading}/> : otpPageLoading ? 
-                                        <span className='flex justify-center items-center gap-[5px]'>  
-                                            <span className='text-secondary text-[11px] tracking-[0.3px] mb-[3px]'> 
-                                                Redirecting to OTP Verification Page 
+                    </motion.div>   
+                    <motion.div variants={childVariants} className='w-full'>
+                        <SiteButtonSquare 
+                            shouldSubmit={true}
+                            customStyle={{ width:'100%', display: 'flex', justifyContent:'center', alignItems:'center', 
+                            marginBottom: type ==='signup' ? '10px': '3rem'}}
+                        >
+                            { 
+                                loading? <CustomHashLoader loading={loading}/> : otpPageLoading ? 
+                                            <span className='flex justify-center items-center gap-[5px]'>  
+                                                <span className='text-secondary text-[11px] tracking-[0.3px] mb-[3px]'> 
+                                                    Redirecting to OTP Verification Page 
+                                                </span>
+                                                <CustomScaleLoader loading={true}/>
                                             </span>
-                                            <CustomScaleLoader loading={true}/>
-                                        </span>
-                                    : 'Sign'+' '+type.slice(4,5).toUpperCase()+type.slice(5) 
-                        }
-                    </SiteButtonSquare>
+                                        : 'Sign'+' '+type.slice(4,5).toUpperCase()+type.slice(5) 
+                            }
+                        </SiteButtonSquare>
+                    </motion.div>
                     {
                         type=="signup"? 
-                        <SiteSecondaryBorderButtonSquare customStyle={{marginBottom:'60px', width:'100%', display:'flex',
-                                justifyContent:'center', alignItems:'center'}} 
-                            clickHandler={()=>{ setGooglePromptLoading(true); googleLogin()}}>
-                            <img src="/google.png" 
-                                 alt="" className='mr-[15px] inline-block'/> 
-                            { 
-                                (loading||googlePromptLoading) ? <CustomHashLoader loading={googlePromptLoading||loading}/> : "Continue with Google" 
-                            }
-                        </SiteSecondaryBorderButtonSquare>: <></>
+                        <motion.div variants={childVariants} className='w-full'>
+                            <SiteSecondaryBorderButtonSquare 
+                                customStyle={{marginBottom:'60px', width:'100%', display:'flex',
+                                    justifyContent:'center', alignItems:'center'}} 
+                                clickHandler={()=>{ setGooglePromptLoading(true); googleLogin()}}>
+                                <img src="/google.png" 
+                                     alt="" className='mr-[15px] inline-block'/> 
+                                { 
+                                    (loading||googlePromptLoading) 
+                                    ? <CustomHashLoader loading={googlePromptLoading||loading}/> 
+                                    : "Continue with Google" 
+                                }
+                            </SiteSecondaryBorderButtonSquare>
+                        </motion.div>
+                        : <></>
                     }
-                </form>
+                </motion.form>
             </main>
-        </section>
+        </motion.section>
         <Footer/>
       </>
     )

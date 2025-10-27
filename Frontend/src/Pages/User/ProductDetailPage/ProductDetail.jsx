@@ -12,7 +12,8 @@ import {CustomHashLoader} from '../../../Components/Loader/Loader'
 
 export default function ProductDetail({product = null, quantity, setQuantity, onAddToCart, isLoading}){
 
-    const [selectedWeight, setSelectedWeight] = useState(null)
+    const [selectedVariantValue, setSelectedVariantValue] = useState(null)
+    const [variantValueIndex, setVariantValueIndex] = useState(0)
 
     const [currentImageIndex, setCurrentImageIndex] = useState(null)
   
@@ -22,7 +23,9 @@ export default function ProductDetail({product = null, quantity, setQuantity, on
 
     useEffect(()=> {
       if(product && Object.keys(product).length > 0){
-        setSelectedWeight(product.weights[0])
+        console.log("product[`${product.variantType}s`][0]---->", product[`${product.variantType}s`][0])
+        setSelectedVariantValue(product[`${product.variantType}s`][0])
+
         const thumbnailIndex = product.images.findIndex(img=> img.isThumbnail)
         setCurrentImageIndex(thumbnailIndex)
       }
@@ -124,7 +127,8 @@ export default function ProductDetail({product = null, quantity, setQuantity, on
               className="flex gap-[12px] xs-sm:gap-[16px] overflow-x-visible pb-2"
               variants={sectionVariants}
             >
-              {Object.keys(product).length === 0 ? null : (
+              {product &&
+                Object.keys(product).length === 0 ? null : (
                 <AnimatePresence>
                   {product.images.map((image, index) => (
                     <motion.img
@@ -187,14 +191,14 @@ export default function ProductDetail({product = null, quantity, setQuantity, on
                     className={` ${bestOffer && bestOffer.bestDiscount > 0 && 'line-through decoration-[2px] decoration-red-500'}`}
                     variants={itemVariants}
                   >
-                    &#8377; {product.price * quantity}  
+                    &#8377; {product && product.prices[variantValueIndex] * quantity}  
                   </motion.p>
                   { bestOffer && bestOffer.bestDiscount > 0 && 
                     <motion.span 
                       className='mt-[-3px] xs-sm:mt-[-5px] text-green-500'
                       variants={itemVariants}
                     > 
-                    &#8377; { (product.price - bestOffer.bestDiscount).toFixed(2) }  
+                    &#8377; { (product.prices[variantValueIndex] - bestOffer.bestDiscount).toFixed(2)  }  
                     </motion.span>
                   }
                 </motion.div>
@@ -227,42 +231,52 @@ export default function ProductDetail({product = null, quantity, setQuantity, on
                 }
               </motion.div>
               
-              <motion.div className='!mt-8' variants={sectionVariants}>
-                <motion.h3 className="text-[14px] xs-sm:text-[15px] font-medium mb-[6px] xs-sm:mb-[8px]"
-                  variants={itemVariants}
-                >
-                  WEIGHT:  
-                  <span> 
-                    {selectedWeight && selectedWeight}KG
-                  </span> 
-                </motion.h3>
-                <motion.div className="grid grid-cols-2 gap-[6px] xs-sm:gap-[8px] gap-x-[0.8rem] xs-sm:gap-x-[1rem]"
-                  variants={sectionVariants}
-                >
-                  {product && product.weights &&
-                    product.weights.map((weight) => (
-                      <motion.div key={weight} variants={itemVariants}>
-                        <motion.div
-                          initial="rest"
-                          whileHover="hover"
-                          whileTap="tap"
-                          variants={smallButton}
-                          onClick={() => setSelectedWeight(weight)}
-                        >
-                          <SiteSecondaryFillButton 
-                            key={weight} 
-                            variant={selectedWeight === weight ? "default" : "outline"}
-                            className="w-full text-[13px] xs-sm:text-base py-[8px]" 
-                            clickHandler={() => setSelectedWeight(weight)}
+              {
+                product?.variantType  &&
+                <motion.div className='!mt-8' variants={sectionVariants}>
+                  <motion.h3 className="text-[14px] xs-sm:text-[15px] font-medium mb-[6px] xs-sm:mb-[8px]"
+                    variants={itemVariants}
+                  >
+                    {(product.variantType).toUpperCase()}:
+                    <span className='ml-[5px]'> 
+                      {
+                        selectedVariantValue 
+                          && selectedVariantValue + 
+                            `${product.variantType === 'weight' ? '  Kg' : product.variantType === 'motorPower' ? '  Hp' : null}`
+                      }
+                    </span> 
+                  </motion.h3>
+                  <motion.div className="grid grid-cols-2 gap-[6px] xs-sm:gap-[8px] gap-x-[0.8rem] xs-sm:gap-x-[1rem]"
+                    variants={sectionVariants}
+                  >
+                    {product && product[`${product.variantType}s`] &&
+                      product[`${product.variantType}s`].map((value, index) => (
+                        <motion.div key={value} variants={itemVariants}>
+                          <motion.div
+                            initial="rest"
+                            whileHover="hover"
+                            whileTap="tap"
+                            variants={smallButton}
+                            onClick={() => setSelectedVariantValue(value)}
                           >
-                            {weight} KG
-                          </SiteSecondaryFillButton>
+                            <SiteSecondaryFillButton 
+                              key={value} 
+                              variant={selectedVariantValue === value ? "default" : "outline"}
+                              className="w-full text-[13px] xs-sm:text-base py-[8px]" 
+                              clickHandler={()=> {
+                                setSelectedVariantValue(value)
+                                setVariantValueIndex(index)  
+                              }}
+                            >
+                              {value + `${product.variantType === 'weight' ? '  KG' : product.variantType === 'motorPower' ? '  HP' : null}`} 
+                            </SiteSecondaryFillButton>
+                          </motion.div>
                         </motion.div>
-                      </motion.div>
-                    ))
-                  }
-                </motion.div>
+                      ))
+                    }
+                  </motion.div>
               </motion.div>
+              }
               
               <motion.div className="!mt-8 flex items-center justify-between gap-[12px] xs-sm:gap-[16px]" variants={itemVariants}>
                 <motion.div className="flex items-center border rounded-md" variants={itemVariants}>
@@ -317,7 +331,7 @@ export default function ProductDetail({product = null, quantity, setQuantity, on
                 <motion.div initial="rest" whileHover="hover" whileTap="tap" variants={addToCartButton}>
                   <SiteSecondaryFillButton 
                     className="w-full bg-[#CCFF00] hover:bg-primary text-black py-[12px] text-[14px] xs-sm:text-base" 
-                     clickHandler={()=> onAddToCart(product)}>
+                     clickHandler={()=> onAddToCart(product, variantValueIndex)}>
                       { isLoading? <CustomHashLoader loading={isLoading}/> : 'Add to Cart' }
                   </SiteSecondaryFillButton>
                 </motion.div>

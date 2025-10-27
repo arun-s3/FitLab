@@ -36,8 +36,9 @@ export function SiteButtonSquare({customStyle, tailwindClasses, light, lighter, 
     }
     return(
         <button type={shouldSubmit?"submit":"button"}
-            className={` ${tailwindClasses} site-button-square bg-primary text-black 
-                text-descReg1 ${light ? 'font-[480]' : lighter ? 'font-[450]' : ''}`} style={computedStyle}
+            className={`${tailwindClasses ? tailwindClasses : ''} site-button-square bg-primary text-black 
+                text-descReg1 ${light ? 'font-[480]' : lighter ? 'font-[450]' : ''}`}
+            style={computedStyle}
             onClick={clickHandler ? ()=> clickHandler() : undefined} 
         >
                  {children} 

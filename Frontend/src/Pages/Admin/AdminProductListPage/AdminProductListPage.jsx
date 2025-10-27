@@ -65,10 +65,14 @@ export default function AdminProductListPage(){
 
     const muscleGroups = ["Chest", "Back", "Shoulders", "Biceps", "Triceps", "Forearms", "Quadriceps", "Hamstrings", "Glutes", "Calves",
         "Core/Abs", "Full Body", "Cardio"]
+    
+    useEffect(()=> {
+        dispatch( getAllProducts({queryOptions: {}}))
+    }, [])
 
     useEffect(()=>{
         setShowTheseProducts(products)
-    },[])
+    },[products])
 
     useEffect(()=> {
         if(message && message?.includes('block')){

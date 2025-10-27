@@ -51,7 +51,12 @@ export default function CategoryDisplay({type, filter, setFilter, categoryType, 
   useEffect(()=>{
     const categoryArray = checkedCategories.map(category=> category.name)
     if(!storeCheckedCategories){
-      filter && setFilter({...filter, categories: [...categoryArray]})
+      const topLevelCategories = categories.map(cat=> cat.name)
+      console.log('topLevelcategories---->', topLevelCategories)
+      const mainCategories = categoryArray.filter(cat => topLevelCategories.includes(cat));
+      const subCategories = categoryArray.filter(cat => !topLevelCategories.includes(cat));
+      console.log(`Detected SubCategories----> ${subCategories}, Detected Categories----> ${mainCategories}`)
+      filter && setFilter({...filter, categories: [...mainCategories], subCategories: subCategories.toString()})
       console.log("checkedCategories", JSON.stringify(checkedCategories))
     }else{
     }

@@ -1,6 +1,7 @@
 import React,{useState, useEffect, useRef} from 'react'
 import {useSelector, useDispatch} from 'react-redux'
 import './FileUpload.css'
+import {motion} from 'framer-motion'
 
 import {SiteButtonSquare} from '../SiteButtons/SiteButtons'
 import ImageEditor from '../ImageEditor/ImageEditor'
@@ -458,11 +459,17 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
                     </div>
                 </div>
                 <div className='w-[46%] mt-[7px] flex flex-col gap-[10px]'>
-                    <SiteButtonSquare customStyle={{paddingBlock:'6px', width:'12.5rem', borderRadius:'5px'}} tailwindClasses='!text-[13px]'
-                     clickHandler={(e)=> thumbnailSetter(e)}> 
-                        Set as thumbnail 
-                    </SiteButtonSquare>
-    
+                    <motion.div
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }} 
+                    >
+                        <SiteButtonSquare 
+                            customStyle={{paddingBlock:'6px', width:'12.5rem', borderRadius:'5px'}} 
+                            tailwindClasses={`!text-[13px] hover:bg-primaryDark ${Object.keys(thumbnail).length > 0 && '!bg-primaryDark'}`}
+                            clickHandler={(e)=> thumbnailSetter(e)}> 
+                                Set as thumbnail 
+                        </SiteButtonSquare>
+                    </motion.div>
                 </div>
                 </div>
                 : ''
@@ -482,7 +489,7 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
                     {(imagePreview.imageName.length > 20)? `${imagePreview.imageName[0].toUpperCase() + imagePreview.imageName.slice(3,20)}...` : imagePreview.imageName[0].toUpperCase() + imagePreview.imageName.slice(1)}
                     </span>
                     }
-                    <SiteButtonSquare tailwindClasses={` w-full text-secondary !mt-[10x]`} 
+                    <SiteButtonSquare tailwindClasses={` w-full text-secondary !mt-[10px] !hover:primaryDark transition duration-300`} 
                         customStyle={{paddingBlock:'9px', borderRadius:'5px', marginTop:'10px'}} lowerFont={true}
                             clickHandler={(e)=> openImageEditor(images[0].url, images[0].name, images[0].blob)} > 
                         { `Edit ${imageType} Image` }

@@ -110,7 +110,8 @@ const productSlice = createSlice({
     },
     extraReducers: (builder)=>{
         builder.addCase(createProduct.fulfilled, (state, action)=>{
-            console.log("action.payload.product-->",action.payload.product)
+            console.log("action.payload.mainProduct-->",action.payload.mainProduct)
+            console.log("action.payload.mainProduct-->",action.payload.variants)
             state.error = false
             state.loading = false
             state.productCreated = true

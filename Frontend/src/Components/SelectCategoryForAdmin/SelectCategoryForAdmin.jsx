@@ -82,6 +82,7 @@ export default function SelectCategoryForAdmin({category, setCategory, editCateg
 
         <>
             <h4 className='text-[11.6px] text-secondary'> Select category / categories </h4> 
+            <h5 className='text-[10px] text-muted'> Choose up to two categories. The 'supplements' category must be selected alone </h5>
             <div className='flex justify-between items-center mt-[10px] text-black' onBlur={()=> categoryBlurHandler()}>
                 {
                  categories && categories.length > 0 &&
@@ -98,7 +99,7 @@ export default function SelectCategoryForAdmin({category, setCategory, editCateg
     )
 }
 
-export function SelectSubCategoryForAdmin({category, setCategory, setSubcategory, categoryImgPreview, setCategoryImgPreview}){
+export function SelectSubCategoryForAdmin({category, setCategory, setSubCategory, categoryImgPreview, setCategoryImgPreview}){
 
     const [error, setError] = useState('')
     const [levelOneCategories, setLevelOneCategories] = useState([])
@@ -191,7 +192,7 @@ export function SelectSubCategoryForAdmin({category, setCategory, setSubcategory
             })
             .filter(Boolean);
 
-        setSubcategory(subcategory.find(value => value));
+        setSubCategory(subcategory.find(value => value));
         makeSubCategoryLabel(checkedCategories)
     }, [checkedCategories]);
 
@@ -289,7 +290,7 @@ export function SelectSubCategoryForAdmin({category, setCategory, setSubcategory
         }
         if(subcat.subCategory.length == 0){
             console.log("Setting subcategory...")
-            setSubcategory(subcat.name)
+            setSubCategory(subcat.name)
         }
     }
 

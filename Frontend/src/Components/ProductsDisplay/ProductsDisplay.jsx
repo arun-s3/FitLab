@@ -278,7 +278,7 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
                       className='w-[30px] md:bg-white l-md:bg-transparent xx-lg:bg-white x-xl:bg-transparent p-[5px] border rounded-[20px]
                         z-[2] flex items-center justify-center relative cursor-pointer md:border-mutedDashedSeperation
                         l-md:border-inputBorderLow xx-lg:border-mutedDashedSeperation x-xl:border-inputBorderLow admin-control' 
-                      onClick={()=> !admin && navigate({
+                      onClick={()=> admin && navigate({
                           pathname: '../edit', 
                           search: `?id=${product._id}`
                         }, 
@@ -356,17 +356,47 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
               <div>
 
                 {
-                  product.stock <= 5 &&
+                  product.totalStock <= 5 &&
                   <p className='text-[13px] text-red-500 mb-[5px]'>
-                     { product.stock <= 0 ? 'Out of Stock' :  `Only ${product.stock} items in Stock!`}
+                     { product.totalStock <= 0 ? 'Out of Stock' :  `Only ${product.totalStock} items in Stock!`}
                   </p>
+                }
+
+                {
+                  product.variantType === 'weight' 
+                    ? <p className="mb-[3px] text-[14px] font-[450]"> 
+                       Weights: 
+                       <span className='ml-[3px] text-muted text-[13px]'>
+                        {product.weights.map(weight=> ' ' + weight + 'Kg').toString().trimEnd()} 
+                       </span>
+                      </p>
+                    : product.variantType === 'motorPower'
+                    ? <p className="mb-[3px] text-[14px] font-[450]"> 
+                       Motor Powers: 
+                       <span className='ml-[3px] text-muted text-[13px]'> 
+                        {product.motorPowers.map(power=> ' ' + power + 'HP').toString().trimEnd()} 
+                       </span>
+                      </p>
+                    : product.variantType === 'size'
+                    ? <p className="mb-[3px] text-[14px] font-[450]"> 
+                       Sizes: 
+                       <span className='ml-[3px] text-muted text-[13px]'>
+                         {product.sizes.map(size=> ' ' + size).toString().trimEnd()} 
+                       </span>
+                      </p>
+                    : <p className="mb-[3px] text-[14px] font-[450]"> 
+                       Colors: 
+                       <span className='ml-[3px] text-muted text-[13px]'>
+                         {product.colors.map(color=> ' ' + color).toString().trimEnd()} 
+                       </span>
+                      </p>
                 }
 
                 <p className={`${(admin && !gridView)
                   ? 'text-[16px]' 
                   : (gridView) 
                   ? 'text-[16px] xx-md:text-[15px] lg:text-[16px]' : wishlistDisplay ? 'text-[17px]' : 'text-[18px]'} font-[500] tracking-[0.5px]`}> 
-                      &#8377; {product.price}
+                      &#8377; {product.prices.length > 1 ? `${Math.min(...product.prices)} - ${Math.max(...product.prices)}` : product.prices[0]}
                 </p>
 
                  {

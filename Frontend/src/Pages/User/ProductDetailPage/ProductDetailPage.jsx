@@ -31,7 +31,7 @@ export default function ProductDetailPage(){
 
   const [isCartOpen, setIsCartOpen] = useState(false)
 
-  const [productDetails, setProductDetails] = useState({})
+  const [productDetails, setProductDetails] = useState(null)
 
   const [searchParam, setSearchParam] = useSearchParams()
   const currentProductId = searchParam.get('id')
@@ -47,7 +47,7 @@ export default function ProductDetailPage(){
     const fetchProduct = async()=> {
       const response = await axios.get(`${baseApiUrl}/products/${currentProductId}`, {withCredentials:true})
       console.log('response---->', response)
-      return response.data[0] 
+      return response.data.product 
     }
     const loadProduct = async()=> {
       if(currentProductId){
@@ -93,10 +93,10 @@ export default function ProductDetailPage(){
     },
   }
 
-  const handleAddToCart = (product) => {
+  const handleAddToCart = (product, variantValueIndex) => {
     if(checkAuthOrOpenModal()) return
     console.log("Inside handleAddToCart()--")
-    dispatch( addToCart({productId: product._id, quantity}) )
+    dispatch( addToCart({productId: product.variants[variantValueIndex], quantity}) )
     console.log("Dispatched successfully")
   }
 
@@ -127,13 +127,16 @@ export default function ProductDetailPage(){
         >
           <div className="container mx-auto px-[12px] xs-sm:px-[16px] py-[24px] s-sm:py-[32px]">
 
-              <ProductDetailSection 
-                product={productDetails} 
-                quantity={quantity} 
-                setQuantity={setQuantity} 
-                onAddToCart={handleAddToCart} 
-                isLoading={loading}
-              />
+              {
+                productDetails &&
+                  <ProductDetailSection 
+                    product={productDetails} 
+                    quantity={quantity} 
+                    setQuantity={setQuantity} 
+                    onAddToCart={handleAddToCart} 
+                    isLoading={loading}
+                  />
+              }
 
               <div className="mt-[64px]">
                 <div className="border-b">

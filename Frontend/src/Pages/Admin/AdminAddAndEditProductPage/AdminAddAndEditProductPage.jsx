@@ -2,6 +2,7 @@ import React,{useState, useRef, useEffect} from 'react'
 import './AdminAddAndEditProductPage.css'
 import {useLocation, useNavigate} from 'react-router-dom'
 import {useSelector, useDispatch} from 'react-redux'
+import {motion} from 'framer-motion'
 
 import {ProductIcon, ProductIcon2} from '../../../Components/Icons/Icons'
 import {IoArrowBackSharp} from "react-icons/io5";
@@ -9,9 +10,12 @@ import {IoIosArrowRoundBack} from "react-icons/io";
 import {GoPackage} from "react-icons/go";
 import {MdCurrencyRupee} from "react-icons/md";
 import {LuPackage, LuPackageSearch} from "react-icons/lu";
-import {RiWeightLine} from "react-icons/ri";
+import {LiaWeightSolid} from "react-icons/lia";
+import {BsLightningCharge} from "react-icons/bs";
 import {AiOutlineSafetyCertificate} from "react-icons/ai";
 import {CgDetailsMore} from "react-icons/cg";
+import {TbWeight} from "react-icons/tb";
+import {IoColorPaletteOutline} from "react-icons/io5";
 import {toast} from 'react-toastify';
 
 import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
@@ -33,8 +37,10 @@ export default function AdminAddAndEditProductPage({ editProduct }){
     const [thumbnailIndexOnEditProduct, setThumbnailIndexOnEditProduct] = useState(0)
     const [images, setImages] = useState([])
     const [category, setCategory] = useState([])
-    const [subcategory, setSubcategory] = useState('')
+    const [subCategory, setSubCategory] = useState('')
     const [productData, setProductData] = useState({})
+
+    const [variantsDisabledMsg, setVariantsDisabledMsg] = useState(false)
 
     const [startedSubmission, setStartedSubmission] = useState(false)
 
@@ -58,11 +64,11 @@ export default function AdminAddAndEditProductPage({ editProduct }){
     useEffect(() => {
         console.log("Images-->", JSON.stringify(images))
         console.log("Thumbnail-->", JSON.stringify(thumbnail))
-        console.log("SubCategory---->", subcategory)
+        console.log("SubCategory---->", subCategory)
         if(category.length == 0) setCategoryImgPreview('')
 
-        setProductData({ ...productData, category: category, subcategory, images: images, thumbnail: thumbnail });
-    }, [category, subcategory, images, thumbnail]);
+        setProductData({ ...productData, category: category, subCategory, images: images, thumbnail: thumbnail });
+    }, [category, subCategory, images, thumbnail]);
 
     useEffect(()=>{
         // console.log("tag-->", JSON.stringify(tag))
@@ -95,15 +101,16 @@ export default function AdminAddAndEditProductPage({ editProduct }){
                 editProductItem.current = location.state.product;    
                 setProductData({
                     "title": editProductItem.current.title,
-                    "price": editProductItem.current.price,
-                    "stock": editProductItem.current.stock,
-                    "weights": editProductItem.current.weights || [],
+                    "price": editProductItem.current.prices || [],
+                    "stock": editProductItem.current.stocks || [],
+                    [`${editProductItem.current.variantType}s`] : editProductItem.current[`${editProductItem.current.variantType}s`] || [],
                     "brand": editProductItem.current.brand,
                     "subtitle": editProductItem.current.subtitle || '',
                     "description": editProductItem.current.description || '',
                     "additionalInformation": editProductItem.current.additionalInformation || []
                 });
-                setCategory(editProductItem.current.category);
+                setCategory(editProductItem.current.category)
+                setSubCategory(editProductItem.current.subCategory)
                 images.forEach((img,index)=> console.log(`image[${index}]from state of location on Edit-->`, JSON.stringify(img)))
                 console.log("thumbnail from state of location on Edit-->", JSON.stringify(thumbnail))
                 const newImages = await Promise.all(
@@ -129,7 +136,7 @@ export default function AdminAddAndEditProductPage({ editProduct }){
     
     useEffect(()=>{
         console.log(`Inside useEffect for productCreated, productUpdated success, productUpdated-${productUpdated} productCreated-${productCreated}`)
-        if(editProduct && (productCreated || productUpdated)){
+        if(productCreated || (editProduct && productUpdated)){
             productCreated && toast.success('Created product succesfully!')
             productUpdated && toast.success('Updated product succesfully!')
             dispatch(resetStates())
@@ -161,19 +168,32 @@ export default function AdminAddAndEditProductPage({ editProduct }){
          console.log("inside inputBlurHandler, fieldname", fieldName)
          e.target.value.trim()? null : e.target.previousElementSibling.style.display = 'inline-block'
          if(fieldName){
-            let uniqueWeights
-            if(fieldName == 'weights'){
-                let weightArr = e.target.value.trim().split(',')
-                weightArr = weightArr.map(wt=> wt.trim())
-                uniqueWeights = new Set([...weightArr])
-                setProductData({...productData, weights: [...uniqueWeights]})
+            let uniqueArr
+            const arrayFields = ['weights', 'stock', 'price', 'sizes', 'motorPowers', 'colors']
+            if(arrayFields.some(field=> field === fieldName)){
+                let arr = e.target.value.trim().split(',')
+                arr = arr.map(el=> el.trim())
+                uniqueArr = new Set([...arr])
+                fieldName === 'weights' 
+                    ? setProductData({...productData, weights: [...uniqueArr]})
+                    : fieldName === 'stock' 
+                    ? setProductData({...productData, stock: [...uniqueArr]})
+                    : fieldName === 'price' 
+                    ? setProductData({...productData, price: [...uniqueArr]})
+                    : fieldName === 'sizes' 
+                    ? setProductData({...productData, sizes: [...uniqueArr]})
+                    : fieldName === 'motorPowers' 
+                    ? setProductData({...productData, motorPowers: [...uniqueArr]})
+                    : setProductData({...productData, colors: [...uniqueArr]})
             }
-            const value = (fieldName == 'weights') ? Array.from(uniqueWeights) : productData[fieldName]
-            const statusObj = (options?.optionalField) ? handleInputValidation(fieldName, value, {optionalField: true}, limits) : handleInputValidation(fieldName, value, limits)
+            const value = (arrayFields.some(field=> field === fieldName)) ? Array.from(uniqueArr) : productData[fieldName]
+            const statusObj = (options?.optionalField) 
+                ? handleInputValidation(fieldName, value, {optionalField: true}, limits) 
+                : handleInputValidation(fieldName, value, limits)
             console.log("statusObj from inputBlurHandler--> ", JSON.stringify(statusObj))
             if(!statusObj.error && statusObj.message.startsWith("Optional")){
                 console.log("Inside here----")
-                e.target.nextElementSibling.textContent = ''
+                // e.target.nextElementSibling.textContent = ''
                 e.target.style.borderColor = primaryColor.current
                 return
             }
@@ -205,7 +225,33 @@ export default function AdminAddAndEditProductPage({ editProduct }){
     const submitHandler = async (e)=>{
         console.log("Inside submitData()--")
         setStartedSubmission(true)
-        const optionalFields = ["description", "additionalInformation", "tags","weights"]
+
+        const checkVariantDataValidity = (variantAttribute)=> {
+            if(productData[variantAttribute] && productData[variantAttribute].length !== productData['stock'].length ){
+                console.log(`Enter stock quantities for each ${variantAttribute} variant — exactly one per variant!`)
+                toast.error(`Enter stock quantities for each ${variantAttribute} variant — exactly one per variant!`)
+                return false
+            }
+            if(productData[variantAttribute] && productData[variantAttribute].length !== productData['price'].length ){
+                console.log(`Enter prices for each ${variantAttribute} variant — exactly one per variant!`)
+                toast.error(`Enter prices for each ${variantAttribute} variant — exactly one per variant!`)
+                return false
+            }
+            return true
+        }
+        const variantAttributes = ['weights', 'sizes', 'motorPowers', 'colors']
+        const doesMultipleVariantAttrExists = variantAttributes.filter(attribute=> productData[attribute]).length > 1
+        console.log("doesMultipleVariantAttrExists---->", doesMultipleVariantAttrExists)
+        if(doesMultipleVariantAttrExists){
+            toast.error("Only one variant attribute (weights, sizes, motor power, or colors) can be selected!")
+            return
+        }
+
+        const userSelectedVariantAttr = variantAttributes.find(attribute=> productData[attribute])
+        console.log("userSelectedVariantAttr-->", userSelectedVariantAttr)
+        if( !checkVariantDataValidity(userSelectedVariantAttr) ) return
+
+        const optionalFields = ["description", "additionalInformation", "tags", ...variantAttributes]
         const requiredFields = Object.keys(productData).filter(field=> !optionalFields.includes(field))
         const isRequiredFieldsMissing = requiredFields.some(field=> productData[field] === undefined || productData[field].toString().trim() === '')
         console.log("productData---->", productData)
@@ -227,11 +273,16 @@ export default function AdminAddAndEditProductPage({ editProduct }){
         else{
             console.log("Inside else(no errors) of submitData() ")
             console.log("ProductData now-->"+JSON.stringify(productData))
+
             const formData = new FormData()
             const {images, thumbnail, ...rest} = productData
+
+            rest.variantType = userSelectedVariantAttr
+
             console.log("Images-->", JSON.stringify(images))
             console.log("Thumbnail-->",JSON.stringify(thumbnail))
             console.log("rest-->", JSON.stringify(rest))
+
             for (let field in rest){
                 if( Array.isArray(rest[field]) ){
                     rest[field].forEach((item) => {
@@ -241,6 +292,7 @@ export default function AdminAddAndEditProductPage({ editProduct }){
                     formData.append(field, rest[field])
                 }
             }
+
             const compressedImageBlobs = async(images)=>{
                 return await Promise.all( images.map( async(image)=> {
                     if(image.size > (5*1024*1024)){
@@ -251,7 +303,9 @@ export default function AdminAddAndEditProductPage({ editProduct }){
                     }
                 }) )
             } 
+
             const newBlobs = await compressedImageBlobs(images)
+
             newBlobs.forEach((blob, index) => {
                 formData.append('images', blob, `productImg${index}`);
             })
@@ -264,7 +318,9 @@ export default function AdminAddAndEditProductPage({ editProduct }){
                 console.log("thumbnail not found in the images")
                 toast.error('Please select a Thumbnail!')
             }
+
             console.log("PRODUCTDATA BEFORE DISPATCHING-->", JSON.stringify(productData))
+
             editProduct?  dispatch( updateProduct({formData, id: editProductItem.current._id}) ) : dispatch( createProduct({formData}) )
             console.log("Dispatched successfully--")
             setStartedSubmission(false)
@@ -282,7 +338,8 @@ export default function AdminAddAndEditProductPage({ editProduct }){
             </header>
             <main className='flex gap-[10px]'>
                 <div className='flex flex-col gap-[15px] basis[60%] w-[60%]'>
-                    <div className='flex flex-col gap-[1rem] justify-center product-input-wrapper'>
+
+                    <div className='flex flex-col gap-[5px] justify-center product-input-wrapper'>
                         <div className='input-wrapper'>
                             <label for='product-name'> Product Name</label>
                             <div className='relative'>
@@ -297,34 +354,29 @@ export default function AdminAddAndEditProductPage({ editProduct }){
                             <div className='input-wrapper'>
                                 <label for='product-price'> Price </label>
                                 <div className='relative'>
-                                    <PlaceholderIcon icon={<MdCurrencyRupee/>}/>
+                                    <PlaceholderIcon icon={<MdCurrencyRupee/>} fromTop={35}/>
                                     <input type='text' id='product-price' required className='pl-[21px]' onFocus={(e)=> inputFocusHandler(e)} 
                                        onBlur={(e)=> inputBlurHandler(e, "price")} onChange={(e)=> changeHandler(e, "price")} value={productData.price}/>
-                                    <p className='error' onClick={(e)=> cancelErrorState(e, primaryColor.current)}></p>
+                                    <span className='text-[10px] text-[#7e7d81] absolute left-0 -bottom-[31px]'>
+                                        For multiple variants, enter the price for each variants separated by commas.
+                                    </span> 
+                                    <p className='error !absolute !top-[68px] left-0 !h-0 !mt-0' onClick={(e)=> cancelErrorState(e, primaryColor.current)}></p>
                                 </div>
                             </div>
                             <div className='input-wrapper'>
                                 <label for='product-stock'> Stock </label>
                                 <div className='relative'>
-                                    <PlaceholderIcon icon={<LuPackageSearch/>}/>
+                                    <PlaceholderIcon icon={<LuPackageSearch/>} fromTop={35}/>
                                     <input type='text' placeholder='' id='product-stock' required className='pl-[21px]' onFocus={(e)=> inputFocusHandler(e)} 
                                             onBlur={(e)=> inputBlurHandler(e, "stock")} onChange={(e)=> changeHandler(e, "stock")} value={productData.stock}/>
-                                    <p className='error' onClick={(e)=> cancelErrorState(e, primaryColor.current)}></p>
-                                </div>
-                            </div>
-                            <div className='input-wrapper'>
-                                <label for='product-weight'> Weights Available (optional) </label>
-                                <div className='relative'>
-                                    <PlaceholderIcon icon={<RiWeightLine/>}/>
-                                    <input type='text' placeholder='' id='product-weight' required  className='pl-[21px]' onFocus={(e)=> inputFocusHandler(e)} 
-                                         onBlur={(e)=> inputBlurHandler(e, "weights", {optionalField: true})}  onChange={(e)=> changeHandler(e, "weights")} 
-                                            value={productData.weights}/>
-                                    {/* <span className='text-[8px]'>(Enter each weight seperated by commas)</span>  */}
-                                    <p className='error' onClick={(e)=> cancelErrorState(e, primaryColor.current, {optionalField: true})}></p>
+                                    <span className='text-[10px] text-[#7e7d81] absolute left-0 -bottom-[31px]'>
+                                        For multiple variants, enter stock values for each variant separated by commas.
+                                    </span> 
+                                    <p className='error !absolute !top-[68px] right-0 !h-0 !mt-0' onClick={(e)=> cancelErrorState(e, primaryColor.current)}></p>
                                 </div>
                             </div>
                         </div>
-                        <div className='input-wrapper'>
+                        <div className='input-wrapper mt-[2.5rem]'>
                             <label for='product-brand'> Brand </label>
                             <div className='relative'>
                                 <PlaceholderIcon icon={<AiOutlineSafetyCertificate/>}/>
@@ -350,18 +402,7 @@ export default function AdminAddAndEditProductPage({ editProduct }){
                             </div>
                         </div>
                     </div>
-                    <div className='flex justify-center items-center product-input-wrapper'>
-                        <div className='input-wrapper'>
-                            <label for='product-description'> Description (optional)</label>
-                            <div className='relative'>
-                                <PlaceholderIcon icon={<CgDetailsMore/>} fromTop={8} />
-                                <textarea placeholder='Type description here' rows='7' cols='70' maxlength='2000' id='product-description'
-                                    required className='pl-[21px]' onFocus={(e)=> inputFocusHandler(e)} onBlur={(e)=> inputBlurHandler(e, "description", {optionalField: true})}
-                                     onChange={(e)=> changeHandler(e, "description")} value={productData.description}/>
-                                <p className='error' onClick={(e)=> cancelErrorState(e, primaryColor.current, {optionalField: true})}></p>
-                            </div>
-                        </div>
-                    </div>
+                    
                     <div className='flex justify-center items-center product-input-wrapper'>
                         <div className='input-wrapper categories'>
                         
@@ -372,7 +413,90 @@ export default function AdminAddAndEditProductPage({ editProduct }){
                     <div className='flex justify-center items-center product-input-wrapper' 
                         style={ categoryImgPreview? categoryBgImage : {}}>
                         <div className='input-wrapper categories'>
-                            <SelectSubCategoryForAdmin category={category} setCategory={setCategory} setSubcategory={setSubcategory} categoryImgPreview={categoryImgPreview} setCategoryImgPreview={setCategoryImgPreview}/>                    
+                            <SelectSubCategoryForAdmin category={category} setCategory={setCategory} setSubCategory={setSubCategory} categoryImgPreview={categoryImgPreview} setCategoryImgPreview={setCategoryImgPreview}/>                    
+                        </div>
+                    </div>
+
+                    <div className='flex flex-col gap-[1rem] justify-center product-input-wrapper' 
+                        onMouseEnter={()=> !category.length ? setVariantsDisabledMsg(true) : setVariantsDisabledMsg(false)}
+                        onMouseLeave={()=> setVariantsDisabledMsg(false)}
+                    >
+                    <div className='flex gap-8 items-center'> 
+                        <div className='input-wrapper'>  
+                            <label for='product-price'> Weights Available (For strength based products only) </label>
+                            <div className='relative'>  
+                                <PlaceholderIcon icon={<TbWeight/>} fromTop={20}/>
+                                <input type='text' id='product-weights' required className='pl-[21px] disabled:cursor-not-allowed ' 
+                                    placeholder='In Kg (Optional field)' onFocus={(e)=> inputFocusHandler(e)} 
+                                    onBlur={(e)=> inputBlurHandler(e, "weights", {optionalField: true})} onChange={(e)=> changeHandler(e, "weights")} 
+                                    value={productData.weights} disabled={category?.[0] !== 'strength'}
+                                />
+                                <p className='mt-[4px] text-[10px] text-[#7e7d81] left-0 -bottom-[31px]'>
+                                        For multiple variants, enter weight values for each variant separated by commas.
+                                </p> 
+                                <p className='error !absolute !top-[72px] right-0 !h-0 !mt-0' onClick={(e)=> cancelErrorState(e, primaryColor.current)}></p>
+                            </div>
+                        </div>
+                        <div className='input-wrapper'>
+                            <label for='product-stock'> Motor Powers (For cardio based products only) </label>
+                            <div className='relative'>
+                                <PlaceholderIcon icon={<BsLightningCharge/>} fromTop={20}/>
+                                <input type='text' placeholder='Eg: 5.5 (Optional field)' id='product-motorPowers' required className='pl-[21px] disabled:cursor-not-allowed ' 
+                                    onFocus={(e)=> inputFocusHandler(e)} 
+                                    onBlur={(e)=> inputBlurHandler(e, "motorPowers", {optionalField: true})} onChange={(e)=> changeHandler(e, "motorPowers")} 
+                                    value={productData.motorPowers} disabled={category?.[0] !== 'cardio'}/>
+                                <p className='mt-[4px] text-[10px] text-[#7e7d81] left-0 -bottom-[31px]'>
+                                    For multiple variants, enter power values for each variant separated by commas.
+                                </p> 
+                                <p className='error !absolute !top-[72px] right-0 !h-0 !mt-0' onClick={(e)=> cancelErrorState(e, primaryColor.current, {optionalField: true})}></p>
+                            </div>
+                        </div> 
+                        </div>
+                        <div className='flex gap-8 items-center'>
+                            <div className='input-wrapper'>
+                                <label for='product-brand'>  Colors (For accessory based products) </label>
+                                <div className='relative'>
+                                    <PlaceholderIcon icon={<IoColorPaletteOutline/>} fromTop={20}/>
+                                    <input type='text' placeholder='Eg: red (Optional field)' id='product-colors' required  className='pl-[21px] w-full disabled:cursor-not-allowed ' 
+                                       onFocus={(e)=> inputFocusHandler(e)} onBlur={(e)=> inputBlurHandler(e , "colors", {optionalField: true})} onChange={(e)=> changeHandler(e, "colors")}
+                                        value={productData.colors} disabled={category?.[0] !== 'accessories'}/>
+                                    <p className='mt-[4px] text-[10px] text-[#7e7d81]  left-0 -bottom-[31px]'>
+                                        For multiple variants, enter color values for each variant separated by commas.
+                                    </p> 
+                                    <p className='error !absolute !top-[72px] right-0 !h-0 !mt-0' onClick={(e)=> cancelErrorState(e, primaryColor.current, {optionalField: true})}></p>
+                                </div>
+                                <p className='error mt-[5px]' onClick={(e)=> cancelErrorState(e, primaryColor.current)}> 
+                                    {variantsDisabledMsg && "Please choose a category first!"}
+                                </p>
+                            </div>
+                            <div className='input-wrapper !-mt-[24px]'>  
+                                <label for='product-brand'>  Sizes (For supplement based products only) </label>
+                                <div className='relative'>
+                                    <PlaceholderIcon icon={<LiaWeightSolid/>} fromTop={20}/>
+                                    <input type='text' placeholder='Eg: 2L, 500ml, 2Kg, 2 serving (Optional field)' id='product-sizes' required  className='pl-[21px] w-full disabled:cursor-not-allowed ' 
+                                       onFocus={(e)=> inputFocusHandler(e)} onBlur={(e)=> inputBlurHandler(e , "sizes", {optionalField: true})} 
+                                       onChange={(e)=> changeHandler(e, "sizes")}
+                                        value={productData.sizes} disabled={category?.[0] !== 'supplements'}/>
+                                    <p className='mt-[4px] text-[10px] text-[#7e7d81]  left-0 -bottom-[31px]'> 
+                                        For multiple variants, enter size values for each variant separated by commas.
+                                    </p> 
+                                    <p className='error !absolute !top-[72px] right-0 !h-0 !mt-0' onClick={(e)=> cancelErrorState(e, primaryColor.current, {optionalField: true})}></p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div className='flex justify-center items-center product-input-wrapper'>
+                        <div className='input-wrapper'>
+                            <label for='product-description'> Description (optional)</label>
+                            <div className='relative'>
+                                <PlaceholderIcon icon={<CgDetailsMore/>} fromTop={8} />
+                                <textarea placeholder='Type description here' rows='7' cols='70' maxlength='2000' id='product-description'
+                                    required className='pl-[21px]' onFocus={(e)=> inputFocusHandler(e)} 
+                                     onChange={(e)=> changeHandler(e, "description")} value={productData.description}/>
+                                <p className='error' onClick={(e)=> cancelErrorState(e, primaryColor.current, {optionalField: true})}></p>
+                            </div>
                         </div>
                     </div>
                     <div className='flex justify-center items-center product-input-wrapper'>
@@ -395,12 +519,16 @@ export default function AdminAddAndEditProductPage({ editProduct }){
                         </div>
                     </div>
                     <div className='mt-[1rem] flex items-center gap-[1rem]'>
-                        <SiteButtonSquare customStyle={{paddingInline:'50px', paddingBlock:'9px', borderRadius:'7px'}}
-                                            clickHandler={(e)=>{ submitHandler(e)}}>
-                             {loading? <CustomHashLoader loading={loading}/> : 'Submit'}  
-                        </SiteButtonSquare>
+                        <motion.div whileTap={{ scale: 0.98 }} >
+                            <SiteButtonSquare 
+                                tailwindClasses={`hover:!bg-primaryDark transition duration-300`} 
+                                customStyle={{paddingInline:'50px', paddingBlock:'9px', borderRadius:'7px'}}
+                                                clickHandler={(e)=>{ submitHandler(e)}}>
+                                 {loading? <CustomHashLoader loading={loading}/> : 'Submit'}  
+                            </SiteButtonSquare>
+                        </motion.div>
                         <p className='text-[11.5px] text-red-500 tracking-[0.5px]'> 
-                            {(startedSubmission && !productData.subcategory) ? '*Please select a subcategory!' : '' } 
+                            {(startedSubmission && !productData.subCategory) ? '*Please select a subcategory!' : '' } 
                         </p>
                     </div>
                 </div>

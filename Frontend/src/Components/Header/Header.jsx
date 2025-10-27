@@ -47,7 +47,7 @@ export default function Header({customStyle, goToShopByCategorySec}){
     const menuItems = [
         {label: 'Home', path: '/'},
         {label: 'Shop By Categories', handleClick: goToShopByCategorySec,
-             mobileLabel: 'Explore', className: 'hidden lg:hidden xl:inline-block', mobileClassName: 'xl:hidden'},
+             mobileLabel: 'Browse', className: 'hidden lg:hidden xl:inline-block', mobileClassName: 'xl:hidden'},
         {label: 'Products', path: '/shop'},
         {label: 'Support', path: '/support'},
         {label: 'About Us', path: '/about'}

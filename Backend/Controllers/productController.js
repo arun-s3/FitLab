@@ -16,7 +16,7 @@ const {errorHandler} = require('../Utils/errorHandler')
 const MAXPRICE = 500000
 
 
-const packProductData = async (req)=>{
+const packProductData = async (req, next)=>{
     try{
         console.log("req.body-->", JSON.stringify(req.body))
         console.log("req.files-->", JSON.stringify(req.files))
@@ -71,11 +71,9 @@ const packProductData = async (req)=>{
         const productDatas = {
             title: req.body.title, 
             subtitle: req.body.subtitle,
-            price: req.body.price,
-            stock: req.body.stock,
-            weights: req.body?.weights|| [],
             brand: req.body.brand,
             category: req.body.category,
+            subCategory: req.body.subCategory,
             description: req.body?.description || '',
             additionalInformation: req.body?.additionalInformation || [],
             tags: req.body?.tags|| [],
@@ -85,9 +83,6 @@ const packProductData = async (req)=>{
         for(field in productDatas){
             !productDatas[field] && delete productDatas[field]
         }
-        console.log("Weights-->" ,productDatas.weights)
-        console.log("Weights Array?-->" ,Array.isArray(productDatas.weights))
-        console.log("Tags Array?-->" ,Array.isArray(productDatas.tags))
         console.log("productData--->", JSON.stringify(productDatas))
 
         return productDatas
@@ -98,38 +93,166 @@ const packProductData = async (req)=>{
 }
 
 
-const createProduct = async(req,res,next)=>{
-    try {
-        console.log("Inside createProduct controller, received productForm-->", JSON.stringify(req.body.title))
-        const productDatas = await packProductData(req)
-        console.log("productData's description--->", productDatas.description)
-        const newProduct = new Product(productDatas)
-        console.log("newProduct's description--->", newProduct.description)
-        const savedProduct = await newProduct.save();
-        console.log("saved Product's title--->", savedProduct.title)
-        res.status(201).json({createdProduct:'true', product:savedProduct});  
-    } 
-    catch (error) { 
-        console.log("Error in productController-createUser-->"+error.message);
-        next(error)
+const createProduct = async (req, res, next)=> {
+  try {
+    console.log("Inside createProduct controller -->", req.body.title)
+
+    const productData = await packProductData(req, next)
+
+    const {variantType} = req.body
+
+    const variantValue = Array.isArray(req.body[variantType]) ? req.body[variantType] : [req.body[variantType]]
+    const stock = Array.isArray(req.body.stock) ? req.body.stock : [req.body.stock]
+    const price = Array.isArray(req.body.price) ? req.body.price : [req.body.price]
+    if (variantValue.length !== stock.length) {
+      next(errorHandler(400,`${variantType} and stocks count must match.!`))
     }
+    if (variantValue.length !== price.length) {
+      next(errorHandler(400,`${variantType} and price count must match.!`))
+    }
+
+    if (!variantType){
+      const newProduct = new Product(productData)
+      const saved = await newProduct.save();
+      return res.status(201).json({createdProduct: true, mainProduct: saved});
+    }
+
+    const variantValues = req.body[`${variantType}`] || []
+    const stocks = req.body.stock || []
+    const prices = req.body.price || []
+
+    const mainProduct = new Product({
+      ...productData,
+      [variantType.slice(0, -1)]: variantValues[0],
+      variantType: variantType.slice(0, -1),
+      stock: stocks[0],
+      price: prices[0],
+      variantOf: null,
+      variants: [],
+    })
+
+    const savedMain = await mainProduct.save();
+    const createdVariants = []
+
+    for (let i = 1; i < variantValues.length; i++) {
+      const variant = new Product({
+        ...productData,
+        [variantType.slice(0, -1)]: variantValues[i],
+        variantType: variantType.slice(0, -1),
+        stock: stocks[i],
+        price: prices[i],
+        variantOf: savedMain._id,
+      });
+
+      const savedVariant = await variant.save();
+      createdVariants.push(savedVariant)
+      savedMain.variants.push(savedVariant._id)
+    }
+
+    await savedMain.save()
+
+    res.status(201).json({
+      createdProduct: true,
+      mainProduct: savedMain,
+      variants: createdVariants.length ? createdVariants : null,
+    });
+  }
+  catch (error) {
+    console.log("Error in productController-createProduct -->", error.message)
+    next(error)
+  }
 }
 
 
-const getSingleProduct = async (req, res, next) => {
-    try {
-        console.log("Inside getSingleProduct of productController")
-        const {id} = req.params;
-        const product = await Product.find({_id: id});
-        console.log("Product-->", product)
-        if(!product) next(errorHandler(400,"No such product available!"))
-        res.status(200).json(product);
+
+// const getSingleProduct = async (req, res, next) => {
+//     try {
+//         console.log("Inside getSingleProduct of productController")
+//         const {id} = req.params;
+//         const product = await Product.find({_id: id});
+//         console.log("Product-->", product)
+//         if(!product) next(errorHandler(400,"No such product available!"))
+//         res.status(200).json(product);
+//     }
+//     catch (error) {
+//         console.log("Error in productController-getSingleProduct-->"+error.message);
+//         next(error)
+//     }
+//   }
+
+
+const getSingleProduct = async (req, res, next)=> {
+  try {
+    console.log("Inside getSingleProduct of productController")
+    const {id} = req.params
+
+    const product = await Product.findById(id)
+      .populate({
+        path: "variants",
+        select: "weight size motorPower color stock price",
+      })
+      .lean()
+
+    if (!product){
+      return next(errorHandler(404, "No such product available!"))
     }
-    catch (error) {
-        console.log("Error in productController-getSingleProduct-->"+error.message);
-        next(error)
+
+    const variantKey = product.variantType
+
+    let mergedProduct = { ...product }
+
+    if (!product.variantOf){
+      const variants = product.variants || []
+
+      const variantValues = variantKey
+        ? [product[variantKey], ...variants.map((v) => v[variantKey])].filter(Boolean)
+        : []
+      const prices = [product.price, ...variants.map((v) => v.price)]
+      const stocks = [product.stock, ...variants.map((v) => v.stock)]
+      const totalStock = stocks.reduce((sum, s) => sum + (s || 0), 0)
+
+      mergedProduct = {
+        ...product,
+        ...(variantKey ? { [`${variantKey}s`]: variantValues } : {}),
+        prices,
+        stocks,
+        totalStock,
+      }
+    }else{
+      const mainProduct = await Product.findById(product.variantOf)
+        .populate({
+          path: "variants",
+          select: "weight size motorPower color stock price",
+        })
+        .lean()
+
+      if (mainProduct){
+        const variantKeyMain = mainProduct.variantType
+
+        const variantValues = variantKeyMain
+          ? [mainProduct[variantKeyMain], ...mainProduct.variants.map((v) => v[variantKeyMain])].filter(Boolean) : []
+        const prices = [mainProduct.price, ...mainProduct.variants.map((v) => v.price)]
+        const stocks = [mainProduct.stock, ...mainProduct.variants.map((v) => v.stock)]
+        const totalStock = stocks.reduce((sum, s) => sum + (s || 0), 0)
+
+        mergedProduct = {
+          ...product,
+          mainProduct,
+          ...(variantKeyMain ? { [`${variantKeyMain}s`]: variantValues } : {}),
+          prices,
+          stocks,
+          totalStock,
+        }
+      }
     }
+    res.status(200).json({ product: mergedProduct });
   }
+  catch (error){
+    console.log("Error in productController-getSingleProduct -->", error.message)
+    next(error)
+  }
+}
+
 
 
 const getAllProducts = async (req, res, next)=> {
@@ -159,6 +282,9 @@ const getAllProducts = async (req, res, next)=> {
       }
       if (queryOptions?.filter?.categories && queryOptions?.filter?.categories.length > 0) {
         filters.category = { $in: queryOptions.filter.categories }
+      }
+      if (queryOptions?.filter?.subCategories && queryOptions?.filter?.subCategories.length > 0) {
+        filters.subCategory = queryOptions.filter.subCategories
       }
       if (queryOptions?.filter?.products && queryOptions?.filter?.products.length > 0) {
         filters.title = { $in: queryOptions.filter.products }
@@ -200,7 +326,7 @@ const getAllProducts = async (req, res, next)=> {
           } else if(sortKey === 'newestArrivals'){
             sortCriteria = { createdAt: -1 }
           } else{
-            sortCriteria[sortKey] = Number.parseInt(sortOrder);
+            sortCriteria[sortKey] = Number.parseInt(sortOrder)
           }
         }
         console.log("sortCriteria---->", JSON.stringify(sortCriteria))
@@ -213,19 +339,62 @@ const getAllProducts = async (req, res, next)=> {
         skipables = (parseInt(queryOptions.page) - 1) * limit
       }
   
-      const productListQuery = Product.find(filters).sort(sortCriteria).skip(skipables).limit(limit);
+      // const productListQuery = Product.find(filters).sort(sortCriteria).skip(skipables).limit(limit);
   
-      const productBundle = await productListQuery.exec()
-      const productCounts = await Product.countDocuments(filters)
+      // const productBundle = await productListQuery.exec()
+      // const productCounts = await Product.countDocuments(filters)
+
+      // const maxPriceAggregation = await Product.aggregate([
+      //   { $match: filters }, 
+      //   { $group: { _id: null, maxPrice: { $max: "$price" } } },
+      // ])
+
+      // const maxPriceAvailable = maxPriceAggregation[0]?.maxPrice || 100000;
+  
+      // res.status(200).json({ productBundle, productCounts, maxPriceAvailable })
+
+      const mainFilter = { ...filters, variantOf: { $in: [null, undefined] } }
+
+      const mainProducts = await Product.find(mainFilter)
+        .populate({
+          path: "variants",
+          select: "weight size motorPower color stock price",
+        })
+        .sort(sortCriteria)
+        .skip(skipables)
+        .limit(limit)
+        .lean()
+
+      const mergedProducts = mainProducts.map((main) => {
+        const variants = main.variants || []
+        const variantKey = main.variantType
+
+        const variantValues = variantKey
+          ? [main[variantKey], ...variants.map((v) => v[variantKey])].filter(Boolean)
+          : []
+        const prices = [main.price, ...variants.map((v) => v.price)]
+        const stocks = [main.stock, ...variants.map((v) => v.stock)]
+        const totalStock = stocks.reduce((sum, s) => sum + (s || 0), 0)
+
+        return {
+          ...main,
+          ...(variantKey ? { [`${variantKey}s`]: variantValues } : {}),
+          prices,
+          stocks,
+          totalStock,
+        }
+      })
+
+      const productCounts = await Product.countDocuments(mainFilter)
 
       const maxPriceAggregation = await Product.aggregate([
-        { $match: filters }, 
+        { $match: filters },
         { $group: { _id: null, maxPrice: { $max: "$price" } } },
       ])
 
-      const maxPriceAvailable = maxPriceAggregation[0]?.maxPrice || 100000;
-  
-      res.status(200).json({ productBundle, productCounts, maxPriceAvailable })
+      const maxPriceAvailable = maxPriceAggregation[0]?.maxPrice || 100000
+
+      res.status(200).json({productBundle: mergedProducts, productCounts, maxPriceAvailable})
     }
     catch (error){
       console.log("Error in productController-getProducts -->", error.message)
@@ -388,23 +557,109 @@ const searchProduct = async (req, res, next)=> {
 }
 
 
-const updateProduct = async (req, res, next) => {    
-    try {
-        console.log("Inside updateProduct controller--")
-        const {id} = req.params;
-        console.log("Id from params-->",id)
-        const product = await Product.findOne({_id: id})
-        if(product){
-            const productDatas = await packProductData(req)
-            const updatedProduct = await Product.updateOne({_id: id}, {$set: productDatas});
-            res.status(200).json({updatedProduct:true, product:productDatas});
-        }
-       else{ next(errorHandler(400, "No such product available to update"))}
-    } catch (error) {
-        console.log("Error in productController-updateProduct-->"+error.message);
-        next(error)
+// const updateProduct = async (req, res, next) => {    
+//     try {
+//         console.log("Inside updateProduct controller--")
+//         const {id} = req.params;
+//         console.log("Id from params-->",id)
+//         const product = await Product.findOne({_id: id})
+//         if(product){
+//             const productDatas = await packProductData(req)
+//             const updatedProduct = await Product.updateOne({_id: id}, {$set: productDatas});
+//             res.status(200).json({updatedProduct:true, product:productDatas});
+//         }
+//        else{ next(errorHandler(400, "No such product available to update"))}
+//     } catch (error) {
+//         console.log("Error in productController-updateProduct-->"+error.message);
+//         next(error)
+//     }
+//   }
+
+const updateProduct = async (req, res, next) => {
+  try {
+    console.log("Inside updateProduct controller--")
+
+    const {id} = req.params
+    console.log("Id from params -->", id)
+
+    const existingProduct = await Product.findById(id)
+    if (!existingProduct) {
+      return next(errorHandler(404, "No such product available to update"))
     }
+
+    const updatedData = await packProductData(req, next)
+
+    const { variantType } = req.body
+
+    if (!variantType) {
+      const updatedProduct = await Product.findByIdAndUpdate(id, { $set: updatedData }, { new: true })
+      return res.status(200).json({ updatedProduct: true, product: updatedProduct })
+    }
+
+    const variantValues = Array.isArray(req.body[variantType]) ? req.body[variantType] : [req.body[variantType]]
+    const stocks = Array.isArray(req.body.stock) ? req.body.stock : [req.body.stock]
+    const prices = Array.isArray(req.body.price) ? req.body.price : [req.body.price]
+
+    if (variantValues.length !== stocks.length) {
+      return next(errorHandler(400, `${variantType} and stock count must match!`))
+    }
+    if (variantValues.length !== prices.length) {
+      return next(errorHandler(400, `${variantType} and price count must match!`))
+    }
+
+    const mainUpdate = {
+      ...updatedData,
+      [variantType.slice(0, -1)]: variantValues[0],
+      variantType: variantType.slice(0, -1),
+      stock: stocks[0],
+      price: prices[0],
+    }
+
+    const updatedMain = await Product.findByIdAndUpdate(id, { $set: mainUpdate }, { new: true })
+
+    const existingVariants = await Product.find({ variantOf: id })
+    const updatedVariants = []
+
+    if (existingVariants.length !== variantValues.length - 1) {
+      await Product.deleteMany({ variantOf: id })
+      updatedMain.variants = []
+    }
+
+    for (let i = 1; i < variantValues.length; i++) {
+      const variantPayload = {
+        ...updatedData,
+        [variantType.slice(0, -1)]: variantValues[i],
+        variantType: variantType.slice(0, -1),
+        stock: stocks[i],
+        price: prices[i],
+        variantOf: updatedMain._id,
+      }
+
+      let variantDoc;
+      if (existingVariants[i - 1]){
+        variantDoc = await Product.findByIdAndUpdate(existingVariants[i - 1]._id, { $set: variantPayload }, { new: true })
+      } else{
+        variantDoc = await new Product(variantPayload).save()
+      }
+
+      updatedVariants.push(variantDoc)
+      updatedMain.variants.push(variantDoc._id)
+    }
+
+    await updatedMain.save()
+
+    res.status(200).json({
+      updatedProduct: true,
+      mainProduct: updatedMain,
+      variants: updatedVariants.length ? updatedVariants : null,
+    });
+  } 
+  catch (error){
+    console.log("Error in productController-updateProduct -->", error.message)
+    next(error)
   }
+}
+
 
 
   const toggleProductStatus = async(req,res,next)=>{

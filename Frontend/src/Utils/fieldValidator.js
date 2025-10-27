@@ -9,7 +9,10 @@ const regexPatterns = {
     titlePattern: /^([a-zA-Z]){3,}[a-zA-Z0-9\s,'-]{0,100}$/,
     pricePattern: /^\d+(\.\d{1,2})?$/,
     stockPattern: /^\d{1,}$/,
-    weightsPattern: /^\d+(\.\d{1,3})?$/,
+    sizesPattern: /^\d+(\.\d+)?\s?[a-zA-Z]+(?:\s?[a-zA-Z]+)*$/,
+    motorPowersPattern: /^\d+(\.\d+)?\s?(HP|hp|W|w)?$/,
+    weightsPattern: /^\d+(\.\d+)?$/,
+    colorsPattern: /^[A-Za-z]{3,}(?:\s[A-Za-z]{2,})*$/,
     brandPattern: /^(?!^\d+$)[a-zA-Z0-9\s,'-]{1,50}$/, 
     subtitlePattern: /^[\w\s.,!'"-]{20,300}$/,   
     descriptionPattern: /^[\w\s.,!'"-]{30,2000}$/,
@@ -74,10 +77,11 @@ export const handleInputValidation = (fieldName, value, options, limits)=>{
     console.log("Limits--->", JSON.stringify(limits))
     if (Array.isArray(value) && (!value.length || value.some(val => !val.trim()))){
         if( value.some(val=> val.trim()) ){
-            if(fieldName==='weights'){
+            const arrayFields = ['weights', 'stock', 'price', 'sizes', 'motorPowers', 'colors']
+            if(arrayFields.some(field=> field === fieldName)){
                 return{
                     error: true,
-                    message: 'Please make sure that there are no consecutive commas without any number between them' 
+                    message: 'Consecutive commas without values between them are not allowed' 
                 }
             }
         }
@@ -140,6 +144,12 @@ export const handleInputValidation = (fieldName, value, options, limits)=>{
                 return regexPatterns.validator(fieldName, value, "Please enter a valid stock number!.")
             case "weights":
                 return regexPatterns.validator(fieldName, value, "Please enter a valid Weight!")
+            case "sizes":
+                return regexPatterns.validator(fieldName, value, "Please enter a valid size!")
+            case "motorPowers":
+                return regexPatterns.validator(fieldName, value, "Please enter a valid motor power value!")
+            case "colors":
+                return regexPatterns.validator(fieldName, value, "Please enter a valid color!")
             case "brand":
                 return regexPatterns.validator(fieldName, value, "Please enter a valid Brand number!")
             case "subtitle":

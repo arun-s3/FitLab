@@ -3,7 +3,7 @@ import {motion, AnimatePresence} from "framer-motion"
 
 import {Trash2, Plus, Minus, BadgePlus} from 'lucide-react'
 
-import {capitalizeFirstLetter} from '../../../Utils/helperFunctions'
+import {capitalizeFirstLetter, camelToCapitalizedWords} from '../../../Utils/helperFunctions'
 
 
 export default function CartTable({products, omIncQuantity, onDecQuantity, onRemoveProduct}){
@@ -28,6 +28,8 @@ export default function CartTable({products, omIncQuantity, onDecQuantity, onRem
         transition: { type: "spring", stiffness: 80, damping: 18 },
       },
     }
+
+    const variantSymbol = {weight: 'Kg', motorPower: 'Hp', color: '', size: ''}
 
 
     return (
@@ -66,6 +68,18 @@ export default function CartTable({products, omIncQuantity, onDecQuantity, onRem
                               <h3 className="text-[13px] s-sm:text-[15px] text-secondary font-medium capitalize truncate"> 
                                 {product.title}
                               </h3>
+                              {
+                                product.productId.variantType &&
+                                  <p className="mt-[3px] text-[13px] text-muted font-[450]"> 
+                                      {`${camelToCapitalizedWords(product.productId.variantType)}:`} 
+                                    <span className='ml-[3px] text-[13px] capitalize'>
+                                      {
+                                        product.productId[`${product.productId.variantType}`] 
+                                          + ' ' + variantSymbol[`${product.productId.variantType}`]
+                                      } 
+                                    </span>
+                                  </p>
+                              }
                               {product?.category.length > 0 &&
                                 <div className='hidden xs-sm:inline-block'>
                                   <p className="text-[11px] hidden sm:inline-block text-mutedLight truncate"> 

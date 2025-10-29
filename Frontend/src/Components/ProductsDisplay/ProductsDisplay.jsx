@@ -21,7 +21,7 @@ import RemoveWishlistItemModal from '../WishlistModals/RemoveWishlistItemModal'
 import Pagination from '../Pagination/Pagination'
 import StarGenerator from '../StarGenerator/StarGenerator'
 import {SiteButtonSquare} from '../SiteButtons/SiteButtons'
-import {capitalizeFirstLetter} from '../../Utils/helperFunctions'
+import {capitalizeFirstLetter, camelToCapitalizedWords} from '../../Utils/helperFunctions'
 import {addToCart} from '../../Slices/cartSlice'
 import ProductsTableView from './ProductsTableView'
 
@@ -121,6 +121,8 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
     show: { opacity: 1, x: 0, transition: { duration: 0.2 } },
     exit: { opacity: 0, x: 20, transition: { duration: 0.2 } }
   }
+
+  const variantSymbol = {weight: 'Kg', motorPower: 'Hp', color: '', size: ''}
 
   const currentPageChanger = (page)=>{
     setCurrentPage(page)
@@ -237,7 +239,7 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
         style={admin ? { justifyItems: 'center' } : {}}
       >  
 
-      { !showByTable && products.length > 0 ?
+      { !showByTable && products && products.length > 0 ?
         products.map((product)=> (
           <motion.div key={product._id} 
             variants={child}
@@ -296,11 +298,22 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
                     </span>
                   </div>
                   :
-                  <SiteButtonSquare clickHandler={()=> handleAddToCart(product._id)} 
+                  <SiteButtonSquare clickHandler={()=> {
+                    if(!product.variantOf && !product.variants.length){
+                      handleAddToCart(product._id)
+                    } else{
+                        navigate({
+                            pathname: '/shop/product', 
+                            search: `?id=${product._id}`
+                          }, 
+                          {state: {product}}
+                        )
+                    }}
+                  } 
                       customStyle={{paddingBlock: '8px'}}
                       tailwindClasses='w-[12rem] xx-md:w-[9rem] lg:w-[12rem] text-[15px] xx-md:text-[14px] lg:text-[15px]'
                   >
-                       Add to Cart 
+                       { !product.variantOf && !product.variants.length ? 'Add to Cart' : 'View Product' }
                   </SiteButtonSquare>
                 }
               </figcaption>
@@ -362,42 +375,25 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
                   </p>
                 }
 
-                {
-                  product.variantType === 'weight' 
-                    ? <p className="mb-[3px] text-[14px] font-[450]"> 
-                       Weights: 
-                       <span className='ml-[3px] text-muted text-[13px]'>
-                        {product.weights.map(weight=> ' ' + weight + 'Kg').toString().trimEnd()} 
-                       </span>
-                      </p>
-                    : product.variantType === 'motorPower'
-                    ? <p className="mb-[3px] text-[14px] font-[450]"> 
-                       Motor Powers: 
-                       <span className='ml-[3px] text-muted text-[13px]'> 
-                        {product.motorPowers.map(power=> ' ' + power + 'HP').toString().trimEnd()} 
-                       </span>
-                      </p>
-                    : product.variantType === 'size'
-                    ? <p className="mb-[3px] text-[14px] font-[450]"> 
-                       Sizes: 
-                       <span className='ml-[3px] text-muted text-[13px]'>
-                         {product.sizes.map(size=> ' ' + size).toString().trimEnd()} 
-                       </span>
-                      </p>
-                    : <p className="mb-[3px] text-[14px] font-[450]"> 
-                       Colors: 
-                       <span className='ml-[3px] text-muted text-[13px]'>
-                         {product.colors.map(color=> ' ' + color).toString().trimEnd()} 
-                       </span>
-                      </p>
-                }
-
-                <p className={`${(admin && !gridView)
+                <p className={`${(admin && !gridView) 
                   ? 'text-[16px]' 
                   : (gridView) 
                   ? 'text-[16px] xx-md:text-[15px] lg:text-[16px]' : wishlistDisplay ? 'text-[17px]' : 'text-[18px]'} font-[500] tracking-[0.5px]`}> 
                       &#8377; {product.prices.length > 1 ? `${Math.min(...product.prices)} - ${Math.max(...product.prices)}` : product.prices[0]}
                 </p>
+
+                {
+                  product.variantType &&
+                    <p className="mt-[3px] text-[13px] text-muted font-[450]"> 
+                        {`${camelToCapitalizedWords(product.variantType)}s:`} 
+                      <span className='ml-[3px] text-[13px] capitalize'>
+                        {product[`${product.variantType}s`].map(value=> 
+                          ' ' + value + variantSymbol[`${product.variantType}`]
+                          ).toString().trimEnd()
+                        } 
+                      </span>
+                    </p>
+                }
 
                  {
                     (

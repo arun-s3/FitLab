@@ -248,6 +248,7 @@ const getOrders = async (req, res, next)=> {
     console.log("filter--->", JSON.stringify(filter))
     const orders = await Order.find(filter)
       .populate('shippingAddress') 
+      .populate('products.productId', 'variantType weight color size motorPower') 
       .sort({createdAt: sort}) 
       .skip(skip)
       .limit(parseInt(limit))
@@ -322,6 +323,7 @@ const getAllUsersOrders = async (req, res, next)=> {
 
     const orders = await Order.find(filter)
       .populate('userId', 'username email profilePic') 
+      .populate('products.productId', 'variantType weight color size motorPower') 
       .populate('shippingAddress') 
       .sort({createdAt: sort})
       .skip(skip)
@@ -573,6 +575,7 @@ const getOrderCounts = async (req, res, next)=> {
 
 const getTodaysLatestOrder = async (req, res, next)=> {
   try {
+    console.log("Inside getTodaysLatestOrder of orderController")
     const userId = req.user._id
 
     const startOfDay = new Date()
@@ -582,6 +585,7 @@ const getTodaysLatestOrder = async (req, res, next)=> {
     endOfDay.setHours(23, 59, 59, 999)
 
     const latestOrder = await Order.findOne({userId, createdAt: { $gte: startOfDay, $lte: endOfDay } }).sort({ createdAt: -1 }) 
+    console.log("latestOrder--->", latestOrder)
     if (!latestOrder){
       return next(errorHandler(500, 'Internal Server Error!'))
     }

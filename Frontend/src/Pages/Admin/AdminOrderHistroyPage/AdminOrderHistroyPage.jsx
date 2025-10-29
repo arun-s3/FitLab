@@ -148,11 +148,14 @@ export default function AdminOrderHistoryPage(){
     {status:'returning', textColor:'text-red-500', bg:'bg-red-500', lightBg:'bg-red-50', border:'border-red-300', shadow: '#fca5a5'},
     {status:'refunded', textColor:'text-green-500', bg:'bg-green-500', lightBg:'bg-green-50', border:'border-green-300', shadow: '#86efac'},
   ]
+  
   const paymentStatusStyles = [
     {status:'pending', textColor:'text-yellow-500', bg:'bg-yellow-500', lightBg:'bg-yellow-50', border:'border-yellow-300', shadow: '#fde047'}, 
     {status:'completed', textColor:'text-green-500', bg:'bg-green-500', lightBg:'bg-green-50', border:'border-green-300', shadow: '#86efac'}, 
     {status:'failed', textColor:'text-red-500', bg:'bg-red-500', lightBg:'bg-red-50', border:'border-red-300', shadow: '#fca5a5'},
   ]
+
+  const variantSymbol = {weight: 'Kg', motorPower: 'Hp', color: '', size: ''}
 
   const findStyle = (statusType, status, styler)=> {
     if(statusType === 'order' || statusType === 'product'){
@@ -484,7 +487,7 @@ export default function AdminOrderHistoryPage(){
                           </span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">{order.shippingAddress.district}</td>
+                      <td className="px-6 py-4 text-sm text-gray-500">{order?.shippingAddress ? order.shippingAddress.district : ''}</td>
                       <td className="px-6 py-4 text-sm text-gray-500">{ format(new Date(order.orderDate), "MMMM dd, yyyy" ) }</td>
                       <td className="px-6 py-4 text-sm text-gray-500 flex items-center gap-[15px]">
                         <span> {order.products.length} </span>
@@ -575,7 +578,15 @@ export default function AdminOrderHistoryPage(){
                             <div className="flex-1">
                               <h4 className="mb-[8px] flex items-center gap-[4rem]">
                                 <span className='text-gray-800 text-[14px] font-[600] hover:text-secondary transition-colors cursor-pointer'>
-                                   {product.title}
+                                   <span> {product.title} </span>
+                                   <span className='ml-[3px] capitalize text-[#a09fa8]'> 
+                                      {
+                                          product.productId?.variantType 
+                                          ? ' - ' + ' ' + product.productId[`${product.productId.variantType}`] 
+                                            + ' ' + variantSymbol[`${product.productId.variantType}`]
+                                          : ''
+                                      }
+                                    </span>
                                </span>
                                 { 
                                   <span className='px-[5px] py-[3px] w-[10%] flex gap-[10px] items-center'>

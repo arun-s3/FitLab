@@ -39,10 +39,10 @@ export default function AdminProductListPage(){
     const [totalFilter, setTotalFilter] = useState({})
     const mouseInFilter = useRef(true)
 
-    const [limit, setLimit] = useState(12)  
+    const [limit, setLimit] = useState(9)  
     const [currentPage, setCurrentPage] = useState(1)
     const [sorts, setSorts] = useState({})
-    const [queryOptions, setQueryOptions] = useState({})
+    const [queryOptions, setQueryOptions] = useState({page: 1, limit: 9})
 
     const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(false)
 
@@ -67,7 +67,7 @@ export default function AdminProductListPage(){
         "Core/Abs", "Full Body", "Cardio"]
     
     useEffect(()=> {
-        dispatch( getAllProducts({queryOptions: {}}))
+        dispatch( getAllProducts({queryOptions: {page: 1, limit: 9}}))
     }, [])
 
     useEffect(()=>{
@@ -238,13 +238,16 @@ export default function AdminProductListPage(){
 
                     <div className='mt-[2rem] px-[2rem]'>
 
-                        <ProductsDisplay gridView={showByGrid} 
-                            showByTable={showByTable} 
-                            pageReader={{currentPage, setCurrentPage}} 
-                            limiter={{limit, setLimit}} 
-                            showTheseProducts={showTheseProducts} 
-                            admin={true}
-                        />
+                       {
+                        products &&
+                             <ProductsDisplay gridView={showByGrid} 
+                                showByTable={showByTable} 
+                                pageReader={{currentPage, setCurrentPage}} 
+                                limiter={{limit, setLimit}} 
+                                showTheseProducts={showTheseProducts} 
+                                admin={true}
+                            />
+                       }
 
                     </div>
 

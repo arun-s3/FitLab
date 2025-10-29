@@ -133,7 +133,7 @@ export default function CartSidebar({ isOpen, onClose, retractedView }) {
         {
           !scaleDownSidebar &&
           <div className={`flex-1 relative ${packedupCart?.products?.length > 4 ? 'overflow-y-scroll' : 'overflow-y-auto'} p-3 xxs-sm:p-4 space-y-3 xxs-sm:space-y-4`}>
-          {  Object.keys(packedupCart).length === 0 || (packedupCart?.products && packedupCart.products.length === 0) ? (
+          {  packedupCart && Object.keys(packedupCart).length === 0 || (packedupCart?.products && packedupCart.products.length === 0) ? (
             <p className={`h-full w-full text-muted capitalize flex items-center justify-center text-[13px] xxs-sm:text-[14px] ${retractedView && 'text-[13px] xxs-sm:text-[14px]'}`}>
                Your cart is empty 
             </p>

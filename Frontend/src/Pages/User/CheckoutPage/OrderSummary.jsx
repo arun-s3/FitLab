@@ -42,32 +42,35 @@ export default function OrderSummary({shippingAddress, paymentMethod, onApplyDis
                 >
                    ORDER SUMMARY 
                 </motion.h2>
-                <motion.div 
-                  className="mb-6 p-4 border border-primary rounded-lg"
-                  initial={{ opacity: 0, scale: 0.97 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.15, duration: 0.35 }}
-                >
-                    <div className="flex items-center mb-2">
-                      <MapPin className="w-5 h-5 text-gray-500 mr-2" />
-                      <h3 className="font-semibold text-[16px]">Delivery Address</h3>
-                    </div>
-                    {
-                      shippingAddress &&
-                      <motion.div 
-                        className="text-[14px] text-gray-700 capitalize"
-                        initial={{ opacity: 0, y: 5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2, duration: 0.35 }}
-                      >
-                      <p>{shippingAddress.firstName + ' ' + shippingAddress.lastName}</p>
-                      <p>{shippingAddress.street}</p>
-                      <p>{shippingAddress.district}, {shippingAddress.state}</p>
-                      <p>{shippingAddress.pincode}</p>
-                      <p>{shippingAddress?.landmark ? shippingAddress.landmark : null}</p>
+                {
+                  shippingAddress &&
+                    <motion.div 
+                      className="mb-6 p-4 border border-primary rounded-lg"
+                      initial={{ opacity: 0, scale: 0.97 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.15, duration: 0.35 }}
+                    >
+                        <div className="flex items-center mb-2">
+                          <MapPin className="w-5 h-5 text-gray-500 mr-2" />
+                          <h3 className="font-semibold text-[16px]">Delivery Address</h3>
+                        </div>
+                        {
+                          shippingAddress &&
+                          <motion.div 
+                            className="text-[14px] text-gray-700 capitalize"
+                            initial={{ opacity: 0, y: 5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.2, duration: 0.35 }}
+                          >
+                          <p>{shippingAddress.firstName + ' ' + shippingAddress.lastName}</p>
+                          <p>{shippingAddress.street}</p>
+                          <p>{shippingAddress.district}, {shippingAddress.state}</p>
+                          <p>{shippingAddress.pincode}</p>
+                          <p>{shippingAddress?.landmark ? shippingAddress.landmark : null}</p>
+                        </motion.div>
+                        }
                     </motion.div>
-                    }
-                </motion.div>
+                }
                 <AnimatePresence>
                   {
                     !cart.couponDiscount &&

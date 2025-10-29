@@ -42,7 +42,7 @@ export default function ProductList({admin}){
     const [currentPage, setCurrentPage] = useState(1)
     const [limit, setLimit] = useState(12)  
 
-    const [queryOptions, setQueryOptions] = useState({})
+    const [queryOptions, setQueryOptions] = useState({page: 1, limit:12})
 
     const [isCartOpen, setIsCartOpen] = useState(false)
 

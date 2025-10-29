@@ -5,8 +5,8 @@ const {Parser} = require("json2csv")
 const PDFDocument = require("pdfkit")
 require("pdfkit-table")
 
-const jsPDF = require('jspdf').jsPDF;
-require('jspdf-autotable');
+const jsPDF = require('jspdf').jsPDF
+require('jspdf-autotable')
 
 const path = require("path")
 
@@ -202,6 +202,7 @@ const getSingleProduct = async (req, res, next)=> {
     let mergedProduct = { ...product }
 
     if (!product.variantOf){
+      console.log('Its the main product')
       const variants = product.variants || []
 
       const variantValues = variantKey
@@ -219,6 +220,7 @@ const getSingleProduct = async (req, res, next)=> {
         totalStock,
       }
     }else{
+      console.log('Not the main product')
       const mainProduct = await Product.findById(product.variantOf)
         .populate({
           path: "variants",
@@ -407,22 +409,44 @@ const getLatestProducts = async (req, res, next)=> {
   try {
     console.log("Inside getLatestProducts of productController")
 
-    const products = await Product.find({})
+    const mainProducts = await Product.find({ isBlocked: false, variantOf: { $in: [null, undefined] } })
       .sort({ createdAt: -1 })
       .limit(8)
-      .select("_id title subtitle thumbnail")
+      .populate({
+        path: "variants",
+        select: "weight size motorPower color stock price",
+      })
+      .lean()
 
-    const formattedProducts = products.map((product)=> ({
-      id: product._id,
-      image: product.thumbnail?.url || "",  
-      title: product.title,
-      subtitle: product.subtitle,
-    }))
+    const formattedProducts = mainProducts.map((main) => {
+      const variants = main.variants || []
+      const variantKey = main.variantType
 
-    console.log("Latest products---->", formattedProducts)
-    res.status(200).json({latestProducts: formattedProducts});
-  }
-  catch (error){
+      const variantValues = variantKey
+        ? [main[variantKey], ...variants.map((v) => v[variantKey])].filter(Boolean)
+        : []
+      const prices = [main.price, ...variants.map((v) => v.price)]
+      const stocks = [main.stock, ...variants.map((v) => v.stock)]
+      const totalStock = stocks.reduce((sum, s) => sum + (s || 0), 0)
+
+      const minPrice = Math.min(...prices)
+      const maxPrice = Math.max(...prices)
+
+      return {
+        id: main._id,
+        image: main.thumbnail?.url || "",
+        title: main.title,
+        subtitle: main.subtitle,
+        totalStock,
+        price: minPrice === maxPrice ? minPrice : `${minPrice} - ${maxPrice}`,
+        ...(variantKey ? { [`${variantKey}s`]: variantValues } : {}),
+      }
+    })
+
+    console.log("Latest products ---->", formattedProducts)
+    res.status(200).json({ latestProducts: formattedProducts });
+  } 
+  catch (error) {
     console.log("Error in productController-getLatestProducts -->", error.message)
     next(error)
   }
@@ -433,21 +457,45 @@ const getPopularProducts = async (req, res, next)=> {
   try {
     console.log("Inside getPopularProducts of productController")
 
-    const products = await Product.find({ isBlocked: false })
-      .sort({ ratings: -1, totalReviews: -1 }) 
+    const mainProducts = await Product.find({
+      isBlocked: false,
+      variantOf: { $in: [null, undefined] },
+    })
+      .sort({ ratings: -1, totalReviews: -1 })
       .limit(9)
-      .select("_id title price thumbnail")
+      .populate({
+        path: "variants",
+        select: "weight size motorPower color stock price",
+      })
+      .lean()
 
-    const formattedProducts = products.map((product) => ({
-      id: product._id,
-      name: product.title,
-      price: product.price.toString(), 
-      image: product.thumbnail?.url || ""
-    }))
+    const formattedProducts = mainProducts.map((main) => {
+      const variants = main.variants || []
+      const variantKey = main.variantType
+
+      const variantValues = variantKey
+        ? [main[variantKey], ...variants.map((v) => v[variantKey])].filter(Boolean)
+        : []
+      const prices = [main.price, ...variants.map((v) => v.price)]
+      const stocks = [main.stock, ...variants.map((v) => v.stock)]
+      const totalStock = stocks.reduce((sum, s) => sum + (s || 0), 0)
+
+      const minPrice = Math.min(...prices)
+      const maxPrice = Math.max(...prices)
+
+      return {
+        id: main._id,
+        name: main.title,
+        image: main.thumbnail?.url || "",
+        totalStock,
+        price: minPrice === maxPrice ? minPrice : `${minPrice} - ${maxPrice}`,
+        ...(variantKey ? { [`${variantKey}s`]: variantValues } : {}),
+      }
+    })
 
     console.log("Popular products →", formattedProducts)
-    res.status(200).json({popularProducts: formattedProducts})
-  }
+    res.status(200).json({ popularProducts: formattedProducts });
+  } 
   catch (error) {
     console.log("Error in productController-getPopularProducts -->", error.message)
     next(error)
@@ -455,11 +503,11 @@ const getPopularProducts = async (req, res, next)=> {
 }
 
 
-
 const getSimilarProducts = async (req, res, next)=> {
   try {
     console.log("Inside getSimilarProducts of productController")
-    console.log('req.body-------->', req.body)
+    console.log("req.body-------->", req.body)
+
     const { productIds } = req.body
 
     if (!Array.isArray(productIds) || productIds.length === 0) {
@@ -478,102 +526,162 @@ const getSimilarProducts = async (req, res, next)=> {
     const allTags = new Set()
 
     referenceProducts.forEach((prod) => {
-      prod.category?.forEach((c)=> allCategories.add(c))
-      prod.tags?.forEach((t)=> allTags.add(t))
+      prod.category?.forEach((c) => allCategories.add(c));
+      prod.tags?.forEach((t) => allTags.add(t));
     })
 
-    const similarProducts = await Product.find({
+    const similarMainProducts = await Product.find({
       isBlocked: false,
-      _id: { $nin: productIds }, 
+      variantOf: { $in: [null, undefined] },
+      _id: { $nin: productIds },
       $or: [
         { category: { $in: Array.from(allCategories) } },
         { tags: { $in: Array.from(allTags) } },
       ],
     })
       .limit(12)
-      .select("_id title price thumbnail discountType discountValue")
+      .populate({
+        path: "variants",
+        select: "weight size motorPower color stock price",
+      })
+      .lean()
 
-    const formattedSimilarProducts = similarProducts.map((product)=> {
+    const formattedSimilarProducts = similarMainProducts.map((main) => {
+      const variants = main.variants || []
+      const variantKey = main.variantType
+
+      const variantValues = variantKey
+        ? [main[variantKey], ...variants.map((v) => v[variantKey])].filter(Boolean)
+        : []
+      const prices = [main.price, ...variants.map((v) => v.price)]
+      const stocks = [main.stock, ...variants.map((v) => v.stock)]
+      const totalStock = stocks.reduce((sum, s) => sum + (s || 0), 0)
+
+      const minPrice = Math.min(...prices)
+      const maxPrice = Math.max(...prices)
+
       let discountLabel = null
+      if (main.discountType === "percentage") {
+        discountLabel = `-${main.discountValue}%`
+      } else if (main.discountType === "fixed" && main.discountValue > 0) {
+        discountLabel = `-₹${main.discountValue}`
+      }
 
+      return {
+        id: main._id,
+        name: main.title,
+        image: main.thumbnail?.url || "",
+        totalStock,
+        rating: 5,
+        price: minPrice === maxPrice ? `₹${minPrice}` : `₹${minPrice} - ₹${maxPrice}`,
+        ...(variantKey ? { [`${variantKey}s`]: variantValues } : {}),
+        ...(discountLabel && { discount: discountLabel }),
+      }
+    })
+
+    console.log("Similar products →", formattedSimilarProducts)
+    res.status(200).json({ similarProducts: formattedSimilarProducts });
+  }
+  catch (error) {
+    console.log("Error in productController-getSimilarProducts -->", error.message)
+    next(error)
+  }
+}
+
+
+const searchProduct = async (req, res, next) => {
+  try {
+      console.log("Inside searchProduct of productController")
+      const {find} = req.query
+      console.log("find---->", find);
+
+    if (!find) {
+      return next(errorHandler(400, "No search query provided"))
+    }
+
+    const filter = {
+      $or: [
+        { title: { $regex: find, $options: "i" } },
+        { subtitle: { $regex: find, $options: "i" } },
+      ],
+      isBlocked: false,
+    }
+
+    const products = await Product.find(filter)
+      .populate({
+        path: "variants",
+        select: "weight size motorPower color stock price",
+      })
+      .lean()
+
+    if (!products.length) {
+      return next(errorHandler(404, "No products match your search!"));
+    }
+
+    const formattedProducts = products.map((product) => {
+      const variantKey = product.variantType;
+      let variantValues = []
+      let prices = [product.price]
+      let stocks = [product.stock]
+      let totalStock = product.stock || 0;
+
+      if (product.variants?.length > 0) {
+        variantValues = variantKey
+          ? [product[variantKey], ...product.variants.map((v) => v[variantKey])].filter(Boolean)
+          : []
+        prices = [product.price, ...product.variants.map((v) => v.price)]
+        stocks = [product.stock, ...product.variants.map((v) => v.stock)]
+        totalStock = stocks.reduce((sum, s) => sum + (s || 0), 0)
+      }
+
+      const minPrice = Math.min(...prices)
+      const maxPrice = Math.max(...prices)
+
+      let discountLabel = null;
       if (product.discountType === "percentage") {
         discountLabel = `-${product.discountValue}%`
       } else if (product.discountType === "fixed" && product.discountValue > 0) {
         discountLabel = `-₹${product.discountValue}`
       }
 
+      const priceLabel =
+        minPrice !== maxPrice ? `₹${minPrice} - ₹${maxPrice}` : `₹${minPrice}`
+
       return {
         id: product._id,
         name: product.title,
-        price: `Rs ${product.price}`,
+        price: priceLabel,
         image: product.thumbnail?.url || "",
-        rating: 5, 
+        variantType: variantKey || null,
+        variantValues,
+        totalStock,
         ...(discountLabel && { discount: discountLabel }),
       }
-    }); 
+    })
 
-    console.log("Similar products--->", formattedSimilarProducts)
+    const allPrices = formattedProducts.flatMap((p) =>
+      typeof p.price === "string"
+        ? p.price
+            .replace(/[₹\s]/g, "")
+            .split("-")
+            .map(Number)
+        : []
+    )
+    const maxPriceAvailable = Math.max(...allPrices, 100000)
 
-    res.status(200).json({similarProducts: formattedSimilarProducts});
+    res.status(200).json({
+      products: formattedProducts,
+      productCounts: products.length,
+      maxPriceAvailable,
+    });
+
   } 
-  catch (error){
-    console.log("Error in productController-getSimilarProducts ---->", error.message)
-    next(error)
-  }
-}
-
-
-const searchProduct = async (req, res, next)=> {
-  try {
-    console.log("Inside searchProduct of productController")
-    const {find} = req.query
-    console.log("find---->",find)
-    if (!find) {
-      return next(errorHandler(400, "No search query provided"))
-    }
-
-    const filter = { $or: [
-      { title: { $regex: find, $options: "i" } },
-      { subtitle: { $regex: find, $options: "i" } }
-    ]}
-
-    const products = await Product.find(filter)
-
-    const maxPriceAggregation = await Product.aggregate([
-      { $match: filter }, 
-      { $group: { _id: null, maxPrice: { $max: "$price" } } },
-    ])
-    const maxPriceAvailable = maxPriceAggregation[0]?.maxPrice || 100000
-
-    if (!products.length) {
-      return next(errorHandler(404, "No products match your search!"))
-    }
-
-    res.status(200).json({products, productCounts: products.length, maxPriceAvailable})
-  } catch (error) {
+  catch (error) {
     console.log("Error in productController-searchProduct --> " + error.message)
     next(error)
   }
 }
 
-
-// const updateProduct = async (req, res, next) => {    
-//     try {
-//         console.log("Inside updateProduct controller--")
-//         const {id} = req.params;
-//         console.log("Id from params-->",id)
-//         const product = await Product.findOne({_id: id})
-//         if(product){
-//             const productDatas = await packProductData(req)
-//             const updatedProduct = await Product.updateOne({_id: id}, {$set: productDatas});
-//             res.status(200).json({updatedProduct:true, product:productDatas});
-//         }
-//        else{ next(errorHandler(400, "No such product available to update"))}
-//     } catch (error) {
-//         console.log("Error in productController-updateProduct-->"+error.message);
-//         next(error)
-//     }
-//   }
 
 const updateProduct = async (req, res, next) => {
   try {
@@ -661,67 +769,126 @@ const updateProduct = async (req, res, next) => {
 }
 
 
-
-  const toggleProductStatus = async(req,res,next)=>{
-    try{
-        console.log("Inside toggleProductStatus controller--")
-        const {id} = req.params
-        console.log("ID-->", id)
-        const product = await Product.findOne({_id:id},{password:0})
-        if (!product) {
-            return next(errorHandler(404, "No such product found!"));
-        }
-        const status = product.isBlocked
-        console.log("Blocked status-->", status)
-        const returnedProduct = await Product.findOneAndUpdate({_id:id},{$set: {isBlocked: !status}}, {new: true})
-        if(returnedProduct){
-            const status = returnedProduct.isBlocked? 'Blocked' : 'Unblocked'
-            res.status(200).json({productBlocked: status, productId:id})
-        }
-        else{
-            next(errorHandler(400, "No such product available to update status!"))
-        }
-    }  
-    catch(error){
-        console.log("Error in updateProductStatus controller-->", error.message)
-        next(error)
-    } 
-  }
-
-
-  const exportProductsAsCsv = async (req, res, next)=> {
+  const toggleProductStatus = async (req, res, next)=> {
     try {
-      console.log("Inside exportProductsAsCsv in productController--")
-      const {products} = req.body
-      if (!products || products.length === 0) {
-        return next(errorHandler(404, "No products found"))
+      console.log("Inside toggleProductStatus controller--")
+      const { id } = req.params
+      console.log("ID -->", id)
+      
+      const product = await Product.findById(id).populate({
+        path: "variants",
+        select: "isBlocked title variantOf variantType",
+      })
+
+      if (!product) {
+        return next(errorHandler(404, "No such product found!"))
       }
 
-      const fields = [
-        { label: "Name", value: "title" },
-        { label: "Category", value: "category" },
-        { label: "Weights", value: "weights" },
-        { label: "Price", value: "price" },
-        { label: "Discount-Type", value: "discountType" },
-        { label: "Discunt-value", value: "discountValue" },
-        { label: "Stock", value: "stock" },
-        { label: "Block-status", value: "isBlocked" },
-        { label: "Created On", value: "createdAt" },
-      ]
+      const newStatus = !product.isBlocked
+      product.isBlocked = newStatus
+      await product.save()
 
-      const json2csv = new Parser({fields})
-      const csv = json2csv.parse(products) 
+      if (product.variants?.length > 0) {
+        await Product.updateMany(
+          { _id: { $in: product.variants.map((v) => v._id) } },
+          { $set: { isBlocked: newStatus } }
+        )
+        console.log(`Updated all ${product.variants.length} variants → ${newStatus ? "Blocked" : "Unblocked"}`)
+      }
 
-      res.header("Content-Type", "text/csv")
-      res.attachment("products.csv")
+      if (product.variantOf) {
+        await Product.findByIdAndUpdate(product.variantOf, { $set: { isBlocked: newStatus } })
+        console.log(`Also ${newStatus ? "blocked" : "unblocked"} main product → ${product.variantOf}`)
+      }
 
-      return res.send(csv);
-    }
-    catch (error){
-      console.error("Error exporting products:", error.message)
+      const statusText = newStatus ? "Blocked" : "Unblocked"
+
+      res.status(200).json({
+        message: `Product and its variants ${statusText} successfully`,
+        productId: id,
+        productBlocked: statusText,
+        variantSync: product.variants?.length || 0,
+      });
+
+    } 
+    catch (error) {
+      console.log("Error in toggleProductStatus controller -->", error.message)
       next(error)
     }
+}
+
+
+const exportProductsAsCsv = async (req, res, next)=> {
+  try {
+    console.log("Inside exportProductsAsCsv in productController--")
+    const { products } = req.body
+
+    if (!products || products.length === 0) {
+      return next(errorHandler(404, "No products found"))
+    }
+
+    const formattedProducts = products.map((product)=> {
+      const variantType = product.variantType || null
+
+      const formatArray = (arr)=>
+        Array.isArray(arr) && arr.length > 0 ? arr.join(", ") : "";
+
+      let priceLabel = `₹${product.price}`;
+      if (Array.isArray(product.prices) && product.prices.length > 1) {
+        const min = Math.min(...product.prices)
+        const max = Math.max(...product.prices)
+        priceLabel = min === max ? `₹${min}` : `₹${min} - ₹${max}`
+      }
+
+      return {
+        Name: product.title,
+        Category: Array.isArray(product.category)
+          ? product.category.join(", ")
+          : product.category,
+        Weights:
+          variantType === "weight" ? formatArray(product.weights) : "",
+        Colors: variantType === "color" ? formatArray(product.colors) : "",
+        Sizes: variantType === "size" ? formatArray(product.sizes) : "",
+        "Motor Powers":
+          variantType === "motorPower"
+            ? formatArray(product.motorPowers)
+            : "",
+        Price: priceLabel,
+        "Discount Type": product.discountType || "-",
+        "Discount Value": product.discountValue || 0,
+        "Total Stock": product.totalStock ?? product.stock,
+        "Block Status": product.isBlocked ? "Blocked" : "Active",
+        "Created On": new Date(product.createdAt).toLocaleDateString(),
+      }
+    })
+
+    const fields = [
+      "Name",
+      "Category",
+      "Weights",
+      "Colors",
+      "Sizes",
+      "Motor Powers",
+      "Price",
+      "Discount Type",
+      "Discount Value",
+      "Total Stock",
+      "Block Status",
+      "Created On",
+    ];
+
+    const json2csv = new Parser({ fields, quote: '"' })
+    const csv = json2csv.parse(formattedProducts)
+
+    res.header("Content-Type", "text/csv; charset=utf-8")
+    res.attachment("products.csv")
+    res.send(csv)
   }
+  catch (error){
+    console.error("Error exporting products:", error.message)
+    next(error)
+  }
+}
 
 
   const exportProductsAsPdf = async (req, res, next) => {
@@ -745,13 +912,12 @@ const updateProduct = async (req, res, next) => {
       const colConfig = [
         { name: "Title", width: 90, x: 30 },
         { name: "Category", width: 80, x: 130 },
-        { name: "Weight", width: 60, x: 220 },
-        { name: "Price", width: 50, x: 290 },
-        { name: "Disc Type", width: 50, x: 340 },
-        { name: "Disc Value", width: 50, x: 390 },
-        { name: "Stock", width: 40, x: 440 },
-        { name: "Blocked", width: 40, x: 480 },
-        { name: "Created", width: 50, x: 520 }
+        { name: "Variants", width: 60, x: 220 },
+        { name: "Prices", width: 50, x: 280 },
+        { name: "Discount", width: 50, x: 360 },
+        { name: "Stock", width: 40, x: 410 },
+        { name: "Blocked", width: 40, x: 450 },
+        { name: "Created", width: 50, x: 500 }
       ];
 
       doc.font("Helvetica-Bold").fontSize(9)
@@ -766,6 +932,12 @@ const updateProduct = async (req, res, next) => {
 
       doc.font("Helvetica").fontSize(8)
 
+      const variantSymbol = {weight: ' Kg', motorPower: ' Hp', color: '', size: ''}
+      const discount = (discountType, discountValue)=> {
+        if(discountType === 'percentage') return `${discountValue} %`
+        else return `₹ ${discountValue}`
+      }
+
       products.forEach((product, index)=> {
         const rowY = doc.y
         if (index % 2 === 0) {
@@ -774,14 +946,18 @@ const updateProduct = async (req, res, next) => {
         doc.fillColor('#000000')
 
         const rowData = [
-          product.title ? String(product.title).length > 25 ? String(product.title).substring(0, 25) + '...' : String(product.title) : "N/A",
-          product.category ? String(product.category).length > 32 ? String(product.category).substring(0, 32) + '...' : String(product.category) : "N/A",
-          product.weights ? String(product.weights).length > 32 ? String(product.weights).substring(0, 32) + '...' : String(product.weights) : "N/A",
-          product.price ? String(product.price) : "N/A",
-          product.discountType ? String(product.discountType) : "N/A",
-          product.discountValue ? String(product.discountValue) : "N/A",
-          product.stock ? String(product.stock) : "N/A",
-          product.isBlocked ? String(product.isBlocked) === 'true' ? 'Yes' : 'No' : "N/A",
+          product.title ? String(product.title).length > 25 
+            ? String(product.title).substring(0, 25) + '...' : String(product.title) : "N/A",
+          product.category ? String(product.category).length > 32 
+            ? String(product.category).substring(0, 32) + '...' : String(product.category) : "N/A",
+          product[`${product.variantType}s`] 
+            ? String(product[`${product.variantType}s`]).length > 32 
+            ? String(product[`${product.variantType}s`]).substring(0, 32) + '...' + variantSymbol[product.variantType]
+            : String(product[`${product.variantType}s`]) + variantSymbol[product.variantType] : "N/A",
+          product.prices ? String(product.prices) : "N/A",
+          product.discountValue ? String(discount(product.discountType, product.discountValue)) : "N/A",
+          product.totalStock ? String(product.totalStock) : "N/A",
+          product.isBlocked ? 'Yes' : 'No' ,
           product.createdAt ? new Date(product.createdAt).toLocaleDateString() : "N/A"
         ]
 

@@ -72,7 +72,7 @@ export default function AddressManager({addresses, shippingAddress, setShippingA
     return (
         <>
             <motion.div 
-                className={`mt-[30px] ${addresses.length > 4 ? 'overflow-y-scroll' : 'overflow-y-auto'} overflow-x-hidden 
+                className={`mt-[30px] ${addresses?.length > 4 ? 'overflow-y-scroll' : 'overflow-y-auto'} overflow-x-hidden 
                   flex flex-col gap-4 lg:grid lg:grid-cols-2 lg:gap-x-4 x-lg:gap-x-[3rem] gap-y-[1rem] max-h-[30rem]`}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -80,7 +80,7 @@ export default function AddressManager({addresses, shippingAddress, setShippingA
             >
 
             <AnimatePresence>
-            {
+            {addresses &&
               [...addresses].sort((a, b)=> {
                 if (b.defaultAddress && !a.defaultAddress){
                   return 1

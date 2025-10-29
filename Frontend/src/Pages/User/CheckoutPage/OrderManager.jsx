@@ -5,6 +5,9 @@ import {motion} from 'framer-motion'
 import {Plus, Minus, AlertCircle} from 'lucide-react'
 import axios from 'axios'
 
+import {camelToCapitalizedWords} from '../../../Utils/helperFunctions'
+
+
 
 export default function OrderManager({products, orderReviewError, onIncQuantity, onDecQuantity}){
 
@@ -36,6 +39,8 @@ export default function OrderManager({products, orderReviewError, onIncQuantity,
         transition: { type: "spring", stiffness: 400, damping: 12 },
       },
     }
+
+    const variantSymbol = {weight: 'Kg', motorPower: 'Hp', color: '', size: ''}
 
     const goToProductDetailPage = async(id)=> {
       try {
@@ -82,10 +87,22 @@ export default function OrderManager({products, orderReviewError, onIncQuantity,
                               > 
                                 {!product.title.length > 22 ? product.title : product.title.slice(0,15) + '...'}
                               </h3>
-                              {
+                              {/* {
                                 product?.weight? 
                                 <p className="text-sm text-[13px] text-gray-500"> Weight: { product.weight } </p>
                                 : null
+                              } */}
+                              {
+                                product.productId.variantType &&
+                                  <p className="mt-[3px] text-[13px] text-muted font-[450]"> 
+                                      {`${camelToCapitalizedWords(product.productId.variantType)}:`} 
+                                    <span className='ml-[3px] text-[13px] capitalize'>
+                                      {
+                                        product.productId[`${product.productId.variantType}`] 
+                                          + ' ' + variantSymbol[`${product.productId.variantType}`]
+                                      } 
+                                    </span>
+                                  </p>
                               }
                             </div>
                           </div>

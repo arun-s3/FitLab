@@ -23,6 +23,7 @@ export default function OrderCompletedSummary(){
     useEffect(()=> {
       const loadOrderCompletedDetails = async ()=> {
         try{
+          console.log('Getting success details...')
           const response = await axios.get(`${baseApiUrl}/order/latest`,{ withCredentials: true })
           setOrderSuccessDetails(response.data.order)
         }
@@ -30,6 +31,7 @@ export default function OrderCompletedSummary(){
           console.log("Error during loadOrderCompletedDetails:", error.message)
         }
       }
+      console.log('calling loadOrderCompletedDetails()...')
       loadOrderCompletedDetails()
     }, [])
 
@@ -75,7 +77,8 @@ export default function OrderCompletedSummary(){
                     transition={{ duration: 0.6, delay: 0.5 }}
                   >
                      {
-                      format(new Date(orderSuccessDetails.estimtatedDeliveryDate), "MMMM dd, yyyy" )
+                      orderSuccessDetails &&
+                        format(new Date(orderSuccessDetails.estimtatedDeliveryDate), "MMMM dd, yyyy" )
                      }
                   </motion.p>
                 </div>
@@ -86,7 +89,7 @@ export default function OrderCompletedSummary(){
                 >
                   <SiteButton
                     customStyle={{ filter: "none" }}
-                    onClick={() => navigate("/orders")}
+                    clickHandler={() => navigate("/orders")}
                   >
                     View order
                   </SiteButton>
@@ -109,7 +112,7 @@ export default function OrderCompletedSummary(){
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ duration: 0.5, delay: 0.8, type: "spring" }} 
                 >
-                  { orderSuccessDetails.fitlabOrderId }
+                  { orderSuccessDetails && orderSuccessDetails.fitlabOrderId }
                 </motion.span>{" "}
                 has been placed!
               </p>

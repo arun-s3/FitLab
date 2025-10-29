@@ -15,6 +15,6 @@ orderRouter.patch('/cancel', isLogin, cancelOrderProduct)
 orderRouter.patch('/cancel/:orderId', cancelOrder)
 orderRouter.post('/delete/:orderId', deleteProductFromOrderHistory)
 orderRouter.get('/statusCounts', getOrderCounts)
-orderRouter.get('/latest', getTodaysLatestOrder)
+orderRouter.get('/latest', isLogin, getTodaysLatestOrder)
 
 module.exports = orderRouter

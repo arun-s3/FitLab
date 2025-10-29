@@ -46,7 +46,7 @@ export default function ProductDetailPage(){
   useEffect(()=> {
     const fetchProduct = async()=> {
       const response = await axios.get(`${baseApiUrl}/products/${currentProductId}`, {withCredentials:true})
-      console.log('response---->', response)
+      console.log('response.data.product---->', response.data.product)
       return response.data.product 
     }
     const loadProduct = async()=> {
@@ -95,8 +95,9 @@ export default function ProductDetailPage(){
 
   const handleAddToCart = (product, variantValueIndex) => {
     if(checkAuthOrOpenModal()) return
-    console.log("Inside handleAddToCart()--")
-    dispatch( addToCart({productId: product.variants[variantValueIndex], quantity}) )
+    console.log(`Inside handleAddToCart()--Product---->${JSON.stringify(product)}, variantValueIndex---->, ${variantValueIndex}`)
+    const requiredProductVariantId = variantValueIndex === 0 ? product._id : product.variants[variantValueIndex - 1]._id
+    dispatch( addToCart({productId: requiredProductVariantId, quantity}) )
     console.log("Dispatched successfully")
   }
 

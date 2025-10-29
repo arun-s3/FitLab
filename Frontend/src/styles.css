@@ -2223,10 +2223,6 @@ select{
   margin-top: 9px;
 }
 
-.ml-\[\]{
-  margin-left: ;
-}
-
 .line-clamp-1{
   overflow: hidden;
   display: -webkit-box;
@@ -7435,6 +7431,11 @@ select{
 .text-\[\#EF4444\]{
   --tw-text-opacity: 1;
   color: rgb(239 68 68 / var(--tw-text-opacity));
+}
+
+.text-\[\#a09fa8\]{
+  --tw-text-opacity: 1;
+  color: rgb(160 159 168 / var(--tw-text-opacity));
 }
 
 .text-\[\#a5a5a5\]{

@@ -4,12 +4,13 @@ import {useSelector} from 'react-redux'
 import {motion} from 'framer-motion'
 
 
-export function SiteButton({customStyle, children, className, shouldSubmit = false}){
+export function SiteButton({customStyle, children, className, clickHandler, shouldSubmit = false}){
     
     return(
         <button type={shouldSubmit?"submit":"button"} 
             className={`bg-primary text-black text-descReg1 hover:bg-yellow-300 transition duration-300 ${className} site-button`} 
             style={customStyle}
+            onClick={clickHandler ? ()=> clickHandler() : undefined}
         >
                 {children}
         </button>

@@ -24,7 +24,15 @@ export default function ProductDetail({product = null, quantity, setQuantity, on
     useEffect(()=> {
       if(product && Object.keys(product).length > 0){
         console.log("product[`${product.variantType}s`][0]---->", product[`${product.variantType}s`][0])
-        setSelectedVariantValue(product[`${product.variantType}s`][0])
+        
+        if(!product?.mainProduct){
+          setSelectedVariantValue(product[`${product.variantType}s`][0])
+        }else{
+          const requiredVariantIndex = product.mainProduct.variants.findIndex(variant=> variant._id.toString() === product._id.toString()) + 1
+          console.log("requiredVariantIndex--->", requiredVariantIndex )
+          setSelectedVariantValue(product[`${product.variantType}s`][requiredVariantIndex])
+          setVariantValueIndex(requiredVariantIndex)
+        }
 
         const thumbnailIndex = product.images.findIndex(img=> img.isThumbnail)
         setCurrentImageIndex(thumbnailIndex)
@@ -237,12 +245,12 @@ export default function ProductDetail({product = null, quantity, setQuantity, on
                   <motion.h3 className="text-[14px] xs-sm:text-[15px] font-medium mb-[6px] xs-sm:mb-[8px]"
                     variants={itemVariants}
                   >
-                    {(product.variantType).toUpperCase()}:
-                    <span className='ml-[5px]'> 
+                    {product.variantType === 'motorPower' ? 'MOTOR-POWER' : (product.variantType).toUpperCase()}:
+                    <span className='ml-[5px] capitalize'> 
                       {
                         selectedVariantValue 
                           && selectedVariantValue + 
-                            `${product.variantType === 'weight' ? '  Kg' : product.variantType === 'motorPower' ? '  Hp' : null}`
+                            `${product.variantType === 'weight' ? '  Kg' : product.variantType === 'motorPower' ? '  Hp' : ''}`
                       }
                     </span> 
                   </motion.h3>
@@ -262,13 +270,13 @@ export default function ProductDetail({product = null, quantity, setQuantity, on
                             <SiteSecondaryFillButton 
                               key={value} 
                               variant={selectedVariantValue === value ? "default" : "outline"}
-                              className="w-full text-[13px] xs-sm:text-base py-[8px]" 
+                              className="w-full text-[13px] xs-sm:text-base py-[8px] capitalize" 
                               clickHandler={()=> {
                                 setSelectedVariantValue(value)
                                 setVariantValueIndex(index)  
                               }}
                             >
-                              {value + `${product.variantType === 'weight' ? '  KG' : product.variantType === 'motorPower' ? '  HP' : null}`} 
+                              {value + `${product.variantType === 'weight' ? '  KG' : product.variantType === 'motorPower' ? '  HP' : ''}`} 
                             </SiteSecondaryFillButton>
                           </motion.div>
                         </motion.div>

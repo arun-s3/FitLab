@@ -115,6 +115,14 @@ const createUser = async(req,res,next)=>{
             if(!userExists){
                 console.log("inside !userExists-->"+!userExists)
                 if(password===confirmPassword){
+                    const mobileExists = await User.findOne({mobile})
+                    const usernameExists = await User.findOne({username})
+                    if(mobileExists){
+                        next(errorHandler(409, "Mobile number already exists!"))
+                    }
+                    if(usernameExists){
+                        next(errorHandler(409, "Username already exists!"))
+                    }
                     const spassword = await securePassword(password)
                     const newUser = new User({
                         username,
@@ -243,11 +251,11 @@ const updateUserDetails = async (req, res, next) => {
     }
 
     const existingUser = await User.findOne({
-      $or: [{ email: userDetails.email }, { mobile: userDetails.mobile }], 
+      $or: [{ email: userDetails.email }, { mobile: userDetails.mobile }, { username: userDetails.username }], 
       _id: { $ne: userId }
     })
     if(existingUser){
-        next(errorHandler(409, "Email or mobile number already exists for another user!"))
+        next(errorHandler(409, "Email, username or  mobile number already exists for another user!"))
     }
 
     const updatedUser = await User.findByIdAndUpdate(userId, { $set: userDetails },{ new: true, runValidators: true })

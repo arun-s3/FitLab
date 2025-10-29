@@ -38,7 +38,7 @@ export default function AdminAddAndEditProductPage({ editProduct }){
     const [images, setImages] = useState([])
     const [category, setCategory] = useState([])
     const [subCategory, setSubCategory] = useState('')
-    const [productData, setProductData] = useState({})
+    const [productData, setProductData] = useState({targetMuscles: []})
 
     const [variantsDisabledMsg, setVariantsDisabledMsg] = useState(false)
 
@@ -103,9 +103,11 @@ export default function AdminAddAndEditProductPage({ editProduct }){
                     "title": editProductItem.current.title,
                     "price": editProductItem.current.prices || [],
                     "stock": editProductItem.current.stocks || [],
-                    [`${editProductItem.current.variantType}s`] : editProductItem.current[`${editProductItem.current.variantType}s`] || [],
+                    [`${editProductItem.current.variantType}s`] 
+                        : editProductItem.current[`${editProductItem.current.variantType}s`] || [],
                     "brand": editProductItem.current.brand,
                     "subtitle": editProductItem.current.subtitle || '',
+                    "targetMuscles":  editProductItem.current.targetMuscles || [],
                     "description": editProductItem.current.description || '',
                     "additionalInformation": editProductItem.current.additionalInformation || []
                 });
@@ -143,6 +145,23 @@ export default function AdminAddAndEditProductPage({ editProduct }){
             setTimeout(()=> {navigate('/admin/products/list', {replace: true})}, 1000)
         }
     },[productCreated, productUpdated])
+
+    const muscleGroups = ["Chest", "Back", "Shoulders", "Biceps", "Triceps", "Forearms", "Quadriceps", "Hamstrings", "Glutes", "Calves",
+        "Core", "Abs", "Full Body", "Cardio"]
+
+    const muscleGroupPics = {
+      chest: "/MuscleGroups/chest.jpg",
+      back: "/MuscleGroups/back.jpg",
+      shoulders: "/MuscleGroups/shoulders.jpg",
+      biceps: "/MuscleGroups/biceps.jpg",
+      triceps: "/MuscleGroups/triceps.jpg",
+      forearms: "/MuscleGroups/forearms.jpg",
+      quadriceps: "/MuscleGroups/quads.jpg",
+      hamstrings: "/MuscleGroups/hams.jpg",
+      glutes: "/MuscleGroups/glutes.jpg",
+      calves: "/MuscleGroups/calves.jpg",
+      abs: "/MuscleGroups/abs.jpg",
+    }
 
     const changeHandler = (e, fieldName)=> {
         console.log(" inside Changehandler")
@@ -221,6 +240,15 @@ export default function AdminAddAndEditProductPage({ editProduct }){
     //         console.error('Error during compression:', error)
     //     }
     // }
+ 
+    const handleMuscleChange = (muscle) => {
+        setProductData((datas) => ({
+          ...datas,
+          targetMuscles: datas?.targetMuscles?.includes(muscle)
+            ? datas.targetMuscles.filter((m) => m !== muscle)
+            : [...datas?.targetMuscles, muscle]
+        }))
+    }
 
     const submitHandler = async (e)=>{
         console.log("Inside submitData()--")
@@ -499,6 +527,49 @@ export default function AdminAddAndEditProductPage({ editProduct }){
                             </div>
                         </div>
                     </div>
+
+                    <div className='product-input-wrapper relative'>
+                        <p className='label'> Target Muscles (optional)</p>
+                        <div className="mt-4 grid grid-cols-4 gap-2 overflow-visible pl-2">
+                          {muscleGroups.map((muscle, index) => (
+                            <span key={muscle}
+                              className="flex items-center space-x-2 cursor-pointer text-[11.6px]
+                                !text-gray-700 hover:text-secondary">
+                                <input
+                                  type="checkbox"
+                                  checked={productData?.targetMuscles?.includes(muscle)}
+                                  onChange={() => handleMuscleChange(muscle)}
+                                  className="!w-[12px] !h-[12px] !text-secondary !rounded-[2px] focus:ring-2 !ring-secondary !outline-secondary"
+                                />
+                                <span className="text-[11px] text-inherit dark:text-gray-300"> {muscle} </span>
+                            </span>
+                          ))}
+                        </div>
+                        {/* {   productData.targetMuscles &&
+                            <img src={muscleGroupPics.find(pic=> productData.targetMuscles.some(muscle=> pic.includes(muscle.toLowerCase())))} 
+                                className='absolute right-[-31px] w-[30%] h-auto rounded-[8px]'/>
+                        } */}
+                        {productData.targetMuscles && (
+                          (() => {
+                            const match = Object.keys(muscleGroupPics).find((muscle, picIndex) =>
+                              productData.targetMuscles.some((m, muscleIndex) =>
+                                m.toLowerCase().includes(muscle) && muscleIndex === productData.targetMuscles.length - 1
+                              )
+                            );
+                            return (
+                              match && (
+                                <img
+                                  src={muscleGroupPics[match]}
+                                  alt={match}
+                                  className="absolute -right-[30rem] -bottom-[9rem] w-[45%] h-auto rounded-[13px] outline outline-2 outline-primary"
+                                />
+                              )
+                            );
+                          })()
+                        )
+                        }
+                    </div>
+
                     <div className='flex justify-center items-center product-input-wrapper'>
                         <div className='input-wrapper'>
                             <label for='product-additionalInfo'> Additional Information (optional) </label>

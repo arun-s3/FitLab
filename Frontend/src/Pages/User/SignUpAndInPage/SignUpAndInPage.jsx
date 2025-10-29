@@ -6,6 +6,7 @@ import {motion} from "framer-motion"
 
 import {toast} from 'react-toastify'
 import {useGoogleLogin} from '@react-oauth/google'
+import {Eye, EyeOff} from 'lucide-react'
 import axios from 'axios'
 
 import {SiteButtonSquare, SiteSecondaryBorderButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
@@ -24,6 +25,9 @@ export default function SignUpAndInPage({type}){
 
     const [formData,setFormData] = useState({})
     const [googlePromptLoading, setGooglePromptLoading] = useState(false)
+
+    const [showPassword, setShowPassword] = useState(false)
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
     const navigate = useNavigate()
     const identifierRef = useRef(null)
@@ -374,28 +378,50 @@ export default function SignUpAndInPage({type}){
                     }
                     
                     <motion.div className='flex flex-col gap-[15px] w-full' variants={childVariants}>
-                        <div>
+                        <div className='relative'>
                             <label htmlFor='password'>Enter your Password</label>
-                            <input type="password" 
+                            <input type={showPassword ? 'text' : 'password'} 
                                 placeholder="Password"
                                 id="password"
                                 onChange={(e)=>handleChange(e)} 
                                 autoComplete="off" ref={passwordRef}  
                                 onBlur={(e)=>{handleInput(e)}}
                             />
+                            {
+                                showPassword 
+                                    ? <Eye 
+                                        className='absolute top-[45%] right-4 text-secondary w-[18px] h-[18px] cursor-pointer'
+                                         onClick={()=> setShowPassword(false)}
+                                       />
+                                    : <EyeOff 
+                                        className='absolute top-[45%] right-4 text-secondary w-[18px] h-[18px] cursor-pointer' 
+                                        onClick={()=> setShowPassword(true)}
+                                       />
+                            }
                             <p className='error' ></p>
                         </div>
                         
                         {
                             type==="signup"?
                                             (
-                                                <div>   {/*className='mt-[15px]'*/}
+                                                <div className='relative'>   
                                                     <label htmlFor='confirmPassword'> Confirm your Password </label>
-                                                    <input type="password" 
+                                                    <input type={showConfirmPassword ? 'text' : 'password'} 
                                                         placeholder="Password"
                                                         id="confirmPassword" 
                                                         onBlur={(e)=>{handleInput(e)}} onChange={(e)=>handleChange(e)}
                                                     />
+                                                    {
+                                                        showConfirmPassword 
+                                                            ? <Eye 
+                                                                className='absolute top-[33%] right-4 text-secondary w-[18px] h-[18px] cursor-pointer'
+                                                                 onClick={()=> setShowConfirmPassword(false)}
+                                                               />
+                                                            : <EyeOff 
+                                                                className='absolute top-[33%] right-4 text-secondary w-[18px] h-[18px] cursor-pointer' 
+                                                                onClick={()=> setShowConfirmPassword(true)}
+                                                               />
+                                                    }
                                                     <p className='error'></p>
 
                                                     <p className='text-white mt-[1rem] text-subtitleSmall1 ml-[4px]'>
@@ -443,6 +469,7 @@ export default function SignUpAndInPage({type}){
                             <SiteSecondaryBorderButtonSquare 
                                 customStyle={{marginBottom:'60px', width:'100%', display:'flex',
                                     justifyContent:'center', alignItems:'center'}} 
+                                tailwindClasses={'!text-[13px] xxs-sm:!text-[15px]'}
                                 clickHandler={()=>{ setGooglePromptLoading(true); googleLogin()}}>
                                 <img src="/google.png" 
                                      alt="" className='mr-[15px] inline-block'/> 

@@ -88,7 +88,7 @@ export default function ProductList({admin}){
     const brands = ["Nike", "Adidas", "Under Armour", "Reebok", "Puma", "Gymshark"]
 
     const muscleGroups = ["Chest", "Back", "Shoulders", "Biceps", "Triceps", "Forearms", "Quadriceps", "Hamstrings", "Glutes", "Calves",
-        "Core/Abs", "Full Body", "Cardio"]
+        "Core", "Abs", "Full Body", "Cardio"]
 
 
     const dispatch = useDispatch()

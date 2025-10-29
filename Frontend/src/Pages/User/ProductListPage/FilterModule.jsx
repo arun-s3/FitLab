@@ -132,7 +132,7 @@ export default function FilterModule({filter, setFilter, rating, setRating, popu
 
 
     return (
-            <aside className='hidden xx-md:flex flex-col gap-[10px] basis-[15rem]'>
+            <aside className='hidden xx-md:flex flex-col gap-[10px] basis-[15rem] mb-[5rem]'>
         
                 <div className='flex gap-[5px] items-center pb-[10px] border-b border-[#DEE2E7] filter-head'>
                     <VscSettings/>

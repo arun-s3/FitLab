@@ -27,6 +27,7 @@
     padding:10px;
     padding-left:20px;
     margin-left: 0px; 
+    font-size: 14px;
 }
 #signup-and-in>main input::placeholder{
     font-size:12px;

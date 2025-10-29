@@ -59,6 +59,10 @@ const productSchema = mongoose.Schema({
        type: [String],
        default: []  
     },
+    targetMuscles: {
+      type: [String],
+      default: null
+    },
     //  totalReviews: {
     //    type: Number,
     //    default: 0,

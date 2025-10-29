@@ -19,7 +19,7 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
          imagePreview, imageType, imageCropperPositionFromTop, imageCropperBgBlur, imageCropperContainerHt,
              imageCropperControllerStyle,  uploadBox, editingMode}){
 
-    const [error, setError] = useState(null)
+    const [error, setError] = useState("error")
     const [imageMessage, setImageMessage] = useState('')
     const imageMessageDisplay = useRef(null)
     const [displayCompressButton, setDisplayCompressButton] = useState(false)
@@ -389,7 +389,9 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
                         </span >
                 </h3>
             </div>
-            <p className='text-red-500 text-[10px] h-[20px] mt-[5px]'> {error} </p>
+            <p className={`${error ? 'text-red-500' : 'text-muted'} text-[10px] h-[20px] mt-[5px]`}>
+                 {error ? error : 'Upload images up to a maximum dimension of 400×400 pixels. Images exceeding this size will be automatically resized to 400×400 pixels.'} 
+            </p>
             {   imageCropperState &&
                 <ImageCropper images={images} onCropComplete={handleCropComplete} imageCropperState={imageCropperState}
                      setImageCropperState={setImageCropperState} imageCropperDefaultIndex={imageCropperDefaultIndex} imageCloseHandler={closeHandler}

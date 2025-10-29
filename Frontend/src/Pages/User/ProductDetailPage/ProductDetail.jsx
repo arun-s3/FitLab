@@ -18,6 +18,9 @@ export default function ProductDetail({product = null, quantity, setQuantity, on
     const [currentImageIndex, setCurrentImageIndex] = useState(null)
   
     const thumbnailRef = useRef(null)
+    const containerRef = useRef(null)
+
+    const [isZoomed, setIsZoomed] = useState(false)
   
     const {bestOffer} = useSelector(state=> state.offers)
 
@@ -87,6 +90,25 @@ export default function ProductDetail({product = null, quantity, setQuantity, on
         setCurrentImageIndex(index)
     }
 
+    const handleMouseMove = (e)=> {
+      if (!isZoomed || !thumbnailRef.current || !containerRef.current) return
+
+      const { left, top, width, height } = containerRef.current.getBoundingClientRect()
+      const x = ((e.clientX - left) / width) * 100
+      const y = ((e.clientY - top) / height) * 100
+
+      thumbnailRef.current.style.transformOrigin = `${x}% ${y}%`
+      thumbnailRef.current.style.transform = "scale(1.6)"
+    }
+
+    const handleMouseLeave = ()=> {
+      setIsZoomed(false)
+      if (thumbnailRef.current) {
+        thumbnailRef.current.style.transformOrigin = "center center"
+        thumbnailRef.current.style.transform = "scale(1)"
+      }
+    }
+
 
     return (
 
@@ -100,15 +122,21 @@ export default function ProductDetail({product = null, quantity, setQuantity, on
               className="border rounded-lg p-[12px] xs-sm:p-[16px] bg-white"
               variants={itemVariants}
             >
-              <div className="w-full h-auto overflow-hidden rounded">
+              <div 
+                ref={containerRef}
+                className="relative w-full overflow-hidden rounded group"
+                onMouseMove={handleMouseMove}
+                onMouseEnter={() => setIsZoomed(true)}
+                onMouseLeave={handleMouseLeave}
+              >
                 <AnimatePresence mode="wait">
                   {mainImageUrl ? (
                     <motion.img
                       key={mainImageUrl}
                       src={mainImageUrl}
                       alt={product?.title || "Product Thumbnail"}
-                      className="w-full h-auto object-contain"
-                      ref={thumbnailRef}
+                      className={`w-full h-auto object-contain transition-transform duration-300 ease-out cursor-zoom-in`}
+                      ref={thumbnailRef }
                       initial="initial"
                       animate="animate"
                       exit="exit"

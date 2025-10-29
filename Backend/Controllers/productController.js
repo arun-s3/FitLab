@@ -23,25 +23,14 @@ const packProductData = async (req, next)=>{
         console.log("Image path:", req.files['images'][0].path);
         console.log("Thumbnail path:", req.files['thumbnail'][0].path);
         
-        // const uploadedImages = []
-        // for (let i=0; i<req.files['images'].length; i++) {
-        //     const result = await cloudinary.uploader.upload(req.files['images'][i].path, {
-        //       folder: 'products/images', 
-        //       resource_type: 'image' 
-        //     });
-        //     uploadedImages.push({
-        //         public_id: result.public_id,
-        //         name: req.files['images'][i].originalname,
-        //         url: result.secure_url, 
-        //         size: result.bytes,
-        //         isThumbnail: i == req.body.thumbnailImageIndex? true : false
-        //     });
-        //   }
         const uploadedImages = await Promise.all(
             req.files['images'].map(async (image, index) => {
               const result = await cloudinary.uploader.upload(image.path, {
                 folder: 'products/images',
                 resource_type: 'image',
+                transformation: [
+                  { width: 400, height: 400, crop: "limit"}
+                ]
               });
               return {
                 public_id: result.public_id,
@@ -57,7 +46,10 @@ const packProductData = async (req, next)=>{
 
         const thumbnailResult = await cloudinary.uploader.upload( req.files['thumbnail'][0].path, {
           folder: 'products/thumbnails',
-          resource_type: 'image'
+          resource_type: 'image',
+          transformation: [
+            { width: 400, height: 400, crop: "limit"} 
+          ]
         });
         const thumbnailImage = {
             public_id: thumbnailResult.public_id,
@@ -74,6 +66,7 @@ const packProductData = async (req, next)=>{
             brand: req.body.brand,
             category: req.body.category,
             subCategory: req.body.subCategory,
+            targetMuscles: req.body.targetMuscles || [],
             description: req.body?.description || '',
             additionalInformation: req.body?.additionalInformation || [],
             tags: req.body?.tags|| [],
@@ -279,14 +272,17 @@ const getAllProducts = async (req, res, next)=> {
         ]
       }
   
-      if (queryOptions?.brands) {
-        filters.brand = { $in: queryOptions.brands }
+      if (queryOptions?.filter?.brands && queryOptions?.filter?.brands.length > 0) {
+        filters.brand = queryOptions.filter.brands 
       }
       if (queryOptions?.filter?.categories && queryOptions?.filter?.categories.length > 0) {
         filters.category = { $in: queryOptions.filter.categories }
       }
       if (queryOptions?.filter?.subCategories && queryOptions?.filter?.subCategories.length > 0) {
         filters.subCategory = queryOptions.filter.subCategories
+      }
+      if (queryOptions?.filter?.targetMuscles && queryOptions?.filter?.targetMuscles.length > 0) {
+        filters.targetMuscles = queryOptions.filter.targetMuscles
       }
       if (queryOptions?.filter?.products && queryOptions?.filter?.products.length > 0) {
         filters.title = { $in: queryOptions.filter.products }

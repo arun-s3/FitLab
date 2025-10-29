@@ -53,7 +53,7 @@ export default function AdminProductListPage(){
 
     const {products, message} = useSelector(state=> state.productStore)
 
-    const {setHeaderZIndex} = useOutletContext()
+    const {setHeaderZIndex, setPageBgUrl} = useOutletContext() 
 
     const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
@@ -64,7 +64,7 @@ export default function AdminProductListPage(){
     const brands = ["Nike", "Adidas", "Under Armour", "Reebok", "Puma", "Gymshark"]
 
     const muscleGroups = ["Chest", "Back", "Shoulders", "Biceps", "Triceps", "Forearms", "Quadriceps", "Hamstrings", "Glutes", "Calves",
-        "Core/Abs", "Full Body", "Cardio"]
+        "Core", "Abs", "Full Body", "Cardio"]
     
     useEffect(()=> {
         dispatch( getAllProducts({queryOptions: {page: 1, limit: 9}}))

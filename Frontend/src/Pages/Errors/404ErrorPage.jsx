@@ -1,4 +1,6 @@
 import React from 'react'
+import {useSelector} from 'react-redux'
+import {useNavigate} from 'react-router-dom'
 import {motion} from "framer-motion"
 
 import {Home} from "lucide-react"
@@ -6,6 +8,18 @@ import {Home} from "lucide-react"
 
 export default function ErrorPage404() {
 
+  const navigate = useNavigate()
+
+  const {admin} = useSelector(state=> state.admin)
+  const {user} = useSelector(state=> state.user)
+  
+  console.log("Inside PrivateAdminRoutes", user && !user.isAdmin)
+
+  const goToHome = ()=> {
+    // user && !user.isAdmin  && !user.isBlocked
+    //     ?  navigate('/')
+  }
+  
     
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 bg-[#F9FADE] relative overflow-hidden">
@@ -69,7 +83,7 @@ export default function ErrorPage404() {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => (window.location.href = "/")}
+                  onClick={()=> goToHome()}
                   className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-8 rounded-[10px] transition-colors duration-200 shadow-lg hover:shadow-xl"
                 >
                   <Home className="w-5 h-5" />

@@ -1,4 +1,5 @@
 import React, {useState, useEffect, useRef, useContext} from "react"
+import {useOutletContext} from 'react-router-dom'
 import {motion, AnimatePresence} from "framer-motion"
 
 import VideoChatDashboard from './VideoChatDashboard'
@@ -18,6 +19,9 @@ export default function AdminVideoChatSupportPage() {
 
   const adminId = 'admin-room'
   const [adminStatus, setAdminStatus] = useState("available")
+
+  const {setPageBgUrl} = useOutletContext() 
+  setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.95),rgba(255,255,255,0.95)), url('/admin-bg9.png')`)
 
   const adminSocketContextItems = useContext(AdminSocketContext)
 

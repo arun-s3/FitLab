@@ -138,6 +138,8 @@ const initialState = {
   OrderRemoved: false,
   orderCancelled: false,
   orderUpdated: false,
+  totalUsersOrders: null,
+  totalOrders:null,
   loading: false,
   orderError: null,
   orderSuccess: false,
@@ -187,6 +189,7 @@ const orderSlice = createSlice({
         state.orderSuccess = true
         state.orderMessage = action.payload.message
         state.orders = action.payload.orders
+        state.totalOrders = action.payload.pagination.totalOrders
       })
       .addCase(getOrders.pending, (state) => {
         state.loading = true
@@ -206,6 +209,7 @@ const orderSlice = createSlice({
         state.orderSuccess = true
         state.orderMessage = action.payload.message
         state.orders = action.payload.orders
+        state.totalUsersOrders = action.payload.pagination.totalOrders
       })
       .addCase(getAllUsersOrders.pending, (state) => {
         state.loading = true

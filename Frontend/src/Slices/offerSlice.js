@@ -119,6 +119,7 @@ const initialState = {
     offerRemoved: false,
     offerUpdated: false,
     offerToggled: false,
+    totalOffers: null,
     loading: false,
     offerMessage: null,
     offerError: null,
@@ -159,6 +160,7 @@ const offerSlice = createSlice({
         state.offerError = null
         state.loading = false
         state.offers = action.payload.offers
+        state.totalOffers = action.payload.totalOffers
       })
       .addCase(getAllOffers.pending, (state)=> {
         state.loading = true

@@ -19,6 +19,7 @@ import WishlistModal from '../../Pages/User/WishlistPage/Modals/WishlistModal'
 import WishlistOptionsModal from '../WishlistModals/WishlistOptionsModal'
 import RemoveWishlistItemModal from '../WishlistModals/RemoveWishlistItemModal'
 import Pagination from '../Pagination/Pagination'
+import PaginationV2 from '../PaginationV2/PaginationV2'
 import StarGenerator from '../StarGenerator/StarGenerator'
 import {SiteButtonSquare} from '../SiteButtons/SiteButtons'
 import {capitalizeFirstLetter, camelToCapitalizedWords} from '../../Utils/helperFunctions'
@@ -26,10 +27,9 @@ import {addToCart} from '../../Slices/cartSlice'
 import ProductsTableView from './ProductsTableView'
 
 
-export default function ProductsDisplay({gridView, showByTable, customGridViewStyles, pageReader, limiter, queryOptions, showTheseProducts, admin, 
-  wishlistDisplay, currentList, couponApplicableItems = null, checkAuthOrOpenModal = null}) {
+export default function ProductsDisplay({gridView, showByTable, customGridViewStyles, currentPage, limiter, queryOptions, showTheseProducts, admin, 
+  wishlistDisplay, currentList, setCurrentPage, totalPages, couponApplicableItems = null, checkAuthOrOpenModal = null}) {
 
-  const {currentPage, setCurrentPage} = pageReader
 
   const dispatch = useDispatch()
   const {products:items, productCounts} = useSelector(state=> state.productStore)
@@ -123,10 +123,6 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
   }
 
   const variantSymbol = {weight: 'Kg', motorPower: 'Hp', color: '', size: ''}
-
-  const currentPageChanger = (page)=>{
-    setCurrentPage(page)
-  }
 
   const handleAddToCart = (id)=> {
      if(checkAuthOrOpenModal && checkAuthOrOpenModal()) return
@@ -225,7 +221,8 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
         variants={container}
         initial="hidden"
         animate="show"
-        className={`${gridView ?
+        className={`${
+          gridView ?
           customGridViewStyles
           ? customGridViewStyles
           :`w-full grid gap-y-8 ${admin ? 'md:grid-cols-2' : 'x-sm:grid-cols-2'} xx-md:grid-cols-2 lg:grid-cols-2 
@@ -234,7 +231,7 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
           : showByTable 
           ? '' 
           : 'flex flex-col gap-[2rem]'}
-          ${wishlistDisplay && 'ml-[15px] xx-lg:ml-[1.5rem]'}`} 
+          ${wishlistDisplay && 'ml-[15px] xx-lg:ml-[1.5rem]'} ${products.length === 0 && '!flex !justify-center !items-center'}`} 
         id="products-display" 
         style={admin ? { justifyItems: 'center' } : {}}
       >  
@@ -453,7 +450,9 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
            
           </motion.div> 
         ))
-        : <h3 className='text-[17px] text-muted text-center tracking-[0.5px]'> No Products Available! </h3>
+        : <h3 className='mt-[12rem] text-[13px] xs-sm2:text-[16px] xs-sm:text-[17px] text-muted capitalize tracking-[0.5px]'> 
+            No Products Available! 
+          </h3>
       }
     </motion.div>
     { showByTable &&
@@ -491,11 +490,16 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
 
     <div className={` ${wishlistDisplay && 'ml-[1.5rem]'} `}>
 
-      <Pagination productCounts={productCounts} 
+      {/* <Pagination productCounts={productCounts} 
         currentPage={currentPage} 
         currentPageChanger={currentPageChanger} 
         limiter={limiter} 
-      />
+      /> */}
+
+      {
+          products.length > 0 && totalPages && 
+            <PaginationV2 currentPage={currentPage} totalPages={totalPages} onPageChange={(page)=> setCurrentPage(page)} />
+      }
 
     </div>
     <div className='h-[7rem] w-full'></div>

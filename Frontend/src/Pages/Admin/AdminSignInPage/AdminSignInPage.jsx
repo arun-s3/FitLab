@@ -5,6 +5,7 @@ import {useSelector,useDispatch} from 'react-redux'
 
 import {toast} from 'react-toastify'
 import {RiAdminLine} from "react-icons/ri"
+import {Eye, EyeOff} from 'lucide-react'
 
 import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
 import {CustomHashLoader} from '../../../Components/Loader/Loader'
@@ -22,6 +23,8 @@ export default function AdminSignInPage(){
 
     const [formData,setFormData] = useState({})
 
+    const [showPassword, setShowPassword] = useState(false)
+
     const navigate = useNavigate()
 
     const dispatch = useDispatch()
@@ -35,13 +38,13 @@ export default function AdminSignInPage(){
         if (adminSuccess) {
             console.log("ADMIN TOKEN-->"+adminToken)
             console.log("ADMIN DATA-->"+JSON.stringify(admin))
-            navigate('/admin/dashboard', { replace: true });
+            navigate('/admin/dashboard/business', { replace: true });
             dispatch(resetStates())
         } else if (adminError) {
             toast.error(adminError)
             dispatch(resetStates())
         } else if (!adminSuccess && adminToken) {
-            navigate('/admin/dashboard', {replace: true })
+            navigate('/admin/dashboard/business', {replace: true })
         }
     }, [adminSuccess, adminError, adminToken, dispatch, navigate])
     
@@ -150,18 +153,31 @@ export default function AdminSignInPage(){
                                     onBlur={(e)=> handleInput(e)} />
                                 <p className='error'></p>
                             </div>
-                            <div className='w-full'>
+                            <div className='w-full relative'>
                                 <label htmlFor='password'
                                     className='text-[13px] s-sm:text-descReg1 '>
                                         Enter your Password
                                 </label>
-                                <input type="password"
+                                <input type={showPassword ? 'text' : 'password'} 
                                     placeholder="Password"
                                     id="password"
                                     className='w-full'
                                     onChange={(e)=> handleChange(e)} 
                                     autoComplete="off"
                                     onBlur={(e)=> handleInput(e)} />
+
+                                    {
+                                        showPassword 
+                                            ? <Eye 
+                                                className='absolute top-[45%] right-4 text-secondary w-[18px] h-[18px] cursor-pointer'
+                                                 onClick={()=> setShowPassword(false)}
+                                               />
+                                            : <EyeOff 
+                                                className='absolute top-[45%] right-4 text-secondary w-[18px] h-[18px] cursor-pointer' 
+                                                onClick={()=> setShowPassword(true)}
+                                               />
+                                    }
+
                                 <p className='error' ></p>
                             </div>
                             <Link to=""

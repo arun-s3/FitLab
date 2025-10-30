@@ -1,4 +1,6 @@
 import React, {useEffect, useState} from "react"
+import {useOutletContext} from 'react-router-dom'
+
 import { motion, AnimatePresence } from "framer-motion"
 
 import {ComposableMap, Geographies, Geography, ZoomableGroup} from "react-simple-maps"
@@ -17,13 +19,16 @@ export default function AdminDashboardHeatmapPage(){
 
   const [userLocationStats, setUserLocationStats] = useState([])
 
-  const [stateData, setStateData] = useState([]);
-  const [tooltipContent, setTooltipContent] = useState("");
-  const [selectedState, setSelectedState] = useState(null);
-  const [maxState, setMaxState] = useState(null);
-  const [totalUsers, setTotalUsers] = useState(0);
-  const [zoom, setZoom] = useState(6);
+  const [stateData, setStateData] = useState([])
+  const [tooltipContent, setTooltipContent] = useState("")
+  const [selectedState, setSelectedState] = useState(null)
+  const [maxState, setMaxState] = useState(null)
+  const [totalUsers, setTotalUsers] = useState(0)
+  const [zoom, setZoom] = useState(6)
 
+  const {setPageBgUrl} = useOutletContext() 
+  setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.94),rgba(255,255,255,0.94)), url('/admin-bg12.png')`)
+  
   const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
   useEffect(()=> {

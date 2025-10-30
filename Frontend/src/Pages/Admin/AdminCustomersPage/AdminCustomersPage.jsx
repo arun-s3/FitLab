@@ -1,4 +1,5 @@
 import React, {useEffect, useState, useRef} from 'react'
+import {useOutletContext} from 'react-router-dom'
 import './AdminCustomersPage.css'
 import axios from '../../../Utils/axiosConfig'
 import {useSelector, useDispatch} from 'react-redux'
@@ -41,6 +42,9 @@ export default function AdminCustomersPageV1() {
     const [showStatusDropdown, setShowStatusDropdown] = useState(false)
 
     const [openModal, setOpenModal] = useState(false)
+
+    const {setPageBgUrl} = useOutletContext() 
+    setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.95),rgba(255,255,255,0.95)), url('/admin-bg13.png')`)
 
     const mainBgImg = {
         colorImage : "linear-gradient(to right,rgba(255,255,255),rgba(255,255,255))"

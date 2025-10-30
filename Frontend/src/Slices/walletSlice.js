@@ -140,6 +140,7 @@ const initialState = {
   peerAccountAdded: true,
   walletCreated: false,
   walletUpdated: false,
+  transactionsCount: null,
   walletLoading: false,
   walletError: '',
   walletMessage: null,
@@ -153,6 +154,10 @@ const handleAsyncThunkCases = (builder, asyncThunk) => {
       state.walletLoading = false
       state.walletMessage = action.payload.message
       state.safeWallet = action.payload.safeWallet
+
+      if(asyncThunk === getOrCreateWallet){
+        state.transactionsCount = action.payload.transactionsCount
+      }
       if(asyncThunk === sendMoneyToUser){
         state.moneySent = true
       }

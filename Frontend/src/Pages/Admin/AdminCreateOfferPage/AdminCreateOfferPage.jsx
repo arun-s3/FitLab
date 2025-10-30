@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react"
+import {useOutletContext} from 'react-router-dom'
 import './AdminCreateOfferPage.css'
 import { useSelector, useDispatch } from "react-redux"
 import {debounce} from 'lodash'
@@ -73,6 +74,10 @@ export default function AdminCreateOfferPage(){
   
   const {loading, offerCreated} = useSelector(state=> state.offers)
   const dispatch = useDispatch()
+
+  const {setPageBgUrl} = useOutletContext()
+  setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.94),rgba(255,255,255,0.94)), url('/admin-bg5.png')`)
+  
 
   const userGroupValues = ["all", "newUsers", "returningUsers", "VIPUsers"]
 

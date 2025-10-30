@@ -1,6 +1,6 @@
 import React,{useState, useEffect} from 'react'
 import './AdminCategoryListPage.css'
-import {useNavigate} from 'react-router-dom'
+import {useNavigate, useOutletContext} from 'react-router-dom'
 import {useDispatch, useSelector} from 'react-redux'
 
 import {getAllCategories, getCategoriesOfType, getSingleCategory, toggleCategoryStatus, resetSubcategories, resetStates} 
@@ -31,6 +31,10 @@ export default function AdminCategoryListPage(){
 
   const [showTheseCategories, setShowTheseCategories] = useState([])
   const [toggleTab, setToggleTab] = useState({goTo: 'all'})
+
+  const {setPageBgUrl} = useOutletContext() 
+//   setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.95),rgba(255,255,255,0.95)), url('/admin-bg1.png')`)
+     setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.94),rgba(255,255,255,0.94)), url('/admin-ProductsListBg.jpg')`)
 
   useEffect(() => {
     const getFitlabCategories =  async ()=>{

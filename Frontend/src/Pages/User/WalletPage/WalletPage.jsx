@@ -34,7 +34,7 @@ export default function WalletPage() {
     const [showFundingModal, setShowFundingModal] = useState(false)
     const [paymentVia, setPaymentVia] = useState("razorpayAndPaypal")
 
-    const [queryOptions, setQueryOptions] = useState({page: 1, status: 'all', type: 'all', userLevel: false})
+    const [queryOptions, setQueryOptions] = useState({page: 1, status: 'all', type: 'all', limit: 6, userLevel: false})
 
     const [isAutoRechargeModalOpen, setIsAutoRechargeModalOpen] = useState(false)
     const [autoRechargeSettings, setAutoRechargeSettings] = useState(null)

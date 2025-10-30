@@ -29,11 +29,12 @@ export default function TransactionDetailsSection({transactions, queryOptions, s
 
     const {openDropdowns, dropdownRefs, toggleDropdown} = useFlexiDropdown(['sortDropdown'])
     
+    const [limit, setLimit] = useState(6) 
     const [currentPage, setCurrentPage] = useState(1)
-    const totalPages = 20
+    const [totalPages, setTotalPages] = useState(20)         
 
     const dispatch = useDispatch()
-    const {moneyRequestConfirmed, moneyRequestDeclined} = useSelector(state=> state.wallet)
+    const {moneyRequestConfirmed, moneyRequestDeclined, transactionsCount} = useSelector(state=> state.wallet)
     const {user} = useSelector((state)=> state.user)
 
     const sortTypes = [
@@ -53,10 +54,17 @@ export default function TransactionDetailsSection({transactions, queryOptions, s
     },[moneyRequestConfirmed, moneyRequestDeclined])
 
     useEffect(()=> {
+      if(transactionsCount && totalPages && limit){
+        console.log(`transactionsCount-----> ${transactionsCount}, totalPages------>${totalPages}, limit------>${limit}`)
+        setTotalPages(Math.ceil(transactionsCount/limit))
+      }
+    }, [transactions, transactionsCount])
+
+    useEffect(()=> {
       setQueryOptions(query=> {
-        return {...query, page: currentPage}
+        return {...query, page: currentPage, limit}
       })
-    },[currentPage])
+    },[currentPage, limit])
 
     const containerVariants = {
       hidden: { opacity: 0, y: 20 },
@@ -437,9 +445,11 @@ export default function TransactionDetailsSection({transactions, queryOptions, s
           animate={{ marginTop: openStickyDropdowns.filterDropdown ? 160 : 0 }}
           transition={{ type: "spring", stiffness: 120, damping: 18 }}
         >
-        
-          <PaginationV2 currentPage={currentPage} totalPages={totalPages} bgColorStyle='mob:bg-primary max-mob:text-primary' 
+         {
+           transactions && totalPages &&
+            <PaginationV2 currentPage={currentPage} totalPages={totalPages} bgColorStyle='mob:bg-primary max-mob:text-primary' 
             onPageChange={(page)=> {setCurrentPage(page); setSliceIt(6);}} />
+         }
         
         </motion.div>
 

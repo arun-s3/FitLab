@@ -1,7 +1,7 @@
 import React,{useState, useEffect, useRef} from 'react'
 import './AdminAddAndEditCategoryPage.css'
 import {useDispatch, useSelector} from 'react-redux'
-import {useNavigate, useLocation} from 'react-router-dom'
+import {useNavigate, useLocation, useOutletContext} from 'react-router-dom'
 
 import {IoArrowBackSharp} from "react-icons/io5";
 import {BiCategory} from "react-icons/bi";
@@ -56,6 +56,9 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
     const primaryColor = useRef('rgba(215, 241, 72, 1)')
 
     const hiddenInputRef = useRef(null)
+
+    const {setPageBgUrl} = useOutletContext() 
+    setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.95),rgba(255,255,255,0.95)), url('/admin-bg1.png')`)
 
     useEffect(()=>{
         console.log("CATEGORYDATA-->", JSON.stringify(categoryData))

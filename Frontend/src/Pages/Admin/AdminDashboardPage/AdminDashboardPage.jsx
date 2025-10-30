@@ -1,4 +1,6 @@
 import React, { useState, useEffect, createContext } from 'react'
+import {useOutletContext} from 'react-router-dom'
+
 import {motion} from "framer-motion"
 
 import {Search, ChevronDown} from 'lucide-react'
@@ -21,6 +23,9 @@ export const OperationsAnalyticsContext = createContext()
 export default function AdminDashboardPage({ insightType }){
 
     const [dateRange, setDateRange] = useState("30d")
+
+    const {setPageBgUrl} = useOutletContext() 
+    setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.96),rgba(255,255,255,0.96)), url('/admin-bg10.png')`)
 
     const [showBusinessAnalytics, setShowBusinessAnalytics] = useState({sales: true, orders: true, customers: true})
     const [showOperationsAnalytics, setShowOperationsAnalytics] = useState({inventory: true, payments: true, coupons: true, offers: true})

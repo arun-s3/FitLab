@@ -25,6 +25,7 @@ export default function AdminPageLayout(){
     const asideBgImg={
         backgroundImage:"linear-gradient(to bottom,black,var(--SECONDARY) 400%)"
     }
+
     const adminContentBgImg = {
         backgroundImage: "linear-gradient(to right,rgba(255,255,255,0.9),rgba(255,255,255,0.9)), url('/admin-bg.jpg')"
     }
@@ -36,6 +37,14 @@ export default function AdminPageLayout(){
     const [compressList, setCompressList] = useState(false)
 
     const [sidebarOpen, setSidebarOpen] = useState(false)
+
+    const [pageBgUrl, setPageBgUrl] = useState('admin-bg.jpg')
+
+    const createPageBg = (url)=> {
+      return {
+        backgroundImage: `linear-gradient(to right,rgba(255,255,255,0.9),rgba(255,255,255,0.9)), url('/${url}')`
+      }
+    }
 
     const [showSubmenu, setShowSubmenu] = useState({
         dashboard:false, customerHeatmap:false, customers:false, product: false, category: false, couponManager:false, orders:false,
@@ -72,7 +81,7 @@ export default function AdminPageLayout(){
       hasSubmenu: true,
       submenu: [
         { id: "add-product", label: "Add Product", path: '/admin/products/add' },
-        { id: "list-edit-product", label: "List/Edit Product", path: '/admin/products/list' },
+        { id: "list-edit-product", label: "List/Edit Product", path: '/admin/products' },
       ],
     },
     {
@@ -315,14 +324,18 @@ export default function AdminPageLayout(){
 
                 </aside>                      
             
-                <div className='basis-full pt-[2rem] pl-[3rem] flex-grow overflow-scroll h-screen'
-                    id='admin-content-outlet' 
-                    style={adminContentBgImg}
-                >
+                {
+                  pageBgUrl &&
 
-                        <Outlet context={{setHeaderZIndex}}/>
+                    <div className='basis-full pt-[2rem] pl-[3rem] flex-grow overflow-scroll h-screen'
+                      id='admin-content-outlet' 
+                      style={{backgroundImage: pageBgUrl } }
+                    >
 
-                </div>  
+                        <Outlet context={{setHeaderZIndex, setPageBgUrl}}/>
+
+                    </div>
+                }  
 
         </div>
        </div>

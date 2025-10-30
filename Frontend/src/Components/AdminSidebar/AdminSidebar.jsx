@@ -48,7 +48,7 @@ export default function AdminSidebar({ isOpen, onClose }){
       hasSubmenu: true,
       submenu: [
         { id: "add-product", label: "Add Product", path: '/admin/products/add' },
-        { id: "list-edit-product", label: "List/Edit Product", path: '/admin/products/list' },
+        { id: "list-edit-product", label: "List/Edit Product", path: '/admin/products' },
       ],
     },
     {

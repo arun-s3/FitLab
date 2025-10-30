@@ -39,8 +39,9 @@ export default function ProductList({admin}){
     const [filter, setFilter] = useState({categories: [], products: [], brands: [], targetMuscles: []})
     const [sorts, setSorts] = useState({})
 
+    const [limit, setLimit] = useState(9) 
     const [currentPage, setCurrentPage] = useState(1)
-    const [limit, setLimit] = useState(12)  
+    const [totalPages, setTotalPages] = useState(20)  
 
     const [queryOptions, setQueryOptions] = useState({page: 1, limit:12})
 
@@ -52,6 +53,7 @@ export default function ProductList({admin}){
 
     const [openCouponApplicableModal, setOpenCouponApplicableModal] = useState({status: false, code: '', products: [], categories: []})
 
+    const {products, productCounts} = useSelector(state=> state.productStore)
     const {cart, productAdded, productRemoved, loading, error, message} = useSelector(state=> state.cart)    
     
     const location = useLocation()
@@ -66,6 +68,13 @@ export default function ProductList({admin}){
             setShowCategoryTypeOf(category)
         }
     }, [location])
+
+    useEffect(()=> {
+      if(products && productCounts && totalPages && limit){
+        console.log(`totalPages------>${totalPages}, limit------>${limit}`)
+        setTotalPages(Math.ceil(productCounts/limit))
+      }
+    }, [products, productCounts])
 
     const headerBg = {
         backgroundImage: "url('/header-bg.png')",
@@ -216,6 +225,9 @@ export default function ProductList({admin}){
                         <ProductsDisplay gridView={showByGrid}
                             pageReader={{currentPage, setCurrentPage}}
                             limiter={{limit, setLimit}}
+                            totalPages={totalPages}
+                            currentPage={currentPage}
+                            setCurrentPage={setCurrentPage}
                             queryOptions={queryOptions}
                             couponApplicableItems={openCouponApplicableModal}
                             checkAuthOrOpenModal={checkAuthOrOpenModal}

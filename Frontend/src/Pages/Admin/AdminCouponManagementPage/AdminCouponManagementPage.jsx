@@ -6,10 +6,14 @@ import {debounce} from 'lodash'
 
 import {Plus, Search, SlidersHorizontal, CalendarX2} from "lucide-react"
 // import {IconFilePercent, IconRosetteDiscount, IconRosetteDiscountCheck, IconRosetteDiscountOff} from "@tabler/icons-react"
+import {TbFilePercent} from "react-icons/tb"
+import {RiDiscountPercentLine} from "react-icons/ri"
+import {TbRosetteDiscountCheck} from "react-icons/tb"
+import {TbRosetteDiscountOff} from "react-icons/tb"
 import {RiArrowDropDownLine} from "react-icons/ri"
 import {MdSort} from "react-icons/md"
 import {toast} from 'react-toastify'
-import {TbDiscountOff} from "react-icons/tb";
+import {TbDiscountOff} from "react-icons/tb"
 
 import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
 import CouponList from "./CouponList"
@@ -40,7 +44,7 @@ export default function AdminCouponManagementPage(){
 
     const [limit, setLimit] = useState(6) 
     const [currentPage, setCurrentPage] = useState(1)
-    const totalPages = 20
+    const [totalPages, setTotalPages] = useState(20)  
 
     const {openDropdowns, dropdownRefs, toggleDropdown} = useFlexiDropdown(['limitDropdown', 'sortDropdown', 'statusDropdown'])
 
@@ -50,16 +54,24 @@ export default function AdminCouponManagementPage(){
     
     const [queryOptions, setQueryOptions] = useState({page: 1, limit: 6, status: 'all'})
 
-    const {setHeaderZIndex} = useOutletContext()
+    const {setHeaderZIndex, setPageBgUrl} = useOutletContext()
     setHeaderZIndex(0)
+    setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.94),rgba(255,255,255,0.94)), url('/admin-bg4.png')`)
 
-    const {coupons: allCoupons, couponDeactivated} = useSelector(state=> state.coupons)
+    const {coupons: allCoupons, totalCoupons, couponDeactivated} = useSelector(state=> state.coupons)
     const dispatch = useDispatch()
     
 
     useEffect(() => {
         setCoupons(allCoupons)
     }, [allCoupons])
+
+    useEffect(()=> {
+      if(coupons && totalCoupons && totalPages && limit){
+        console.log(`totalPages------>${totalPages}, limit------>${limit}`)
+        setTotalPages(Math.ceil(totalCoupons/limit))
+      }
+    }, [coupons, totalCoupons])    
 
     useEffect(()=> {
       setQueryOptions(query=> {
@@ -87,25 +99,25 @@ export default function AdminCouponManagementPage(){
     ]
 
     const statusTypes = [
-      {name: 'All', icon: IconFilePercent},
-      {name: 'Active', icon: IconRosetteDiscount},
+      {name: 'All', icon: TbFilePercent},
+      {name: 'Active', icon: RiDiscountPercentLine},
       {name: 'Expired', icon: CalendarX2}, 
-      {name: 'Deactivated', icon: IconRosetteDiscountOff},
-      {name: 'Used up', icon: IconRosetteDiscountCheck},
+      {name: 'Deactivated', icon: TbRosetteDiscountOff},
+      {name: 'Used up', icon: TbRosetteDiscountCheck},
     ]
 
     const getStatusIcon = (statusType)=> {
       switch(statusType){
         case "All":
-          return IconFilePercent
+          return TbFilePercent
         case "Active":
-          return IconRosetteDiscount
+          return RiDiscountPercentLine
         case "Expired":
           return CalendarX2
         case "Deactivated":
-          return IconRosetteDiscountOff
+          return TbRosetteDiscountOff
         case "Used up": 
-          return IconRosetteDiscountCheck
+          return TbRosetteDiscountCheck
       }
     }
 
@@ -222,7 +234,8 @@ export default function AdminCouponManagementPage(){
                           {Object.keys(queryOptions).length > 0 &&
                            (()=> {
                              const StatusIcon = getStatusIcon(camelToCapitalizedWords(queryOptions.status))
-                             return <StatusIcon className='w-[19px] h-[19px] text-muted'/>
+                             return <StatusIcon className={` ${queryOptions.status === 'Expired' ? ' w-[17px] h-[17px]' : ' w-[19px] h-[19px]'} 
+                                        w-[19px] h-[19px] text-muted`}/>
                            })()
                           }
                           <div className='flex items-center gap-[5px]'>
@@ -246,7 +259,8 @@ export default function AdminCouponManagementPage(){
                                  {
                                     (()=> {
                                       const StatusIcon = getStatusIcon(statusType.name)
-                                      return <StatusIcon className='w-[17px] h-[17px] text-muted'/>
+                                      return <StatusIcon className={` ${statusType.name === 'Expired' 
+                                                    ? ' w-[15px] h-[15px]' : ' w-[17px] h-[17px]'} `}/>
                                     })()
                                   }
                                   <span className='text-[12px]'> { camelToCapitalizedWords(statusType.name) } </span>
@@ -325,7 +339,7 @@ export default function AdminCouponManagementPage(){
                       </div>
 
                     {
-                      coupons && coupons.length > 0 &&
+                      coupons && 
                         <CouponList coupons={coupons} onEdit={(coupon)=> { setEditingCoupon(coupon); setIsModalOpen(true); }}
                           onDelete={(coupon)=> { setCouponToDelete(coupon); setIsDeleteModalOpen(true); }} 
                             onDeactivate={(id)=> dispatch(toggleCouponStatus({couponId: id}))} onSort={handleSort}/>
@@ -341,7 +355,10 @@ export default function AdminCouponManagementPage(){
 
                 <div className='mt-[3rem] mb-[5rem]'>
 
-                  <PaginationV2 currentPage={currentPage} totalPages={totalPages} onPageChange={(page)=> setCurrentPage(page)} />
+                  {
+                    coupons.length > 0 && totalPages &&
+                      <PaginationV2 currentPage={currentPage} totalPages={totalPages} onPageChange={(page)=> setCurrentPage(page)} />
+                  }
 
                 </div>
 

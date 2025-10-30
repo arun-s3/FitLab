@@ -121,6 +121,8 @@ export default function App(){
                         </Route>
                     </Route>
 
+                    <Route path="*" element={<ErrorPage404 />} />
+
                 </Route>
 
 
@@ -132,14 +134,14 @@ export default function App(){
                             <Route element={<PrivateAdminRoutes/>}>
                                 <Route path='image-editor' element={<ImageEditor/>} />
                                 <Route element={<AdminPageLayout/>}>
-                                    <Route path='dashboard'>
+                                    <Route path='dashboard' element={<AdminDashboardPage insightType='business'/>} >
                                         <Route path="business" element={<AdminDashboardPage insightType='business'/>} />
                                         <Route path="operations" element={<AdminDashboardPage insightType='operations'/>} />
                                         <Route path="heatmap" element={<AdminDashboardHeatmapPage/>} />
                                     </Route>
                                     <Route path="customers" element={<AdminCustomersPage/>} />
                                     <Route path='products'>
-                                        <Route path='list' element={<AdminProductListPage/>} />
+                                        <Route index element={<AdminProductListPage/>} />
                                         <Route path='add' element={<AdminAddAndEditProductPage/>} />
                                         <Route path='edit' element={<AdminAddAndEditProductPage editProduct={true}/>} />
                                     </Route>
@@ -154,13 +156,15 @@ export default function App(){
                                         <Route index element={<AdminOfferManagementPage/>} />
                                         <Route path='add' element={<AdminCreateOfferPage/>} />
                                     </Route>
-                                    <Route path='support'>
+                                    <Route path='support' element={<AdminTextChatSupportPage/>} >
                                         <Route path='text' element={<AdminTextChatSupportPage/>} />
                                         <Route path='video' element={<AdminVideoChatSupportPage/>} />
                                     </Route>
                                 </Route>
                             </Route>
                     </Route>
+
+                    <Route path="*" element={<ErrorPage404 />} />
 
                 </Route>
 
@@ -172,7 +176,9 @@ export default function App(){
                         <Route path='403' element={<ErrorPage403/>} />
                     </Route>
                     <Route path='404' element={<ErrorPage404/>} />
-                </Route>    
+                </Route>  
+
+                <Route path="*" element={<ErrorPage404 />} />  
 
             </Routes>
         </BrowserRouter>

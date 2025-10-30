@@ -40,9 +40,9 @@ export default function AdminOfferManagementPage(){
     const [startDate, setStartDate] = useState(null)
     const [endDate, setEndDate] = useState(null)
 
-    const [limit, setLimit] = useState(6) 
+    const [limit, setLimit] = useState(4) 
     const [currentPage, setCurrentPage] = useState(1)
-    const totalPages = 20
+    const [totalPages, setTotalPages] = useState(20)  
     const [activeTab, setActiveTab] = useState('all')
 
     const {openDropdowns, dropdownRefs, toggleDropdown} = useFlexiDropdown(['limitDropdown', 'sortDropdown', 'userGroupDropdown'])
@@ -51,12 +51,13 @@ export default function AdminOfferManagementPage(){
     
     const [advFilterEvent, setAdvFilterEvent] = useState(null)
     
-    const [queryOptions, setQueryOptions] = useState({page: 1, limit: 6, targetUserGroup: 'all', status: 'all'})
+    const [queryOptions, setQueryOptions] = useState({page: 1, limit: 4, targetUserGroup: 'all', status: 'all'})
 
-    const {setHeaderZIndex} = useOutletContext()
+    const {setHeaderZIndex, setPageBgUrl} = useOutletContext()
     setHeaderZIndex(0)
+    setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.94),rgba(255,255,255,0.94)), url('/admin-bg6.png')`)
 
-    const {offers: allOffers } = useSelector(state=> state.offers)
+    const {offers: allOffers, totalOffers} = useSelector(state=> state.offers)
     const dispatch = useDispatch()
 
     const statusTabs = [
@@ -65,11 +66,14 @@ export default function AdminOfferManagementPage(){
       {name: 'Expired', subtitle:'All expired offers', icon: CalendarX2}, 
       {name: 'Deactivated', subtitle:'All deactivated offers', icon: TbTagOff},
     ]
-    
 
-    useEffect(() => {
-        setOffers(allOffers)
-    }, [allOffers])
+    useEffect(()=> {
+      setOffers(allOffers)
+      if(allOffers && totalOffers && totalPages && limit){
+        console.log(`totalPages------>${totalPages}, limit------>${limit}`)
+        setTotalPages(Math.ceil(totalOffers/limit))
+      }
+    }, [allOffers, totalOffers])    
 
     useEffect(()=> {
       setQueryOptions(query=> {
@@ -356,10 +360,16 @@ export default function AdminOfferManagementPage(){
                       </div>
 
                     {
-                      offers && offers.length > 0 &&
-                      <OfferList offers={offers} onEdit={(offer)=> { setEditingOffer(offer); setIsModalOpen(true); }}
-                        onDelete={(offer)=> { setOfferToDelete(offer); setIsDeleteModalOpen(true); }} onSort={handleSort}
-                          onDeactivate={(id)=> dispatch(toggleOfferStatus({offerId: id}))}/>
+                      offers && offers.length > 0 
+                        ?
+                        <OfferList offers={offers} onEdit={(offer)=> { setEditingOffer(offer); setIsModalOpen(true); }}
+                          onDelete={(offer)=> { setOfferToDelete(offer); setIsDeleteModalOpen(true); }} onSort={handleSort}
+                            onDeactivate={(id)=> dispatch(toggleOfferStatus({offerId: id}))}/>
+                        : 
+                          <h3 className='w-full h-full flex justify-center items-center mt-[12rem] 
+                            text-[13px] xs-sm2:text-[16px] xs-sm:text-[17px] text-muted capitalize tracking-[0.5px]'>
+                             No Offers Available Right Now ! 
+                          </h3>
                     }
 
                     <OfferModal isOpen={isModalOpen} onClose={()=> { setIsModalOpen(false); setEditingOffer(null); }}
@@ -371,8 +381,11 @@ export default function AdminOfferManagementPage(){
                 </div>
 
                 <div className='mt-[3rem] mb-[5rem]'>
-
-                  <PaginationV2 currentPage={currentPage} totalPages={totalPages} onPageChange={(page)=> setCurrentPage(page)} />
+                    
+                  {
+                    offers.length > 0 && totalPages && 
+                      <PaginationV2 currentPage={currentPage} totalPages={totalPages} onPageChange={(page)=> setCurrentPage(page)} />
+                  }
 
                 </div>
 

@@ -177,6 +177,7 @@ const couponSlice = createSlice({
         state.couponError = null
         state.loading = false
         state.coupons = action.payload.coupons
+        state.totalCoupons = action.payload.totalCoupons
       })
       .addCase(getAllCoupons.pending, (state)=> {
         state.loading = true

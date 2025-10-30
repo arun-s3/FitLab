@@ -1,4 +1,5 @@
 import React, {useState, useEffect, useRef, useContext} from "react"
+import {useOutletContext} from 'react-router-dom'
 import {motion, AnimatePresence} from "framer-motion"
 import {debounce} from 'lodash'
 
@@ -22,6 +23,9 @@ export default function AdminTextChatSupportPage() {
 
   const [textOrReply, setTextOrReply] = useState('Text')
   const [lastSeen, setLastSeen] = useState('')
+
+  const {setPageBgUrl} = useOutletContext() 
+  setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.93),rgba(255,255,255,0.93)), url('/admin-bg8.png')`)
 
   const adminName = "Support Agent"
 

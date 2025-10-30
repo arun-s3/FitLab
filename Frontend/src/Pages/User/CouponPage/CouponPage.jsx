@@ -196,7 +196,7 @@ export default function CouponPage(){
       <div className='mt-[3rem] mb-[5rem]'>
 
         {
-          totalPages &&
+          coupons.length > 0 && totalPages &&
             <PaginationV2 currentPage={currentPage} totalPages={totalPages} onPageChange={(page)=> setCurrentPage(page)} />
         }
 

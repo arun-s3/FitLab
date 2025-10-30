@@ -1,4 +1,5 @@
 import React, {useState, useEffect, useRef} from 'react'
+import {useOutletContext} from 'react-router-dom'
 import './AdminOrderHistroyPage.css'
 import {useDispatch, useSelector} from 'react-redux'
 
@@ -32,10 +33,10 @@ export default function AdminOrderHistoryPage(){
   const [endDate, setEndDate] = useState(null)
 
   const [currentPage, setCurrentPage] = useState(1)
-  const totalPages = 20
-  const [limit, setLimit] = useState(10) 
+  const [totalPages, setTotalPages] = useState(20)  
+  const [limit, setLimit] = useState(8) 
 
-  const [queryDetails, setQueryDetails] = useState({'page': 1, 'limit': 10, 'sort': -1, 'orderStatus': 'orders'})
+  const [queryDetails, setQueryDetails] = useState({'page': 1, 'limit': 8, 'sort': -1, 'orderStatus': 'orders'})
 
   const mouseInSort = useRef(true)
 
@@ -49,8 +50,11 @@ export default function AdminOrderHistoryPage(){
   const [isHovered, setIsHovered] = useState({})
   const [showProducts, setShowProducts] = useState({})
 
-  const {orders, orderCreated, orderMessage, orderError} = useSelector(state=> state.order)
+  const {orders, totalUsersOrders, orderCreated, orderMessage, orderError} = useSelector(state=> state.order)
   const dispatch = useDispatch()
+
+  const {setPageBgUrl} = useOutletContext() 
+  setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.93),rgba(255,255,255,0.93)), url('/admin-ProductsListBg.jpg')`)
 
   const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
@@ -101,6 +105,13 @@ export default function AdminOrderHistoryPage(){
     },[])
 
     useEffect(()=> {
+      if(orders && totalUsersOrders && totalPages && limit){
+        console.log(`totalUsersOrders-----> ${totalUsersOrders}, totalPages------>${totalPages}, limit------>${limit}`)
+        setTotalPages(Math.ceil(totalUsersOrders/limit))
+      }
+    }, [orders, totalUsersOrders])
+
+    useEffect(()=> {
         setQueryDetails(query=> {
           return {...query, startDate, endDate}
         })
@@ -117,22 +128,22 @@ export default function AdminOrderHistoryPage(){
   const metrics = [
     {
       title: 'Total orders',
-      value: statusCounts.totalOrders,
+      value: statusCounts?.totalOrders ? statusCounts.totalOrders : 0,
       icon: <ShoppingBag className="w-6 h-6 text-white" />,
     },
     {
       title: 'Delivered Orders',
-      value: statusCounts.deliveredOrders,
+      value: statusCounts?.deliveredOrders ? statusCounts?.deliveredOrders : 0,
       icon: <Package className="w-6 h-6 text-white" />,
     },
     {
       title: 'Returned Orders',
-      value: statusCounts.returningOrders,
+      value: statusCounts?.returningOrders ? statusCounts?.returningOrders : 0,
       icon: <RefreshCcw className="w-6 h-6 text-white" />,
     },
     {
       title: 'Cancelled Orders',
-      value: statusCounts.cancelledOrders,
+      value: statusCounts?.cancelledOrders ? statusCounts.cancelledOrders : 0,
       icon: <CircleOff className="w-6 h-6 text-white" />,
     }
   ]
@@ -421,7 +432,7 @@ export default function AdminOrderHistoryPage(){
              </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-lg" id='order-list-table'>
+          <div className={`${orders && orders.length && 'bg-white rounded-xl shadow-lg' }`} id='order-list-table'>
             <div className="p-6 border border-dropdownBorder">
               <div className="flex items-center justify-between">
                 <div className="p-[5px] flex gap-2 bg-gray-100 rounded-[9px]">
@@ -463,214 +474,223 @@ export default function AdminOrderHistoryPage(){
               </div>
             </div>
                 
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-gray-100">
-                    {
-                      ["Customer Name", "City", "Date", "Products", "Status", "Tax(GST)", "Total", "Payment Status"].map(tableHeader=> (
-                        <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 capitalize"> {tableHeader} </th>
-                      ))
-                    }
-                    <th className="px-6 py-3 text-center text-sm font-medium text-gray-500 capitalize"> Action </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {orders && orders.map((order) => (
-                    <React.Fragment  key={order._id}>
-                    <tr className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <img src={order.userId.profilePic} alt={order.userId.username} className="w-8 h-8 rounded-full"/>
-                          <span className="text-sm font-medium text-gray-900">
-                            {order.userId.username}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-500">{order?.shippingAddress ? order.shippingAddress.district : ''}</td>
-                      <td className="px-6 py-4 text-sm text-gray-500">{ format(new Date(order.orderDate), "MMMM dd, yyyy" ) }</td>
-                      <td className="px-6 py-4 text-sm text-gray-500 flex items-center gap-[15px]">
-                        <span> {order.products.length} </span>
-                        <button className="relative overflow-hidden rounded-[8px] p-[2px]"
-                              onMouseEnter={()=> setIsHovered({orderId: order._id})}  onMouseLeave={()=> setIsHovered({})}
-                                onClick={()=> setShowProducts(showProducts=> showProducts.orderId ? {} : {orderId: order._id})}>
-                          <div className="relative flex items-center gap-[2px] rounded-2xl  transition-all duration-300">
-                            <ShoppingBag  className={`h-[15px] w-[15px] text-muted transition-all duration-300 
-                              ${(isHovered.orderId === order._id) ?'rotate-[-5deg] scale-110' : '' }`}/>
-                            <ChevronDown className={`h-[10px] w-[10px] text-secondary self-end transition-all duration-300
-                               ${(isHovered.orderId === order._id) ? 'translate-y-[5px]' : ''}`}/>
-                          </div>
-                        </button>
-                      </td>
-                      <td className="px-6 py-4">
+            {
+              orders && orders.length > 0 ?
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-gray-100">
                         {
-                          <span className='px-[5px] py-[3px] w-[10%] flex gap-[10px] items-center'>
-                             <span className={`w-[3px] h-[3px] p-[3px] ${findStyle("order", order.orderStatus, 'bg')} rounded-[5px]`} 
-                                 style={{boxShadow: `0px 0px 5px 2px  ${findStyle("order", order.orderStatus, 'shadow')}`}}>
-                             </span>
-                             <span className={`capitalize ${ findStyle("order", order.orderStatus, 'textColor') } text-[13px] font-[500]`}>
-                               {order.orderStatus}
-                             </span>
-                          </span>
-                        } 
-                      </td>
-                      <td className={`px-6 py-4 text-sm font-medium
-                           ${order.orderStatus === 'cancelled' ? 'text-muted' : 'text-gray-900'}`}>
-                        {order.gst}
-                      </td>
-                      <td className={`px-6 py-4 text-sm font-medium
-                           ${order.orderStatus === 'cancelled' ? 'text-muted' : 'text-gray-900'}`}>
-                       {order.absoluteTotalWithTaxes}
-                      </td>
-                      <td className={`px-6 py-4 text-sm text-gray-500 capitalize 
-                          ${order.orderStatus !== 'cancelled'? findStyle("payment", order.paymentDetails.paymentStatus, 'textColor') : ''} `}>
-                        {order.orderStatus === 'cancelled'? '---' : order.paymentDetails.paymentStatus}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex justify-center items-center gap-2">
-                          {
-                             ['delivered', 'cancelled', 'refunded'].every(status=> status !== order.orderStatus) &&
-                             <button className='relative py-[4px] px-4 text-secondary bg-white border border-secondary rounded-[6px]
-                                 hover:bg-secondary hover:text-white transition duration-300 cancel-button' data-label='Order'
-                                    onClick={(e)=> preCancelTheOrder(e, order._id)}>
-                               <CircleOff className="w-4 h-4" />
-                             </button>
-                          }
-                          { 
-                            ['delivered', 'cancelled', 'refunded'].every(status=> status !== order.orderStatus) &&
-                            <SiteSecondaryFillImpButton className="text-[11px] capitalize" 
-                                clickHandler={(e)=> changeTheOrderStatus(order._id, changeStatus(order.orderStatus).status)}
-                                  customStyle={{width:'auto', marginTop:'0', paddingBlock:'4px', borderRadius:'6px'}}>
+                          ["Customer Name", "City", "Date", "Products", "Status", "Tax(GST)", "Total", "Payment Status"].map(tableHeader=> (
+                            <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 capitalize"> {tableHeader} </th>
+                          ))
+                        }
+                        <th className="px-6 py-3 text-center text-sm font-medium text-gray-500 capitalize"> Action </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {orders && orders.map((order) => (
+                        <React.Fragment  key={order._id}>
+                        <tr className="border-b border-gray-100 hover:bg-gray-50">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <img src={order.userId.profilePic} alt={order.userId.username} className="w-8 h-8 rounded-full"/>
+                              <span className="text-sm font-medium text-gray-900">
+                                {order.userId.username}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-500">{order?.shippingAddress ? order.shippingAddress.district : ''}</td>
+                          <td className="px-6 py-4 text-sm text-gray-500">{ format(new Date(order.orderDate), "MMMM dd, yyyy" ) }</td>
+                          <td className="px-6 py-4 text-sm text-gray-500 flex items-center gap-[15px]">
+                            <span> {order.products.length} </span>
+                            <button className="relative overflow-hidden rounded-[8px] p-[2px]"
+                                  onMouseEnter={()=> setIsHovered({orderId: order._id})}  onMouseLeave={()=> setIsHovered({})}
+                                    onClick={()=> setShowProducts(showProducts=> showProducts.orderId ? {} : {orderId: order._id})}>
+                              <div className="relative flex items-center gap-[2px] rounded-2xl  transition-all duration-300">
+                                <ShoppingBag  className={`h-[15px] w-[15px] text-muted transition-all duration-300 
+                                  ${(isHovered.orderId === order._id) ?'rotate-[-5deg] scale-110' : '' }`}/>
+                                <ChevronDown className={`h-[10px] w-[10px] text-secondary self-end transition-all duration-300
+                                   ${(isHovered.orderId === order._id) ? 'translate-y-[5px]' : ''}`}/>
+                              </div>
+                            </button>
+                          </td>
+                          <td className="px-6 py-4">
                             {
-                              (()=> {
-                                const {status, icon:Icon} = changeStatus(order.orderStatus)
-                                return(
-                                  <span className='flex items-center gap-[7px]'>
-                                      <span> {status} </span>
-                                      {Icon && <Icon className="w-4 h-4"/>} 
-                                  </span>
-                                )
-                              })()
-                            }
-                            </SiteSecondaryFillImpButton>
-                          }
-
-                          { openOrderCancelModal &&
-                          <Modal openModal={openOrderCancelModal} setOpenModal={setOpenOrderCancelModal} title='Important' 
-                              content={`You are about to cancel an order. Do you want to continue?`} okButtonText='Continue'
-                                closeButtonText='Cancel' contentCapitalize={false} clickTest={true} activateProcess={cancelThisOrder}/>
-                          } 
-                        </div>
-                      </td>
-                    </tr>
-                    <tr>
-
-                    <td colSpan='9' className='pl-[4rem]'>
-                    {showProducts.orderId === order._id  && order.products.map((product, index) => ( 
-                        <div key={product._id} className={`p-[1.5rem] ${index != order.products.length -1 ? 'border-b': ''} border-gray-100`}
-                           id='item-details'>
-                          <div className="flex items-center gap-[2rem]">
-                            <figure className="w-[60px] h-[60px] bg-gray-50 rounded-xl overflow-hidden">
-                              <img src={product.thumbnail} alt={product.title} className={`w-full h-full object-cover transform
-                                   hover:scale-105 transition-transform duration-200
-                                     ${product.productStatus === 'cancelled' || product.productStatus === 'returning' ? 'filter grayscale' : ''} `}/>
-                            </figure>
-                            <div className="flex-1">
-                              <h4 className="mb-[8px] flex items-center gap-[4rem]">
-                                <span className='text-gray-800 text-[14px] font-[600] hover:text-secondary transition-colors cursor-pointer'>
-                                   <span> {product.title} </span>
-                                   <span className='ml-[3px] capitalize text-[#a09fa8]'> 
-                                      {
-                                          product.productId?.variantType 
-                                          ? ' - ' + ' ' + product.productId[`${product.productId.variantType}`] 
-                                            + ' ' + variantSymbol[`${product.productId.variantType}`]
-                                          : ''
-                                      }
-                                    </span>
-                               </span>
-                                { 
-                                  <span className='px-[5px] py-[3px] w-[10%] flex gap-[10px] items-center'>
-                                     <span className={`w-[4px] h-[4px] ${ findStyle('product', product.productStatus, 'bg') } rounded-[5px]`} 
-                                         style={{boxShadow: `0px 0px 6px 3px  ${findStyle('product', product.productStatus, 'shadow')}`}}>
-                                     </span>
-                                     <span className={`capitalize ${ findStyle('product', product.productStatus, 'textColor') } text-[11px] font-[500]`}>
-                                       {product.productStatus}
-                                     </span>
-                                  </span>
-                                } 
-                              </h4>
-                              <p className="mb-[8px] text-[11px] text-gray-600">{product.subtitle}</p>
-                              {product.deliveryNote && (
-                                <p className="mt-[8px] text-[13px] leading-[20px] text-gray-500 flex items-center gap-[4px]">
-                                  <Package className="w-[1rem] h-[1rem]" />
-                                  {'Delivery Note:' + product.deliveryNote}
-                                </p>
-                              )}
-                              
-                              <div className="flex items-center gap-[20px]">
-                          {
-                             ['processing', 'confirmed', 'shipped',].includes(product.productStatus) &&
-                             <button className='relative py-[4px] px-4 text-secondary bg-white border border-secondary rounded-[6px]
-                                 hover:bg-secondary hover:text-white transition duration-300  before:bg-white cancel-button'
-                                     data-label='Product' data-bottom='50'
-                                        onClick={(e)=> cancelTheOrderProduct(product.productId, order._id)} >  
-                               <CircleOff className="w-4 h-4" />
-                             </button>
-                          }
-                          { 
-                            !['cancelled', 'refunded'].includes(product.productStatus) &&
-                            <SiteSecondaryFillImpButton className="text-[11px] capitalize" 
-                                clickHandler={(e)=> changeTheProductStatus(order._id, product.productId, changeStatus(product.productStatus).status)}
-                                  customStyle={{width:'auto',marginTop:'0', paddingBlock:'4px', borderRadius:'6px'}}> 
-                            {
-                              (()=> {
-                                const {status, icon:Icon} = changeStatus(product.productStatus)
-                                return(
-                                  <span className='flex items-center gap-[10px]'>
-                                      <span className='capitalize'> 
-                                        {status + '  Product' } 
+                              <span className='px-[5px] py-[3px] w-[10%] flex gap-[10px] items-center'>
+                                 <span className={`w-[3px] h-[3px] p-[3px] ${findStyle("order", order.orderStatus, 'bg')} rounded-[5px]`} 
+                                     style={{boxShadow: `0px 0px 5px 2px  ${findStyle("order", order.orderStatus, 'shadow')}`}}>
+                                 </span>
+                                 <span className={`capitalize ${ findStyle("order", order.orderStatus, 'textColor') } text-[13px] font-[500]`}>
+                                   {order.orderStatus}
+                                 </span>
+                              </span>
+                            } 
+                          </td>
+                          <td className={`px-6 py-4 text-sm font-medium
+                               ${order.orderStatus === 'cancelled' ? 'text-muted' : 'text-gray-900'}`}>
+                            {order.gst}
+                          </td>
+                          <td className={`px-6 py-4 text-sm font-medium
+                               ${order.orderStatus === 'cancelled' ? 'text-muted' : 'text-gray-900'}`}>
+                           {order.absoluteTotalWithTaxes}
+                          </td>
+                          <td className={`px-6 py-4 text-sm text-gray-500 capitalize 
+                              ${order.orderStatus !== 'cancelled'? findStyle("payment", order.paymentDetails.paymentStatus, 'textColor') : ''} `}>
+                            {order.orderStatus === 'cancelled'? '---' : order.paymentDetails.paymentStatus}
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex justify-center items-center gap-2">
+                              {
+                                 ['delivered', 'cancelled', 'refunded'].every(status=> status !== order.orderStatus) &&
+                                 <button className='relative py-[4px] px-4 text-secondary bg-white border border-secondary rounded-[6px]
+                                     hover:bg-secondary hover:text-white transition duration-300 cancel-button' data-label='Order'
+                                        onClick={(e)=> preCancelTheOrder(e, order._id)}>
+                                   <CircleOff className="w-4 h-4" />
+                                 </button>
+                              }
+                              { 
+                                ['delivered', 'cancelled', 'refunded'].every(status=> status !== order.orderStatus) &&
+                                <SiteSecondaryFillImpButton className="text-[11px] capitalize" 
+                                    clickHandler={(e)=> changeTheOrderStatus(order._id, changeStatus(order.orderStatus).status)}
+                                      customStyle={{width:'auto', marginTop:'0', paddingBlock:'4px', borderRadius:'6px'}}>
+                                {
+                                  (()=> {
+                                    const {status, icon:Icon} = changeStatus(order.orderStatus)
+                                    return(
+                                      <span className='flex items-center gap-[7px]'>
+                                          <span> {status} </span>
+                                          {Icon && <Icon className="w-4 h-4"/>} 
                                       </span>
-                                      {Icon && <Icon className="w-4 h-4"/>} 
-                                  </span>
-                                )
-                              })()
-                            }
-                            </SiteSecondaryFillImpButton>
-                          }
-                        </div>
+                                    )
+                                  })()
+                                }
+                                </SiteSecondaryFillImpButton>
+                              }
+
+                              { openOrderCancelModal &&
+                              <Modal openModal={openOrderCancelModal} setOpenModal={setOpenOrderCancelModal} title='Important' 
+                                  content={`You are about to cancel an order. Do you want to continue?`} okButtonText='Continue'
+                                    closeButtonText='Cancel' contentCapitalize={false} clickTest={true} activateProcess={cancelThisOrder}/>
+                              } 
+                            </div>
+                          </td>
+                        </tr>
+                        <tr>
+                            
+                        <td colSpan='9' className='pl-[4rem]'>
+                        {showProducts.orderId === order._id  && order.products.map((product, index) => ( 
+                            <div key={product._id} className={`p-[1.5rem] ${index != order.products.length -1 ? 'border-b': ''} border-gray-100`}
+                               id='item-details'>
+                              <div className="flex items-center gap-[2rem]">
+                                <figure className="w-[60px] h-[60px] bg-gray-50 rounded-xl overflow-hidden">
+                                  <img src={product.thumbnail} alt={product.title} className={`w-full h-full object-cover transform
+                                       hover:scale-105 transition-transform duration-200
+                                         ${product.productStatus === 'cancelled' || product.productStatus === 'returning' ? 'filter grayscale' : ''} `}/>
+                                </figure>
+                                <div className="flex-1">
+                                  <h4 className="mb-[8px] flex items-center gap-[4rem]">
+                                    <span className='text-gray-800 text-[14px] font-[600] hover:text-secondary transition-colors cursor-pointer'>
+                                       <span> {product.title} </span>
+                                       <span className='ml-[3px] capitalize text-[#a09fa8]'> 
+                                          {
+                                              product.productId?.variantType 
+                                              ? ' - ' + ' ' + product.productId[`${product.productId.variantType}`] 
+                                                + ' ' + variantSymbol[`${product.productId.variantType}`]
+                                              : ''
+                                          }
+                                        </span>
+                                   </span>
+                                    { 
+                                      <span className='px-[5px] py-[3px] w-[10%] flex gap-[10px] items-center'>
+                                         <span className={`w-[4px] h-[4px] ${ findStyle('product', product.productStatus, 'bg') } rounded-[5px]`} 
+                                             style={{boxShadow: `0px 0px 6px 3px  ${findStyle('product', product.productStatus, 'shadow')}`}}>
+                                         </span>
+                                         <span className={`capitalize ${ findStyle('product', product.productStatus, 'textColor') } text-[11px] font-[500]`}>
+                                           {product.productStatus}
+                                         </span>
+                                      </span>
+                                    } 
+                                  </h4>
+                                  <p className="mb-[8px] text-[11px] text-gray-600">{product.subtitle}</p>
+                                  {product.deliveryNote && (
+                                    <p className="mt-[8px] text-[13px] leading-[20px] text-gray-500 flex items-center gap-[4px]">
+                                      <Package className="w-[1rem] h-[1rem]" />
+                                      {'Delivery Note:' + product.deliveryNote}
+                                    </p>
+                                  )}
+
+                                  <div className="flex items-center gap-[20px]">
+                              {
+                                 ['processing', 'confirmed', 'shipped',].includes(product.productStatus) &&
+                                 <button className='relative py-[4px] px-4 text-secondary bg-white border border-secondary rounded-[6px]
+                                     hover:bg-secondary hover:text-white transition duration-300  before:bg-white cancel-button'
+                                         data-label='Product' data-bottom='50'
+                                            onClick={(e)=> cancelTheOrderProduct(product.productId, order._id)} >  
+                                   <CircleOff className="w-4 h-4" />
+                                 </button>
+                              }
+                              { 
+                                !['cancelled', 'refunded'].includes(product.productStatus) &&
+                                <SiteSecondaryFillImpButton className="text-[11px] capitalize" 
+                                    clickHandler={(e)=> changeTheProductStatus(order._id, product.productId, changeStatus(product.productStatus).status)}
+                                      customStyle={{width:'auto',marginTop:'0', paddingBlock:'4px', borderRadius:'6px'}}> 
+                                {
+                                  (()=> {
+                                    const {status, icon:Icon} = changeStatus(product.productStatus)
+                                    return(
+                                      <span className='flex items-center gap-[10px]'>
+                                          <span className='capitalize'> 
+                                            {status + '  Product' } 
+                                          </span>
+                                          {Icon && <Icon className="w-4 h-4"/>} 
+                                      </span>
+                                    )
+                                  })()
+                                }
+                                </SiteSecondaryFillImpButton>
+                              }
+                            </div>
+                            
+                                </div>
+                              </div>
+
+                              <div ref={productCancelFormRef} className='flex justify-center items-center'>
+                              {openCancelForm.type === 'product' && openCancelForm.options.productId === product.productId &&
+                                  openCancelForm.options.orderId === order._id && openCancelForm.status &&
+                                <CancelForm openSelectReasons={openSelectReasons} setOpenSelectReasons={setOpenSelectReasons} 
+                                  cancelReasonHandler={cancelReasonHandler} setOpenCancelForm={setOpenCancelForm} submitReason={submitReason}
+                                     formFor='product' canceledByAdmin={true}/>
+                              }
+                              </div>
 
                             </div>
-                          </div>
-                          
-                          <div ref={productCancelFormRef} className='flex justify-center items-center'>
-                          {openCancelForm.type === 'product' && openCancelForm.options.productId === product.productId &&
-                              openCancelForm.options.orderId === order._id && openCancelForm.status &&
-                            <CancelForm openSelectReasons={openSelectReasons} setOpenSelectReasons={setOpenSelectReasons} 
-                              cancelReasonHandler={cancelReasonHandler} setOpenCancelForm={setOpenCancelForm} submitReason={submitReason}
-                                 formFor='product' canceledByAdmin={true}/>
-                          }
-                          </div>
-                          
-                        </div>
-                      ))} 
-                    </td>
+                          ))} 
+                        </td>
+                        
+                        </tr>
+                        <tr ref={orderCancelFormRef}>
+                          <td colSpan='9'>
+                            {
+                              openCancelForm.type === 'order' && openCancelForm.options.orderId === order._id && openCancelForm.status &&
+                              <CancelForm openSelectReasons={openSelectReasons} setOpenSelectReasons={setOpenSelectReasons} 
+                                cancelReasonHandler={cancelReasonHandler} setOpenCancelForm={setOpenCancelForm} submitReason={submitReason}
+                                  formFor='order' canceledByAdmin={true}/>
+                            }
+                          </td>
+                        </tr>
+                        </React.Fragment>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              :
+              <h3 className='w-full h-full flex justify-center items-center mt-[6rem] 
+                text-[13px] xs-sm2:text-[16px] xs-sm:text-[17px] text-muted capitalize tracking-[0.5px]'>
+                 No Order Records ! 
+              </h3>
+            }
 
-                    </tr>
-                    <tr ref={orderCancelFormRef}>
-                      <td colSpan='9'>
-                        {
-                          openCancelForm.type === 'order' && openCancelForm.options.orderId === order._id && openCancelForm.status &&
-                          <CancelForm openSelectReasons={openSelectReasons} setOpenSelectReasons={setOpenSelectReasons} 
-                            cancelReasonHandler={cancelReasonHandler} setOpenCancelForm={setOpenCancelForm} submitReason={submitReason}
-                              formFor='order' canceledByAdmin={true}/>
-                        }
-                      </td>
-                    </tr>
-                    </React.Fragment>
-                  ))}
-                </tbody>
-              </table>
-            </div>
           </div>
         </div>
 
@@ -678,7 +698,10 @@ export default function AdminOrderHistoryPage(){
 
       <div className='mb-[7rem]'>
 
-        <PaginationV2 currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+        {
+          orders && totalPages &&
+            <PaginationV2 currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+        }
 
       </div>
 

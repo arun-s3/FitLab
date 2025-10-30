@@ -1,6 +1,6 @@
 import React,{useState, useRef, useEffect} from 'react'
 import './AdminAddAndEditProductPage.css'
-import {useLocation, useNavigate} from 'react-router-dom'
+import {useLocation, useNavigate, useOutletContext} from 'react-router-dom'
 import {useSelector, useDispatch} from 'react-redux'
 import {motion} from 'framer-motion'
 
@@ -39,6 +39,9 @@ export default function AdminAddAndEditProductPage({ editProduct }){
     const [category, setCategory] = useState([])
     const [subCategory, setSubCategory] = useState('')
     const [productData, setProductData] = useState({targetMuscles: []})
+
+    const {setPageBgUrl} = useOutletContext() 
+    setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.9),rgba(255,255,255,0.9)), url('/admin-bg.jpg')`)
 
     const [variantsDisabledMsg, setVariantsDisabledMsg] = useState(false)
 
@@ -142,7 +145,7 @@ export default function AdminAddAndEditProductPage({ editProduct }){
             productCreated && toast.success('Created product succesfully!')
             productUpdated && toast.success('Updated product succesfully!')
             dispatch(resetStates())
-            setTimeout(()=> {navigate('/admin/products/list', {replace: true})}, 1000)
+            setTimeout(()=> {navigate('/admin/products', {replace: true})}, 1000)
         }
     },[productCreated, productUpdated])
 

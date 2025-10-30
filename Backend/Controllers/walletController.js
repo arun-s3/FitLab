@@ -92,6 +92,7 @@ const getOrCreateWallet = async (req, res, next)=> {
       console.log("Already has a wallet....")
 
       let transactions = wallet.transactions || []
+      let transactionsCount
 
       if (Object.keys(queryOptions).length > 0) {
         const {
@@ -100,6 +101,7 @@ const getOrCreateWallet = async (req, res, next)=> {
           userLevel,
           paymentMethod,
           type,
+          limit,
           startDate,
           endDate,
           sortBy = 'createdAt',
@@ -127,6 +129,8 @@ const getOrCreateWallet = async (req, res, next)=> {
           transactions = transactions.filter(txn => txn.type && txn.type.toLowerCase() === type.toLowerCase());
         }
 
+        transactionsCount = transactions.length
+
         if (startDate && endDate){
           const start = new Date(startDate)
           const end = new Date(endDate)
@@ -147,10 +151,11 @@ const getOrCreateWallet = async (req, res, next)=> {
           return 0
         })
 
-        const limit = 6
-        const startSlice = (page - 1) * limit
-        const endSlice = startSlice + limit
-        transactions = transactions.slice(startSlice, endSlice)
+        if (limit) {
+          const startSlice = (page - 1) * limit
+          const endSlice = startSlice + limit
+          transactions = transactions.slice(startSlice, endSlice)
+        }
       }
 
       const { userId: _, ...walletWithoutUserId } = wallet.toObject()
@@ -163,7 +168,7 @@ const getOrCreateWallet = async (req, res, next)=> {
 
       const encryptedWallet = encryptData(walletWithoutIds)
 
-      return res.status(200).json({ safeWallet: encryptedWallet, message: 'wallet sent' })
+      return res.status(200).json({ safeWallet: encryptedWallet, message: 'wallet sent' , transactionsCount })
     }
   }
   catch (error){

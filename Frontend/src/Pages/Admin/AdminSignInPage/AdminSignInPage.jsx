@@ -3,6 +3,7 @@ import './AdminSignInPage.css'
 import {Link,useNavigate} from 'react-router-dom'
 import {useSelector,useDispatch} from 'react-redux'
 
+import {toast as sonnerToast} from 'sonner'
 import {toast} from 'react-toastify'
 import {RiAdminLine} from "react-icons/ri"
 import {Eye, EyeOff} from 'lucide-react'
@@ -41,7 +42,7 @@ export default function AdminSignInPage(){
             navigate('/admin/dashboard/business', { replace: true });
             dispatch(resetStates())
         } else if (adminError) {
-            toast.error(adminError)
+            sonnerToast.error(adminError)
             dispatch(resetStates())
         } else if (!adminSuccess && adminToken) {
             navigate('/admin/dashboard/business', {replace: true })
@@ -105,7 +106,7 @@ export default function AdminSignInPage(){
             }
             else{
                 console.log("Check errors"+JSON.stringify(formData))
-                toast.error("Please check the fields and submit again!")
+                sonnerToast.error("Please check the fields and submit again!")
             }
         } 
         else{

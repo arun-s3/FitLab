@@ -12,7 +12,7 @@ import {TbCirclesRelation} from "react-icons/tb";
 import {RiDiscountPercentLine} from "react-icons/ri";
 import {SlBadge} from "react-icons/sl";
 import {IoIosClose} from "react-icons/io";
-import {toast} from 'react-toastify';
+import {toast as sonnerToast} from 'sonner'
 
 import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection';
 import FileUpload from '../../../Components/FileUpload/FileUpload';
@@ -144,8 +144,8 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
     useEffect(()=>{
         console.log(`Inside useEffect for productCreated, productUpdated success, productUpdated-${categoryUpdated} productCreated-${categoryCreated}`)
         if(editCategory && (categoryCreated || categoryUpdated)){
-            categoryCreated && toast.success('Created category succesfully!')
-            categoryUpdated && toast.success('Updated category succesfully!')
+            categoryCreated && sonnerToast.success('Created category succesfully!')
+            categoryUpdated && sonnerToast.success('Updated category succesfully!')
             dispatch(resetStates())
             setTimeout(()=> {navigate('/admin/products/category', {replace: true})}, 1000)
         }
@@ -270,6 +270,7 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
             const compressedImageBlobs = async(image)=>{
                 if(image.size > (5*1024*1024)){
                     const newBlob = await handleImageCompression(image.blob)
+                    sonnerToast.info("The image has been compressed as its size exceeded 5 MB!")
                     return newBlob
                 }else{
                     return image.blob
@@ -287,13 +288,13 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
             console.log("DISPATCHED SUCCESSFULLY--")
         } 
         else{
-            if(!categoryData.size){
+            if(!Object.keys(categoryData).length){
                 console.log("No Fields entered!")
-                toast.error("Please enter all the fields!")
+                sonnerToast.error("Please enter all the fields!", {description: "Some required details are missing. Fill them in to continue."})
             }
             else{
                 console.log("Check errors"+JSON.stringify(categoryData))
-                toast.error("Please check the fields and submit again!")
+                sonnerToast.error("Please check the fields and submit!", {description: "Some required details are wrong. Check them and continue."})
             }
         }
     }

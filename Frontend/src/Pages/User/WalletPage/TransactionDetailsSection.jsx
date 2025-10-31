@@ -4,7 +4,7 @@ import {motion} from 'framer-motion'
 
 import { ArrowDown, ArrowUp, ChevronRight, FunnelPlus, ArrowUpDown, Pause, BanknoteArrowUp, BanknoteArrowDown, 
   BanknoteX, Check, X } from "lucide-react"
-import {toast} from 'react-toastify'
+import {toast as sonnerToast} from 'sonner'
 import {format} from "date-fns" 
 
 import useStickyDropdown from '../../../Hooks/StickyDropdown'
@@ -44,11 +44,11 @@ export default function TransactionDetailsSection({transactions, queryOptions, s
     
     useEffect(()=> { 
       if(moneyRequestConfirmed){
-        toast.success('Money request confirmed and amount transferred successfully!')
+        sonnerToast.success('Money request confirmed and amount transferred successfully!')
         dispatch(resetWalletStates())
       }
       if(moneyRequestDeclined){
-        toast.success('Money request declined successfully!')
+        sonnerToast.success('Money request declined successfully!')
         dispatch(resetWalletStates())
       }
     },[moneyRequestConfirmed, moneyRequestDeclined])

@@ -1,14 +1,16 @@
-import React, {useState, useEffect} from "react"
+import React, {useState, useEffect, useRef} from "react"
 import {useSelector, useDispatch} from "react-redux"
 import {motion, AnimatePresence} from "framer-motion"
 
 import { X, Calendar, Users, Clock, Flag} from "lucide-react"
+import {toast as sonnerToast} from 'sonner'
 
 import {createList, updateList} from "../../../../Slices/wishlistSlice"
 import FileUpload from "../../../../Components/FileUpload/FileUpload"
 import {handleImageCompression} from '../../../../Utils/compressImages'
 import {SiteSecondaryFillButton} from "../../../../Components/SiteButtons/SiteButtons"
 import {CustomHashLoader} from "../../../../Components/Loader/Loader"
+import useModalHelpers from '../../../../Hooks/ModalHelpers'
 
 
 export default function WishlistModal({ isOpen, onClose, listDetails, setLoadingListCard}) {
@@ -28,6 +30,9 @@ export default function WishlistModal({ isOpen, onClose, listDetails, setLoading
 
   const {loading} = useSelector((state) => state.wishlist)
   const dispatch = useDispatch()
+
+  const modalRef = useRef(null)
+  useModalHelpers({open: isOpen, onClose, modalRef})
 
   useEffect(() => {
     async function loadListDetails(){
@@ -119,6 +124,7 @@ export default function WishlistModal({ isOpen, onClose, listDetails, setLoading
     const compressedImageBlobs = async(image)=>{
         if(image.size > (5*1024*1024)){
             const newBlob = await handleImageCompression(image.blob)
+            sonnerToast.info("The image has been compressed as its size exceeded 5 MB!")
             return newBlob
         }else{
             return image.blob
@@ -130,7 +136,7 @@ export default function WishlistModal({ isOpen, onClose, listDetails, setLoading
 
     if(!wishlistDetails.name){
       console.log("No name entered!")
-      toast.error("Please enter the name!")
+      sonnerToast.error("Please enter the name!")
       return
     }
 
@@ -179,6 +185,7 @@ export default function WishlistModal({ isOpen, onClose, listDetails, setLoading
               variants={containerVariants}
               initial="hidden"
               animate="visible"
+              ref={modalRef}
               className="p-4 mob:p-6 space-y-2 max-h-[35rem] s-sm:max-h-[38rem] overflow-y-auto"
             >
               <motion.div variants={fieldVariants}>

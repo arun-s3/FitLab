@@ -1,8 +1,9 @@
-import React from 'react'
+import React, {useRef} from 'react'
 import {useDispatch} from 'react-redux'
 
 import { X, AlertTriangle } from "lucide-react"
 
+import useModalHelpers from '../../Hooks/ModalHelpers'
 import {removeProductFromList, resetWishlistStates} from '../../Slices/wishlistSlice'
 
 
@@ -12,6 +13,9 @@ export default function RemoveWishlistItemModal({ isOpen, onClose, product, list
   const dispatch = useDispatch()
   
   if (!isOpen) return null
+
+  const modalRef = useRef(null)
+  useModalHelpers({open: isOpen, onClose, modalRef})
 
   const handleRemoveListProductConfirm = ()=> {
     console.log(`Removing ${product.title} from ${listName}`)
@@ -25,7 +29,7 @@ export default function RemoveWishlistItemModal({ isOpen, onClose, product, list
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" ref={modalRef}>
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
 
         <div className="flex justify-between items-center p-[1rem] border-b border-primary">

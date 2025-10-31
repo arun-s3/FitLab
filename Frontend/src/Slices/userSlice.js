@@ -11,8 +11,6 @@ export const signup = createAsyncThunk('userSignup', async(formData, thunkAPI)=>
     catch(error){
         console.log("inside catch of signup from Userslice")
         const errorMessage = error.response?.data?.message
-        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
-        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -27,8 +25,6 @@ export const signin = createAsyncThunk('signin', async(formData, thunkAPI)=>{
     catch(error){
         console.log("inside catch of signup from Userslice")
         const errorMessage = error.response?.data?.message
-        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
-        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -44,7 +40,6 @@ export const googleSignin = createAsyncThunk('googleSignin', async(userData,thun
     catch(error){
         console.log("inside catch of googleSignin from userSlice")
         const errorMessage = error.response?.data?.message
-        console.log("error object inside createAsyncThunk error.response of googleSignin-->"+JSON.stringify(error.response))
         return thunkAPI.rejectWithValue(errorMessage)
     }
 } )
@@ -61,8 +56,6 @@ export const signout = createAsyncThunk('signout', async(googleId,thunkAPI)=>{
     catch(error){
         console.log("inside catch of signout from Userslice")
         const errorMessage = error.response?.data?.message
-        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
-        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -78,7 +71,6 @@ export const updateUserDetails = createAsyncThunk('updateUserDetails', async({us
     catch(error){
         console.log("inside catch of updateUserDetails from userSlice")
         const errorMessage = error.response?.data?.message
-        console.log("error object inside createAsyncThunk error.response of updateUserDetails-->"+JSON.stringify(error.response))
         return thunkAPI.rejectWithValue(errorMessage)
     }
 } )
@@ -94,7 +86,6 @@ export const updateUserDetails = createAsyncThunk('updateUserDetails', async({us
 //     catch(error){
 //         console.log("inside catch of updateUserDetails from userSlice")
 //         const errorMessage = error.response?.data?.message
-//         console.log("error object inside createAsyncThunk error.response of updateUserDetails-->"+JSON.stringify(error.response))
 //         return thunkAPI.rejectWithValue(errorMessage)
 //     }
 // } )

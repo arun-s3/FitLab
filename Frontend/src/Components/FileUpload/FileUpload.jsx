@@ -13,6 +13,8 @@ import {IoCloseSharp} from "react-icons/io5";
 import {RiImageEditLine} from "react-icons/ri";
 import {FaArrowUp, FaArrowDown} from "react-icons/fa";
 import {toast} from 'react-toastify'
+import {toast as sonnerToast} from 'sonner'
+
 // import { uploadImages } from 'Frontend/src/Slices/productSlice'
 
 export default function FileUpload({images, setImages, imageLimit, needThumbnail, thumbnail, setThumbnail, thumbnailIndexOnEditProduct,
@@ -42,6 +44,7 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
             imageMessageDisplay.current.parentElement.style.visibility = 'visible'
             imageMessageDisplay.current.style.display = 'none'
             setImageMessage('Please upload images smaller than 3MB. Images between 3MB and 5MB can be compressed or deleted.')
+            sonnerToast.warning('Please upload images smaller than 3MB. Images between 3MB and 5MB can be compressed or deleted.')
             setDisplayCompressButton(true)
         }
         if(!images.length){
@@ -311,6 +314,7 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
         setImages([...compressedImages])
         setImageMessage(null)
         imageMessageDisplay.current.parentElement.style.visibility = 'hidden'
+        sonnerToast.info('Compressed images!')
     }
 
     const openImageEditor = (imageUrl, name, blob)=>{
@@ -365,7 +369,7 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
                     setImageMessage("Make sure you crop every image later before submitting")
                 }, 5000)
                 setError("Make sure you crop every image later before submitting")
-                toast.warn("Make sure you crop every image later before submitting")
+                sonnerToast.warning("Make sure you crop every image later before submitting")
             }
         } 
     }

@@ -170,6 +170,7 @@ const getUserWishlist = async(req, res, next)=> {
       return res.status(200).json({ message: "No wishlist found for this user.", wishlist: {} })
     }
 
+    console.log("wishlist------>", JSON.stringify(wishlist))
     res.status(200).json({ message: "Wishlist retrieved successfully", wishlist})
   }
   catch(error){
@@ -179,36 +180,157 @@ const getUserWishlist = async(req, res, next)=> {
 }
 
 
-const getAllWishlistProducts = async (req, res, next)=> {
+// const getAllWishlistProducts = async (req, res, next)=> {
+//   try {
+//     console.log("Inside getAllWishlistProducts controller")
+//     const { queryOptions } = req.body
+//     const userId = req.user.id
+//     console.log("queryOptions:", JSON.stringify(queryOptions))
+
+//     let wishlist = await Wishlist.findOne({ userId: userId }).populate("lists.products.product")
+//     if (!wishlist){
+//       console.log("No wishlist available!")
+//       return res.status(200).json({ wishlistProducts: [], productCounts: 0 })
+//     }
+
+//     let productsArray = []
+//     if (queryOptions?.listName){
+//       const targetList = wishlist.lists.find((list)=> list.name === queryOptions.listName)
+//       if (targetList){
+//         // return res.status(404).json({ message: "List not found!", wishlistProducts: [], productCounts: 0 })
+//         productsArray = targetList.products
+//       }
+//     }else{
+//       wishlist.lists.forEach((list) => {
+//         productsArray = productsArray.concat(list.products)
+//       })
+//     }
+//     console.log("productsArray-->", productsArray)
+
+//     if (queryOptions?.searchData){
+//       const searchQuery = queryOptions.searchData.toLowerCase()
+//       productsArray = productsArray.filter((item)=> {
+//         const title = item.product?.title?.toLowerCase() || ""
+//         const subtitle = item.product?.subtitle?.toLowerCase() || ""
+//         return title.includes(searchQuery) || subtitle.includes(searchQuery)
+//       })
+//     }
+
+//     if (queryOptions?.sort && Object.keys(queryOptions?.sort).length > 0) {
+//       const sortKey = Object.keys(queryOptions.sort)[0]
+//       const sortOrder = Number(queryOptions.sort[sortKey])
+//       console.log(`Sorting by ${sortKey} in order ${sortOrder}`)
+
+//       if (sortKey === "price") {
+//         productsArray.sort((a, b) => {
+//           const priceA = a.product?.price || 0
+//           const priceB = b.product?.price || 0
+//           return sortOrder * (priceA - priceB)
+//         })
+//       }else if (sortKey === "addedAt") {
+//         productsArray.sort((a, b) => {
+//           const dateA = new Date(a.addedAt)
+//           const dateB = new Date(b.addedAt)
+//           return sortOrder * (dateA - dateB)
+//         })
+//       } else if (sortKey === "alphabetical") {
+//         productsArray.sort((a, b) => {
+//           const titleA = a.product?.title?.toLowerCase() || ""
+//           const titleB = b.product?.title?.toLowerCase() || ""
+//           return sortOrder * titleA.localeCompare(titleB)
+//         })
+//       } else if (sortKey === "priority") {
+//         productsArray.sort((a, b)=> {
+//           const priorityA = a.productPriority || 2
+//           const priorityB = b.productPriority || 2
+//           return sortOrder * (priorityA - priorityB)
+//         })
+//       }
+//     }
+
+//     const page = parseInt(queryOptions?.page) || 1
+//     const limit = parseInt(queryOptions?.limit) || 12
+//     const skip = (page - 1) * limit
+//     const productCounts = productsArray.length
+//     const wishlistProducts = productsArray.slice(skip, skip + limit)
+
+//     res.status(200).json({ wishlistProducts, productCounts })
+//   } 
+//   catch(error){
+//     console.error("Error in getAllWishlistProducts controller:", error.message)
+//     next(error)
+//   }
+// }
+
+const getAllWishlistProducts = async (req, res, next) => {
   try {
     console.log("Inside getAllWishlistProducts controller")
     const { queryOptions } = req.body
     const userId = req.user.id
     console.log("queryOptions:", JSON.stringify(queryOptions))
 
-    let wishlist = await Wishlist.findOne({ userId: userId }).populate("lists.products.product")
-    if (!wishlist){
+    let wishlist = await Wishlist.findOne({ userId })
+      .populate({
+        path: "lists.products.product",
+        populate: {
+          path: "variants",
+          select: "weight size motorPower color stock price",
+        },
+      })
+
+    if (!wishlist) {
       console.log("No wishlist available!")
       return res.status(200).json({ wishlistProducts: [], productCounts: 0 })
     }
 
     let productsArray = []
-    if (queryOptions?.listName){
-      const targetList = wishlist.lists.find((list)=> list.name === queryOptions.listName)
-      if (targetList){
-        // return res.status(404).json({ message: "List not found!", wishlistProducts: [], productCounts: 0 })
+    if (queryOptions?.listName) {
+      const targetList = wishlist.lists.find(
+        (list) => list.name === queryOptions.listName
+      )
+      if (targetList) {
         productsArray = targetList.products
       }
-    }else{
+    } else {
       wishlist.lists.forEach((list) => {
         productsArray = productsArray.concat(list.products)
       })
     }
-    console.log("productsArray-->", productsArray)
 
-    if (queryOptions?.searchData){
+    console.log("productsArray length before filter:", productsArray.length)
+
+    productsArray = productsArray.filter(
+      (item) => item.product && !item.product.variantOf
+    )
+
+    const mergedProducts = productsArray.map((item) => {
+      const main = item.product
+      const variants = main.variants || []
+      const variantKey = main.variantType
+
+      const variantValues = variantKey
+        ? [main[variantKey], ...variants.map((v) => v[variantKey])].filter(Boolean)
+        : []
+
+      const prices = [main.price, ...variants.map((v) => v.price)]
+      const stocks = [main.stock, ...variants.map((v) => v.stock)]
+      const totalStock = stocks.reduce((sum, s) => sum + (s || 0), 0)
+
+      return {
+        ...item, 
+        product: {
+          ...main,
+          ...(variantKey ? { [`${variantKey}s`]: variantValues } : {}),
+          prices,
+          stocks,
+          totalStock,
+        },
+      }
+    })
+
+    if (queryOptions?.searchData) {
       const searchQuery = queryOptions.searchData.toLowerCase()
-      productsArray = productsArray.filter((item)=> {
+      mergedProducts = mergedProducts.filter((item) => {
         const title = item.product?.title?.toLowerCase() || ""
         const subtitle = item.product?.subtitle?.toLowerCase() || ""
         return title.includes(searchQuery) || subtitle.includes(searchQuery)
@@ -220,46 +342,47 @@ const getAllWishlistProducts = async (req, res, next)=> {
       const sortOrder = Number(queryOptions.sort[sortKey])
       console.log(`Sorting by ${sortKey} in order ${sortOrder}`)
 
-      if (sortKey === "price") {
-        productsArray.sort((a, b) => {
-          const priceA = a.product?.price || 0
-          const priceB = b.product?.price || 0
-          return sortOrder * (priceA - priceB)
-        })
-      }else if (sortKey === "addedAt") {
-        productsArray.sort((a, b) => {
-          const dateA = new Date(a.addedAt)
-          const dateB = new Date(b.addedAt)
-          return sortOrder * (dateA - dateB)
-        })
-      } else if (sortKey === "alphabetical") {
-        productsArray.sort((a, b) => {
-          const titleA = a.product?.title?.toLowerCase() || ""
-          const titleB = b.product?.title?.toLowerCase() || ""
-          return sortOrder * titleA.localeCompare(titleB)
-        })
-      } else if (sortKey === "priority") {
-        productsArray.sort((a, b)=> {
-          const priorityA = a.productPriority || 2
-          const priorityB = b.productPriority || 2
-          return sortOrder * (priorityA - priorityB)
-        })
-      }
+      mergedProducts.sort((a, b) => {
+        const productA = a.product || {}
+        const productB = b.product || {}
+        switch (sortKey) {
+          case "price":
+            return sortOrder * ((productA.price || 0) - (productB.price || 0))
+          case "addedAt":
+            return sortOrder * (new Date(a.addedAt) - new Date(b.addedAt))
+          case "alphabetical":
+            return (
+              sortOrder *
+              (productA.title?.toLowerCase() || "").localeCompare(
+                productB.title?.toLowerCase() || ""
+              )
+            )
+          case "priority":
+            return (
+              sortOrder *
+              ((a.productPriority || 2) - (b.productPriority || 2))
+            )
+          default:
+            return 0
+        }
+      })
     }
 
     const page = parseInt(queryOptions?.page) || 1
     const limit = parseInt(queryOptions?.limit) || 12
     const skip = (page - 1) * limit
-    const productCounts = productsArray.length
-    const wishlistProducts = productsArray.slice(skip, skip + limit)
 
-    res.status(200).json({ wishlistProducts, productCounts })
-  } 
-  catch(error){
+    const productCounts = mergedProducts.length
+    const wishlistProducts = mergedProducts.slice(skip, skip + limit)
+
+    res.status(200).json({wishlistProducts, productCounts});
+  }
+  catch (error){
     console.error("Error in getAllWishlistProducts controller:", error.message)
     next(error)
   }
 }
+
 
 
 const updateList = async (req, res, next)=> {

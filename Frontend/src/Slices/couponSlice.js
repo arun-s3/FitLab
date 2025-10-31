@@ -11,8 +11,6 @@ export const createCoupon = createAsyncThunk('coupon/add', async ({couponDetails
   }catch(error){
     console.log('Inside catch of createCoupon')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -27,8 +25,6 @@ export const getAllCoupons = createAsyncThunk('coupon/list', async ({queryOption
   }catch(error){
     console.log('Inside catch of getAllCoupons')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -43,8 +39,6 @@ export const getEligibleCoupons = createAsyncThunk('coupon/list-eligible', async
   }catch(error){
     console.log('Inside catch of getEligibleCoupons')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -59,8 +53,6 @@ export const updateCoupon = createAsyncThunk('coupon/update', async ({couponDeta
   }catch(error){
     console.log('Inside catch of updateCoupon')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -75,8 +67,6 @@ export const deleteCoupon = createAsyncThunk('coupon/delete', async ({couponId},
   }catch(error){
     console.log('Inside catch of deleteCoupon')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -91,8 +81,6 @@ export const searchCoupons = createAsyncThunk('coupon/search', async ({query}, t
   }catch(error){
     console.log('Inside catch of searchCoupons')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -106,8 +94,6 @@ export const getBestCoupon = createAsyncThunk('coupon/getBestCoupon', async (thu
   }catch(error){
     console.log('Inside catch of getBestCoupon')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -121,8 +107,6 @@ export const toggleCouponStatus = createAsyncThunk('coupon/toggleCouponStatus', 
   }catch(error){
     console.log('Inside catch of toggleCouponStatus')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })

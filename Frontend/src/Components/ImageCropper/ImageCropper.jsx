@@ -6,6 +6,7 @@ import { getCroppedImg } from "../ImageCropper/ImageCropperUtilities";
 import {SiteButtonSquare, SitePrimaryWhiteTextButton, SitePrimaryButtonWithShadow, SitePrimaryMinimalButtonWithShadow} from "../SiteButtons/SiteButtons";
 
 import {toast} from 'react-toastify'
+import {toast as sonnerToast} from 'sonner'
 import {GoArrowLeft, GoArrowRight} from "react-icons/go";
 import {FaArrowLeft, FaArrowRight} from "react-icons/fa6";
 import {FiArrowLeftCircle, FiArrowRightCircle } from "react-icons/fi";
@@ -135,7 +136,7 @@ const ImageCropper = ({ images, onCropComplete, imageCropperState, setImageCropp
     setModalIsOpen(false)
     setImageCropperState(false)
     if(images.some(img=> !img.isCropped)){
-      toast.warn("Make sure you crop every image later before submitting", {autoClose: 5000})
+      sonnerToast.warning("Product removed from cart", {duration: 5000})
     }
   }
 

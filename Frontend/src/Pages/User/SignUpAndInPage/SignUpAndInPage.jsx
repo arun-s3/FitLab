@@ -5,6 +5,7 @@ import {useDispatch, useSelector} from 'react-redux'
 import {motion} from "framer-motion"
 
 import {toast} from 'react-toastify'
+import {toast as sonnerToast} from 'sonner'
 import {useGoogleLogin} from '@react-oauth/google'
 import {Eye, EyeOff} from 'lucide-react'
 import axios from 'axios'
@@ -49,7 +50,7 @@ export default function SignUpAndInPage({type}){
             console.log("Cookies cleared!")
             dispatch(signin(formData))
         }else{
-            toast.error("Internal Server Error.Please try after sometime!")
+            toast.error("Internal Server Error. Please try after sometime!")
         }
     }
      
@@ -57,7 +58,7 @@ export default function SignUpAndInPage({type}){
         console.log("Inside useEffect()")
         const checkSuccessAndSendOtp = async()=> {
                 console.log("success state now-->"+success)
-                toast.success("Registered succesfully!")
+                sonnerToast.success("Registered succesfully!")
                 console.log("Just after success toast!")
                 // const response = await axios.post('/sendOtp', formData.email)
                 const response = await axios.post(`${baseApiUrl}/sendOtp`, { email: formData.email }, {withCredentials:true});
@@ -102,7 +103,7 @@ export default function SignUpAndInPage({type}){
             }
             else{
                 console.log("Just after before toast!-->"+error)
-                toast.error(error || "Something went wrong.")
+                sonnerToast.error(error || "Something went wrong.")
                 console.log("Just after error toast!")
                 dispatch(resetStates())
             }
@@ -203,11 +204,11 @@ export default function SignUpAndInPage({type}){
         if((type=="signup"? Object.keys(formData).length<5: Object.keys(formData).length<2) || Object.values(formData).find(inputValues=>inputValues==='undefined')){
             if(!formData.size){
                 console.log("No Fields entered!")
-                toast.error("Please enter all the fields!")
+                sonnerToast.error("Please enter all the fields!")
             }
             else{
                 console.log("Check errors"+JSON.stringify(formData))
-                toast.error("Please check the fields and submit again!")
+                sonnerToast.error("Please check the fields and submit again!")
             }
         } 
         else{
@@ -240,7 +241,7 @@ export default function SignUpAndInPage({type}){
         } 
         else{
             console.log("Inside googleSuccessHandler else-userDetails, couldn't fetch userDetails")
-            toast.error("Couldn't find the user details!")
+            sonnerToast.error("Couldn't find the user details!")
         }  
     }
     const googleFailureHandler = (error)=>{

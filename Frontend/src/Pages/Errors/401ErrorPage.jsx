@@ -1,5 +1,6 @@
 import React from 'react'
 import {useNavigate} from "react-router-dom"
+import {useSelector} from 'react-redux'
 import {motion} from "framer-motion"
 
 import {Home, Headset, ArrowLeft} from "lucide-react"
@@ -8,6 +9,8 @@ import {Home, Headset, ArrowLeft} from "lucide-react"
 export default function ErrorPage401() {
 
   const navigate = useNavigate()
+
+  const {user} = useSelector(state=> state.user)
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -122,7 +125,7 @@ export default function ErrorPage401() {
                 variants={buttonVariants}
                 whileHover={{ scale: 1.08 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={()=> navigate('/', {replace: true})}
+                onClick={()=> user && user.isBlocked ? navigate('/blocked', {replace: true}) : navigate('/', {replace: true})}
               >
                 <Home className="h-5 w-5" />
                 Return Home

@@ -5,7 +5,7 @@ import {useSelector, useDispatch} from 'react-redux'
 import {motion} from 'framer-motion'
 
 import {HousePlus} from 'lucide-react'
-import {toast} from 'react-toastify'
+import {toast as sonnerToast} from 'sonner'
 
 import AddressLists from './AddressLists'
 import DeleteAddressModal from './DeleteAddressModal'
@@ -40,11 +40,11 @@ export default function AddressListingPage(){
 
     useEffect(()=> {
         if(addressDeleted){
-            toast.success('Deleted the address successfully!')
+            sonnerToast.success('Deleted the address successfully!')
             dispatch(resetStates())
         }
         if(error){
-            toast.error(error)
+            sonnerToast.error(error)
             dispatch(resetStates())
         }
         if(addresses){

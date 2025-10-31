@@ -3,6 +3,7 @@ import React, {useState, forwardRef, useImperativeHandle} from "react"
 import './CardPayment.css'
 
 import axios from 'axios'
+import {toast as sonnerToast} from 'sonner'
 import {toast} from 'react-toastify'
 
 import { useStripe, useElements, PaymentElement } from "@stripe/react-stripe-js"
@@ -44,7 +45,7 @@ const CardPayment = forwardRef( ({onPayment, payButtonText, displayError}, ref)=
       if (error){
         console.log(error)
         setMessage(error.message)
-        toast.error(error.message)
+        sonnerToast.error(error.message, {duration: 4000})
         setIsLoading(false)
         displayError("Only Test Cards Allowed as of now via Stripe!")
         return
@@ -66,11 +67,11 @@ const CardPayment = forwardRef( ({onPayment, payButtonText, displayError}, ref)=
   
       if (error.type === "card_error" || error.type === "validation_error") {
         setMessage(error.message)
-        toast.error(error.message)
+        toast.error(error.message, {autoClose: 4000})
         displayError(error.message)
       } else {
         setMessage("An unexpected error occurred.")
-        toast.error("An unexpected error occurred.")
+        toast.error("An unexpected error occurred.", {autoClose: 4000})
         displayError("An unexpected error occurred.")
       }
   
@@ -78,9 +79,9 @@ const CardPayment = forwardRef( ({onPayment, payButtonText, displayError}, ref)=
     }
     catch(error){
       if(error.response.status !== 500){
-        toast.error(error.message)
+        toast.error(error.message, {autoClose: 4000})
       }else{
-        toast.error("An unexpected error occurred.")
+        toast.error("An unexpected error occurred.", {autoClose: 4000})
         displayError("An unexpected error occurred.")
       }
     }

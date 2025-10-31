@@ -1,14 +1,18 @@
-import React, {useState} from "react"
+import React, {useState, useRef} from "react"
 import {motion, AnimatePresence} from "framer-motion"
 
 import {X, FileText, Download, FileSpreadsheet} from "lucide-react"
 
+import useModalHelpers from '../../../Hooks/ModalHelpers'
 
 
 export default function ExportFileModal({ isOpen, onClose, onExport, productCount = 0 }){
     
   const [selectedFormat, setSelectedFormat] = useState("csv")
   const [isExporting, setIsExporting] = useState(false)
+
+  const modalRef = useRef(null)
+  useModalHelpers({open: isOpen, onClose, modalRef})
 
   const formatOptions = [
     {
@@ -85,7 +89,7 @@ export default function ExportFileModal({ isOpen, onClose, onExport, productCoun
                 </button>
               </div>
 
-              <div className="p-6">
+              <div className="p-6" ref={modalRef}>
                 <div className="mb-6">
                   <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-3"> Select export format: </h3>
                   <div className="space-y-3">

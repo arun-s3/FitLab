@@ -8,7 +8,7 @@ import axios from 'axios'
 
 import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
 import {CustomScaleLoader} from '../../../Components/Loader/Loader'
-import { toast } from 'react-toastify'
+import {toast as sonnerToast} from 'sonner'
 
 
 const PaymentSummary = forwardRef((
@@ -39,6 +39,7 @@ const PaymentSummary = forwardRef((
       navigate('/checkout')
     }
     else{
+      sonnerToast.info("You are not a verified user!")
       setOtpPageLoading(true)
       try{
         const response = await axios.post(`${baseApiUrl}/sendOtp`, {email: user.email}, {withCredentials:true})
@@ -53,7 +54,7 @@ const PaymentSummary = forwardRef((
       }
       catch(error){
         console.log("Error in handleCheckout", error.message)
-        toast.error(error.message)
+        sonnerToast.error(error.message)
       }
     }
   }, [user, navigate, baseApiUrl])

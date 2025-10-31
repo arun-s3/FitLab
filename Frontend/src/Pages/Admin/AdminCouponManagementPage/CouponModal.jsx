@@ -5,13 +5,15 @@ import {debounce} from 'lodash'
 
 import { X, DiamondPercent, BadgePercent, Plus, Minus, Search, ChevronDown, ChevronUp } from "lucide-react"
 import { RiCoupon4Line } from "react-icons/ri"
-import {toast} from 'react-toastify';
+import {toast as sonnerToast} from 'sonner'
+import {toast} from 'react-toastify'
 
 import CategoryDisplay from "../../../Components/CategoryDisplay/CategoryDisplay"
 import {handleInputValidation, displaySuccess, displayErrorAndReturnNewFormData, cancelErrorState} from '../../../Utils/fieldValidator'
 import {createCoupon, updateCoupon, resetCouponStates} from '../../../Slices/couponSlice'
 import {searchProduct, getAllProducts} from '../../../Slices/productSlice'
 import {showUsers} from '../../../Slices/adminSlice'
+import useModalHelpers from '../../../Hooks/ModalHelpers'
 import {camelToCapitalizedWords} from "../../../Utils/helperFunctions"
 
 
@@ -55,8 +57,10 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
   
   const {couponCreated, couponUpdated} = useSelector(state=> state.coupons)
   const dispatch = useDispatch()
- 
 
+  const modalRef = useRef(null)
+  useModalHelpers({open: isOpen, onClose, modalRef})
+ 
   useEffect(() => {
     if (coupon){
       if(coupon.applicableProducts.length > 0){
@@ -135,11 +139,11 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
 
   useEffect(()=> {
     if(couponCreated){
-      toast.success('A coupon is successfully created!')
+      sonnerToast.success('A coupon is successfully created!')
       dispatch(resetCouponStates())
     }
     if(couponUpdated){
-      toast.success('A coupon is successfully updated!')
+      sonnerToast.success('A coupon is successfully updated!')
       dispatch(resetCouponStates())
     }
   }, [couponCreated, couponUpdated])
@@ -324,15 +328,15 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
       return
     }
     if( (formData.discountType === 'percentage' || formData.discountType === 'fixed') && !formData.discountValue  ){
-      toast.error("Please fill the Discount value!")
+      sonnerToast.error("Please fill the Discount value!")
       return
     } 
     if (new Date(endDate) <= new Date(startDate)) {
-      toast.error("Start date must be before the End date!")
+      sonnerToast.error("Start date must be before the End date!")
       return
     }
     if( Object.values(error).some(error=> error.trim() !== '') ){
-      toast.error("There are some errors in the form. Please correct them before submitting!")
+      sonnerToast.error("There are some errors in the form. Please correct them before submitting!")
       return
     }
 
@@ -355,7 +359,7 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
             <X className="h-6 w-6" />
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto" ref={modalRef}>
 
           <div className="grid grid-cols-2 gap-4">
 

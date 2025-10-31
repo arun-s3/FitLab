@@ -1,9 +1,11 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useRef} from 'react'
 import {useSelector} from 'react-redux'
 import {motion, AnimatePresence} from 'framer-motion'
 
 import axios from 'axios'
 import { X } from "lucide-react"
+
+import useModalHelpers from '../../../../Hooks/ModalHelpers'
 
 
 export default function ReplaceCouponModal({ isOpen, onClose, putOldCoupon, currentCoupon, newCoupon, onConfirm }){
@@ -16,6 +18,9 @@ export default function ReplaceCouponModal({ isOpen, onClose, putOldCoupon, curr
   const {cart} = useSelector(state=> state.cart)
 
   const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+
+  const modalRef = useRef(null)
+  useModalHelpers({open: isOpen, onClose, modalRef})
 
   useEffect(()=> {
     if(currentCoupon.trim() === newCoupon.trim()){
@@ -114,7 +119,7 @@ export default function ReplaceCouponModal({ isOpen, onClose, putOldCoupon, curr
                     <X className="h-6 w-6" />
                   </button>
                 </div>
-                <div className="p-6">
+                <div className="p-6" ref={modalRef}>
 
                     <p className="text-gray-600 text-[14px] mb-4">
                       {  !couponError && winnerCouponDiscount.newCoupon ?

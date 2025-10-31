@@ -17,7 +17,7 @@ import {FaTrashAlt} from "react-icons/fa"
 import {LuCaseSensitive} from "react-icons/lu"
 import {VscCaseSensitive} from "react-icons/vsc"
 import {CiSquareChevRight} from "react-icons/ci"
-import {toast} from 'react-toastify'
+import {toast as sonnerToast} from 'sonner'
 
 export default function AdminCustomersPageV1() {
     const dispatch = useDispatch();
@@ -84,10 +84,10 @@ export default function AdminCustomersPageV1() {
 
     useEffect(() => {
         if (adminMessage) {
-            toast.success(`The User is ${adminMessage.toLowerCase()}`);
+            sonnerToast.success(`The User is ${adminMessage.toLowerCase()}`)
         }
         if(adminError){
-            toast.error(adminError)
+            sonnerToast.error(adminError)
         }
         dispatch(resetStates());
     }, [adminMessage, adminError, dispatch]);
@@ -112,6 +112,7 @@ export default function AdminCustomersPageV1() {
             setDeleteDelay(15);
             const id = deleteThisId
             console.log("Set delete delay to 10 seconds");
+            sonnerToast.warning("You are about to delete a customer")
             
             timerId.current = setInterval(() => {
                 setDeleteDelay(prevCount => {

@@ -11,8 +11,6 @@ export const createCategory = createAsyncThunk('createCategory', async({formData
     catch(error){
         console.log("inside catch of createCategory from categorySlice")
         const errorMessage = error.response?.data?.message
-        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
-        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -27,8 +25,6 @@ export const getAllCategories = createAsyncThunk('getAllCategories', async(thunk
     catch(error){
         console.log("inside catch of getAllCategories from categorySlice")
         const errorMessage = error.response?.data?.message
-        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
-        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -43,8 +39,6 @@ export const getAllCategories = createAsyncThunk('getAllCategories', async(thunk
 //     catch(error){
 //         console.log("inside catch of getEveryCategoryNames from categorySlice")
 //         const errorMessage = error.response?.data?.message
-//         console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
-//         console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
 //         return thunkAPI.rejectWithValue(errorMessage)
 //     }
 // })
@@ -59,8 +53,6 @@ export const getCategoriesOfType = createAsyncThunk('getCategoriesOfType', async
     catch(error){
         console.log("inside catch of getCategoriesOfType from categorySlice")
         const errorMessage = error.response?.data?.message
-        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
-        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -76,8 +68,6 @@ export const getSingleCategory = createAsyncThunk('getSingleCategory', async({id
     catch(error){
         console.log("inside catch of getSingleCategory from categorySlice")
         const errorMessage = error.response?.data?.message
-        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
-        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -93,8 +83,6 @@ export const getCategoryNames = createAsyncThunk('getCategoryNames', async({id},
     catch(error){
         console.log("inside catch of getCategoryNames from categorySlice")
         const errorMessage = error.response?.data?.message
-        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
-        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -110,8 +98,6 @@ export const getNestedSubcategoryNames = createAsyncThunk('getNestedSubcategoryN
     catch(error){
         console.log("inside catch of getNestedSubcategoryNames from categorySlice")
         const errorMessage = error.response?.data?.message
-        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
-        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -126,8 +112,6 @@ export const getFirstLevelCategories = createAsyncThunk('getFirstLevelCategories
     catch(error){
         console.log("inside catch of getFirstLevelCategories from categorySlice")
         const errorMessage = error.response?.data?.message
-        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
-        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -143,8 +127,6 @@ export const toggleCategoryStatus = createAsyncThunk('toggleCategoryStatus', asy
     catch(error){
         console.log("inside catch of toggleCategoryStatus from productSlice")
         const errorMessage = error.response?.data?.message
-        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
-        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -159,8 +141,6 @@ export const updateCategory = createAsyncThunk('updateCategory', async({formData
     catch(error){
         console.log("inside catch of updateCategory from categorySlice")
         const errorMessage = error.response?.data?.message
-        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
-        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })

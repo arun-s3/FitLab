@@ -12,6 +12,19 @@ export default function ErrorPage403({message = null}){
 
     const {admin} = useSelector((state)=> state.admin)
 
+    const goToHome = ()=> {
+      user && !user.isAdmin && !admin
+          ?  user.isBlocked
+          ?  navigate('/blocked', {
+                      replace: true, 
+                      state: {NoDirectAccesss: true}
+                  })
+          : navigate('/', {replace: true})
+          : admin && admin.isAdmin 
+          ? navigate('/admin/dashboard/business', {replace: true})
+          : navigate('/', {replace: true})
+    }
+
 
     return(
         <section id='ErrorPage403' 
@@ -70,7 +83,7 @@ export default function ErrorPage403({message = null}){
                             style={{wordSpacing: '0.5px'}}
                             whileHover={{ scale: 1.08 }}
                             whileTap={{ scale: 0.95 }}
-                            onClick={()=> admin ? navigate('/admin/dashboard', {replace: true}) : navigate('/', {replace: true})}
+                            onClick={()=> admin ? navigate('/admin/dashboard/business', {replace: true}) : navigate('/', {replace: true})}
                         > 
                             Go Home <FaArrowRightLong/> 
                         </motion.button>

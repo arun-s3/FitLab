@@ -3,12 +3,17 @@ import {AnimatePresence, motion} from "framer-motion"
 
 import {Trash2, X} from "lucide-react"
 
+import useModalHelpers from '../../../Hooks/ModalHelpers'
+
 
 export default function DeleteAddressModal({open, onClose, onConfirm, loading = false}){
 
   const overlayRef = useRef(null)
   const cancelRef = useRef(null)
   const confirmRef = useRef(null)
+
+  const modalRef = useRef(null)
+  useModalHelpers({open, onClose, modalRef})
 
   useEffect(() => {
     if (!open) return
@@ -112,7 +117,7 @@ export default function DeleteAddressModal({open, onClose, onConfirm, loading = 
                 </button>
               </div>
 
-              <div className="px-5 py-4">
+              <div className="px-5 py-4" ref={modalRef}>
                 <p id="delete-address-description" className="text-sm text-muted-foreground"> Are you sure you want to delete this address?
                   {" This action cannot be undone. "}
                 </p>

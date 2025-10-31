@@ -1,8 +1,9 @@
-import React, {useState} from "react"
+import React, {useState, useRef} from "react"
 import {useDispatch} from 'react-redux'
 
 import {X, Heart, Flag, Plus} from "lucide-react"
 
+import useModalHelpers from '../../Hooks/ModalHelpers'
 import {addProductToList, resetWishlistStates} from '../../Slices/wishlistSlice'
 import {SiteSecondaryFillButton} from '../SiteButtons/SiteButtons'
 
@@ -15,8 +16,10 @@ export default function WishlistOptionsModal({ isOpen, onClose, product, setIsWi
   const [isHovered, setIsHovered] = useState(false)
 
   const dispatch = useDispatch()
-  
 
+  const modalRef = useRef(null)
+  useModalHelpers({open: isOpen, onClose, modalRef})
+  
   if (!isOpen) return null
 
   const handleSubmit = (e)=> {
@@ -34,11 +37,12 @@ export default function WishlistOptionsModal({ isOpen, onClose, product, setIsWi
           <h2 className="text-[18px] text-secondary capitalize font-semibold" style={{wordSpacing: '1px'}}>
             Add to Wishlist
           </h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition duration-150 ease-in-out">
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition duration-150 ease-in-out 
+            ocus:outline-none focus:border-none focus-within:outline-none focus-within:border-none focus-visible:ring-2 focus-visible:ring-gray-50 ">
             <X className="h-6 w-6" />
           </button>
         </div>
-        <div className="p-6 pb-[1rem]">
+        <div className="p-6 pb-[1rem]" ref={modalRef}>
           <div className="flex items-center space-x-4 mb-6">
             <img src={product.thumbnail.url || "/placeholder.svg"} alt={product.title} className="w-16 h-16 object-cover rounded-md" />
             <div>

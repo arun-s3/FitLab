@@ -1,10 +1,11 @@
-import React from 'react'
+import React, {useRef} from 'react'
 import {useDispatch} from 'react-redux'
 import {motion, AnimatePresence} from "framer-motion"
 
 import { X, AlertTriangle } from "lucide-react"
 
 import {deleteList} from '../../../../Slices/wishlistSlice'
+import useModalHelpers from '../../../../Hooks/ModalHelpers'
 
 
 export default function ListDeletionModal({ isOpen, onClose, listDetails, setListDetails }){
@@ -12,6 +13,9 @@ export default function ListDeletionModal({ isOpen, onClose, listDetails, setLis
     if (!isOpen) return null
 
     const dispatch = useDispatch()
+
+    const modalRef = useRef(null)
+    useModalHelpers({open: isOpen, onClose, modalRef})
     
     const handleDeleteConfirm = ()=> {
         dispatch( deleteList({listId: listDetails.listId}) )
@@ -58,6 +62,7 @@ export default function ListDeletionModal({ isOpen, onClose, listDetails, setLis
 
             <motion.div
               className="p-6"
+              ref={modalRef}
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.3 }}

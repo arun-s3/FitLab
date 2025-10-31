@@ -11,8 +11,6 @@ export const getOrCreateWallet = createAsyncThunk('wallet/getOrCreateWallet', as
   }catch(error){
     console.log('Inside catch of getOrCreateWallet')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -27,8 +25,6 @@ export const addFundsToWallet = createAsyncThunk('wallet/addFundsToWallet', asyn
   }catch(error){
     console.log('Inside catch of addFundsToWallet')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -43,8 +39,6 @@ export const addPeerAccount = createAsyncThunk('wallet/peer-account', async ({ac
   }catch(error){
     console.log('Inside catch of addPeerAccount')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -59,8 +53,6 @@ export const sendMoneyToUser = createAsyncThunk('wallet/sendMoneyToUser', async 
   }catch(error){
     console.log('Inside catch of sendMoneyToUser')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -75,8 +67,6 @@ export const requestMoneyFromUser = createAsyncThunk('wallet/requestMoneyFromUse
   }catch(error){
     console.log('Inside catch of requestMoneyFromUser')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -91,8 +81,6 @@ export const confirmMoneyRequest = createAsyncThunk('wallet/confirmMoneyRequest'
   }catch(error){
     console.log('Inside catch of confirmMoneyRequest')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -107,8 +95,6 @@ export const declineMoneyRequest = createAsyncThunk('wallet/declineMoneyRequest'
   }catch(error){
     console.log('Inside catch of declineMoneyRequest')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -123,8 +109,6 @@ export const updateAutoRechargeSettings = createAsyncThunk('wallet/updateAutoRec
   }catch(error){
     console.log('Inside catch of updateAutoRechargeSettings')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })

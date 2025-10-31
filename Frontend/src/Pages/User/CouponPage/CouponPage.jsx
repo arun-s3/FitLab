@@ -3,7 +3,7 @@ import './CouponPage.css'
 import {useLocation, useNavigate} from 'react-router-dom'
 import {useDispatch, useSelector} from 'react-redux'
 
-import {toast} from "react-toastify"
+import {toast as sonnerToast} from 'sonner'
 
 import CouponTools from "./CouponTools"
 import CouponList from "./CouponList"
@@ -82,7 +82,7 @@ export default function CouponPage(){
 
   useEffect(()=> {
     if(couponApplied){
-      toast.success("Coupon applied successfully!")
+      sonnerToast.success("Coupon applied successfully!")
       dispatch(resetCartStates())
       navigate('/shop', {
         state: {
@@ -94,7 +94,7 @@ export default function CouponPage(){
       })
     }
     if(couponRemoved){
-      toast.success("Coupon removed successfully!")
+      sonnerToast.success("Coupon removed successfully!")
       dispatch(resetCartStates())
     }
   },[couponApplied, couponRemoved])

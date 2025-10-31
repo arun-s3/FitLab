@@ -16,7 +16,8 @@ import {AiOutlineSafetyCertificate} from "react-icons/ai";
 import {CgDetailsMore} from "react-icons/cg";
 import {TbWeight} from "react-icons/tb";
 import {IoColorPaletteOutline} from "react-icons/io5";
-import {toast} from 'react-toastify';
+import {toast as sonnerToast} from 'sonner'
+import {toast} from 'react-toastify'
 
 import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
 import FileUpload from '../../../Components/FileUpload/FileUpload';
@@ -142,8 +143,8 @@ export default function AdminAddAndEditProductPage({ editProduct }){
     useEffect(()=>{
         console.log(`Inside useEffect for productCreated, productUpdated success, productUpdated-${productUpdated} productCreated-${productCreated}`)
         if(productCreated || (editProduct && productUpdated)){
-            productCreated && toast.success('Created product succesfully!')
-            productUpdated && toast.success('Updated product succesfully!')
+            productCreated && sonnerToast.success('Created product succesfully!')
+            productUpdated && sonnerToast.success('Updated product succesfully!')
             dispatch(resetStates())
             setTimeout(()=> {navigate('/admin/products', {replace: true})}, 1000)
         }
@@ -260,12 +261,12 @@ export default function AdminAddAndEditProductPage({ editProduct }){
         const checkVariantDataValidity = (variantAttribute)=> {
             if(productData[variantAttribute] && productData[variantAttribute].length !== productData['stock'].length ){
                 console.log(`Enter stock quantities for each ${variantAttribute} variant — exactly one per variant!`)
-                toast.error(`Enter stock quantities for each ${variantAttribute} variant — exactly one per variant!`)
+                sonnerToast.error(`Enter stock quantities for each ${variantAttribute} variant — exactly one per variant!`)
                 return false
             }
             if(productData[variantAttribute] && productData[variantAttribute].length !== productData['price'].length ){
                 console.log(`Enter prices for each ${variantAttribute} variant — exactly one per variant!`)
-                toast.error(`Enter prices for each ${variantAttribute} variant — exactly one per variant!`)
+                sonnerToast.error(`Enter prices for each ${variantAttribute} variant — exactly one per variant!`)
                 return false
             }
             return true
@@ -274,7 +275,7 @@ export default function AdminAddAndEditProductPage({ editProduct }){
         const doesMultipleVariantAttrExists = variantAttributes.filter(attribute=> productData[attribute]).length > 1
         console.log("doesMultipleVariantAttrExists---->", doesMultipleVariantAttrExists)
         if(doesMultipleVariantAttrExists){
-            toast.error("Only one variant attribute (weights, sizes, motor power, or colors) can be selected!")
+            sonnerToast.error("Only one variant attribute (weights, sizes, motor power, or colors) can be selected!")
             return
         }
 
@@ -298,7 +299,7 @@ export default function AdminAddAndEditProductPage({ editProduct }){
             }
             else{
                 console.log("Check errors"+JSON.stringify(productData))
-                toast.error("Please check the fields and submit again!")
+                sonnerToast.error("Please check the fields and submit again!")
             }
         } 
         else{
@@ -328,6 +329,7 @@ export default function AdminAddAndEditProductPage({ editProduct }){
                 return await Promise.all( images.map( async(image)=> {
                     if(image.size > (5*1024*1024)){
                         const newBlob = await handleImageCompression(image.blob)
+                        sonnerToast.info("Some images have been compressed as its size exceeded 5 MB!")
                         return newBlob
                     }else{
                         return image.blob
@@ -347,7 +349,7 @@ export default function AdminAddAndEditProductPage({ editProduct }){
                 formData.append('thumbnailImageIndex', thumbnailIndex)
             }else{
                 console.log("thumbnail not found in the images")
-                toast.error('Please select a Thumbnail!')
+                sonnerToast.error('Please select a Thumbnail!')
             }
 
             console.log("PRODUCTDATA BEFORE DISPATCHING-->", JSON.stringify(productData))

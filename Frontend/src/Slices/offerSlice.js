@@ -11,8 +11,6 @@ export const createOffer = createAsyncThunk('offer/add', async ({offerDetails}, 
   }catch(error){
     console.log('Inside catch of createOffer')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -27,8 +25,6 @@ export const getAllOffers = createAsyncThunk('offer/list', async ({queryOptions}
   }catch(error){
     console.log('Inside catch of averageRating')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -43,8 +39,6 @@ export const updateOffer = createAsyncThunk('offer/update', async ({offerDetails
   }catch(error){
     console.log('Inside catch of updateOffer')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -59,8 +53,6 @@ export const deleteOffer = createAsyncThunk('offer/delete', async ({offerId}, th
   }catch(error){
     console.log('Inside catch of deleteOffer')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -75,8 +67,6 @@ export const searchOffers = createAsyncThunk('offer/search', async ({query}, thu
   }catch(error){
     console.log('Inside catch of searchOffers')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -90,8 +80,6 @@ export const getBestOffer = createAsyncThunk('offer/getBestOffer', async ({produ
   }catch(error){
     console.log('Inside catch of getBestOffer')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -105,8 +93,6 @@ export const toggleOfferStatus = createAsyncThunk('offer/toggleOfferStatus', asy
   }catch(error){
     console.log('Inside catch of toggleOfferStatus')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })

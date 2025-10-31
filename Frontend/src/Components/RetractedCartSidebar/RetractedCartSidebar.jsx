@@ -1,6 +1,8 @@
 import React, {useState, useEffect} from 'react'
 import {useSelector} from 'react-redux'
 
+import {toast as sonnerToast} from 'sonner'
+
 import CartSidebar from '../CartSidebar/CartSidebar'
 import {addToCart, removeFromCart, resetCartStates} from '../../Slices/cartSlice'
 
@@ -20,7 +22,7 @@ export default function RetractedCartSidebar(){
         }
         if(error && error.toLowerCase().includes('product')){
           console.log("Error from ProductDetailPage-->", error)
-          toast.error(error)
+          sonnerToast.error(error)
           dispatch(resetCartStates())
         }
         if(productAdded){

@@ -9,9 +9,7 @@ export const addToCart = createAsyncThunk('cart/addToCart', async ({productId, q
     return response.data
   }catch(error){
     console.log('Inside catch of addToCart')
-    const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
+    const errorMessage = error.response?.data?.message || error?.message ||  'Something went wrong. Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -25,9 +23,7 @@ export const reduceFromCart = createAsyncThunk('cart/reduceFromCart', async ({pr
       absoluteTotal: response.data.absoluteTotal, absoluteTotalWithTaxes: response.data.absoluteTotalWithTaxes, gst: response.data.gst}
   }catch(error){
     console.log('Inside catch of reduceFromCart')
-    const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
+    const errorMessage = error.response?.data?.message || error?.message ||  'Something went wrong. Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -41,9 +37,7 @@ export const removeFromCart = createAsyncThunk('cart/removeFromCart', async ({pr
        absoluteTotalWithTaxes: response.data.absoluteTotalWithTaxes, gst: response.data.gst}
   }catch(error){
     console.log('Inside catch of removeFromCart')
-    const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
+    const errorMessage = error.response?.data?.message || error?.message ||  'Something went wrong. Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -56,9 +50,7 @@ export const getTheCart = createAsyncThunk('cart/getTheCart', async (thunkAPI) =
     return response.data
   }catch(error){
     console.log('Inside catch of getTheCart')
-    const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
+    const errorMessage = error.response?.data?.message || error?.message ||  'Something went wrong. Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -71,9 +63,7 @@ export const applyCoupon = createAsyncThunk('cart/applyCoupon', async ({couponCo
     return response.data
   }catch(error){
     console.log('Inside catch of applyCoupon')
-    const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
+    const errorMessage = error.response?.data?.message || error?.message ||  'Something went wrong. Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -86,9 +76,7 @@ export const removeCoupon = createAsyncThunk('cart/removeCoupon', async (thunkAP
     return response.data
   }catch(error){
     console.log('Inside catch of removeCoupon')
-    const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
+    const errorMessage = error.response?.data?.message || error?.message ||  'Something went wrong. Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -138,7 +126,7 @@ const cartSlice = createSlice({
         console.log('addToCart rejected:', action.payload)
         state.loading = false
         state.error = action.payload
-        state.message = action.payload.message
+        state.message = action.payload?.message || action.payload
         state.success = false
       })
       .addCase(reduceFromCart.fulfilled, (state, action) => {

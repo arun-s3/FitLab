@@ -6,6 +6,7 @@ import {useSelector, useDispatch} from 'react-redux'
 import {User, Mail, Phone, MapPin, MapPinHouse, Lock, SquareChevronRight, ArrowRight, Camera, Edit2, Check, X} from 'lucide-react'
 import {RiArrowDropDownLine} from "react-icons/ri"
 import {toast} from 'react-toastify'
+import {toast as sonnerToast} from 'sonner'
 
 import {UserPageLayoutContext} from '../UserPageLayout/UserPageLayout'
 import ChangePasswordBox from './ChangePasswordBox'
@@ -117,7 +118,7 @@ export default function UserAccountPage(){
 
   useEffect(()=> {
     if(userUpdated && addressUpdated){
-      toast.success('The details have been succesfully Updated!')
+      sonnerToast.success('The details have been succesfully Updated!')
       dispatch(resetAddressStates())
       dispatch(resetUserStates())
     }
@@ -196,7 +197,7 @@ export default function UserAccountPage(){
       }
        if (missingRequiredFields.length > 0) {
           console.log("Undefined values found in required fields!")
-          toast.error("Please check the fields and submit again!")
+          sonnerToast.error("Please check the fields and submit again!")
           return 'error';
       }
     }

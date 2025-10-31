@@ -4,6 +4,7 @@ import {Link, useNavigate} from 'react-router-dom'
 import axios from 'axios'
 
 import {Eye, EyeOff} from 'lucide-react'
+import {toast as sonnerToast} from 'sonner'
 import {toast} from 'react-toastify'
 
 import Header from '../../../Components/Header/Header'
@@ -101,9 +102,11 @@ export default function ForgotAndResetPasswordPage(){
                   // setResetPhase(true)
                   setLoading(false)
                 }
-              }catch(error){
-              console.log("Error during sending Code...", error.message)
-              setLoading(false)
+              }
+              catch(error){
+                sonnerToast.error('Error sending the code to your mail. Please try again later!')
+                console.log("Error during sending Code...", error.message)
+                setLoading(false)
               } 
         }    
     }
@@ -162,7 +165,7 @@ export default function ForgotAndResetPasswordPage(){
                     setError('')
                     setVerificationError(false)
                     setCodeBoxDisabled(false)
-                    toast.success("You are successfully verified!")
+                    sonnerToast.success("You are successfully verified!")
                     console.log("You are successfully verified!")
                     setLoading(false)
                     setPhase({...phase, resetPhase: true})    
@@ -174,7 +177,7 @@ export default function ForgotAndResetPasswordPage(){
                 const errorMessage = error.response.data.message.toLowerCase()
                 if(errorMessage.includes('invalid')){
                     console.log("INAVLID Code from frontend")
-                    toast.error("Invalid Code!")
+                    sonnerToast.error("Invalid Code!")
                     setError("Inavlid Code. Please click 'resend again' to try again!")
                     setCode(null)
                     setVerificationError(true)
@@ -192,6 +195,7 @@ export default function ForgotAndResetPasswordPage(){
     }
 
     const cancelVerification = ()=> {
+        sonnerToast.info("You have cancelled the verification!")
         setCode(null)
         setLoading(false)
         stopTimer()
@@ -244,7 +248,7 @@ export default function ForgotAndResetPasswordPage(){
           if(response.data.message.includes('success')){
             setError('')
             setVerificationError(false)
-            toast.success("Your password is successfully updated!")
+            sonnerToast.success("Your password is successfully updated!")
             console.log("Your password is successfully updated!")
             setLoading(false)
             navigate('/signin', {replace: true})
@@ -252,6 +256,7 @@ export default function ForgotAndResetPasswordPage(){
         }
         catch(error){
           setLoading(false)
+          sonnerToast.error("Internal Server Error!")
           console.log("error from  frontend--->", error.message)
         }
       }

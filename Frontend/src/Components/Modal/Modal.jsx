@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react"
+import React, {useEffect, useState, useRef} from "react"
 import './Modal.css'
 
+import useModalHelpers from '../../Hooks/ModalHelpers'
 import {SitePrimaryWhiteTextButton} from "../SiteButtons/SiteButtons"
 
 export default function Modal({openModal, setOpenModal, title, content, instruction, okButtonText, closeButtonText, contentCapitalize,
@@ -8,6 +9,14 @@ export default function Modal({openModal, setOpenModal, title, content, instruct
 
   const [modelIsOpen, setModelIsOpen] = useState(false)
   const [message, setMessage] = useState('')
+
+  const closeModal = () => {
+    setModelIsOpen(false) 
+    setOpenModal(false)
+  }
+
+  const modalRef = useRef(null)
+  useModalHelpers({open: openModal, onClose: closeModal, modalRef})
 
   useEffect(()=>{
     if(openModal){
@@ -19,11 +28,6 @@ export default function Modal({openModal, setOpenModal, title, content, instruct
     console.log("Message written---->", message)
   },[message])
 //   const openModal = () => { setModelIsOpen(true) }
-
-  const closeModal = () => {
-    setModelIsOpen(false) 
-    setOpenModal(false)
-  }
 
   const inputHandler = (e)=> {
     setMessage(e.target.value)
@@ -41,7 +45,7 @@ export default function Modal({openModal, setOpenModal, title, content, instruct
   }
 
   return (
-    <main id="message-modal">
+    <main id="message-modal" ref={modalRef}>
 
       {modelIsOpen && (
         <div className="modal-main">

@@ -9,7 +9,7 @@ import {ShoppingBag, ShoppingCart, Truck, PackagePlus, PackageX , CalendarArrowD
 import {RiArrowDropDownLine} from "react-icons/ri"
 import {BiCartAdd} from "react-icons/bi"
 import {MdSort} from "react-icons/md"
-import {toast} from 'react-toastify'
+import {toast as sonnerToast} from 'sonner'
 import {format} from "date-fns"
 
 import Header from '../../../Components/Header/Header'
@@ -141,10 +141,10 @@ export default function OrderHistoryPage(){
         setTimeout(()=> setShowLoader(false), 1000)
       }else setShowLoader(true)
       if(error){
-        toast.error(error)
+        sonnerToast.error(error)
       }
       if(orderError){
-        toast.error(orderError)
+        sonnerToast.error(orderError)
       }
     },[loading, error, orderError, productAdded])
     
@@ -242,6 +242,7 @@ export default function OrderHistoryPage(){
         console.log("Opening the CancelForm..")
         setOpenCancelForm({type:'product', status:true, options: {productId, orderId}})
         window.scrollTo( {top: productCancelFormRef.current.getBoundingClientRect().top, scrollBehavior: 'smooth'} )
+        sonnerToast.warning("You are about to cancel the product!")
       }else{
 
       }

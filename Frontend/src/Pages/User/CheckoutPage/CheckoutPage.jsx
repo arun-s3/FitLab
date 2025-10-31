@@ -5,6 +5,7 @@ import {useDispatch, useSelector} from 'react-redux'
 import {motion} from 'framer-motion'
 
 import {toast} from 'react-toastify'
+import {toast as sonnerToast} from 'sonner'
 import axios from 'axios'
 
 import Header from '../../../Components/Header/Header'
@@ -110,7 +111,7 @@ export default function CheckoutPage(){
     useEffect(()=> {
       if(orderCreated){
         setIsLoading(false)
-        toast.success(orderMessage)
+        sonnerToast.success(orderMessage)
         navigate('/order-confirm', 
           { replace: true,
             state: {
@@ -125,12 +126,12 @@ export default function CheckoutPage(){
       if(orderError){
         setIsLoading(false)
         console.log("orderError--->", orderError)
-        toast.error(orderError)
+        toast.error(orderError, {autoClose: 3500})
         dispatch(resetOrderStates())
       }
       if(orderMessage){
         console.log("orderMessage--->", orderMessage)
-        toast.error(orderMessage)
+        sonnerToast.error(orderMessage)
         dispatch(resetOrderStates())
       }
     },[orderCreated, orderMessage, orderError, orderReviewError])
@@ -262,12 +263,12 @@ export default function CheckoutPage(){
     try{
       console.log("Inside placeOrder")
       if(paymentMethod === ''){
-        toast.error('Please select a payment Method!')
+        sonnerToast.error('Please select a payment Method!')
         setIsLoading(false)
         return
       }
       if(Object.keys(shippingAddress).length === 0){
-        toast.error('Please select a delivery address!')
+        sonnerToast.error('Please select a delivery address!')
         setIsLoading(false)
         return
       }
@@ -294,13 +295,13 @@ export default function CheckoutPage(){
             )
           console.log('response.data--->', response.data)
           if(response.data.transactionId){ 
-            toast.success("Payment via Wallet successfull!")
+            sonnerToast.success("Payment via Wallet successfull!", {autoClose: 4000})
             const paymentDetails = {paymentMethod: 'wallet', paymentStatus: 'completed', transactionId: response.data.transactionId}
             dispatch( createOrder({orderDetails: {...orderDetails, paymentDetails}}) ) 
           }
         }
         catch(error){
-          toast.error(error.message)
+          sonnerToast.error(error.message, {duration: 4000})
           setIsPaymentFailedModalOpen({status: true, msg: 'Network Error'})
           setIsLoading(false)
         }
@@ -313,9 +314,9 @@ export default function CheckoutPage(){
       setIsLoading(false)
       console.log('Error in placeOrder:', error.response.data?.message || error.message)
       if (error.response && error.response.status !== 500){
-        toast.error(error.response.data?.message || error.message)
+        sonnerToast.error(error.response.data?.message || error.message, {duration: 4000})
       }else{
-        toast.error('Something went wrong.')
+        toast.error('Something went wrong.', {autoClose: 4000})
       }
     }
   }
@@ -355,7 +356,7 @@ export default function CheckoutPage(){
                 console.log("verifiedData--->", verifiedData)
                 if (verifiedData.data.message.toLowerCase().includes('success')) {
                     setIsLoading(true)
-                    toast.success(verifiedData.data.message)
+                    sonnerToast.success(verifiedData.data.message, {duration: 4000})
                     dispatch( createOrder({
                       orderDetails: {
                         ...orderDetails, 
@@ -363,7 +364,7 @@ export default function CheckoutPage(){
                       }
                     }) ) 
                 }else{
-                    toast.error('Payment Failed! Try again later!')
+                    toast.error('Payment Failed! Try again later!', {autoClose: 4000})
                     setIsPaymentFailedModalOpen({status: true, msg: "Payment Failed! Try again later!"})
                 }
             } catch (error) {
@@ -381,7 +382,7 @@ export default function CheckoutPage(){
 
 const handleStripeOrPaypalPayment = (paymentGateway, paymentId)=> {
   setIsLoading(true)
-  toast.success("Payment Successfull!")
+  sonnerToast.success("Payment Successfull!", {duration: 4000})
   const paymentMethod = paymentGateway
   dispatch( createOrder({
     orderDetails: {
@@ -392,12 +393,14 @@ const handleStripeOrPaypalPayment = (paymentGateway, paymentId)=> {
 }
 
 const handleRetryCheckout = ()=> {
+  sonnerToast.info("Retrying to place the order..")
   console.log("Inside handleRetryCheckout()...")
   sourceItAgainAndOrder()
 }
 
 const handleRetryPayment = ()=> {
   console.log('Retrying Payment....')
+  sonnerToast.info("Retrying Payment..")
   if(paymentMethod === 'cards'){
     setRetryStripePaymentStatus(true)
   }

@@ -4,6 +4,7 @@ import {useDispatch, useSelector} from 'react-redux'
 import {motion, AnimatePresence} from 'framer-motion'
 
 import {toast} from 'react-toastify'
+import {toast as sonnerToast} from 'sonner'
 import axios from 'axios'
 
 import Header from '../../../Components/Header/Header'
@@ -66,7 +67,7 @@ export default function ProductDetailPage(){
       }
     if(error && error.toLowerCase().includes('product')){
       console.log("Error from ProductDetailPage-->", error)
-      toast.error(error)
+      sonnerToast.error(error)
       dispatch(resetCartStates())
     }
     if(productAdded){

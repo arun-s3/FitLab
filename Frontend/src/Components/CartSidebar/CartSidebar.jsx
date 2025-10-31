@@ -5,6 +5,7 @@ import {useSelector, useDispatch} from 'react-redux'
 
 import {X, Minus, Plus, ChevronRight, ShoppingCart, SquareArrowOutUpLeft, Trash, Trash2, Check, Circle, BadgePlus} from 'lucide-react'
 import {toast} from 'react-toastify'
+import {toast as sonnerToast} from 'sonner'
 
 import {SiteSecondaryFillImpButton} from '../SiteButtons/SiteButtons'
 import ProductRemovalModal from '../ProductRemovalModal/ProductRemovalModal'
@@ -33,6 +34,10 @@ export default function CartSidebar({ isOpen, onClose, retractedView }) {
       setPackedupCart(cart)
       // setIsCartOpen(true)
     }
+    if(error){
+        sonnerToast.error(error, {description: "Please try again!"})
+        dispatch(resetCartStates())
+    }
     if(error && error.toLowerCase().includes('product')){
       console.log("Error from ProductDetailPage-->", error)
       toast.error(error)
@@ -46,6 +51,7 @@ export default function CartSidebar({ isOpen, onClose, retractedView }) {
     }
     if(productRemoved){
       setPackedupCart(cart)
+      sonnerToast.info("Product removed from cart")
       dispatch(resetCartStates())
     }
   },[error, productAdded, productRemoved, cart])
@@ -59,9 +65,6 @@ export default function CartSidebar({ isOpen, onClose, retractedView }) {
     if(packedupCart?.products && packedupCart.products.length <= 0){
       console.log("Closing sidebar...")
       onClose()
-    }
-    if(error){
-      toast.error(error)
     }
   },[packedupCart])
 

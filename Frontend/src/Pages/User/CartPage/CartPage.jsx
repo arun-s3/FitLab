@@ -5,6 +5,7 @@ import {useDispatch, useSelector} from 'react-redux'
 import {motion} from 'framer-motion'
 
 import {toast} from 'react-toastify'
+import {toast as sonnerToast} from 'sonner'
 
 import Header from '../../../Components/Header/Header'
 import CartTable from './CartTable'
@@ -76,7 +77,7 @@ export default function ShoppingCartPage(){
   useEffect(()=> {
     if(location){
       if(location.state?.OtpVerified){
-        toast.success("Your OTP Verification is successful!")
+        toast.success("Your OTP Verification is successful!", {autoClose: 4500})
         makeCheckoutRef.current.clickCheckout()
       }
     }
@@ -84,7 +85,7 @@ export default function ShoppingCartPage(){
 
   useEffect(()=> {
     if(bestCoupon && couponApplied && couponMessage && couponMessage?.includes('Best')){
-      toast.success(couponMessage + ' and applied to the cart!')
+      toast.success(couponMessage + ' and applied to the cart!', {autoClose: 4500})
       dispatch(resetCartStates())
     }
   },[couponApplied, bestCoupon])
@@ -92,7 +93,7 @@ export default function ShoppingCartPage(){
   useEffect(()=> {
     if(error){
       console.log("Error-->", error)
-      toast.error(error)
+      sonnerToast.error(error)
       dispatch(resetCartStates())
     }
   },[error])
@@ -128,6 +129,7 @@ export default function ShoppingCartPage(){
   }
 
   const removeTheCoupon = ()=> {
+    sonnerToast.warning("Removing coupon...")
     dispatch(removeCoupon())
   }
 

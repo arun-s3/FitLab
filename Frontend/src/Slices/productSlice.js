@@ -11,8 +11,6 @@ export const createProduct = createAsyncThunk('createProduct', async({formData},
     catch(error){
         console.log("inside catch of createProduct from productSlice")
         const errorMessage = error.response?.data?.message
-        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
-        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -28,8 +26,6 @@ export const updateProduct = createAsyncThunk('updateProduct', async({formData, 
     catch(error){
         console.log("inside catch of createProduct from productSlice")
         const errorMessage = error.response?.data?.message
-        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
-        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -44,8 +40,6 @@ export const toggleProductStatus = createAsyncThunk('toggleProductStatus', async
     catch(error){
         console.log("inside catch of toggleProductStatus from productSlice")
         const errorMessage = error.response?.data?.message
-        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
-        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -61,8 +55,6 @@ export const getAllProducts = createAsyncThunk('getAllProducts', async({queryOpt
     catch(error){
         console.log("inside catch of getAllProducts from productSlice")
         const errorMessage = error.response?.data?.message
-        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
-        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -77,8 +69,6 @@ export const searchProduct = createAsyncThunk('searchProduct', async({find}, thu
     catch(error){
         console.log("inside catch of searchProduct from productSlice")
         const errorMessage = error.response?.data?.message
-        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
-        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })

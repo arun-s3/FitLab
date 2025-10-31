@@ -1,13 +1,18 @@
-import React, {useState} from "react"
+import React, {useState, useRef} from "react"
 import {motion, AnimatePresence} from "framer-motion"
 
 import {XCircle, X, RefreshCw, HelpCircle, ArrowLeft, AlertTriangle} from "lucide-react"
+
+import useModalHelpers from '../../../../Hooks/ModalHelpers'
 
 
 
 export default function PaymentFailedModal({ isOpen, message, onClose, onRetry, paymentMethod, onContactSupport }){
 
   const [isRetrying, setIsRetrying] = useState(false)
+
+  const modalRef = useRef(null)
+  useModalHelpers({open: isOpen, onClose, modalRef})
 
   const handleRetry = async () => {
     setIsRetrying(true)
@@ -131,7 +136,7 @@ export default function PaymentFailedModal({ isOpen, message, onClose, onRetry, 
               <X size={20} />
             </motion.button>
 
-            <div className="px-6 pt-6 pb-4 text-center">
+            <div className="px-6 pt-6 pb-4 text-center" ref={modalRef}>
               <motion.div
                 variants={iconVariants}
                 initial="hidden"

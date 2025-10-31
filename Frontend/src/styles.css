@@ -9632,6 +9632,11 @@ select{
   --tw-ring-color: rgba(210, 199, 215, 0.52);
 }
 
+.focus-visible\:ring-gray-50:focus-visible{
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(249 250 251 / var(--tw-ring-opacity));
+}
+
 .focus-visible\:ring-primaryDark:focus-visible{
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(241 196 15 / var(--tw-ring-opacity));

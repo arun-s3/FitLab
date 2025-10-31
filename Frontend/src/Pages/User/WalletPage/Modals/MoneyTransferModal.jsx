@@ -1,15 +1,15 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useRef} from 'react'
 import {useDispatch, useSelector} from 'react-redux'
 import {motion} from "framer-motion"
 
-import { CreditCard, BanknoteArrowUp, HeartPlus, Plus, User, ArrowRight, AlertCircle, X, Check, IndianRupee, BanknoteArrowDown, } from "lucide-react" 
-import {toast} from 'react-toastify'
+import {CreditCard, BanknoteArrowUp, HeartPlus, Plus, User, ArrowRight, AlertCircle, X, Check, IndianRupee, BanknoteArrowDown, } from "lucide-react" 
+import {toast as sonnerToast} from 'sonner'
 
 import {addPeerAccount, sendMoneyToUser, requestMoneyFromUser, resetWalletStates} from '../../../../Slices/walletSlice'
 import {decryptData} from '../../../../Utils/decryption'
+import useModalHelpers from '../../../../Hooks/ModalHelpers'
 
 
-    
 export default function MoneyTransferModal({isTransferModalOpen, setIsTransferModalOpen, walletBalance, selectedPeerAccount, setSelectedPeerAccount,
    isRequester, requestMoney, complexModal}){
 
@@ -29,6 +29,9 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
     const dispatch = useDispatch()
     const {safeWallet, walletLoading, walletError, peerAccountAdded, moneySent, moneyRequested} = useSelector(state=> state.wallet)
 
+    const modalRef = useRef(null)
+    useModalHelpers({open: isTransferModalOpen, onClose: ()=> setIsTransferModalOpen(false), modalRef})
+
     useEffect(()=> {
       if(complexModal){
         setSelectedPeerAccount(null)
@@ -40,16 +43,16 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
 
     useEffect(()=> {
         if(moneySent){
-            toast.success("Money sent successfull!")
+            sonnerToast.success("Money sent successfull!")
             setTransferSuccess(true)
             dispatch(resetWalletStates())
         }
         if(moneyRequested){
-            toast.success("Money requested successfull!")
+            sonnerToast.success("Money requested successfull!")
             dispatch(resetWalletStates())
         }
         if(peerAccountAdded){
-            toast.success(`${!isRequester ? 'Beneficiary' : 'Creditor'} account added successfully!`)
+            sonnerToast.success(`${!isRequester ? 'Beneficiary' : 'Creditor'} account added successfully!`)
 
             setSelectedPeerAccount(newPeerAccount)
             setNewPeerAccount({name: '', accountNumber: ''})
@@ -59,7 +62,7 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
             dispatch(resetWalletStates())
         }
         if(walletError){
-            toast.error(walletError)
+            sonnerToast.error(walletError)
             if(walletError.includes("doesn't match any existing FitLab user")){
               setNewPeerAccountErrors(error=> ({...error, accountNumber: walletError.toString()}))
               setIsAddingPeerAccount(true)
@@ -213,6 +216,7 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
           
           <motion.div
             className="max-h-[80vh] overflow-y-auto custom-scrollbar"
+            ref={modalRef}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.1 }}

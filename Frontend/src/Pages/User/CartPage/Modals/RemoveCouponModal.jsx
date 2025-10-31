@@ -1,13 +1,18 @@
-import React, {useState} from 'react'
+import React, {useState, useRef} from 'react'
 import {motion, AnimatePresence} from 'framer-motion'
 
 import { X, AlertTriangle } from "lucide-react"
+
+import useModalHelpers from '../../../../Hooks/ModalHelpers'
 
 
 export default function RemoveCouponModal({isOpen, onClose, couponCode, onConfirm}){
 
 
   if (!isOpen) return null
+
+  const modalRef = useRef(null)
+  useModalHelpers({open: isOpen, onClose, modalRef})
 
   const backdropVariants = {
     hidden: { opacity: 0 },
@@ -69,7 +74,7 @@ export default function RemoveCouponModal({isOpen, onClose, couponCode, onConfir
                     <X className="h-6 w-6" />
                   </button>
                 </div>
-                <div className="p-6">
+                <div className="p-6" ref={modalRef}>
 
                   <div className="flex items-center space-x-4 mb-4">
                     <div className="bg-yellow-100 rounded-full p-3">

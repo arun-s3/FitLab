@@ -1,12 +1,16 @@
-import React from 'react'
+import React, {useRef} from 'react'
 import { motion, AnimatePresence } from "framer-motion"
 
 import { X, PhoneOff, Clock, Headphones } from "lucide-react"
+
+import useModalHelpers from '../../../../Hooks/ModalHelpers'
 
 
 
 export default function CallDeclinedModal({ isOpen, onClose }) {
 
+  const modalRef = useRef(null)
+  useModalHelpers({open: isOpen, onClose, modalRef})
     
   return (
 
@@ -42,7 +46,7 @@ export default function CallDeclinedModal({ isOpen, onClose }) {
                   <X size={24} />
                 </button>
 
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-3" ref={modalRef}>
                   <motion.div
                     initial={{ rotate: 0 }}
                     animate={{ rotate: [0, -10, 10, -10, 0] }}

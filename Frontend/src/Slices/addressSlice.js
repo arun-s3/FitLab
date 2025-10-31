@@ -11,8 +11,6 @@ export const createNewAddress = createAsyncThunk('createNewAddress', async({id, 
     catch(error){
         console.log("inside catch of createNewAddress from addressSlice")
         const errorMessage = error.response?.data?.message
-        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
-        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -27,8 +25,6 @@ export const editAddress = createAsyncThunk('editAddress', async({id, addressId,
     catch(error){
         console.log("inside catch of editAddress from addressSlice")
         const errorMessage = error.response?.data?.message
-        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
-        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -44,8 +40,6 @@ export const deleteAddress = createAsyncThunk('deleteAddress', async({addressId}
     catch(error){
         console.log("inside catch of deleteAddress from addressSlice")
         const errorMessage = error.response?.data?.message
-        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
-        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -60,8 +54,6 @@ export const getAllAddress = createAsyncThunk('getAllAddress', async(thunkAPI)=>
     catch(error){
         console.log("inside catch of getAllAddress from addressSlice")
         const errorMessage = error.response?.data?.message
-        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
-        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -76,8 +68,6 @@ export const getDefaultAddress = createAsyncThunk('getDefaultAddress', async({id
     catch(error){
         console.log("inside catch of getDefaultAddress from addressSlice")
         const errorMessage = error.response?.data?.message
-        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
-        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -93,8 +83,6 @@ export const setAsDefaultAddress = createAsyncThunk('setAsDefaultAddress', async
     catch(error){
         console.log("inside catch of setAsDefaultAddress from addressSlice")
         const errorMessage = error.response?.data?.message
-        console.log("error object inside createAsyncThunk error.response-->"+JSON.stringify(error.response))
-        console.log("error object inside createAsyncThunk error.response.data.message-->"+JSON.stringify(error.response.data.message))
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })

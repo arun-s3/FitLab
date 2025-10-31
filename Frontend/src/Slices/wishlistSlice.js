@@ -11,8 +11,6 @@ export const createList = createAsyncThunk('wishlist/add', async ({wishlistDetai
   }catch(error){
     console.log('Inside catch of createList')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -29,8 +27,6 @@ export const addProductToList = createAsyncThunk('addProductToList', async ({lis
   }catch(error){
     console.log('Inside catch of addProductToList')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -46,8 +42,6 @@ export const removeProductFromList = createAsyncThunk('removeProductFromList', a
   }catch(error){
     console.log('Inside catch of removeProductFromList')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -61,8 +55,6 @@ export const getUserWishlist = createAsyncThunk('getUserWishlist', async (thunkA
   }catch(error){
     console.log('Inside catch of getUserWishlist')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -76,8 +68,6 @@ export const getAllWishlistProducts = createAsyncThunk('getAllWishlistProducts',
   }catch(error){
     console.log('Inside catch of getAllWishlistProducts')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -94,8 +84,6 @@ export const updateList = createAsyncThunk('updateList', async ({updateListDetai
   }catch(error){
     console.log('Inside catch of updateList')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -111,8 +99,6 @@ export const deleteList = createAsyncThunk('deleteList', async ({listId}, thunkA
   }catch(error){
     console.log('Inside catch of deleteList')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -128,8 +114,6 @@ export const searchList = createAsyncThunk('searchList', async ({find}, thunkAPI
   }catch(error){
     console.log('Inside catch of searchList')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })

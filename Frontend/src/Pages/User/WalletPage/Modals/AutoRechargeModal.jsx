@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react"
+import React, {useState, useEffect, useRef} from "react"
 import {useDispatch, useSelector} from 'react-redux'
 import {motion, AnimatePresence} from 'framer-motion'
 
@@ -6,6 +6,7 @@ import { CloudLightningIcon, X, IndianRupee, CreditCard, AlertCircle, CheckCircl
     ChevronDown, ChevronUp, Info } from 'lucide-react'
 
 import {updateAutoRechargeSettings, resetWalletStates} from '../../../../Slices/walletSlice'
+import useModalHelpers from '../../../../Hooks/ModalHelpers'
 
 
 export default function AutoRechargeModal({ isOpen, onClose, savedPaymentMethods = [], onSave, currentSettings = null }) {
@@ -19,6 +20,9 @@ export default function AutoRechargeModal({ isOpen, onClose, savedPaymentMethods
   const [saveSuccess, setSaveSuccess] = useState(false)
 
   const dispatch = useDispatch()
+
+  const modalRef = useRef(null)
+  useModalHelpers({open: isOpen, onClose, modalRef})
 
   // Load current settings if available
   useEffect(() => {
@@ -156,6 +160,7 @@ export default function AutoRechargeModal({ isOpen, onClose, savedPaymentMethods
                 </motion.div>
 
                 <motion.div
+                  ref={modalRef}
                   initial="hidden"
                   animate="visible"
                   variants={{

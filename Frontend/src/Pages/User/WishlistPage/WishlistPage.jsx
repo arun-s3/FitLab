@@ -56,7 +56,7 @@ export default function WishlistPage(){
     const [isCartOpen, setIsCartOpen] = useState(false)
 
     const {cart, productAdded, productRemoved, error, message} = useSelector(state=> state.cart) 
-    const {wishlist} = useSelector(state=> state.wishlist) 
+    const {wishlist, wishlistProducts} = useSelector(state=> state.wishlist) 
     const {user} = useSelector((state)=> state.user)
 
     const dispatch = useDispatch()
@@ -78,6 +78,7 @@ export default function WishlistPage(){
 
     useEffect(()=> {
         console.log("wishlist--------->", wishlist)
+        // dispatch( getAllWishlistProducts({queryOptions}))
     }, [wishlist])
 
     useEffect(()=>{
@@ -214,18 +215,21 @@ export default function WishlistPage(){
                         wishlistDisplay={true}
                     />
                                                          
-                    <div className='mt-[2rem]'>
+                    <div className='mt-[2rem]'> 
                         
-                        <ProductsDisplay 
-                            gridView={showByGrid} 
-                            customGridViewStyles={gridViewStyles} 
-                            pageReader={{currentPage, setCurrentPage}} 
-                            limiter={{limit, setLimit}}
-                            queryOptions={queryOptions} 
-                            wishlistDisplay={true} 
-                            currentList={currentList}
-                            checkAuthOrOpenModal={checkAuthOrOpenModal}
-                        />
+                        {
+                            wishlistProducts && wishlistProducts.length > 0 &&
+                                <ProductsDisplay 
+                                    gridView={showByGrid} 
+                                    customGridViewStyles={gridViewStyles} 
+                                    pageReader={{currentPage, setCurrentPage}} 
+                                    limiter={{limit, setLimit}}
+                                    queryOptions={queryOptions} 
+                                    wishlistDisplay={true} 
+                                    currentList={currentList}
+                                    checkAuthOrOpenModal={checkAuthOrOpenModal}
+                                />
+                        }
 
                     </div>
                     

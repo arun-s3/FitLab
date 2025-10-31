@@ -1,8 +1,10 @@
 import React, {useEffect, useRef, useCallback} from "react"
 import {createPortal} from "react-dom"
 
-import {AnimatePresence, motion } from "framer-motion"
+import {AnimatePresence, motion} from "framer-motion"
 import {X, Tag } from "lucide-react"
+
+import useModalHelpers from '../../../Hooks/ModalHelpers'
 
 
 export default function CouponApplicableModal({open, onClose, couponLabel = "Selected Coupon", products = [], categories=[]}){
@@ -10,6 +12,9 @@ export default function CouponApplicableModal({open, onClose, couponLabel = "Sel
   const panelRef = useRef(null)
 
   useLockBodyScroll(open)
+
+  const modalRef = useRef(null)
+  useModalHelpers({open, onClose, modalRef})
 
   useEffect(()=> {
     console.log("CouponApplicableModal opens...")
@@ -139,7 +144,10 @@ export default function CouponApplicableModal({open, onClose, couponLabel = "Sel
               </button>
             </div>
 
-            <div className={`px-5 py-4 ${products.length > 3 ? 'overflow-y-scroll' : categories.length > 2 ? 'overflow-scroll' : null}`}>
+            <div 
+                className={`px-5 py-4 ${products.length > 3 ? 'overflow-y-scroll' : categories.length > 2 ? 'overflow-scroll' : null}`}
+                ref={modalRef}
+            >
                 {
                   products.length > 0 &&
                     <motion.ul

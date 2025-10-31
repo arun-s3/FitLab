@@ -8,7 +8,7 @@ import {getAllCategories, getCategoriesOfType, getSingleCategory, toggleCategory
 import {SearchInput} from '../../../Components/FromComponents/FormComponents'
 import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
 
-import {toast} from 'react-toastify'
+import {toast as sonnerToast} from 'sonner'
 import {IoArrowBackSharp} from "react-icons/io5";
 import {FaSortUp,FaSortDown} from "react-icons/fa6";
 import {MdBlock, MdDeleteOutline} from 'react-icons/md';
@@ -67,7 +67,7 @@ export default function AdminCategoryListPage(){
   useEffect(()=> {
     if(message){
       console.log("message arrived-->", message)
-      toast.success(message)
+      sonnerToast.success(message)
     }
     dispatch(resetStates())
   },[message])

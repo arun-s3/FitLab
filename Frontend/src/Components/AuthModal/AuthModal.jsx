@@ -1,8 +1,10 @@
-import React, {useEffect} from 'react'
+import React, {useEffect, useRef} from 'react'
 import {useNavigate, useLocation} from 'react-router-dom'
 import {motion, AnimatePresence} from "framer-motion"
 
 import {X, Lock, ArrowRight, UserPlus} from "lucide-react"
+
+import useModalHelpers from '../../Hooks/ModalHelpers'
 
 
 
@@ -10,6 +12,9 @@ export default function AuthModal({isOpen, onClose, accessFor = "this feature"})
 
     const navigate = useNavigate()
     const currentLocation = useLocation()
+
+    const modalRef = useRef(null)
+    useModalHelpers({open: isOpen, onClose, modalRef})
 
     const handleSignIn = () => {
         navigate('/signin', {replace: true, state: {currentPath: currentLocation.pathname}})
@@ -35,6 +40,7 @@ export default function AuthModal({isOpen, onClose, accessFor = "this feature"})
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
+            ref={modalRef}
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md"
             onClick={onClose}
           >

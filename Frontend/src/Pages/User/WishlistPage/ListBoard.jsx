@@ -6,7 +6,7 @@ import {motion, AnimatePresence} from "framer-motion"
 import {Search, Trash, ArrowRight, SquarePen, Plus} from "lucide-react"
 import {PiListHeartDuotone} from "react-icons/pi"
 import {format} from "date-fns"
-import {toast} from 'react-toastify'
+import {toast as sonnerToast} from 'sonner'
 
 import {resetWishlistStates} from '../../../Slices/wishlistSlice'
 
@@ -31,16 +31,16 @@ export default function ListBoard({lists, currentList, onNewCurrenList, onSearch
 
     useEffect(()=> {
         if(listCreated){
-            toast.success("Created wishlist successfully!")
+            sonnerToast.success("Created wishlist successfully!")
             dispatch(resetWishlistStates())
         }
         if(listUpdated){
-            toast.success("Updated wishlist successfully!")
+            sonnerToast.success("Updated wishlist successfully!")
             setLoadingListCard({})
             dispatch(resetWishlistStates())
         }
         if(listRemoved){
-            toast.success("Deleted wishlist successfully!")
+            sonnerToast.success("Deleted wishlist successfully!")
             dispatch(resetWishlistStates())
         }
     },[listCreated, listUpdated, listRemoved])

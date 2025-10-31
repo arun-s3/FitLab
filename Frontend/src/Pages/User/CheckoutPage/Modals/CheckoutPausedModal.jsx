@@ -1,12 +1,17 @@
-import React, {useState} from 'react'
+import React, {useState, useRef} from 'react'
 import {motion, AnimatePresence} from "framer-motion"
 
 import {X, AlertTriangle, ShoppingCart, Trash2} from "lucide-react"
+
+import useModalHelpers from '../../../../Hooks/ModalHelpers'
 
 
 export default function CheckoutPausedModal({isOpen, onClose, products = [], onDecQuantity, onRemoveProduct, onRetryCheckout}){
     
   const [removingProducts, setRemovingProducts] = useState(new Set())
+
+  const modalRef = useRef(null)
+  useModalHelpers({open: isOpen, onClose, modalRef})
 
   const getStatusColor = (product) => {
     if (product.productId.isBlocked) {
@@ -91,7 +96,7 @@ export default function CheckoutPausedModal({isOpen, onClose, products = [], onD
                 </button>
               </div>
 
-              <div className="p-6">
+              <div className="p-6" ref={modalRef}>
                 <p className="text-gray-600 dark:text-gray-300 mb-4 text-[13px] xxs-sm:text-sm leading-relaxed">
                   The following items in your cart are currently unavailable or blocked or out of stock. 
                   Please remove them/decrease the quanity to continue with your checkout.

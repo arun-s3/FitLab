@@ -1,15 +1,21 @@
-import React from 'react'
+import React, {useRef} from 'react'
 
 import { AlertTriangle } from "lucide-react"
+
+import useModalHelpers from '../../Hooks/ModalHelpers'
 
 
 export default function ProductRemovalModal({ isOpen, productToRemove, onConfirm, onCancel }){
 
   if (!isOpen) return null
 
+  const modalRef = useRef(null)
+  useModalHelpers({open: isOpen, onClose: onCancel, modalRef})
+
+
   return (
-    <>
-      <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={onCancel} ></div>
+    <div ref={modalRef}>
+      <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={onCancel}></div>
 
       <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-lg
          p-6 z-50 w-11/12 max-w-md">
@@ -33,7 +39,7 @@ export default function ProductRemovalModal({ isOpen, productToRemove, onConfirm
           </button>
         </div>
       </div>
-    </>
+    </div>
   )
 }
 

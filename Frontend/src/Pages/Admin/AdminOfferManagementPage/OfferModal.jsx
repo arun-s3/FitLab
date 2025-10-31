@@ -7,7 +7,9 @@ import {X, DiamondPercent, BadgePercent, Plus, Minus, Search, ChevronDown, Chevr
    IndianRupee, ListTodo} from "lucide-react"
 import {RiCoupon4Line} from "react-icons/ri"
 import {GoDotFill} from "react-icons/go"
-import {toast} from 'react-toastify';
+import {CgDetailsMore} from "react-icons/cg"
+import {toast as sonnerToast} from 'sonner'
+import {toast} from 'react-toastify'
 
 import CategoryDisplay from "../../../Components/CategoryDisplay/CategoryDisplay"
 import FileUpload from '../../../Components/FileUpload/FileUpload'
@@ -16,7 +18,8 @@ import {updateOffer, resetOfferStates} from '../../../Slices/offerSlice'
 import {searchProduct, getAllProducts} from '../../../Slices/productSlice'
 import {showUsers} from '../../../Slices/adminSlice'
 import {camelToCapitalizedWords} from "../../../Utils/helperFunctions"
-import { CgDetailsMore } from "react-icons/cg"
+import useModalHelpers from '../../../Hooks/ModalHelpers'
+
 
 
 
@@ -58,6 +61,9 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
   
   const {offerCreated, offerUpdated} = useSelector(state=> state.offers)
   const dispatch = useDispatch()
+
+  const modalRef = useRef(null)
+  useModalHelpers({open: isOpen, onClose, modalRef})
 
   const userGroupValues = ["all", "newUsers", "returningUsers", "VIPUsers"]
 
@@ -147,7 +153,7 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
 
   useEffect(()=> {
     if(offerUpdated){
-      toast.success('An offer is successfully updated!')
+      sonnerToast.success('An offer is successfully updated!')
       dispatch(resetOfferStates())
     }
   }, [offerCreated, offerUpdated])
@@ -317,23 +323,23 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
       return
     }
     if( (formData.discountType === 'percentage' || formData.discountType === 'fixed') && !formData.discountValue  ){
-      toast.error("Please fill the Discount value!")
+      sonnerToast.error("Please fill the Discount value!")
       return
     } 
     if (new Date(endDate) <= new Date(startDate)) {
-      toast.error("Start date must be before the End date!")
+      sonnerToast.error("Start date must be before the End date!")
       return
     }
     if(formData.applicableType === 'products' && selectedProducts.length === 0){
-      toast.error("Choose atleast one product!")
+      sonnerToast.error("Choose atleast one product!")
       return
     }
     if(formData.applicableType === 'categories' && selectedCategories.length === 0){
-      toast.error("Choose atleast one category!")
+      sonnerToast.error("Choose atleast one category!")
       return
     }
     if( Object.values(error).some(error=> error.trim() !== '') ){
-      toast.error("There are some errors in the form. Please correct them before submitting!")
+      sonnerToast.error("There are some errors in the form. Please correct them before submitting!")
       return
     }
 
@@ -357,7 +363,7 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
             <X className="h-6 w-6" />
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto" ref={modalRef}>
 
           <div className="grid grid-cols-2 gap-4">
 

@@ -11,8 +11,6 @@ export const createOrder = createAsyncThunk('order/createOrder', async ({orderDe
   }catch(error){
     console.log('Inside catch of createOrder')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -27,8 +25,6 @@ export const getOrders = createAsyncThunk('order/getOrders', async ({queryDetail
   }catch(error){
     console.log('Inside catch of getOrders')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -43,8 +39,6 @@ export const getAllUsersOrders = createAsyncThunk('order/getAllUsersOrders', asy
   }catch(error){
     console.log('Inside catch of getOrders')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -59,8 +53,6 @@ export const cancelOrder = createAsyncThunk('order/cancelOrder', async ({orderId
   }catch(error){
     console.log('Inside catch of cancelOrder')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -75,8 +67,6 @@ export const cancelOrderProduct = createAsyncThunk('order/cancelOrderProduct', a
     }catch(error) {
       console.log('Inside catch of cancelOrder')
       const errorMessage = error.response?.data?.message
-      console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-      console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
       return thunkAPI.rejectWithValue(errorMessage)
     }
   }
@@ -92,8 +82,6 @@ export const deleteProductFromOrderHistory = createAsyncThunk('order/deleteProdu
   }catch(error) {
     console.log('Inside catch of deleteProductFromOrderHistory')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 }
@@ -109,8 +97,6 @@ export const changeOrderStatus = createAsyncThunk('order/changeOrderStatus', asy
   }catch(error){
     console.log('Inside catch of cancelOrder')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -125,8 +111,6 @@ export const changeProductStatus = createAsyncThunk('order/changeProductStatus',
   }catch(error){
     console.log('Inside catch of changeProductStatus')
     const errorMessage = error.response?.data?.message
-    console.log('Error object inside createAsyncThunk', JSON.stringify(error.response))
-    console.log("error object inside createAsyncThunk error.response.data.message-->", JSON.stringify(error.response.data.message))
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })

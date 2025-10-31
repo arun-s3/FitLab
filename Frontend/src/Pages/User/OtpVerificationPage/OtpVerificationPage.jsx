@@ -5,6 +5,7 @@ import axios from 'axios'
 import {useDispatch, useSelector} from 'react-redux'
 import {motion, AnimatePresence} from 'framer-motion'
 
+import {toast as sonnerToast} from 'sonner'
 import {toast} from 'react-toastify'
 import {IoMail} from "react-icons/io5"
 
@@ -176,7 +177,7 @@ export default function OtpVerificationPage(){
                     setError('')
                     setVerificationError(false)
                     setOtpBoxDisabled(false)
-                    toast.success("You are successfully verified!")
+                    sonnerToast.success("You are successfully verified!")
                     dispatch(makeUserVerified())
                     location.state?.from === 'signup' 
                         ? navigate('/signin',{replace:true}) 
@@ -192,7 +193,7 @@ export default function OtpVerificationPage(){
                 const errorMessage = error.response.data.message.toLowerCase()
                 if(errorMessage.includes('invalid')){
                     console.log("INAVLID OTP from frontend")
-                    toast.error("Invalid OTP!")
+                    sonnerToast.error("Invalid OTP!")
                     setError("Inavlid OTP. Please click 'resend again' to try again!")
                     setvalues({})
                     setVerificationError(true)
@@ -205,11 +206,15 @@ export default function OtpVerificationPage(){
                     setVerificationError(true)
                     setOtpBoxDisabled(true)
                 }
+                else{
+                    toast.error("Internal Server Error!")
+                }
             }   
         }
     }
 
     const cancelVerification = (e)=> {
+        sonnerToast.info("You have cancelled the verification!")
         setvalues({})
         setLoading(false)
         stopTimer()

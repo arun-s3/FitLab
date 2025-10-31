@@ -1,9 +1,10 @@
-import React, {useEffect} from 'react'
+import React, {useEffect, useRef} from 'react'
 import {useDispatch, useSelector} from "react-redux"
 
 import { X, AlertTriangle } from "lucide-react"
-import {toast} from 'react-toastify';
+import {toast as sonnerToast} from 'sonner'
 
+import useModalHelpers from '../../../Hooks/ModalHelpers'
 import {deleteOffer, resetOfferStates} from '../../../Slices/offerSlice'
 
 
@@ -12,9 +13,12 @@ export default function OfferDeleteModal ({ isOpen, onClose, offer }){
   const {offerRemoved} = useSelector(state=> state.offers)
   const dispatch = useDispatch()
 
+  const modalRef = useRef(null)
+  useModalHelpers({open: isOpen, onClose, modalRef})
+
   useEffect(()=> {
     if(offerRemoved){
-      toast.success('Offer removed successfully!')
+      sonnerToast.success('Offer removed successfully!')
       dispatch(resetOfferStates())
     }
   },[offerRemoved])
@@ -36,7 +40,7 @@ export default function OfferDeleteModal ({ isOpen, onClose, offer }){
             <X className="h-6 w-6" />
           </button>
         </div>
-        <div className="p-6">
+        <div className="p-6" ref={modalRef}>
           <div className="flex items-center space-x-4 mb-4">
             <div className="bg-yellow-100 rounded-full p-3">
               <AlertTriangle className="h-6 w-6 text-yellow-600" />

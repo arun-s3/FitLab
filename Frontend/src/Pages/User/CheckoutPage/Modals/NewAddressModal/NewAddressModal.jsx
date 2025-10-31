@@ -1,9 +1,10 @@
-import React, {useState, useEffect} from "react"
+import React, {useState, useEffect, useRef} from "react"
 import {motion, AnimatePresence} from "framer-motion"
 
 import {X, MapPin, User, Phone, Mail, Home, Briefcase, Clock, Gift, AlertCircle} from "lucide-react"
 
 import AddressField from "./AddressField"
+import useModalHelpers from '../../../../../Hooks/ModalHelpers'
 
 
 export default function NewAddressModal({ isOpen, onClose, onSubmit }){
@@ -26,6 +27,9 @@ export default function NewAddressModal({ isOpen, onClose, onSubmit }){
 
   const [errors, setErrors] = useState({})
   const [touched, setTouched] = useState({})
+
+  const modalRef = useRef(null)
+  useModalHelpers({open: isOpen, onClose, modalRef})
 
   const validationPatterns = {
     firstName: {
@@ -200,7 +204,7 @@ export default function NewAddressModal({ isOpen, onClose, onSubmit }){
                 </div>
               </div>
 
-              <div className="overflow-y-auto max-h-[calc(90vh-140px)]">
+              <div className="overflow-y-auto max-h-[calc(90vh-140px)]" ref={modalRef}>
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
 
                   <motion.div

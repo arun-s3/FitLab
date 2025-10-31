@@ -3,6 +3,7 @@ import './AddressManagementPage.css'
 import {useLocation, useNavigate} from 'react-router-dom'
 import {useDispatch, useSelector} from 'react-redux'
 
+import {toast as sonnerToast} from 'sonner'
 import {toast} from 'react-toastify'
 
 import AddressFields from './AddressFields'
@@ -60,18 +61,18 @@ export default function AddressManagementPage({editAddresses = false}){
     useEffect(()=> {
         if(error){
             console.log("Just after before toast!-->"+error)
-            toast.error(error)
+            sonnerToast.error(error)
             console.log("Just after error toast, resetting..")
             dispatch(resetStates())
         }
         if(addressCreated){
-            toast.success("New Address registered successfully!") 
+            sonnerToast.success("New Address registered successfully!") 
             console.log("Just after error toast, resetting..")
             dispatch(resetStates())
             navigate('/account/addresses', {replace: true})
         }
         if(addressUpdated){
-            toast.success("Address Updated successfully!")
+            sonnerToast.success("Address Updated successfully!")
             console.log("Just after error toast, resetting..")
             dispatch(resetStates())
             navigate('/account/addresses', {replace: true})
@@ -127,7 +128,7 @@ export default function AddressManagementPage({editAddresses = false}){
     
         if (missingRequiredFields.length > 0 || Object.values(addressData).some((value) => value === undefined)) {
             console.log("Undefined values found in addressData:", addressData)
-            toast.error("Please check the fields and submit again!")
+            sonnerToast.error("Please check the fields and submit again!")
             return;
         }
     

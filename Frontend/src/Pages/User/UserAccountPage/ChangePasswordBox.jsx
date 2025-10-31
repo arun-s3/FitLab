@@ -2,7 +2,7 @@ import React, {useState, useEffect} from "react"
 import {Link} from 'react-router-dom'
 
 import {Check, AlertCircle, Eye, EyeOff} from "lucide-react"
-import {toast} from 'react-toastify'
+import {toast as sonnerToast} from 'sonner'
 import axios from 'axios'
 
 import {SiteSecondaryFillImpButton} from '../../../Components/SiteButtons/SiteButtons'
@@ -87,7 +87,7 @@ export default function ChangePasswordBox({setOpenSecurityMenu}){
         if(response.data.message.includes('success')){
           setLoading(false)
           setOpenSecurityMenu(false)
-          toast.success("Your password is successfully updated!")
+          sonnerToast.success("Your password is successfully updated!")
           console.log("Your password is successfully updated!")
         }
       }
@@ -95,7 +95,7 @@ export default function ChangePasswordBox({setOpenSecurityMenu}){
         console.log("Error inside submitPassword--->", error.message)
         setLoading(false)
         const errorMessage = error.response.data.message
-        toast.error(errorMessage)
+        sonnerToast.error(errorMessage)
         if(errorMessage.toLowerCase().includes('current')){
           setError( {current: true, value: "The Current Pasword is wrong!"} )
         }

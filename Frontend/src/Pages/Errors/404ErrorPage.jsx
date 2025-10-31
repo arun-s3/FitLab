@@ -16,8 +16,16 @@ export default function ErrorPage404() {
   console.log("Inside PrivateAdminRoutes", user && !user.isAdmin)
 
   const goToHome = ()=> {
-    // user && !user.isAdmin  && !user.isBlocked
-    //     ?  navigate('/')
+    user && !user.isAdmin && !admin
+        ?  user.isBlocked
+        ?  navigate('/blocked', {
+                    replace: true, 
+                    state: {NoDirectAccesss: true}
+                })
+        : navigate('/', {replace: true})
+        : admin && admin.isAdmin 
+        ? navigate('/admin/dashboard/business', {replace: true})
+        : navigate('/', {replace: true})
   }
   
     

@@ -55,9 +55,9 @@ import ErrorPage401 from './Pages/Errors/401ErrorPage'
 import ErrorPage404 from './Pages/Errors/404ErrorPage'
 import UserBlockedPage from './Pages/Errors/UserBlockedPage'
 
-
+import {Toaster as SonnerToaster} from 'sonner'
 import {ToastContainer} from 'react-toastify'
-import "react-toastify/dist/ReactToastify.css";
+import "react-toastify/dist/ReactToastify.css"
 import Header from './Components/Header/Header'
 import SocketProvider from './Components/SocketProvider/SocketProvider'
 import AdminSocketProvider from './Components/AdminSocketProvider/AdminSocketProvider'
@@ -69,7 +69,9 @@ export default function App(){
     return(
         <BrowserRouter>
 
-            <ToastContainer theme='dark' autoClose={1500} style={{fontSize:'12px'}} hideProgressBar />
+            <ToastContainer theme='dark' autoClose={3000} style={{fontSize:'12px'}} hideProgressBar />
+
+            <SonnerToaster position="bottom-right" duration={3500} richColors />
             
             <Routes path='/'>
 

@@ -5,7 +5,7 @@ import {useDispatch, useSelector} from 'react-redux'
 import {motion, AnimatePresence} from 'framer-motion'
 
 import axios from 'axios'
-import {toast} from 'react-toastify'
+import {toast as sonnerToast} from 'sonner'
 import {MdFavorite, MdFavoriteBorder} from "react-icons/md"
 import {RiFileEditLine} from "react-icons/ri"
 import {MdBlock} from "react-icons/md"
@@ -59,11 +59,12 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
       setProducts(items)
     }
     if(wishlistDisplay){
+      console.log("wishlistProducts---->", wishlistProducts)
       let allWishlistProducts = wishlistProducts
-      allWishlistProducts = allWishlistProducts.map(list=> {
-        const {product, ...rest} = list
-        const id = {productId: product._id}
-        return {...id, ...product, ...rest}
+      allWishlistProducts = allWishlistProducts.filter(list=> list.product).map(list=> {
+          const {product, ...rest} = list
+          const id = {productId: product._id}
+          return {...id, ...product, ...rest}
       })
       console.log("allWishlistProducts---->", allWishlistProducts)
       setProducts(allWishlistProducts)
@@ -76,11 +77,11 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
 
   useEffect(()=> {
     if(listProductAdded){
-      toast.success("The product have been added to the Wishlist!")
+      sonnerToast.success("The product have been added to the Wishlist!")
       dispatch(resetWishlistStates())
     }
     if(listProductRemoved){
-      toast.success("The product have been removed from the Wishlist!")
+      sonnerToast.success("The product have been removed from the Wishlist!")
       dispatch(resetWishlistStates())
       if(wishlistDisplay){
         dispatch( getAllWishlistProducts({queryOptions}) )
@@ -88,7 +89,7 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
     }
     if(wishlistError && !wishlistError.includes('Unauthorized')){
       console.log("wishlistError--->", wishlistError)
-      toast.error(wishlistError)
+      sonnerToast.error("The product have been removed from the Wishlist!")
       dispatch(resetWishlistStates())
     }
     if(wishlist){

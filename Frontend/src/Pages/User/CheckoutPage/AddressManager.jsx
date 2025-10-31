@@ -4,6 +4,7 @@ import {motion, AnimatePresence} from "framer-motion"
 
 import {Check, Plus} from 'lucide-react'
 import {toast} from 'react-toastify'
+import {toast as sonnerToast} from 'sonner'
 
 import NewAddressModal from './Modals/NewAddressModal/NewAddressModal'
 import {createNewAddress, getAllAddress, resetStates} from '../../../Slices/addressSlice'
@@ -22,13 +23,13 @@ export default function AddressManager({addresses, shippingAddress, setShippingA
     useEffect(()=> {
         if(error){
             console.log("Just after before toast!-->"+error)
-            toast.error(error)
+            sonnerToast.error(error)
             console.log("Just after error toast, resetting..")
             dispatch(resetStates())
         }
         if(addressSubmitted && addressCreated){
             dispatch(getAllAddress())
-            toast.success("New Address registered successfully!") 
+            sonnerToast.success("New Address registered successfully!") 
             setIsModalOpen(false)
             setDeliverAddressMade(true)
             setAddressSubmitted(false)
@@ -57,7 +58,7 @@ export default function AddressManager({addresses, shippingAddress, setShippingA
 
         if (missingRequiredFields.length > 0 || Object.values(newAddressData).some((value) => value === undefined)) {
             console.log("Undefined values found in addressData:", newAddressData)
-            toast.error("Some of non-optional fields are not filled. Please check and submit again!")
+            sonnerToast.error("Some of non-optional fields are not filled. Please check and submit again!")
             return;
         }
 

@@ -1,12 +1,16 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef} from "react"
 import { motion, AnimatePresence } from "framer-motion"
 
 import { Calendar, Check, Clock, Star, MessageSquare, Tag, X } from "lucide-react"
+import {toast as sonnerToast} from 'sonner'
 import {toast} from "react-toastify"
 import axios from 'axios'
 
+import useModalHelpers from '../../../../Hooks/ModalHelpers'
+
 
 export default function ScheduleModal({ userId, isOpen, onClose }) {
+
   const [selectedDate, setSelectedDate] = useState("")
   const [selectedTime, setSelectedTime] = useState("")
   const [selectedTopic, setSelectedTopic] = useState("")
@@ -18,6 +22,9 @@ export default function ScheduleModal({ userId, isOpen, onClose }) {
   const timeSlots = ["09:00 AM", "10:00 AM", "11:00 AM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM", "06:00 PM", "07:00 PM", "08:00 PM"]
 
   const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+
+  const modalRef = useRef(null)
+  useModalHelpers({open: isOpen, onClose, modalRef})
 
   const availableDates = Array.from({ length: 7 }, (_, i) => {
     const date = new Date()
@@ -224,9 +231,9 @@ export default function ScheduleModal({ userId, isOpen, onClose }) {
     if (userId && selectedDate && selectedTime) {
       const isSessionBooked = await bookSession({ userId, scheduledDate: selectedDate, scheduledTime: selectedTime, subjectLine: selectedTopic, notes: notes.trim()})
       if(isSessionBooked){
-        toast.success('Session booked successfully!')
+        sonnerToast.success('Session booked successfully!')
       }else{
-        toast.error('Error booking the session')
+        sonnerToast.error('Error booking the session')
       }
       setTimeout(() => {
         onClose()
@@ -234,7 +241,7 @@ export default function ScheduleModal({ userId, isOpen, onClose }) {
     }else{
       if(!userId){
         toast.error('Error in the connection. Try again Later!')
-      }else toast.error('Error provide the date and time and retry!')
+      }else sonnerToast.error('Error provide the date and time and retry!')
     }
   }
 
@@ -273,6 +280,7 @@ export default function ScheduleModal({ userId, isOpen, onClose }) {
                   animate={{ scale: 1 }}
                   transition={{ type: "spring", stiffness: 260, damping: 20 }}
                   className="relative w-24 h-24 mx-auto mb-6"
+                  ref={modalRef}
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full"></div>
                   <div className="absolute inset-2 bg-white rounded-full flex items-center justify-center">

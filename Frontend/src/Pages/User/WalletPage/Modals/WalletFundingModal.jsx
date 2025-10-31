@@ -1,14 +1,16 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useRef} from 'react'
 import {useDispatch, useSelector} from 'react-redux'
 import {motion, AnimatePresence} from 'framer-motion'
 
 import { CreditCard, PlusCircle, X, Globe, ChevronLeft } from "lucide-react" 
 import {toast} from 'react-toastify'
+import {toast as sonnerToast} from 'sonner'
 import axios from 'axios'
 
 import PaypalPayment from '../../PaymentPages/PayPalPayment'
 import StripePayment from '../../PaymentPages/StripePayment'
 import {addFundsToWallet} from '../../../../Slices/walletSlice'
+import useModalHelpers from '../../../../Hooks/ModalHelpers'
 
 
 export default function WalletFundingModal({showFundingModal, closeFundingModal, paymentVia, setPaymentVia}){
@@ -27,6 +29,9 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
     const dispatch = useDispatch()
 
     const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+
+    const modalRef = useRef(null)
+    useModalHelpers({open: showFundingModal, onClose: closeFundingModal, modalRef})
 
     useEffect(()=> {
       const script = document.createElement("script")
@@ -97,7 +102,7 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
                     )
                     console.log("verifiedData--->", verifiedData)
                     if (verifiedData.data.message.toLowerCase().includes('success')) {
-                        toast.success(verifiedData.data.message)
+                        sonnerToast.success(verifiedData.data.message)
                         const paymentDetails = {
                           amount,
                           notes,
@@ -125,7 +130,7 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
     }
 
     const handleStripeOrPaypalPayment = (paymentGateway, paymentId)=> {
-      toast.success("Payment Successfull!")
+      sonnerToast.success("Payment Successfull!")
       const paymentMethod = paymentGateway
       const paymentDetails = {
         amount,
@@ -185,6 +190,7 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.15, duration: 0.35 }}
+                  ref={modalRef}
                   className={`${paymentMethod === 'cards' ? 'p-0' : 'p-4 sm:p-6'}`}
                 >
                   <div className="flex border-b mb-4 sm:mb-6 text-sm sm:text-[15px]">

@@ -12,6 +12,7 @@ import {MdOutlineCategory, MdArrowDropDown} from "react-icons/md"
 import {CgDetailsMore} from "react-icons/cg"
 import {TbShoppingCartDiscount} from "react-icons/tb"
 import {GoDotFill} from "react-icons/go"
+import {toast as sonnerToast} from 'sonner'
 import {toast} from 'react-toastify'
 
 import AdminTitleSection from "../../../Components/AdminTitleSection/AdminTitleSection"
@@ -186,7 +187,7 @@ export default function AdminCreateOfferPage(){
 
   useEffect(()=> {
     if(offerCreated){
-      toast.success('An offer is successfully created!')
+      sonnerToast.success('An offer is successfully created!')
       dispatch(resetOfferStates())
     }
     setFormData({})
@@ -420,23 +421,23 @@ export default function AdminCreateOfferPage(){
       return
     }
     if( (formData.discountType === 'percentage' || formData.discountType === 'fixed') && !formData.discountValue  ){
-      toast.error("Please fill the Discount value!")
+      sonnerToast.error("Please fill the Discount value!")
       return
     } 
     if (new Date(endDate) <= new Date(startDate)) {
-      toast.error("Start date must be before the End date!")
+      sonnerToast.error("Start date must be before the End date!")
       return
     }
     if(formData.applicableType === 'products' && selectedProducts.length === 0){
-      toast.error("Choose atleast one product!")
+      sonnerToast.error("Choose atleast one product!")
       return
     }
     if(formData.applicableType === 'categories' && selectedCategories.length === 0){
-      toast.error("Choose atleast one category!")
+      sonnerToast.error("Choose atleast one category!")
       return
     }
     if( Object.values(error).some(error=> error.trim() !== '') ){
-      toast.error("There are some errors in the form. Please correct them before submitting!")
+      sonnerToast.error("There are some errors in the form. Please correct them before submitting!")
       return
     }
 
@@ -450,6 +451,7 @@ export default function AdminCreateOfferPage(){
       const compressedImageBlob = async(image)=>{
         if(image.size > (5*1024*1024)){
             const newBlob = await handleImageCompression(image.blob)
+            sonnerToast.info("The image has been compressed as its size exceeded 5 MB!")
             return newBlob
         }else{
             return image.blob

@@ -4,7 +4,7 @@ import {useSelector} from 'react-redux'
 import {motion} from 'framer-motion'
 
 import {Eye, EyeOff} from "lucide-react"
-import {toast} from 'react-toastify'
+import {toast as sonnerToast} from 'sonner'
 
 import {decryptData} from '../../../Utils/decryption'
 
@@ -36,7 +36,7 @@ export default function WalletCard({children}) {
         console.log('Its a First time user!')
         setFirstTimeUser(true)
         setMessage("Welcome to FitLab Wallet! Your unique account number:")
-        toast.success("A new FitLab Account has been created for you!")
+        sonnerToast.success("A new FitLab Account has been created for you!")
       }
     },[safeWallet, walletMessage])
 

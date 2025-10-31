@@ -12,7 +12,7 @@ import {TbRosetteDiscountCheck} from "react-icons/tb"
 import {TbRosetteDiscountOff} from "react-icons/tb"
 import {RiArrowDropDownLine} from "react-icons/ri"
 import {MdSort} from "react-icons/md"
-import {toast} from 'react-toastify'
+import {toast as sonnerToast} from 'sonner'
 import {TbDiscountOff} from "react-icons/tb"
 
 import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
@@ -88,7 +88,7 @@ export default function AdminCouponManagementPage(){
 
     useEffect(()=> {
       if(couponDeactivated){
-        toast.success('The coupon is successfully deactivated!')
+        sonnerToast.success('The coupon is successfully deactivated!')
       }
       dispatch(resetCouponStates())
     },[couponDeactivated])

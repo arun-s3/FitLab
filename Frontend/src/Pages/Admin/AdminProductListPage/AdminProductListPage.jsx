@@ -5,6 +5,7 @@ import {useSelector, useDispatch} from 'react-redux'
 import {motion} from 'framer-motion'
 
 import {toast} from 'react-toastify'
+import {toast as sonnerToast} from 'sonner'
 import {LiaSlidersHSolid} from "react-icons/lia"
 import {FiDownload} from "react-icons/fi"
 import {RiArrowDropDownLine} from "react-icons/ri"
@@ -78,7 +79,7 @@ export default function AdminProductListPage(){
     useEffect(()=> {
         if(message && message?.includes('block')){
           console.log("message arrived-->", message)
-          toast.success(`${message} successfully`)
+          sonnerToast.success(`${message} successfully`)
         }
       },[message])
 

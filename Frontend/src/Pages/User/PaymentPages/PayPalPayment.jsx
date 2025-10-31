@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react"
 
 import axios from 'axios'
+import {toast as sonnerToast} from 'sonner'
 import {toast} from 'react-toastify'
 
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js'
@@ -85,8 +86,8 @@ export default function PaypalPayment({amount, onPayment, onError}) {
                 const errorMessage = errorDetail
                     ? `${errorDetail.issue} ${errorDetail.description} (${orderData.debug_id})`
                     : JSON.stringify(orderData)
-
-                toast.error(errorMessage)
+                
+                sonnerToast.error(errorMessage)
                 onError(errorMessage)
                 return
             }
@@ -94,7 +95,7 @@ export default function PaypalPayment({amount, onPayment, onError}) {
         catch(error){
             console.error(error)
             setMessage(`Could not initiate PayPal Checkout...${error}`)
-            toast.error(`Could not initiate PayPal Checkout...${error}`)
+            sonnerToast.error(`Could not initiate PayPal Checkout...${error}`)
             onError(`Could not initiate PayPal Checkout...${error}`)
         }
     }

@@ -11,7 +11,7 @@ import {toast as sonnerToast} from 'sonner'
 import {resetWishlistStates} from '../../../Slices/wishlistSlice'
 
 
-export default function ListBoard({lists, currentList, onNewCurrenList, onSearch, onUpdateList, onDeleteList, 
+export default function ListBoard({currentList, onNewCurrenList, onSearch, onUpdateList, onDeleteList, 
     onOpenNewListModal, setLoadingListCard, isListCardLoading}){
 
     const [hovered, setHovered] = useState(false)
@@ -19,7 +19,7 @@ export default function ListBoard({lists, currentList, onNewCurrenList, onSearch
 
     const open = hovered || focused
     
-    const {listCreated, listUpdated, listRemoved} = useSelector(state=> state.wishlist) 
+    const {wishlist, listCreated, listUpdated, listRemoved} = useSelector(state=> state.wishlist) 
     
     const dispatch = useDispatch()
 
@@ -86,7 +86,7 @@ export default function ListBoard({lists, currentList, onNewCurrenList, onSearch
               transition={{ duration: 0.5, ease: "easeOut" }}
               className={`p-[12px] pl-[20px] bg-purple-50 border border-dashed border-secondary rounded-[7px] h-[20rem] 
                 ${
-                  lists.length > 2
+                  wishlist.lists.length > 2
                     ? "md:h-[30rem] overflow-y-auto"
                     : "md:h-fit overflow-y-auto md:overflow-visible"
                 }
@@ -155,9 +155,9 @@ export default function ListBoard({lists, currentList, onNewCurrenList, onSearch
               className="w-full pr-[5px] flex flex-col gap-[10px]"
             >
               <AnimatePresence>
-                {lists &&
-                  lists.length > 0 &&
-                  [...lists]
+                {wishlist?.lists &&
+                  wishlist.lists.length > 0 &&
+                  [...wishlist.lists]
                     .sort((a, b) => {
                       const priorityA = a.priority.toString()
                       const priorityB = b.priority.toString()
@@ -209,12 +209,12 @@ export default function ListBoard({lists, currentList, onNewCurrenList, onSearch
                           >
                             <div>
                               <figure
-                                className={` ${
-                                  !list?.thumbnail.url &&
+                                className={` ${ 
+                                  !list?.thumbnail &&
                                   "flex justify-center items-center"
                                 } w-[100px] h-[100px] rounded-[10px]`}
                               >
-                                {list?.thumbnail.url ? (
+                                {list?.thumbnail ? (
                                   <img
                                     src={list?.thumbnail.url}
                                     className="w-[100px] h-[100px] rounded-[10px]"

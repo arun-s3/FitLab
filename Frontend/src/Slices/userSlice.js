@@ -75,6 +75,20 @@ export const updateUserDetails = createAsyncThunk('updateUserDetails', async({us
     }
 } )
 
+export const updateUserProfilePic = createAsyncThunk('updateUserProfilePic', async({formData},thunkAPI)=>{
+    try{
+        console.log("inside updateUserProfilePic of createAsyncThunk")
+        const response = await axios.put('/profilePic', formData, {headers: { "Content-Type": "multipart/form-data" }, withCredentials: true})
+        console.log("returning success response from updateUserProfilePic createAsyncThunk..."+JSON.stringify(response)) 
+        return response.data
+    }
+    catch(error){
+        console.log("inside catch of updateUserProfilePic from userSlice")
+        const errorMessage = error.response?.data?.message
+        return thunkAPI.rejectWithValue(errorMessage)
+    }
+} )
+
 // export const resetPassword = resetPasswords('updateUserDetails', async({currentPassword, newPassword, confirmPassword}, thunkAPI)=>{
 //     try{
 //         console.log("inside updateUserDetails of createAsyncThunk")
@@ -94,6 +108,7 @@ const initialState = {
     userToken: null,
     user: null,
     userUpdated: false,
+    userDpUpdated: false,
     currentPath: '',
     error:null,
     loading:false,
@@ -110,6 +125,8 @@ const userSlice = createSlice({
             state.error = null
             state.loading = false
             state.success = false
+            state.userUpdated = false
+            state.userDpUpdated = false
             console.log("state(success) after reset-->"+state.success)
         },
         changePath: (state, action)=> {
@@ -179,6 +196,25 @@ const userSlice = createSlice({
                 console.log("userData from userSlice-updateUserDetails.fulfilled-user-->"+JSON.stringify(state.user))
         })
         .addCase(updateUserDetails.rejected, (state,action)=>{
+                state.error = action.payload
+                state.loading = false
+                state.success = false
+                console.log("error from userSlice- updateUserDetails.rejected after assignment-->"+ state.error)
+        })
+        .addCase(updateUserProfilePic.pending, (state,action)=>{
+                state.loading = true
+                state.success = false
+                console.log("loading from userSlice updateUserDetails.pending--"+state.loading)
+        })
+        .addCase(updateUserProfilePic.fulfilled, (state,action)=>{
+                state.loading = false
+                state.error = null
+                state.success = true 
+                state.user.profilePic = action.payload.profilePic
+                state.userDpUpdated =  true
+                console.log("userData from userSlice-updateUserDetails.fulfilled-user-->"+JSON.stringify(state.user))
+        })
+        .addCase(updateUserProfilePic.rejected, (state,action)=>{
                 state.error = action.payload
                 state.loading = false
                 state.success = false

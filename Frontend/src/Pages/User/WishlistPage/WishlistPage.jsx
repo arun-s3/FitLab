@@ -78,7 +78,7 @@ export default function WishlistPage(){
 
     useEffect(()=> {
         console.log("wishlist--------->", wishlist)
-        // dispatch( getAllWishlistProducts({queryOptions}))
+        dispatch( getAllWishlistProducts({queryOptions}))
     }, [wishlist])
 
     useEffect(()=>{
@@ -162,21 +162,19 @@ export default function WishlistPage(){
                       </h2>
                     </motion.div>     
                 
-                    { 
-                        wishlist &&
+                    
 
-                            <ListBoard 
-                                lists={wishlist?.lists || []} 
-                                currentList={currentList}
-                                onNewCurrenList={setCurrentList}
-                                onSearch={searchHandler}
-                                onUpdateList={updateListHandler}
-                                onDeleteList={openDeleteListModal}
-                                setLoadingListCard={setLoadingListCard}
-                                isListCardLoading={loadingListCard}
-                                onOpenNewListModal={checkAuthAndOpenListModal}
-                            />
-                    }
+                    <ListBoard 
+                        currentList={currentList}
+                        onNewCurrenList={setCurrentList}
+                        onSearch={searchHandler}
+                        onUpdateList={updateListHandler}
+                        onDeleteList={openDeleteListModal}
+                        setLoadingListCard={setLoadingListCard}
+                        isListCardLoading={loadingListCard}
+                        onOpenNewListModal={checkAuthAndOpenListModal}
+                    />
+                
 
                     <WishlistModal 
                         isOpen={isWishlistModalOpen} 

@@ -111,7 +111,7 @@ export default function WishlistModal({ isOpen, onClose, listDetails, setLoading
 
   const handleSubmit = async(e) => {
     e.preventDefault()
-    setLoadingListCard({[listDetails._id]: true})
+    // setLoadingListCard({[listDetails._id]: true})
     const formData = new FormData()
     const {thumbnail, ...rest} = wishlistDetails
     for (const key in rest) {
@@ -239,7 +239,7 @@ export default function WishlistModal({ isOpen, onClose, listDetails, setLoading
                 />
               </motion.div>
 
-              <motion.div variants={fieldVariants} className="!-mt-4 flex items-center flex-wrap gap-2">
+              <motion.div variants={fieldVariants} className="flex items-center flex-wrap gap-2">
                 <input
                   type="checkbox"
                   id="isPublic"

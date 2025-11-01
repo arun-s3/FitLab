@@ -1,21 +1,33 @@
-import React,{useState, useEffect} from 'react'
+import React, {useState, useEffect} from 'react'
 import './UserSidebar.css'
-import {Link, useLocation, useNavigate} from 'react-router-dom'
-import {useSelector} from 'react-redux';
+import {Link, useNavigate} from 'react-router-dom'
+import {useSelector, useDispatch} from 'react-redux'
+import {motion, AnimatePresence} from 'framer-motion'
 
 import {Camera, ChevronsDown, Clock, CreditCard, Heart, BadgePercent, Home, Key, LogOut, MapPin, RefreshCw,
      ShoppingCart, Headset} from 'lucide-react'
-import {IoMdPerson} from "react-icons/io"
 import {IoBagCheckOutline} from "react-icons/io5"
+import {toast as sonnerToast} from 'sonner'
+
+import SelfieModal from './SelfieModal'
+import {updateUserProfilePic, resetStates} from '../../Slices/userSlice'
+import {CustomPuffLoader} from '../Loader/Loader'
 
 
 export default function UserSidebar({currentPath, openMenuByDefault = true, flexiOpen}){
 
     const [isMenuOpen, setIsMenuOpen] = useState(openMenuByDefault)
 
-    const {user} = useSelector(state=> state.user)
+    const [showCamera, setShowCamera] = useState(false)
+    const [profilePic, setProfilePic] = useState([])
+    const [photoDispatched, setPhotoDispatched] = useState(false)
+
+    const {user, loading, userDpUpdated, error} = useSelector(state=> state.user)
 
     const navigate = useNavigate()
+    const dispatch = useDispatch()
+
+    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
     const menuItems = [
         { icon: Home, label: 'Account', path: '/account'},
@@ -45,18 +57,95 @@ export default function UserSidebar({currentPath, openMenuByDefault = true, flex
         console.log("currentPath--->", currentPath)
     },[])
 
+    useEffect(()=> {
+        if(photoDispatched && userDpUpdated){
+            sonnerToast.success("Your profile pic has been updated!")
+            dispatch(resetStates())
+            setPhotoDispatched(false)
+        }
+        if(error){
+            sonnerToast.error(error)
+            dispatch(resetStates())
+            setPhotoDispatched(false)
+        }
+    }, [userDpUpdated, error])
+
+    const sidebarVariants = {
+        hidden: { opacity: 0, x: -25 },
+        visible: {
+            opacity: 1,
+            x: 0,
+            transition: {
+                type: 'tween',
+                duration: 0.45,
+                ease: [0.22, 1, 0.36, 1],
+                when: 'beforeChildren',
+                staggerChildren: 0.06, 
+                delayChildren: 0.1,
+           },
+    },
+    exit: {
+        opacity: 0,
+        x: -25,
+        transition: { duration: 0.25, ease: 'easeInOut' },
+    },
+  }
+
+  const listVariants = {
+        hidden: { opacity: 0, y: 15, scale: 0.98 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            transition: {
+              type: 'spring',
+              stiffness: 420,
+              damping: 22,
+            },
+        },
+  }
+
+  const uploadPhoto = async (dataUrl) => {
+      console.log("Inside uploadPhoto function")
+      const blob = await (await fetch(dataUrl)).blob()
+      const formData = new FormData()
+      formData.append("image", blob, "photo.jpg")
+      dispatch(updateUserProfilePic({formData}))
+      setPhotoDispatched(true)
+  }
+
     return(
         <section id='userSidebar' className='mt-[4rem] w-[13.5rem] z-[20]'>
             <div className='user flex flex-col justify-center items-center'>
                 <div className='relative w-[75px] h-[75px] rounded-[45px] profilePic'>
                     {
-                        user?.profilePic ? 
-                        <img src={user.profilePic} alt='ProfilePic' className='rounded-[35px]'/> :
-                        <img src='/DefaultDp.png' alt='ProfilePic' className='rounded-[35px]'/>
+                        user?.profilePic  
+                            ? <img src={user.profilePic} alt='ProfilePic' className='w-full h-full object-cover rounded-[35px]'/> 
+                            : <img src='/DefaultDp.png' alt='ProfilePic' className='rounded-[35px]'/>
                     }
-                    <div className='absolute bottom-[2px] right-[3px] p-[5px] rounded-[25px]  bg-white border border-white'>
-                        <Camera className='w-[15px] h-[15px] text-secondaryLight2 z-[1]' />
-                    </div>
+                    <button 
+                        className='absolute bottom-[2px] right-[3px] p-[5px] rounded-[25px]  bg-white border border-white'
+                        onClick={()=> setShowCamera(true)}
+                        
+                    >   
+                        {
+                            loading 
+                                ? <CustomPuffLoader loading={loading} customStyle={{marginLeft: '5px', alignSelf: 'center'}}/>
+                                : <Camera className='w-[15px] h-[15px] text-secondaryLight2 z-[1]' />
+                        }
+                    </button>
+                     {
+                        showCamera && 
+                            <SelfieModal isOpen={showCamera}
+                                onClose={()=> setShowCamera(false)}
+                                onCapture={(photo)=> {
+                                  uploadPhoto(photo)
+                                  setShowCamera(false)
+                                }}
+                                profilePic={profilePic}
+                                onChangeProfilePic={setProfilePic}
+                            />
+                     }
                 </div>
                 <div className='flex items-center gap-[4px]'>
                     <h1 className='text-[17px] font-[550]'> {user?.username ? user.username : 'User'} </h1>
@@ -64,34 +153,56 @@ export default function UserSidebar({currentPath, openMenuByDefault = true, flex
                         onMouseEnter={()=> setIsMenuOpen(status=> !status)}/>
                 </div>
             </div>
-
-            {
-            isMenuOpen &&
-            <main className='mt-[10px] w-full h-auto px-[18px] py-[20px] bg-white border border-[#E4E7E9] rounded-[7px]'
-                onMouseLeave={()=> flexiOpen && setIsMenuOpen(false)}>
-                <ul className='w-full list-none flex flex-col justify-center gap-[1rem]'>
-                    {
-                        menuItems.map((item, index)=> (
-                            <li key={item.label} className={`relative w-full flex items-center gap-[10px] cursor-pointer z-[1] 
-                                ${currentPath === item.path &&
-                                 'text-secondary font-[500] before:content-[""] before:absolute before:top-[-24%] before:left-[-11%] before:w-[121%] before:h-[149%] before:bg-primary before:z-[-1]'}`}
-                                    onMouseOver={(e)=> listMouseOverHandler(e)} 
-                                        onMouseLeave={(e)=> currentPath !== item.path && listMouseLeaveHandler(e)}
-                                            onClick={()=> navigate(item.path)} >
-                                <item.icon className={`h-[16px] w-[16px] 
-                                    ${currentPath === item.path ? 'text-primaryDark' : 'text-primary' }`}/>   {/* text-[#5F6C72] */}
-                                <Link className={`text-[13px] text-[#5F6C72] capitalize tracking-[0.3px] hover:text-secondary
-                                     hover:font-[500] ${currentPath === item.path && 'text-secondary font-[500]'}`} 
-                                        to={item.path} >
-                                    {item.label}
-                                </Link>
-                            </li>
-                        ))
-                    }
-                </ul>
-            </main>
-            }
-
+            
+            <AnimatePresence mode="wait">
+                
+                {
+                    isMenuOpen &&
+                        <motion.main 
+                            key="sidebar"
+                            id='main'
+                            className='mt-[10px] w-full h-auto px-[18px] py-[20px] bg-white border border-[#E4E7E9] rounded-[7px]'
+                            variants={sidebarVariants}
+                            initial="hidden"
+                            animate="visible"
+                            exit="exit"
+                            onMouseLeave={()=> flexiOpen && setIsMenuOpen(false)}
+                        >
+                            <motion.ul 
+                                className='w-full list-none flex flex-col justify-center gap-[1rem]'
+                                variants={sidebarVariants}
+                            >
+                                {
+                                    menuItems.map((item)=> (
+                                        <motion.li 
+                                            key={item.label}
+                                            variants={listVariants}
+                                            className={`relative w-full flex items-center gap-[10px] cursor-pointer z-[1] 
+                                              ${currentPath === item.path && `text-secondary font-[500] before:content-[""] 
+                                                before:absolute before:top-[-24%] before:left-[-11%] before:w-[121%] before:h-[149%]
+                                                before:bg-primary before:z-[-1]`}`}
+                                            onMouseOver={(e)=> listMouseOverHandler(e)} 
+                                            onMouseLeave={(e)=> currentPath !== item.path && listMouseLeaveHandler(e)}
+                                            onClick={()=> navigate(item.path)} 
+                                        >
+                                            <item.icon 
+                                                className={`h-[16px] w-[16px] 
+                                                    ${currentPath === item.path ? 'text-primaryDark' : 'text-primary' }`}
+                                            />   
+                                            <Link 
+                                                className={`text-[13px] text-[#5F6C72] capitalize tracking-[0.3px] hover:text-secondary
+                                                    hover:font-[500] ${currentPath === item.path && 'text-secondary font-[500]'}`} 
+                                                to={item.path} 
+                                            >
+                                                {item.label}
+                                            </Link>
+                                        </motion.li>
+                                    ))
+                                }
+                            </motion.ul>
+                        </motion.main>
+                }
+            </AnimatePresence>
         </section>
     )
 }

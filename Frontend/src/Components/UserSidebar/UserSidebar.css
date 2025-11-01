@@ -1,11 +1,11 @@
-#userSidebar main{
+#userSidebar #main{
     border: 2px solid rgb(243, 231, 252);
     box-shadow: 2px 2px 20px rgba(0,0,0,0.1);
 }
 /* #userSidebar main li{
     padding-inline: 40px;
 } */
-#userSidebar main li:hover::before{
+#userSidebar #main li:hover::before{
     content: '';
     position: absolute;
     top: -24%;
@@ -15,7 +15,7 @@
     background: var(--PRIMARY);
     z-index: -1;
 }
-#userSidebar main ul li span{
+#userSidebar #main ul li span{
     word-spacing: 1px;
 }
 #userSidebar .profilePic{

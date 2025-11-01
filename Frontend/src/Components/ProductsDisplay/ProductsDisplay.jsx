@@ -58,10 +58,10 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
     if(!admin && !wishlistDisplay){
       setProducts(items)
     }
-    if(wishlistDisplay){
+    if(wishlistDisplay && wishlistProducts){
       console.log("wishlistProducts---->", wishlistProducts)
       let allWishlistProducts = wishlistProducts
-      allWishlistProducts = allWishlistProducts.filter(list=> list.product).map(list=> {
+      allWishlistProducts = allWishlistProducts.map(list=> {
           const {product, ...rest} = list
           const id = {productId: product._id}
           return {...id, ...product, ...rest}

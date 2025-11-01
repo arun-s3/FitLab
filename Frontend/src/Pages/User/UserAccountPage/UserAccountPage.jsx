@@ -237,8 +237,12 @@ export default function UserAccountPage(){
     return(
       infoTypes.map(infoType=> (
         <div key={infoType.type}>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="text-sm font-medium text-gray-700 mb-1 flex justify-between items-center">
              { camelToCapitalizedWords(infoType.type) } 
+             {
+              !infoType?.optionalField &&
+                <span className='text-red-500 text-[11px]'> *Required Field </span>
+             }
           </label>
           <div className={`${infoType?.Icon ? 'relative' : ''}`}>
               <input type="text" value={detailType === 'personal' ? userDetails[infoType.type] : addressDetails[infoType.type]} 

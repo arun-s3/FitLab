@@ -1,6 +1,8 @@
 const User = require('../Models/userModel')
 const bcryptjs = require('bcryptjs')
-const nodemailer = require("nodemailer");
+const nodemailer = require("nodemailer")
+const cloudinary = require('../Utils/cloudinary')
+
 // const crypto = require("crypto");
 const {errorHandler} = require('../Utils/errorHandler')
 const {generateToken, verifyToken} = require('../Utils/jwt')
@@ -334,6 +336,45 @@ const resetPassword = async (req, res, next)=> {
   }
 }
 
+
+const updateProfilePic = async (req, res, next) => {
+  try {
+    console.log('Inside updateProfilePic...')
+    const userId = req.user._id
+
+    if (!req.file) {
+      return next(errorHandler(400, "No image has been provided"))
+    }
+
+    const uploadResponse = await cloudinary.uploader.upload(req.file.path, {
+      folder: 'fitlab_users/images',
+      resource_type: 'image',
+      transformation: [{ width: 400, height: 400, crop: 'limit' }],
+    })
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { profilePic: uploadResponse.secure_url },
+      { new: true, select: 'username profilePic email' }
+    )
+
+    if (!updatedUser) {
+      return next(errorHandler(404, "User not found"))
+    }
+
+    console.log('Profile picture created successfully---->', updatedUser.profilePic)
+
+    return res.status(200).json({
+      message: 'Profile picture updated successfully',
+      profilePic: updatedUser.profilePic,
+    });
+  }
+  catch (error) {
+    console.error('Error updating profile pic:', error)
+    next(error)
+  }
+}
+
 const googleSignin = async(req,res,next)=>{
     try{
         const {username, email, sub:googleId, picture:profilePic} = req.body
@@ -500,4 +541,4 @@ const signout = (req,res,next)=>{
 
 
 module.exports = {tester, createUser, sendOtp, verifyOtp, loginUser, clearAllCookies, updateUserDetails, updateForgotPassword, resetPassword,
-     googleSignin, getUserId, searchUsernames, totalUsersCount, generateUniqueGuestUser, verifyAndDeleteGuestUser, signout}
+     updateProfilePic, googleSignin, getUserId, searchUsernames, totalUsersCount, generateUniqueGuestUser, verifyAndDeleteGuestUser, signout}

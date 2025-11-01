@@ -262,27 +262,151 @@ const getUserWishlist = async(req, res, next)=> {
 //   }
 // }
 
+// const getAllWishlistProducts = async (req, res, next) => {
+//   try {
+//     console.log("Inside getAllWishlistProducts controller")
+//     const { queryOptions } = req.body
+//     const userId = req.user.id
+//     console.log("queryOptions:", JSON.stringify(queryOptions))
+
+//     let wishlist = await Wishlist.findOne({ userId })
+//       .populate({
+//         path: "lists.products.product",
+//         populate: {
+//           path: "variants",
+//           select: "weight size motorPower color stock price",
+//         },
+//       })
+
+//     if (!wishlist) {
+//       console.log("No wishlist available!")
+//       return res.status(200).json({ wishlistProducts: [], productCounts: 0 })
+//     }
+
+//     let productsArray = []
+//     if (queryOptions?.listName) {
+//       const targetList = wishlist.lists.find(
+//         (list) => list.name === queryOptions.listName
+//       )
+//       if (targetList) {
+//         productsArray = targetList.products
+//       }
+//     } else {
+//       wishlist.lists.forEach((list) => {
+//         productsArray = productsArray.concat(list.products)
+//       })
+//     }
+
+//     console.log("productsArray length before filter:", productsArray.length)
+
+//     productsArray = productsArray.filter(
+//       (item) => item.product && !item.product.variantOf
+//     )
+
+//     const mergedProducts = productsArray.map((item) => {
+//       const main = item.product
+//       const variants = main.variants || []
+//       const variantKey = main.variantType
+
+//       const variantValues = variantKey
+//         ? [main[variantKey], ...variants.map((v) => v[variantKey])].filter(Boolean)
+//         : []
+
+//       const prices = [main.price, ...variants.map((v) => v.price)]
+//       const stocks = [main.stock, ...variants.map((v) => v.stock)]
+//       const totalStock = stocks.reduce((sum, s) => sum + (s || 0), 0)
+
+//       return {
+//         ...item, 
+//         product: {
+//           ...main,
+//           ...(variantKey ? { [`${variantKey}s`]: variantValues } : {}),
+//           prices,
+//           stocks,
+//           totalStock,
+//         },
+//       }
+//     })
+
+//     if (queryOptions?.searchData) {
+//       const searchQuery = queryOptions.searchData.toLowerCase()
+//       mergedProducts = mergedProducts.filter((item) => {
+//         const title = item.product?.title?.toLowerCase() || ""
+//         const subtitle = item.product?.subtitle?.toLowerCase() || ""
+//         return title.includes(searchQuery) || subtitle.includes(searchQuery)
+//       })
+//     }
+
+//     if (queryOptions?.sort && Object.keys(queryOptions?.sort).length > 0) {
+//       const sortKey = Object.keys(queryOptions.sort)[0]
+//       const sortOrder = Number(queryOptions.sort[sortKey])
+//       console.log(`Sorting by ${sortKey} in order ${sortOrder}`)
+
+//       mergedProducts.sort((a, b) => {
+//         const productA = a.product || {}
+//         const productB = b.product || {}
+//         switch (sortKey) {
+//           case "price":
+//             return sortOrder * ((productA.price || 0) - (productB.price || 0))
+//           case "addedAt":
+//             return sortOrder * (new Date(a.addedAt) - new Date(b.addedAt))
+//           case "alphabetical":
+//             return (
+//               sortOrder *
+//               (productA.title?.toLowerCase() || "").localeCompare(
+//                 productB.title?.toLowerCase() || ""
+//               )
+//             )
+//           case "priority":
+//             return (
+//               sortOrder *
+//               ((a.productPriority || 2) - (b.productPriority || 2))
+//             )
+//           default:
+//             return 0
+//         }
+//       })
+//     }
+
+//     const page = parseInt(queryOptions?.page) || 1
+//     const limit = parseInt(queryOptions?.limit) || 12
+//     const skip = (page - 1) * limit
+
+//     const productCounts = mergedProducts.length
+//     const wishlistProducts = mergedProducts.slice(skip, skip + limit)
+
+//     res.status(200).json({wishlistProducts, productCounts});
+//   }
+//   catch (error){
+//     console.error("Error in getAllWishlistProducts controller:", error.message)
+//     next(error)
+//   }
+// }
+
 const getAllWishlistProducts = async (req, res, next) => {
   try {
     console.log("Inside getAllWishlistProducts controller")
     const { queryOptions } = req.body
-    const userId = req.user.id
+    const userId = req.user._id
     console.log("queryOptions:", JSON.stringify(queryOptions))
 
+    // 1️⃣ Get user's wishlist + deeply populate variants
     let wishlist = await Wishlist.findOne({ userId })
       .populate({
         path: "lists.products.product",
         populate: {
           path: "variants",
-          select: "weight size motorPower color stock price",
+          select: "weight size motorPower color stock price variantType variantOf",
         },
       })
+      .lean()
 
     if (!wishlist) {
       console.log("No wishlist available!")
       return res.status(200).json({ wishlistProducts: [], productCounts: 0 })
     }
 
+    // 2️⃣ Flatten all products (or filter by list name)
     let productsArray = []
     if (queryOptions?.listName) {
       const targetList = wishlist.lists.find(
@@ -297,12 +421,14 @@ const getAllWishlistProducts = async (req, res, next) => {
       })
     }
 
-    console.log("productsArray length before filter:", productsArray.length)
+    console.log("Total products before merge:", productsArray.length)
 
+    // 3️⃣ Filter out products without valid product refs
     productsArray = productsArray.filter(
       (item) => item.product && !item.product.variantOf
     )
 
+    // 4️⃣ Merge main product with variants
     const mergedProducts = productsArray.map((item) => {
       const main = item.product
       const variants = main.variants || []
@@ -316,35 +442,40 @@ const getAllWishlistProducts = async (req, res, next) => {
       const stocks = [main.stock, ...variants.map((v) => v.stock)]
       const totalStock = stocks.reduce((sum, s) => sum + (s || 0), 0)
 
+      // Merge with wishlist-level info
       return {
-        ...item, 
+        ...item,
         product: {
           ...main,
-          ...(variantKey ? { [`${variantKey}s`]: variantValues } : {}),
           prices,
           stocks,
           totalStock,
+          ...(variantKey ? { [`${variantKey}s`]: variantValues } : {}),
         },
       }
     })
 
+    // 5️⃣ Search
+    let filteredProducts = [...mergedProducts]
     if (queryOptions?.searchData) {
       const searchQuery = queryOptions.searchData.toLowerCase()
-      mergedProducts = mergedProducts.filter((item) => {
+      filteredProducts = filteredProducts.filter((item) => {
         const title = item.product?.title?.toLowerCase() || ""
         const subtitle = item.product?.subtitle?.toLowerCase() || ""
         return title.includes(searchQuery) || subtitle.includes(searchQuery)
       })
     }
 
-    if (queryOptions?.sort && Object.keys(queryOptions?.sort).length > 0) {
+    // 6️⃣ Sorting
+    if (queryOptions?.sort && Object.keys(queryOptions.sort).length > 0) {
       const sortKey = Object.keys(queryOptions.sort)[0]
       const sortOrder = Number(queryOptions.sort[sortKey])
       console.log(`Sorting by ${sortKey} in order ${sortOrder}`)
 
-      mergedProducts.sort((a, b) => {
+      filteredProducts.sort((a, b) => {
         const productA = a.product || {}
         const productB = b.product || {}
+
         switch (sortKey) {
           case "price":
             return sortOrder * ((productA.price || 0) - (productB.price || 0))
@@ -368,20 +499,23 @@ const getAllWishlistProducts = async (req, res, next) => {
       })
     }
 
+    // 7️⃣ Pagination
     const page = parseInt(queryOptions?.page) || 1
     const limit = parseInt(queryOptions?.limit) || 12
     const skip = (page - 1) * limit
 
-    const productCounts = mergedProducts.length
-    const wishlistProducts = mergedProducts.slice(skip, skip + limit)
+    const productCounts = filteredProducts.length
+    const wishlistProducts = filteredProducts.slice(skip, skip + limit)
 
-    res.status(200).json({wishlistProducts, productCounts});
-  }
-  catch (error){
+    console.log("wishlistProducts------------>", JSON.stringify(wishlistProducts))
+
+    res.status(200).json({ wishlistProducts, productCounts })
+  } catch (error) {
     console.error("Error in getAllWishlistProducts controller:", error.message)
     next(error)
   }
 }
+
 
 
 

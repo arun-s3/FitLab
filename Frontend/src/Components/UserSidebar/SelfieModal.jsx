@@ -1,12 +1,14 @@
 import React, {useRef, useState, useEffect} from "react"
 import { motion, AnimatePresence } from "framer-motion"
 
-import { X, Camera, RotateCcw } from "lucide-react"
+import { X, Camera, ArrowLeft } from "lucide-react"
+import {toast as sonnerToast} from 'sonner'
 
 import FileUpload from "../FileUpload/FileUpload"
+import {SiteButtonSquare} from '../SiteButtons/SiteButtons'
 
 
-export default function SelfieModal({ isOpen, onClose, onCapture, profilePic, onChangeProfilePic}) {
+export default function SelfieModal({ isOpen, onClose, onCapture, userSystemPic, setUserSystemPic}) {
 
   const videoRef = useRef(null)
   const canvasRef = useRef(null)
@@ -14,6 +16,7 @@ export default function SelfieModal({ isOpen, onClose, onCapture, profilePic, on
 
   const [cameraActive, setCameraActive] = useState(false)
   const [streamActive, setStreamActive] = useState(false)
+  const [capturedPic, setCapturedPic] = useState(null)
   const [isMobile, setIsMobile] = useState(false)
   const [error, setError] = useState(null)
 
@@ -25,6 +28,22 @@ export default function SelfieModal({ isOpen, onClose, onCapture, profilePic, on
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
   }, [])
+
+    useEffect(()=> {
+        if(userSystemPic && userSystemPic.length > 0){
+          setCapturedPic(null)
+        }
+    }, [userSystemPic])
+
+    useEffect(()=> {
+      console.log(`capturedPic-----------> ${capturedPic} and userSystemPic-----------> ${JSON.stringify(userSystemPic)}`)
+    }, [userSystemPic, capturedPic])
+
+    useEffect(()=> {
+      if(error){
+        setTimeout(()=> setError(null), 3500)
+      }
+    }, [error])
 
   const startCamera = async () => {
     try {
@@ -61,14 +80,17 @@ export default function SelfieModal({ isOpen, onClose, onCapture, profilePic, on
   const capturePhoto = () => {
     console.log("[v0] Capturing photo...")
     if (videoRef.current && canvasRef.current) {
+
+      if(userSystemPic) setUserSystemPic([])
+
       const context = canvasRef.current.getContext("2d")
       canvasRef.current.width = videoRef.current.videoWidth
       canvasRef.current.height = videoRef.current.videoHeight
       context.drawImage(videoRef.current, 0, 0)
       const photoData = canvasRef.current.toDataURL("image/jpeg")
       console.log("[v0] Photo captured successfully")
+      setCapturedPic(photoData)
       stopCamera()
-      onCapture(photoData)
     }
   }
 
@@ -96,6 +118,25 @@ export default function SelfieModal({ isOpen, onClose, onCapture, profilePic, on
     console.log("[v0] Restarting camera for retake...")
     setCameraActive(false)
     setStreamActive(false)
+    videoContainerRef.current.style.display = 'none'
+  }
+
+  const submitPhoto = ()=> {
+    if(capturedPic){
+      console.log("Inside if(capturePhoto)")
+      onCapture(capturedPic)
+      sonnerToast.info('Uploading profile pic...')
+      onClose()
+    }
+    else if(userSystemPic && userSystemPic.length > 0){
+      console.log("Inside else if(userSystemPic && userSystemPic.length > 0)")
+      onCapture(userSystemPic[0].url)
+      sonnerToast.info('Uploading profile pic...')
+      onClose()
+    }
+    else{
+      setError("No photo to Submit!")
+    }
   }
   
 
@@ -118,7 +159,7 @@ export default function SelfieModal({ isOpen, onClose, onCapture, profilePic, on
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             className="fixed inset-0 flex items-center justify-center z-50 p-4"
           >
-            <div className="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl overflow-hidden">
+            <div className="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-h-[42rem] overflow-y-auto">
               <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800 
                 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-slate-800 dark:to-slate-900"
               >
@@ -134,18 +175,15 @@ export default function SelfieModal({ isOpen, onClose, onCapture, profilePic, on
               </div>
 
               <div className="p-6 bg-white dark:bg-slate-900">
-                {error && (
-                  <div className="mb-4 p-4 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 rounded-lg">
-                    <p className="text-red-800 dark:text-red-200">{error}</p>
-                  </div>
-                )}
+                
+                <p className="text-red-800 text-[12px] h-[7px] dark:text-red-200">{error && error}</p>
 
                 {!cameraActive && 
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 20 }}
-                    className="flex flex-col items-center justify-center py-12"
+                    className="flex flex-col items-center justify-center"
                   >
                     <motion.div
                       animate={{ scale: [1, 1.1, 1] }}
@@ -175,17 +213,34 @@ export default function SelfieModal({ isOpen, onClose, onCapture, profilePic, on
                     </div>
 
                     <FileUpload 
-                      images={profilePic} 
-                      setImages={onChangeProfilePic} 
+                      images={userSystemPic} 
+                      setImages={setUserSystemPic} 
                       imageLimit={1} 
                       needThumbnail={false} 
                       imageType='Profile pic'
-                      imageCropperBgBlur={false}
+                      imagePreview={{
+                        status: true,
+                        size: "landscape",
+                        imageName: null,
+                      }}
+                      imageCropperPositionFromTop={"0px"}
+                      imageCropperBgBlur={true}
                       uploadBox={{
                         beforeUpload: "85px",
                         afterUpload: "55px",
                       }}
                     />
+
+                    {
+                      capturedPic && 
+                        <motion.div className="w-[300px] h-auto border-2 border-secondary rounded-[8px]">
+                          <img 
+                            className="p-[5px] w-full h-auto object-cover rounded-[8px]"
+                            src={capturedPic}
+                            alt='Profile pic'
+                          />
+                        </motion.div>
+                    }
 
                   </motion.div>
                 }
@@ -231,8 +286,8 @@ export default function SelfieModal({ isOpen, onClose, onCapture, profilePic, on
                         className="px-6 py-3 bg-slate-500 text-white font-semibold rounded-lg hover:bg-slate-600 transition-all 
                           duration-200 shadow-lg flex items-center gap-2"
                       >
-                        <RotateCcw size={20} />
-                        Close
+                        <ArrowLeft size={20} />
+                        Back
                       </motion.button>
                     </div>
 
@@ -241,10 +296,29 @@ export default function SelfieModal({ isOpen, onClose, onCapture, profilePic, on
                     </p>
                   </motion.div>
               </div>
+
+              <motion.div
+                className='w-full pb-6 xxs-sm:w-auto text-center'
+              >    
+                {
+                  !cameraActive && 
+                    <SiteButtonSquare 
+                      tailwindClasses={`hover:!bg-primaryDark !px-[32px] transition duration-300`}
+                      customStyle={{fontWeight:'600', paddingBlock:'9px', borderRadius:'7px'}} 
+                      clickHandler={()=> submitPhoto()}>
+                        Submit Photo
+                    </SiteButtonSquare>
+                }
+              </motion.div>
+
             </div>
           </motion.div>
 
-          <canvas ref={canvasRef} className="hidden" />
+          <canvas 
+            ref={canvasRef} 
+            className="hidden" 
+          />
+
         </>
       )}
     </AnimatePresence>

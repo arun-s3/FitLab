@@ -87,6 +87,8 @@ export default function App(){
                     <Route path='signin' element={<SignUpAndInPage type='signin' />}/>
                     <Route path='forgot-password' element={<ForgotAndResetPasswordPage/>}/>
 
+                    <Route path='image-editor' element={<ImageEditor/>} />
+
                     <Route element={<SocketProvider/>}>
                         <Route element={<GlobalVideoCallModalLayout/>}>
                             <Route index element={<HomePage/>}/>
@@ -134,7 +136,6 @@ export default function App(){
                     <Route path="signin" element={<AdminSignInPage/>}/>
                         <Route element={<AdminSocketProvider/>}>
                             <Route element={<PrivateAdminRoutes/>}>
-                                <Route path='image-editor' element={<ImageEditor/>} />
                                 <Route element={<AdminPageLayout/>}>
                                     <Route path='dashboard' element={<AdminDashboardPage insightType='business'/>} >
                                         <Route path="business" element={<AdminDashboardPage insightType='business'/>} />

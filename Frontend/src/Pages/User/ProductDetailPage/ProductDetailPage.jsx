@@ -10,7 +10,6 @@ import axios from 'axios'
 import Header from '../../../Components/Header/Header'
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
 import ProductDetailSection from './ProductDetail'
-import ReviewSystem from './ReviewSystem'
 import SimilarProductsCarousal from '../../../Components/ProductsCarousal/SimilarProductsCarousal'
 import {capitalizeFirstLetter} from '../../../Utils/helperFunctions'
 import {addToCart, getTheCart, resetCartStates} from '../../../Slices/cartSlice'
@@ -28,7 +27,7 @@ export default function ProductDetailPage(){
 
   const [quantity, setQuantity] = useState(1)
 
-  const [activeTab, setActiveTab] = useState("description")
+  const [activeTab, setActiveTab] = useState("reviews")
 
   const [isCartOpen, setIsCartOpen] = useState(false)
 
@@ -43,6 +42,25 @@ export default function ProductDetailPage(){
   const dispatch = useDispatch()
 
   const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+
+  const dummyProduct = {
+    id: 1,
+    name: "Premium Wireless Headphones",
+    price: 299.99,
+    originalPrice: 399.99,
+    rating: 4.5,
+    reviewCount: 128,
+    description:
+      "Experience crystal-clear sound with our premium wireless headphones. Featuring active noise cancellation, 30-hour battery life, and premium comfort padding.",
+    image: "/premium-wireless-headphones.jpg",
+    features: [
+      "Active Noise Cancellation",
+      "30-Hour Battery Life",
+      "Premium Sound Quality",
+      "Bluetooth 5.0",
+      "Lightweight Design",
+    ],
+  }
 
   useEffect(()=> {
     const fetchProduct = async()=> {
@@ -169,7 +187,7 @@ export default function ProductDetailPage(){
                         >
                           {productDetails.description &&
                             <>
-                              <h2 className="text-[17px] font-bold mb-[16px]"> Product Description </h2>
+                              <h2 className="text-[24px] font-bold mb-[16px]"> Product Description </h2>
                               <p className='text-gray-600 text-[14px] xs-sm:text-base leading-relaxed break-words
                                 whitespace-normal max-w-full overflow-hidden'>
                                    {capitalizeFirstLetter(productDetails.description)} 
@@ -190,7 +208,7 @@ export default function ProductDetailPage(){
                               exit={{ opacity: 0, y: -10 }}
                               transition={{ duration: 0.25, ease: "easeInOut" }}
                             >
-                              <h2 className="text-[17px] font-bold mb-[16px]"> Additional Information </h2>
+                              <h2 className="text-[24px] font-bold mb-[16px]"> Additional Information </h2>
                               <ul className="list-disc list-inside space-y-[8px]">
                                 {
                                   productDetails.additionalInformation.map(info=> (
@@ -214,7 +232,7 @@ export default function ProductDetailPage(){
                           transition={{ duration: 0.25, ease: "easeInOut" }}
                         >
 
-                          <ReviewSystem onReviewSubmit={submitReviewHandler}/>
+
 
                         </motion.div>
                     }

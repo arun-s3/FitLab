@@ -322,7 +322,7 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
         console.log(`imageUrl----> ${imageUrl}, name----> ${name}, blob----> ${blob}`)
         console.log("editorPath.current-->"+editorPath.current)
 
-        windowRef.current = window.open(`${window.location.origin}/admin/image-editor?name=${name}`, "", "width=1300,height=700,left=300,top=300,resizable=no")
+        windowRef.current = window.open(`${window.location.origin}/image-editor?name=${name}`, "", "width=1300,height=700,left=300,top=300,resizable=no")
         // windowRef.current.postMessage({type:'target-img', blob, name}, '*')
 
         const messageHandler = (event)=> {

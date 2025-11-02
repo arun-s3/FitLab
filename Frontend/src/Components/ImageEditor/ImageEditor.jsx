@@ -267,7 +267,7 @@ const panelHandler = (e, panel)=>{
                 }
                 <div className='h-[85%] w-full content-panel'>
                     <figure className='h-[97%] w-full p-[2rem] flex justify-center items-center bg-grayLightMuted'>
-                        <img src={image.url} alt='current image' className='max-w-[700px] h-auto' ref={previewRef}
+                        <img src={image.url} alt='current image' className='max-w-[700px] h-full' ref={previewRef}
                             style={{filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturate}%) 
                                         grayscale(${grayscale}%) blur(${blur/5}px) sepia(${sepia}%) opacity(${opacity/100})`,
                                     transform: `rotate(${rotate}deg) scaleX(${scaleX}) scaleY(${scaleY})`}}/>

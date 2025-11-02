@@ -217,7 +217,7 @@ export default function ListBoard({currentList, onNewCurrenList, onSearch, onUpd
                                 {list?.thumbnail ? (
                                   <img
                                     src={list?.thumbnail.url}
-                                    className="w-[100px] h-[100px] rounded-[10px]"
+                                    className="w-[100px] h-[100px] object-cover rounded-[10px]"
                                   />
                                 ) : (
                                   <PiListHeartDuotone className="w-[50px] h-[50px] text-[#dde1e7]" />

@@ -23,3 +23,31 @@
     box-shadow: 2px 2px 24px rgba(0,0,0,0.1);
 }
 
+@keyframes draw-border {
+  0% {
+    border-width: 0 0 0 0;
+    border-color: transparent;
+  }
+  25% {
+    border-width: 1px 0 0 0;
+    border-color: var(--PRIMARY) transparent transparent transparent;
+  }
+  50% {
+    border-width: 1px 1px 0 0;
+    border-color: var(--PRIMARY) var(--PRIMARY) transparent transparent;
+  }
+  75% {
+    border-width: 1px 1px 1px 0;
+    border-color: var(--PRIMARY) var(--PRIMARY) var(--PRIMARY) transparent;
+  }
+  100% {
+    border-width: 1px 1px 1px 1px;
+    border-color: #E4E7E9;
+  }
+}
+
+#userSidebar #main {
+  border-style: solid;
+  border-color: transparent;
+  animation: draw-border 1.5s ease-in-out forwards;
+}

@@ -19,7 +19,8 @@ export default function UserSidebar({currentPath, openMenuByDefault = true, flex
     const [isMenuOpen, setIsMenuOpen] = useState(openMenuByDefault)
 
     const [showCamera, setShowCamera] = useState(false)
-    const [profilePic, setProfilePic] = useState([])
+    const [isHoveringCam, setIsHoveringCam] = useState(false)
+    const [userSystemPic, setUserSystemPic] = useState([])
     const [photoDispatched, setPhotoDispatched] = useState(false)
 
     const {user, loading, userDpUpdated, error} = useSelector(state=> state.user)
@@ -77,7 +78,7 @@ export default function UserSidebar({currentPath, openMenuByDefault = true, flex
             x: 0,
             transition: {
                 type: 'tween',
-                duration: 0.45,
+                duration: 0.2,
                 ease: [0.22, 1, 0.36, 1],
                 when: 'beforeChildren',
                 staggerChildren: 0.06, 
@@ -124,14 +125,22 @@ export default function UserSidebar({currentPath, openMenuByDefault = true, flex
                             : <img src='/DefaultDp.png' alt='ProfilePic' className='rounded-[35px]'/>
                     }
                     <button 
-                        className='absolute bottom-[2px] right-[3px] p-[5px] rounded-[25px]  bg-white border border-white'
+                        className={`absolute bottom-[2px] right-[3px] p-[5px] rounded-[25px] bg-white 
+                            hover:bg-gray-100 border border-gray-300 hover:border-primary hover:scale-110 transition duration-300`}
                         onClick={()=> setShowCamera(true)}
-                        
+                        onMouseEnter={()=> setIsHoveringCam(true)}
+                        onMouseLeave={()=> setIsHoveringCam(false)}
                     >   
                         {
                             loading 
                                 ? <CustomPuffLoader loading={loading} customStyle={{marginLeft: '5px', alignSelf: 'center'}}/>
-                                : <Camera className='w-[15px] h-[15px] text-secondaryLight2 z-[1]' />
+                                : <Camera 
+                                    className={`w-[15px] h-[15px] focus:outline-none focus:ring-2 focus:ring-purple-300 z-[1]
+                                      ${isHoveringCam 
+                                            ? 'text-purple-600 hover:drop-shadow-[0_0_6px_rgba(139,92,246,0.8)]'
+                                            : 'text-primaryDark'}
+                                        `}
+                                  />
                         }
                     </button>
                      {
@@ -142,8 +151,8 @@ export default function UserSidebar({currentPath, openMenuByDefault = true, flex
                                   uploadPhoto(photo)
                                   setShowCamera(false)
                                 }}
-                                profilePic={profilePic}
-                                onChangeProfilePic={setProfilePic}
+                                userSystemPic={userSystemPic}
+                                setUserSystemPic={setUserSystemPic}
                             />
                      }
                 </div>
@@ -161,7 +170,7 @@ export default function UserSidebar({currentPath, openMenuByDefault = true, flex
                         <motion.main 
                             key="sidebar"
                             id='main'
-                            className='mt-[10px] w-full h-auto px-[18px] py-[20px] bg-white border border-[#E4E7E9] rounded-[7px]'
+                            className='mt-[10px] w-full h-auto px-[18px] py-[27px] bg-white border border-[#E4E7E9] rounded-[7px]'
                             variants={sidebarVariants}
                             initial="hidden"
                             animate="visible"

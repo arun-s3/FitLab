@@ -153,40 +153,19 @@ const productSchema = mongoose.Schema({
         ref: "Product",
       },
     ],
-    user: {
-       type: mongoose.Schema.ObjectId,
-       ref: "User",
-       // required: true,
-     },
-    reviews: [
-      {
-        user: {
-          type: mongoose.Schema.ObjectId,
-          ref: "User",
-          required: true
-        },
-        name: {
-          type: String,
-          required: true
-        },
-        email: {
-           type: String,
-           required: true
-        },
-        date: {
-           type: Date,
-           default: Date.now()
-        },
-        rating: {
-          type: Number,
-          required: true
-        },
-        comment: {
-          type: String,
-          required: true
-        },
-      },
-     ],
+    averageRating: {
+      type: Number,
+      default: 0,
+    },
+    totalReviews: {
+      type: Number,
+      default: 0,
+    },
+    // user: {
+    //    type: mongoose.Schema.ObjectId,
+    //    ref: "User",
+    //    // required: true,
+    //  },
     }, {timestamps:true});
 
 const product = mongoose.model('Product', productSchema)

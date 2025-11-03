@@ -1,6 +1,6 @@
 import React, {useState, useEffect, useContext} from 'react'
 import './Header.css'
-import {Link, useNavigate} from 'react-router-dom'
+import {Link, useNavigate, useLocation} from 'react-router-dom'
 import {useSelector, useDispatch} from 'react-redux'
 import {motion} from "framer-motion"
 
@@ -34,6 +34,7 @@ export default function Header({customStyle, goToShopByCategorySec}){
 
     const navigate = useNavigate()
     const dispatch = useDispatch()
+    const location = useLocation()
 
     // const {setOpenVideoCallModal, VideoCallCommonModal} = useContext(SocketContext)
     // const {socket} = socketContextItems
@@ -44,9 +45,16 @@ export default function Header({customStyle, goToShopByCategorySec}){
             setIsCartOpen(true)
     }
 
+    const jumpToShopByCategorySec = ()=> {
+        if(location.pathname !== '/' ){
+            console.log("Navigating now...")
+            setTimeout(() => navigate('/', { state: { scrollTo: "shopByCategories" }}), 0)
+        }
+    }
+
     const menuItems = [
         {label: 'Home', path: '/'},
-        {label: 'Shop By Categories', handleClick: goToShopByCategorySec,
+        {label: 'Shop By Categories', handleClick: ()=> jumpToShopByCategorySec(),
              mobileLabel: 'Browse', className: 'hidden lg:hidden xl:inline-block', mobileClassName: 'xl:hidden'},
         {label: 'Products', path: '/shop'},
         {label: 'Support', path: '/support'},

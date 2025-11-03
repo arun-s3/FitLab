@@ -5,6 +5,8 @@ import {motion, AnimatePresence} from 'framer-motion'
 import {Star, ChevronLeft, ChevronRight} from 'lucide-react'
 import axios from 'axios'
 
+import StarGenerator from '../StarGenerator/StarGenerator'
+
 
 export default function SimilarProductsCarousal({titleColor = null, referenceProductIds}){
 
@@ -150,13 +152,15 @@ export default function SimilarProductsCarousal({titleColor = null, referencePro
                           transition={{ type: "spring", stiffness: 250, damping: 20 }}
                         />
                         <div>
-                          <div className="flex items-center gap-[4px] mb-[8px]">
-                            {Array.from({ length: product.rating }).map((_, i) => (
+                          <div className="text-secondary flex items-center gap-[4px] mb-[8px]">
+                            {/* {Array.from({ length: product.averageRating }).map((_, i) => (
                               <Star
                                 key={i}
                                 className="w-[16px] h-[16px] fill-yellow-400 text-yellow-400"
                               />
-                            ))}
+                            ))} */}
+                            <StarGenerator product={product} />
+                            <span className='text-secondary text-[13px]'> ({`${product.totalReviews}`}) </span>
                           </div>
                           <h3 className="font-medium">{product.name}</h3>
                           <p className="font-bold mt-[4px]">{product.price}</p>

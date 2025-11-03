@@ -10,6 +10,7 @@ import axios from 'axios'
 import Header from '../../../Components/Header/Header'
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
 import ProductDetailSection from './ProductDetail'
+import ReviewPanel from './ReviewsPanel'
 import SimilarProductsCarousal from '../../../Components/ProductsCarousal/SimilarProductsCarousal'
 import {capitalizeFirstLetter} from '../../../Utils/helperFunctions'
 import {addToCart, getTheCart, resetCartStates} from '../../../Slices/cartSlice'
@@ -232,7 +233,11 @@ export default function ProductDetailPage(){
                           transition={{ duration: 0.25, ease: "easeInOut" }}
                         >
 
-
+                          <ReviewPanel 
+                            productId={productDetails._id} 
+                            productRating={productDetails?.averageRating ? productDetails.averageRating : 0}
+                            totalReviews={productDetails.totalReviews}
+                          />
 
                         </motion.div>
                     }

@@ -1,3 +1,4 @@
+const mongoose = require("mongoose")
 const Review = require('../Models/reviewModel')
 const Product = require('../Models/productModel')
 
@@ -5,6 +6,7 @@ const {errorHandler} = require('../Utils/errorHandler')
 
 
 const calculateAverageRating = async (productId)=> {
+  console.log("Inside calculateAverageRating...")
   const reviews = await Review.find({ productId })
 
   if (reviews.length === 0) {
@@ -16,10 +18,12 @@ const calculateAverageRating = async (productId)=> {
   }
   const avg = reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length
 
-  await Product.findByIdAndUpdate(productId, {
-    averageRating: avg.toFixed(1),
-    totalReviews: reviews.length,
-  })
+  const averageRating = avg.toFixed(1)
+  const totalReviews = reviews.length
+  console.log(`averageRating---->${averageRating} and totalReviews---->${totalReviews}`)
+
+  await Product.findByIdAndUpdate(productId, {averageRating, totalReviews})
+  return {averageRating, totalReviews}
 }
 
 
@@ -56,10 +60,10 @@ const createReview = async (req, res, next)=> {
       comment,
     })
 
-    await calculateAverageRating(mainProductId)
+    const reviewStats = await calculateAverageRating(mainProductId)
 
     console.log('Review added----->', review)
-    res.status(201).json({success: true, message: "Review submitted successfully", review});
+    res.status(201).json({success: true, message: "Review submitted successfully", review, productAvgReview: reviewStats.averageRating, productTotalReview: reviewStats.totalReviews});
   } 
   catch (error){
     console.log("Error in createReview -->", error.message)
@@ -70,11 +74,13 @@ const createReview = async (req, res, next)=> {
 
 const updateReview = async (req, res, next)=> {
   try {
+    console.log("Inside updateReview...")
     const { reviewId } = req.params
     const { rating, title, comment } = req.body
     const userId = req.user._id
 
     const review = await Review.findById(reviewId)
+    console.log("Review found--->", review)
 
     if (!review) return next(errorHandler(404, "Review not found"))
     if (review.userId.toString() !== userId.toString()){
@@ -102,28 +108,94 @@ const updateReview = async (req, res, next)=> {
 }
 
 
-const getProductReviews = async (req, res, next)=> {
+const getProductReviews = async (req, res, next) => {
   try {
-    const { productId } = req.params
+    console.log("Inside getProductReviews...")
 
-    const reviews = await Review.find({ productId })
-      .populate("userId", "username profilePic isVerified") 
-      .sort({ createdAt: -1 })
+    const {productId} = req.params
+    const {sort = "newest", page = 1} = req.query 
+    const limit = 6
 
-    if (!reviews.length){
-      return res.status(200).json({success: true, message: "No reviews yet for this product", reviews: []});
+    console.log(`sort--> ${sort} and page--> ${page}`)
+    const currentPage = Math.max(parseInt(page), 1)
+    const perPage = Math.max(parseInt(limit), 1)
+    const skip = (currentPage - 1) * perPage
+
+    let sortOption = {}
+
+    switch (sort) {
+      case "most-helpful":
+        sortOption = { helpfulCount: -1, createdAt: -1 }
+        break
+      case "highest-rating":
+        sortOption = { rating: -1, createdAt: -1 }
+        break
+      case "lowest-rating":
+        sortOption = { rating: 1, createdAt: -1 }
+        break
+      case "oldest":
+        sortOption = { createdAt: 1 }
+        break
+      default:
+        sortOption = { createdAt: -1 } // newest
+        break
     }
-    res.status(200).json({success: true, reviewCounts: reviews.length, reviews})
-  } 
-  catch (error){
+
+    const reviews = await Review.aggregate([
+      { $match: { productId: new mongoose.Types.ObjectId(productId) } },
+      {
+        $addFields: {
+          helpfulCount: { $size: "$helpful" }
+        }
+      },
+      { $sort: sortOption },
+      { $skip: skip },
+      { $limit: perPage }
+    ])
+
+    const populatedReviews = await Review.populate(reviews, {
+      path: "userId",
+      select: "username profilePic isVerified"
+    })
+
+    const totalReviews = await Review.countDocuments({ productId })
+
+    const reviewStats = await calculateAverageRating(productId)
+
+    if (!populatedReviews.length) {
+      return res.status(200).json({
+        success: true,
+        message: "No reviews yet for this product",
+        reviews: [],
+        currentPage,
+        totalPages: 0,
+        productAvgReview: reviewStats.averageRating,
+        productTotalReview: reviewStats.totalReviews,
+      })
+    }
+
+    res.status(200).json({
+      success: true,
+      sortBy: sort,
+      currentPage,
+      totalPages: Math.ceil(totalReviews / perPage),
+      totalReviews,
+      reviews: populatedReviews,
+      productAvgReview: reviewStats.averageRating,
+      productTotalReview: reviewStats.totalReviews,
+    })
+  }
+  catch (error) {
     console.log("Error in getProductReviews -->", error.message)
     next(error)
   }
 }
 
 
+
 const toggleHelpfulReview = async (req, res, next)=> {
   try {
+    console.log("Inside toggleHelpfulReview...")
     const { reviewId } = req.params
     const userId = req.user._id
 
@@ -131,16 +203,17 @@ const toggleHelpfulReview = async (req, res, next)=> {
     if (!review) return next(errorHandler(404, "Review not found"))
 
     const alreadyHelpful = review.helpful.includes(userId)
+    console.log("alreadyHelpful---->", alreadyHelpful)
 
     if (alreadyHelpful) {
       review.helpful.pull(userId)
       await review.save()
-      res.status(200).json({ success: true, message: "Removed from helpful", helpfulCount: review.helpful.length });
+      res.status(200).json({ success: true, helpfulStatus: false, helpfulCount: review.helpful.length });
     }
     else{
       review.helpful.push(userId)
       await review.save()
-      res.status(200).json({ success: true, message: "Marked as helpful", helpfulCount: review.helpful.length });
+      res.status(200).json({ success: true, helpfulStatus: true, helpfulCount: review.helpful.length });
     }
   }
   catch(error){
@@ -150,6 +223,37 @@ const toggleHelpfulReview = async (req, res, next)=> {
 }
 
 
+const getProductRatingStats = async (req, res, next) => {
+  try {
+    console.log("Inside getProductRatingStats...")
+    const { productId } = req.params
+
+    const breakdown = await Review.aggregate([
+      { $match: { productId: new mongoose.Types.ObjectId(productId) } },
+      { $group: { _id: "$rating", count: { $sum: 1 } } },
+      { $sort: { _id: -1 } } 
+    ])
+
+    const ratingCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }
+    let total = 0
+    let totalWeighted = 0
+
+    breakdown.forEach(item => {
+      ratingCounts[item._id] = item.count
+      total += item.count
+      totalWeighted += item._id * item.count
+    })
+    console.log("Breakdown----->", JSON.stringify(breakdown))
+    const averageRating = total > 0 ? (totalWeighted / total).toFixed(1) : 0
+
+    res.status(200).json({success: true, averageRating, totalReviews: total, ratingCounts})
+  }
+  catch (error) {
+    console.log("Error in getProductRatingBreakdown -->", error.message)
+    next(error)
+  }
+}
 
 
-module.exports = {createReview, updateReview, getProductReviews, toggleHelpfulReview }
+
+module.exports = {createReview, updateReview, getProductReviews, toggleHelpfulReview, getProductRatingStats}

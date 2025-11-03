@@ -301,7 +301,7 @@ export default function SignUpAndInPage({type}){
         
             <main 
                 className={`-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2
-                    rounded-[22px] px-[50px] sm:px-10
+                    rounded-[22px] px-[50px] sm:px-10 
                     ${type=='signup'? 'w-[90%] sm:w-[70%] md:w-[50%] lg:w-[40%] my-[16rem] sm:my-[12rem] sm:border' 
                         : 'w-[90%] x-md:w-[65%] lg:w-[50%] x-lg:w-[40%] my-[2%] before:h-[120vh]'}`}
             >

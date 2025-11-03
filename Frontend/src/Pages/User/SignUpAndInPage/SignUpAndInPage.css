@@ -63,7 +63,7 @@
   }
   75% {
     border-width: 1px 1px 1px 0;
-    border-color: var(--SECONDARY) var(--SECONDARY) var(--SECONDARY)transparent;
+    border-color: var(--SECONDARY) var(--SECONDARY) var(--SECONDARY) transparent;
   }
   100% {
     border-width: 1px 1px 1px 1px;

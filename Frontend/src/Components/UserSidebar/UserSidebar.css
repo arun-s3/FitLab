@@ -23,7 +23,7 @@
     box-shadow: 2px 2px 24px rgba(0,0,0,0.1);
 }
 
-@keyframes draw-border {
+@keyframes draw-userSidebar-border {
   0% {
     border-width: 0 0 0 0;
     border-color: transparent;
@@ -49,5 +49,5 @@
 #userSidebar #main {
   border-style: solid;
   border-color: transparent;
-  animation: draw-border 1.5s ease-in-out forwards;
+  animation: draw-userSidebar-border 1.5s ease-in-out forwards;
 }

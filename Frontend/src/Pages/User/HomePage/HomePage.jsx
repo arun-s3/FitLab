@@ -1,4 +1,5 @@
 import React, {useState, useEffect, useRef} from 'react'
+import {useLocation} from "react-router-dom"
 
 import Header from '../../../Components/Header/Header'
 import HeroSection from './HeroSection'
@@ -18,6 +19,8 @@ export default function HomePage(){
     const [showHighlights, setShowHighlights] = useState(false)
     const highlightsRef = useRef(null)
 
+    const location = useLocation()
+
     const shopByCategoryRef = useRef(null)
 
     useEffect(() => {
@@ -36,7 +39,15 @@ export default function HomePage(){
       if (highlightsRef.current) observer.observe(highlightsRef.current)
 
       return () => observer.disconnect()
-    }, [])
+    }, []) 
+  
+    useEffect(() => {
+      if (location.state?.scrollTo === "shopByCategories"){
+        setTimeout(() => {
+          shopByCategoryRef.current?.scrollIntoView({ behavior: "smooth" })
+        }, 200)
+      }
+    }, [location])
 
     const bgImg = {
         backgroundImage:"url('/Hero-section-bg2.png')",
@@ -75,7 +86,7 @@ export default function HomePage(){
 
         </div>
 
-        <div ref={shopByCategoryRef}>
+        <div id="shopByCategoriesSection" ref={shopByCategoryRef}>
 
           <ShopByCategories />
 

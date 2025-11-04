@@ -8,37 +8,53 @@ import axios from 'axios'
 
 export default function PopularProductsCarousal() {
 
-  // const [products, setProducts] = useState([])
+  const [products, setProducts] = useState([])
   const [currentIndex, setCurrentIndex] = useState(0)
 
   const navigate = useNavigate()
 
-  const products = [
-    {
-      id: 1,
-      name: "Pro Dumbbells Set",
-      price: "29999",
-      image: "./professional-dumbbells-set-in-gym.jpg",
-    },
-    {
-      id: 2,
-      name: "Yoga Mat Premium",
-      price: "3000",
-      image: "./premium-yoga-mat-fitness.jpg",
-    },
-    {
-      id: 3,
-      name: "Treadmill Elite",
-      price: "73000",
-      image: "./modern-treadmill-gym-equipment.jpg",
-    },
-    {
-      id: 4,
-      name: "Resistance Bands",
-      price: "1300",
-      image: "./colorful-resistance-bands-set.jpg",
-    },
-  ]
+  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+
+  useEffect(()=> {
+    async function loadProducts(){
+      try{
+        const response = await axios.get(`${baseApiUrl}/products/popular`, {withCredentials: true})
+        console.log("RESPONSE from loadSlides---->", response)
+        setProducts(response.data.popularProducts)
+      }
+      catch(error){
+        console.log("error from  loadSlides--->", error.message)
+      }  
+    }
+    loadProducts()
+  }, [])
+
+  // const products = [
+  //   {
+  //     id: 1,
+  //     name: "Pro Dumbbells Set",
+  //     price: "29999",
+  //     image: "./professional-dumbbells-set-in-gym.jpg",
+  //   },
+  //   {
+  //     id: 2,
+  //     name: "Yoga Mat Premium",
+  //     price: "3000",
+  //     image: "./premium-yoga-mat-fitness.jpg",
+  //   },
+  //   {
+  //     id: 3,
+  //     name: "Treadmill Elite",
+  //     price: "73000",
+  //     image: "./modern-treadmill-gym-equipment.jpg",
+  //   },
+  //   {
+  //     id: 4,
+  //     name: "Resistance Bands",
+  //     price: "1300",
+  //     image: "./colorful-resistance-bands-set.jpg",
+  //   },
+  // ]
 
   // const baseApiUrl = import.meta.env.VITE_API_BASE_URL
   
@@ -92,7 +108,6 @@ export default function PopularProductsCarousal() {
                   onClick={prevSlide}
                   className="bg-primary hover:bg-green-500 text-white p-3 rounded-lg transition-colors duration-200 
                     flex items-center justify-center"
-                  aria-label="Previous slide"
                 >
                   <ChevronLeft size={24} />
                 </motion.button>
@@ -102,7 +117,6 @@ export default function PopularProductsCarousal() {
                   onClick={nextSlide}
                   className="bg-primary hover:bg-green-500 text-white p-3 rounded-lg transition-colors duration-200 
                     flex items-center justify-center"
-                  aria-label="Next slide"
                 >
                   <ChevronRight size={24} />
                 </motion.button>
@@ -193,7 +207,6 @@ export default function PopularProductsCarousal() {
                     index === currentIndex ? "bg-green-600 w-8" : "bg-gray-300 w-2 hover:bg-gray-400"
                   }`}
                   whileHover={{ scale: 1.2 }}
-                  aria-label={`Go to slide ${index + 1}`}
                 />
               ))}
             </div>

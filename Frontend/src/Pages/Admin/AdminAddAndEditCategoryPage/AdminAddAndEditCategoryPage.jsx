@@ -286,6 +286,7 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
             editCategory? dispatch( updateCategory( {formData, id: editCategoryItem.current._id}) ) : dispatch( createCategory( {formData}) )
             // editProduct?  dispatch( updateProduct({formData, id: editProductItem.current._id}) ) : dispatch( createProduct({formData}) )
             console.log("DISPATCHED SUCCESSFULLY--")
+            sonnerToast.info("Uploading the informations...")
         } 
         else{
             if(!Object.keys(categoryData).length){

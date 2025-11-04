@@ -182,7 +182,10 @@ export default function ProductList({admin}){
             
             <BreadcrumbBar heading='shopping' />
                 
-            <main className='px-[60px] mt-[3rem] flex gap-[2.5rem] items-start justify-start' id='productlist'>
+            <main 
+                className='px-0 xxs-sm:px-[20px] xs-sm2:px-[60px] mt-[3rem] flex gap-[2.5rem] items-start justify-start' 
+                id='productlist'
+            >
 
                 
                 <motion.div

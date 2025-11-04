@@ -112,7 +112,7 @@ export default function SimilarProductsCarousal({titleColor = null, referencePro
             <AnimatePresence custom={direction} initial={false}>
               <motion.div
                 key={currentProductIndex}
-                className="grid grid-cols-1 justify-items-center sm:justify-items-start
+                className="relative grid grid-cols-1 justify-items-center sm:justify-items-start
                  sm:grid-cols-2 md:grid-cols-4 gap-[1.5rem]"
                 custom={direction}
                 variants={containerVariants}
@@ -125,7 +125,7 @@ export default function SimilarProductsCarousal({titleColor = null, referencePro
                   .map((product, i) => (
                     <motion.div
                       key={product.id}
-                      className="relative border rounded-[8px] overflow-hidden bg-white"
+                      className={`${i === similarProducts.length-1 && 'relative'} border rounded-[17px] overflow-hidden bg-white`}
                       variants={cardVariants}
                       initial="hidden"
                       animate="visible"
@@ -147,27 +147,36 @@ export default function SimilarProductsCarousal({titleColor = null, referencePro
                         <motion.img
                           src={product.image}
                           alt={product.name}
-                          className="w-full h-auto mb-[1rem] object-cover rounded-[8px]"
+                          className="w-full h-auto mb-[1rem] object-cover rounded-[17px]"
                           whileHover={{ scale: 1.05 }}
                           transition={{ type: "spring", stiffness: 250, damping: 20 }}
                         />
                         <div>
                           <div className="text-secondary flex items-center gap-[4px] mb-[8px]">
-                            {/* {Array.from({ length: product.averageRating }).map((_, i) => (
-                              <Star
-                                key={i}
-                                className="w-[16px] h-[16px] fill-yellow-400 text-yellow-400"
-                              />
-                            ))} */}
+
                             <StarGenerator product={product} />
+
                             <span className='text-secondary text-[13px]'> ({`${product.totalReviews}`}) </span>
                           </div>
                           <h3 className="font-medium">{product.name}</h3>
                           <p className="font-bold mt-[4px]">{product.price}</p>
                         </div>
                       </div>
+                                        <motion.button
+              variants={buttonVariants}
+              initial="rest"
+              whileHover="hover"
+              whileTap="tap" 
+              className="absolute right-1/2 sm:right-[2%] bottom-[-35px] sm:bottom-0 sm:top-[33%] transform !rotate-90 
+               sm:!rotate-0 -translate-y-1/2 h-[40px] bg-white p-[8px] border border-inputBorderLow rounded-full shadow-md"
+              onClick={handleNextProduct}
+            >
+              <ChevronRight className="w-[1.5rem] h-[1.5rem]" />
+            </motion.button>
+
                     </motion.div>
                   ))}
+
               </motion.div>
             </AnimatePresence>
 
@@ -176,24 +185,13 @@ export default function SimilarProductsCarousal({titleColor = null, referencePro
               initial="rest"
               whileHover="hover"
               whileTap="tap"
-              className="absolute left-1/2 sm:left-[-2%] top-[-20px] sm:top-[33%] transform !rotate-90 sm:!rotate-0
-               sm:-translate-y-1/2 bg-white p-[8px] rounded-full shadow-md"
+              className="absolute left-1/2 sm:left-[0.5%] top-[-20px] sm:top-[33%] transform !rotate-90 sm:!rotate-0
+               sm:-translate-y-1/2 bg-white p-[8px] border border-inputBorderLow rounded-full shadow-md"
               onClick={handlePrevProduct}
             >
               <ChevronLeft className="w-[1.5rem] h-[1.5rem]" />
             </motion.button>
 
-            <motion.button
-              variants={buttonVariants}
-              initial="rest"
-              whileHover="hover"
-              whileTap="tap" 
-              className="absolute right-1/2 sm:right-[-2%] bottom-[-35px] sm:bottom-0 sm:top-[33%] transform !rotate-90 
-               sm:!rotate-0 -translate-y-1/2 h-[40px] bg-white p-[8px] rounded-full shadow-md"
-              onClick={handleNextProduct}
-            >
-              <ChevronRight className="w-[1.5rem] h-[1.5rem]" />
-            </motion.button>
           </div>
         </section>
       )

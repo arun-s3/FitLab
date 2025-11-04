@@ -917,6 +917,10 @@ select{
   bottom: 0px;
 }
 
+.bottom-1{
+  bottom: 0.25rem;
+}
+
 .bottom-24{
   bottom: 6rem;
 }
@@ -1127,6 +1131,10 @@ select{
 
 .right-0{
   right: 0px;
+}
+
+.right-1{
+  right: 0.25rem;
 }
 
 .right-1\/2{
@@ -1652,6 +1660,10 @@ select{
   margin-right: -1rem;
 }
 
+.-mt-\[11px\]{
+  margin-top: -11px;
+}
+
 .-mt-\[1rem\]{
   margin-top: -1rem;
 }
@@ -1666,6 +1678,10 @@ select{
 
 .-mt-\[4rem\]{
   margin-top: -4rem;
+}
+
+.-mt-\[5px\]{
+  margin-top: -5px;
 }
 
 .mb-0{
@@ -1798,6 +1814,10 @@ select{
 
 .mb-\[6px\]{
   margin-bottom: 6px;
+}
+
+.mb-\[7px\]{
+  margin-bottom: 7px;
 }
 
 .mb-\[7rem\]{
@@ -2076,10 +2096,6 @@ select{
   margin-top: -10px;
 }
 
-.mt-\[-11px\]{
-  margin-top: -11px;
-}
-
 .mt-\[-12px\]{
   margin-top: -12px;
 }
@@ -2254,14 +2270,6 @@ select{
 
 .mt-\[9px\]{
   margin-top: 9px;
-}
-
-.mt-\[-5\]{
-  margin-top: -5;
-}
-
-.mt-\[-px\]{
-  margin-top: -px;
 }
 
 .line-clamp-1{
@@ -2890,6 +2898,10 @@ select{
   max-height: calc(90vh - 140px);
 }
 
+.min-h-96{
+  min-height: 24rem;
+}
+
 .min-h-\[2rem\]{
   min-height: 2rem;
 }
@@ -2916,6 +2928,10 @@ select{
 
 .\!w-\[7rem\]{
   width: 7rem !important;
+}
+
+.\!w-auto{
+  width: auto !important;
 }
 
 .\!w-full{
@@ -4415,6 +4431,10 @@ select{
   border-radius: 16px;
 }
 
+.rounded-\[17px\]{
+  border-radius: 17px;
+}
+
 .rounded-\[19px\]{
   border-radius: 19px;
 }
@@ -4826,6 +4846,11 @@ select{
   border-color: rgb(244 235 201 / var(--tw-border-opacity));
 }
 
+.border-amber-500{
+  --tw-border-opacity: 1;
+  border-color: rgb(245 158 11 / var(--tw-border-opacity));
+}
+
 .border-blue-200\/50{
   border-color: rgb(191 219 254 / 0.5);
 }
@@ -4837,6 +4862,11 @@ select{
 
 .border-blue-400\/20{
   border-color: rgb(96 165 250 / 0.2);
+}
+
+.border-blue-500{
+  --tw-border-opacity: 1;
+  border-color: rgb(59 130 246 / var(--tw-border-opacity));
 }
 
 .border-blue-600{
@@ -5328,6 +5358,10 @@ select{
 .bg-gray-900{
   --tw-bg-opacity: 1;
   background-color: rgb(17 24 39 / var(--tw-bg-opacity));
+}
+
+.bg-gray-900\/70{
+  background-color: rgb(17 24 39 / 0.7);
 }
 
 .bg-grayLightMuted{
@@ -7644,6 +7678,11 @@ select{
   color: rgb(217 119 6 / var(--tw-text-opacity));
 }
 
+.text-amber-900{
+  --tw-text-opacity: 1;
+  color: rgb(120 53 15 / var(--tw-text-opacity));
+}
+
 .text-black{
   --tw-text-opacity: 1;
   color: rgb(0 0 0 / var(--tw-text-opacity));
@@ -7997,6 +8036,16 @@ select{
 
 .placeholder-\[13px\]::placeholder{
   color: 13px;
+}
+
+.placeholder-gray-400::-moz-placeholder{
+  --tw-placeholder-opacity: 1;
+  color: rgb(156 163 175 / var(--tw-placeholder-opacity));
+}
+
+.placeholder-gray-400::placeholder{
+  --tw-placeholder-opacity: 1;
+  color: rgb(156 163 175 / var(--tw-placeholder-opacity));
 }
 
 .placeholder-gray-500::-moz-placeholder{
@@ -8913,6 +8962,11 @@ select{
 .hover\:border-gray-300:hover{
   --tw-border-opacity: 1;
   border-color: rgb(209 213 219 / var(--tw-border-opacity));
+}
+
+.hover\:border-gray-400:hover{
+  --tw-border-opacity: 1;
+  border-color: rgb(156 163 175 / var(--tw-border-opacity));
 }
 
 .hover\:border-green-300:hover{
@@ -10788,6 +10842,10 @@ select{
     width: 19px;
   }
 
+  .xxs-sm\:w-\[19rem\]{
+    width: 19rem;
+  }
+
   .xxs-sm\:w-\[25rem\]{
     width: 25rem;
   }
@@ -10893,6 +10951,11 @@ select{
   .xxs-sm\:px-4{
     padding-left: 1rem;
     padding-right: 1rem;
+  }
+
+  .xxs-sm\:px-\[20px\]{
+    padding-left: 20px;
+    padding-right: 20px;
   }
 
   .xxs-sm\:px-\[4rem\]{
@@ -11065,6 +11128,11 @@ select{
   .xs-sm2\:px-\[30px\]{
     padding-left: 30px;
     padding-right: 30px;
+  }
+
+  .xs-sm2\:px-\[60px\]{
+    padding-left: 60px;
+    padding-right: 60px;
   }
 
   .xs-sm2\:py-\[6px\]{
@@ -11717,8 +11785,8 @@ select{
     bottom: 0px;
   }
 
-  .sm\:left-\[-2\%\]{
-    left: -2%;
+  .sm\:left-\[0\.5\%\]{
+    left: 0.5%;
   }
 
   .sm\:left-\[17rem\]{
@@ -11729,8 +11797,8 @@ select{
     right: 0px;
   }
 
-  .sm\:right-\[-2\%\]{
-    right: -2%;
+  .sm\:right-\[2\%\]{
+    right: 2%;
   }
 
   .sm\:top-\[-3px\]{
@@ -12633,6 +12701,10 @@ select{
 
   .md\:text-\[25px\]{
     font-size: 25px;
+  }
+
+  .md\:text-\[30px\]{
+    font-size: 30px;
   }
 
   .md\:text-\[35px\]{

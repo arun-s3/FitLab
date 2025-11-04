@@ -457,7 +457,7 @@ const getPopularProducts = async (req, res, next)=> {
       isBlocked: false,
       variantOf: { $in: [null, undefined] },
     })
-      .sort({ ratings: -1, totalReviews: -1 })
+      .sort({ averageRating: -1, totalReviews: -1 })
       .limit(9)
       .populate({
         path: "variants",

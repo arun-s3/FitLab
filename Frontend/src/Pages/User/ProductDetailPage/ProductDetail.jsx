@@ -199,7 +199,9 @@ export default function ProductDetail({product = null, quantity, setQuantity, on
                 className="flex items-center gap-[6px] xs-sm:gap-[8px]" 
                 variants={itemVariants}
               >
+                
                 <StarGenerator product={product} />
+
                 <motion.span className="text-[13px] xs-sm:text-[14px] text-gray-500"> (10 Reviews) </motion.span>
               </motion.div>
               <motion.h1 

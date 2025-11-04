@@ -71,13 +71,22 @@ const orderSchema = new mongoose.Schema({
             },
             productStatus: {
                 type: String,   
-                enum: ['processing', 'confirmed', 'shipped', 'cancelled', 'returning', 'refunded'],
+                enum: ['processing', 'confirmed', 'shipped', 'cancelled', 'delivered', 'returning', 'refunded'],
                 default: 'processing'
             },
             productCancelReason: {
                 type: String,
                 default: null,
                 maxLength: 500
+            },
+            productReturnReason: {
+                type: String,
+                default: null,
+                maxLength: 500
+            },
+            productReturnImages: {
+                type: [String],
+                default: null,
             },
             isDeleted: {
                 type: Boolean,
@@ -170,6 +179,15 @@ const orderSchema = new mongoose.Schema({
         type: String,
         default: null,
         maxLength: 500 
+    },
+    orderReturnReason: {
+        type: String,
+        default: null,
+        maxLength: 500 
+    },
+    orderReturnImages: {
+        type: [String],
+        default: null,
     }
 }, {timestamps: true})
 

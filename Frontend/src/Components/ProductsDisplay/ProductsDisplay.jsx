@@ -342,18 +342,16 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
                 )}
             >
               <div>
-              {/* {product?.totalReviews &&  */}
-                 <p className='flex items-center gap-[10px]'> 
+
+                 <p className='text-secondary flex items-center gap-[10px]'> 
 
                     {/* <StarGenerator product={product} /> */}
 
                     <AnimatedStarGenerator product={product}/>
 
-                    <span className='text-secondary text-[14px] mt-[-11px]'> ({ product?.totalReviews || 0 }) </span> 
+                    <span className='text-secondary text-[14px] -mt-[11px]'> ({ product?.totalReviews || 0 }) </span> 
                   </p>
-                 {/* ( <p className='text-secondary'> No rating available! </p> ) */}
 
-                {/* } */}
                 <p className= {(gridView ? 'text-[15px] xx-md:text-[14px] lg:text-[15px]' : (admin && !gridView)? 'text-[15px]' 
                     : wishlistDisplay ? 'text-[16px] font-[500]' : 'text-[18px]')  
                       + ' mt-[10px] capitalize font-[450] line-clamp-2 hover:text-secondary hover:underline'} style={{wordBreak: 'break-word'}}>

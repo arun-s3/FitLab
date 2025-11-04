@@ -67,14 +67,11 @@ export default function MobileSidebar() {
 
         <nav
           className="mx-auto flex items-center justify-between rounded-full px-4  text-white lg:px-6"
-          aria-label="Primary"
         >
 
           <motion.button
             whileTap={{ scale: 0.96 }}
             onClick={() => setOpen(true)}
-            aria-label="Open menu"
-            aria-expanded={open}
             className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 p-2 text-white
              hover:bg-white/10 lg:hidden"
           >
@@ -88,7 +85,6 @@ export default function MobileSidebar() {
           <>
             <motion.button
               type="button"
-              aria-label="Close menu"
               className="fixed inset-0 z-40 bg-black/50"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -102,8 +98,6 @@ export default function MobileSidebar() {
                overflow-hidden rounded-l-[12px] bg-neutral-900 text-white shadow-2xl bg-gradient-to-br from-neutral-900
               via-neutral-950 to-[#2c0f4a]"    
               role="dialog"
-              aria-modal="true"
-              aria-label="Mobile Menu"
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
@@ -138,7 +132,6 @@ export default function MobileSidebar() {
 
                     <button
                       onClick={()=> setOpen(false)}
-                      aria-label="Close menu"
                       className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-neutral-800 ring-1
                        ring-white/10 transition hover:bg-neutral-700"
                     >
@@ -152,7 +145,6 @@ export default function MobileSidebar() {
                     <motion.div
                       className="h-full w-full origin-left bg-primaryDark"
                       style={{ scaleX: scrollProgress }}
-                      aria-hidden="true"
                     />
                   </div>
                 </div>

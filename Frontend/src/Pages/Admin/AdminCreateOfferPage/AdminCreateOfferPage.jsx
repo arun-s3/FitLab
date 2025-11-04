@@ -474,6 +474,7 @@ export default function AdminCreateOfferPage(){
     }
 
     dispatch( createOffer({offerDetails: offerData}) ) 
+    sonnerToast.info("Uploading the offer...")
   }
 
 

@@ -4,6 +4,7 @@ const Product = require('../Models/productModel')
 const Offer = require('../Models/offerModel')
 const Coupon = require('../Models/couponModel')
 const Payment = require('../Models/paymentModel')
+const cloudinary = require('../Utils/cloudinary')
 
 const {calculateCharges} = require('./controllerUtils/taxesUtils')
 const {recalculateAndValidateCoupon} = require('./controllerUtils/couponsUtils')
@@ -598,7 +599,212 @@ const getTodaysLatestOrder = async (req, res, next)=> {
 }
 
 
+const initiateReturn = async (req, res, next)=> {
+  try {
+    console.log("Inside initiateReturn...")
+
+    const userId = req.user._id
+    const { orderId, productId, returnType, returnReason } = req.body
+    console.log("req.files---------->", JSON.stringify(req.files))
+    console.log(`orderId-----> ${orderId}, productId-----> ${productId}, returnReason-----> ${returnReason}, returnType-----> ${returnType}`)
+
+    if (!orderId || !returnType || !returnReason){
+      return next(errorHandler(400, "Missing required fields."))
+    }
+
+    const order = await Order.findOne({ _id: orderId, userId }).populate("products.productId")
+    if (!order) return next(errorHandler(404, "Order not found."))
+
+    // let uploadedImages = []
+
+    // const uploadedImages = await Promise.all(
+    //   req.files['images'].map(async (image, index) => {
+    //     const result = await cloudinary.uploader.upload(image.path, {
+    //       folder: 'products/images',
+    //       resource_type: 'image',
+    //       transformation: [
+    //         { width: 400, height: 400, crop: "limit"}
+    //       ]
+    //     });
+    //     return result.secure_url
+    //   })
+    // );
+    const uploadedImages = await Promise.all(
+  req.files.map(async (image, index) => {
+    const result = await cloudinary.uploader.upload(image.path, {
+      folder: 'fitlab/returns',
+      resource_type: 'image',
+      transformation: [
+        { width: 400, height: 400, crop: "limit" }
+      ]
+    });
+    return result.secure_url;
+  })
+);
+
+
+    // if (req.files && req.files.length > 0) {
+    //   for (const image of req.files['image']) {
+    //     const uploadResult = await cloudinary.uploader.upload(image.path, {
+    //       folder: "fitlab/returns",
+    //       resource_type: 'image',
+    //       transformation: [
+    //         { width: 400, height: 400, crop: "limit"}
+    //       ]
+    //     })
+    //     uploadedImages.push(uploadResult.secure_url)
+    //   }
+    // }
+    console.log("uploadedImages---------->", JSON.stringify(uploadedImages))
+
+    if (returnType === "product"){
+      if (!productId) return next(errorHandler(400, "Product ID is required for product return."))
+
+      const productInOrder = order.products.find(
+        (p) => p.productId.equals(productId)
+      )
+
+      if (!productInOrder)
+        return next(errorHandler(404, "This product was not found in your order."))
+
+      productInOrder.productStatus = "returning"
+      productInOrder.productReturnReason = returnReason
+      productInOrder.productReturnImages = uploadedImages
+      productInOrder.productReturnRequestedAt = new Date()
+
+      await order.save()
+
+      return res.status(200).json({
+        success: true,
+        message: "Product return initiated successfully.",
+        updatedProduct: productInOrder,
+      });
+    }
+
+    else if (returnType === "order") {
+      order.orderStatus = "returning"
+      order.orderReturnReason = returnReason
+      order.orderReturnImages = uploadedImages
+      order.orderReturnRequestedAt = new Date();
+
+      order.products.forEach((p) => (p.productStatus = "returning"))
+
+      await order.save()
+
+      return res.status(200).json({
+        success: true,
+        message: "Order return initiated successfully.",
+        updatedOrder: order,
+      });
+    }else{
+      return next(errorHandler(400, "Invalid return type. Must be 'order' or 'product'."))
+    }
+  } 
+  catch (error){
+    console.log("Error in initiateReturn -->", error.message)
+    next(error)
+  }
+}
+
+
+const refundOrder = async (req, res, next)=> {
+  try {
+    console.log("Inside refundOrder controller...")
+
+    const { orderId, productId, reason } = req.body
+    const userId = req.user._id
+
+    if (!orderId) return next(errorHandler(400, "Order ID is required"))
+
+    const order = await Order.findOne({ _id: orderId, userId }).populate("products.productId")
+    if (!order) return next(errorHandler(404, "Order not found"))
+
+    const paymentDetails = order.paymentDetails
+    const paymentMethod = paymentDetails?.paymentMethod
+    const refundableProducts = []
+
+    const productsToRefund = productId
+      ? order.products.filter((p) => p.productId._id.toString() === productId)
+      : order.products
+
+    if (!productsToRefund.length)
+      return next(errorHandler(404, "No matching products found for refund"))
+
+    let refundAmount = 0
+
+    for (const item of productsToRefund) {
+      const product = await Product.findById(item.productId._id);
+      if (!product) continue
+
+      product.stock += item.quantity
+      await product.save()
+
+      refundAmount += item.total
+      refundableProducts.push({
+        productId: product._id,
+        title: product.title,
+        quantity: item.quantity,
+        refundAmount: item.total,
+      })
+    }
+
+    // Handle payment refund (wallet or online)
+    if (refundAmount > 0) {
+      if (paymentMethod === "wallet") {
+        // Add to user wallet
+        let wallet = await Wallet.findOne({ userId });
+        if (!wallet) {
+          wallet = new Wallet({ userId, balance: 0, transactions: [] });
+        }
+        wallet.balance += refundAmount;
+        wallet.transactions.push({
+          type: "credit",
+          amount: refundAmount,
+          description: `Refund for order ${order.fitlabOrderId}`,
+          date: new Date(),
+        });
+        await wallet.save();
+      } else {
+        // For online payments, mark the refund request (manual or API integration)
+        const payment = await Payment.findOne({ orderId: order._id });
+        if (payment) {
+          payment.refundStatus = "pending"; // later handled via gateway
+          payment.refundRequestedAt = new Date();
+          await payment.save();
+        }
+      }
+    }
+
+    // Update order status & add refund log
+    const refundRecord = {
+      refundedProducts: refundableProducts,
+      refundAmount,
+      refundDate: new Date(),
+      reason: reason || "Not specified",
+      status: paymentMethod === "wallet" ? "completed" : "pending",
+    };
+
+    order.orderStatus = "refunded";
+    order.refundDetails = refundRecord;
+    await order.save();
+
+    res.status(200).json({
+      message:
+        paymentMethod === "wallet"
+          ? "Refund completed successfully"
+          : "Refund request submitted. It will be processed soon.",
+      refundRecord,
+    });
+  } catch (error) {
+    console.error("Error in refundOrder controller:", error)
+    next(error)
+  }
+}
+
+
+
+
 
 
 module.exports = {createOrder, getOrders, getAllUsersOrders, cancelOrderProduct, cancelOrder, deleteProductFromOrderHistory, 
-        changeOrderStatus, changeProductStatus, getOrderCounts, getTodaysLatestOrder}
+        changeOrderStatus, changeProductStatus, initiateReturn, getOrderCounts, getTodaysLatestOrder}

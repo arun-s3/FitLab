@@ -3,11 +3,12 @@ import './CancelForm.css'
 
 import {RiArrowDropDownLine} from "react-icons/ri"
 
+import RefundModal from '../../Pages/User/OrderHistoryPage/RefundModal'
 import {SiteSecondaryFillImpButton} from '../SiteButtons/SiteButtons'
 
 
 export default function CancelForm({openSelectReasons, setOpenSelectReasons, cancelReasonHandler, setOpenCancelForm, submitReason, canceledByAdmin,
-   formFor}){
+   formFor, returnAndRefund = false}){
 
   
   const commonReasonTitles = [
@@ -33,10 +34,12 @@ export default function CancelForm({openSelectReasons, setOpenSelectReasons, can
         <div id='CancelForm' className='flex flex-col items-center'>
             <h2 className='mt-[2rem] flex items-center gap-[1rem]'> 
               <span className='text-[15px] tracking-[0.2px] capitalize'>
-                {`Reason for Cancellation of the ${formFor} (Optional ${canceledByAdmin? ', for Records' : ''}):`} 
+                {`Reason for Cancellation of the ${formFor} ( ${returnAndRefund ? '*Required' : 'Optional'}
+                   ${canceledByAdmin? ', for Records' : ''}):`} 
               </span>
+
               {
-                !canceledByAdmin  &&
+                !canceledByAdmin  && !returnAndRefund &&
                 <span className='relative px-[15px] py-[5px] w-[17rem] flex items-center justify-between border
                  border-dropdownBorder rounded-[6px] cursor-pointer' ref={dropdownBoxRef} id='dropdownBox'
                    onClick={()=> setOpenSelectReasons(selectReason=> ( {...selectReason, status: !selectReason.status} ))}>

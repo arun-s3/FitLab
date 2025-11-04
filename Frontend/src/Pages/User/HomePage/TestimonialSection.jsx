@@ -79,7 +79,6 @@ export default function TestimonialSection(){
               onClick={prevSlide}
               className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-white hover:bg-primary text-black 
                 flex items-center justify-center transition-colors duration-300 flex-shrink-0 shadow-[0_0_8px_2px_var(--PRIMARY)]"
-              aria-label="Previous testimonial"
             >
               <ArrowLeft size={24} />
             </motion.button>
@@ -89,7 +88,6 @@ export default function TestimonialSection(){
               onClick={nextSlide}
               className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-white hover:bg-primary text-black 
                 flex items-center justify-center transition-colors duration-300 flex-shrink-0 shadow-[0_0_8px_2px_var(--PRIMARY)]"
-              aria-label="Next testimonial"
             >
               <ArrowRight size={24} />
             </motion.button>
@@ -157,7 +155,6 @@ export default function TestimonialSection(){
               className={`h-2 rounded-full transition-all duration-300 ${
                 index === currentIndex ? "bg-primary w-8" : "bg-gray-600 w-2 hover:bg-gray-500"
               }`}
-              aria-label={`Go to testimonial ${index + 1}`}
             />
           ))}
         </motion.div>

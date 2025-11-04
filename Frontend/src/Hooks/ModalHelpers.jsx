@@ -6,12 +6,9 @@ export default function useModalHelpers({ open, onClose, modalRef }){
 
   const previouslyFocusedRef = useRef(null)
 
-  console.log("Inside useModalHelpers useEffect")
 
   useEffect(() => {
     if (!open) return
-
-    console.log("Inside useModalHelpers useEffect")
 
     // previouslyFocusedRef.current = document.activeElement
 

@@ -355,6 +355,7 @@ export default function AdminAddAndEditProductPage({ editProduct }){
             console.log("PRODUCTDATA BEFORE DISPATCHING-->", JSON.stringify(productData))
 
             editProduct?  dispatch( updateProduct({formData, id: editProductItem.current._id}) ) : dispatch( createProduct({formData}) )
+            sonnerToast.info("Uploading your product...")
             console.log("Dispatched successfully--")
             setStartedSubmission(false)
         }

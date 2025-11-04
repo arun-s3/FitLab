@@ -345,6 +345,7 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
       couponId = coupon._id
     } 
     coupon ? dispatch( updateCoupon({couponDetails: formData, couponId}) )  : dispatch( createCoupon({couponDetails: formData}) ) 
+    sonnerToast.info("Uploading the coupon...")
     onClose()
   }
 

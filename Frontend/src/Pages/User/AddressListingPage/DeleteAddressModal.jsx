@@ -113,7 +113,7 @@ export default function DeleteAddressModal({open, onClose, onConfirm, loading = 
                   onClick={onClose}
                   className="rounded-md p-1.5 hover:bg-grayMuted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
-                  <X className="h-5 w-5" aria-hidden="true" />
+                  <X className="h-5 w-5" />
                 </button>
               </div>
 

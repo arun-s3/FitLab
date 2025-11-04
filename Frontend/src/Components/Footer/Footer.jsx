@@ -26,8 +26,7 @@ export default function Footer() {
             for homes and businesses all across India. Pump up your fitness routine with our expert touch!
           </p>
           <nav className="ml-[28px] flex flex-wrap gap-4 items-center text-white"
-           id="footer-socials"
-           aria-label="Social media">
+           id="footer-socials">
             <FaFacebook className="text-primary" />
             <FaTwitter />
             <FaInstagram />

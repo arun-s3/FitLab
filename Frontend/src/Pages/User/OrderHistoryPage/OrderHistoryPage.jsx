@@ -19,13 +19,15 @@ import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
 import Footer from '../../../Components/Footer/Footer'
 import CartSidebar from '../../../Components/CartSidebar/CartSidebar'
 import Modal from '../../../Components/Modal/Modal'
+import RefundModal from './RefundModal'
 import TextChatBox from '../TextChatBox/TextChatBox'
 import CancelForm from '../../../Components/CancelForm/CancelForm'
 import {CustomPuffLoader} from '../../../Components/Loader//Loader'
 import {DateSelector} from '../../../Components/Calender/Calender'
 import {addToCart, resetCartStates} from '../../../Slices/cartSlice'
-import {getOrders, cancelOrder, cancelOrderProduct, deleteProductFromOrderHistory, resetOrderStates} from '../../../Slices/orderSlice'
-import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
+import {getOrders, cancelOrder, cancelOrderProduct, deleteProductFromOrderHistory, changeProductStatus, initiateReturn,
+    resetOrderStates} from '../../../Slices/orderSlice'
+import {SiteButtonSquare, SiteSecondaryFillImpButton} from '../../../Components/SiteButtons/SiteButtons'
 
 
 export default function OrderHistoryPage(){
@@ -56,12 +58,14 @@ export default function OrderHistoryPage(){
     const [openOrderCancelModal, setOpenOrderCancelModal] = useState(false)
     const [cancelThisOrderId, setCancelThisOrderId] = useState(null)
 
-    const [openCancelForm, setOpenCancelForm] = useState({type:'', status:false, options:{}})
+    const [openCancelForm, setOpenCancelForm] = useState({type:'', status:false, return:false, options:{}})
     const [openSelectReasons, setOpenSelectReasons] = useState({status:false, reasonTitle:'', reason:''})
     const productCancelFormRef = useRef(null)
     const orderCancelFormRef = useRef(null)
 
-    const {orders, totalOrders, orderCreated, loading, orderMessage, orderError} = useSelector(state=> state.order)
+    const [openRefundModal, setOpenRefundModal] = useState({status: false, orderOrProduct: null})
+
+    const {orders, totalOrders, orderCreated, orderReturnRequested, loading, orderMessage, orderError} = useSelector(state=> state.order)
     const {cart, productAdded, productRemoved, error, message} = useSelector(state=> state.cart)
     const dispatch = useDispatch()
     
@@ -142,10 +146,13 @@ export default function OrderHistoryPage(){
       }else setShowLoader(true)
       if(error){
         sonnerToast.error(error)
+        dispatch(resetCartStates())
       }
       if(orderError){
         sonnerToast.error(orderError)
+        dispatch(resetCartStates())
       }
+      dispatch(resetCartStates())
     },[loading, error, orderError, productAdded])
     
     const orderTabs = [
@@ -238,13 +245,17 @@ export default function OrderHistoryPage(){
     }
 
     const cancelOrReturnProduct = (e, productId, orderId)=> {
+      console.log(`orderId---> ${orderId}, productId---> ${JSON.stringify(productId)}`)
       if(e.target.textContent.toLowerCase().includes('cancel')){
         console.log("Opening the CancelForm..")
-        setOpenCancelForm({type:'product', status:true, options: {productId, orderId}})
+        setOpenCancelForm({type:'product', status:true, options: {productId: productId, orderId}, return: false},)
         window.scrollTo( {top: productCancelFormRef.current.getBoundingClientRect().top, scrollBehavior: 'smooth'} )
         sonnerToast.warning("You are about to cancel the product!")
       }else{
-
+        console.log("Opening the ReturnForm..")
+        setOpenCancelForm({type:'product', status:true, options: {productId, orderId}, return: true})
+        window.scrollTo( {top: productCancelFormRef.current.getBoundingClientRect().top, scrollBehavior: 'smooth'} )
+        sonnerToast.warning("You are about to return the product!")
       }
     }
 
@@ -299,9 +310,14 @@ export default function OrderHistoryPage(){
         if(openSelectReasons.reason.trim()){
           productCancelReason = productCancelReason + openSelectReasons.reason.trim()
         }
-        setOpenSelectReasons(({status:false, reasonTitle:'', reason:''}))
-        dispatch(cancelOrderProduct({orderId: openCancelForm.options.orderId, productId: openCancelForm.options.productId, productCancelReason}))
-        setOpenCancelForm({type:'', status:false, options:{}})
+        if(!openCancelForm.return){
+          setOpenSelectReasons(({status:false, reasonTitle:'', reason:''}))
+          dispatch(cancelOrderProduct({orderId: openCancelForm.options.orderId, productId: openCancelForm.options.productId._id, productCancelReason}))
+          setOpenCancelForm({type:'', status:false, options:{}})
+        }else{
+          console.log('openSelectReasons inside submitReason()--->', openSelectReasons)
+          setOpenRefundModal({status: true, orderOrProduct: 'product'})
+        }
       }
       if(formFor === 'order'){
         console.log("Cancelling the Order..")
@@ -309,6 +325,40 @@ export default function OrderHistoryPage(){
         setCancelThisOrderId(openCancelForm.options.orderId)
         setOpenCancelForm({type:'', status:false, options:{}})
       }
+    }
+
+    const compressedImageBlobs = async(images)=>{
+      return await Promise.all( images.map( async(image)=> {
+          if(image.size > (5*1024*1024)){
+              const newBlob = await handleImageCompression(image.blob)
+              sonnerToast.info("Some images have been compressed as its size exceeded 5 MB!")
+              return newBlob
+          }else{
+              return image.blob
+          }
+      }) )
+    }
+
+    const initiateReturnProduct = async (uploadedImages = [])=> {
+      console.log('openSelectReasons--->', openSelectReasons)
+      console.log('uploadedImages--->', uploadedImages)
+      console.log(`orderId---> ${openCancelForm.options.orderId}, productId---> ${openCancelForm.options.productId}, 
+          returnType---> ${openRefundModal.orderOrProduct}`)
+      console.log("Inside initiateReturnProduct()..")
+
+      // const compressedImages = await compressedImageBlobs(uploadedImages)
+
+      dispatch(
+        initiateReturn({
+          orderId: openCancelForm.options.orderId, 
+          productId: openCancelForm.options.productId._id, 
+          returnType: openRefundModal.orderOrProduct,
+          returnReason: openSelectReasons.reason,
+          uploadedImages
+        })
+      )
+      setOpenCancelForm({type:'', status:false, options:{}})
+      setOpenSelectReasons(({status:false, reasonTitle:'', reason:''}))
     }
 
 
@@ -520,13 +570,30 @@ export default function OrderHistoryPage(){
                                          </span>
                                       </h3>
                                     </div>
-                                      
-                                {order.orderStatus !== 'cancelled' && order.orderStatus !== 'returning' && order.orderStatus !== 'refunded' &&
-                                    <SiteButtonSquare lowerFont={true} lighter={true} lowShadow={true} clickHandler={(e)=> preCancelTheOrder(e, order._id)}
-                                         customStyle={{paddingBlock:'7px', paddingInline:'18px', borderRadius:'7px'}}>
-                                       Cancel Order
-                                    </SiteButtonSquare>
-                                }
+                                <div className='flex flex-col'>
+                                  {order.orderStatus !== 'cancelled' && order.orderStatus !== 'returning' && order.orderStatus !== 'refunded' &&
+                                      <SiteButtonSquare lowerFont={true} lighter={true} lowShadow={true} clickHandler={(e)=> preCancelTheOrder(e, order._id)}
+                                           customStyle={{paddingBlock:'7px', paddingInline:'18px', borderRadius:'7px'}}>
+                                         Cancel Order
+                                      </SiteButtonSquare>
+                                  }
+                                  {
+                                    order.orderStatus != 'cancelled' &&  order.orderStatus != 'returning' && order.orderStatus != 'refunded'
+                                        && order.orderStatus === 'delivered' &&
+                                        // <SiteButtonSquare lowerFont={true} lighter={true} lowShadow={true} 
+                                        //   clickHandler={(e)=> preCancelTheOrder(e, order._id)}
+                                        //   tailwindClasses='!mt-[10px]'
+                                        //    customStyle={{paddingBlock:'7px', paddingInline:'18px', borderRadius:'7px'}}>
+                                        //   Return Order
+                                        // </SiteButtonSquare>
+                                        <SiteSecondaryFillImpButton
+                                          className={`px-[18px] py-[7px] !w-auto !text-[13px] rounded-[7px]`} 
+                                          clickHandler={(e)=> setOpenRefundModal({status: true, orderOrProduct: 'order'})}
+                                        >
+                                            Return Order
+                                        </SiteSecondaryFillImpButton>
+                                  }
+                                </div>
 
                                 { openOrderCancelModal &&
                                   <Modal openModal={openOrderCancelModal} setOpenModal={setOpenOrderCancelModal} title='Important' 
@@ -602,7 +669,7 @@ export default function OrderHistoryPage(){
                                             onClick={()=> viewProduct(product.productId._id)}> 
                                            {product.productStatus === 'cancelled'||product.productStatus === 'returning' ? 'View this item' : 'View your item'}
                                         </button>
-                                          {(product.productStatus != 'cancelled' && product.productStatus != 'delivered' && 
+                                          {(product.productStatus != 'cancelled' && 
                                                   product.productStatus != 'returning' && product.productStatus != 'refunded') &&
                                             <button className="hover:bg-gray-50 hover:border-gray-300 transition-all duration-200"
                                                   onClick={(e)=> cancelOrReturnProduct(e, product.productId, order._id)}> 
@@ -630,12 +697,14 @@ export default function OrderHistoryPage(){
                                   </div>
                                       
                                   <div ref={productCancelFormRef} className='flex justify-center items-center'>
-                                  {
+                                  { 
                                     openCancelForm.type === 'product' && openCancelForm.options.productId === product.productId &&
                                       openCancelForm.options.orderId === order._id && openCancelForm.status &&
+
                                     <CancelForm openSelectReasons={openSelectReasons} setOpenSelectReasons={setOpenSelectReasons} 
-                                      cancelReasonHandler={cancelReasonHandler} setOpenCancelForm={setOpenCancelForm} submitReason={submitReason}
-                                         formFor='product'/>
+                                      cancelReasonHandler={cancelReasonHandler} setOpenCancelForm={setOpenCancelForm} 
+                                        submitReason={(formFor)=> submitReason(formFor)}
+                                         formFor='product' returnAndRefund={openCancelForm.return}/>
                                   }
                                   </div>
 
@@ -644,11 +713,20 @@ export default function OrderHistoryPage(){
                                 <div ref={orderCancelFormRef}>
                                   {
                                     openCancelForm.type === 'order' && openCancelForm.options.orderId === order._id && openCancelForm.status &&
+
                                     <CancelForm openSelectReasons={openSelectReasons} setOpenSelectReasons={setOpenSelectReasons} 
                                       cancelReasonHandler={cancelReasonHandler} setOpenCancelForm={setOpenCancelForm} submitReason={submitReason}
                                         formFor='order'/>
                                   }
                                 </div>
+
+                                  {
+                                    openRefundModal.status &&
+                                      <RefundModal isOpen={openRefundModal.status} onClose={()=> setOpenRefundModal(info=> ({...info, status: false}))} 
+                                          returnOrderOrProduct={initiateReturnProduct} orderOrProduct={openRefundModal.orderOrProduct}
+                                            onReasonWritten={setOpenSelectReasons} reasonWritten={openSelectReasons}/>
+                                  }
+
                             </div>
                           ))}
                       </div>

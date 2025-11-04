@@ -12,7 +12,7 @@ export function CustomHashLoader({loading, color, customStyle}){
     };
 
     return(
-        <HashLoader loading={loading} cssOverride={loaderCssOverride} size={20} aria-label="Loading HashLoader" 
+        <HashLoader loading={loading} cssOverride={loaderCssOverride} size={20}
                                                      color={color? color : "rgba(159, 42, 240, 1)"} data-testid="loader"/> 
     )
 }
@@ -26,7 +26,7 @@ export function CustomPacmanLoader({loading, size}){
     };
 
     return(
-        <PacmanLoader loading={loading} cssOverride={loaderCssOverride} size={size} aria-label="Loading PacmanLoader" 
+        <PacmanLoader loading={loading} cssOverride={loaderCssOverride} size={size} 
                                                      color="rgba(159, 42, 240, 1)" data-testid="loader"/> 
     )
 }
@@ -40,7 +40,7 @@ export function CustomPropagateLoader({loading, size}){
     };
 
     return(
-        <PropagateLoader loading={loading} cssOverride={loaderCssOverride} size={size} aria-label="Loading PropagateLoader" 
+        <PropagateLoader loading={loading} cssOverride={loaderCssOverride} size={size} 
                                                      color="rgba(159, 42, 240, 1)" data-testid="loader"/> 
     )
 }
@@ -54,7 +54,7 @@ export function CustomScaleLoader({loading, size}){
     };
 
     return(
-        <ScaleLoader loading={loading} cssOverride={loaderCssOverride} size={size} aria-label="Loading ScaleLoader" 
+        <ScaleLoader loading={loading} cssOverride={loaderCssOverride} size={size} 
                                                      color="rgba(159, 42, 240, 1)" data-testid="loader"/> 
     )
 }
@@ -69,7 +69,7 @@ export function CustomPuffLoader({loading, color, customStyle}){
     };
 
     return(
-        <PuffLoader loading={loading} cssOverride={loaderCssOverride} size={20} aria-label="Loading HashLoader" 
+        <PuffLoader loading={loading} cssOverride={loaderCssOverride} size={20} 
                                                      color={color? color : "rgba(159, 42, 240, 1)"} data-testid="loader"/> 
     )
 }

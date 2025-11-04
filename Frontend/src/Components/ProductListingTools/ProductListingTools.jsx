@@ -99,7 +99,8 @@ export default function ProductListingTools({admin, showByGrid, setShowByGrid, s
 
     return(
 
-        <div className='flex flex-col justify-between lg:flex-row gap-[1rem] lg:gap-[2rem]' id='ProductListingTools'>
+        <div className='w-[18rem] xxs-sm:w-[19rem] xs-sm2:w-auto flex flex-col justify-between lg:flex-row gap-[1rem] lg:gap-[2rem]' 
+            id='ProductListingTools'>
 
             <input type='search'
                 placeholder={wishlistDisplay ? 'Search Wishlist...' : 'Search Fitlab..'} 

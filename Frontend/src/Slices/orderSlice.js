@@ -115,12 +115,84 @@ export const changeProductStatus = createAsyncThunk('order/changeProductStatus',
   }
 })
 
+// export const initiateReturn = createAsyncThunk('order/initiateReturn', async ({ orderId, productId, returnType, returnReason, uploadedImages }, thunkAPI)=> {
+//   try {
+//     console.log('Inside initiateReturn createAsyncThunk')
+//     console.log("orderId from orderSlice---->", orderId)
+
+//     const formData = new FormData()
+//     formData.append('orderId', orderId)
+//     formData.append('returnType', returnType)
+//     formData.append('returnReason', returnReason)
+//     if (productId) {
+//       formData.append('productId', productId)
+//     }
+//     if (uploadedImages && uploadedImages.length > 0) {
+//       uploadedImages.forEach((file, index) => {
+//         formData.append('images', file,  `returnImg${index}`)
+//       })
+//     }
+//     // console.log("formData--------->", formData)
+//     const response = await axios.post('/order/return', formData, {headers: {'Content-Type': 'multipart/form-data'}, withCredentials: true})
+//     console.log('Returning success response from initiateReturn...', JSON.stringify(response.data))
+//     return {orderId, productId, returnType, returnReason }
+//   }catch(error){
+//     console.log('Inside catch of initiateReturn')
+//     const errorMessage = error.response?.data?.message
+//     return thunkAPI.rejectWithValue(errorMessage)
+//   }
+// })
+
+
+export const initiateReturn = createAsyncThunk(
+  'order/initiateReturn',
+  async ({ orderId, productId, returnType, returnReason, uploadedImages }, thunkAPI) => {
+    try {
+      console.log('Inside initiateReturn createAsyncThunk')
+      console.log('orderId from orderSlice ---->', orderId)
+
+      const formData = new FormData()
+      formData.append('orderId', orderId)
+      formData.append('returnType', returnType)
+      formData.append('returnReason', returnReason)
+
+      if (productId) formData.append('productId', productId)
+      if (uploadedImages?.length) {
+        uploadedImages.forEach((file, index) => {
+          formData.append('images', file)
+        })
+      }
+
+      const response = await axios.post('/order/return', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        withCredentials: true,
+      })
+
+      console.log('Returning success response from initiateReturn...', JSON.stringify(response.data))
+      return { orderId, productId, returnType, returnReason }
+    } catch (error) {
+      console.log('Inside catch of initiateReturn:', error)
+
+      // ✅ FIX: Always provide fallback message
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        'Something went wrong while initiating the return.'
+
+      // ✅ FIX: Return properly rejected promise
+      return thunkAPI.rejectWithValue(errorMessage)
+    }
+  }
+)
+
+
 
 const initialState = {
   orders: [], 
   orderCreated: false,
   OrderRemoved: false,
   orderCancelled: false,
+  orderReturnRequested: true,
   orderUpdated: false,
   totalUsersOrders: null,
   totalOrders:null,
@@ -140,8 +212,9 @@ const orderSlice = createSlice({
       state.orderMessage = null
       state.orderSuccess = false
       state.orderCreated = false
-      state.orderCancelled = false
+      state.orderCancelled = false 
       state.orderUpdated = false
+      state.orderReturnRequested = false
     }
   },
   extraReducers: (builder) => {
@@ -362,6 +435,40 @@ const orderSlice = createSlice({
         state.orderError = true
         state.orderMessage = action.payload.message
         state.orderUpdated = false
+      })
+      .addCase(initiateReturn.fulfilled, (state, action) => {
+        console.log('initiateReturn fulfilled:', action.payload)
+        state.orderError = null
+        state.loading = false
+        state.orderSuccess = true
+        state.orderReturnRequested = true
+
+        if (state.orders && state.orders.length > 0) {
+          const order = state.orders.find(o => o._id === action.payload.orderId)
+          if (order) {
+            if (returnType === 'product') {
+              const product = order.products.find(p => p.productId._id === action.payload.productId)
+              if (product) {
+                product.productStatus = 'returning'
+                product.productReturnReason = action.payload.returnReason
+              }
+            } else if (returnType === 'order') {
+              order.orderStatus = 'returning'
+              order.orderReturnReason = action.payload.returnReason
+              order.products.forEach(p => p.productStatus = 'returning')
+            }
+          }
+        }
+      })
+      .addCase(initiateReturn.pending, (state) => {
+        state.loading = true
+        state.orderError = null
+      })
+      .addCase(initiateReturn.rejected, (state, action) => {
+        console.log('initiateReturn rejected:', action.payload)
+        state.loading = false
+        state.orderError = action.payload
+        state.orderSuccess = false
       })
     }
 })

@@ -88,6 +88,11 @@ const orderSchema = new mongoose.Schema({
                 type: [String],
                 default: null,
             },
+            productReturnStatus: {
+                type: String,   
+                enum: ['accepted', 'rejected'],
+                default: null
+            },
             isDeleted: {
                 type: Boolean,
                 default: false
@@ -188,7 +193,12 @@ const orderSchema = new mongoose.Schema({
     orderReturnImages: {
         type: [String],
         default: null,
-    }
+    },
+    orderReturnStatus: {
+        type: String,   
+        enum: ['accepted', 'rejected'],
+        default: null
+    },
 }, {timestamps: true})
 
 

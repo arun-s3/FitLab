@@ -394,7 +394,11 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
                 </h3>
             </div>
             <p className={`${error ? 'text-red-500' : 'text-muted'} text-[10px] h-[20px] mt-[5px]`}>
-                 {error ? error : 'Upload images up to a maximum dimension of 400×400 pixels. Images exceeding this size will be automatically resized to 400×400 pixels.'} 
+                {
+                    error ? error : `Upload images up to a maximum dimension of 400×400 pixels. 
+                        Images exceeding this size will be automatically resized to 400×400 pixels.
+                        Only ${imageLimit} such images are allowed to upload`
+                } 
             </p>
             {   imageCropperState &&
                 <ImageCropper images={images} onCropComplete={handleCropComplete} imageCropperState={imageCropperState}

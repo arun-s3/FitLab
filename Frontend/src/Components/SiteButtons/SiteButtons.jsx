@@ -29,7 +29,8 @@ export function SiteButtonDark({customStyle, children, className = '', shouldSub
     )
 }
 
-export function SiteButtonSquare({customStyle, tailwindClasses, light, lighter, lowFont, lowerFont, lowShadow, children, clickHandler, shouldSubmit = false}){
+export function SiteButtonSquare({customStyle, tailwindClasses, light, lighter, lowFont, lowerFont, lowShadow, children, 
+        clickHandler, isDisabled = false, shouldSubmit = false}){
     const computedStyle = {
         ...customStyle,
         fontSize: lowFont ? '14px' : lowerFont ? '13px' : undefined,
@@ -37,10 +38,11 @@ export function SiteButtonSquare({customStyle, tailwindClasses, light, lighter, 
     }
     return(
         <button type={shouldSubmit?"submit":"button"}
-            className={`${tailwindClasses ? tailwindClasses : ''} site-button-square bg-primary text-black 
+            className={`${tailwindClasses ? tailwindClasses : ''} site-button-square bg-primary text-black !disabled:cursor-not-allowed
                 text-descReg1 ${light ? 'font-[480]' : lighter ? 'font-[450]' : ''}`}
             style={computedStyle}
             onClick={clickHandler ? ()=> clickHandler() : undefined} 
+            disabled={isDisabled}
         >
                  {children} 
         </button>

@@ -5,74 +5,40 @@ import { motion, AnimatePresence } from "framer-motion"
 import { AlertTriangle, Clock, CheckCircle, X, ImageIcon } from "lucide-react"
 import {toast as sonnerToast} from 'sonner'
 
+import FileUpload from "../../../Components/FileUpload/FileUpload"
 import useModalHelpers from '../../../Hooks/ModalHelpers'
+import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
 import {CustomHashLoader} from '../../../Components/Loader/Loader'
+import {resetOrderStates} from '../../../Slices/orderSlice'
 
 
 export default function RefundModal({isOpen, onClose, returnOrderOrProduct, orderOrProduct, onReasonWritten, reasonWritten}) {
 
-  const [uploadedImages, setUploadedImages] = useState([])
-  const [dragActive, setDragActive] = useState(false)
   const [step, setStep] = useState("warning")
+
+  const [images, setImages] = useState([])
 
   const {orderReturnRequested, loading, orderError} = useSelector(state=> state.order)
 
   const modalRef = useRef(null)
   useModalHelpers({open: isOpen, onClose, modalRef})
 
+  const dispatch = useDispatch()
+
   useEffect(()=> {
-    if(orderReturnRequested && openCancelForm.return){
+    if(orderReturnRequested && isOpen){
       sonnerToast.info("Your return request has been sent.", {description: "The request will be processed within 24 hrs", duration: 4500})
       setStep("success")
       setTimeout(() => {
         setStep("warning")
         onClose()
       }, 2000)
+      dispatch(resetOrderStates())
     }
   }, [orderReturnRequested])
 
-  const handleDrag = (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true)
-    } else if (e.type === "dragleave") {
-      setDragActive(false)
-    }
-  }
-
-  const handleDrop = (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setDragActive(false)
-
-    const files = e.dataTransfer.files
-    if (files && files[0]) {
-      const newImages = []
-      for (let i = 0; i < Math.min(files.length, 3 - uploadedImages.length); i++) {
-        newImages.push(URL.createObjectURL(files[i]))
-      }
-      setUploadedImages([...uploadedImages, ...newImages])
-    }
-  }
-
-  const handleFileInput = (e) => {
-    const files = e.target.files
-    if (files && files[0]) {
-      const newImages = []
-      for (let i = 0; i < Math.min(files.length, 3 - uploadedImages.length); i++) {
-        newImages.push(URL.createObjectURL(files[i]))
-      }
-      setUploadedImages([...uploadedImages, ...newImages])
-    }
-  }
-
-  const removeImage = (index) => {
-    setUploadedImages(uploadedImages.filter((_, i) => i !== index))
-  }
-
   const handleConfirm = () => {
-    returnOrderOrProduct(uploadedImages)
+    returnOrderOrProduct(images)
     sonnerToast.info("Sending the return details...", {description: "please wait few seconds!", duration: 4500})
   }
 
@@ -151,7 +117,7 @@ export default function RefundModal({isOpen, onClose, returnOrderOrProduct, orde
             {step === "warning" && (
               <motion.div className="p-8 md:p-12" variants={contentVariants} initial="hidden" animate="visible" ref={modalRef}>
                 {/* Header */}
-                <motion.div className="flex items-center gap-4 mb-6" variants={itemVariants}>
+                <motion.div className="flex items-center gap-4 mb-10" variants={itemVariants}>
                   <div className="p-3 bg-orange-100 rounded-full flex-shrink-0">
                     <AlertTriangle className="text-orange-600" size={28} />
                   </div>
@@ -237,7 +203,7 @@ export default function RefundModal({isOpen, onClose, returnOrderOrProduct, orde
                         placeholder="Please describe the exact problem you faced with the product. Be as detailed as possible..."
                         className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none 
                           focus:ring-2 focus:ring-purple-200 transition-all resize-none text-gray-700 placeholder-gray-400
-                          placeholder:text-[13px]"
+                          text-[14px] placeholder:text-[13px]"
                         rows="4"
                       />
                       <p className="text-[12px] text-gray-500">{reasonWritten.reason.length}/500 characters</p>
@@ -246,70 +212,23 @@ export default function RefundModal({isOpen, onClose, returnOrderOrProduct, orde
 
                 {/* Image Upload */}
                 <motion.div className="mb-6" variants={itemVariants}>
-                  <h3 className="text-[15px] text-secondary font-semibold text-gray-900 mb-[7px]">Product Images (Optional)</h3>
+                  <h3 className="text-[15px] text-secondary font-semibold text-gray-900 mb-4">Product Images (Optional)</h3>
 
-                  {uploadedImages.length < 3 && (
-                    <motion.div
-                      className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all cursor-pointer ${
-                        dragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 bg-gray-50 hover:border-gray-400"
-                      }`}
-                      onDragEnter={handleDrag}
-                      onDragLeave={handleDrag}
-                      onDragOver={handleDrag}
-                      onDrop={handleDrop}
-                      whileHover={{ scale: 1.02 }}
-                    >
-                      <input
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        onChange={handleFileInput}
-                        className="hidden"
-                        id="imageInput"
-                      />
-                      <label htmlFor="imageInput" className="cursor-pointer flex flex-col items-center gap-2">
-                        <ImageIcon className="text-gray-400" size={32} />
-                        <p className="text-[14px] text-gray-700 font-medium">Drag and drop images here or click to select</p>
-                        <p className="mt-[-7px] text-[12px] text-gray-500">PNG, JPG, or GIF (Max 3 images, up to 5MB each)</p>
-                      </label>
-                    </motion.div>
-                  )}
+                  <FileUpload
+                    images={images}
+                    setImages={setImages}
+                    imageLimit={5}
+                    needThumbnail={false}
+                    imageType="Return product"
+                    imageCropperPositionFromTop={"0px"}
+                    imageCropperBgBlur={true}
+                    uploadBox={{
+                      beforeUpload: "85px",
+                      afterUpload: "55px",
+                    }}
+                  />
 
-                  {/* Image Preview */}
-                  {uploadedImages.length > 0 && (
-                    <motion.div
-                      className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                    >
-                      {uploadedImages.map((image, index) => (
-                        <motion.div
-                          key={index}
-                          className="relative group rounded-lg overflow-hidden bg-gray-100"
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          whileHover={{ scale: 1.05 }}
-                        >
-                          <img
-                            src={image || "/placeholder.svg"}
-                            alt={`Product ${index + 1}`}
-                            className="w-full h-32 object-cover"
-                          />
-                          <button
-                            onClick={() => removeImage(index)}
-                            className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <X size={16} />
-                          </button>
-                          <div className="absolute bottom-1 right-1 bg-gray-900/70 text-white text-xs px-2 py-1 rounded">
-                            {index + 1}/3
-                          </div>
-                        </motion.div>
-                      ))}
-                    </motion.div>
-                  )}
-
-                  <p className="text-[12px] text-gray-600 mt-[5px]">{uploadedImages.length}/3 images uploaded</p>
+                  <p className="text-[11px] text-gray-600">{images.length}/5 images uploaded</p>
                 </motion.div>
 
                 {/* Disclaimer */}
@@ -331,7 +250,7 @@ export default function RefundModal({isOpen, onClose, returnOrderOrProduct, orde
                   >
                     Cancel
                   </button>
-                  <button
+                  {/* <button
                     onClick={handleConfirm}
                     disabled={orderOrProduct === 'order' && !reasonWritten.reason.trim()}
                     className="px-6 py-3 text-[15px] bg-purple-600 text-white hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed rounded-lg font-semibold transition-colors"
@@ -340,7 +259,20 @@ export default function RefundModal({isOpen, onClose, returnOrderOrProduct, orde
                     {
                       loading ? <CustomHashLoader loading={loading} customStyle={{color: 'rgba(215, 241, 72, 1)'}}/> : "Confirm & Submit" 
                     }
-                  </button>
+                  </button> */}
+
+                  <SiteButtonSquare 
+                      isDisabled={orderOrProduct === 'order' && !reasonWritten.reason.trim()}
+                      clickHandler={()=> handleConfirm()}
+                      tailwindClasses='!py-[12px] !min-w-[11.1rem]'
+                      customStyle={{display: 'flex', justifyContent:'center', alignItems:'center'}}
+                  >
+                      { 
+                          loading? <CustomHashLoader loading={loading}/> : "Confirm & Submit" 
+                      }
+
+                  </SiteButtonSquare>
+
                 </motion.div>
               </motion.div>
             )}
@@ -358,10 +290,10 @@ export default function RefundModal({isOpen, onClose, returnOrderOrProduct, orde
                     <CheckCircle className="text-green-600" size={48} />
                   </div>
                 </motion.div>
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 text-center mb-2">
+                <h2 className="text-[21px] md:text-[25px] font-bold text-secondary text-center mb-2">
                   Return Request Confirmed
                 </h2>
-                <p className="text-gray-600 text-center">
+                <p className="text-gray-600 text-center text-[15px]">
                   Your return has been successfully submitted. You'll receive an update within 24 hours.
                 </p>
               </motion.div>

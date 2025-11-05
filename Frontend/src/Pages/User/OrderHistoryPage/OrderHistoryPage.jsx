@@ -22,6 +22,7 @@ import Modal from '../../../Components/Modal/Modal'
 import RefundModal from './RefundModal'
 import TextChatBox from '../TextChatBox/TextChatBox'
 import CancelForm from '../../../Components/CancelForm/CancelForm'
+import {handleImageCompression} from '../../../Utils/compressImages'
 import {CustomPuffLoader} from '../../../Components/Loader//Loader'
 import {DateSelector} from '../../../Components/Calender/Calender'
 import {addToCart, resetCartStates} from '../../../Slices/cartSlice'
@@ -62,6 +63,8 @@ export default function OrderHistoryPage(){
     const [openSelectReasons, setOpenSelectReasons] = useState({status:false, reasonTitle:'', reason:''})
     const productCancelFormRef = useRef(null)
     const orderCancelFormRef = useRef(null)
+
+    const returnWindowTime = 30 * 24 * 60 * 60 * 1000
 
     const [openRefundModal, setOpenRefundModal] = useState({status: false, orderOrProduct: null})
 
@@ -244,17 +247,21 @@ export default function OrderHistoryPage(){
       navigate(`/shop/product?id=${id}`)
     }
 
-    const cancelOrReturnProduct = (e, productId, orderId)=> {
+    const cancelOrReturnProduct = (e, productId, orderId, orderDate)=> {
       console.log(`orderId---> ${orderId}, productId---> ${JSON.stringify(productId)}`)
       if(e.target.textContent.toLowerCase().includes('cancel')){
         console.log("Opening the CancelForm..")
         setOpenCancelForm({type:'product', status:true, options: {productId: productId, orderId}, return: false},)
-        window.scrollTo( {top: productCancelFormRef.current.getBoundingClientRect().top, scrollBehavior: 'smooth'} )
+        // window.scrollTo( {top: productCancelFormRef.current.getBoundingClientRect().top, scrollBehavior: 'smooth'} )
         sonnerToast.warning("You are about to cancel the product!")
       }else{
         console.log("Opening the ReturnForm..")
+        const isReturnEligible = Date.now() <= new Date(orderDate).getTime() + returnWindowTime
+        if(!isReturnEligible){
+          sonnerToast.error("Sorry! Return requests are accepted within 30 days of purchase!", {duration: 4500})
+        }
         setOpenCancelForm({type:'product', status:true, options: {productId, orderId}, return: true})
-        window.scrollTo( {top: productCancelFormRef.current.getBoundingClientRect().top, scrollBehavior: 'smooth'} )
+        // window.scrollTo( {top: productCancelFormRef.current.getBoundingClientRect().top, scrollBehavior: 'smooth'} )
         sonnerToast.warning("You are about to return the product!")
       }
     }
@@ -339,26 +346,41 @@ export default function OrderHistoryPage(){
       }) )
     }
 
-    const initiateReturnProduct = async (uploadedImages = [])=> {
+    const initiateReturnProduct = async (images = [])=> {
       console.log('openSelectReasons--->', openSelectReasons)
-      console.log('uploadedImages--->', uploadedImages)
+      console.log('images--->', images)
       console.log(`orderId---> ${openCancelForm.options.orderId}, productId---> ${openCancelForm.options.productId}, 
           returnType---> ${openRefundModal.orderOrProduct}`)
       console.log("Inside initiateReturnProduct()..")
 
-      // const compressedImages = await compressedImageBlobs(uploadedImages)
+      const formData = new FormData()
+      formData.append('orderId', openCancelForm.options.orderId)
+      formData.append('returnType', openRefundModal.orderOrProduct)
+      formData.append('returnReason', openSelectReasons.reason)
+
+      if (openCancelForm.options.productId) formData.append('productId', openCancelForm.options.productId._id)
+
+      const compressedImages = await compressedImageBlobs(images)
+            
+      compressedImages.forEach((blob, index) => {
+          formData.append('images', blob, `returnImg${index}`)
+      })
 
       dispatch(
         initiateReturn({
           orderId: openCancelForm.options.orderId, 
-          productId: openCancelForm.options.productId._id, 
+          productId: openCancelForm?.options?.productId ? openCancelForm.options.productId._id : null, 
           returnType: openRefundModal.orderOrProduct,
           returnReason: openSelectReasons.reason,
-          uploadedImages
+          formData
         })
       )
       setOpenCancelForm({type:'', status:false, options:{}})
       setOpenSelectReasons(({status:false, reasonTitle:'', reason:''}))
+    }
+
+    const cancelReturnRequest = (orderId, productId)=> {
+
     }
 
 
@@ -560,13 +582,14 @@ export default function OrderHistoryPage(){
                                         </span> */}
                                       </h3>
                                       }
-                                      <h3 className={`px-[5px] py-[3px] w-[23%] flex gap-[15px] justify-center items-center
+                                      <h3 className={`px-[5px] py-[3px] ${order.orderStatus === 'returning' ? 'w-[35%]' : 'w-[23%]'} 
+                                        flex gap-[15px] justify-center items-center
                                         ${ findStyle(order.orderStatus, 'lightBg') } border ${ findStyle(order.orderStatus, 'border') } rounded-[5px]`}>
                                          <span className={`w-[8px] h-[8px] ${ findStyle(order.orderStatus, 'bg') } rounded-[5px]`} 
                                              style={{boxShadow: `0px 0px 6px 3px ${findStyle(order.orderStatus, 'shadow')}`}}>
                                          </span>
                                          <span className={`capitalize ${ findStyle(order.orderStatus, 'textColor') } text-[14px]`}>
-                                            {order.orderStatus}
+                                            {order.orderStatus === 'returning' ? 'Appied for return' : order.orderStatus}
                                          </span>
                                       </h3>
                                     </div>
@@ -588,7 +611,10 @@ export default function OrderHistoryPage(){
                                         // </SiteButtonSquare>
                                         <SiteSecondaryFillImpButton
                                           className={`px-[18px] py-[7px] !w-auto !text-[13px] rounded-[7px]`} 
-                                          clickHandler={(e)=> setOpenRefundModal({status: true, orderOrProduct: 'order'})}
+                                          clickHandler={(e)=> {
+                                            setOpenRefundModal({status: true, orderOrProduct: 'order'})
+                                            setOpenCancelForm({type:'order', status:false, options: {orderId: order._id}, return: true})
+                                          }}
                                         >
                                             Return Order
                                         </SiteSecondaryFillImpButton>
@@ -641,10 +667,11 @@ export default function OrderHistoryPage(){
                                         { product.productStatus === 'cancelled'||product.productStatus === 'returning' ?
                                              <CircleOff className="w-[1rem] h-[1rem]"/> : <RefreshCcw className="w-[1rem] h-[1rem]" /> 
                                         }
-                                        { product.productStatus === 'cancelled'||product.productStatus=== 'returning' ? 'This product is cancelled'
-                                            :Date.now() <= new Date(order.orderDate).getTime() + 15 * 24 * 60 * 60 * 1000 ?
+                                        { product.productStatus === 'cancelled' ? 'This product is cancelled' 
+                                          : product.productStatus === 'returning' ? 'Applied for return request'
+                                            :Date.now() <= new Date(order.orderDate).getTime() + returnWindowTime ?
                                               'Return or replace items: Eligible through ' + 
-                                                format( new Date(order.orderDate).getTime() + 15 * 24 * 60 * 60 * 1000, "MMMM dd, yyyy" )
+                                                format( new Date(order.orderDate).getTime() + returnWindowTime, "MMMM dd, yyyy" )
                                               : 'Return date expired'
                                         }
                                       </p>
@@ -672,7 +699,7 @@ export default function OrderHistoryPage(){
                                           {(product.productStatus != 'cancelled' && 
                                                   product.productStatus != 'returning' && product.productStatus != 'refunded') &&
                                             <button className="hover:bg-gray-50 hover:border-gray-300 transition-all duration-200"
-                                                  onClick={(e)=> cancelOrReturnProduct(e, product.productId, order._id)}> 
+                                                  onClick={(e)=> cancelOrReturnProduct(e, product.productId, order._id, order.orderDate)}> 
                                               {product.productStatus === 'delivered' ? 'Return Product' : 'Cancel Product'}
                                             </button>
                                           }
@@ -680,6 +707,12 @@ export default function OrderHistoryPage(){
                                             <button className="hover:bg-gray-50 hover:border-gray-300 transition-all duration-200"
                                                   onClick={(e)=> clearProduct(order._id, product.productId)}> 
                                               Clear this item
+                                            </button>
+                                          }
+                                          { (product.productStatus === 'returning') && 
+                                            <button className="hover:bg-gray-50 hover:border-gray-300 transition-all duration-200"
+                                                  onClick={(e)=> cancelReturnRequest(order._id, product.productId)}> 
+                                              Cancel return request
                                             </button>
                                           }
 
@@ -696,7 +729,7 @@ export default function OrderHistoryPage(){
                                     </div>
                                   </div>
                                       
-                                  <div ref={productCancelFormRef} className='flex justify-center items-center'>
+                                  <div className='flex justify-center items-center'>
                                   { 
                                     openCancelForm.type === 'product' && openCancelForm.options.productId === product.productId &&
                                       openCancelForm.options.orderId === order._id && openCancelForm.status &&

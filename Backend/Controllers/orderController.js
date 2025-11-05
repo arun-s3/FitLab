@@ -603,7 +603,6 @@ const initiateReturn = async (req, res, next)=> {
   try {
     console.log("Inside initiateReturn...")
 
-    const userId = req.user._id
     const { orderId, productId, returnType, returnReason } = req.body
     console.log("req.files---------->", JSON.stringify(req.files))
     console.log(`orderId-----> ${orderId}, productId-----> ${productId}, returnReason-----> ${returnReason}, returnType-----> ${returnType}`)
@@ -612,49 +611,24 @@ const initiateReturn = async (req, res, next)=> {
       return next(errorHandler(400, "Missing required fields."))
     }
 
-    const order = await Order.findOne({ _id: orderId, userId }).populate("products.productId")
+    const order = await Order.findOne({ _id: orderId}).populate("products.productId")
     if (!order) return next(errorHandler(404, "Order not found."))
 
-    // let uploadedImages = []
+    const uploadedImages = req.files?.images
+      ? await Promise.all(
+         req.files['images'].map(async (image, index) => {
+           const result = await cloudinary.uploader.upload(image.path, {
+             folder: 'returns/images',
+             resource_type: 'image',
+             transformation: [
+               { width: 400, height: 400, crop: "limit"}
+             ]
+           })
+           return result.secure_url
+         })
+        )
+      : []
 
-    // const uploadedImages = await Promise.all(
-    //   req.files['images'].map(async (image, index) => {
-    //     const result = await cloudinary.uploader.upload(image.path, {
-    //       folder: 'products/images',
-    //       resource_type: 'image',
-    //       transformation: [
-    //         { width: 400, height: 400, crop: "limit"}
-    //       ]
-    //     });
-    //     return result.secure_url
-    //   })
-    // );
-    const uploadedImages = await Promise.all(
-  req.files.map(async (image, index) => {
-    const result = await cloudinary.uploader.upload(image.path, {
-      folder: 'fitlab/returns',
-      resource_type: 'image',
-      transformation: [
-        { width: 400, height: 400, crop: "limit" }
-      ]
-    });
-    return result.secure_url;
-  })
-);
-
-
-    // if (req.files && req.files.length > 0) {
-    //   for (const image of req.files['image']) {
-    //     const uploadResult = await cloudinary.uploader.upload(image.path, {
-    //       folder: "fitlab/returns",
-    //       resource_type: 'image',
-    //       transformation: [
-    //         { width: 400, height: 400, crop: "limit"}
-    //       ]
-    //     })
-    //     uploadedImages.push(uploadResult.secure_url)
-    //   }
-    // }
     console.log("uploadedImages---------->", JSON.stringify(uploadedImages))
 
     if (returnType === "product"){
@@ -670,7 +644,11 @@ const initiateReturn = async (req, res, next)=> {
       productInOrder.productStatus = "returning"
       productInOrder.productReturnReason = returnReason
       productInOrder.productReturnImages = uploadedImages
-      productInOrder.productReturnRequestedAt = new Date()
+
+      const allReturning = order.products.every((p) => p.productStatus === "returning");
+      if (allReturning) {
+        order.orderStatus = "returning";
+      }
 
       await order.save()
 
@@ -685,7 +663,6 @@ const initiateReturn = async (req, res, next)=> {
       order.orderStatus = "returning"
       order.orderReturnReason = returnReason
       order.orderReturnImages = uploadedImages
-      order.orderReturnRequestedAt = new Date();
 
       order.products.forEach((p) => (p.productStatus = "returning"))
 
@@ -702,6 +679,91 @@ const initiateReturn = async (req, res, next)=> {
   } 
   catch (error){
     console.log("Error in initiateReturn -->", error.message)
+    next(error)
+  }
+}
+
+
+const handleReturnDecision = async (req, res, next)=> {
+  try {
+    console.log("Inside handleReturnDecision...")
+
+    const {orderId, productId, returnType, didAccept} = req.body.returnDetails
+    console.log(`orderId: ${orderId}, productId: ${productId}, returnType: ${returnType}, didAccept: ${didAccept}`)
+
+    if (!orderId || typeof didAccept === 'undefined' || !returnType){
+      return next(errorHandler(400, "Missing required fields."))
+    }
+
+    const order = await Order.findById(orderId)
+    if (!order) return next(errorHandler(404, "Order not found."))
+
+    const decision = didAccept ? "accepted" : "rejected"
+
+    if (returnType === "product") {
+      if (!productId) return next(errorHandler(400, "Product ID is required for product-level return decision."))
+
+      const productInOrder = order.products.find(p => p.productId.equals(productId))
+      if (!productInOrder) return next(errorHandler(404, "Product not found in this order."))
+      productInOrder.productReturnStatus = decision
+
+      if (decision === "rejected"){
+        productInOrder.productStatus = "delivered"
+      }
+
+      const allAccepted = order.products.every(p => p.productReturnStatus === "accepted")
+      if (allAccepted) {
+        order.orderReturnStatus = "accepted"
+      }
+
+      const allRejected = order.products.every(p => p.productReturnStatus === "rejected")
+      if (allRejected) {
+        order.orderReturnStatus = "rejected"
+        order.orderStatus = "delivered"
+      }
+
+      await order.save()
+
+      return res.status(200).json({
+        success: true,
+        message: `Product return ${decision} successfully.`,
+        updatedProduct: productInOrder,
+        updatedOrderStatus: order.orderStatus,
+      });
+    }
+
+    else if (returnType === "order"){
+      order.orderReturnStatus = decision
+
+      if (decision === "rejected") {
+        order.orderStatus = "delivered"
+        order.products.forEach(p => {
+          if (p.productStatus === "returning") {
+            p.productStatus = "delivered"
+            p.productReturnStatus = "rejected"
+          }
+        })
+      } else if (decision === "accepted") {
+        order.products.forEach(p => {
+          p.productReturnStatus = "accepted"
+        })
+      }
+
+      await order.save()
+
+      return res.status(200).json({
+        success: true,
+        message: `Order return ${decision} successfully.`,
+        updatedOrder: order,
+      });
+    }
+
+    else {
+      return next(errorHandler(400, "Invalid return type. Must be 'order' or 'product'."))
+    }
+  }
+  catch (error){
+    console.log("Error in handleReturnDecision ---->", error.message)
     next(error)
   }
 }
@@ -807,4 +869,4 @@ const refundOrder = async (req, res, next)=> {
 
 
 module.exports = {createOrder, getOrders, getAllUsersOrders, cancelOrderProduct, cancelOrder, deleteProductFromOrderHistory, 
-        changeOrderStatus, changeProductStatus, initiateReturn, getOrderCounts, getTodaysLatestOrder}
+        changeOrderStatus, changeProductStatus, initiateReturn, handleReturnDecision, refundOrder, getOrderCounts, getTodaysLatestOrder}

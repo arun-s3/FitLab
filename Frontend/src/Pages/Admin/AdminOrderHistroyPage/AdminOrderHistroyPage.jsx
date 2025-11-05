@@ -4,7 +4,7 @@ import './AdminOrderHistroyPage.css'
 import {useDispatch, useSelector} from 'react-redux'
 
 import {ShoppingBag, Package, RefreshCcw, CircleOff, Box, Download, Search, MoreHorizontal, MessageSquare, 
-   Filter, Plus, CalendarArrowDown, CircleCheckBig, SquareCheckBig, Truck, PackageCheck, ChevronDown, ShoppingCart } from 'lucide-react'
+   Filter, Plus, CalendarArrowDown, CircleCheckBig, SquareCheckBig, Truck, PackageCheck, ChevronDown, TextSearch, ShoppingCart } from 'lucide-react'
 import {RiArrowDropDownLine} from "react-icons/ri"
 import {BiCartAdd} from "react-icons/bi"
 import {TbCreditCardRefund} from "react-icons/tb"
@@ -16,6 +16,7 @@ import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleS
 import {DateSelector} from '../../../Components/Calender/Calender'
 import Modal from '../../../Components/Modal/Modal'
 import CancelForm from '../../../Components/CancelForm/CancelForm'
+import ReturnRequestModal from './ReturnRequestModal'
 import {SitePrimaryButtonWithShadow, SiteSecondaryFillImpButton} from '../../../Components/SiteButtons/SiteButtons' 
 import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
 import {getOrders, getAllUsersOrders, cancelOrder, cancelOrderProduct, changeOrderStatus,
@@ -50,10 +51,12 @@ export default function AdminOrderHistoryPage(){
   const [isHovered, setIsHovered] = useState({})
   const [showProducts, setShowProducts] = useState({})
 
+  const [showReturnRequestModal, setshowReturnRequestModal] = useState({status: false, order: null, product: null, returnOrderOrProduct: null})
+
   const {orders, totalUsersOrders, orderCreated, orderMessage, orderError} = useSelector(state=> state.order)
   const dispatch = useDispatch()
 
-  const {setPageBgUrl} = useOutletContext() 
+  const {setHeaderZIndex, setPageBgUrl} = useOutletContext() 
   setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.93),rgba(255,255,255,0.93)), url('/admin-ProductsListBg.jpg')`)
 
   const baseApiUrl = import.meta.env.VITE_API_BASE_URL
@@ -123,6 +126,14 @@ export default function AdminOrderHistoryPage(){
           dispatch( getAllUsersOrders({queryDetails}) )
         }
     },[queryDetails])
+
+    useEffect(()=> {
+        if(setHeaderZIndex && showReturnRequestModal && showReturnRequestModal.status){
+            setHeaderZIndex(0)
+        }else{
+            setHeaderZIndex(10)
+        }
+    }, [showReturnRequestModal.status])
 
 
   const metrics = [
@@ -228,7 +239,7 @@ export default function AdminOrderHistoryPage(){
     })
   }
 
-  const changeStatus = (status)=> {
+  const changeStatus = (status, returnStatus = null)=> {
     switch(status.toLowerCase()){
       case 'processing':
         return {status:'confirm', icon:SquareCheckBig}
@@ -236,8 +247,11 @@ export default function AdminOrderHistoryPage(){
         return {status:'ship', icon:Truck}
       case 'shipped':
         return {status:'delivered', icon:PackageCheck}
-      case 'returning':
-        return {status:'refund', icon:TbCreditCardRefund}
+      case 'returning': 
+        return {  
+          status: !returnStatus ? 'Review return request' : returnStatus === 'accepted' ? 'refund' : null, 
+          icon: !returnStatus ? TextSearch : returnStatus === 'accepted' ? TbCreditCardRefund : null
+        }
       default:
         return {status: null, icon: null}
     }
@@ -300,10 +314,13 @@ export default function AdminOrderHistoryPage(){
     }
   }
 
-  const changeTheOrderStatus = (orderId, newStatus)=> {
+  const changeTheOrderStatus = (orderId, order = null, newStatus)=> {
     console.log("Inside changeTheOrderStatus..")
     console.log("newStatus---->", newStatus)
-    dispatch(changeOrderStatus({orderId, newStatus}))
+    if(newStatus === 'Review return request'){
+      setshowReturnRequestModal({status: true, order, product: null, returnOrderOrProduct: 'order'})
+    }
+    else dispatch(changeOrderStatus({orderId, newStatus}))
   }
 
   const changeTheProductStatus = (orderId, productId, newProductStatus)=> {
@@ -520,9 +537,18 @@ export default function AdminOrderHistoryPage(){
                               <span className='px-[5px] py-[3px] w-[10%] flex gap-[10px] items-center'>
                                  <span className={`w-[3px] h-[3px] p-[3px] ${findStyle("order", order.orderStatus, 'bg')} rounded-[5px]`} 
                                      style={{boxShadow: `0px 0px 5px 2px  ${findStyle("order", order.orderStatus, 'shadow')}`}}>
-                                 </span>
-                                 <span className={`capitalize ${ findStyle("order", order.orderStatus, 'textColor') } text-[13px] font-[500]`}>
-                                   {order.orderStatus}
+                                 </span> 
+                                 <span className={`capitalize ${ findStyle("order", order.orderStatus, 'textColor') } text-[13px] 
+                                   font-[500] !whitespace-nowrap`}>
+                                   {
+                                      order.orderStatus !== 'returning' 
+                                        ? order.orderStatus 
+                                        : !order?.orderReturnStatus
+                                        ? 'Return request'
+                                        : order.orderReturnStatus === 'accepted'
+                                        ? 'Accepted request'
+                                        : 'Rejected request'
+                                   }
                                  </span>
                               </span>
                             } 
@@ -539,10 +565,10 @@ export default function AdminOrderHistoryPage(){
                               ${order.orderStatus !== 'cancelled'? findStyle("payment", order.paymentDetails.paymentStatus, 'textColor') : ''} `}>
                             {order.orderStatus === 'cancelled'? '---' : order.paymentDetails.paymentStatus}
                           </td>
-                          <td className="px-6 py-4">
+                          <td className="px-6 py-4 relative">
                             <div className="flex justify-center items-center gap-2">
                               {
-                                 ['delivered', 'cancelled', 'refunded'].every(status=> status !== order.orderStatus) &&
+                                 ['delivered', 'cancelled', 'returning', 'refunded'].every(status=> status !== order.orderStatus) &&
                                  <button className='relative py-[4px] px-4 text-secondary bg-white border border-secondary rounded-[6px]
                                      hover:bg-secondary hover:text-white transition duration-300 cancel-button' data-label='Order'
                                         onClick={(e)=> preCancelTheOrder(e, order._id)}>
@@ -551,15 +577,17 @@ export default function AdminOrderHistoryPage(){
                               }
                               { 
                                 ['delivered', 'cancelled', 'refunded'].every(status=> status !== order.orderStatus) &&
-                                <SiteSecondaryFillImpButton className="text-[11px] capitalize" 
-                                    clickHandler={(e)=> changeTheOrderStatus(order._id, changeStatus(order.orderStatus).status)}
-                                      customStyle={{width:'auto', marginTop:'0', paddingBlock:'4px', borderRadius:'6px'}}>
+                                <SiteSecondaryFillImpButton className="!py-[6px] text-[11px] capitalize" 
+                                    clickHandler={
+                                      (e)=> changeTheOrderStatus(order._id, order, changeStatus(order.orderStatus, order.orderReturnStatus).status)
+                                    }
+                                    customStyle={{width:'auto', marginTop:'0', paddingBlock:'4px', borderRadius:'6px'}}>
                                 {
                                   (()=> {
-                                    const {status, icon:Icon} = changeStatus(order.orderStatus)
+                                    const {status, icon:Icon} = changeStatus(order.orderStatus, order.orderReturnStatus)
                                     return(
                                       <span className='flex items-center gap-[7px]'>
-                                          <span> {status} </span>
+                                          <span className='whitespace-nowrap'> {status} </span>
                                           {Icon && <Icon className="w-4 h-4"/>} 
                                       </span>
                                     )
@@ -574,6 +602,12 @@ export default function AdminOrderHistoryPage(){
                                     closeButtonText='Cancel' contentCapitalize={false} clickTest={true} activateProcess={cancelThisOrder}/>
                               } 
                             </div>
+                            {
+                              order.orderStatus === 'returning' && !order.orderReturnStatus &&
+                              <p className='block absolute text-[11px] text-red-500 hover:underline transition-all duration-300 cursor-pointer'>
+                                View customer grievances with evidences and more for refund. 
+                              </p>
+                            }
                           </td>
                         </tr>
                         <tr>
@@ -606,8 +640,18 @@ export default function AdminOrderHistoryPage(){
                                          <span className={`w-[4px] h-[4px] ${ findStyle('product', product.productStatus, 'bg') } rounded-[5px]`} 
                                              style={{boxShadow: `0px 0px 6px 3px  ${findStyle('product', product.productStatus, 'shadow')}`}}>
                                          </span>
-                                         <span className={`capitalize ${ findStyle('product', product.productStatus, 'textColor') } text-[11px] font-[500]`}>
-                                           {product.productStatus}
+                                         <span className={`capitalize ${ findStyle('product', product.productStatus, 'textColor') } 
+                                           text-[11px] font-[500] !whitespace-nowrap`}>
+                                           {/* {product.productStatus === 'returning' ? 'Return request received' : product.productStatus } */}
+                                           {
+                                              product.productStatus !== 'returning' 
+                                                ? product.productStatus
+                                                : !product?.productReturnStatus
+                                                ? 'Return request'
+                                                : product.productReturnStatus === 'accepted'
+                                                ? 'Accepted request'
+                                                : 'Rejected request'
+                                           }
                                          </span>
                                       </span>
                                     } 
@@ -632,15 +676,17 @@ export default function AdminOrderHistoryPage(){
                               }
                               { 
                                 !['cancelled', 'refunded'].includes(product.productStatus) &&
-                                <SiteSecondaryFillImpButton className="text-[11px] capitalize" 
-                                    clickHandler={(e)=> changeTheProductStatus(order._id, product.productId, changeStatus(product.productStatus).status)}
+                                <SiteSecondaryFillImpButton className="!py-[6px] text-[11px] capitalize" 
+                                    clickHandler={
+                                      (e)=> changeTheProductStatus(order._id, product.productId, changeStatus(product.productStatus, product.productReturnStatus).status)
+                                    }
                                       customStyle={{width:'auto',marginTop:'0', paddingBlock:'4px', borderRadius:'6px'}}> 
                                 {
                                   (()=> {
-                                    const {status, icon:Icon} = changeStatus(product.productStatus)
+                                    const {status, icon:Icon} = changeStatus(product.productStatus, product.productReturnStatus)
                                     return(
                                       <span className='flex items-center gap-[10px]'>
-                                          <span className='capitalize'> 
+                                          <span className='capitalize whitespace-nowrap'> 
                                             {status + '  Product' } 
                                           </span>
                                           {Icon && <Icon className="w-4 h-4"/>} 
@@ -704,6 +750,21 @@ export default function AdminOrderHistoryPage(){
         }
 
       </div>
+
+      {
+      showReturnRequestModal.status &&
+        <ReturnRequestModal
+          returnRequestOrder={showReturnRequestModal.order}
+          returnRequestProduct={showReturnRequestModal.product}
+          returnOrderOrProduct={showReturnRequestModal.returnOrderOrProduct}
+          isOpen={()=> showReturnRequestModal.status}
+          onClose={() => setshowReturnRequestModal({status: false, order: null, product: null, returnOrderOrProduct: null})} 
+          onDecision={(orderId, didAccept) => {
+            console.log(`The request of ${orderId} is ${didAccept ? 'approved!' : 'rejected'}`)
+            setshowReturnRequestModal({status: false, order: null, product: null, returnOrderOrProduct: null})
+          }}
+        />
+      }
 
     </section>
 

@@ -222,6 +222,7 @@ export default function RefundModal({isOpen, onClose, returnOrderOrProduct, orde
                     imageType="Return product"
                     imageCropperPositionFromTop={"0px"}
                     imageCropperBgBlur={true}
+                    editable={false}
                     uploadBox={{
                       beforeUpload: "85px",
                       afterUpload: "55px",

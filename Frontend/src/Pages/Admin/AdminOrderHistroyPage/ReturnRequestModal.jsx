@@ -8,16 +8,16 @@ import {toast as sonnerToast} from 'sonner'
 
 import {handleReturnDecision, resetOrderStates} from '../../../Slices/orderSlice'
 import useModalHelpers from '../../../Hooks/ModalHelpers'
+import {capitalizeFirstLetter, camelToCapitalizedWords} from '../../../Utils/helperFunctions'
 
 
-export default function ReturnRequestModal({returnRequestOrder = null, returnRequestProduct = null, returnOrderOrProduct, isOpen, onClose, onDecision}){
+export default function ReturnRequestModal({returnRequestOrder = null, returnRequestProduct = null, returnOrderOrProduct, isOpen, onClose, onDecision, user}){
 
   const [currentImageIndex, setCurrentImageIndex] = useState(1)
   const [selectedAction, setSelectedAction] = useState(null)
 
   const [images, setImages] = useState(null)
 
-  const {user} = useSelector(state=> state.user)
   const {handledOrderDecision, orderError} = useSelector(state=> state.order)
   const dispatch = useDispatch()
 
@@ -36,18 +36,6 @@ export default function ReturnRequestModal({returnRequestOrder = null, returnReq
         setImages(images)
     }
   }, [returnOrderOrProduct])
-
-  useEffect(()=> {
-    if(handledOrderDecision){
-        sonnerToast.success("Updated the decision to the user successfully!")
-        dispatch(resetOrderStates())
-    }
-    if(orderError){
-        sonnerToast.error(orderError)
-        dispatch(resetOrderStates())
-    }
-  }, [handledOrderDecision, orderError])
-
 
   const statusColor = {
     pending: "bg-yellow-50 border-yellow-200",
@@ -76,7 +64,7 @@ export default function ReturnRequestModal({returnRequestOrder = null, returnReq
     if(onDecision){
         onDecision(returnRequestOrder.fitlabOrderId, didAccept)
     } 
-    sonnerToast.info('Updating the user...')
+    sonnerToast.info('Updating the status of return request...')
   }
 
   const containerVariants = {
@@ -123,24 +111,24 @@ export default function ReturnRequestModal({returnRequestOrder = null, returnReq
           onClick={(e) => e.stopPropagation()}
         >
           <motion.div
-            className="sticky top-0 bg-gradient-to-r from-slate-900 to-slate-800 p-6 flex justify-between items-center z-40"
+            className="sticky top-0 bg-[#f3e9fc] p-8 flex justify-between items-center z-40"
             variants={itemVariants}
           >
             <div className="flex items-center gap-3">
-              <motion.div className="p-2 bg-white bg-opacity-10 rounded-lg" whileHover={{ scale: 1.05 }}>
-                <Package className="w-6 h-6 text-white" />
+              <motion.div className="p-[12px] bg-white rounded-lg" whileHover={{ scale: 1.05 }}>
+                <Package className="w-6 h-6 text-secondary" />
               </motion.div>
               <div>
-                <h1 className="text-2xl font-bold text-white">Return Request</h1>
-                <p className="text-slate-300 text-sm mt-1"> {returnRequestOrder.fitlabOrderId} </p>
+                <h1 className="text-[25px] font-bold">Return Request</h1>
+                <p className="text-secondary text-sm font-medium"> {returnRequestOrder.fitlabOrderId} </p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <motion.span
-                className={`px-3 py-1 rounded-full text-xs font-semibold ${statusBadgeColor['pending']}`}
+                className={`px-3 py-1 rounded-[5px] text-xs font-semibold text-secondary bg-primary`}
                 whileHover={{ scale: 1.05 }}
               >
-                pending
+                Pending
               </motion.span>
               <motion.button
                 onClick={onClose}
@@ -148,14 +136,14 @@ export default function ReturnRequestModal({returnRequestOrder = null, returnReq
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <X className="w-5 h-5 text-white" />
+                <X className="w-5 h-5 text-muted" />
               </motion.button>
             </div>
           </motion.div>
 
           <div className="p-8" ref={modalRef}>
             <motion.div
-              className="grid grid-cols-1 lg:grid-cols-3 gap-8"
+              className="grid grid-cols-1 lg:grid-cols-2 gap-8"
               variants={containerVariants}
               initial="hidden"
               animate="visible"
@@ -175,8 +163,14 @@ export default function ReturnRequestModal({returnRequestOrder = null, returnReq
 
                 <motion.div className="grid grid-cols-2 sm:grid-cols-4 gap-4" variants={itemVariants}>
                   <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                    <p className="text-xs text-slate-600 uppercase tracking-wide mb-1">Price</p>
-                    <p className="text-lg font-bold text-slate-900">
+                    <p className="text-xs text-slate-600 uppercase tracking-wide mb-1">
+                        {
+                            returnOrderOrProduct === 'order' 
+                                ? 'Total Price'
+                                : 'Price'
+                        }
+                    </p>
+                    <p className="text-[16px] !text-secondary font-bold text-slate-900">
                         ₹{
                             returnOrderOrProduct === 'order' 
                                 ? returnRequestOrder.orderTotal.toFixed(2) 
@@ -188,17 +182,31 @@ export default function ReturnRequestModal({returnRequestOrder = null, returnReq
                     returnOrderOrProduct === 'product' &&
                         <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
                           <p className="text-xs text-slate-600 uppercase tracking-wide mb-1">Quantity</p>
-                          <p className="text-lg font-bold text-slate-900">{returnRequestProduct.quantity}</p>
+                          <p className="text-[16px] !text-primaryDark font-[550]">{returnRequestProduct.quantity}</p>
                         </div>
                   }
                   <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
                     <p className="text-xs text-slate-600 uppercase tracking-wide mb-1">Delivered on</p>
+                    <p className="text-[16px] !text-primaryDark font-[550]">{ format(new Date(returnRequestOrder.deliveryDate), "MMMM dd, yyyy" ) }</p>
                   </div>
+                  <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                    <p className="text-xs text-slate-600 uppercase tracking-wide mb-1">Payment Method</p>
+                    <p className="text-[16px] !text-primaryDark font-[550]">
+                        {camelToCapitalizedWords(returnRequestOrder.paymentDetails.paymentMethod)}
+                    </p>
+                  </div>
+                    {
+                    returnOrderOrProduct === 'order' &&
+                        <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
+                          <p className="text-xs text-slate-600 uppercase tracking-wide mb-1">Products</p>
+                          <p className="text-[16px] !text-primaryDark font-[550]">{returnRequestOrder.products.length}</p>
+                        </div>
+                    }
                   {
                     returnOrderOrProduct === 'product' &&
                         <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
                             <p className="text-xs text-slate-600 uppercase tracking-wide mb-1">Total</p>
-                            <p className="text-lg font-bold text-slate-900">
+                            <p className="text-[16px] !text-primaryDark font-[550]">
                                 ₹{(returnRequestProduct.price.toFixed(2) * returnRequestProduct.quantity).toFixed(2)}
                             </p>
                         </div>
@@ -280,21 +288,21 @@ export default function ReturnRequestModal({returnRequestOrder = null, returnReq
                 }
 
                 <motion.div
-                  className="bg-gradient-to-br from-orange-50 to-amber-50 border-2 border-orange-200 rounded-xl p-6"
+                  className="bg-gradient-to-br from-orange-50 to-orange-100 border-2 border-primaryDark rounded-xl p-6"
                   variants={itemVariants}
                 >
-                  <div className="flex items-start gap-3 mb-3">
-                    <MessageSquare className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />
-                    <h3 className="text-lg font-semibold text-slate-900">Reason for Return</h3>
+                  <div className="flex items-center gap-3 mb-3">
+                    <MessageSquare className="w-5 h-5 text-secondary flex-shrink-0 mt-0.5" />
+                    <h3 className="text-lg font-semibold text-secondary">Reason for Return</h3>
                   </div>
-                  <p className="text-slate-700 leading-relaxed">
+                  <p className="text-[13px] text-slate-700 leading-relaxed">
                     {returnOrderOrProduct === 'order' ? returnRequestOrder.orderReturnReason : returnRequestProduct.productReturnReason}
                   </p>
                 </motion.div>
               </motion.div>
 
-              <motion.div className="lg:col-span-1" variants={itemVariants}>
-                {user &&
+              <motion.div className="lg:col-span-2" variants={itemVariants}>
+                {returnRequestOrder &&
                 <motion.div
                   className="bg-slate-50 border-2 border-slate-200 rounded-xl p-6 space-y-4 mb-6"
                   variants={itemVariants}
@@ -304,8 +312,8 @@ export default function ReturnRequestModal({returnRequestOrder = null, returnReq
                   <div className="flex items-start gap-3">
                     <User className="w-5 h-5 text-slate-600 flex-shrink-0 mt-0.5" />
                     <div className="min-w-0">
-                      <p className="text-xs text-slate-600 uppercase tracking-wide mb-1">Uesrname</p>
-                      <p className="text-slate-900 font-medium truncate">{user.username}</p>
+                      <p className="text-xs text-slate-600 uppercase tracking-wide mb-1">Username</p>
+                      <p className="text-[13px] !text-secondary font-medium truncate">{returnRequestOrder.userId.username}</p>
                     </div>
                   </div>
 
@@ -313,28 +321,31 @@ export default function ReturnRequestModal({returnRequestOrder = null, returnReq
                     <Mail className="w-5 h-5 text-slate-600 flex-shrink-0 mt-0.5" />
                     <div className="min-w-0">
                       <p className="text-xs text-slate-600 uppercase tracking-wide mb-1">Email</p>
-                      <p className="text-slate-900 font-medium text-sm truncate">{user.email}</p>
+                      <p className="text-[13px] !text-secondary font-medium text-sm truncate">{returnRequestOrder.userId.email}</p>
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-3">
-                    <Calendar className="w-5 h-5 text-slate-600 flex-shrink-0 mt-0.5" />
-                    <div className="min-w-0">
-                      <p className="text-xs text-slate-600 uppercase tracking-wide mb-1">Contact</p>
-                      <p className="text-slate-900 font-medium">{user.mobile}</p>
-                    </div>
-                  </div>
+                  {
+                    returnRequestOrder.userId.mobile &&
+                      <div className="flex items-start gap-3">
+                        <Calendar className="w-5 h-5 text-slate-600 flex-shrink-0 mt-0.5" />
+                        <div className="min-w-0">
+                          <p className="text-xs text-slate-600 uppercase tracking-wide mb-1">Contact</p>
+                          <p className="text-[13px] !text-secondary font-medium">{returnRequestOrder.userId.mobile}</p>
+                        </div>
+                      </div>
+                  }
                 </motion.div>
                 }
 
-                <motion.div className="space-y-3" variants={itemVariants}>
+                <motion.div className="flex items-center gap-12 mt-6" variants={itemVariants}>
                   <motion.button
                     onClick={()=> handleDecision(true)}
                     className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    <Check className="w-5 h-5" />
+                    {/* <Check className="w-5 h-5" /> */}
                     Approve Return
                   </motion.button>
 
@@ -344,16 +355,17 @@ export default function ReturnRequestModal({returnRequestOrder = null, returnReq
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    <XCircle className="w-5 h-5" />
+                    {/* <XCircle className="w-5 h-5" /> */}
                     Reject Return
                   </motion.button>
 
                   <motion.button
-                    className="w-full bg-slate-200 hover:bg-slate-300 text-slate-900 font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
+                    className="w-full bg-gray-200 hover:bg-slate-300 text-slate-900 font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
+                    onClick={onClose}
                   >
-                    <Clock className="w-5 h-5" />
+                    {/* <Clock className="w-5 h-5" /> */}
                     Keep Pending
                   </motion.button>
                 </motion.div>

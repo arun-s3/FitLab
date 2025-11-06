@@ -10,6 +10,7 @@ import {BiCartAdd} from "react-icons/bi"
 import {TbCreditCardRefund} from "react-icons/tb"
 import {MdSort} from "react-icons/md"
 import {format} from "date-fns"
+import {toast as sonnerToast} from 'sonner'
 import axios from 'axios'
 
 import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
@@ -53,7 +54,7 @@ export default function AdminOrderHistoryPage(){
 
   const [showReturnRequestModal, setshowReturnRequestModal] = useState({status: false, order: null, product: null, returnOrderOrProduct: null})
 
-  const {orders, totalUsersOrders, orderCreated, orderMessage, orderError} = useSelector(state=> state.order)
+  const {orders, totalUsersOrders, handledOrderDecision, orderError} = useSelector(state=> state.order)
   const dispatch = useDispatch()
 
   const {setHeaderZIndex, setPageBgUrl} = useOutletContext() 
@@ -126,6 +127,17 @@ export default function AdminOrderHistoryPage(){
           dispatch( getAllUsersOrders({queryDetails}) )
         }
     },[queryDetails])
+
+    useEffect(()=> {
+      if(handledOrderDecision){
+          sonnerToast.success("Updated the status of return request to the user successfully!")
+          dispatch(resetOrderStates())
+      }
+      if(orderError){
+          sonnerToast.error(orderError)
+          dispatch(resetOrderStates())
+      }
+    }, [handledOrderDecision, orderError])
 
     useEffect(()=> {
         if(setHeaderZIndex && showReturnRequestModal && showReturnRequestModal.status){
@@ -532,9 +544,9 @@ export default function AdminOrderHistoryPage(){
                               </div>
                             </button>
                           </td>
-                          <td className="px-6 py-4">
+                          <td className="px-6 py-4 ">
                             {
-                              <span className='px-[5px] py-[3px] w-[10%] flex gap-[10px] items-center'>
+                              <span className='px-[5px] py-[3px] w-[10%] flex gap-[10px] items-center relative'>
                                  <span className={`w-[3px] h-[3px] p-[3px] ${findStyle("order", order.orderStatus, 'bg')} rounded-[5px]`} 
                                      style={{boxShadow: `0px 0px 5px 2px  ${findStyle("order", order.orderStatus, 'shadow')}`}}>
                                  </span> 
@@ -550,6 +562,12 @@ export default function AdminOrderHistoryPage(){
                                         : 'Rejected request'
                                    }
                                  </span>
+                                    {
+                                      (order.orderReturnStatus === 'accepted' || order.orderReturnStatus === 'rejected') &&
+                                        <p className='absolute mt-[5px] top-[17px] left-[21px] text-[11px] text-muted whitespace-nowrap'>
+                                           {`Return request has been reviewed ${order.orderReturnStatus === 'rejected' ? 'and rejected' : ''}`}
+                                        </p>
+                                    }
                               </span>
                             } 
                           </td>
@@ -604,7 +622,8 @@ export default function AdminOrderHistoryPage(){
                             </div>
                             {
                               order.orderStatus === 'returning' && !order.orderReturnStatus &&
-                              <p className='block absolute text-[11px] text-red-500 hover:underline transition-all duration-300 cursor-pointer'>
+                              <p className='block absolute text-[11px] text-red-500 hover:underline transition-all duration-300 cursor-pointer'
+                                  onClick={()=> setshowReturnRequestModal({status: true, order, product: null, returnOrderOrProduct: 'order'})}>
                                 View customer grievances with evidences and more for refund. 
                               </p>
                             }
@@ -636,13 +655,13 @@ export default function AdminOrderHistoryPage(){
                                         </span>
                                    </span>
                                     { 
-                                      <span className='px-[5px] py-[3px] w-[10%] flex gap-[10px] items-center'>
+                                      <span className='px-[5px] py-[3px] w-[10%] flex gap-[10px] items-center relative'>
                                          <span className={`w-[4px] h-[4px] ${ findStyle('product', product.productStatus, 'bg') } rounded-[5px]`} 
                                              style={{boxShadow: `0px 0px 6px 3px  ${findStyle('product', product.productStatus, 'shadow')}`}}>
                                          </span>
                                          <span className={`capitalize ${ findStyle('product', product.productStatus, 'textColor') } 
                                            text-[11px] font-[500] !whitespace-nowrap`}>
-                                           {/* {product.productStatus === 'returning' ? 'Return request received' : product.productStatus } */}
+                                           {product.productStatus === 'returning' ? 'Return request received' : product.productStatus }
                                            {
                                               product.productStatus !== 'returning' 
                                                 ? product.productStatus
@@ -653,6 +672,13 @@ export default function AdminOrderHistoryPage(){
                                                 : 'Rejected request'
                                            }
                                          </span>
+                                          {
+                                            product.productReturnStatus === 'accepted' || product.productReturnStatus === 'rejected' &&
+                                              <p className='absolute text-[11px] text-muted whitespace-nowrap'>
+                                                 {`Return request has been reviewed 
+                                                    ${product.productReturnStatus === 'rejected' ? 'and rejected' : ''}`}
+                                              </p>
+                                          }
                                       </span>
                                     } 
                                   </h4>

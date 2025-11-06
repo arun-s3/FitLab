@@ -18,7 +18,7 @@ import {toast as sonnerToast} from 'sonner'
 // import { uploadImages } from 'Frontend/src/Slices/productSlice'
 
 export default function FileUpload({images, setImages, imageLimit, needThumbnail, thumbnail, setThumbnail, thumbnailIndexOnEditProduct,
-         imagePreview, imageType, imageCropperPositionFromTop, imageCropperBgBlur, imageCropperContainerHt,
+         imagePreview, imageType, imageCropperPositionFromTop, imageCropperBgBlur, imageCropperContainerHt, editable = true,
              imageCropperControllerStyle,  uploadBox, editingMode}){
 
     const [error, setError] = useState("error")
@@ -419,7 +419,7 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
                                     <span className=' rounded-[4px] text-secondary'>
                                         <IoCloseSharp onClick={(e)=> closeHandler(image.url, index)}/> 
                                     </span>
-                                    { !imagePreview &&
+                                    { !imagePreview && editable && 
                                     <span className=' rounded-[4px] text-secondary absolute cursor-pointer
                                             bottom-[40px] text-[15px]' onClick={()=> openImageEditor(image.url, image.name, image.blob)}>
                                         <RiImageEditLine/>

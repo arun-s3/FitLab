@@ -665,7 +665,7 @@ const payOrderWithWallet = async(req, res, next)=> {
       transactionId: transactionId,
       transactionAccountDetails: {
         type: 'fitlab',
-        account: 'fitlab',
+        account: 'fitlab-order-paid',
       },
       notes,
       status: 'success',

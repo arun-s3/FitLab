@@ -2,15 +2,17 @@ import React, {useEffect, useState, useRef} from 'react'
 import './OrderHistoryPage.css'
 import {useNavigate, Link} from 'react-router-dom'
 import {useDispatch, useSelector} from 'react-redux'
-import axios from 'axios'
+import {motion} from 'framer-motion'
 
-import {ShoppingBag, ShoppingCart, Truck, PackagePlus, PackageX , CalendarArrowDown, Star, MoreHorizontal, X,
+import {ShoppingBag, ShoppingCart, Truck, PackagePlus, PackageX , CalendarArrowDown, Star, MoreHorizontal, X, CheckCircle,
            MessageSquare, RefreshCcw, Package, ChevronDown, FileText, CircleX, CircleOff  }  from 'lucide-react'
 import {RiArrowDropDownLine} from "react-icons/ri"
 import {BiCartAdd} from "react-icons/bi"
 import {MdSort} from "react-icons/md"
 import {toast as sonnerToast} from 'sonner'
 import {format} from "date-fns"
+import axios from 'axios'
+
 
 import Header from '../../../Components/Header/Header'
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
@@ -26,7 +28,7 @@ import {handleImageCompression} from '../../../Utils/compressImages'
 import {CustomPuffLoader} from '../../../Components/Loader//Loader'
 import {DateSelector} from '../../../Components/Calender/Calender'
 import {addToCart, resetCartStates} from '../../../Slices/cartSlice'
-import {getOrders, cancelOrder, cancelOrderProduct, deleteProductFromOrderHistory, changeProductStatus, initiateReturn,
+import {getOrders, cancelOrder, cancelOrderProduct, deleteProductFromOrderHistory, changeProductStatus, initiateReturn, cancelReturnRequest,
     resetOrderStates} from '../../../Slices/orderSlice'
 import {SiteButtonSquare, SiteSecondaryFillImpButton} from '../../../Components/SiteButtons/SiteButtons'
 
@@ -56,8 +58,10 @@ export default function OrderHistoryPage(){
     const [currentProductId, setCurrentProductId] = useState(null)
     const [showLoader, setShowLoader] = useState(false)
 
-    const [openOrderCancelModal, setOpenOrderCancelModal] = useState(false)
+    const [openCancelConfirmModal, setOpenCancelConfirmModal] = useState(false)
     const [cancelThisOrderId, setCancelThisOrderId] = useState(null)
+
+    const [cancelReturnReq, setCancelReturnReq] = useState({orderId: null, productId: null, cancelType: null})
 
     const [openCancelForm, setOpenCancelForm] = useState({type:'', status:false, return:false, options:{}})
     const [openSelectReasons, setOpenSelectReasons] = useState({status:false, reasonTitle:'', reason:''})
@@ -68,10 +72,12 @@ export default function OrderHistoryPage(){
 
     const [openRefundModal, setOpenRefundModal] = useState({status: false, orderOrProduct: null})
 
-    const {orders, totalOrders, orderCreated, orderReturnRequested, loading, orderMessage, orderError} = useSelector(state=> state.order)
+    const {orders, totalOrders, orderCreated, orderReturnRequested, canceledReturnRequest, loading, 
+        orderMessage, orderError} = useSelector(state=> state.order)
+
     const {cart, productAdded, productRemoved, error, message} = useSelector(state=> state.cart)
+
     const dispatch = useDispatch()
-    
     const navigate = useNavigate()
 
     const baseApiUrl = import.meta.env.VITE_API_BASE_URL
@@ -157,6 +163,13 @@ export default function OrderHistoryPage(){
       }
       dispatch(resetCartStates())
     },[loading, error, orderError, productAdded])
+
+    useEffect(()=> {
+      if(canceledReturnRequest){ 
+        sonnerToast.success("The return request has been declined, and the return process has been permanently closed!")
+        dispatch(resetOrderStates())
+      }
+    }, [canceledReturnRequest])
     
     const orderTabs = [
       {name: 'Orders', subtitle:'All Orders', icon: ShoppingBag},
@@ -328,7 +341,7 @@ export default function OrderHistoryPage(){
       }
       if(formFor === 'order'){
         console.log("Cancelling the Order..")
-        setOpenOrderCancelModal(true)
+        setOpenCancelConfirmModal(true)
         setCancelThisOrderId(openCancelForm.options.orderId)
         setOpenCancelForm({type:'', status:false, options:{}})
       }
@@ -379,8 +392,17 @@ export default function OrderHistoryPage(){
       setOpenSelectReasons(({status:false, reasonTitle:'', reason:''}))
     }
 
-    const cancelReturnRequest = (orderId, productId)=> {
+    const initiateCancelReturnReq = (orderId, productId, cancelType)=> {
+      setCancelReturnReq({orderId, productId, cancelType })
+      setOpenCancelConfirmModal(true)
+    }
 
+    const confirmCancelReturn = ()=> {
+      if(cancelReturnReq.cancelType){
+        const returnDetails = {orderId: cancelReturnReq.orderId, productId: cancelReturnReq.productId, returnType: cancelReturnReq.cancelType}
+        console.log('returnDetails------------>', returnDetails)
+        dispatch(cancelReturnRequest({returnDetails}))
+      }
     }
 
 
@@ -550,7 +572,9 @@ export default function OrderHistoryPage(){
                                      bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-100 rounded-xl">
                                     <div className="flex items-center gap-[8px]">
                                       <Star className="w-[20px] h-[20px] text-yellow-400 fill-current" />
-                                      <span className="font-[13px]">Please rate your experience using this product</span>
+                                      <span className="font-[13px] cursor-pointer hover:text-secondary transition-colors duration-300">
+                                        Please rate your experience using this product
+                                      </span>
                                     </div>
                                     <button className="text-gray-400 hover:text-gray-600 transition-colors"
                                        onClick={()=> setShowRating(false)}>
@@ -559,6 +583,60 @@ export default function OrderHistoryPage(){
                                   </div>
                                 </div>
                               )}
+
+                              
+                              {
+                                order.orderStatus === 'returning' && order?.orderReturnStatus && order.orderReturnStatus === 'accepted'
+                                    ? (
+                                      <div className="mx-[1.5rem] mt-[1.5rem]">
+                                        <div className="p-[11px] text-[13px] font-[500] flex justify-between items-center
+                                           bg-gradient-to-r from-green-50 to-green-100 border border-primary rounded-xl">
+                                          <div className="flex items-center gap-[8px]">
+                                            <CheckCircle className="w-[20px] h-[20px] text-green-400" />
+                                            <span className="font-[13px]">
+                                                Your return request has been thoroughly reviewed and approved. 
+                                                Your refund will be processed within 24 hours.
+                                            </span>   
+                                          </div>
+                                          <p className="text-xs md:text-sm text-gray-600" onClick={()=> setShowChat(true)}>
+                                            Questions?{" "}
+                                            <span className="text-emerald-600 font-semibold cursor-pointer hover:underline">
+                                              Contact our support team
+                                            </span>
+                                          </p>
+                                        </div>
+                                      </div>
+                                    )
+                                    : order.orderStatus === 'delivered' && order?.orderReturnStatus && order.orderReturnStatus === 'rejected'
+                                    ? (
+                                      <div className="mx-[1.5rem] mt-[1.5rem] bg-gradient-to-r from-red-50 to-red-100 border border-red-500 rounded-xl">
+                                        <div className="p-[11px] pb-0 text-[13px] font-[500] flex justify-between items-center
+                                           ">
+                                          <div className="flex items-center gap-[8px]">
+                                            <X className="w-[20px] h-[20px] text-red-700" strokeWidth={3} />
+                                            <span className="font-[13px]">
+                                              Your return request has been thoroughly reviewed by our team. 
+                                              Unfortunately, we're unable to process this return at this time.
+                                            </span>
+                                          </div>
+                                          <p className="text-xs md:text-sm text-gray-600" onClick={()=> setShowChat(true)}>
+                                            Questions?{" "}
+                                            <span className="text-emerald-600 font-semibold cursor-pointer hover:underline">
+                                              Contact our support team
+                                            </span>
+                                          </p>
+                                        </div>
+                                        <div className='-mt-[5px] ml-8 px-[11px] pb-[11px]'>
+                                          <span className='text-[13px] font-medium'> Probable Reasons: </span>
+                                          <ul className='list-disc ml-4 text-muted text-[11px]'>
+                                            <li>Product shows signs of significant wear and damage</li>
+                                            <li>Item appears to have been used professionally</li>
+                                          </ul>
+                                        </div>
+                                      </div>
+                                      )
+                                    : null
+                              }
 
                               <div className="p-[1.5rem] pb-0 flex items-center justify-between">
                                     <div className='flex items-center gap-[3rem] basis-[40%]'>
@@ -595,20 +673,15 @@ export default function OrderHistoryPage(){
                                     </div>
                                 <div className='flex flex-col'>
                                   {order.orderStatus !== 'cancelled' && order.orderStatus !== 'returning' && order.orderStatus !== 'refunded' &&
+                                    order.orderStatus !== 'delivered' && !order.orderReturnStatus &&
                                       <SiteButtonSquare lowerFont={true} lighter={true} lowShadow={true} clickHandler={(e)=> preCancelTheOrder(e, order._id)}
                                            customStyle={{paddingBlock:'7px', paddingInline:'18px', borderRadius:'7px'}}>
                                          Cancel Order
                                       </SiteButtonSquare>
-                                  }
+                                  } 
                                   {
                                     order.orderStatus != 'cancelled' &&  order.orderStatus != 'returning' && order.orderStatus != 'refunded'
-                                        && order.orderStatus === 'delivered' &&
-                                        // <SiteButtonSquare lowerFont={true} lighter={true} lowShadow={true} 
-                                        //   clickHandler={(e)=> preCancelTheOrder(e, order._id)}
-                                        //   tailwindClasses='!mt-[10px]'
-                                        //    customStyle={{paddingBlock:'7px', paddingInline:'18px', borderRadius:'7px'}}>
-                                        //   Return Order
-                                        // </SiteButtonSquare>
+                                        && order.orderStatus === 'delivered' && !order.orderReturnStatus &&
                                         <SiteSecondaryFillImpButton
                                           className={`px-[18px] py-[7px] !w-auto !text-[13px] rounded-[7px]`} 
                                           clickHandler={(e)=> {
@@ -619,17 +692,48 @@ export default function OrderHistoryPage(){
                                             Return Order
                                         </SiteSecondaryFillImpButton>
                                   }
+                                  {
+                                    order.orderStatus === 'returning' &&
+                                        <SiteSecondaryFillImpButton
+                                          className={`px-[18px] py-[7px] !w-auto !text-[13px] rounded-[7px]`} 
+                                          clickHandler={(e)=> {
+                                            initiateCancelReturnReq(order._id, null, 'order')
+                                          }}
+                                        >
+                                            Cancel Return Request
+                                        </SiteSecondaryFillImpButton>
+                                  }
                                 </div>
 
-                                { openOrderCancelModal &&
-                                  <Modal openModal={openOrderCancelModal} setOpenModal={setOpenOrderCancelModal} title='Important' 
+                                { openCancelConfirmModal &&
+                                  <Modal openModal={openCancelConfirmModal} setOpenModal={setOpenCancelConfirmModal} title='Important' 
+                                      content={`You are about to cancel an ${cancelThisOrderId ? 'order' : 'return request'}.
+                                         Do you want to continue?`} 
+                                      okButtonText='Continue' closeButtonText='Cancel' contentCapitalize={false} 
+                                      instruction="If you are sure, write 'cancel' and press 'Continue', else click 'Close' button"
+                                      typeTest={true} typeValue='cancel'
+                                      clickTest={true} activateProcess={cancelThisOrderId ? cancelThisOrder : confirmCancelReturn}/>
+                                }     
+{/* 
+                                { openReturnCancelModal.status &&
+                                  <Modal openModal={openReturnCancelModal.status} setOpenModal={setOpenCancelConfirmModal} title='Important' 
                                       content={`You are about to cancel an order. Do you want to continue?`} okButtonText='Continue'
                                         closeButtonText='Cancel' contentCapitalize={false} clickTest={true} activateProcess={cancelThisOrder}/>
-                                }                            
+                                }  */}
+
                               </div>
+{/* 
+                              {
+                                order.orderStatus === 'returning' && order?.orderReturnStatus && order.orderReturnStatus === 'accepted'
+                                    ? <ReturnAcceptedMsg />
+                                    : order.orderStatus === 'returning' && order?.orderReturnStatus && order.orderReturnStatus === 'rejected'
+                                    ? <ReturnRejectedMsg />
+                                    : null
+                              } */}
                               
                               {order.products.map((product, index) => ( !product.isDeleted &&
-                                <div key={product._id} className={`p-[1.5rem] ${index != order.products.length -1 ? 'border-b': ''} border-gray-100`}
+                                <div key={product._id} className={`p-[1.5rem] ${index != order.products.length -1 ? 'border-b': ''}
+                                     border-gray-100`}
                                    id='item-details'>
                                   <div className="flex gap-[2rem]">
                                     <figure className="w-[120px] h-[120px] bg-gray-50 rounded-xl overflow-hidden">
@@ -663,18 +767,29 @@ export default function OrderHistoryPage(){
                                         } 
                                       </h4>
                                       <p className="mb-[8px] text-[13px] text-gray-600">{product.subtitle}</p>
-                                      <p className="text-[13px] text-gray-500 tracking-[0.3px] flex items-center gap-[4px]">
+                                      {
+                                      !product.productReturnStatus &&
+                                        <p className="w-fit text-[13px] text-gray-500 tracking-[0.3px] flex items-center gap-[4px]
+                                            hover:text-secondary transition-colors duration-300 cursor-default"
+                                        >
                                         { product.productStatus === 'cancelled'||product.productStatus === 'returning' ?
                                              <CircleOff className="w-[1rem] h-[1rem]"/> : <RefreshCcw className="w-[1rem] h-[1rem]" /> 
                                         }
-                                        { product.productStatus === 'cancelled' ? 'This product is cancelled' 
-                                          : product.productStatus === 'returning' ? 'Applied for return request'
-                                            :Date.now() <= new Date(order.orderDate).getTime() + returnWindowTime ?
-                                              'Return or replace items: Eligible through ' + 
-                                                format( new Date(order.orderDate).getTime() + returnWindowTime, "MMMM dd, yyyy" )
-                                              : 'Return date expired'
+                                        { !product.productReturnStatus && product.productStatus === 'cancelled' 
+                                            ? 'This product is cancelled' 
+                                            : product.productStatus === 'returning' 
+                                            ? 'Applied for return request'
+                                            : Date.now() <= new Date(order.deliveryDate).getTime() + returnWindowTime 
+                                            ? 'Return item: Eligible through ' + 
+                                                  format( new Date(order.deliveryDate).getTime() + returnWindowTime, "MMMM dd, yyyy" )
+                                            : 'Return date expired'
+                                        }
+                                        { !['cancelled', 'returning', 'refunded'].includes(product.productStatus) &&
+                                            Date.now() > new Date(order.deliveryDate).getTime() + returnWindowTime &&
+                                              <span className='ml-[10px]'> (Eligible within 30 days of delivery only). </span>
                                         }
                                       </p>
+                                      }
                                       {product.deliveryNote && (
                                         <p className="mt-[8px] text-[13px] leading-[20px] text-gray-500 flex items-center gap-[4px]">
                                           <Package className="w-[1rem] h-[1rem]" />
@@ -683,8 +798,8 @@ export default function OrderHistoryPage(){
                                       )}
                                       <div className="flex gap-[12px] mt-[1.5rem] item-buttons">
                                         <button className="px-[16px] py-[4px] text-[14px] text-white bg-gradient-to-r from-[#B863F2]
-                                           to-secondary flex items-center gap-[8px] rounded-[7px] hover:shadow-md transition-all duration-200 
-                                                transform hover:translate-y-px"
+                                           to-secondary flex items-center gap-[8px] rounded-[7px] hover:shadow-md transition-all duration-300 
+                                                transform hover:!bg-purple-800 hover:translate-y-px"
                                                  onClick={()=> {handleAddToCart(product.productId); setCurrentProductId(product.productId)}}>
                                           {
                                             product.productStatus === 'cancelled'||product.productStatus === 'returning' ?
@@ -692,28 +807,47 @@ export default function OrderHistoryPage(){
                                               : <> <BiCartAdd className="w-[1rem] h-[1rem]" /> Buy it again </>
                                           }
                                         </button>
-                                        <button className="hover:bg-gray-50 hover:border-gray-300 transition-all duration-200"
-                                            onClick={()=> viewProduct(product.productId._id)}> 
+                                        <motion.button 
+                                          whileHover={{ scale: 1.02 }}
+                                          whileTap={{ scale: 0.96 }}
+                                          className="hover:!bg-primary hover:!text-secondary hover:!border-yellow-300 
+                                            !transition !duration-300"
+                                            onClick={()=> viewProduct(product.productId._id)}
+                                        > 
                                            {product.productStatus === 'cancelled'||product.productStatus === 'returning' ? 'View this item' : 'View your item'}
-                                        </button>
-                                          {(product.productStatus != 'cancelled' && 
-                                                  product.productStatus != 'returning' && product.productStatus != 'refunded') &&
-                                            <button className="hover:bg-gray-50 hover:border-gray-300 transition-all duration-200"
+                                        </motion.button>
+                                          {
+                                           !['cancelled', 'returning', 'refunded'].includes(product.productStatus) 
+                                              && !product.productReturnStatus &&
+                                            <motion.button 
+                                              whileHover={{ scale: 1.02 }}
+                                              whileTap={{ scale: 0.96 }}
+                                              className="hover:!bg-primary hover:!text-secondary transition duration-300"
                                                   onClick={(e)=> cancelOrReturnProduct(e, product.productId, order._id, order.orderDate)}> 
-                                              {product.productStatus === 'delivered' ? 'Return Product' : 'Cancel Product'}
-                                            </button>
+                                              {
+                                                product.productStatus === 'delivered' 
+                                                   ? 'Return Product' 
+                                                   : 'Cancel Product'
+                                              }
+                                            </motion.button>
                                           }
                                           { (product.productStatus === 'cancelled' || product.productStatus === 'refunded') && 
-                                            <button className="hover:bg-gray-50 hover:border-gray-300 transition-all duration-200"
+                                            <motion.button 
+                                              className="hover:!bg-primary hover:!text-secondary transition duration-300"
+                                              whileHover={{ scale: 1.02 }}
+                                              whileTap={{ scale: 0.96 }}
                                                   onClick={(e)=> clearProduct(order._id, product.productId)}> 
                                               Clear this item
-                                            </button>
+                                            </motion.button>
                                           }
                                           { (product.productStatus === 'returning') && 
-                                            <button className="hover:bg-gray-50 hover:border-gray-300 transition-all duration-200"
-                                                  onClick={(e)=> cancelReturnRequest(order._id, product.productId)}> 
+                                            <motion.button 
+                                              className="hover:!bg-primary hover:!text-secondary transition duration-300"
+                                              whileHover={{ scale: 1.02 }}
+                                              whileTap={{ scale: 0.96 }}
+                                              onClick={(e)=> initiateCancelReturnReq(order._id, product.productId._id, 'product')}> 
                                               Cancel return request
-                                            </button>
+                                            </motion.button>
                                           }
 
                                         <button className="border !border-primary hover:border-gray-300 transition-all duration-200">      
@@ -726,7 +860,71 @@ export default function OrderHistoryPage(){
                                         }
 
                                       </div>
+
+                                        {
+                                          product.productStatus === 'returning' && product?.productReturnStatus && 
+                                            product.productReturnStatus === 'accepted' && !order.orderReturnStatus 
+                                              ? (
+                                                <div className="mx-[1.5rem] mt-[1.5rem]">
+                                                  <div className="p-[11px] text-[13px] font-[500] flex justify-between items-center
+                                                     bg-gradient-to-r from-green-50 to-green-100 border border-primary rounded-xl">
+                                                    <div className="flex items-center gap-[8px]">
+                                                      <CheckCircle className="w-[20px] h-[20px] text-green-400" />
+                                                      <span className="font-[13px]">
+                                                          Your return request for the product has been thoroughly reviewed and approved. 
+                                                          Your refund will be processed within 24 hours.
+                                                      </span>   
+                                                    </div>
+                                                    <p className="text-xs md:text-sm text-gray-600" onClick={()=> setShowChat(true)}>
+                                                      Questions?{" "}
+                                                      <span className="text-emerald-600 font-semibold cursor-pointer hover:underline">
+                                                        Contact our support team
+                                                      </span>
+                                                    </p>
+                                                  </div>
+                                                </div>
+                                              )
+                                              : order.orderStatus === 'delivered' && order?.orderReturnStatus &&
+                                                 order.orderReturnStatus === 'rejected' && !order.orderReturnStatus 
+                                              ? (
+                                                <div className="mx-[1.5rem] mt-[1.5rem] bg-gradient-to-r from-red-50 to-red-100 border border-red-500 rounded-xl">
+                                                  <div className="p-[11px] pb-0 text-[13px] font-[500] flex justify-between items-center
+                                                     ">
+                                                    <div className="flex items-center gap-[8px]">
+                                                      <X className="w-[20px] h-[20px] text-red-700" strokeWidth={3} />
+                                                      <span className="font-[13px]">
+                                                        Your return request for the product has been thoroughly reviewed by our team. 
+                                                        Unfortunately, we're unable to process this return at this time.
+                                                      </span>
+                                                    </div>
+                                                    <p className="text-xs md:text-sm text-gray-600" onClick={()=> setShowChat(true)}>
+                                                      Questions?{" "}
+                                                      <span className="text-emerald-600 font-semibold cursor-pointer hover:underline">
+                                                        Contact our support team
+                                                      </span>
+                                                    </p>
+                                                  </div>
+                                                  <div className='-mt-[5px] ml-8 px-[11px] pb-[11px]'>
+                                                    <span className='text-[13px] font-medium'> Probable Reasons: </span>
+                                                    <ul className='list-disc ml-4 text-muted text-[11px]'>
+                                                      <li>Product shows signs of significant wear and damage</li>
+                                                      <li>Item appears to have been used professionally</li>
+                                                    </ul>
+                                                  </div>
+                                                </div>
+                                                )
+                                              : null
+                                          }           
+
                                     </div>
+                                  </div>
+
+                                  <div>
+                                      {/* {
+                                        order?.orderReturnStatus && order.orderReturnStatus === 'accepted'
+                                            ? <ReturnAcceptedMsg />
+                                            : <ReturnRejectedMsg />
+                                      } */}
                                   </div>
                                       
                                   <div className='flex justify-center items-center'>
@@ -772,7 +970,7 @@ export default function OrderHistoryPage(){
                 
                 <div className="fixed bottom-[2rem] right-[2rem] z-50">
 
-                  <TextChatBox />
+                  <TextChatBox openChats={showChat}/>
                   
                 </div>
               </div>

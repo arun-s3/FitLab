@@ -139,10 +139,23 @@ export const handleReturnDecision = createAsyncThunk('order/handleReturnDecision
     console.log("orderId from orderSlice---->", returnDetails.orderId)
     const response = await axios.post(`order/return/decision`, {returnDetails}, {withCredentials: true})
     console.log('Returning success response from handleReturnDecision...', JSON.stringify(response.data))
-    // const {orderId, productId, returnType, didAccept} = returnDetails
     return {...returnDetails}
   }catch(error){
     console.log('Inside catch of handleReturnDecision')
+    const errorMessage = error.response?.data?.message
+    return thunkAPI.rejectWithValue(errorMessage)
+  }
+})
+
+export const cancelReturnRequest = createAsyncThunk('order/cancelReturnRequest', async ({returnDetails}, thunkAPI)=> {
+  try {
+    console.log('Inside handleReturnDecision createAsyncThunk')
+    console.log("orderId from orderSlice---->", returnDetails.orderId)
+    const response = await axios.post(`order/return/cancel`, {returnDetails}, {withCredentials: true})
+    console.log('Returning success response from cancelReturnRequest...', JSON.stringify(response.data))
+    return {...returnDetails}
+  }catch(error){
+    console.log('Inside catch of cancelReturnRequest')
     const errorMessage = error.response?.data?.message
     return thunkAPI.rejectWithValue(errorMessage)
   }
@@ -157,6 +170,7 @@ const initialState = {
   orderReturnRequested: true,
   orderUpdated: false,
   handledOrderDecision: false,
+  canceledReturnRequest: false,
   totalUsersOrders: null,
   totalOrders:null,
   loading: false,
@@ -176,9 +190,10 @@ const orderSlice = createSlice({
       state.orderSuccess = false
       state.orderCreated = false
       state.orderCancelled = false 
-      state.orderUpdated = false
+      state.orderUpdated = false 
       state.orderReturnRequested = false
       state.handledOrderDecision = false
+      state.canceledReturnRequest = false
     }
   },
   extraReducers: (builder) => {
@@ -496,8 +511,67 @@ const orderSlice = createSlice({
         state.loading = false
         state.orderError = action.payload
         state.orderSuccess = false
-        state.handledOrderDecision = true
+        state.handledOrderDecision = false
       })
+      .addCase(cancelReturnRequest.fulfilled, (state, action) => {
+        console.log('cancelReturnRequest fulfilled:', action.payload)
+        state.orderError = null
+        state.loading = false
+        state.orderSuccess = true
+        state.canceledReturnRequest = true
+
+        const {orderId, productId, returnType} = action.payload
+
+        if (state.orders && state.orders.length > 0){
+          const order = state.orders.find(o => o._id === orderId)
+          if (order) {
+            if (returnType === 'product') {
+              const product = order.products.find(p => p.productId._id === productId)
+              if (product) {
+                product.productStatus = 'delivered'
+                product.productReturnReason = null
+                product.productReturnImages = null
+                product.productReturnStatus = null
+              }
+            
+              const anyReturning = order.products.some(p => p.productStatus === 'returning')
+              if (!anyReturning) {
+                order.orderStatus = 'delivered'
+                order.orderReturnReason = null
+                order.orderReturnImages = null
+                order.orderReturnStatus = null
+              }
+            } 
+            else if (returnType === 'order') {
+              order.orderStatus = 'delivered'
+              order.orderReturnReason = null
+              order.orderReturnImages = null
+              order.orderReturnStatus = null
+
+              order.products.forEach(p => {
+                if (p.productStatus === 'returning') {
+                  p.productStatus = 'delivered'
+                  p.productReturnReason = null
+                  p.productReturnImages = null
+                  p.productReturnStatus = null
+                }
+              })
+            }
+          }
+        }
+      })
+      .addCase(cancelReturnRequest.pending, (state) => {
+        state.loading = true
+        state.orderError = null
+      })
+      .addCase(cancelReturnRequest.rejected, (state, action) => {
+        console.log('handleReturnDecision rejected:', action.payload)
+        state.loading = false
+        state.orderError = action.payload
+        state.orderSuccess = false
+        state.canceledReturnRequest = false
+      })
+
 
     }
 })

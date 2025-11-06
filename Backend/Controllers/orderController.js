@@ -4,10 +4,13 @@ const Product = require('../Models/productModel')
 const Offer = require('../Models/offerModel')
 const Coupon = require('../Models/couponModel')
 const Payment = require('../Models/paymentModel')
+const Wallet = require('../Models/walletModel')
 const cloudinary = require('../Utils/cloudinary')
+const {v4: uuidv4} = require('uuid')
 
 const {calculateCharges} = require('./controllerUtils/taxesUtils')
 const {recalculateAndValidateCoupon} = require('./controllerUtils/couponsUtils')
+const {generateUniqueAccountNumber, generateTransactionId} = require('../Controllers/controllerUtils/walletUtils')
 const {errorHandler} = require('../Utils/errorHandler') 
 
 
@@ -499,6 +502,9 @@ const changeOrderStatus = async (req, res, next)=> {
 
     if(requiredStatus === 'delivered'){
       order.deliveryDate = new Date()
+      if(order.paymentDetails.paymentMethod === 'cashOnDelivery'){
+        order.paymentDetails.paymentStatus = 'completed'
+      }
     }
 
     order.products = order.products.map((product)=> ({ ...product, productStatus: requiredStatus}))
@@ -540,6 +546,17 @@ const changeProductStatus = async (req, res, next)=> {
     order.products[productIndex].productStatus = requiredStatus
     if(order.products.every(product=> product.productStatus === requiredStatus)){
       order.orderStatus = requiredStatus
+    }
+
+    if(requiredStatus === 'delivered'){
+      const otherDeliveredProducts = order.products.find(product=> product.productStatus === 'delivered')
+      if(!otherDeliveredProducts){
+        order.orderStatus = 'delivered'
+        order.deliveryDate = new Date()
+        if(order.paymentDetails.paymentMethod === 'cashOnDelivery'){
+          order.paymentDetails.paymentStatus = 'completed'
+        }
+      }
     }
 
     await order.save();
@@ -769,96 +786,186 @@ const handleReturnDecision = async (req, res, next)=> {
 }
 
 
-const refundOrder = async (req, res, next)=> {
+const cancelReturnRequest = async (req, res, next)=> {
   try {
-    console.log("Inside refundOrder controller...")
+    console.log("Inside cancelReturnRequest...")
 
-    const { orderId, productId, reason } = req.body
+    const { orderId, productId, returnType } = req.body.returnDetails
+    console.log(`orderId: ${orderId}, productId: ${productId}, returnType: ${returnType}`)
+
+    if (!orderId || !returnType){
+      return next(errorHandler(400, "Missing required fields."))
+    }
+
+    const order = await Order.findById(orderId)
+    if (!order) return next(errorHandler(404, "Order not found."))
+
+    if (returnType === "product"){
+      if (!productId) return next(errorHandler(400, "Product ID is required for product-level cancellation."))
+
+      const productInOrder = order.products.find(p => p.productId.equals(productId))
+      if (!productInOrder)
+        return next(errorHandler(404, "Product not found in this order."))
+
+      if (productInOrder.productStatus !== "returning") {
+        return next(errorHandler(400, "No return request exists for this product."))
+      }
+
+      productInOrder.productStatus = "delivered"
+      productInOrder.productReturnReason = null
+      productInOrder.productReturnImages = null
+      productInOrder.productReturnStatus = null
+
+      const anyReturning = order.products.some(p => p.productStatus === "returning")
+      if (!anyReturning) {
+        order.orderStatus = "delivered"
+        order.orderReturnReason = null
+        order.orderReturnImages = null
+        order.orderReturnStatus = null
+      }
+
+      await order.save()
+
+      return res.status(200).json({success: true, message: "Product return request cancelled successfully."});
+    }
+
+    else if (returnType === "order"){
+      if (order.orderStatus !== "returning") {
+        return next(errorHandler(400, "No order-level return request exists."))
+      }
+
+      order.orderStatus = "delivered"
+      order.orderReturnReason = null
+      order.orderReturnImages = null
+      order.orderReturnStatus = null
+
+      order.products.forEach(p => {
+        if (p.productStatus === "returning") {
+          p.productStatus = "delivered"
+          p.productReturnReason = null
+          p.productReturnImages = null
+          p.productReturnStatus = null
+        }
+      })
+
+      await order.save()
+
+      return res.status(200).json({success: true, message: "Order return request cancelled successfully."});
+    }
+
+    else {
+      return next(errorHandler(400, "Invalid return type. Must be 'order' or 'product'."))
+    }
+  } 
+  catch (error) {
+    console.log("Error in cancelReturnRequest -->", error.message)
+    next(error)
+  }
+}
+
+
+const processRefund = async (req, res, next)=> {
+  try {
+    console.log('Inside processRefund...')
+
+    const { orderId, productId, refundType } = req.body
     const userId = req.user._id
 
-    if (!orderId) return next(errorHandler(400, "Order ID is required"))
+    console.log(`Refund request received for orderId: ${orderId}, productId: ${productId}, refundType: ${refundType}`)
 
-    const order = await Order.findOne({ _id: orderId, userId }).populate("products.productId")
-    if (!order) return next(errorHandler(404, "Order not found"))
+    if (!orderId || !refundType)
+      return next(errorHandler(400, "Missing required fields: orderId or refundType."))
 
-    const paymentDetails = order.paymentDetails
-    const paymentMethod = paymentDetails?.paymentMethod
-    const refundableProducts = []
-
-    const productsToRefund = productId
-      ? order.products.filter((p) => p.productId._id.toString() === productId)
-      : order.products
-
-    if (!productsToRefund.length)
-      return next(errorHandler(404, "No matching products found for refund"))
+    const order = await Order.findById(orderId)
+    if (!order) return next(errorHandler(404, "Order not found."))
 
     let refundAmount = 0
+    let refundedProducts = []
 
-    for (const item of productsToRefund) {
-      const product = await Product.findById(item.productId._id);
-      if (!product) continue
+    if (refundType === 'product') {
+      if (!productId)
+        return next(errorHandler(400, "Product ID is required for product refund."))
 
-      product.stock += item.quantity
-      await product.save()
+      const productInOrder = order.products.find(p => p.productId.equals(productId))
+      if (!productInOrder)
+        return next(errorHandler(404, "Product not found in order."))
 
-      refundAmount += item.total
-      refundableProducts.push({
-        productId: product._id,
-        title: product.title,
-        quantity: item.quantity,
-        refundAmount: item.total,
-      })
-    }
+      if (productInOrder.productReturnStatus !== 'accepted')
+        return next(errorHandler(400, "Refund can only be processed for accepted returns."))
 
-    // Handle payment refund (wallet or online)
-    if (refundAmount > 0) {
-      if (paymentMethod === "wallet") {
-        // Add to user wallet
-        let wallet = await Wallet.findOne({ userId });
-        if (!wallet) {
-          wallet = new Wallet({ userId, balance: 0, transactions: [] });
-        }
-        wallet.balance += refundAmount;
-        wallet.transactions.push({
-          type: "credit",
-          amount: refundAmount,
-          description: `Refund for order ${order.fitlabOrderId}`,
-          date: new Date(),
-        });
-        await wallet.save();
-      } else {
-        // For online payments, mark the refund request (manual or API integration)
-        const payment = await Payment.findOne({ orderId: order._id });
-        if (payment) {
-          payment.refundStatus = "pending"; // later handled via gateway
-          payment.refundRequestedAt = new Date();
-          await payment.save();
-        }
+      refundAmount = productInOrder.total
+      refundedProducts.push(productInOrder.title)
+
+      productInOrder.productStatus = 'refunded'
+
+      const allRefunded = order.products.every(p => p.productStatus === 'refunded')
+      if (allRefunded) {
+        order.orderStatus = 'refunded'
       }
+
+      await order.save()
     }
 
-    // Update order status & add refund log
-    const refundRecord = {
-      refundedProducts: refundableProducts,
-      refundAmount,
-      refundDate: new Date(),
-      reason: reason || "Not specified",
-      status: paymentMethod === "wallet" ? "completed" : "pending",
-    };
+    else if (refundType === 'order') {
+      if (order.orderReturnStatus !== 'accepted')
+        return next(errorHandler(400, "Refund can only be processed for accepted returns."))
 
-    order.orderStatus = "refunded";
-    order.refundDetails = refundRecord;
-    await order.save();
+      refundAmount = order.products.reduce((acc, p) => acc + p.total, 0)
+      refundedProducts = order.products.map(p => p.title)
+
+      order.orderStatus = 'refunded'
+      order.products.forEach(p => (p.productStatus = 'refunded'))
+
+      await order.save()
+    }
+
+    else {
+      return next(errorHandler(400, "Invalid refundType. Must be 'product' or 'order'."))
+    }
+
+    const wallet = await Wallet.findOne({ userId })
+    if (!wallet) {
+      const uniqueAccountNumber = await generateUniqueAccountNumber()
+      console.log("Creating new wallet....")
+      console.log("uniqueAccountNumber--->", uniqueAccountNumber)
+
+      const newWallet = new Wallet({
+        userId,
+        accountNumber: uniqueAccountNumber,
+        balance: 0,
+        transactions: [],
+      })
+      await newWallet.save();
+    }
+
+    wallet.balance += refundAmount
+
+    const refundTransaction = {
+      type: 'credit',
+      amount: refundAmount,
+      transactionId: uuidv4(),
+      transactionAccountDetails: {
+        type: 'fitlab',
+        account: 'fitLab-order-refund',
+      },
+      notes: `Refund for ${refundType === 'product' ? 'product' : 'order'}: ${refundedProducts.join(', ')}`,
+      status: 'refunded',
+    }
+
+    wallet.transactions.push(refundTransaction)
+    await wallet.save();
+
+    console.log(`Refund of ₹${refundAmount} credited to wallet ${wallet.accountNumber}`)
 
     res.status(200).json({
-      message:
-        paymentMethod === "wallet"
-          ? "Refund completed successfully"
-          : "Refund request submitted. It will be processed soon.",
-      refundRecord,
-    });
-  } catch (error) {
-    console.error("Error in refundOrder controller:", error)
+      success: true,
+      message: `Refund of ₹${refundAmount} processed successfully to wallet.`,
+      refundAmount,
+      walletBalance: wallet.balance
+    })
+  } 
+  catch (error) {
+    console.log("Error in processRefund -->", error.message)
     next(error)
   }
 }
@@ -869,4 +976,5 @@ const refundOrder = async (req, res, next)=> {
 
 
 module.exports = {createOrder, getOrders, getAllUsersOrders, cancelOrderProduct, cancelOrder, deleteProductFromOrderHistory, 
-        changeOrderStatus, changeProductStatus, initiateReturn, handleReturnDecision, refundOrder, getOrderCounts, getTodaysLatestOrder}
+        changeOrderStatus, changeProductStatus, initiateReturn, handleReturnDecision, cancelReturnRequest, 
+        processRefund, getOrderCounts, getTodaysLatestOrder}

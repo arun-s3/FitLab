@@ -21,7 +21,7 @@ import ReturnRequestModal from './ReturnRequestModal'
 import {SitePrimaryButtonWithShadow, SiteSecondaryFillImpButton} from '../../../Components/SiteButtons/SiteButtons' 
 import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
 import {getOrders, getAllUsersOrders, cancelOrder, cancelOrderProduct, changeOrderStatus,
-          changeProductStatus, resetOrderStates} from '../../../Slices/orderSlice'
+          changeProductStatus, processRefund, resetOrderStates} from '../../../Slices/orderSlice'
 
 
 export default function AdminOrderHistoryPage(){
@@ -42,7 +42,7 @@ export default function AdminOrderHistoryPage(){
 
   const mouseInSort = useRef(true)
 
-  const [openOrderCancelModal, setOpenOrderCancelModal] = useState(false)
+  const [openGenericModal, setOpenGenericModal] = useState(false)
   const [cancelThisOrderId, setCancelThisOrderId] = useState(null)
   const [openCancelForm, setOpenCancelForm] = useState({type:'', status:false, options:{}})
   const [openSelectReasons, setOpenSelectReasons] = useState({status:false, reasonTitle:'', reason:''})
@@ -52,9 +52,11 @@ export default function AdminOrderHistoryPage(){
   const [isHovered, setIsHovered] = useState({})
   const [showProducts, setShowProducts] = useState({})
 
+  const [refundDetails, setRefundDetails] = useState({orderId: null, productId: null, refundType: null})
+
   const [showReturnRequestModal, setshowReturnRequestModal] = useState({status: false, order: null, product: null, returnOrderOrProduct: null})
 
-  const {orders, totalUsersOrders, handledOrderDecision, orderError} = useSelector(state=> state.order)
+  const {orders, totalUsersOrders, handledOrderDecision, refundSuccess, orderError} = useSelector(state=> state.order)
   const dispatch = useDispatch()
 
   const {setHeaderZIndex, setPageBgUrl} = useOutletContext() 
@@ -137,7 +139,11 @@ export default function AdminOrderHistoryPage(){
           sonnerToast.error(orderError)
           dispatch(resetOrderStates())
       }
-    }, [handledOrderDecision, orderError])
+      if(refundSuccess){ 
+        sonnerToast.success("The user is successfully refunded!")
+        dispatch(resetOrderStates())
+      }
+    }, [handledOrderDecision, refundSuccess, orderError])
 
     useEffect(()=> {
         if(setHeaderZIndex && showReturnRequestModal && showReturnRequestModal.status){
@@ -288,6 +294,7 @@ export default function AdminOrderHistoryPage(){
       setOpenSelectReasons(({status:false, reasonTitle:'', reason:''}))
       dispatch( cancelOrder({orderId: cancelThisOrderId, orderCancelReason}) )
       setCancelThisOrderId(null)
+      setOpenGenericModal(false)
     }
   }
 
@@ -320,7 +327,7 @@ export default function AdminOrderHistoryPage(){
     }
     if(formFor === 'order'){
       console.log("Cancelling the Order..")
-      setOpenOrderCancelModal(true)
+      setOpenGenericModal(true)
       setCancelThisOrderId(openCancelForm.options.orderId)
       setOpenCancelForm({type:'', status:false, options:{}})
     }
@@ -347,6 +354,15 @@ export default function AdminOrderHistoryPage(){
     setOpenCancelForm({type:'product', status:true, options: {productId, orderId}})
     window.scrollTo( {top: productCancelFormRef.current.getBoundingClientRect().top, scrollBehavior: 'smooth'} )
   }
+
+  const initiateRefundProcess = ()=> {
+    const refundInfos = {orderId: refundDetails.orderId, productId: refundDetails.productId, refundType: refundDetails.refundType}
+    console.log("refundInfos-------->", refundInfos)
+    dispatch(processRefund({refundInfos}))
+    setRefundDetails({orderId: null, productId: null, refundType: null})
+  }
+
+
 
   return (
     <section id='AdminOrderHistoryPage'>
@@ -597,7 +613,15 @@ export default function AdminOrderHistoryPage(){
                                 ['delivered', 'cancelled', 'refunded'].every(status=> status !== order.orderStatus) &&
                                 <SiteSecondaryFillImpButton className="!py-[6px] text-[11px] capitalize" 
                                     clickHandler={
-                                      (e)=> changeTheOrderStatus(order._id, order, changeStatus(order.orderStatus, order.orderReturnStatus).status)
+                                      (e)=> {
+                                        const requiredStatus = changeStatus(order.orderStatus, order.orderReturnStatus).status
+                                        if(requiredStatus !== 'refund'){
+                                          changeTheOrderStatus(order._id, order, changeStatus(order.orderStatus, order.orderReturnStatus).status)
+                                        }else{
+                                          setRefundDetails({orderId: order._id, productId: null, refundType: 'order'})
+                                          setOpenGenericModal(true)
+                                        }
+                                      }
                                     }
                                     customStyle={{width:'auto', marginTop:'0', paddingBlock:'4px', borderRadius:'6px'}}>
                                 {
@@ -614,10 +638,13 @@ export default function AdminOrderHistoryPage(){
                                 </SiteSecondaryFillImpButton>
                               }
 
-                              { openOrderCancelModal &&
-                              <Modal openModal={openOrderCancelModal} setOpenModal={setOpenOrderCancelModal} title='Important' 
-                                  content={`You are about to cancel an order. Do you want to continue?`} okButtonText='Continue'
-                                    closeButtonText='Cancel' contentCapitalize={false} clickTest={true} activateProcess={cancelThisOrder}/>
+                              { openGenericModal &&
+                              <Modal openModal={openGenericModal} setOpenModal={setOpenGenericModal} title='Important' 
+                                  content={`You are about to ${cancelThisOrderId ? ' cancel an order' : 'refund this user'}. Do you want to continue?`} 
+                                  okButtonText='Continue'  closeButtonText='Cancel' contentCapitalize={false}
+                                  instruction="If you are sure, write 'start' and press 'Continue', else click 'Close' button"
+                                  typeTest={true} typeValue='start'
+                                  activateProcess={cancelThisOrderId ? cancelThisOrder : initiateRefundProcess}/>
                               } 
                             </div>
                             {
@@ -704,7 +731,15 @@ export default function AdminOrderHistoryPage(){
                                 !['cancelled', 'refunded'].includes(product.productStatus) &&
                                 <SiteSecondaryFillImpButton className="!py-[6px] text-[11px] capitalize" 
                                     clickHandler={
-                                      (e)=> changeTheProductStatus(order._id, product.productId, changeStatus(product.productStatus, product.productReturnStatus).status)
+                                      (e)=> {
+                                        const requiredStatus = changeStatus(product.productStatus, product.productReturnStatus).status
+                                        if(requiredStatus !== 'refund'){
+                                          changeTheProductStatus(order._id, product.productId._id, requiredStatus)
+                                        }else{
+                                          setRefundDetails({orderId: order._id, productId: product.productId._id, refundType: 'product'})
+                                          setOpenGenericModal(true)
+                                        }
+                                      }
                                     }
                                       customStyle={{width:'auto',marginTop:'0', paddingBlock:'4px', borderRadius:'6px'}}> 
                                 {

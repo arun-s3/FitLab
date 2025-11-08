@@ -30,7 +30,7 @@ export function SiteButtonDark({customStyle, children, className = '', shouldSub
 }
 
 export function SiteButtonSquare({customStyle, tailwindClasses, light, lighter, lowFont, lowerFont, lowShadow, children, 
-        clickHandler, isDisabled = false, shouldSubmit = false}){
+        clickHandler, onMouseEnter, onMouseLeave, isDisabled = false, shouldSubmit = false}){
     const computedStyle = {
         ...customStyle,
         fontSize: lowFont ? '14px' : lowerFont ? '13px' : undefined,
@@ -42,6 +42,8 @@ export function SiteButtonSquare({customStyle, tailwindClasses, light, lighter, 
                 text-descReg1 ${light ? 'font-[480]' : lighter ? 'font-[450]' : ''}`}
             style={computedStyle}
             onClick={clickHandler ? ()=> clickHandler() : undefined} 
+            onMouseEnter={onMouseEnter ? ()=> onMouseEnter(): undefined}
+            onMouseLeave={onMouseLeave ? ()=> onMouseLeave(): undefined}
             disabled={isDisabled}
         >
                  {children} 

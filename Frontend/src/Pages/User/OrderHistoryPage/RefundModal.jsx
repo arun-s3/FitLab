@@ -18,6 +18,8 @@ export default function RefundModal({isOpen, onClose, returnOrderOrProduct, orde
 
   const [images, setImages] = useState([])
 
+  const [errorMsg, setErrorMsg] = useState('')
+
   const {orderReturnRequested, loading, orderError} = useSelector(state=> state.order)
 
   const modalRef = useRef(null)
@@ -244,7 +246,7 @@ export default function RefundModal({isOpen, onClose, returnOrderOrProduct, orde
                 </motion.div>
 
                 {/* Action Buttons */}
-                <motion.div className="flex flex-col sm:flex-row gap-4 justify-end" variants={itemVariants}>
+                <motion.div className="relative flex flex-col sm:flex-row gap-4 justify-end" variants={itemVariants}>
                   <button
                     onClick={onClose}
                     className="px-6 py-3 text-[15px] text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-semibold transition-colors"
@@ -261,20 +263,27 @@ export default function RefundModal({isOpen, onClose, returnOrderOrProduct, orde
                       loading ? <CustomHashLoader loading={loading} customStyle={{color: 'rgba(215, 241, 72, 1)'}}/> : "Confirm & Submit" 
                     }
                   </button> */}
-
-                  <SiteButtonSquare 
-                      isDisabled={orderOrProduct === 'order' && !reasonWritten.reason.trim()}
-                      clickHandler={()=> handleConfirm()}
-                      tailwindClasses='!py-[12px] !min-w-[11.1rem]'
-                      customStyle={{display: 'flex', justifyContent:'center', alignItems:'center'}}
+                  <div 
+                    onMouseEnter={()=> !reasonWritten.reason.trim() && setErrorMsg("The description of the problem faced with the product must be entered!")}
+                    onMouseLeave={()=> setErrorMsg('')} 
                   >
-                      { 
-                          loading? <CustomHashLoader loading={loading}/> : "Confirm & Submit" 
-                      }
+                    <SiteButtonSquare 
+                        isDisabled={orderOrProduct === 'order' && !reasonWritten.reason.trim()}
+                        clickHandler={()=> handleConfirm()}
+                        tailwindClasses='!py-[12px] !min-w-[11.1rem] disabled:!cursor-not-allowed'
+                        customStyle={{display: 'flex', justifyContent:'center', alignItems:'center'}}
+                    >
+                        { 
+                            loading? <CustomHashLoader loading={loading}/> : "Confirm & Submit" 
+                        }
 
-                  </SiteButtonSquare>
+                    </SiteButtonSquare>
+                  </div>
 
-                </motion.div>
+                  <p className="mt-[10px] absolute top-[2.8rem] text-right text-red-500 text-[11px] "> {errorMsg && errorMsg} </p>
+
+                </motion.div>                
+
               </motion.div>
             )}
 

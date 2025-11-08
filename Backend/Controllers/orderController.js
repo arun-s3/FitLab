@@ -8,6 +8,12 @@ const Wallet = require('../Models/walletModel')
 const cloudinary = require('../Utils/cloudinary')
 const {v4: uuidv4} = require('uuid')
 
+const {jsPDF} = require('jspdf')
+const fs = require('fs')
+const path = require('path')
+const {format} = require('date-fns')
+
+
 const {calculateCharges} = require('./controllerUtils/taxesUtils')
 const {recalculateAndValidateCoupon} = require('./controllerUtils/couponsUtils')
 const {generateUniqueAccountNumber, generateTransactionId} = require('../Controllers/controllerUtils/walletUtils')
@@ -561,7 +567,12 @@ const changeProductStatus = async (req, res, next)=> {
 
     await order.save();
     console.log("Updated the order and all the products of that order")
-    return res.status(200).json({success: true, message: 'Product status updated successfully', updatedProduct: order.products[productIndex]})
+    return res.status(200).json({
+      success: true, 
+      message: 'Product status updated successfully', 
+      updatedProduct: order.products[productIndex], 
+      order
+    })
   }catch(error){
     console.error('Error updating product status:', error.message)
     next(error)
@@ -868,8 +879,7 @@ const processRefund = async (req, res, next)=> {
   try {
     console.log('Inside processRefund...')
 
-    const { orderId, productId, refundType } = req.body
-    const userId = req.user._id
+    const { orderId, productId, refundType } = req.body.refundInfos
 
     console.log(`Refund request received for orderId: ${orderId}, productId: ${productId}, refundType: ${refundType}`)
 
@@ -919,10 +929,7 @@ const processRefund = async (req, res, next)=> {
       await order.save()
     }
 
-    else {
-      return next(errorHandler(400, "Invalid refundType. Must be 'product' or 'order'."))
-    }
-
+    const userId = order.userId
     const wallet = await Wallet.findOne({ userId })
     if (!wallet) {
       const uniqueAccountNumber = await generateUniqueAccountNumber()
@@ -971,10 +978,111 @@ const processRefund = async (req, res, next)=> {
 }
 
 
+const generateInvoice = async (req, res, next) => {
+  try {
+    console.log('Inside generateInvoice...')
+    const {orderId} = req.params
+
+    if (!orderId) return next(errorHandler(400, 'Order ID is required'))
+
+    const order = await Order.findById(orderId)
+      .populate('userId', 'name email')
+      .populate('shippingAddress')
+      .populate('products.productId')
+
+    if (!order) return next(errorHandler(404, 'Order not found'))
+
+    const { jsPDF } = await import('jspdf')
+    const doc = new jsPDF()
+
+    let y = 20
+
+    doc.setFontSize(18)
+    doc.text('FITLAB - ORDER INVOICE', 70, y)
+    y += 15
+
+    doc.setFontSize(12)
+    doc.text(`Invoice Date: ${format(new Date(), 'dd MMM yyyy')}`, 15, y)
+    y += 7
+    doc.text(`Order ID: ${order.fitlabOrderId}`, 15, y)
+    y += 7
+    doc.text(`Order Date: ${format(order.orderDate, 'dd MMM yyyy')}`, 15, y)
+    y += 10
+
+    doc.setFontSize(14)
+    doc.text('Customer Details:', 15, y)
+    y += 7
+    doc.setFontSize(12)
+    doc.text(`Name: ${order.userId.name}`, 15, y)
+    y += 6
+    doc.text(`Email: ${order.userId.email}`, 15, y)
+    y += 6
+    doc.text(
+      `Shipping Address: ${order.shippingAddress?.street || ''}, ${order.shippingAddress?.city || ''}, ${order.shippingAddress?.state || ''} - ${order.shippingAddress?.pincode || ''}`,
+      15,
+      y
+    )
+    y += 10
+
+    doc.setFontSize(13)
+    doc.text('Products:', 15, y)
+    y += 6
+    doc.setFontSize(11)
+    doc.text('Title', 15, y)
+    doc.text('Qty', 110, y)
+    doc.text('Price', 130, y)
+    doc.text('Total', 160, y)
+    y += 5
+    doc.line(15, y, 200, y)
+    y += 6
+
+    order.products.forEach((item) => {
+      const title = item.title.length > 35 ? item.title.slice(0, 35) + '...' : item.title
+      doc.text(title, 15, y)
+      doc.text(item.quantity.toString(), 112, y)
+      doc.text(`${item.price.toFixed(2)}`, 132, y)
+      doc.text(`${item.total.toFixed(2)}`, 162, y)
+      y += 6
+    })
+
+    y += 5
+    doc.line(15, y, 200, y)
+    y += 8
+
+    doc.setFontSize(13)
+    doc.text('Order Summary', 15, y)
+    y += 7
+    doc.setFontSize(11)
+    doc.text(`Subtotal: ${(order.orderTotal - order.gst - order.deliveryCharge).toFixed(2)}`, 15, y)
+    y += 5
+    doc.text(`GST: ${order.gst.toFixed(2)}`, 15, y)
+    y += 5
+    doc.text(`Delivery Charge: ${order.deliveryCharge.toFixed(2)}`, 15, y)
+    y += 5
+    doc.text(`Discount: ${order.discount.toFixed(2)}`, 15, y)
+    y += 5
+    doc.text(`Total Payable:  ${order.absoluteTotalWithTaxes.toFixed(2)}`, 15, y)
+    y += 10
+
+    doc.setFontSize(10)
+    doc.text('Thank you for shopping with FitLab!', 70, y)
+    y += 5
+    doc.text('For any assistance, contact support@fitlab.com', 55, y)
+
+    const pdfData = doc.output('arraybuffer')
+    res.setHeader('Content-Type', 'application/pdf')
+    res.setHeader('Content-Disposition', `attachment; filename=invoice_${order.fitlabOrderId}.pdf`)
+    res.send(Buffer.from(pdfData))
+  } 
+  catch (error) {
+    console.log('Error in generateInvoice -->', error.message)
+    next(error)
+  }
+}
 
 
 
 
 module.exports = {createOrder, getOrders, getAllUsersOrders, cancelOrderProduct, cancelOrder, deleteProductFromOrderHistory, 
         changeOrderStatus, changeProductStatus, initiateReturn, handleReturnDecision, cancelReturnRequest, 
-        processRefund, getOrderCounts, getTodaysLatestOrder}
+        processRefund, getOrderCounts, getTodaysLatestOrder, generateInvoice}

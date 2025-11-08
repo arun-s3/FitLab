@@ -18,6 +18,14 @@ const userSchema = mongoose.Schema({
         required:true,
         maxlength:100
     },
+    firstName:{
+        type:String,
+        default: null
+    },
+    lastName:{
+        type:String,
+        default: null
+    },
     mobile:{
         type:Number,
         required:true,

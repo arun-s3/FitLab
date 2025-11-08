@@ -4,7 +4,7 @@ import { motion } from "framer-motion"
 import {toast as sonnerToast} from 'sonner'
 
 
-export default function ReviewForm({onSubmit, editReview = null, onEditSubmission}) {    
+export default function ReviewForm({onSubmit, editReview = null, onEditSubmission,  containerStyle = null}) {    
 
   const [rating, setRating] = useState(5)
   const [title, setTitle] = useState("")
@@ -21,9 +21,11 @@ export default function ReviewForm({onSubmit, editReview = null, onEditSubmissio
   }, [])
 
   useEffect(()=> {
-    setRating(editReview.rating)
-    setTitle(editReview.title)
-    setComment(editReview.comment)
+    if(editReview){
+      setRating(editReview.rating)
+      setTitle(editReview.title)
+      setComment(editReview.comment)
+    }
   }, [editReview])
 
   const handleSubmit = (e) => {
@@ -64,7 +66,8 @@ export default function ReviewForm({onSubmit, editReview = null, onEditSubmissio
   return (
     <motion.form
       onSubmit={handleSubmit}
-      className="bg-gray-50 dark:bg-zinc-900 p-8 rounded-lg border border-gray-200 dark:border-gray-800"
+      className={`bg-gray-50 dark:bg-zinc-900 p-8 rounded-lg border 
+        border-gray-200 dark:border-gray-800 ${containerStyle ? containerStyle : ''}`}
       variants={containerVariants}
       initial="hidden"
       animate="visible"

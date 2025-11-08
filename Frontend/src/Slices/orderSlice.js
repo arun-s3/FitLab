@@ -107,7 +107,7 @@ export const changeProductStatus = createAsyncThunk('order/changeProductStatus',
     console.log("orderId from orderSlice---->", orderId)
     const response = await axios.patch(`/order/status/${orderId}/products/${productId}`,{newProductStatus}, {withCredentials: true})
     console.log('Returning success response from changeProductStatus...', JSON.stringify(response.data))
-    return {orderId, productId, updatedProduct: response.data.updatedProduct}
+    return {orderId, productId, updatedProduct: response.data.updatedProduct, order: response.data.order}
   }catch(error){
     console.log('Inside catch of changeProductStatus')
     const errorMessage = error.response?.data?.message
@@ -161,6 +161,20 @@ export const cancelReturnRequest = createAsyncThunk('order/cancelReturnRequest',
   }
 })
 
+export const processRefund = createAsyncThunk('order/processRefund', async ({refundInfos}, thunkAPI)=> {
+  try {
+    console.log('Inside processRefund createAsyncThunk')
+    console.log("orderId from orderSlice---->", refundInfos.orderId)
+    const response = await axios.post(`order/refund`, {refundInfos}, {withCredentials: true})
+    console.log('Returning success response from processRefund...', JSON.stringify(response.data))
+    return {...refundInfos}
+  }catch(error){
+    console.log('Inside catch of processRefund')
+    const errorMessage = error.response?.data?.message
+    return thunkAPI.rejectWithValue(errorMessage)
+  }
+})
+
 
 const initialState = {
   orders: [], 
@@ -171,6 +185,7 @@ const initialState = {
   orderUpdated: false,
   handledOrderDecision: false,
   canceledReturnRequest: false,
+  refundSuccess: false, 
   totalUsersOrders: null,
   totalOrders:null,
   loading: false,
@@ -194,6 +209,7 @@ const orderSlice = createSlice({
       state.orderReturnRequested = false
       state.handledOrderDecision = false
       state.canceledReturnRequest = false
+      state.refundSuccess = false
     }
   },
   extraReducers: (builder) => {
@@ -360,8 +376,17 @@ const orderSlice = createSlice({
         state.orderMessage = action.payload.message
 
         state.orders = state.orders.map(order=> {
+
           if(order._id === action.payload.orderId){
             order.orderStatus = action.payload.updatedOrder.orderStatus
+
+            if(action.payload.updatedOrder.orderStatus === 'delivered'){
+              order.deliveryDate = action.payload.updatedOrder.deliveryDate
+
+              if(order.paymentDetails.paymentMethod === 'cashOnDelivery'){
+                order.paymentDetails.paymentStatus = 'completed'
+              }
+            }
             order.products = order.products.map(product=> {
               product.productStatus = action.payload.updatedOrder.orderStatus
               return product
@@ -389,11 +414,25 @@ const orderSlice = createSlice({
         state.orderMessage = action.payload.message
 
         state.orders = state.orders.map(order=> {
+
           if(order._id === action.payload.orderId){
             const requiredStatus = action.payload.updatedProduct.productStatus
             order.products = order.products.map(product=> {
+
               if(product.productId === action.payload.productId){
                 product.productStatus = requiredStatus
+
+                if(requiredStatus === 'delivered'){
+                  const otherDeliveredProducts = order.products.find(product=> product.productStatus === 'delivered')
+
+                  if(!otherDeliveredProducts){
+                    order.orderStatus = 'delivered'
+                    order.deliveryDate = action.payload.order.deliveryDate
+                    if(order.paymentDetails.paymentMethod === 'cashOnDelivery'){
+                      order.paymentDetails.paymentStatus = 'completed'
+                    }
+                  }
+                }
               }
               return product
             })
@@ -570,6 +609,46 @@ const orderSlice = createSlice({
         state.orderError = action.payload
         state.orderSuccess = false
         state.canceledReturnRequest = false
+      })
+      .addCase(processRefund.fulfilled, (state, action) => {
+        console.log('processRefund fulfilled:', action.payload)
+        state.orderError = null
+        state.loading = false
+        state.refundSuccess = true
+
+        if (state.orders && state.orders.length > 0) {
+          const order = state.orders.find(o => o._id === action.payload.orderId)
+
+          if (order) {
+            if (action.payload.refundType === 'product') {
+              const product = order.products.find(p => p.productId._id === action.payload.productId)
+              if (product) {
+                product.productStatus = 'refunded'
+              }
+            
+              const allRefunded = order.products.every(p => p.productStatus === 'refunded')
+              if (allRefunded) {
+                order.orderStatus = 'refunded'
+              }
+            }
+          
+            else if (action.payload.refundType === 'order') {
+              order.orderStatus = 'refunded'
+              order.products.forEach(p => (p.productStatus = 'refunded'))
+            }
+          }
+        }
+      })
+      .addCase(processRefund.pending, (state) => {
+        state.loading = true
+        state.orderError = null
+      })
+      .addCase(processRefund.rejected, (state, action) => {
+        console.log('handleReturnDecision rejected:', action.payload)
+        state.loading = false
+        state.orderError = action.payload
+        state.orderSuccess = false
+        state.refundSuccess = false
       })
 
 

@@ -129,11 +129,6 @@ export default function CheckoutPage(){
         toast.error(orderError, {autoClose: 3500})
         dispatch(resetOrderStates())
       }
-      if(orderMessage){
-        console.log("orderMessage--->", orderMessage)
-        sonnerToast.error(orderMessage)
-        dispatch(resetOrderStates())
-      }
     },[orderCreated, orderMessage, orderError, orderReviewError])
 
     useEffect(()=> {

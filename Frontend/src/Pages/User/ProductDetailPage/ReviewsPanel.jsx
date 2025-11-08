@@ -5,7 +5,7 @@ import axios from 'axios'
 import {toast as sonnerToast} from 'sonner'
 
 import ReviewsStats from "./ReviewStats"
-import ReviewForm from "./ReviewForm"
+import ReviewForm from '../../../Components/ReviewForm/ReviewForm'
 import ReviewCard from "./ReviewCard"
 import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
 
@@ -138,16 +138,26 @@ export default function ReviewsPanel({ productId, productRating, totalReviews })
     >
       <motion.div className="mb-12" variants={itemVariants}>
         <h2 className="text-[20px] md:text-[24px] font-bold text-gray-900 dark:text-white">Customer Reviews</h2>
-        <p className="text-gray-600 dark:text-gray-400">See what our customers think about this product</p>
+        <p className="text-gray-600 dark:text-gray-400">
+          {
+            (totalReviewCount > 0 || totalReviews > 0) 
+              ? 'See what our customers think about this product'
+              : 'Be the first to review the product!'
+          }
+        </p>
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-12">
-        <motion.div variants={itemVariants} className="lg:col-span-1">
-          {
-            reviews && rating && totalReviewCount &&
-              <ReviewsStats productId={productId} rating={rating} totalReviews={totalReviewCount} />
-          }
-        </motion.div>
+
+        {
+          (totalReviewCount > 0 || totalReviews > 0) &&
+            <motion.div variants={itemVariants} className="lg:col-span-1">
+              {
+                reviews && rating && totalReviewCount &&
+                  <ReviewsStats productId={productId} rating={rating} totalReviews={totalReviewCount} />
+              }
+            </motion.div>
+        }
 
         <motion.div className="lg:col-span-3" variants={containerVariants}>
           <motion.button
@@ -173,21 +183,24 @@ export default function ReviewsPanel({ productId, productRating, totalReviews })
             </motion.div>
           )}
 
-          <motion.div className="mb-6 flex items-center gap-4" variants={itemVariants}>
-            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Sort by:</span>
-            <select
-              value={sortBy}    
-              onChange={(e)=> handleReviewSort(e.target.value)}
-              className="!w-40 px-4 py-[4px] text-[14px] bg-white dark:bg-zinc-900 border border-gray-300 dark:border-gray-700 
-                rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
-            >
-              <option value="most-helpful">Most Helpful</option>
-              <option value="newest">Newest</option>
-              <option value="highest-rating">Highest Rating</option>
-              <option value="lowest-rating">Lowest Rating</option>
-              <option value="oldest">Oldest</option>
-            </select>
-          </motion.div>
+          {
+            (totalReviewCount > 0 || totalReviews > 0) &&
+              <motion.div className="mb-6 flex items-center gap-4" variants={itemVariants}>
+                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">Sort by:</span>
+                <select
+                  value={sortBy}    
+                  onChange={(e)=> handleReviewSort(e.target.value)}
+                  className="!w-40 px-4 py-[4px] text-[14px] bg-white dark:bg-zinc-900 border border-gray-300 dark:border-gray-700 
+                    rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+                >
+                  <option value="most-helpful">Most Helpful</option>
+                  <option value="newest">Newest</option>
+                  <option value="highest-rating">Highest Rating</option>
+                  <option value="lowest-rating">Lowest Rating</option>
+                  <option value="oldest">Oldest</option>
+                </select>
+              </motion.div>
+          }
 
           <motion.div className="space-y-4" variants={containerVariants}>
             {

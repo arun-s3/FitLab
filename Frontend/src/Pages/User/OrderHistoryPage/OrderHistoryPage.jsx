@@ -9,6 +9,7 @@ import {ShoppingBag, ShoppingCart, Truck, PackagePlus, PackageX , CalendarArrowD
 import {RiArrowDropDownLine} from "react-icons/ri"
 import {BiCartAdd} from "react-icons/bi"
 import {MdSort} from "react-icons/md"
+import {TbCreditCardRefund} from "react-icons/tb";
 import {toast as sonnerToast} from 'sonner'
 import {format} from "date-fns"
 import axios from 'axios'
@@ -22,8 +23,10 @@ import Footer from '../../../Components/Footer/Footer'
 import CartSidebar from '../../../Components/CartSidebar/CartSidebar'
 import Modal from '../../../Components/Modal/Modal'
 import RefundModal from './RefundModal'
+import OrderDetailsModal from './OrderDetailsModal'
 import TextChatBox from '../TextChatBox/TextChatBox'
 import CancelForm from '../../../Components/CancelForm/CancelForm'
+import ReviewForm from '../../../Components/ReviewForm/ReviewForm'
 import {handleImageCompression} from '../../../Utils/compressImages'
 import {CustomPuffLoader} from '../../../Components/Loader//Loader'
 import {DateSelector} from '../../../Components/Calender/Calender'
@@ -36,7 +39,7 @@ import {SiteButtonSquare, SiteSecondaryFillImpButton} from '../../../Components/
 export default function OrderHistoryPage(){
 
     const [activeTab, setActiveTab] = useState('Orders')
-    const [showRating, setShowRating] = useState(true)
+    const [showRating, setShowRating] = useState({order: true, product: true})
     const [showChat, setShowChat] = useState(false)
 
     const [orderDuration, setOrderDuration] = useState('All Orders')
@@ -58,6 +61,8 @@ export default function OrderHistoryPage(){
     const [currentProductId, setCurrentProductId] = useState(null)
     const [showLoader, setShowLoader] = useState(false)
 
+    const [showOrderDetailsModal, setShowOrderDetailsModal] = useState({status: false, order: null})
+
     const [openCancelConfirmModal, setOpenCancelConfirmModal] = useState(false)
     const [cancelThisOrderId, setCancelThisOrderId] = useState(null)
 
@@ -67,6 +72,10 @@ export default function OrderHistoryPage(){
     const [openSelectReasons, setOpenSelectReasons] = useState({status:false, reasonTitle:'', reason:''})
     const productCancelFormRef = useRef(null)
     const orderCancelFormRef = useRef(null)
+
+    const [showMoreMenu, setShowMoreMenu] = useState({id: null, status: false})
+
+    const [showReviewForm, setShowReviewForm] = useState({status: false, orderId: null, productId: null, testimony: false})
 
     const returnWindowTime = 30 * 24 * 60 * 60 * 1000
 
@@ -123,7 +132,8 @@ export default function OrderHistoryPage(){
       console.log(`totalPages------>${totalPages}, limit------>${limit}`)
       setTotalPages(Math.ceil(totalOrders/limit))
     }
-  }, [orders, totalOrders])
+    console.log("showOrderDetailsModal--------------------->", showOrderDetailsModal)
+  }, [orders, totalOrders, showOrderDetailsModal])
   
 
   useEffect(()=> {
@@ -170,12 +180,17 @@ export default function OrderHistoryPage(){
         dispatch(resetOrderStates())
       }
     }, [canceledReturnRequest])
+
+    useEffect(()=> {
+      console.log("showReviewForm--------------->", showReviewForm)
+    }, [showReviewForm])
     
     const orderTabs = [
       {name: 'Orders', subtitle:'All Orders', icon: ShoppingBag},
       {name: 'Shipped', subtitle:'On Delivery', icon: Truck},
       {name: 'Delivered', subtitle:'Order Completed', icon: PackagePlus},
-      {name: 'Cancelled', subtitle:'Cancelled orders', icon: PackageX}
+      {name: 'Cancelled', subtitle:'Cancelled orders', icon: PackageX},
+      {name: 'Refunded', subtitle:'Refunded orders after review', icon: TbCreditCardRefund}
     ]
 
     const orderStatusStyles = [
@@ -402,7 +417,51 @@ export default function OrderHistoryPage(){
         const returnDetails = {orderId: cancelReturnReq.orderId, productId: cancelReturnReq.productId, returnType: cancelReturnReq.cancelType}
         console.log('returnDetails------------>', returnDetails)
         dispatch(cancelReturnRequest({returnDetails}))
+        // setCancelReturnReq({orderId: null, productId: null, cancelType: null})
       }
+    }
+
+    const exportInvoice = async(orderId)=> {
+      try{
+        const response = await axios.get(`${baseApiUrl}/order/invoice/${orderId}`,{responseType: 'blob', withCredentials: true})
+        console.log("RESPONSE from order/invoice---->", response)
+        
+        const url = window.URL.createObjectURL(new Blob([response.data]))
+        const link = document.createElement('a')
+        link.href = url
+        link.setAttribute('download', `invoice_${orderId}.pdf`)
+        document.body.appendChild(link)
+        link.click()
+      }
+      catch(error){
+        console.log("error from  createInvoice--->", error.message)
+      }  
+    }
+
+    const handleAddReview = async(newReview) => {
+        try{
+          let response;
+          if(showReviewForm.testimony){
+            response = await axios.post(`${baseApiUrl}/testimony/add`, {...newReview}, { withCredentials: true })
+          }else{
+            response = await axios.post(`${baseApiUrl}/review/add`, {productId: showReviewForm.productId, ...newReview},
+                { withCredentials: true }
+              )
+          }
+          console.log("handleAddReview response----->", response)
+          if(response.data.success){
+            sonnerToast.success(`Your ${showReviewForm.testimony ? 'testimony' : 'review'} has been submitted successfully!`)
+            setShowReviewForm({status: false, userId: null, productId: null, testimony: false})
+          }
+        }
+        catch(error){
+          console.log(error)
+          if (error.response && (error.response.status === 400 || error.response.status === 404)) {
+            sonnerToast.error(error.response.data.message || "Error while submitting!")
+          }else{
+            sonnerToast.error("Internal Server Error")
+          }
+        }
     }
 
 
@@ -435,9 +494,9 @@ export default function OrderHistoryPage(){
                 </div>
 
                 <div className="mb-[2rem] flex justify-between items-center" id='order-menu'>
-                  <div className="px-[8px] py-[6px] flex gap-4 bg-white rounded-[9px] border border-primary shadow-sm">
+                  <div className="px-[8px] py-[6px] flex gap-[10px] bg-white rounded-[9px] border border-primary shadow-sm">
                     {orderTabs.map((tab)=> (
-                      <button key={tab.name} className={`px-[1.5rem] py-[8px] flex items-center gap-[5px] rounded-[7px] transition-all
+                      <button key={tab.name} className={`px-[1rem] py-[8px] flex items-center gap-[5px] rounded-[7px] transition-all
                            duration-200 
                           ${activeTab === tab.name ? 
                             'text-black shadow-md transform scale-105'
@@ -553,21 +612,30 @@ export default function OrderHistoryPage(){
                                     <div className="text-right space-y-1">            
                                       <h3 className="label">Order # {order.paymentDetails.transactionId}</h3>
                                       <div className="space-x-4 order-details">
-                                        <Link to="#" className="hover:text-primaryDark transition-colors">                  
-                                          <FileText/>
-                                          View order details
+                                        <Link className="hover:scale-105 transition duration-150" 
+                                            onClick={()=> setShowOrderDetailsModal({status: true, order: order})}>                  
+                                          <ShoppingBag className='text-secondary hover:text-primaryDark transition-colors duration-300'/>
+                                          <span className='text-secondary hover:text-primaryDark transition-colors duration-300'>
+                                            View order details
+                                          </span>
                                         </Link>
-                                        <Link to="#" className="hover:text-primaryDark transition-colors">                      
-                                          <FileText/>
-                                          View invoice
+                                        <Link className="hover:scale-105 transition duration-150" onClick={()=> exportInvoice(order._id)}>                      
+                                          <FileText className='text-secondary hover:text-primaryDark transition-colors duration-300'/>
+                                          <span className='text-secondary hover:text-primaryDark transition-colors duration-300'>
+                                             View invoice 
+                                          </span>
                                         </Link>
                                       </div>
                                     </div>
                                 }
                               </div>
                               
-                              {showRating && order.orderStatus === 'delivered' && (
-                                <div className="mx-[1.5rem] mt-[1.5rem]">
+                              {showRating.order && order.orderStatus === 'delivered' && (
+                                <div className="mx-[1.5rem] mt-[1.5rem]"  
+                                  onClick={()=> setShowReviewForm(prev=> (
+                                    {status: !prev.status, orderId: order._id, productId: null, testimony: true}
+                                  ))}
+                                >
                                   <div className="p-[11px] text-[13px] font-[500] flex justify-between items-center
                                      bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-100 rounded-xl">
                                     <div className="flex items-center gap-[8px]">
@@ -577,11 +645,29 @@ export default function OrderHistoryPage(){
                                       </span>
                                     </div>
                                     <button className="text-gray-400 hover:text-gray-600 transition-colors"
-                                       onClick={()=> setShowRating(false)}>
+                                       onClick={()=> {
+                                        setShowRating(status=> ({...status, order: null}))
+                                        if(showReviewForm.orderId === order._id){
+                                              setShowReviewForm({status: false, orderId: null, productId: null, testimony: false})}
+                                        }
+                                       }>
                                       <X className="w-[20px] h-[20px]" />
                                     </button>
                                   </div>
                                 </div>
+                              )}
+
+                              {showRating.order && order.orderStatus === 'delivered' && showReviewForm.orderId === order._id &&
+                                  !showReviewForm.productId && showReviewForm.status && (
+                                <motion.div
+                                  initial={{ opacity: 0, height: 0 }}
+                                  animate={{ opacity: 1, height: "auto" }}
+                                  exit={{ opacity: 0, height: 0 }}
+                                  transition={{ duration: 0.3 }}
+                                  className="my-8"
+                                >
+                                  <ReviewForm onSubmit={handleAddReview} containerStyle='mx-16'/>
+                                </motion.div>
                               )}
 
                               
@@ -649,7 +735,7 @@ export default function OrderHistoryPage(){
                                               order.orderStatus === 'confirmed' ? 'Estimated Delivery Date:' : null
                                           }
                                         </span>
-                                        {/* <span className='ml-[5px] font-[550] tracking-[0.5px]'>
+                                        <span className='ml-[5px] font-[550] tracking-[0.5px]'>
                                           { 
                                             order.orderStatus === 'delivered' ? 
                                               format(new Date(order.deliveryDate), "MMMM dd, yyyy" ) 
@@ -657,7 +743,7 @@ export default function OrderHistoryPage(){
                                             ? format(new Date(order.estimtatedDeliveryDate), "MMMM dd, yyyy" ) 
                                             : null
                                           } 
-                                        </span> */}
+                                        </span>
                                       </h3>
                                       }
                                       <h3 className={`px-[5px] py-[3px] ${order.orderStatus === 'returning' ? 'w-[35%]' : 'w-[23%]'} 
@@ -707,12 +793,12 @@ export default function OrderHistoryPage(){
 
                                 { openCancelConfirmModal &&
                                   <Modal openModal={openCancelConfirmModal} setOpenModal={setOpenCancelConfirmModal} title='Important' 
-                                      content={`You are about to cancel an ${cancelThisOrderId ? 'order' : 'return request'}.
+                                      content={`You are about to cancel ${cancelThisOrderId ? 'an order' : 'a return request'}.
                                          Do you want to continue?`} 
                                       okButtonText='Continue' closeButtonText='Cancel' contentCapitalize={false} 
                                       instruction="If you are sure, write 'cancel' and press 'Continue', else click 'Close' button"
                                       typeTest={true} typeValue='cancel'
-                                      clickTest={true} activateProcess={cancelThisOrderId ? cancelThisOrder : confirmCancelReturn}/>
+                                      activateProcess={cancelThisOrderId ? cancelThisOrder : confirmCancelReturn}/>
                                 }     
 {/* 
                                 { openReturnCancelModal.status &&
@@ -796,7 +882,7 @@ export default function OrderHistoryPage(){
                                           {product.deliveryNote}
                                         </p>
                                       )}
-                                      <div className="flex gap-[12px] mt-[1.5rem] item-buttons">
+                                      <div className="relative flex gap-[12px] mt-[1.5rem] item-buttons">
                                         <button className="px-[16px] py-[4px] text-[14px] text-white bg-gradient-to-r from-[#B863F2]
                                            to-secondary flex items-center gap-[8px] rounded-[7px] hover:shadow-md transition-all duration-300 
                                                 transform hover:!bg-purple-800 hover:translate-y-px"
@@ -849,12 +935,42 @@ export default function OrderHistoryPage(){
                                               Cancel return request
                                             </motion.button>
                                           }
-
-                                        <button className="border !border-primary hover:border-gray-300 transition-all duration-200">      
+                                        { product.productId?._id &&
+                                        <button className="border !border-primary hover:border-gray-300 transition-all duration-200"
+                                          onClick={()=> setShowMoreMenu(showmenu=> ({id: product?.productId?._id, status: !showmenu.status}))}
+                                        >      
                                           <MoreHorizontal className="w-[20px] h-[20px] text-primaryDark" />
-                                        </button>
+                                          {
+                                            showMoreMenu && showMoreMenu?.id === product?.productId?._id &&  showMoreMenu?.status &&
+                                            <ul className='absolute !bottom-10 !right-[46%] bg-gray-50 border
+                                               border-dropdownBorder py-4 rounded-[7px]'
+                                               onMouseLeave={()=> setShowMoreMenu(showmenu=> ({...showmenu, status: false}))}
+                                            >
+                                              <li className='w-fit px-4 pb-[10px] flex items-center gap-[10px] 
+                                                border-b border-dropdownBorder hoevr:bg-100 hover:text-secondary 
+                                                transition-colors duration-300'
+                                                onClick={()=> {
+                                                  setShowOrderDetailsModal({status: true, order: order})
+                                                  setShowMoreMenu(showmenu=> ({...showmenu, status: false}))
+                                                }}
+                                              > 
+                                                  <ShoppingBag className='w-[15px] h-[15px] text-muted'/>
+                                                  <span className='text-[14px] text-inherit'>
+                                                     View Complete Order details  
+                                                  </span>
+                                              </li>
+                                              <li className='w-fit px-4 pt-[10px] flex items-center gap-[10px] 
+                                              hover:text-secondary transition-colors duration-300'>
+                                                  <Star className='w-[15px] h-[15px] text-muted text-inherit'/>
+                                                  <span className='text-[14px] text-inherit'>  Give Feedback  </span>
+                                              </li>
+                                            </ul>
+                                          }
 
-                                        { showLoader && currentProductId === product.productId &&    
+                                        </button>
+                                      }
+
+                                        { showLoader && currentProductId === product.productId?._id &&    
                                            <CustomPuffLoader loading={showLoader} 
                                                customStyle={{marginLeft: '5px', alignSelf: 'center'}}/>
                                         }
@@ -869,7 +985,7 @@ export default function OrderHistoryPage(){
                                                   <div className="p-[11px] text-[13px] font-[500] flex justify-between items-center
                                                      bg-gradient-to-r from-green-50 to-green-100 border border-primary rounded-xl">
                                                     <div className="flex items-center gap-[8px]">
-                                                      <CheckCircle className="w-[20px] h-[20px] text-green-400" />
+                                                      <CheckCircle className="w-[20px] h-[20px] text-green-500" />
                                                       <span className="font-[13px]">
                                                           Your return request for the product has been thoroughly reviewed and approved. 
                                                           Your refund will be processed within 24 hours.
@@ -920,11 +1036,7 @@ export default function OrderHistoryPage(){
                                   </div>
 
                                   <div>
-                                      {/* {
-                                        order?.orderReturnStatus && order.orderReturnStatus === 'accepted'
-                                            ? <ReturnAcceptedMsg />
-                                            : <ReturnRejectedMsg />
-                                      } */}
+
                                   </div>
                                       
                                   <div className='flex justify-center items-center'>
@@ -938,6 +1050,49 @@ export default function OrderHistoryPage(){
                                          formFor='product' returnAndRefund={openCancelForm.return}/>
                                   }
                                   </div>
+
+                                  {showRating.product && product.productStatus === 'delivered' && (
+                                    <div className="mx-[1.5rem] mt-[1.5rem]" 
+                                      onClick={()=> setShowReviewForm(prev=> (
+                                        {status: !prev.status, orderId: null, productId: product.productId._id, testimony: false}
+                                      ))}>
+                                      <div className="p-[11px] text-[13px] font-[500] flex justify-between items-center
+                                         bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-100 rounded-xl">
+                                        <div className="flex items-center gap-[8px]">
+                                          <Star className="w-[20px] h-[20px] text-yellow-400 fill-current" />
+                                          <span className="font-[13px] cursor-pointer hover:text-secondary transition-colors duration-300">
+                                            Please rate your experience using this product
+                                          </span>
+                                        </div>
+                                        <button className="text-gray-400 hover:text-gray-600 transition-colors"
+                                           onClick={()=> {
+                                            setShowRating(status=> ({...status, product: null}))
+                                            if(showReviewForm.productId === product.productId._id){
+                                              setShowReviewForm({status: false,  orderId: null, productId: null, testimony: false})}
+                                            }
+                                           }>
+                                          <X className="w-[20px] h-[20px]" />
+                                        </button>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {
+                                    showRating.order && product.productStatus === 'delivered'  
+                                      && showReviewForm.productId === product.productId._id && !showReviewForm.orderId && showReviewForm.status && (
+                                        <motion.div
+                                          initial={{ opacity: 0, height: 0 }}
+                                          animate={{ opacity: 1, height: "auto" }}
+                                          exit={{ opacity: 0, height: 0 }}
+                                          transition={{ duration: 0.3 }}
+                                          className="my-8"
+                                        >
+
+                                          <ReviewForm onSubmit={handleAddReview} containerStyle='mx-16'/>
+
+                                        </motion.div>
+                                      )
+                                  }
 
                                 </div>
                               ))}
@@ -956,6 +1111,13 @@ export default function OrderHistoryPage(){
                                       <RefundModal isOpen={openRefundModal.status} onClose={()=> setOpenRefundModal(info=> ({...info, status: false}))} 
                                           returnOrderOrProduct={initiateReturnProduct} orderOrProduct={openRefundModal.orderOrProduct}
                                             onReasonWritten={setOpenSelectReasons} reasonWritten={openSelectReasons}/>
+                                  }
+
+                                  {
+                                    showOrderDetailsModal.status &&
+
+                                      <OrderDetailsModal order={showOrderDetailsModal.order} isOpen={showOrderDetailsModal.status} 
+                                          onClose={()=> setShowOrderDetailsModal({status: false, order: null})}/>
                                   }
 
                             </div>

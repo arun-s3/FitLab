@@ -10,21 +10,21 @@ export const createCategory = createAsyncThunk('createCategory', async({formData
     }
     catch(error){
         console.log("inside catch of createCategory from categorySlice")
-        const errorMessage = error.response?.data?.message
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
 
-export const getAllCategories = createAsyncThunk('getAllCategories', async(thunkAPI)=>{
+export const getAllCategories = createAsyncThunk('getAllCategories', async({isAdmin}, thunkAPI)=>{
     try{
         console.log("Inside createCategory createAsyncThunk")
-        const response = await axios.get('/admin/products/category', {withCredentials: true})
+        const response = await axios.get(`/admin/products/category/?isAdmin=${isAdmin ? true : false}`, {withCredentials: true})
         console.log("returning success response from getAllCategories createAsyncThunk..."+JSON.stringify(response.data))
         return response.data
     }
     catch(error){
         console.log("inside catch of getAllCategories from categorySlice")
-        const errorMessage = error.response?.data?.message
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -38,7 +38,7 @@ export const getAllCategories = createAsyncThunk('getAllCategories', async(thunk
 //     }
 //     catch(error){
 //         console.log("inside catch of getEveryCategoryNames from categorySlice")
-//         const errorMessage = error.response?.data?.message
+//         const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
 //         return thunkAPI.rejectWithValue(errorMessage)
 //     }
 // })
@@ -46,13 +46,13 @@ export const getAllCategories = createAsyncThunk('getAllCategories', async(thunk
 export const getCategoriesOfType = createAsyncThunk('getCategoriesOfType', async({status}, thunkAPI)=>{
     try{
         console.log("Inside getCategoriesOfType createAsyncThunk")
-        const response = await axios.get(`/admin/products/category/?status=${status}`, {withCredentials: true})
+        const response = await axios.get(`/admin/products/category/?status=${status}&`, {withCredentials: true})
         console.log("returning success response from getCategoriesOfType createAsyncThunk..."+JSON.stringify(response.data))
         return response.data
     }
     catch(error){
         console.log("inside catch of getCategoriesOfType from categorySlice")
-        const errorMessage = error.response?.data?.message
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -67,7 +67,7 @@ export const getSingleCategory = createAsyncThunk('getSingleCategory', async({id
     }
     catch(error){
         console.log("inside catch of getSingleCategory from categorySlice")
-        const errorMessage = error.response?.data?.message
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -82,7 +82,7 @@ export const getCategoryNames = createAsyncThunk('getCategoryNames', async({id},
     }
     catch(error){
         console.log("inside catch of getCategoryNames from categorySlice")
-        const errorMessage = error.response?.data?.message
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -97,7 +97,7 @@ export const getNestedSubcategoryNames = createAsyncThunk('getNestedSubcategoryN
     }
     catch(error){
         console.log("inside catch of getNestedSubcategoryNames from categorySlice")
-        const errorMessage = error.response?.data?.message
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -111,7 +111,7 @@ export const getFirstLevelCategories = createAsyncThunk('getFirstLevelCategories
     }
     catch(error){
         console.log("inside catch of getFirstLevelCategories from categorySlice")
-        const errorMessage = error.response?.data?.message
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -126,7 +126,7 @@ export const toggleCategoryStatus = createAsyncThunk('toggleCategoryStatus', asy
     }
     catch(error){
         console.log("inside catch of toggleCategoryStatus from productSlice")
-        const errorMessage = error.response?.data?.message
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -140,7 +140,7 @@ export const updateCategory = createAsyncThunk('updateCategory', async({formData
     }
     catch(error){
         console.log("inside catch of updateCategory from categorySlice")
-        const errorMessage = error.response?.data?.message
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })

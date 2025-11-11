@@ -23,7 +23,7 @@ export const adminSignout = createAsyncThunk('adminSignout', async(thunkAPI)=>{
     }
     catch(error){
         console.log("inside catch of signout from Userslice")
-        const errorMessage = error.response?.data?.message
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -37,7 +37,7 @@ export const showUsers = createAsyncThunk('showUsers', async({queryOptions}, thu
     }
     catch(error){
         console.log("inside catch of createAsyncThunk for getUsers")
-        const errorMessage = error.response?.data?.message
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -51,7 +51,7 @@ export const showUsersofStatus = createAsyncThunk('showUsersofStatus', async({st
     }
     catch(error){
         console.log("inside catch of createAsyncThunk for showUsersofStatus")
-        const errorMessage = error.response?.data?.message
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -65,7 +65,7 @@ export const toggleBlockUser = createAsyncThunk('toggleBlockUser', async(id,thun
     }
     catch(error){
         console.log("inside catch of createAsyncThunk for toggleBlockUser")
-        const errorMessage = error.response?.data?.message
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -79,7 +79,7 @@ export const deleteUser = createAsyncThunk('deleteUser', async(id,thunkAPI)=>{
     }
     catch(error){
         console.log("inside catch of createAsyncThunk for deleteUser")
-        const errorMessage = error.response?.data?.message
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -93,7 +93,7 @@ export const deleteUsersList = createAsyncThunk('deleteUser', async(userList,thu
     }
     catch(error){
         console.log("inside catch of createAsyncThunk for deleteUser")
-        const errorMessage = error.response?.data?.message
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })

@@ -10,7 +10,7 @@ export const createProduct = createAsyncThunk('createProduct', async({formData},
     }
     catch(error){
         console.log("inside catch of createProduct from productSlice")
-        const errorMessage = error.response?.data?.message
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -25,7 +25,7 @@ export const updateProduct = createAsyncThunk('updateProduct', async({formData, 
     }
     catch(error){
         console.log("inside catch of createProduct from productSlice")
-        const errorMessage = error.response?.data?.message
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -39,7 +39,7 @@ export const toggleProductStatus = createAsyncThunk('toggleProductStatus', async
     }
     catch(error){
         console.log("inside catch of toggleProductStatus from productSlice")
-        const errorMessage = error.response?.data?.message
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -54,7 +54,7 @@ export const getAllProducts = createAsyncThunk('getAllProducts', async({queryOpt
     }
     catch(error){
         console.log("inside catch of getAllProducts from productSlice")
-        const errorMessage = error.response?.data?.message
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -68,7 +68,7 @@ export const searchProduct = createAsyncThunk('searchProduct', async({find}, thu
     }
     catch(error){
         console.log("inside catch of searchProduct from productSlice")
-        const errorMessage = error.response?.data?.message
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })

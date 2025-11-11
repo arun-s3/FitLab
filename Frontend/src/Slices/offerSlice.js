@@ -10,7 +10,7 @@ export const createOffer = createAsyncThunk('offer/add', async ({offerDetails}, 
     return response.data
   }catch(error){
     console.log('Inside catch of createOffer')
-    const errorMessage = error.response?.data?.message
+    const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -24,7 +24,7 @@ export const getAllOffers = createAsyncThunk('offer/list', async ({queryOptions}
     return response.data
   }catch(error){
     console.log('Inside catch of averageRating')
-    const errorMessage = error.response?.data?.message
+    const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -38,7 +38,7 @@ export const updateOffer = createAsyncThunk('offer/update', async ({offerDetails
     return response.data
   }catch(error){
     console.log('Inside catch of updateOffer')
-    const errorMessage = error.response?.data?.message
+    const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -52,7 +52,7 @@ export const deleteOffer = createAsyncThunk('offer/delete', async ({offerId}, th
     return {offerId, message: response.data.message}
   }catch(error){
     console.log('Inside catch of deleteOffer')
-    const errorMessage = error.response?.data?.message
+    const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -66,7 +66,7 @@ export const searchOffers = createAsyncThunk('offer/search', async ({query}, thu
     return response.data
   }catch(error){
     console.log('Inside catch of searchOffers')
-    const errorMessage = error.response?.data?.message
+    const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -79,7 +79,7 @@ export const getBestOffer = createAsyncThunk('offer/getBestOffer', async ({produ
     return response.data
   }catch(error){
     console.log('Inside catch of getBestOffer')
-    const errorMessage = error.response?.data?.message
+    const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -92,7 +92,7 @@ export const toggleOfferStatus = createAsyncThunk('offer/toggleOfferStatus', asy
     return {offerId, message: response.data.message}
   }catch(error){
     console.log('Inside catch of toggleOfferStatus')
-    const errorMessage = error.response?.data?.message
+    const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })

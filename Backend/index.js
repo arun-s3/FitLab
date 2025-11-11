@@ -97,8 +97,6 @@ app.use('/wallet', walletRoutes)
 app.use('/chat', textChatBoxRoutes)
 app.use('/video-chat', videoSupportSessionRoutes)
 
-
-
 app.use('/admin', adminRoutes)
 app.use('/admin/products', adminProductRoutes)
 app.use('/admin/products/category', adminCategoryRoutes)
@@ -112,6 +110,11 @@ app.use( (error ,req ,res, next)=> {
     console.log(`From index.js errorHandling middleware message is---> ${message} and statusCode is- ${statusCode}`)
     res.status(statusCode).json({message})
 })
+
+require("./CronJobs/couponCrons.js")
+require("./CronJobs/offerCrons.js")
+// require("./CronJobs/categoryCrons.js")
+
 
 const port = process.env.PORT||3000
 server.listen(port, ()=>{ console.log(`Listening to port ${port}...`)})

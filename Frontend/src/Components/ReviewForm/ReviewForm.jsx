@@ -4,7 +4,7 @@ import { motion } from "framer-motion"
 import {toast as sonnerToast} from 'sonner'
 
 
-export default function ReviewForm({onSubmit, editReview = null, onEditSubmission,  containerStyle = null}) {    
+export default function ReviewForm({onSubmit, editReview = null, onEditSubmission, provideRating, hideRating = false, containerStyle = null}) {    
 
   const [rating, setRating] = useState(5)
   const [title, setTitle] = useState("")
@@ -27,6 +27,11 @@ export default function ReviewForm({onSubmit, editReview = null, onEditSubmissio
       setComment(editReview.comment)
     }
   }, [editReview])
+
+  useEffect(()=> {
+    console.log("provideRating---->", provideRating)
+    setRating(provideRating)
+  }, [provideRating])
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -72,34 +77,37 @@ export default function ReviewForm({onSubmit, editReview = null, onEditSubmissio
       initial="hidden"
       animate="visible"
     >
-      <motion.div className="mb-6" variants={itemVariants}>
-        <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-3">Rating</label>
-        <div className="flex gap-2">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <motion.button
-              key={star}
-              type="button"
-              onClick={() => setRating(star)}
-              onMouseEnter={() => setHoveredRating(star)}
-              onMouseLeave={() => setHoveredRating(0)}
-              className="focus:outline-none"
-              whileHover={{ scale: 1.15 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <svg
-                className={`w-8 h-8 transition-all ${
-                  star <= (hoveredRating || rating)
-                    ? "text-yellow-400 fill-yellow-400"
-                    : "text-gray-300 dark:text-gray-600"
-                }`}
-                viewBox="0 0 20 20"
-              >
-                <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-              </svg>
-            </motion.button>
-          ))}
-        </div>
-      </motion.div>
+      {
+        !hideRating &&
+          <motion.div className="mb-6" variants={itemVariants}>
+            <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-3">Rating</label>
+            <div className="flex gap-2">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <motion.button
+                  key={star}
+                  type="button"
+                  onClick={() => setRating(star)}
+                  onMouseEnter={() => setHoveredRating(star)}
+                  onMouseLeave={() => setHoveredRating(0)}
+                  className="focus:outline-none"
+                  whileHover={{ scale: 1.15 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <svg
+                    className={`w-8 h-8 transition-all ${
+                      star <= (hoveredRating || rating)
+                        ? "text-yellow-400 fill-yellow-400"
+                        : "text-gray-300 dark:text-gray-600"
+                    }`}
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                  </svg>
+                </motion.button>
+              ))}
+            </div>
+          </motion.div>
+      }
 
       <motion.div className="mb-6" variants={itemVariants}>
         <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">Review Title</label>

@@ -17,10 +17,11 @@ import AuthPrompt from '../../../Components/AuthPrompt/AuthPrompt'
 
 export default function AddressListingPage(){
 
-    const {setBreadcrumbHeading, setSidebarTileClasses, setPageWrapperClasses, setPageLocation} = useContext(UserPageLayoutContext)
+    const {setBreadcrumbHeading, setSidebarTileClasses, setPageWrapperClasses, setPageLocation, setPageBgUrl} = useContext(UserPageLayoutContext)
     setBreadcrumbHeading('Manage Addresses')
-    setPageWrapperClasses('gap-[2rem] px-[4rem] mb-[10rem] justify-center xx-md:justify-normal')
+    setPageWrapperClasses(`gap-[2rem] px-[4rem] pb-[10rem] justify-center xx-md:justify-normal`)
     setSidebarTileClasses('hidden xx-md:inline-block')
+    setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.96),rgba(255,255,255,0.96)), url('/patternBg2.png')`)
       
     const location = useLocation()
     setPageLocation(location.pathname)

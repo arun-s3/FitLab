@@ -1529,6 +1529,10 @@ select{
   grid-column: span 2 / span 2;
 }
 
+.m-8{
+  margin: 2rem;
+}
+
 .m-\[5px\]{
   margin: 5px;
 }
@@ -3586,8 +3590,16 @@ select{
   max-width: 31rem;
 }
 
+.max-w-\[35\%\]{
+  max-width: 35%;
+}
+
 .max-w-\[420px\]{
   max-width: 420px;
+}
+
+.max-w-\[45\%\]{
+  max-width: 45%;
 }
 
 .max-w-\[700px\]{
@@ -4648,6 +4660,10 @@ select{
   border-top-left-radius: 10px;
 }
 
+.rounded-tl-\[8px\]{
+  border-top-left-radius: 8px;
+}
+
 .rounded-tl-none{
   border-top-left-radius: 0px;
 }
@@ -5004,6 +5020,11 @@ select{
 .border-indigo-200{
   --tw-border-opacity: 1;
   border-color: rgb(199 210 254 / var(--tw-border-opacity));
+}
+
+.border-inputBgSecondary{
+  --tw-border-opacity: 1;
+  border-color: rgb(244 236 250 / var(--tw-border-opacity));
 }
 
 .border-inputBorderLow{
@@ -6422,6 +6443,14 @@ select{
   fill: #22c55e;
 }
 
+.fill-primaryDark{
+  fill: #f1c40f;
+}
+
+.fill-purple-500{
+  fill: #a855f7;
+}
+
 .fill-yellow-400{
   fill: #facc15;
 }
@@ -7006,6 +7035,10 @@ select{
 
 .pb-\[10px\]{
   padding-bottom: 10px;
+}
+
+.pb-\[10rem\]{
+  padding-bottom: 10rem;
 }
 
 .pb-\[11px\]{
@@ -12663,6 +12696,10 @@ select{
     margin-top: 4rem;
   }
 
+  .md\:mt-4{
+    margin-top: 1rem;
+  }
+
   .md\:mt-\[3\.5rem\]{
     margin-top: 3.5rem;
   }
@@ -12687,6 +12724,14 @@ select{
     display: none;
   }
 
+  .md\:h-10{
+    height: 2.5rem;
+  }
+
+  .md\:h-11{
+    height: 2.75rem;
+  }
+
   .md\:h-12{
     height: 3rem;
   }
@@ -12697,6 +12742,10 @@ select{
 
   .md\:h-16{
     height: 4rem;
+  }
+
+  .md\:h-6{
+    height: 1.5rem;
   }
 
   .md\:h-72{
@@ -12732,6 +12781,14 @@ select{
     height: fit-content;
   }
 
+  .md\:w-10{
+    width: 2.5rem;
+  }
+
+  .md\:w-11{
+    width: 2.75rem;
+  }
+
   .md\:w-14{
     width: 3.5rem;
   }
@@ -12750,6 +12807,10 @@ select{
 
   .md\:w-48{
     width: 12rem;
+  }
+
+  .md\:w-6{
+    width: 1.5rem;
   }
 
   .md\:w-\[101\%\]{
@@ -12866,6 +12927,14 @@ select{
 
   .md\:gap-24{
     gap: 6rem;
+  }
+
+  .md\:gap-3{
+    gap: 0.75rem;
+  }
+
+  .md\:gap-4{
+    gap: 1rem;
   }
 
   .md\:gap-8{
@@ -13017,6 +13086,10 @@ select{
   .md\:text-5xl{
     font-size: 3rem;
     line-height: 1;
+  }
+
+  .md\:text-\[13px\]{
+    font-size: 13px;
   }
 
   .md\:text-\[14px\]{

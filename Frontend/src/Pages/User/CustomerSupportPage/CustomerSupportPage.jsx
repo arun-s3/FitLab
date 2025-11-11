@@ -93,7 +93,10 @@ export default function CustomerSupportPage(){
                     </svg>
                 </div>
                         
-                <main className='-mt-[4rem] bg-gradient-to-b from-gray-50 to-gray-100'>
+                <main 
+                  className='-mt-[4rem] bg-gradient-to-b from-gray-50 to-gray-100'
+                  // style={{backgroundImage: `linear-gradient(to right,rgba(255,255,255,0.95),rgba(255,255,255,0.95)), url('/patternBg5.png')`}}
+                >
 
                     <div className='w-full flex gap-4 pl-[4rem] pr-[2rem]'>
 

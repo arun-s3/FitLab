@@ -202,7 +202,7 @@ export default function ProductDetail({product = null, quantity, setQuantity, on
                 
                 <StarGenerator product={product} />
 
-                <motion.span className="text-[13px] xs-sm:text-[14px] text-gray-500"> (10 Reviews) </motion.span>
+                <motion.span className="text-[13px] xs-sm:text-[14px] text-gray-500"> ({`${product.totalReviews}`} Reviews) </motion.span>
               </motion.div>
               <motion.h1 
                 className="text-[20px] xs-sm:text-[22px] s-sm:text-[24px] max-xxs-sm:break-words font-bold capitalize leading-tight"

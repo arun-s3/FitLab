@@ -93,6 +93,10 @@ const orderSchema = new mongoose.Schema({
                 enum: ['accepted', 'rejected'],
                 default: null
             },
+            isProductReviewed: {
+                type: Boolean,
+                default: false
+            },
             isDeleted: {
                 type: Boolean,
                 default: false

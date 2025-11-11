@@ -18,11 +18,12 @@ import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
 
 export default function CouponPage(){
 
-  const {setBreadcrumbHeading, setPageLocation, setPageWrapperClasses, setSidebarTileClasses, setContentTileClasses} = useContext(UserPageLayoutContext)
+  const {setBreadcrumbHeading, setPageLocation, setPageWrapperClasses, setSidebarTileClasses, setContentTileClasses, setPageBgUrl} = useContext(UserPageLayoutContext)
   setBreadcrumbHeading('Coupons')
-  setPageWrapperClasses('gap-[2rem] px-4 xx-md:px-[4rem] mb-[10rem]')
+  setPageWrapperClasses('gap-[2rem] px-4 xx-md:px-[4rem] pb-[10rem]')
   setContentTileClasses('basis-full x-lg:basis-[75%] mt-[2rem] content-tile')
   setSidebarTileClasses('hidden x-lg:inline-block')
+  setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.96),rgba(255,255,255,0.96)), url('/admin-bg4.png')`)
 
   const {checkAuthOrOpenModal} = useContext(ProtectedUserContext)  
   

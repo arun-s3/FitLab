@@ -10,7 +10,7 @@ export const signup = createAsyncThunk('userSignup', async(formData, thunkAPI)=>
     }
     catch(error){
         console.log("inside catch of signup from Userslice")
-        const errorMessage = error.response?.data?.message
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -24,7 +24,7 @@ export const signin = createAsyncThunk('signin', async(formData, thunkAPI)=>{
     }
     catch(error){
         console.log("inside catch of signup from Userslice")
-        const errorMessage = error.response?.data?.message
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -39,7 +39,7 @@ export const googleSignin = createAsyncThunk('googleSignin', async(userData,thun
     }
     catch(error){
         console.log("inside catch of googleSignin from userSlice")
-        const errorMessage = error.response?.data?.message
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
 } )
@@ -55,7 +55,7 @@ export const signout = createAsyncThunk('signout', async(googleId,thunkAPI)=>{
     }
     catch(error){
         console.log("inside catch of signout from Userslice")
-        const errorMessage = error.response?.data?.message
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -70,7 +70,7 @@ export const updateUserDetails = createAsyncThunk('updateUserDetails', async({us
     }
     catch(error){
         console.log("inside catch of updateUserDetails from userSlice")
-        const errorMessage = error.response?.data?.message
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
 } )
@@ -84,7 +84,7 @@ export const updateUserProfilePic = createAsyncThunk('updateUserProfilePic', asy
     }
     catch(error){
         console.log("inside catch of updateUserProfilePic from userSlice")
-        const errorMessage = error.response?.data?.message
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
 } )
@@ -99,7 +99,7 @@ export const updateUserProfilePic = createAsyncThunk('updateUserProfilePic', asy
 //     }
 //     catch(error){
 //         console.log("inside catch of updateUserDetails from userSlice")
-//         const errorMessage = error.response?.data?.message
+//         const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
 //         return thunkAPI.rejectWithValue(errorMessage)
 //     }
 // } )

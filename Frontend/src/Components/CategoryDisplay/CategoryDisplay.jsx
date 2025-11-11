@@ -244,6 +244,7 @@ const checkNestedSubcategories = async (id, isChecked) => {
   const CategoryListGenerator = (categories, isSubcategory, parentLevelCount) => (
     <>
       {categories && categories.length > 0 && categories.map((category, index) => {
+        if(!category?.isActive && !category.isBlocked) return
         const isSubcategoryOpen = openSubcategories[category._id]?.status;
         const subCategoryPadding = isSubcategory ? { paddingLeft: `${parentLevelCount * 10}px` } : {};
 

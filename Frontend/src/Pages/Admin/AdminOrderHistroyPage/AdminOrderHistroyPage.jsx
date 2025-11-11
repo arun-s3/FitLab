@@ -322,7 +322,7 @@ export default function AdminOrderHistoryPage(){
         productCancelReason = productCancelReason + openSelectReasons.reason.trim()
       }
       setOpenSelectReasons(({status:false, reasonTitle:'', reason:''}))
-      dispatch(cancelOrderProduct({orderId: openCancelForm.options.orderId, productId: openCancelForm.options.productId, productCancelReason}))
+      dispatch(cancelOrderProduct({orderId: openCancelForm.options.orderId, productId: openCancelForm.options.productId._id, productCancelReason}))
       setOpenCancelForm({type:'', status:false, options:{}})
     }
     if(formFor === 'order'){
@@ -688,9 +688,10 @@ export default function AdminOrderHistoryPage(){
                                          </span>
                                          <span className={`capitalize ${ findStyle('product', product.productStatus, 'textColor') } 
                                            text-[11px] font-[500] !whitespace-nowrap`}>
-                                           {product.productStatus === 'returning' ? 'Return request received' : product.productStatus }
                                            {
-                                              product.productStatus !== 'returning' 
+                                              product.productStatus === 'returning' 
+                                                ? 'Return request received'
+                                                : product.productStatus !== 'returning' 
                                                 ? product.productStatus
                                                 : !product?.productReturnStatus
                                                 ? 'Return request'
@@ -728,7 +729,7 @@ export default function AdminOrderHistoryPage(){
                                  </button>
                               }
                               { 
-                                !['cancelled', 'refunded'].includes(product.productStatus) &&
+                                !['delivered', 'cancelled', 'refunded'].includes(product.productStatus) &&
                                 <SiteSecondaryFillImpButton className="!py-[6px] text-[11px] capitalize" 
                                     clickHandler={
                                       (e)=> {
@@ -745,6 +746,7 @@ export default function AdminOrderHistoryPage(){
                                 {
                                   (()=> {
                                     const {status, icon:Icon} = changeStatus(product.productStatus, product.productReturnStatus)
+                                    console.log("status inside ()()------>", status)
                                     return(
                                       <span className='flex items-center gap-[10px]'>
                                           <span className='capitalize whitespace-nowrap'> 

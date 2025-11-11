@@ -1,5 +1,5 @@
 import React from 'react'
-import {BrowserRouter, Route, Routes} from 'react-router-dom'
+import {BrowserRouter, Route, Routes, Navigate} from 'react-router-dom'
 
 import HomePage from './Pages/User/HomePage/HomePage'
 import SignUpAndInPage from './Pages/User/SignUpAndInPage/SignUpAndInPage'
@@ -137,7 +137,8 @@ export default function App(){
                         <Route element={<AdminSocketProvider/>}>
                             <Route element={<PrivateAdminRoutes/>}>
                                 <Route element={<AdminPageLayout/>}>
-                                    <Route path='dashboard' element={<AdminDashboardPage insightType='business'/>} >
+                                    <Route path='dashboard'>
+                                        <Route index element={<Navigate to="business" replace />} />
                                         <Route path="business" element={<AdminDashboardPage insightType='business'/>} />
                                         <Route path="operations" element={<AdminDashboardPage insightType='operations'/>} />
                                         <Route path="heatmap" element={<AdminDashboardHeatmapPage/>} />

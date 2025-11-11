@@ -18,6 +18,8 @@ export default function UserPageLayout(){
     const [sidebarTileClasses, setSidebarTileClasses] = useState('')
     const [pageWrapperClasses, setPageWrapperClasses] = useState('')
 
+    const [pageBgUrl, setPageBgUrl] = useState('')
+
     const {user} = useSelector((state)=> state.user)
 
     const headerBg = {
@@ -28,7 +30,7 @@ export default function UserPageLayout(){
     return(
         <UserPageLayoutContext.Provider 
             value={{breadcrumbHeading, setBreadcrumbHeading, setContentTileClasses, setSidebarTileClasses, 
-                setPageWrapperClasses, setPageLocation}} >
+                setPageWrapperClasses, setPageLocation, setPageBgUrl}} >
 
             <section id='UserPageLayout'>
                 <header style={headerBg} className='h-[5rem]'>
@@ -40,7 +42,9 @@ export default function UserPageLayout(){
                 <BreadcrumbBar heading={ breadcrumbHeading && breadcrumbHeading } />
 
                 <main 
-                    className={`${user ? 'flex gap-[2rem]' : ''} ${pageWrapperClasses ? pageWrapperClasses : 'gap-[2rem] px-[4rem] mb-[10rem]'} `}>
+                    className={`${user ? 'flex gap-[2rem]' : ''} ${pageWrapperClasses ? pageWrapperClasses : 'gap-[2rem] px-[4rem] mb-[10rem]'} `}
+                    style={{backgroundImage: pageBgUrl } }
+                >
                 
                     {
                         user &&

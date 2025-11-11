@@ -10,7 +10,7 @@ export const getOrCreateWallet = createAsyncThunk('wallet/getOrCreateWallet', as
     return response.data
   }catch(error){
     console.log('Inside catch of getOrCreateWallet')
-    const errorMessage = error.response?.data?.message
+    const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -24,7 +24,7 @@ export const addFundsToWallet = createAsyncThunk('wallet/addFundsToWallet', asyn
     return response.data
   }catch(error){
     console.log('Inside catch of addFundsToWallet')
-    const errorMessage = error.response?.data?.message
+    const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -38,7 +38,7 @@ export const addPeerAccount = createAsyncThunk('wallet/peer-account', async ({ac
     return response.data
   }catch(error){
     console.log('Inside catch of addPeerAccount')
-    const errorMessage = error.response?.data?.message
+    const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -52,7 +52,7 @@ export const sendMoneyToUser = createAsyncThunk('wallet/sendMoneyToUser', async 
     return response.data
   }catch(error){
     console.log('Inside catch of sendMoneyToUser')
-    const errorMessage = error.response?.data?.message
+    const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -66,7 +66,7 @@ export const requestMoneyFromUser = createAsyncThunk('wallet/requestMoneyFromUse
     return response.data
   }catch(error){
     console.log('Inside catch of requestMoneyFromUser')
-    const errorMessage = error.response?.data?.message
+    const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -80,7 +80,7 @@ export const confirmMoneyRequest = createAsyncThunk('wallet/confirmMoneyRequest'
     return response.data
   }catch(error){
     console.log('Inside catch of confirmMoneyRequest')
-    const errorMessage = error.response?.data?.message
+    const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -94,7 +94,7 @@ export const declineMoneyRequest = createAsyncThunk('wallet/declineMoneyRequest'
     return response.data
   }catch(error){
     console.log('Inside catch of declineMoneyRequest')
-    const errorMessage = error.response?.data?.message
+    const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -108,7 +108,7 @@ export const updateAutoRechargeSettings = createAsyncThunk('wallet/updateAutoRec
     return response.data
   }catch(error){
     console.log('Inside catch of updateAutoRechargeSettings')
-    const errorMessage = error.response?.data?.message
+    const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })

@@ -1,6 +1,7 @@
 import {createSlice, createAsyncThunk} from '@reduxjs/toolkit'
 import axios from '../Utils/axiosConfig'
 
+
 export const createOrder = createAsyncThunk('order/createOrder', async ({orderDetails}, thunkAPI)=> {
   try {
     console.log('Inside createOrder createAsyncThunk');
@@ -10,7 +11,7 @@ export const createOrder = createAsyncThunk('order/createOrder', async ({orderDe
     return response.data
   }catch(error){
     console.log('Inside catch of createOrder')
-    const errorMessage = error.response?.data?.message
+    const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -24,7 +25,7 @@ export const getOrders = createAsyncThunk('order/getOrders', async ({queryDetail
     return response.data
   }catch(error){
     console.log('Inside catch of getOrders')
-    const errorMessage = error.response?.data?.message
+    const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -38,7 +39,7 @@ export const getAllUsersOrders = createAsyncThunk('order/getAllUsersOrders', asy
     return response.data
   }catch(error){
     console.log('Inside catch of getOrders')
-    const errorMessage = error.response?.data?.message
+    const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -52,7 +53,7 @@ export const cancelOrder = createAsyncThunk('order/cancelOrder', async ({orderId
     return {orderId, cart: response.data.order}
   }catch(error){
     console.log('Inside catch of cancelOrder')
-    const errorMessage = error.response?.data?.message
+    const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -66,7 +67,7 @@ export const cancelOrderProduct = createAsyncThunk('order/cancelOrderProduct', a
       return {orderId, productId, updatedOrder: response.data.order, message: response.data.message}
     }catch(error) {
       console.log('Inside catch of cancelOrder')
-      const errorMessage = error.response?.data?.message
+      const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
       return thunkAPI.rejectWithValue(errorMessage)
     }
   }
@@ -81,7 +82,7 @@ export const deleteProductFromOrderHistory = createAsyncThunk('order/deleteProdu
     return {orderId, productId, updatedOrder: response.data.order, message: response.data.message}
   }catch(error) {
     console.log('Inside catch of deleteProductFromOrderHistory')
-    const errorMessage = error.response?.data?.message
+    const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
 }
@@ -96,7 +97,7 @@ export const changeOrderStatus = createAsyncThunk('order/changeOrderStatus', asy
     return {orderId, updatedOrder: response.data.updatedOrder}
   }catch(error){
     console.log('Inside catch of cancelOrder')
-    const errorMessage = error.response?.data?.message
+    const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -110,7 +111,7 @@ export const changeProductStatus = createAsyncThunk('order/changeProductStatus',
     return {orderId, productId, updatedProduct: response.data.updatedProduct, order: response.data.order}
   }catch(error){
     console.log('Inside catch of changeProductStatus')
-    const errorMessage = error.response?.data?.message
+    const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -127,7 +128,7 @@ export const initiateReturn = createAsyncThunk(
       return { orderId, productId, returnType, returnReason }
     }catch (error) {
       console.log('Inside catch of initiateReturn:', error)
-      const errorMessage = error.response?.data?.message || error.message || 'Something went wrong while initiating the return.'
+      const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
       return thunkAPI.rejectWithValue(errorMessage)
     }
   }
@@ -142,7 +143,7 @@ export const handleReturnDecision = createAsyncThunk('order/handleReturnDecision
     return {...returnDetails}
   }catch(error){
     console.log('Inside catch of handleReturnDecision')
-    const errorMessage = error.response?.data?.message
+    const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -156,7 +157,7 @@ export const cancelReturnRequest = createAsyncThunk('order/cancelReturnRequest',
     return {...returnDetails}
   }catch(error){
     console.log('Inside catch of cancelReturnRequest')
-    const errorMessage = error.response?.data?.message
+    const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -170,7 +171,7 @@ export const processRefund = createAsyncThunk('order/processRefund', async ({ref
     return {...refundInfos}
   }catch(error){
     console.log('Inside catch of processRefund')
-    const errorMessage = error.response?.data?.message
+    const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
@@ -313,7 +314,7 @@ const orderSlice = createSlice({
         state.orders = state.orders.map((order)=> {
           if (order._id === action.payload.orderId){
             order.products = order.products.map(product=> {
-              if(product.productId === action.payload.productId){
+              if(product.productId._id === action.payload.productId){
                 product.productStatus = 'cancelled'
               }
               return product
@@ -345,17 +346,21 @@ const orderSlice = createSlice({
         state.productDeleted = true
         state.orderMessage = action.payload.message
 
-        state.orders = state.orders.map(order=> {
-          if(order._id === action.payload.orderId){
-            order.products = order.products.map(product=> {
-              if(product.productId === action.payload.productId){
-                product.isDeleted = true
-              }
-              return product
-            })
+        state.orders = state.orders.map((order) => {
+    if (order._id === action.payload.orderId) {
+      return {
+        ...order,
+        products: order.products.map((product) => {
+          if (product.productId._id.toString() === action.payload.productId.toString()) {
+            console.log("if (product.productId._id.toString() === action.payload.productId.toString())...product.productId._id--->", product.productId._id)
+            return { ...product, isDeleted: true };
           }
-          return order
-        })
+          return product;
+        }),
+      };
+    }
+    return order;
+  });
       })
       .addCase(deleteProductFromOrderHistory.pending, (state) => {
         state.loading = true
@@ -419,7 +424,8 @@ const orderSlice = createSlice({
             const requiredStatus = action.payload.updatedProduct.productStatus
             order.products = order.products.map(product=> {
 
-              if(product.productId === action.payload.productId){
+              if(product.productId._id === action.payload.productId){
+                console.log(`product.productStatus-------> ${product.productStatus} and requiredStatus-------> ${requiredStatus} `)
                 product.productStatus = requiredStatus
 
                 if(requiredStatus === 'delivered'){

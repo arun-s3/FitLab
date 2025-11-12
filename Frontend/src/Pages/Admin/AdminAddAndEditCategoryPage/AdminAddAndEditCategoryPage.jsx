@@ -3,25 +3,27 @@ import './AdminAddAndEditCategoryPage.css'
 import {useDispatch, useSelector} from 'react-redux'
 import {useNavigate, useLocation, useOutletContext} from 'react-router-dom'
 
-import {IoArrowBackSharp} from "react-icons/io5";
-import {BiCategory} from "react-icons/bi";
-import {MdOutlineCategory, MdArrowDropDown} from "react-icons/md";
-import {CgDetailsMore} from "react-icons/cg";
-import {CiCalendarDate} from "react-icons/ci";
-import {TbCirclesRelation} from "react-icons/tb";
-import {RiDiscountPercentLine} from "react-icons/ri";
-import {SlBadge} from "react-icons/sl";
-import {IoIosClose} from "react-icons/io";
+import {IoArrowBackSharp} from "react-icons/io5"
+import {BiCategory} from "react-icons/bi"
+import {MdOutlineCategory, MdArrowDropDown} from "react-icons/md"
+import {CgDetailsMore} from "react-icons/cg"
+import {CiCalendarDate} from "react-icons/ci"
+import {TbCirclesRelation} from "react-icons/tb"
+import {RiDiscountPercentLine} from "react-icons/ri"
+import {SlBadge} from "react-icons/sl"
+import {IoIosClose} from "react-icons/io"
 import {toast as sonnerToast} from 'sonner'
+import axios from 'axios'
 
-import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection';
-import FileUpload from '../../../Components/FileUpload/FileUpload';
-import CategoryDisplay from '../../../Components/CategoryDisplay/CategoryDisplay';
-import { SiteButtonSquare } from '../../../Components/SiteButtons/SiteButtons';
+import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
+import FileUpload from '../../../Components/FileUpload/FileUpload'
+import CategoryDisplay from '../../../Components/CategoryDisplay/CategoryDisplay'
+import useFlexiDropdown from '../../../Hooks/FlexiDropdown'
+import { SiteButtonSquare } from '../../../Components/SiteButtons/SiteButtons'
 import {createCategory, getAllCategories, getCategoryNames, updateCategory, resetStates} from '../../../Slices/categorySlice'
 import {SearchInput} from '../../../Components/FromComponents/FormComponents'
 import {CustomHashLoader} from '../../../Components/Loader/Loader'
-import PlaceholderIcon from '../../../Components/PlaceholderIcon/PlaceholderIcon';
+import PlaceholderIcon from '../../../Components/PlaceholderIcon/PlaceholderIcon'
 import {DateSelector} from '../../../Components/Calender/Calender'
 import {handleImageCompression} from '../../../Utils/compressImages'
 import {handleInputValidation, displaySuccess, displayErrorAndReturnNewFormData, cancelErrorState} from '../../../Utils/fieldValidator'
@@ -46,6 +48,8 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
     const [radioCheckedCategory, setRadioCheckedCategory] = useState('')
     const [manualCheckCategory, setManualCheckCategory] = useState({})
 
+    const {openDropdowns, dropdownRefs, toggleDropdown} = useFlexiDropdown(['parentCatDropdown', 'relatedCatDropdown', 'badgeDropdown'])
+    
     const dispatch = useDispatch()
     const {success, loading, error, tempDatas, categories, categoryCreated, categoryUpdated} = useSelector((state)=> state.categoryStore)
 
@@ -57,6 +61,8 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
 
     const hiddenInputRef = useRef(null)
 
+    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+
     const {setPageBgUrl} = useOutletContext() 
     setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.95),rgba(255,255,255,0.95)), url('/admin-bg1.png')`)
 
@@ -67,8 +73,7 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
     useEffect(()=>{
         console.log("Images-->", JSON.stringify(images))
         console.log("Related category--->", JSON.stringify(relatedCategory))
-        const seasonalActivation = (startDate || endDate) ? { startDate: startDate || null, endDate: endDate || null } : undefined
-        setCategoryData({...categoryData, images, parentCategory, relatedCategory, ...(seasonalActivation && {seasonalActivation})})
+        setCategoryData({...categoryData, images, parentCategory, relatedCategory, startDate, endDate})
     },[images, parentCategory, relatedCategory, startDate, endDate])
 
     // useEffect(()=>{
@@ -107,6 +112,23 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
         }
    },[location])
 
+   const loadCategoryInfo = async(id)=> {
+        try{
+            console.log("Inside loadCategoryInfo...")
+            const response = await axios.get(`${baseApiUrl}/admin/products/category/${id}`, { withCredentials: true })
+            if(response && response.status === 200){
+                console.log('response.data.category----->', response.data.category)
+                return {
+                    parentCategory: response.data.category.parentCategory.name,
+                    relatedCategory: response.data.category.relatedCategory.map(cat=> cat.name)
+                }
+            }
+        }
+        catch(error){
+            console.log("Error inside loadCategoryInfo--->", error.message)
+        }
+   }
+
     useEffect(()=>{
         if(editCategoryItem.current){
             console.log("Inside useEffect() for tempDatas----")
@@ -121,6 +143,8 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
         const loadCategoryData = async () => {   
                 console.log("tempDatas.relatedCategoryNames-->",tempDatas.relatedCategoryNames) 
                 console.log("tempDatas.parentCategoryName-->",tempDatas.parentCategoryName) 
+                console.log("editCategoryItem.current-->",editCategoryItem.current) 
+                console.log("editCategoryItem.current?.seasonalActivation?-->",editCategoryItem.current?.seasonalActivation) 
                 setCategoryData({
                     "categoryName": editCategoryItem.current.name,
                     "categoryDescription": editCategoryItem.current.description,
@@ -129,8 +153,13 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
                     "startDate": editCategoryItem.current?.seasonalActivation?.startDate || null,
                     "endDate": editCategoryItem.current?.seasonalActivation?.endDate || null,
                 })
-                setRelatedCategory(tempDatas?.relatedCategoryNames || [])
-                setParentCategory(tempDatas?.parentCategoryName || null)
+
+                setStartDate(new Date(editCategoryItem.current?.seasonalActivation?.startDate) || null)
+                setEndDate(new Date(editCategoryItem.current?.seasonalActivation?.endDate) || null)
+
+                const categoryParentAndRelated = await loadCategoryInfo(editCategoryItem.current._id)
+                setParentCategory(categoryParentAndRelated.parentCategory || null)
+                setRelatedCategory(categoryParentAndRelated.relatedCategory || [])
 
                 console.log('image from state of location on Edit-->', JSON.stringify(editCategoryItem.current.image))
                 const blob = await convertToBlob(editCategoryItem.current.image.url);
@@ -143,11 +172,15 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
 
     useEffect(()=>{
         console.log(`Inside useEffect for productCreated, productUpdated success, productUpdated-${categoryUpdated} productCreated-${categoryCreated}`)
-        if(editCategory && (categoryCreated || categoryUpdated)){
+        if(categoryCreated){
             categoryCreated && sonnerToast.success('Created category succesfully!')
+            dispatch(resetStates())
+            setTimeout(()=> {navigate('/admin/category', {replace: true})}, 1000)
+        }
+        if(editCategory && categoryUpdated){
             categoryUpdated && sonnerToast.success('Updated category succesfully!')
             dispatch(resetStates())
-            setTimeout(()=> {navigate('/admin/products/category', {replace: true})}, 1000)
+            setTimeout(()=> {navigate('/admin/category', {replace: true})}, 1000)
         }
     },[categoryCreated, categoryUpdated])
 
@@ -283,8 +316,8 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
                 !categoryData[field] && delete categoryData[field]
             }
             console.log("CATEGORYDATA BEFORE DISPATCHING-->", JSON.stringify(categoryData))
+            console.log("FORMDATA BEFORE DISPATCHING-->", formData)
             editCategory? dispatch( updateCategory( {formData, id: editCategoryItem.current._id}) ) : dispatch( createCategory( {formData}) )
-            // editProduct?  dispatch( updateProduct({formData, id: editProductItem.current._id}) ) : dispatch( createProduct({formData}) )
             console.log("DISPATCHED SUCCESSFULLY--")
             sonnerToast.info("Uploading the informations...")
         } 
@@ -336,24 +369,33 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
                                 products, improving navigation and customer experience. If this is a standalone category, select 'None'.
                             </p>
                         </div>
-                        <div className='relative'>
+                        <div className='relative' ref={dropdownRefs.parentCatDropdown}>
+                            <span className='absolute -top-[1.3rem] left-0 text-[10px] text-muted whitespace-nowrap'>
+                                 {`You can replace the parent category using the dropdown below.`} 
+                            </span>
                             <PlaceholderIcon icon={<MdOutlineCategory/>} fromTop={35}/>
-                            <div className='w-[20rem] h-[2.4rem] border border-primary rounded-[5px] pr-0 text-[12px] bg-white relativecursor-pointer' 
-                                     onClick={(e)=> showList(e)} >
+                            <div className={`w-[20rem] h-[2.4rem] border border-primary rounded-[5px] pr-0 text-[12px]
+                                 bg-white relativecursor-pointer 
+                                 ${openDropdowns.parentCatDropdown ? '!rounded-bl-none !rounded-br-none' : '!rounded-bl-[5px] !rounded-br-[5px]'}`} 
+                                     onClick={(e)=> toggleDropdown('parentCatDropdown')} >
                                 <span className='absolute top-[10px] left-[25px]'> {categoryData.parentCategory && categoryData.parentCategory} </span>
                                 <i className='w-full h-full flex items-center justify-end pr-[5px] cursor-pointer'> <MdArrowDropDown/> </i>
                             </div>
-                            <div className='absolute top-[38px] flex flex-col justify-center items-center gap-[3px] w-full h-fit py-[10px]
-                                    px-[10%] rounded-[5px] bg-white border border-primary rounded-tl-none rounded-tr-none z-[5] invisible'>
-                                {/* {allCategoryNames.map(name=>
-                                     <span className='text-[11px] text-secondary capitalize w-full text-left pl-[20px] hover:bg-primary cursor-pointer' 
-                                                onClick={(e)=> selectListHandler(name,'parentCategory',e)} > 
-                                            {name}
-                                     </span>
-                                )} */}
-                                <CategoryDisplay type='radioType' radioCheckedCategory={radioCheckedCategory} 
-                                        setRadioCheckedCategory={setRadioCheckedCategory} styler={{borderBottomNone:true}}/>
-                            </div>      
+                            {
+                                openDropdowns.parentCatDropdown && 
+                                    <div className='absolute top-[38px] flex flex-col justify-center items-center gap-[3px] w-full h-fit 
+                                        py-[10px] px-[10%] rounded-[5px] bg-white border border-primary rounded-tl-none 
+                                        rounded-tr-none z-[5]'>
+                                        {/* {allCategoryNames.map(name=>
+                                             <span className='text-[11px] text-secondary capitalize w-full text-left pl-[20px] hover:bg-primary cursor-pointer' 
+                                                        onClick={(e)=> selectListHandler(name,'parentCategory',e)} > 
+                                                    {name}
+                                             </span>
+                                        )} */}
+                                        <CategoryDisplay type='radioType' radioCheckedCategory={radioCheckedCategory} 
+                                                setRadioCheckedCategory={setRadioCheckedCategory} styler={{borderBottomNone:true}}/>
+                                    </div>
+                            }
                         </div>
                     </div>
                     <div className='category-content-wrapper'>
@@ -394,11 +436,19 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
                                 by showing customers similar categories.
                             </p>
                         </div>
-                        <div className='relative'>
+                        <div className='relative' ref={dropdownRefs.relatedCatDropdown}>
+                            <span className='absolute -top-[1.3rem] left-0 text-[10px] text-muted whitespace-nowrap'>
+                                 {`You can replace the related category using the dropdown below.`} 
+                            </span>
                             <PlaceholderIcon icon={<TbCirclesRelation/>} fromTop={35}/>
-                            <div className='w-[20rem] h-[3rem] border border-primary rounded-[5px] flex justify-center items-center pr-0 text-[12px] bg-white cursor-pointer'
-                                        onClick={(e)=> showList(e)} >
-                                {relatedCategory &&
+                            <div className={`w-[20rem] h-[3rem] border border-primary rounded-[5px] flex justify-center items-center pr-0 
+                                text-[12px] bg-white cursor-pointer 
+                                ${openDropdowns.relatedCatDropdown ? '!rounded-bl-none !rounded-br-none' : '!rounded-bl-[5px] !rounded-br-[5px]'}`}
+                                        onClick={(e)=> {
+                                            toggleDropdown('relatedCatDropdown') 
+                                            if(relatedCategoryError) setRelatedCategoryError('')
+                                        }}>
+                                {relatedCategory && 
                                  <div className='flex items-center gap-[5px] ml-[10%]'>
                                  { relatedCategory.map(cat=> (
                                      <span className=' flex items-center gap-[2px] border border-secondary rounded-[10px] px-[9px] py-[1px] text-[10px] text-secondary'> 
@@ -415,20 +465,19 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
                                 }
                                 <i className='w-full h-full flex items-center justify-end pr-[5px] cursor-pointer'> <MdArrowDropDown/> </i>
                             </div>
-                            <div className='absolute top-[47px] flex flex-col justify-center items-center gap-[3px] w-full h-fit py-[10px]
-                                    px-[10%] rounded-[5px] bg-white border border-primary rounded-tl-none rounded-tr-none z-[5] invisible'>
-                                {/* {allCategoryNames.map(name=>(
-                                    <div key={name} className='flex items-center justify-start gap-[5px] w-full pl-[20px]'>
-                                        <input type='checkbox' className='text-[11px] border border-primary w-[15px] h-[15px] rounded-[2px] hover:bg-primary cursor-pointer' 
-                                                onChange={(e)=> selectListHandler(name,'relatedCategory',e)} value={name} checked={relatedCategory.some(cat=> cat==name) || false} />
-                                        <span className='text-[11px] text-secondary capitalize'> {name} </span>
-                                    </div>
-                                    )
-                                )} */}
-                                <CategoryDisplay type='manualCheckboxType' manualCheckCategory={manualCheckCategory} 
-                                        setManualCheckCategory={setManualCheckCategory} setRelatedCategoryError={setRelatedCategoryError} styler={{borderBottomNone:true}}/>
-                                {relatedCategoryError && <p className='error mb-[1rem]'> {relatedCategoryError} </p>}
-                            </div>  
+                            {
+                                openDropdowns.relatedCatDropdown &&
+                                    <div className='absolute top-[47px] flex flex-col justify-center items-center gap-[3px] w-full h-fit py-[10px]
+                                            px-[10%] rounded-[5px] bg-white border border-primary rounded-tl-none rounded-tr-none z-[5]'>
+
+                                        <CategoryDisplay type='manualCheckboxType' manualCheckCategory={manualCheckCategory} 
+                                                setManualCheckCategory={setManualCheckCategory} setRelatedCategoryError={setRelatedCategoryError} 
+                                                styler={{borderBottomNone:true}}/>
+                                        {relatedCategoryError && <p className='error mb-[1rem]'> {relatedCategoryError} </p>}
+
+                                    </div>  
+                            }
+                             
                         </div>
                     </div>
                     <div className='category-content-wrapper'>
@@ -454,26 +503,34 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
                                 website. Keep it concise and under 15 characters.
                             </p>
                         </div>
-                        <div className='relative'>
+                        <div className='relative' ref={dropdownRefs.badgeDropdown}>
                             <PlaceholderIcon icon={<SlBadge/>} />
-                            <div className='w-[20rem] h-[2.4rem] border border-primary rounded-[5px] pr-0 flex items-center justify-between'>
+                            <div className={`w-[20rem] h-[2.4rem] border border-primary rounded-[5px] pr-0 flex items-center justify-between
+                                ${openDropdowns.badgeDropdown ? '!rounded-bl-none !rounded-br-none' : '!rounded-bl-[5px] !rounded-br-[5px]'}`}>
                                 <input type='text' id='category-badge' required className='pl-[23px]' style={{width:'17rem', height:'100%', border:'none', borderRadius:'none'}}
-                                    onFocus={(e)=> badgeFocusHandler(e)} onBlur={()=> hiddenInputRef.current.click()} onClick={(e)=> showList(e)}
-                                         onChange={(e)=> changeHandler(e, "categoryBadge")} value={categoryData.categoryBadge}/>
+                                    onFocus={(e)=> badgeFocusHandler(e)} onBlur={()=> hiddenInputRef.current.click()} 
+                                        onClick={(e)=> toggleDropdown('badgeDropdown')} 
+                                         onChange={(e)=> changeHandler(e, "categoryBadge")} value={categoryData.categoryBadge}
+                                    placeholder='You can enter a badge or choose one from the dropdown'
+                                />
                                 <i className='pr-[5px] cursor-pointer'> <MdArrowDropDown/> </i>
                             </div>
                             <input type='hidden' ref={hiddenInputRef} onClick={(e)=> inputBlurHandler(e, "categoryBadge", {optionalField: true})} value={categoryData.categoryBadge}/>
                             <p className='error' onClick={(e)=> cancelErrorState(e, primaryColor.current, {optionalField: true})}></p> {/* Should come this in the place of <i>*/}
-                            <div className='absolute top-[34px] flex flex-col justify-center items-center gap-[3px] w-full h-full
-                                        rounded-[5px] bg-white border border-primary rounded-tl-none rounded-tr-none 
-                                            invisible' ref={badgeListRef}>
-                                {commonBadges.current.map(name=>
-                                     <span className='text-[11px] text-secondary capitalize w-full text-center hover:bg-primary cursor-pointer' 
-                                                onClick={(e)=> selectListHandler(name,'categoryBadge',e)} > 
-                                            {name}
-                                     </span>
-                                )}
-                            </div>
+                            {
+                                openDropdowns.badgeDropdown &&
+                                    <div className='absolute top-[34px] flex flex-col justify-center items-center gap-[3px] w-full h-full
+                                                rounded-[5px] bg-white border border-primary rounded-tl-none rounded-tr-none '
+                                                 ref={badgeListRef}>
+                                        {commonBadges.current.map(name=>
+                                             <span className='text-[11px] text-secondary capitalize w-full text-center hover:bg-primary cursor-pointer' 
+                                                        onClick={(e)=> selectListHandler(name,'categoryBadge',e)} > 
+                                                    {name}
+                                             </span>
+                                        )}
+                                    </div>
+                            }
+                            
                         </div> 
                     </div>
 

@@ -913,6 +913,10 @@ select{
   top: -1.25rem;
 }
 
+.-top-\[1\.3rem\]{
+  top: -1.3rem;
+}
+
 .-top-\[1\.7rem\]{
   top: -1.7rem;
 }
@@ -1107,6 +1111,10 @@ select{
 
 .left-\[45\%\]{
   left: 45%;
+}
+
+.left-\[450px\]{
+  left: 450px;
 }
 
 .left-\[4rem\]{
@@ -4634,6 +4642,22 @@ select{
 .rounded-t-\[8px\]{
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
+}
+
+.\!rounded-bl-\[5px\]{
+  border-bottom-left-radius: 5px !important;
+}
+
+.\!rounded-bl-none{
+  border-bottom-left-radius: 0px !important;
+}
+
+.\!rounded-br-\[5px\]{
+  border-bottom-right-radius: 5px !important;
+}
+
+.\!rounded-br-none{
+  border-bottom-right-radius: 0px !important;
 }
 
 .rounded-bl-\[60px\]{

@@ -44,25 +44,19 @@ const packCategoryData = async (req)=>{
             console.log("categoryDatas.relatedCategory-->", JSON.stringify(categoryDatas.relatedCategory))
         }
 
-        if (req.body?.seasonalActivation) {
-          const { startDate, endDate } = req.body.seasonalActivation
-            
-          if (startDate && endDate) {
+        if (req.body?.startDate || req.body?.endDate) {             
             const now = new Date()
-            const start = new Date(startDate)
-            const end = new Date(endDate)
+            const start = new Date(req.body.startDate)
+            const end = new Date(req.body.endDate)
         
             categoryDatas.seasonalActivation = { startDate: start, endDate: end }
             categoryDatas.isActive = start <= now && end >= now
-          }
         }
 
         for(field in categoryDatas){
             !categoryDatas[field] && delete categoryDatas[field]
         }
         console.log("Category Name-->" ,categoryDatas.name)
-        // console.log("Weights Array?-->" ,Array.isArray(categoryDatas.weights))
-        // console.log("Tags Array?-->" ,Array.isArray(categoryDatas.tags))
         console.log("categoryDatas--->", JSON.stringify(categoryDatas))
 
         return categoryDatas
@@ -110,7 +104,11 @@ const findCategoryById = async (req, res, next) => {
         const { id } = req.params;
         console.log("id-->", id);
 
-        const category = await Category.findOne({ _id: id }).populate('subCategory').exec();
+        console.log("Inside findCategoryById controller...")
+
+        const category = await Category.findOne({ _id: id })
+            .populate('subCategory').populate('parentCategory').populate('relatedCategory').exec();
+
         console.log("\n\n" + "CATEGORY NAME FROM BACKEND---->", category.name)
         if (!category) {
             return res.status(404).json({ success: false, message: 'Category not found' });
@@ -125,7 +123,7 @@ const findCategoryById = async (req, res, next) => {
             return subCategory.parentCategory ? findParentLevelCount(subCategory.parentCategory._id, level + 1) : level;
         }
         console.log("Sending populatedSubcategories-->", JSON.stringify({ success: true, populatedSubCategories: subCategories, parentName: category.name, parentLevelCount }));
-        res.status(200).json({ success: true, parentName: category.name, populatedSubCategories: subCategories, parentLevelCount });
+        res.status(200).json({ success: true, category, parentName: category.name, populatedSubCategories: subCategories, parentLevelCount });
     } catch (error) {
         console.error('Error in categoryController findCategoryById--->', error.message);
         res.status(500).json({ success: false, message: 'An error occurred' });
@@ -159,116 +157,47 @@ const getCategoryIdByName = async (req, res, next)=> {
 }
 
 
+const getAllCategories = async (req, res, next) => {
+  try {
+    console.log("Inside getAllCategories")
+    console.log("req.query -->", JSON.stringify(req.query))
 
-const getAllCategories = async(req,res,next)=>{
-    try{
-        if(Object.keys(req.query).length > 0){
-            console.log("Inside if of getAllCategories")
-            console.log("req.query-->", JSON.stringify(req.query))
-            // const isAdmin = req.body?.isAdmin === true
-            // console.log("isAdmin-->", isAdmin)
-            let {status} = req.query
-            let categoriesData, categoriesCount
-            console.log("Status found-->", status)
+    let { status, isActive } = req.query
+    let filter = {}
+    let categoriesData, categoriesCount
 
-            if (status === 'blocked' || status === 'active') {
-                status = status === 'active' ? false : true
-                console.log("Status later-->", status)
-                categoriesData = await Category.find({isBlocked: status})
-                categoriesCount = categoriesData.length
-                console.log("categoriesCount-->", categoriesCount)
-            }
-            if (categoriesData.length > 0) {
-                // const now = new Date()
-                // for (const category of categoriesData) {
-                //   if (category.seasonalActivation && category.seasonalActivation.startDate && category.seasonalActivation.endDate){
-                //     const start = new Date(category.seasonalActivation.startDate)
-                //     const end = new Date(category.seasonalActivation.endDate)
-                //     const currentlyActive = start <= now && end >= now
+    if (Object.keys(req.query).length > 0) {
+      console.log("Inside if of getAllCategories")
 
-                //     if (category.isActive !== currentlyActive) {
-                //       category.isActive = currentlyActive
-                //       await category.save()
-                //     }
-                //   }
-                // }
-                console.log("categoriesData to frontend-->", JSON.stringify(categoriesData))
-                res.status(200).json({ success: true, categoriesData, categoriesCount })
-            } else {
-                res.status(404).json({ success: false, categoriesData, categoriesCount, message: "No categories found" })
-            }
-        }else{
-            console.log("Inside else of getAllCategories")
-            // const filter = isAdmin ? {} : { isBlocked: false, isActive: true };
-            const categoriesData = await Category.find({parentCategory: null})
-            const categoriesCount = await Category.countDocuments()
-            if(categoriesData){
-                console.log("categoriesData to frontend-->", JSON.stringify(categoriesData))
-                res.status(200).json({success: true, categoriesData, categoriesCount})
-            }
-        }
+      if (status === "active") filter.isBlocked = false
+      else if (status === "blocked") filter.isBlocked = true
+
+      if (isActive === "true") filter.isActive = true
+      else if (isActive === "false") filter.isActive = false
+
+      console.log("Final filter -->", JSON.stringify(filter))
+
+      categoriesData = await Category.find(filter)
+      categoriesCount = categoriesData.length
+    } 
+    else {
+      console.log("Inside else of getAllCategories")
+      categoriesData = await Category.find({ parentCategory: null })
+      categoriesCount = await Category.countDocuments({ parentCategory: null })
     }
-    catch(error){
-        console.log("Error in categoryController getAllCategories-->"+ error.message)
-        next(error)
+
+    if (categoriesData.length > 0) {
+      console.log("categoriesData to frontend -->", JSON.stringify(categoriesData.map(cat=> cat.name)))
+      res.status(200).json({ success: true, categoriesData, categoriesCount })
+    } else {
+      res.status(404).json({success: false, categoriesData: [], categoriesCount: 0, message: "No categories found"})
     }
+  }
+  catch (error) {
+    console.log("Error in categoryController getAllCategories --> " + error.message)
+    next(error)
+  }
 }
-
-// const getAllCategories = async (req, res, next)=> {
-//   try {
-//     console.log("Inside getAllCategories controller")
-
-//     let categoriesData, categoriesCount
-
-//     if (Object.keys(req.query).length > 0) {
-//       console.log("Inside if of getAllCategories")
-//       console.log("req.query-->", JSON.stringify(req.query))
-
-//       let {status, isAdmin} = req.query
-//       console.log("Status found-->", status)
-
-//       if (status === "blocked" || status === "active") {
-//         status = status === "active" ? false : true
-//         console.log("Status later-->", status)
-
-//         categoriesData = await Category.find({ isBlocked: status })
-//         categoriesCount = categoriesData.length
-//       }
-//     }else{
-//       console.log("Inside else of getAllCategories")
-
-//       const filter = isAdmin ? {} : { isBlocked: false, isActive: true }
-//       categoriesData = await Category.find(filter);
-//       categoriesCount = categoriesData.length;
-//     }
-
-//     if (categoriesData && categoriesData.length > 0) {
-//       const now = new Date()
-
-//       for (const category of categoriesData) {
-//         if (category.seasonalActivation && category.seasonalActivation.startDate && category.seasonalActivation.endDate){
-//           const start = new Date(category.seasonalActivation.startDate);
-//           const end = new Date(category.seasonalActivation.endDate);
-//           const currentlyActive = start <= now && end >= now;
-
-//           if (category.isActive !== currentlyActive) {
-//             category.isActive = currentlyActive
-//             await category.save()
-//           }
-//         }
-//       }
-
-//       console.log("categoriesData to frontend-->", JSON.stringify(categoriesData))
-//       return res.status(200).json({ success: true, categoriesData, categoriesCount })
-//     }else {
-//       return res.status(404).json({success: false, categoriesData: [], categoriesCount: 0, message: "No categories found"});
-//     }
-//   }
-//   catch (error) {
-//     console.log("Error in categoryController getAllCategories --> " + error.message)
-//     next(error)
-//   }
-// }
 
 
 // const getEveryCategoryNames = async(req,res,next)=> {

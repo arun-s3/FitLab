@@ -3,20 +3,21 @@ import './AdminCategoryListPage.css'
 import {useNavigate, useOutletContext} from 'react-router-dom'
 import {useDispatch, useSelector} from 'react-redux'
 
+import {toast as sonnerToast} from 'sonner'
+import {format} from "date-fns"
+import {IoArrowBackSharp} from "react-icons/io5"
+import {FaSortUp,FaSortDown} from "react-icons/fa6"
+import {MdBlock, MdDeleteOutline} from 'react-icons/md'
+import {CgUnblock} from "react-icons/cg"
+import {RiFileEditLine} from "react-icons/ri"
+import {MdOutlineEdit} from "react-icons/md"
+import {MdOutlineArrowDropDownCircle, MdArrowDropDownCircle} from "react-icons/md"
+import {RiDropdownList} from "react-icons/ri"
+
 import {getAllCategories, getCategoriesOfType, getSingleCategory, toggleCategoryStatus, resetSubcategories, resetStates} 
                 from '../../../Slices/categorySlice'
 import {SearchInput} from '../../../Components/FromComponents/FormComponents'
 import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
-
-import {toast as sonnerToast} from 'sonner'
-import {IoArrowBackSharp} from "react-icons/io5";
-import {FaSortUp,FaSortDown} from "react-icons/fa6";
-import {MdBlock, MdDeleteOutline} from 'react-icons/md';
-import {CgUnblock} from "react-icons/cg";
-import {RiFileEditLine} from "react-icons/ri";
-import {MdOutlineEdit} from "react-icons/md";
-import {MdOutlineArrowDropDownCircle, MdArrowDropDownCircle} from "react-icons/md";
-import {RiDropdownList} from "react-icons/ri";
 
 
 export default function AdminCategoryListPage(){
@@ -184,7 +185,10 @@ useEffect(() => {
             dispatch(getAllCategories({}))
        }
        if(type == 'active'){
-            dispatch(getCategoriesOfType({status:'active'}))
+            dispatch(getCategoriesOfType({status:'active', isActive: true}))
+       }
+        if(type == 'inactive'){
+            dispatch(getCategoriesOfType({status:'active', isActive: false}))
        }
        if(type == 'blocked'){
             dispatch(getCategoriesOfType({status:'blocked'}))
@@ -278,13 +282,19 @@ const tableBodyGenerator = (categories, isSubcategory, parentLevelCount)=> {
                         <td className='text-green-500'>
                             {category?.relatedCategory ? category.relatedCategory.map(cat=> <span> {cat} </span>) : null}
                         </td>
-                        <td className=''>
-                            <span>
-                                {category?.seasonalActivation && category?.seasonalActivation.startDate}
-                            </span>  
-                            <span>
-                                {category?.seasonalActivation && category?.seasonalActivation.endDate}
-                            </span>
+                        <td className='text-muted text-[13px]'> 
+                            <p>
+                                {
+                                    category?.seasonalActivation.startDate 
+                                        && format(new Date(category?.seasonalActivation?.startDate), "MMM dd, yy" ) + " (Starts)"
+                                }
+                            </p>  
+                            <p className='mt-[5px]'>
+                                {
+                                    category?.seasonalActivation.endDate 
+                                        && format(new Date(category?.seasonalActivation?.endDate), "MMM dd, yy" ) + " (Ends)"
+                                }
+                            </p>
                         </td>
                         <td>
                             {/* <div className='flex items-center gap-[10px] action-buttons'> */}
@@ -335,8 +345,13 @@ const tableBodyGenerator = (categories, isSubcategory, parentLevelCount)=> {
                         style={toggleTab.goTo == 'active'? {borderBottomColor:'transparent'}:{}}>
             <h4 className={toggleTab.goTo == 'active' ? 'opacity-[1]' : 'opacity-[0.75]'}> Active </h4>
         </div>
+        <div className='h-[40px] w-[150px] bg-white border border-b-[#e5e7eb] flex justify-center items-center absolute cursor-pointer
+                            top-[-39px] left-[300px] tab' onClick={()=> showCategories('inactive')}
+                        style={toggleTab.goTo == 'inactive'? {borderBottomColor:'transparent'}:{}}>
+            <h4 className={toggleTab.goTo == 'inactive' ? 'opacity-[1]' : 'opacity-[0.75]'}> Inactive </h4>
+        </div>
         <div className='h-[40px] w-[150px] bg-white border border-b-[#e5e7eb] rounded-tr-[5px] flex justify-center items-center cursor-pointer
-                     absolute top-[-39px] left-[300px] tab' onClick={()=> showCategories('blocked')}
+                     absolute top-[-39px] left-[450px] tab' onClick={()=> showCategories('blocked')}
                         style={toggleTab.goTo == 'blocked'? {borderBottomColor:'transparent'}:{}}>
             <h4 className={toggleTab.goTo == 'blocked' ? 'opacity-[1]' : 'opacity-[0.75]'}> Blocked </h4>
         </div>

@@ -15,10 +15,10 @@ export const createCategory = createAsyncThunk('createCategory', async({formData
     }
 })
 
-export const getAllCategories = createAsyncThunk('getAllCategories', async({isAdmin}, thunkAPI)=>{
+export const getAllCategories = createAsyncThunk('getAllCategories', async(thunkAPI)=>{
     try{
         console.log("Inside createCategory createAsyncThunk")
-        const response = await axios.get(`/admin/products/category/?isAdmin=${isAdmin ? true : false}`, {withCredentials: true})
+        const response = await axios.get('/admin/products/category', {withCredentials: true})
         console.log("returning success response from getAllCategories createAsyncThunk..."+JSON.stringify(response.data))
         return response.data
     }
@@ -43,10 +43,10 @@ export const getAllCategories = createAsyncThunk('getAllCategories', async({isAd
 //     }
 // })
 
-export const getCategoriesOfType = createAsyncThunk('getCategoriesOfType', async({status}, thunkAPI)=>{
+export const getCategoriesOfType = createAsyncThunk('getCategoriesOfType', async({status, isActive}, thunkAPI)=>{
     try{
         console.log("Inside getCategoriesOfType createAsyncThunk")
-        const response = await axios.get(`/admin/products/category/?status=${status}&`, {withCredentials: true})
+        const response = await axios.get(`/admin/products/category/?status=${status}&isActive=${isActive}`, {withCredentials: true})
         console.log("returning success response from getCategoriesOfType createAsyncThunk..."+JSON.stringify(response.data))
         return response.data
     }

@@ -87,6 +87,7 @@ export default function SelectCategoryForAdmin({category, setCategory, editCateg
                 {
                  categories && categories.length > 0 &&
                  categories.map((category) => (
+                    !category.isBlocked && category.isActive &&
                     <div key={category.name}>
                         <label htmlFor={category.name}> {category.name[0].toUpperCase() + category.name.slice(1)} </label>
                         <input type='checkbox' id={category.name} value={category.name} checked={editCategory && categoryStatus[category.name]}
@@ -318,11 +319,13 @@ export function SelectSubCategoryForAdmin({category, setCategory, setSubCategory
             <div className='flex justify-between items-start mt-[8px] subcategory-body'>
                 {firstLevelCategories &&
                     firstLevelCategories.map(category => (
+                        !category.isBlocked && category.isActive &&
                         <div key={category._id}>
                             <h5 className='capitalize'>{category.name}</h5>
                             <ul className="list-none" id={`${category.name}List`} ref={categoryRefs.current[category.name]}>
                                 {category.subCategory &&
                                     category.subCategory.map(subcat => (
+                                        !subcat.isBlocked && subcat.isActive &&
                                         <li key={subcat._id} onClick={()=> subCategoryBlockClickHandler()}>
                                             <label htmlFor={subcat.name} className={`capitalize ${defaultDisabled ? 'disabled-label' : ''}`}>
                                                 {subcat.name}
@@ -354,7 +357,8 @@ export function SelectSubCategoryForAdmin({category, setCategory, setSubCategory
                                 {
                                     cat.subcategories && cat.subcategories.length > 0 &&
                                     cat.subcategories.map(subcat=> (
-                                        <li  key={subcat._id} className='list-none flex items-center gap-[5px]'>
+                                        !subcat.isBlocked && subcat.isActive &&
+                                        <li key={subcat._id} className='list-none flex items-center gap-[5px]'>
                                             <input type='radio' id={subcat.name} style={{height:'15px', width:'15px', borderColor:'#f1c40f'}}
                                                 onChange={(e)=> nestedRadioChangeHandler(e, cat, subcat)} onClick={(e)=> nestedRadioClickHandler(e, cat, subcat)}
                                                     checked={ checkNestedSubcategories[subcat.parentCategory]?.[subcat.name] || false} />

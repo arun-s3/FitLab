@@ -60,9 +60,11 @@ const createRazorpayPayment = async (req, res, next)=> {
         const expectedSignature = hmac.digest('hex')
 
         const isAuthentic = expectedSignature === razorpay_signature
+        console.log("isAuthentic---->", isAuthentic)
 
         const order = await Razorpay.orders.fetch(razorpay_order_id)
         const receipt = order?.receipt
+        console.log("receipt---->", receipt)
 
         if (isAuthentic){
             const payment = new Payment({
@@ -75,6 +77,7 @@ const createRazorpayPayment = async (req, res, next)=> {
                 amount: amount / 100,
                 receipt: receipt || ''
             })
+            console.log("payment---->", payment)
             await payment.save()
             res.status(200).json({message: "Payment Success!"})
         }

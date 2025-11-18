@@ -24,7 +24,7 @@ cron.schedule("0 0 * * *", async () => {
     )
 
     if (activateResult.modifiedCount > 0 || deactivateResult.modifiedCount > 0) {
-      console.log(`✅ Seasonal categories updated | Activated: ${activateResult.modifiedCount}, 
+      console.log(`Seasonal categories updated | Activated: ${activateResult.modifiedCount}, 
         Deactivated: ${deactivateResult.modifiedCount}`)
     }
   }

@@ -6,8 +6,12 @@ import {useSelector} from 'react-redux'
 import { io } from "socket.io-client"
 
 import axios from "axios"
+import {toast as sonnerToast} from 'sonner'
+import {Wallet} from 'lucide-react'
 
+import NotificationModal from "../NotificationModal/NotificationModal"
 import {decryptData} from '../../Utils/decryption'
+import SemiAutoRechargeModal from "../SemiAutoRechargeModal/SemiAutoRechargeModal"
 import VideoCallCommonModal from '../../Pages/User/VideoCallCommonModal/VideoCallCommonModal'
 
 export const SocketContext = createContext();
@@ -47,6 +51,14 @@ export default function SocketProvider() {
 
     const [forceEndScheduledSession, setForceEndScheduledSession] = useState(false)
 
+    const [openNotificationModal, setOpenNotificationModal] = useState({
+      header: null, content: null, icon: null, type: null, duration: 6000, walletRecharged: false
+    })
+
+    const [openSemiAutoRechargeModal, setOpenSemiAutoRechargeModal] = useState({
+      status: false, walletAmount: null, autoRechargeAmount: null, recharged: false
+    })
+
     const messagesEndRef = useRef(null)             
     const typingTimeoutRef = useRef(null)
 
@@ -84,6 +96,10 @@ export default function SocketProvider() {
         console.log("userWasGuest--->", userWasGuest)
     },[username, roomId, userWasGuest])
 
+    useEffect(()=> {
+      console.log("openSemiAutoRechargeModal--->", openSemiAutoRechargeModal)
+    }, [openSemiAutoRechargeModal])
+
     useEffect(() => {
         const socket = io(baseApiUrl)
     
@@ -98,6 +114,7 @@ export default function SocketProvider() {
             socket.emit("user-login", { userId: roomId, username })
             console.log("User going to join room....")
             socket.emit("user-join-room", roomId)
+            socket.emit("joinFitlab", roomId)
           }
         })
     
@@ -133,6 +150,23 @@ export default function SocketProvider() {
           setOpenVideoCallModal(false)
           console.log("Emiting unNotifiedSupportCaling...")
           socket.emit("unNotifiedSupportCalling")
+        }) 
+
+        socket.on("walletRechargeSuccess", (data) => {
+          console.log("AUTO-RECHARGE SUCCESS!", data)
+          sonnerToast.success('Recharged wallet!', {duration: 2500})
+          setOpenNotificationModal({
+            header: "Wallet Auto-Recharged", content: `Wallet recharged with ₹${data.amount} through ${data.method}`, icon: Wallet,
+            type: "success", duration: 6000, walletRecharged: true
+          })
+        })
+
+        socket.on("warnRazorpayRecharge", (data) => {
+          console.log("Warning on Razorpay recharge", data)
+          console.log("data.autoRechargeAmount------>", data.amount)
+          if(!openSemiAutoRechargeModal.status){
+            setOpenSemiAutoRechargeModal({status: true, walletAmount: data.balance, autoRechargeAmount: data.amount})
+          }
         })
 
         setSocket(socket)
@@ -213,12 +247,41 @@ export default function SocketProvider() {
         scheduledVideoCallSessionId,
         videoSessionInfo,
         forceEndScheduledSession,
-        setForceEndScheduledSession
+        setForceEndScheduledSession,
+        openSemiAutoRechargeModal, 
+        setOpenSemiAutoRechargeModal,
+        setOpenNotificationModal,
+        openNotificationModal
         // VideoCallCommonModal : <VideoCallCommonModal/>
       }}
     >
 
       <Outlet/>
+
+      <NotificationModal
+        isOpen={openNotificationModal.header}
+        onClose={()=> setOpenNotificationModal({header: null, content: null, icon: null, type: null, duration: 6000, walletRecharged: true})}
+        header={openNotificationModal.header}
+        content={openNotificationModal.content}
+        icon={openNotificationModal.icon}
+        type={openNotificationModal.type}
+        autoClose={true}
+        autoCloseDuration={openNotificationModal.duration}
+        closeButton={true}
+      />
+
+      {
+        openSemiAutoRechargeModal && openSemiAutoRechargeModal.status &&
+         <SemiAutoRechargeModal 
+          isOpen={()=> openSemiAutoRechargeModal.status}
+          onClose={()=> setOpenSemiAutoRechargeModal({status: false, walletAmount: null, autoRechargeAmount: null, recharged: false})}
+          walletAmount={openSemiAutoRechargeModal.walletAmount}
+          autoRechargeAmount={openSemiAutoRechargeModal.autoRechargeAmount}
+          onRecharged={()=> {
+            setOpenSemiAutoRechargeModal({status: false, walletAmount: null, autoRechargeAmount: null, recharged: true})
+          }}
+         />
+       }
 
     </SocketContext.Provider>
   )

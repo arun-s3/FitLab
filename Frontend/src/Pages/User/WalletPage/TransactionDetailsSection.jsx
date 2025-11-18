@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react'
 import {useDispatch, useSelector} from 'react-redux'
 import {motion} from 'framer-motion'
 
-import { ArrowDown, ArrowUp, ChevronRight, FunnelPlus, ArrowUpDown, Pause, BanknoteArrowUp, BanknoteArrowDown, 
+import { ArrowDown, ArrowUp, ChevronRight, FunnelPlus, ArrowUpDown, Pause, Banknote, BanknoteArrowUp, BanknoteArrowDown, 
   BanknoteX, Check, X } from "lucide-react"
 import {toast as sonnerToast} from 'sonner'
 import {format} from "date-fns" 
@@ -95,7 +95,7 @@ export default function TransactionDetailsSection({transactions, queryOptions, s
       switch(type){
           case 'credit': 
               return {color: 'text-green-500', bg: 'bg-green-100', icon: ArrowDown, symbol: '+'}
-          case 'debit':
+          case 'debit': 
               return {color: 'text-red-500', bg: 'bg-red-100', icon: ArrowUp, symbol: '-'}
           case 'request_sent':
               { 
@@ -129,6 +129,10 @@ export default function TransactionDetailsSection({transactions, queryOptions, s
               }
               return {color, bg, border: 'border-[#d7f148]', icon, symbol: '#'}
             }
+          case 'auto-recharge': 
+              return {color: 'text-green-500', bg: 'bg-green-100', icon: ArrowDown, symbol: '+'}
+          default:
+            return {color: 'text-muted', bg: 'bg-muted', icon: Banknote, symbol: '#'}
         }
     }
 
@@ -138,14 +142,17 @@ export default function TransactionDetailsSection({transactions, queryOptions, s
             return 'bg-yellow-100 text-yellow-800'
         case 'success':
             return 'bg-green-100 text-green-800 '
+        case 'refunded':
+            return 'bg-green-100 text-green-800 '
         case 'failed':
             return 'bg-red-100 text-red-800 '
       }
     }
 
-    const getTransactionSource = (detailsObj)=> {
+    const getTransactionSource = (detailsObj, type)=> {
         if(detailsObj.type === 'fitlab') return 'fitlab'
-        else if(detailsObj.type === 'gateway') return capitalizeFirstLetter(detailsObj.account + ' ' + '(credited by you)')
+        else if(detailsObj.type === 'gateway') 
+          return capitalizeFirstLetter(detailsObj.account + ' ' + `( ${type === 'auto-recharge' ? 'Auto-recharge credit' : 'Credited by you'})`)
         else if(detailsObj.type === 'user') return `User (${detailsObj.account})`
     }   
 
@@ -291,14 +298,14 @@ export default function TransactionDetailsSection({transactions, queryOptions, s
                 className="w-full min-w-[620px] border-separate border-spacing-y-2 cursor-default"
               >
                 {transactions.slice(0, sliceIt).map((transaction) => {
-                  const transactionColor = getTransactionTypeStyle(transaction.type, transaction.status).color;
-                  const transactionBg = getTransactionTypeStyle(transaction.type, transaction.status).bg;
+                  const transactionColor = getTransactionTypeStyle(transaction.type, transaction.status)?.color;
+                  const transactionBg = getTransactionTypeStyle(transaction.type, transaction.status)?.bg;
                   const transactionBorder =
                     transaction.status === "pending"
-                      ? getTransactionTypeStyle(transaction.type).border
+                      ? getTransactionTypeStyle(transaction.type)?.border
                       : "";
-                  const TransactionIcon = getTransactionTypeStyle(transaction.type, transaction.status).icon;
-                  const TransactionSymbol = getTransactionTypeStyle(transaction.type).symbol;
+                  const TransactionIcon = getTransactionTypeStyle(transaction.type, transaction.status)?.icon;
+                  const TransactionSymbol = getTransactionTypeStyle(transaction.type)?.symbol;
                   const statusStyle = getTransactionStatusStyle(transaction.status);
                 
                   return (
@@ -334,7 +341,7 @@ export default function TransactionDetailsSection({transactions, queryOptions, s
                           transactionBorder && `border border-dashed border-x-0 ${transactionBorder}`
                         }`}
                       >
-                        {getTransactionSource(transaction.transactionAccountDetails)}
+                        {getTransactionSource(transaction.transactionAccountDetails, transaction.type)}
                       </td>
                       
                       <td

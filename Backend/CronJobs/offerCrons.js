@@ -4,7 +4,7 @@ const Offer = require("../Models/offerModel")
 
 cron.schedule("0 0 * * *", async ()=> {
 
-  console.log("Running Offer Cron Job -", new Date().toLocaleString());
+  console.log("Running Offer Cron Job -", new Date().toLocaleString())
 
   try {
     const now = new Date()

@@ -1,21 +1,15 @@
-import React, { useState } from "react"
+import React, {useState} from "react"
+import {useDispatch} from 'react-redux'
+
 import { Wallet, RefreshCw } from "lucide-react"
+
 import AutoRechargeModal from "./Modals/AutoRechargeModal"
 
-export default function AutoRechargeFeature() {
+
+export default function AutoRechargeFeature(){
+
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [autoRechargeSettings, setAutoRechargeSettings] = useState(null)
-
-  // Mock saved payment methods
-  const savedPaymentMethods = [
-    { id: "card1", type: "visa", last4: "4242", expiry: "05/25" },
-    { id: "card2", type: "mastercard", last4: "8888", expiry: "09/24" },
-  ]
-
-  const handleSaveSettings = (settings) => {
-    console.log("Auto-recharge settings saved:", settings)
-    setAutoRechargeSettings(settings)
-  }
 
   return (
     <div className="p-6 max-w-md mx-auto">
@@ -58,13 +52,12 @@ export default function AutoRechargeFeature() {
         </button>
       </div>
 
-      <AutoRechargeModal
+      {/* <AutoRechargeModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        savedPaymentMethods={savedPaymentMethods}
         onSave={handleSaveSettings}
         currentSettings={autoRechargeSettings}
-      />
+      /> */}
     </div>
   )
 }

@@ -2,6 +2,12 @@ import React, {useState, useEffect, useContext} from "react"
 import './WalletPage.css'
 import {useLocation} from 'react-router-dom'
 import {useDispatch, useSelector} from 'react-redux'
+// import { io } from "socket.io-client"
+
+import {Elements} from "@stripe/react-stripe-js"
+import {loadStripe} from "@stripe/stripe-js"
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY)
+import {toast as sonnerToast} from 'sonner'
 
 import WalletCard from "./WalletCard"
 import WalletOptions from "./WalletOptions"
@@ -9,12 +15,14 @@ import MoneyExchange from "./MoneyExchange"
 import WalletFundingModal from "./Modals/WalletFundingModal"
 import TransactionDetailsSection from "./TransactionDetailsSection"
 import AutoRechargeFeature from "./AutoRechargeFeature"
+import {SocketContext} from '../../../Components/SocketProvider/SocketProvider'
 import AutoRechargeModal from "./Modals/AutoRechargeModal"
+import CardExistsWarningModal from "./Modals/CardExistsWarningModal"
 import WalletUtilitySection from "./WalletUtilitySection"
 import {ProtectedUserContext} from '../../../Components/ProtectedUserRoutes/ProtectedUserRoutes'
 import {UserPageLayoutContext} from '../UserPageLayout/UserPageLayout'
 import {decryptData} from '../../../Utils/decryption'
-import {getOrCreateWallet, resetWalletStates} from '../../../Slices/walletSlice'
+import {getOrCreateWallet, updateAutoRechargeSettings, resetWalletStates} from '../../../Slices/walletSlice'
 
 
 export default function WalletPage() {
@@ -31,6 +39,8 @@ export default function WalletPage() {
     const location = useLocation()
     setPageLocation(location.pathname)
 
+    const {openSemiAutoRechargeModal, setOpenSemiAutoRechargeModal, openNotificationModal, setOpenNotificationModal} = useContext(SocketContext)
+
     const [showFundingModal, setShowFundingModal] = useState(false)
     const [paymentVia, setPaymentVia] = useState("razorpayAndPaypal")
 
@@ -39,11 +49,28 @@ export default function WalletPage() {
     const [isAutoRechargeModalOpen, setIsAutoRechargeModalOpen] = useState(false)
     const [autoRechargeSettings, setAutoRechargeSettings] = useState(null)
 
+    const [openCardExistsModal, setOpenCardExistsModal] = useState(false)
+
     const dispatch = useDispatch()
 
     const {safeWallet, walletLoading, walletError, walletMessage} = useSelector(state=> state.wallet)
 
     const membershipCredits = 3
+
+    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+    // const socket = io(baseApiUrl)
+
+    // const {userId} = useContext(SocketContext)
+
+    // socket.on("walletRechargeSuccess", (data) => {
+    //   console.log("AUTO-RECHARGE SUCCESS!", data);
+    //   sonnerToast(`Wallet auto-recharged with ₹${data.amount} through ${data.method}!`)
+    //   alert(`Wallet recharged with ₹${data.amount}`);
+    // })
+
+    // useEffect(()=> {
+    //     console.log("userId--->", userId)
+    // },[userId])
 
     useEffect(()=> {
       dispatch(resetWalletStates())
@@ -56,6 +83,23 @@ export default function WalletPage() {
         dispatch( getOrCreateWallet({queryOptions}) )
       }
     }, [queryOptions])
+
+    useEffect(()=> {
+      if(openSemiAutoRechargeModal.status){
+        if(showFundingModal || isAutoRechargeModalOpen){
+          setOpenSemiAutoRechargeModal({status: false, walletAmount: null, autoRechargeAmount: null, recharged: false})
+        }
+      }
+      if(openSemiAutoRechargeModal.recharged){
+          console.log("Inside if(openSemiAutoRechargeModal.recharged)") 
+          dispatch(getOrCreateWallet({queryOptions}))
+          setTimeout(()=> setOpenSemiAutoRechargeModal((prev)=> ({...prev, recharged: false})), 2000)
+      }
+      if(openNotificationModal.walletRecharged){
+        dispatch(getOrCreateWallet({queryOptions}))
+        setTimeout(()=> setOpenNotificationModal((prev)=> ({...prev, walletRecharged: false})), 2000)
+      }
+    }, [showFundingModal, isAutoRechargeModalOpen, openSemiAutoRechargeModal, openNotificationModal])
 
 
     const openFundingModal = () => {
@@ -75,13 +119,18 @@ export default function WalletPage() {
       if(checkAuthOrOpenModal()){
         return
       }
+      if(safeWallet && decryptData(safeWallet)?.autoRecharge.paymentMethodId){
+        sonnerToast.warning("You already have applied for the auto-recharge! ")
+        setOpenCardExistsModal(true)
+        return 
+      }
       setIsAutoRechargeModalOpen(true)
     } 
     
     const handleSaveAutoRechargeSettings = (settings) => {
+      console.log("Inside handleSaveSettings, settings------->", settings) 
       setAutoRechargeSettings(settings)
-      // I should save the settings to the backend
-      console.log("Auto-recharge settings saved:", settings)
+      dispatch(updateAutoRechargeSettings({settings}))
     }
 
 
@@ -127,17 +176,30 @@ export default function WalletPage() {
                         setPaymentVia={setPaymentVia}
                       />
                 }
-
+                
+                <Elements stripe={stripePromise}>
                   <AutoRechargeModal 
                     isOpen={isAutoRechargeModalOpen} 
                     onClose={() => setIsAutoRechargeModalOpen(false)}
                     onSave={handleSaveAutoRechargeSettings} 
-                    currentSettings={autoRechargeSettings}
+                    currentSettings={safeWallet && decryptData(safeWallet)?.autoRecharge || autoRechargeSettings}
                   />
+                </Elements>
 
                 <WalletUtilitySection membershipCredits={membershipCredits}/>
 
-                {/* <AutoRechargeFeature /> */}
+                <AutoRechargeFeature />
+
+                <CardExistsWarningModal
+                  isOpen={openCardExistsModal}
+                  onClose={()=> {
+                    setOpenCardExistsModal(false)
+                  }}
+                  onUpdateCard={()=> {
+                    setOpenCardExistsModal(false)
+                    setIsAutoRechargeModalOpen(true)
+                  }}
+                />
 
                 </div>
 

@@ -124,6 +124,8 @@ const initialState = {
   peerAccountAdded: true,
   walletCreated: false,
   walletUpdated: false,
+  walletSettingsUpdated: false,
+  stripeClientSecret: null,
   transactionsCount: null,
   walletLoading: false,
   walletError: '',
@@ -156,6 +158,10 @@ const handleAsyncThunkCases = (builder, asyncThunk) => {
       }
       if(asyncThunk === updateAutoRechargeSettings){
         state.walletUpdated = true
+        state.walletSettingsUpdated = true 
+        if(action.payload.paymentMethod === 'stripe'){
+          state.stripeClientSecret = action.payload.stripeClientSecret
+        }
       }
     })
     .addCase(asyncThunk.pending, (state) => {
@@ -185,8 +191,10 @@ const walletSlice = createSlice({
       state.walletError = null
       state.walletMessage = null
       state.walletSuccess = false
-      state.walletCreated = false
+      state.walletCreated = false 
       state.walletUpdated = false
+      state.walletSettingsUpdated = false
+      state.stripeClientSecret = null
     }
   },
   extraReducers: (builder) => {

@@ -1,13 +1,14 @@
 const Wallet = require('../Models/walletModel')
 const Payment = require('../Models/paymentModel')
-const Razorpay = require('../Utils/razorpay')
+const razorpay = require('../Utils/razorpay')
 const Order = require('../Models/orderModel')
 const Cart = require('../Models/cartModel')
 const Product = require('../Models/productModel')
 
+const crypto = require("crypto")
 const {v4: uuidv4} = require('uuid')
 
-const {generateUniqueAccountNumber, generateTransactionId} = require('../Controllers/controllerUtils/walletUtils')
+const {startAutoRecharge, generateUniqueAccountNumber, generateTransactionId} = require('../Controllers/controllerUtils/walletUtils')
 const {encryptData} = require('../Controllers/controllerUtils/encryption')
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
@@ -63,7 +64,7 @@ const getOrCreateWallet = async (req, res, next)=> {
     console.log("Inside getOrCreateWallet of walletController")
 
     const userId = req.user._id
-    const queryOptions = req.body.queryOptions || {}
+    const queryOptions = req.body?.queryOptions || {}
 
     const wallet = await Wallet.findOne({ userId })
     // const wallet = await Wallet.findOne({ userId }).select('-userId -transactions.transactionId')
@@ -246,6 +247,11 @@ const addFundsToWallet = async (req, res, next)=> {
       const {userId: _, ...safeWallet} = wallet.toObject()
       safeWallet.transactions.unshift(transactionDetails)
 
+    if (wallet.autoRecharge.isEnabled && wallet.balance < wallet.autoRecharge.thresholdAmount){
+      console.log("Wallet is below threshold; Hence Recharge will be scheduled")
+      wallet.autoRecharge.needsRecharge = true
+    }
+
       const encryptedWallet = encryptData(safeWallet)
       res.status(200).json({ safeWallet: encryptedWallet, message: "Funds added successfully to wallet" })
     }
@@ -391,6 +397,11 @@ const sendMoneyToUser = async (req, res, next)=> {
       createdAt: new Date()
     })
 
+    if (wallet.autoRecharge.isEnabled && wallet.balance < wallet.autoRecharge.thresholdAmount){
+      console.log("Wallet is below threshold; Hence Recharge will be scheduled")
+      wallet.autoRecharge.needsRecharge = true
+    }
+
     await wallet.save()
     await recipientWallet.save()
 
@@ -472,6 +483,11 @@ const requestMoneyFromUser = async (req, res, next)=> {
     const {userId: _, ...safeWallet} = wallet.toObject()
     safeWallet.transactions.unshift(transactionDetails)
     const encryptedWallet = encryptData(safeWallet)
+    
+    if (wallet.autoRecharge.isEnabled && wallet.balance < wallet.autoRecharge.thresholdAmount){
+      console.log("Wallet is below threshold; Hence Recharge will be scheduled")
+      wallet.autoRecharge.needsRecharge = true
+    }
 
     return res.status(200).json({ safeWallet: encryptedWallet, message: 'Money request sent successfully.' })
   }
@@ -675,6 +691,11 @@ const payOrderWithWallet = async(req, res, next)=> {
     console.log('newTransaction--->', JSON.stringify(newTransaction))
     wallet.transactions.push(newTransaction)
 
+    if (wallet.autoRecharge.isEnabled && wallet.balance < wallet.autoRecharge.thresholdAmount){
+      console.log("Wallet is below threshold; Hence Recharge will be scheduled")
+      wallet.autoRecharge.needsRecharge = true
+    }
+
     await wallet.save();
 
     console.log("Wallet payment successful")
@@ -690,27 +711,62 @@ const payOrderWithWallet = async(req, res, next)=> {
 
 const updateAutoRechargeSettings = async(req, res, next)=> {
   try {
+    console.log("Inside updateAutoRechargeSettings...")
     const userId = req.user._id
+    console.log("req.body.settings----->", JSON.stringify(req.body.settings))
     const {isEnabled, thresholdAmount, rechargeAmount, paymentMethod} = req.body.settings
 
     const wallet = await Wallet.findOne({userId})
-    if (!wallet){
-      return next(errorHandler(404, "Wallet not foun."))
-    }
 
-    wallet.autoRecharge = {
-      isEnabled,
-      thresholdAmount,
-      rechargeAmount,
-      paymentMethod
-    }
+    wallet.autoRecharge.isEnabled = isEnabled
+    wallet.autoRecharge.thresholdAmount = thresholdAmount
+    wallet.autoRecharge.rechargeAmount = rechargeAmount
+    wallet.autoRecharge.paymentMethod = paymentMethod
 
     await wallet.save();
+    console.log("Saved settings!")
+
+    if (paymentMethod === "razorpay") {
+      res.status(200).json({paymentMethod: 'razorpay', message: 'Auto-Recharge settings updated successfully'})
+    }
+
+    if (paymentMethod === 'stripe') {
+      console.log('Payment method choosen is stripe')
+      let customer
+      if (!wallet.autoRecharge.customerId) {
+        customer = await stripe.customers.create({
+          email: req.user.email,
+          name: req.user.username,
+        }) 
+        wallet.autoRecharge.customerId = customer.id
+      }else{
+        customer = await stripe.customers.retrieve(wallet.autoRecharge.customerId)
+      }
+    
+      const setupIntent = await stripe.setupIntents.create({
+        customer: customer.id,
+        payment_method_types: ['card'],
+      })
+      console.log("setupIntent------>", JSON.stringify(setupIntent))
+    
+      wallet.autoRecharge.setupIntentClientSecret = setupIntent.client_secret
+    
+      // wallet.autoRecharge.isEnabled = false
+      await wallet.save()
+    }
+    if (paymentMethod === 'razorpay') {
+      wallet.autoRecharge.needsRecharge = true
+    }
 
     const walletWithoutIds = await Wallet.findOne({ userId }).select('-userId -transactions.transactionId')
     const encryptedWallet = encryptData(walletWithoutIds)
 
-    res.status(200).json({safeWallet: encryptedWallet, message: 'Auto-Recharge settings updated successfully'})
+    res.status(200).json({
+      safeWallet: encryptedWallet, 
+      paymentMethod: 'stripe',
+      stripeClientSecret: paymentMethod === 'stripe' ? wallet.autoRecharge.setupIntentClientSecret : null,
+      message: 'Auto-Recharge settings updated successfully'
+    });
   }
   catch(error){
     console.error('Error updating auto-recharge settings:', error)
@@ -719,9 +775,96 @@ const updateAutoRechargeSettings = async(req, res, next)=> {
 }
 
 
+const saveStripePaymentMethod = async (req, res, next) => {
+  try{
+    console.log("Inside saveStripePaymentMethod...")
+    const {paymentMethodId} = req.body
+    const userId = req.user._id
 
+    console.log("paymentMethodId---->", paymentMethodId)
+
+    const wallet = await Wallet.findOne({userId})
+
+    wallet.autoRecharge.paymentMethodId = paymentMethodId
+    wallet.autoRecharge.isEnabled = true
+    wallet.autoRecharge.needsRecharge = true
+
+    await wallet.save();
+
+    res.status(200).json({message: "Stripe auto-recharge enabled successfully", success: true})
+  }
+  catch(error){
+    console.error('Error inside saveStripePaymentMethod:', error.message)
+    next(error)
+  }
+}
+
+
+const rechargeWalletWithRazorpayMoney = async (req, res, next) => {
+  try{
+    console.log("Inside rechargeWalletWithRazorpayMoney...")
+    const {amount, razorpayPaymentId} = req.body
+    const userId = req.user._id
+
+    console.log("amount----------->", amount)
+
+    const wallet = await Wallet.findOne({userId})
+
+    wallet.transactions.push({
+      type: "auto-recharge",
+      amount: amount/100,
+      transactionId: razorpayPaymentId,
+      transactionAccountDetails: {
+        type: "gateway",
+        account: "razorpay",
+      },
+      status: "success",
+      notes: "Razorpay auto-recharge processed",
+    })
+    wallet.balance += Number.parseInt(amount)/100
+
+    console.log("wallet.balance----------->", wallet.balance)
+    
+    wallet.autoRecharge.needsRecharge = false
+    await wallet.save();
+
+    res.status(200).json({ success: true });
+  }
+  catch(error){
+    console.error('Error inside rechargeWalletWithRazorpayMoney:', error.message)
+    next(error)
+  }
+}
+
+
+const skipAutoRecharge = async (req, res, next)=> {
+  try {
+    const userId = req.user._id
+
+    const wallet = await Wallet.findOne({ userId })
+
+    if (!wallet.autoRecharge.isEnabled) {
+      return res.status(400).json({
+        success: false,
+        message: "Auto-recharge is not enabled",
+      });
+    }
+
+    wallet.autoRecharge.needsRecharge = false
+    await wallet.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Auto-recharge skipped successfully",
+    });
+  } catch (error) {
+    console.error("Skip auto-recharge error:", error)
+    next(error)
+  }
+}
 
 
 
 module.exports = {getOrCreateWallet, addFundsToWallet, getUserNameFromAccountNumber, addPeerAccount, sendMoneyToUser,
-   requestMoneyFromUser, confirmMoneyRequest, declineMoneyRequest, payOrderWithWallet, updateAutoRechargeSettings}
+   requestMoneyFromUser, confirmMoneyRequest, declineMoneyRequest, payOrderWithWallet, updateAutoRechargeSettings, 
+   saveStripePaymentMethod, rechargeWalletWithRazorpayMoney, skipAutoRecharge}

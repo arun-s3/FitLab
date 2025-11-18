@@ -38,6 +38,43 @@ const walletSchema = new mongoose.Schema({
       }
     }
   ],
+  autoRecharge: {
+    isEnabled: {
+      type: Boolean,
+      default: false 
+    },
+    thresholdAmount: {
+      type: Number 
+    },   
+    rechargeAmount: {
+      type: Number 
+    },    
+    paymentMethod: {                      
+      type: String,
+      enum: ['razorpay', 'stripe'],
+      default: 'razorpay'
+    },
+    customerId: {
+      type: String, 
+      default: null 
+    },
+    paymentMethodId: {
+      type: String, 
+      default: null 
+    },
+    lastRecharge: {
+      type: Date, 
+      default: null 
+    },
+    needsRecharge: {
+      type: Boolean,
+      default: false 
+    },
+    status: {
+      type: String, 
+      default: null 
+    }
+  },
   transactions: [
     {
       type: {
@@ -74,28 +111,7 @@ const walletSchema = new mongoose.Schema({
       createdAt: {
         type: Date,
         default: Date.now
-      },
-      autoRecharge: {
-        isEnabled: {
-          type: Boolean,
-          default: false 
-        },
-        thresholdAmount: {
-          type: Number 
-        },   
-        rechargeAmount: {
-          type: Number 
-        },    
-        paymentMethod: {                      
-          type: {
-            type: String,
-            enum: ['paypal', 'razorpay', 'stripe'],
-            default: 'razorpay'
-          },
-          account: { type: String },   
-        }
       }
-      
     }
   ]
 })

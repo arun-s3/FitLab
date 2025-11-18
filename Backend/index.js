@@ -47,17 +47,18 @@ const Server = require("socket.io").Server
 let io = new Server(server, {
       cors: {
         origin: ['http://localhost:5173', 'https://fitlab.co.in', 'https://www.fitlab.co.in'],
-        methods: ["GET", "POST"],
+        methods: ["GET", "POST", 'PUT','PATCH','DELETE'],
         credentials: true,
       },
     })
 
 const textChatBoxSocket = require('./Sockets/textChatSocketHandler.js')
 const videoChatSocket = require('./Sockets/videoChatSocketHandler.js')
+const notificationSocket = require('./Sockets/notificationsSocketHandler.js')
 
 textChatBoxSocket(io)
 videoChatSocket(io)
-
+notificationSocket(io)
 
 const userRoutes = require('./Routes/userRoutes.js')
 const addressRoutes = require('./Routes/userAddressRoutes.js')
@@ -73,14 +74,13 @@ const paymentRoutes = require('./Routes/paymentRoutes.js')
 const walletRoutes = require('./Routes/walletRoutes.js')
 const textChatBoxRoutes = require('./Routes/textChatBoxRoutes.js')
 const videoSupportSessionRoutes = require('./Routes/videoSupportSessionsRoute.js')
-
+const webhookRoutes = require('./Routes/webhookRoutes.js')
 
 const adminRoutes = require('./Routes/adminRoutes.js')
 const adminProductRoutes = require('./Routes/adminProductRoutes.js')
 const adminCategoryRoutes = require('./Routes/adminCategoryRoutes.js')
 const adminDashboardRoutes = require('./Routes/dashboardRoutes.js')
 const adminCustomerGeographyRoutes = require('./Routes/adminCustomerGeographyRoute.js')
-
 
 app.use('/', userRoutes)
 app.use('/products', userProductRoutes)
@@ -96,6 +96,7 @@ app.use('/payment', paymentRoutes)
 app.use('/wallet', walletRoutes)
 app.use('/chat', textChatBoxRoutes)
 app.use('/video-chat', videoSupportSessionRoutes)
+app.use('/webhook', webhookRoutes)
 
 app.use('/admin', adminRoutes)
 app.use('/admin/products', adminProductRoutes)
@@ -104,16 +105,20 @@ app.use('/admin/dashboard', adminDashboardRoutes)
 app.use('/admin/locations', adminCustomerGeographyRoutes)
 // app.use('/product', productRoutes)
 
+require("./CronJobs/couponCrons.js")
+require("./CronJobs/offerCrons.js")
+
+global.io = io
+require("./CronJobs/categoryCrons.js")
+const walletCron = require("./CronJobs/walletCrons.js")
+walletCron(io)
+
 app.use( (error ,req ,res, next)=> {
     const message = error.message||'Internal Server Error'
     const statusCode = error.statusCode||500
     console.log(`From index.js errorHandling middleware message is---> ${message} and statusCode is- ${statusCode}`)
     res.status(statusCode).json({message})
 })
-
-require("./CronJobs/couponCrons.js")
-require("./CronJobs/offerCrons.js")
-// require("./CronJobs/categoryCrons.js")
 
 
 const port = process.env.PORT||3000

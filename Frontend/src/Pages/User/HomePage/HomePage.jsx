@@ -1,17 +1,19 @@
-import React, {useState, useEffect, useRef} from 'react'
+import React, {useState, useEffect, useRef, lazy, Suspense} from 'react'
 import {useLocation} from "react-router-dom"
 
 import Header from '../../../Components/Header/Header'
 import HeroSection from './HeroSection'
-import PopularProductsCarousal from './PopularProductsCarousal'
-import LatestProductsCarousel from './LatestProductsCarousel'
-import BrandsCarousal from './BrandsCarousal'
-import FitnessQuoteSection from './FitnessQuoteSection'
-import ShopByCategories from './ShopByCategories'
-import FitlabHighlights from './FitlabHighlights'
-import SpecialOfferSection from './SpecialOfferSection'
-import TestimonialSection from './TestimonialSection'
-import Footer from '../../../Components/Footer/Footer'
+import Footer from "../../../Components/Footer/Footer"
+import Fallback from '../../../Components/FallbackSuspense/Fallback'
+
+const PopularProductsCarousal = lazy(() => import("./PopularProductsCarousal"))
+const LatestProductsCarousel = lazy(() => import("./LatestProductsCarousel"))
+const BrandsCarousal = lazy(() => import("./BrandsCarousal"))
+const FitnessQuoteSection = lazy(() => import("./FitnessQuoteSection"))
+const ShopByCategories = lazy(() => import("./ShopByCategories"))
+const FitlabHighlights = lazy(() => import("./FitlabHighlights"))
+const SpecialOfferSection = lazy(() => import("./SpecialOfferSection"))
+const TestimonialSection = lazy(() => import("./TestimonialSection"))
 
 
 export default function HomePage(){
@@ -70,37 +72,47 @@ export default function HomePage(){
 
         </div>
 
-        <PopularProductsCarousal />
-          
-        <div className='mb-8'>
+        <Suspense fallback={<Fallback variant="products" height="h-56" />}>
+          <PopularProductsCarousal />
+        </Suspense>
+
+        <div className="mb-8">
+          <Suspense fallback={<Fallback variant="wave" height="h-32" />}>
             <FitnessQuoteSection />
-        </div>
-        
-        <div className='w-full py-8'>
-          <LatestProductsCarousel />
+          </Suspense>
         </div>
 
-        <div className='w-full mt-8'>
+        <div className="w-full py-8">
+          <Suspense fallback={<Fallback variant="products" height="h-56" />}>
+            <LatestProductsCarousel />
+          </Suspense>
+        </div>
 
-          <BrandsCarousal />
-
+        <div className="w-full mt-8">
+          <Suspense fallback={<Fallback variant="brands" height="h-40" />}>
+            <BrandsCarousal />
+          </Suspense>
         </div>
 
         <div id="shopByCategoriesSection" ref={shopByCategoryRef}>
-
-          <ShopByCategories />
-
+          <Suspense fallback={<Fallback variant="products" height="h-64" />}>
+            <ShopByCategories />
+          </Suspense>
         </div>
 
-        <div ref={highlightsRef} className='mt-8'>
-
-          {showHighlights && <FitlabHighlights />}
-
+        <div ref={highlightsRef} className="mt-8">
+          <Suspense fallback={<Fallback variant="pulse" height="h-64" />}>
+            {showHighlights && <FitlabHighlights />}
+          </Suspense>
         </div>
 
-        <SpecialOfferSection />    
+        <Suspense fallback={<Fallback variant="default" height="h-48" />}>
+          <SpecialOfferSection />
+        </Suspense>
 
-        <TestimonialSection />
+        <Suspense fallback={<Fallback variant="dots" height="h-48" />}>
+          <TestimonialSection />
+        </Suspense>
         
         <Footer/>
         

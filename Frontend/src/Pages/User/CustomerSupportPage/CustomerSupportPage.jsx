@@ -1,16 +1,18 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, lazy, Suspense} from 'react'
 import './CustomerSupportPage.css'
 import {motion} from 'framer-motion'
 
 import Header from '../../../Components/Header/Header'
-import VideoSupportModule from './VideoSupportModule'
-import TextChatBox from '../../User/TextChatBox/TextChatBox'
-import ChatTooltip from './VideoSupport/ChatTooltip'
-import FaqSection from './FaqSection'
-import MiniTestimonialCarousal from '../../../Components/MiniTestimonialCarousal/MiniTestimonialCarousal'
 import UserSidebar from '../../../Components/UserSidebar/UserSidebar'
-import FeaturesDisplay from '../../../Components/FeaturesDisplay/FeaturesDisplay'
+import ChatTooltip from './VideoSupport/ChatTooltip'
 import Footer from '../../../Components/Footer/Footer'
+import Fallback from '../../../Components/FallbackSuspense/Fallback'
+
+const VideoSupportModule = lazy(()=> import("./VideoSupportModule"))
+const TextChatBox = lazy(()=> import("../../User/TextChatBox/TextChatBox"))
+const FaqSection = lazy(()=> import("./FaqSection"))
+const MiniTestimonialCarousal = lazy(()=> import("../../../Components/MiniTestimonialCarousal/MiniTestimonialCarousal"))
+const FeaturesDisplay = lazy(()=> import("../../../Components/FeaturesDisplay/FeaturesDisplay"))
 
 
 export default function CustomerSupportPage(){
@@ -109,17 +111,23 @@ export default function CustomerSupportPage(){
 
                       <div className='mt-[4rem] flex justify-between'>
 
-                        <VideoSupportModule />
+                        <Suspense fallback={<Fallback variant="default" height="h-96" />}>
+                          <VideoSupportModule />
+                        </Suspense>
 
                         <div className='mt-[3rem]'>
 
-                          <TextChatBox isStatic={true} boxHeight={517} boxWidth={25} focusByDefault={chatFocusInput}/>
+                          <Suspense fallback={<Fallback variant="wave" height="h-[32rem]" />}>
+                            <TextChatBox isStatic={true} boxHeight={517} boxWidth={25} focusByDefault={chatFocusInput}/>
+                          </Suspense>
 
                           <ChatTooltip isVisible={showTooltip} onHide={()=> setShowTooltip(false)} />
 
                           <div className='mt-[1.7rem]'>
 
-                            <MiniTestimonialCarousal />
+                            <Suspense fallback={<Fallback variant="brands" height="h-32" />}>
+                              <MiniTestimonialCarousal />
+                            </Suspense>
 
                           </div>
 
@@ -131,7 +139,9 @@ export default function CustomerSupportPage(){
 
                     <div className='mt-8'>
 
+                      <Suspense fallback={<Fallback variant="default" height="h-64" />}>
                         <FaqSection/>
+                      </Suspense>
 
                     </div>
 
@@ -139,7 +149,9 @@ export default function CustomerSupportPage(){
 
                   <div className=''>   
 
-                    <FeaturesDisplay topRoom={false}/>
+                    <Suspense fallback={<Fallback variant="products" height="h-80" />}>
+                      <FeaturesDisplay topRoom={false}/>
+                    </Suspense>
 
                   </div>
                                             

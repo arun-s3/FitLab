@@ -22,6 +22,8 @@ import OrderConfirmationPage from './Pages/User/OrderConfirmationPage/OrderConfi
 import OrderHistoryPage from './Pages/User/OrderHistoryPage/OrderHistoryPage'
 import WalletPage from './Pages/User/WalletPage/WalletPage'
 import CustomerSupportPage from './Pages/User/CustomerSupportPage/CustomerSupportPage'
+import FitnessTrainingPage from './Pages/User/FitnessTrainingPage/FitnessTrainingPage'
+
 
 import UserPageLayout from './Pages/User/UserPageLayout/UserPageLayout'
 import GlobalVideoCallModalLayout from './Pages/User/GlobalModalLayouts/GlobalVideoCallModalLayout'
@@ -122,6 +124,7 @@ export default function App(){
                                 <Route path='order-confirm' element={<OrderConfirmationPage/>} />
                             </Route>
                             <Route path='support' element={<CustomerSupportPage/>} />
+                            <Route path='fitness' element={<FitnessTrainingPage/>} />
                         </Route>
                     </Route>
 

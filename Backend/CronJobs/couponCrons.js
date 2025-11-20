@@ -2,7 +2,7 @@ const cron = require("node-cron")
 const Coupon = require("../Models/couponModel")
 
 
-cron.schedule("0 0 * * *", async ()=> {
+cron.schedule("0 * * * *", async ()=> {
   try {
     const now = new Date();
 

@@ -4,7 +4,7 @@ const stripeLib = require("stripe")
 
 module.exports = function walletCron(io) {
 
-  cron.schedule("* * * * *", async () => {
+  cron.schedule("0 * * * *", async () => {
     console.log("Checking auto-recharge wallets...")
 
     console.log("IO exists?", !!global.io)

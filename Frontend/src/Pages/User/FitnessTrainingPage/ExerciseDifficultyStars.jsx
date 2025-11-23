@@ -1,53 +1,64 @@
-import React from 'react'
-import {motion, AnimatePresence} from 'framer-motion'
+import React, {useState, useEffect} from 'react'
+import {motion} from 'framer-motion'
 
 import {Star} from 'lucide-react'
 
 
 export default function ExerciseDifficultyStars({exercise}){
 
-    const calculateDifficultyStars = (exercise) => {
-        const eq = (exercise?.equipment || "").toLowerCase()
-        const force = (exercise?.force || "").toLowerCase()
-        const mechanic = (exercise?.mechanic || "").toLowerCase()
-        const level = (exercise?.level || "").toLowerCase()
-        const name = (exercise?.name || "").toLowerCase()
+    const [rating, setRating] = useState(2)
+    const [isLoading, setIsLoading] = useState(true)
+
+    const getDifficultyRating = (name = "")=> {
+      const n = name.toLowerCase()
     
-        let score = 0
+      const level5 = [
+        "muscle up", "one arm", "one-hand", "planche", "front lever", "skin the cat", "drop push", "jack burpee", 
+        "back lever", "human flag", "iron cross", "superman push", "archer pull",
+        "clap push", "plyometric push", "single arm push", "90 degree", "pirate",
+      ]     
+      if (level5.some(k => n.includes(k))) return 5
     
-        // 1. Equipment-based difficulty
-        if (eq.includes("body")) score += 1
-        else if (eq.includes("band")) score += 2
-        else if (eq.includes("dumbbell")) score += 3
-        else if (eq.includes("kettlebell")) score += 4
-        else if (eq.includes("barbell")) score += 5
-        else if (eq.includes("machine") || eq.includes("cable")) score += 4
-        else if (eq.includes("weighted")) score += 6
-        else score += 2
+      const level4 = [
+        "handstand", "snatch", "clean", "jerk", "thruster", "pistol squat", "tuck", "reverse grip bench", "pendlay",
+        "burpee", "box jump", "plyo", "explosive", "deadlift", "barbell squat", "oly", "complex", "dips",
+        "weighted dip", "weighted pull", "renegade row", "bosu", "exercise ball", "ball pike",
+      ] 
+      if (level4.some(k => n.includes(k))) return 4
     
-        // 2. Force difficulty
-        if (force.includes("pull") || force.includes("push")) score += 1
-        if (force.includes("static") || force.includes("isometric")) score += 0.5
+      const level3 = [
+        "bench press", "press", "row", "squat", "pull-up", "pull up", "pulldown", "around world",
+        "lunge", "clean", "shrug", "raise", "dip", "hammer curl", "bench", "incline", "decline"
+      ] 
+      if (level3.some(k => n.includes(k))) return 3
+
+      const level2 = [
+        "machine", "cable", "smith", "resistance band", "band", "seated",
+        "lying", "kneeling", "chair", "step", "wall", "bodyweight", "floor",
+        "curl", "kickback", "pushdown", "push-up", "push up", "fly", "concentration", "dip",
+        "wrist curl", "reverse curl", "preacher", "swing",
+        "lever", "thrust"
+      ]    
+      if (level2.some(k => n.includes(k))) return 2
     
-        // 3. Mechanic
-        if (mechanic.includes("compound")) score += 1.5
-        if (mechanic.includes("isolation")) score += 0.5
+      const level1 = [
+        "stretch", "mobility", "warm", "extension", "rotation", "skater", "mountain climber",
+        "plank", "dead bug", "bird dog", "walk", "hold", "run", "jump rope", "calf raise beginner"
+      ] 
+      if (level1.some(k => n.includes(k))) return 1
     
-        // 4. Level
-        if (level.includes("intermediate")) score += 1
-        if (level.includes("expert") || level.includes("advanced")) score += 2
-    
-        // 5. Special exercise names
-        if (name.includes("plyometric") || name.includes("jump")) score += 2
-        if (name.includes("muscle up") || name.includes("planche") || name.includes("flag")) score += 3
-    
-        // ---------- NORMALIZE SCORE TO 1–5 ----------
-        // Assume raw score range ~2 to ~15
-        const normalized = Math.round((score / 15) * 5)
-    
-        // clamp to 1–5
-        return Math.max(1, Math.min(5, normalized))
+      return 2
     }
+
+    useEffect(() => {
+      if (!exercise.name || exercise.name.trim() === "") {
+        return
+      }
+
+      const rating = getDifficultyRating(exercise.name)
+      setRating(rating)
+      setIsLoading(false)
+    }, [exercise])
     
 
     return (
@@ -58,17 +69,27 @@ export default function ExerciseDifficultyStars({exercise}){
           <div>
             <p className="text-xs text-slate-500">Difficulty</p>
             <div className="flex gap-1">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <Star
-                  key={i}
-                  size={14}
-                  className={
-                    i < calculateDifficultyStars(exercise)
-                      ? "text-yellow-400 fill-yellow-400"
-                      : "text-slate-300"
-                  }
-                />
-              ))}
+              {
+                !isLoading && rating
+                ? Array.from({ length: 5 }).map((_, i) => (
+                    <Star
+                      key={i}
+                      size={14}
+                      className={
+                        i < rating
+                          ? "text-yellow-400 fill-yellow-400"
+                          : "text-slate-300"
+                      }
+                    />
+                  ))
+                : <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-center py-12">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+                      className="w-6 h-6 border-2 border-slate-200 border-t-secondary rounded-full"
+                    />
+                  </motion.div>
+              }
             </div>
           </div>
         </div>

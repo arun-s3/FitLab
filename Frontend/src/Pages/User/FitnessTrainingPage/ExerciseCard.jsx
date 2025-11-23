@@ -6,54 +6,77 @@ import { Zap, Package } from "lucide-react"
 import axios from 'axios'
 
 import ExerciseDifficultyStars from './ExerciseDifficultyStars'
+import {CustomHashLoader} from '../../../Components/Loader/Loader'
 
 
 
 export default function ExerciseCard({exercise, index}){
 
-    const [thumbnails, setThumbnails] = useState({})
+    const [thumbnail, setThumbnail] = useState('')
+    const [isLoading, setIsLoading] = useState(false)
 
-    const googleApiKey = import.meta.env.VITE_GOOGLE_API_KEY
-    const googleSeId = import.meta.env.VITE_GOOGLE_SE_ID 
-  
-    useEffect(()=> {
-      async function searchImages(query){
-        try {
-          const res = await axios.get("https://www.googleapis.com/customsearch/v1", {
-            params: {
-              key: googleApiKey,
-              cx: googleSeId,
-              searchType: "image",
-              q: query + 'JEFIT',
-            },
-          })
-        
-          console.log("res.data.items----->", res.data.items)
-          console.log("res.data.items[0].link----->", res.data.items[0].link)
-          const validThumbnail = res.data.items.find(item=> item?.link)
-          if(exercise.name === 'cable standing up straight crossovers'){
-            console.log("res.data.items of cable standing up straight crossovers----->", res.data.items)
+    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+
+    useEffect(() => {
+      if (!exercise?.name) return
+    
+      let didCancel = false
+    
+      async function loadThumbnail() {
+        setIsLoading(true)
+      
+        async function searchImages(query) {
+          try {
+            const response = await axios.get(`${baseApiUrl}/fitness/thumbnail/${query}`, { withCredentials: true })
+            return response.data.thumbnail;
+          } catch (error) {
+            console.error("Google Image Search Error:", error.response?.data || error);
+            return null
           }
-          return validThumbnail?.link || './fitness_placeholder.jpg'
-        } catch (err) {
-          console.error("Google Image Search Error:", err.response?.data || err)
-          return './fitness_placeholder.jpg'
+        }
+      
+        const fetchedUrl = await searchImages(exercise.name)
+        if (didCancel) return
+      
+        if (!fetchedUrl) {
+          setThumbnail(exercise.gifUrl)
+          setIsLoading(false)
+          return
+        }
+      
+        const tester = new Image()
+        tester.src = fetchedUrl
+      
+        const timeoutId = setTimeout(() => {
+          if (!didCancel) {
+            setThumbnail(exercise.gifUrl)
+            setIsLoading(false)
+          }
+        }, 4000)
+      
+        tester.onload = () => {
+          clearTimeout(timeoutId)
+          if (!didCancel) {
+            setThumbnail(fetchedUrl)
+            setIsLoading(false)
+          }
+        }
+      
+        tester.onerror = () => {
+          clearTimeout(timeoutId)
+          if (!didCancel) {
+            setThumbnail(exercise.gifUrl)
+            setIsLoading(false)
+          }
         }
       }
-
-      const putThumbnails = async()=> {
-        if(exercise && exercise?.name){
-          const thumbnailLink = await searchImages(exercise.name)
-          setThumbnails(thumbnails=> ({...thumbnails, [exercise.name]: thumbnailLink || './fitness_placeholder.jpg'}))
-        }
-      }
-
-      putThumbnails()
-    }, [exercise])
-
-    useEffect(()=> {
-      console.log("thumbnails----->", thumbnails)
-    }, [thumbnails])
+    
+      loadThumbnail()
+    
+      return () => {
+        didCancel = true
+      };
+    }, [exercise?.name])
 
 
     return (
@@ -62,26 +85,31 @@ export default function ExerciseCard({exercise, index}){
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.08 }}
-              whileHover={{ scale: 1.02 }}
+              whileHover={{ scale: 1.005 }}
               className="group bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-lg hover:border-purple-300 transition-all duration-300 cursor-pointer"
             >
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6 p-6">
                 <div className="md:col-span-1">
                   <motion.div
                     whileHover={{ scale: 1.05 }}
-                    className="relative h-48 md:h-40 bg-slate-100 rounded-lg overflow-hidden"
+                    className={`relative ${isLoading && 'flex justify-center items-center'} 
+                      ${thumbnail === exercise.gifUrl ? 'h-[13rem]' : 'h-48 md:h-40'} bg-slate-100 
+                      rounded-lg overflow-hidden`}
                   >
-                    {thumbnails?.[ exercise.name] ? (
-                      <img
-                        src={thumbnails[exercise.name] || "/placeholder.svg"}
-                        alt={exercise.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-slate-400">
-                        No GIF
-                      </div>
-                    )}
+                    {
+                      isLoading &&
+                        <CustomHashLoader loading={isLoading}/> 
+                    }
+                    {
+                      thumbnail && !isLoading && (
+                        <img
+                          src={thumbnail}
+                          className={`${!isLoading && 'w-full object-cover'} 
+                            ${thumbnail === exercise.gifUrl ? 'h-[13rem]' : ' h-full'}`}
+                          onLoad={()=> setIsLoading(false)}
+                        />
+                      ) 
+                    }
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                   </motion.div>
                 </div>
@@ -102,10 +130,9 @@ export default function ExerciseCard({exercise, index}){
                       
                     <ExerciseDifficultyStars exercise={exercise}/>
 
-                    {/* Equipment */}
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-slate-100 rounded-lg">
-                        <Package size={18} className="text-blue-500" />
+                        <Package size={18} className="text-purple-500" />
                       </div>
                       <div>
                         <p className="text-xs text-slate-500">Equipment</p>
@@ -114,7 +141,6 @@ export default function ExerciseCard({exercise, index}){
                         </p>
                       </div>
                     </div>
-                    {/* Force Type */}
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-slate-100 rounded-lg">
                         <Zap size={18} className="text-orange-500" />
@@ -126,7 +152,6 @@ export default function ExerciseCard({exercise, index}){
                         </p>
                       </div>
                     </div>
-                    {/* Category */}
                     {
                       exercise?.category &&
                         <div>
@@ -155,7 +180,6 @@ export default function ExerciseCard({exercise, index}){
                       </div>
                     )}
                   <Link
-                    // href={`/video/${exercise.id || exercise.name.replace(/\s+/g, "-")}?muscle=${selectedMuscle}`}
                   >
                     <motion.button
                       whileHover={{ scale: 1.05 }}

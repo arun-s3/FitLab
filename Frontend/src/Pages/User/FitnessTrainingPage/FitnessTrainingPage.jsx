@@ -28,7 +28,7 @@ export default function FitnessTrainingPage(){
 
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1) 
-  const exercisesPerPage = 5
+  const exercisesPerPage = 3
 
   const exerciseAPiKey = import.meta.env.VITE_EXERCISEDB_RAPIDAPI_KEY
   const exerciseAPiUrl = import.meta.env.VITE_EXERCISEDB_URL
@@ -66,10 +66,28 @@ export default function FitnessTrainingPage(){
         const response = await axios.get(
           `${exerciseAPiUrl}/bodyparts/${selectedMuscle}/exercises?offset=${firstExerciseIndex}&limit=${exercisesPerPage}`
         )
-        console.log("loadBodyParts response----->", response.data)
+        console.log("fetchExercisesByMuscle response----->", response.data)
         if(response.data.success){
           console.log("Exercises--->", response.data)
-          const totalPagesRequired = Math.ceil(response.totalExercises / exercisesPerPage)
+          const totalPagesRequired = Math.ceil(response.data.metadata.totalExercises / exercisesPerPage)
+          setTotalPages(totalPagesRequired)
+          return response.data.data
+        }
+      }catch (error) {
+      	console.error("Error while loading body parts", error.message)
+      }
+  }
+
+  const searchExercises = async()=> { 
+    try {
+        console.log("Inside searchExercises()...")
+        const response = await axios.get(
+          `${exerciseAPiUrl}/bodyparts/${selectedMuscle}/exercises?offset=${firstExerciseIndex}&limit=${exercisesPerPage}`
+        )
+        console.log("fetchExercisesByMuscle response----->", response.data)
+        if(response.data.success){
+          console.log("Exercises--->", response.data)
+          const totalPagesRequired = Math.ceil(response.data.metadata.totalExercises / exercisesPerPage)
           setTotalPages(totalPagesRequired)
           return response.data.data
         }
@@ -100,7 +118,7 @@ export default function FitnessTrainingPage(){
         setLoading(false)
       }
     }
-
+    console.log("firstExerciseIndex----->", firstExerciseIndex)
     loadExercises()
   }, [selectedMuscle, firstExerciseIndex])
 

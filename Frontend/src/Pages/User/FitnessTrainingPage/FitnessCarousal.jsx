@@ -19,28 +19,28 @@ export default function FitnessCarousal(){
     id: 1,
     title: 'Why Target Specific Muscles?',
     description: 'Targeting specific muscle groups helps you build strength efficiently, improve posture, and achieve your fitness goals with precision. Professional training videos show you the correct form to maximize results.',
-    image: './person-doing-bicep-curl-at-gym.jpg',
+    image: './FitnessCarousal/person-doing-bicep-curl-at-gym.jpg',
     tagline: 'Precision Training'
   },
   {
     id: 2,
     title: 'Benefits of Professional Videos',
     description: 'Learn from certified trainers who break down every movement. Understand muscle activation, proper breathing, and common mistakes to avoid. Get results faster with expert guidance.',
-    image: './trainer-showing-correct-form-in-gym.jpg',
+    image: './FitnessCarousal/trainer-showing-correct-form-in-gym.jpg',
     tagline: 'Expert Guidance'
   },
   {
     id: 3,
     title: 'Why Professional Over Personal Trainer?',
     description: 'Access unlimited videos anytime, anywhere. Learn multiple variations and techniques. Practice at your own pace without time constraints. Build a personalized workout routine with proven methods.',
-    image: './fit-person-exercising-with-dumbbells.jpg',
+    image: './FitnessCarousal/fit-person-exercising-with-dumbbells.jpg',
     tagline: 'Learn At Your Pace'
   },
   {
     id: 4,
     title: 'Structured Learning Path',
     description: 'Follow a progressive training system. Start with basics, advance to complex movements. Track your progress and adapt your routine. Every muscle group has dedicated training content.',
-    image: './gym-equipment-setup-professional.jpg',
+    image: './FitnessCarousal/gym-equipment-setup-professional.jpg',
     tagline: 'Progress Tracking'
   }
 ]
@@ -48,7 +48,7 @@ export default function FitnessCarousal(){
   useEffect(() => {
     const timer = setInterval(() => {
       setCarouselIdx((prev) => (prev + 1) % CAROUSEL_SLIDES.length)
-    }, 6000)
+    }, 600000)
     return () => clearInterval(timer)
   }, [])
 
@@ -85,7 +85,7 @@ export default function FitnessCarousal(){
                   transition={{ delay: 0.2 }}
                   className="inline-block"
                 >
-                  <span className="text-sm font-semibold text-red-600 bg-red-50 px-4 py-2 rounded-full">
+                  <span className="text-sm font-semibold text-purple-600 bg-purple-100 px-4 py-2 rounded-full">
                     {CAROUSEL_SLIDES[carouselIdx].tagline}
                   </span>
                 </motion.div>
@@ -94,7 +94,7 @@ export default function FitnessCarousal(){
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
-                  className="text-4xl md:text-5xl font-bold text-slate-900 leading-tight"
+                  className="text-[25px] md:text-[33px] font-bold text-slate-900 leading-tight"
                 >
                   {CAROUSEL_SLIDES[carouselIdx].title}
                 </motion.h1>
@@ -103,7 +103,7 @@ export default function FitnessCarousal(){
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
-                  className="text-lg text-slate-600 leading-relaxed"
+                  className="text-[16px] text-slate-600 leading-relaxed"
                 >
                   {CAROUSEL_SLIDES[carouselIdx].description}
                 </motion.p>
@@ -114,7 +114,8 @@ export default function FitnessCarousal(){
                   transition={{ delay: 0.5 }}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="inline-block bg-red-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors"
+                  className="inline-block bg-purple-600 text-white text-[15px] px-8 py-3 rounded-lg font-semibold
+                   hover:bg-purple-700 transition-colors"
                 >
                   Start Learning
                 </motion.button>
@@ -143,7 +144,7 @@ export default function FitnessCarousal(){
                   key={idx}
                   onClick={() => setCarouselIdx(idx)}
                   className={`h-1 rounded-full transition-all ${
-                    idx === carouselIdx ? 'bg-red-600 w-8' : 'bg-slate-300 w-2'
+                    idx === carouselIdx ? 'bg-purple-600 w-8' : 'bg-slate-300 w-2'
                   }`}
                   whileHover={{ scale: 1.1 }}
                 />
@@ -162,7 +163,7 @@ export default function FitnessCarousal(){
                 onClick={nextSlide}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                className="p-3 rounded-lg bg-red-600 hover:bg-red-700 transition-colors"
+                className="p-3 rounded-lg bg-purple-600 hover:bg-purple-700 transition-colors"
               >
                 <ChevronRight size={20} className="text-white" />
               </motion.button>

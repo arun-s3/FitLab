@@ -2936,6 +2936,10 @@ select{
   max-height: 15rem;
 }
 
+.max-h-72{
+  max-height: 18rem;
+}
+
 .max-h-\[19rem\]{
   max-height: 19rem;
 }
@@ -5366,11 +5370,6 @@ select{
 .border-t-white{
   --tw-border-opacity: 1;
   border-top-color: rgb(255 255 255 / var(--tw-border-opacity));
-}
-
-.border-t-red-600{
-  --tw-border-opacity: 1;
-  border-top-color: rgb(220 38 38 / var(--tw-border-opacity));
 }
 
 .\!bg-primaryDark{
@@ -9789,6 +9788,11 @@ select{
   background-color: rgba(159, 42, 240, 1);
 }
 
+.hover\:bg-slate-100:hover{
+  --tw-bg-opacity: 1;
+  background-color: rgb(241 245 249 / var(--tw-bg-opacity));
+}
+
 .hover\:bg-slate-200:hover{
   --tw-bg-opacity: 1;
   background-color: rgb(226 232 240 / var(--tw-bg-opacity));
@@ -10078,6 +10082,11 @@ select{
 .hover\:text-red-500:hover{
   --tw-text-opacity: 1;
   color: rgb(239 68 68 / var(--tw-text-opacity));
+}
+
+.hover\:text-red-600:hover{
+  --tw-text-opacity: 1;
+  color: rgb(220 38 38 / var(--tw-text-opacity));
 }
 
 .hover\:text-red-700:hover{
@@ -12946,6 +12955,10 @@ select{
     margin-top: auto;
   }
 
+  .md\:block{
+    display: block;
+  }
+
   .md\:inline-block{
     display: inline-block;
   }
@@ -13367,6 +13380,10 @@ select{
 
   .md\:text-\[30px\]{
     font-size: 30px;
+  }
+
+  .md\:text-\[33px\]{
+    font-size: 33px;
   }
 
   .md\:text-\[35px\]{

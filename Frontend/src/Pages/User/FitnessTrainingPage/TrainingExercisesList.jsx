@@ -3,12 +3,46 @@ import {Link} from 'react-router-dom'
 import {useDispatch, useSelector} from 'react-redux'
 import {motion, AnimatePresence} from 'framer-motion'
 
+import axios from 'axios'
 
 import ExerciseCard from './ExerciseCard'
+import {capitalizeFirstLetter} from '../../../Utils/helperFunctions'
+
 import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
 
 
-export default function TrainingExercisesList({muscles, selectedMuscle, exercises, isLoading, error, currentPage, totalPages, onPageChange}){
+export default function TrainingExercisesList({selectedBodyParts, exercises, isLoading, error, currentPage, totalPages,
+  onPageChange, onfetchMusclesAndEquipments, children}){
+
+  const exerciseAPiUrl = import.meta.env.VITE_EXERCISEDB_URL
+
+  useEffect(()=> {
+    async function loadMusclesAndEquipments(){
+      try {
+        let items = {muscles: [], equipments: []}
+        console.log("Inside loadMusclesAndEquipments()...")
+        const [musclesResponse, equipmentsResponse] = await Promise.allSettled([
+          await axios.get(`${exerciseAPiUrl}/muscles`),
+          await axios.get(`${exerciseAPiUrl}/equipments`),
+        ])
+        
+        console.log("musclesResponse------->", musclesResponse)
+        if (musclesResponse.status === 'fulfilled'){
+          const muscles = musclesResponse.value.data.data.map(data=> data.name)
+          items.muscles = muscles
+        }
+        if (equipmentsResponse.status === 'fulfilled'){
+          const equipments = equipmentsResponse.value.data.data.map(data=> data.name)
+          items.equipments = equipments
+        }
+        console.log("items---->", items)
+        onfetchMusclesAndEquipments(items)
+      }catch (error) {
+      	console.error("Error while loading muscles and equipments", error.message)
+      }
+    }
+    loadMusclesAndEquipments()
+  }, [exercises])
 
   useEffect(()=> {
     console.log(`totalPages------>${totalPages} and currentPage------>${currentPage}`)
@@ -21,19 +55,31 @@ export default function TrainingExercisesList({muscles, selectedMuscle, exercise
           
 
       <AnimatePresence mode="wait">
-          {selectedMuscle && (
+          {(
+            (selectedBodyParts && selectedBodyParts.length > 0) || (exercises && exercises.length > 0)
+           ) && (
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -30 }}
               transition={{ duration: 0.5 }}
-              key={selectedMuscle}
+              key={selectedBodyParts[0] || "exercises-list"}
             >
-              <div className="mb-10">
-                <h3 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">
-                  {muscles.find((muscle)=> muscle === selectedMuscle)?.name} Exercises
-                </h3>
-                <div className="w-12 h-1 bg-secondary rounded-full" />
+              <div className="mb-10 flex items-center justify-between">
+                <div>
+                  <h3 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">
+                    {
+                      selectedBodyParts.length === 1 
+                        ? `${capitalizeFirstLetter(selectedBodyParts[0])} Exercises`
+                        : 'Exercises'
+                    } 
+                  </h3>
+                  <div className="w-12 h-1 bg-secondary rounded-full" />
+                </div>    
+                
+                  {children}
+
+
               </div>
 
               {error && !isDemo && (
@@ -83,7 +129,7 @@ export default function TrainingExercisesList({muscles, selectedMuscle, exercise
 
               {!isLoading && !error && exercises.length === 0 && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-12">
-                  <p className="text-lg text-slate-500">No exercises found for this muscle group</p>
+                  <p className="text-lg text-slate-500">No exercises found!</p>
                 </motion.div>
               )}
 
@@ -97,9 +143,9 @@ export default function TrainingExercisesList({muscles, selectedMuscle, exercise
           )}
         </AnimatePresence>
 
-        {!selectedMuscle && (
+        {selectedBodyParts.length === 0 && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-16">
-            <p className="text-lg text-slate-500">Select a muscle group above to explore exercises</p>
+            <p className="text-lg text-slate-500">Select a body part above to explore exercises</p>
           </motion.div>
         )}
 

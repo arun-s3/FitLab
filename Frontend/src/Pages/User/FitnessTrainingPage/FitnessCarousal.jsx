@@ -15,40 +15,72 @@ export default function FitnessCarousal(){
   const dispatch = useDispatch()
 
   const CAROUSEL_SLIDES = [
-  {
-    id: 1,
-    title: 'Why Target Specific Muscles?',
-    description: 'Targeting specific muscle groups helps you build strength efficiently, improve posture, and achieve your fitness goals with precision. Professional training videos show you the correct form to maximize results.',
-    image: './FitnessCarousal/person-doing-bicep-curl-at-gym.jpg',
-    tagline: 'Precision Training'
-  },
-  {
-    id: 2,
-    title: 'Benefits of Professional Videos',
-    description: 'Learn from certified trainers who break down every movement. Understand muscle activation, proper breathing, and common mistakes to avoid. Get results faster with expert guidance.',
-    image: './FitnessCarousal/trainer-showing-correct-form-in-gym.jpg',
-    tagline: 'Expert Guidance'
-  },
-  {
-    id: 3,
-    title: 'Why Professional Over Personal Trainer?',
-    description: 'Access unlimited videos anytime, anywhere. Learn multiple variations and techniques. Practice at your own pace without time constraints. Build a personalized workout routine with proven methods.',
-    image: './FitnessCarousal/fit-person-exercising-with-dumbbells.jpg',
-    tagline: 'Learn At Your Pace'
-  },
-  {
-    id: 4,
-    title: 'Structured Learning Path',
-    description: 'Follow a progressive training system. Start with basics, advance to complex movements. Track your progress and adapt your routine. Every muscle group has dedicated training content.',
-    image: './FitnessCarousal/gym-equipment-setup-professional.jpg',
-    tagline: 'Progress Tracking'
-  }
-]
+    {
+      id: 1,
+      title: 'Why Target Specific Muscles?',
+      description: 'Targeting specific muscle groups helps you build strength efficiently, improve posture, and achieve your fitness goals with precision. Professional training videos show you the correct form to maximize results.',
+      image: '/FitnessCarousal/img1.jpg',
+      tagline: 'Precision Training'
+    },
+    {
+      id: 2,
+      title: 'Benefits of Professional Videos',
+      description: 'Learn from certified trainers who break down every movement. Understand muscle activation, proper breathing, and common mistakes to avoid. Get results faster with expert guidance.',
+      image: '/FitnessCarousal/img2.jpg',
+      tagline: 'Expert Guidance'
+    },
+    {
+      id: 3,
+      title: 'Why Professional Over Personal Trainer?',
+      description: 'Access unlimited videos anytime, anywhere. Learn multiple variations and techniques. Practice at your own pace without time constraints. Build a personalized workout routine with proven methods.',
+      image: '/FitnessCarousal/img3.jpg',
+      tagline: 'Learn At Your Pace'
+    },
+    {
+      id: 4,
+      title: 'Structured Learning Path',
+      description: 'Follow a progressive training system. Start with basics, advance to complex movements. Track your progress and adapt your routine. Every muscle group has dedicated training content.',
+      image: '/FitnessCarousal/img4.jpg',
+      tagline: 'Progress Tracking'
+    },
+    {
+    id: 5,
+    title: "Train Smarter With Muscle Isolation",
+    tagline: "Focused Efficiency",
+    description:
+      "Every muscle plays a unique role in strength, posture, and performance. Muscle isolation helps you remove unnecessary momentum and activate the exact muscle you intend to train. This creates faster strength gains, better symmetry, and reduces the risk of injury by teaching your body to lift with control and intention.",
+    image: "/FitnessCarousal/img5.jpg"
+    },
+    {
+      id: 6,
+      title: "Why Equipment Choice Matters",
+      tagline: "Optimized Performance",
+      description:
+        "Dumbbells, barbells, cables, and machines each stimulate your muscles differently. Understanding when to use each type of equipment helps you maximize range of motion, increase tension, and avoid plateaus. Learn how to match the right equipment to the right exercise so you can grow stronger with every session.",
+      image: "/FitnessCarousal/img6.jpg"
+    },
+    {
+      id: 7,
+      title: "Master Proper Form for Maximum Gains",
+      tagline: "Form First",
+      description:
+        "Most people fail to see progress not because they don’t train hard, but because they train with improper form. Professional form guidance ensures you activate the correct muscles, protect your joints, and train safely at higher intensities. Build confidence and consistency with clear, step-by-step technique breakdowns.",
+      image: "/FitnessCarousal/img7.jpg"
+    },
+    {
+      id: 8,
+      title: "Build a Complete Balanced Physique",
+      tagline: "Total Development",
+      description:
+        "A well-structured routine strengthens all major and minor muscle groups equally. Balanced training boosts metabolism, improves movement quality, and eliminates weak points that limit your progress. With guided programs, you’ll learn how to combine compound and isolation movements to build a strong, functional, and aesthetic body.",
+      image: "/FitnessCarousal/img8.jpg"
+    }
+  ]
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCarouselIdx((prev) => (prev + 1) % CAROUSEL_SLIDES.length)
-    }, 600000)
+    }, 6000)
     return () => clearInterval(timer)
   }, [])
 
@@ -61,8 +93,6 @@ export default function FitnessCarousal(){
   }
 
 
-
-
   return (
     
     <section id='ShoppingCartPage'>
@@ -72,13 +102,19 @@ export default function FitnessCarousal(){
           <AnimatePresence mode="wait">
             <motion.div
               key={carouselIdx}
-              initial={{ opacity: 0, x: 100 }}
+              initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -100 }}
-              transition={{ duration: 0.7 }}
+              // transition={{ duration: 0.7 }}
+              // exit={{ opacity: 0, x: -100 }}
               className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center"
             >
-              <div className="space-y-6">
+              <motion.div 
+                className="space-y-6"
+                initial={{ opacity: 0, x: 100 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.7 }}
+                // exit={{ opacity: 0, y: 10 }}
+              >
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -119,12 +155,13 @@ export default function FitnessCarousal(){
                 >
                   Start Learning
                 </motion.button>
-              </div>
+              </motion.div>
 
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.2 }}
+                transition={{ delay: 0.2, duration: 1.3 }}
+                exit={{ opacity: 0, x: -40 }}
                 className="relative h-80 md:h-96 rounded-2xl overflow-hidden bg-slate-200"
               >
                 <img

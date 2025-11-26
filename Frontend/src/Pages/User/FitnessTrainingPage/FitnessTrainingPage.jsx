@@ -10,6 +10,7 @@ import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
 import FitnessCarousal from './FitnessCarousal'
 import MuscleSelector from './MuscleSelector'
 import TrainingExercisesList from './TrainingExercisesList'
+import ExerciseDetails from './ExerciseDetails'
 import FilterPanel from './FilterPanel'
 import CompactFilterPanel from './CompactFilterPanel'
 import FeaturesDisplay from '../../../Components/FeaturesDisplay/FeaturesDisplay'
@@ -35,6 +36,8 @@ export default function FitnessTrainingPage(){
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
+  const [selectedExercise, setSelectedExercise] = useState(null)
+
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1) 
   const exercisesPerPage = 3
@@ -50,61 +53,61 @@ export default function FitnessTrainingPage(){
 
   const location = useLocation()
 
-  // useEffect(()=> {
-  //   async function loadBodyParts(){
-  //     try {
-  //       console.log("Inside loadBodyParts()...")
-  //       const response = await axios.get(`${exerciseAPiUrl}/bodyparts`)
-  //       console.log("loadBodyParts response----->", response.data)
-  //       if(response.data.success){ 
-  //         setBodyParts(response.data.data.map(data=> data.name))
-  //         console.log("Body Parts--->", bodyParts)
-  //       }
-  //     }catch (error) {
-  //     	console.error("Error while loading body parts", error.message)
-  //     }
-  //   }
-  //   loadBodyParts()
-  // }, [])
+  useEffect(()=> {
+    async function loadBodyParts(){
+      try {
+        console.log("Inside loadBodyParts()...")
+        const response = await axios.get(`${exerciseAPiUrl}/bodyparts`)
+        console.log("loadBodyParts response----->", response.data)
+        if(response.data.success){ 
+          setBodyParts(response.data.data.map(data=> data.name))
+          console.log("Body Parts--->", bodyParts)
+        }
+      }catch (error) {
+      	console.error("Error while loading body parts", error.message)
+      }
+    }
+    loadBodyParts()
+  }, [])
 
-  // const fetchExercises = async(options)=> { 
-  //   try {
-  //       console.log("Inside fetchExercises()...")
-  //       if(options?.searchQueryRemoved && selectedBodyParts?.length === 0){
-  //         setExercises([])
-  //         return
-  //       }     
+  const fetchExercises = async(options)=> { 
+    try {
+        console.log("Inside fetchExercises()...")
+        if(options?.searchQueryRemoved && selectedBodyParts?.length === 0){
+          setExercises([])
+          return
+        }     
 
-  //       const response = await axios.get(
-  //         `${exerciseAPiUrl}/exercises/filter`,
-  //         {
-  //           params: {
-  //             offset: firstExerciseIndex,          
-  //             limit: exercisesPerPage,             
+        const response = await axios.get(
+          `${exerciseAPiUrl}/exercises/filter`,
+          {
+            params: {
+              offset: firstExerciseIndex,          
+              limit: exercisesPerPage,             
             
-  //             muscles: selectedMuscles.length > 0 ? selectedMuscles.join(",") : undefined,        
-  //             bodyParts: selectedBodyParts.length > 0 ? selectedBodyParts.join(",") : undefined,    
-  //             equipment: selectedEquipments.length > 0 ? selectedEquipments.join(",") : undefined,   
+              muscles: selectedMuscles.length > 0 ? selectedMuscles.join(",") : undefined,        
+              bodyParts: selectedBodyParts.length > 0 ? selectedBodyParts.join(",") : undefined,    
+              equipment: selectedEquipments.length > 0 ? selectedEquipments.join(",") : undefined,   
             
-  //             search: options?.searchQueryRemoved ? undefined : searchQuery || undefined,
+              search: options?.searchQueryRemoved ? undefined : searchQuery || undefined,
             
-  //             sortBy: sort.by ? sort.by : undefined,
-  //             sortOrder: sort.order ? sort.order : undefined,
-  //           }
-  //         }
-  //       );
+              sortBy: sort.by ? sort.by : undefined,
+              sortOrder: sort.order ? sort.order : undefined,
+            }
+          }
+        );
 
-  //       console.log("fetchExercises response----->", response.data)
-  //       if(response.data.success){
-  //         console.log("Exercises--->", response.data)
-  //         const totalPagesRequired = Math.ceil(response.data.metadata.totalExercises / exercisesPerPage)
-  //         setTotalPages(totalPagesRequired)
-  //         return response.data.data
-  //       }
-  //     }catch (error) {
-  //     	console.error("Error while loading body parts", error.message)
-  //     }
-  // }
+        console.log("fetchExercises response----->", response.data)
+        if(response.data.success){
+          console.log("Exercises--->", response.data)
+          const totalPagesRequired = Math.ceil(response.data.metadata.totalExercises / exercisesPerPage)
+          setTotalPages(totalPagesRequired)
+          return response.data.data
+        }
+      }catch (error) {
+      	console.error("Error while loading body parts", error.message)
+      }
+  }
 
   
   const loadExercises = async (options) => {
@@ -167,6 +170,11 @@ export default function FitnessTrainingPage(){
     }
   }, [currentPage])
 
+  useEffect(() => {
+    console.log("selectedExercise----->", selectedExercise)
+  }, [selectedExercise])
+
+
   const saveMusclesAndEquipments = (items)=>{
     setAvailableMuscles(items.muscles || [])
     setAvailableEquipments(items.equipments || [])
@@ -196,68 +204,80 @@ export default function FitnessTrainingPage(){
           
           <div className="min-h-screen bg-white text-slate-900">
 
-            <FitnessCarousal />
-
-            <div className="mt-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-0 md:py-0">
-
             {
-              bodyParts && bodyParts.length > 0 &&
-                <MuscleSelector 
-                  bodyParts={bodyParts} 
-                  searchedBodyPart={searchQuery} 
-                  setSearchedBodyPart={setSearchQuery} 
-                  onSearchBodyPart={setSelectedBodyParts}
-                  selectedBodyParts={selectedBodyParts}
-                  listExercises={loadExercises}
+              !selectedExercise ?
+                <>
+                  <FitnessCarousal />
+
+                  <div className="mt-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-0 md:py-0">
+
+                  {
+                    bodyParts && bodyParts.length > 0 &&
+                      <MuscleSelector 
+                        bodyParts={bodyParts} 
+                        searchedBodyPart={searchQuery} 
+                        setSearchedBodyPart={setSearchQuery} 
+                        onSearchBodyPart={setSelectedBodyParts}
+                        selectedBodyParts={selectedBodyParts}
+                        listExercises={loadExercises}
+                      />
+                  }
+
+                  </div>
+                
+                  <TrainingExercisesList 
+                    selectedBodyParts={selectedBodyParts} 
+                    exercises={exercises}
+                    onfetchMusclesAndEquipments={saveMusclesAndEquipments}
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onSelectExercise={setSelectedExercise}
+                    onPageChange={setCurrentPage}
+                    isLoading={loading}
+                    error={error}
+                  >
+                    <div className="hidden md:block">
+                
+                      <CompactFilterPanel
+                        selectedMuscles={selectedMuscles}
+                        onMusclesChange={setSelectedMuscles}
+                        selectedEquipments={selectedEquipments}
+                        onEquipmentsChange={setSelectedEquipments}
+                        sortBy={sort.by}
+                        onSortByChange={(value)=> setSort(sorts=> ({...sorts, by: value}))}
+                        sortOrder={sort.order}
+                        onSortOrderChange={(value)=> setSort(sorts=> ({...sorts, order: value}))}
+                        availableMuscles={availableMuscles}
+                        availableEquipments={availableEquipments}
+                      />
+
+                    </div>
+                    <div className="md:hidden mb-6">
+                
+                      <FilterPanel
+                        selectedMuscles={selectedMuscles}
+                        onMusclesChange={setSelectedMuscles}
+                        selectedEquipments={selectedEquipments}
+                        onEquipmentsChange={setSelectedEquipments}
+                        sortBy={sort.by}
+                        onSortByChange={(value)=> setSort(sorts=> ({...sorts, by: value}))}
+                        sortOrder={sort.order}
+                        onSortOrderChange={(value)=> setSort(sorts=> ({...sorts, order: value}))}
+                        availableMuscles={availableMuscles}
+                        availableEquipments={availableEquipments}
+                      />
+
+                    </div>
+                
+                  </TrainingExercisesList>
+                </>
+              
+              : <ExerciseDetails 
+                  exercise={selectedExercise} 
+                  onGoBack={()=> setSelectedExercise(null)}
                 />
+
             }
-
-            </div>
-
-            <TrainingExercisesList 
-              selectedBodyParts={selectedBodyParts} 
-              exercises={exercises}
-              onfetchMusclesAndEquipments={saveMusclesAndEquipments}
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-              isLoading={loading}
-              error={error}
-            >
-              <div className="hidden md:block">
-
-                <CompactFilterPanel
-                  selectedMuscles={selectedMuscles}
-                  onMusclesChange={setSelectedMuscles}
-                  selectedEquipments={selectedEquipments}
-                  onEquipmentsChange={setSelectedEquipments}
-                  sortBy={sort.by}
-                  onSortByChange={(value)=> setSort(sorts=> ({...sorts, by: value}))}
-                  sortOrder={sort.order}
-                  onSortOrderChange={(value)=> setSort(sorts=> ({...sorts, order: value}))}
-                  availableMuscles={availableMuscles}
-                  availableEquipments={availableEquipments}
-                />
-
-              </div>
-              <div className="md:hidden mb-6">
-
-                <FilterPanel
-                  selectedMuscles={selectedMuscles}
-                  onMusclesChange={setSelectedMuscles}
-                  selectedEquipments={selectedEquipments}
-                  onEquipmentsChange={setSelectedEquipments}
-                  sortBy={sort.by}
-                  onSortByChange={(value)=> setSort(sorts=> ({...sorts, by: value}))}
-                  sortOrder={sort.order}
-                  onSortOrderChange={(value)=> setSort(sorts=> ({...sorts, order: value}))}
-                  availableMuscles={availableMuscles}
-                  availableEquipments={availableEquipments}
-                />
-
-              </div>
-
-            </TrainingExercisesList>
 
           </div>
 

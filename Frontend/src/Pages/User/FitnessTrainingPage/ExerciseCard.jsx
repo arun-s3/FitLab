@@ -10,7 +10,7 @@ import {CustomHashLoader} from '../../../Components/Loader/Loader'
 
 
 
-export default function ExerciseCard({exercise, index}){
+export default function ExerciseCard({exercise, index, onChooseExercise}){
 
     const [thumbnail, setThumbnail] = useState('')
     const [isLoading, setIsLoading] = useState(false)
@@ -115,7 +115,9 @@ export default function ExerciseCard({exercise, index}){
                 </div>
                 <div className="md:col-span-3 flex flex-col justify-between">
                   <div className="mb-4">
-                    <h4 className="text-xl md:text-2xl capitalize font-bold text-slate-900 mb-2 group-hover:text-secondary transition-colors">
+                    <h4 className="text-xl md:text-2xl capitalize font-bold text-slate-900 mb-2 group-hover:text-secondary transition-colors"
+                      onClick={()=> onChooseExercise({...exercise, thumbnail})}
+                    >
                       {exercise.name}
                     </h4>
                     {exercise.instructions &&
@@ -184,6 +186,7 @@ export default function ExerciseCard({exercise, index}){
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
+                      onClick={()=> onChooseExercise({...exercise, thumbnail})}
                       className="w-full md:w-auto bg-purple-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-purple-700 transition-colors"
                     >
                       View Details

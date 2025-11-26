@@ -11,7 +11,7 @@ import {capitalizeFirstLetter} from '../../../Utils/helperFunctions'
 import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
 
 
-export default function TrainingExercisesList({selectedBodyParts, exercises, isLoading, error, currentPage, totalPages,
+export default function TrainingExercisesList({selectedBodyParts, exercises, isLoading, error, currentPage, totalPages, onSelectExercise,
   onPageChange, onfetchMusclesAndEquipments, children}){
 
   const exerciseAPiUrl = import.meta.env.VITE_EXERCISEDB_URL
@@ -114,7 +114,7 @@ export default function TrainingExercisesList({selectedBodyParts, exercises, isL
                   {
                     exercises && exercises.length > 0 && exercises.map((exercise, index) => (
 
-                      <ExerciseCard exercise={exercise} index={index}/>
+                      <ExerciseCard exercise={exercise} index={index} onChooseExercise={onSelectExercise}/>
 
                   ))}
 

@@ -110,7 +110,7 @@ export default function FitnessCarousal(){
             >
               <motion.div 
                 className="space-y-6"
-                initial={{ opacity: 0, x: 100 }}
+                initial={{ opacity: 0, x: -100 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.7 }}
                 // exit={{ opacity: 0, y: 10 }}
@@ -144,7 +144,7 @@ export default function FitnessCarousal(){
                   {CAROUSEL_SLIDES[carouselIdx].description}
                 </motion.p>
 
-                <motion.button
+                {/* <motion.button
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5 }}
@@ -154,7 +154,7 @@ export default function FitnessCarousal(){
                    hover:bg-purple-700 transition-colors"
                 >
                   Start Learning
-                </motion.button>
+                </motion.button> */}
               </motion.div>
 
               <motion.div

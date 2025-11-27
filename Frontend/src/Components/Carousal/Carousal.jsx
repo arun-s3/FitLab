@@ -1,76 +1,12 @@
-import React, {useState, useEffect} from "react"
-import {useNavigate} from 'react-router-dom'
+import React, {useState} from "react"
 import {motion, AnimatePresence} from "framer-motion"
 
 import {ChevronLeft, ChevronRight, IndianRupee} from "lucide-react"
-import axios from 'axios'
 
 
-export default function PopularProductsCarousal() {
+export default function Carousal({products, title, subtitle, buttonLabel, size, titleStyle, imageStyle}) {
 
-  const [products, setProducts] = useState([])
   const [currentIndex, setCurrentIndex] = useState(0)
-
-  const navigate = useNavigate()
-
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
-  useEffect(()=> {
-    async function loadProducts(){
-      try{
-        const response = await axios.get(`${baseApiUrl}/products/popular`, {withCredentials: true})
-        console.log("RESPONSE from loadSlides---->", response)
-        setProducts(response.data.popularProducts)
-      }
-      catch(error){
-        console.log("error from  loadSlides--->", error.message)
-      }  
-    }
-    loadProducts()
-  }, [])
-
-  // const products = [
-  //   {
-  //     id: 1,
-  //     name: "Pro Dumbbells Set",
-  //     price: "29999",
-  //     image: "./professional-dumbbells-set-in-gym.jpg",
-  //   },
-  //   {
-  //     id: 2,
-  //     name: "Yoga Mat Premium",
-  //     price: "3000",
-  //     image: "./premium-yoga-mat-fitness.jpg",
-  //   },
-  //   {
-  //     id: 3,
-  //     name: "Treadmill Elite",
-  //     price: "73000",
-  //     image: "./modern-treadmill-gym-equipment.jpg",
-  //   },
-  //   {
-  //     id: 4,
-  //     name: "Resistance Bands",
-  //     price: "1300",
-  //     image: "./colorful-resistance-bands-set.jpg",
-  //   },
-  // ]
-
-  // const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-  
-  // useEffect(()=> {
-  //   async function loadProducts(){
-  //     try{
-  //       const response = await axios.get(`${baseApiUrl}/products/popular`, {withCredentials: true})
-  //       console.log("RESPONSE from loadSlides---->", response)
-  //       setProducts(response.data.popularProducts)
-  //     }
-  //     catch(error){
-  //       console.log("error from  loadSlides--->", error.message)
-  //     }  
-  //   }
-  //   loadProducts()
-  // }, [])
 
   const nextSlide = () => {
     setCurrentIndex((prev) => (prev + 1) % products.length)
@@ -82,7 +18,8 @@ export default function PopularProductsCarousal() {
 
   const getVisibleProducts = () => {
     const visible = []
-    for (let i = 0; i < 4; i++) {
+    const visibleEndIndex = products.length >= 4 ? 4 : products.length
+    for (let i = 0; i < visibleEndIndex; i++) {
       visible.push(products[(currentIndex + i) % products.length])
     }
     return visible
@@ -93,12 +30,19 @@ export default function PopularProductsCarousal() {
   return (
     products && products.length > 0 &&
       (
-        <div className="w-full py-16 px-4 sm:px-6 lg:px-8">
+        <div className="w-full px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
               <div className="mb-8 sm:mb-0">
-                <p className="text-secondary font-semibold text-sm tracking-wide">TOP FITNESS PICKS</p>
-                <h2 className="text-[30px] sm:text-[40px] font-bold text-gray-900">Most Popular Products</h2>
+                {
+                    subtitle &&
+                        <p className="text-secondary font-semibold text-sm tracking-wide"> {subtitle} </p>
+                }
+                {
+                    title &&
+                        <h2 className={`${size === 'small' ? 'text-[28px] sm:text-[30px]' : 'text-[30px] sm:text-[40px]'} 
+                            font-bold text-gray-900 ${titleStyle && titleStyle}`}> {title} </h2>
+                }
               </div>
 
               <div className="flex gap-3">
@@ -147,7 +91,8 @@ export default function PopularProductsCarousal() {
                       <motion.div
                         whileHover={{ y: -8 }}
                         transition={{ duration: 0.3 }}
-                        className="relative h-96 rounded-3xl overflow-hidden shadow-lg group cursor-pointer"
+                        className={`relative ${size === 'small' ? 'h-[17rem]' : 'h-96'} rounded-3xl overflow-hidden shadow-lg group 
+                            cursor-pointer ${imageStyle && imageStyle}`}
                       >
                         <motion.img
                           src={product.image}
@@ -167,7 +112,7 @@ export default function PopularProductsCarousal() {
                         >
                           <button className="bg-primaryDark hover:bg-green-500 text-white font-semibold px-6 py-2 
                             rounded-[7px] text-sm transition-colors duration-200 shadow-md">
-                              ADD TO CART
+                              {buttonLabel}
                           </button>
                         </motion.div>
 

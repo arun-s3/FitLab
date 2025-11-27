@@ -1,5 +1,6 @@
 const Product = require('../Models/productModel')
 const cloudinary = require('../Utils/cloudinary')
+const {muscleGroups} = require('./controllerUtils/fitnessUtils')
 
 const {Parser} = require("json2csv")
 const PDFDocument = require("pdfkit")
@@ -586,6 +587,99 @@ const getSimilarProducts = async (req, res, next)=> {
 }
 
 
+const getEquipmentByMuscleOrExercise = async (req, res, next) => {
+  try {
+    console.log("Inside getEquipmentByMuscleOrExercise of productController")
+    console.log("req.query-------->", req.query)
+
+    const {muscle, exercise} = req.query
+
+    let muscleFilters = []
+    let exerciseFilters = []
+
+    if (muscle) {
+      const normalizedMuscle = muscle.toLowerCase().trim()
+
+      const matchedGroupKey = Object.keys(muscleGroups).find(group =>
+        muscleGroups[group].some(m => m.toLowerCase() === normalizedMuscle)
+      );
+      console.log("matchedGroupKey----->", matchedGroupKey)
+
+      if (matchedGroupKey) {
+        muscleFilters.push({
+          targetMuscles: { $regex: new RegExp(matchedGroupKey, "i") }
+        })
+      }
+    }
+
+    if (exercise) {
+      const keywords = exercise.toLowerCase().split(" ")
+
+      const keywordQueries = keywords.map(word => ({
+        $or: [
+          { title: { $regex: word, $options: "i" } },
+          { brand: { $regex: word, $options: "i" } },
+          { tags: { $regex: word, $options: "i" } },
+        ],
+      }))
+
+      exerciseFilters.push(...keywordQueries)
+    }
+
+    if (muscleFilters.length === 0 && exerciseFilters.length === 0) {
+      return res.status(200).json({ products: [] });
+    }
+
+    const query = {
+      isBlocked: false,
+      variantOf: { $in: [null, undefined] }, 
+      $or: [...muscleFilters, ...exerciseFilters]
+    }
+
+    const foundProducts = await Product.find(query)
+      .populate({
+        path: "variants",
+        select: "weight size motorPower color stock price",
+      })
+      .limit(20)
+      .lean()
+
+    const formattedProducts = foundProducts.map((main) => {
+      const variants = main.variants || []
+      const variantKey = main.variantType
+
+      const variantValues = variantKey
+        ? [main[variantKey], ...variants.map((v) => v[variantKey])].filter(Boolean)
+        : []
+
+      const prices = [main.price, ...variants.map((v) => v.price)]
+      const stocks = [main.stock, ...variants.map((v) => v.stock)]
+      const totalStock = stocks.reduce((acc, s) => acc + (s || 0), 0)
+
+      const minPrice = Math.min(...prices)
+      const maxPrice = Math.max(...prices)
+
+      return {
+        id: main._id,
+        name: main.title,
+        image: main.thumbnail?.url || "",
+        totalStock,
+        price: minPrice === maxPrice ? minPrice : `${minPrice} - ${maxPrice}`,
+        ...(variantKey ? { [`${variantKey}s`]: variantValues } : {}),
+      }
+    })
+  
+    console.log("Filtered products →", formattedProducts.length)
+
+    res.status(200).json({exerciseBasedProducts: formattedProducts});
+
+  } catch (error) {
+    console.log("Error in getEquipmentByMuscleOrExercise →", error.message)
+    next(error)
+  }
+}
+
+
 const searchProduct = async (req, res, next) => {
   try {
       console.log("Inside searchProduct of productController")
@@ -984,4 +1078,4 @@ const exportProductsAsCsv = async (req, res, next)=> {
 
 
 module.exports = {createProduct, getSingleProduct, getAllProducts, getLatestProducts, getPopularProducts, getSimilarProducts, 
-  searchProduct, updateProduct, toggleProductStatus, exportProductsAsCsv, exportProductsAsPdf}
+  getEquipmentByMuscleOrExercise, searchProduct, updateProduct, toggleProductStatus, exportProductsAsCsv, exportProductsAsPdf}

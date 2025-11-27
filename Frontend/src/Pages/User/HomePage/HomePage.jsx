@@ -1,12 +1,14 @@
 import React, {useState, useEffect, useRef, lazy, Suspense} from 'react'
 import {useLocation} from "react-router-dom"
 
+import axios from 'axios'
+
 import Header from '../../../Components/Header/Header'
 import HeroSection from './HeroSection'
 import Footer from "../../../Components/Footer/Footer"
 import Fallback from '../../../Components/FallbackSuspense/Fallback'
 
-const PopularProductsCarousal = lazy(() => import("./PopularProductsCarousal"))
+const Carousal = lazy(() => import("../../../Components/Carousal/Carousal"))
 const LatestProductsCarousel = lazy(() => import("./LatestProductsCarousel"))
 const BrandsCarousal = lazy(() => import("./BrandsCarousal"))
 const FitnessQuoteSection = lazy(() => import("./FitnessQuoteSection"))
@@ -19,11 +21,15 @@ const TestimonialSection = lazy(() => import("./TestimonialSection"))
 export default function HomePage(){
 
     const [showHighlights, setShowHighlights] = useState(false)
+    const [popularproducts, setPopularProducts] = useState([])
+    
     const highlightsRef = useRef(null)
 
     const location = useLocation()
 
     const shopByCategoryRef = useRef(null)
+
+    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
     useEffect(() => {
       const observer = new IntersectionObserver(
@@ -51,6 +57,20 @@ export default function HomePage(){
       }
     }, [location])
 
+    useEffect(()=> {
+      async function loadPopularProducts(){
+        try{
+          const response = await axios.get(`${baseApiUrl}/products/popular`, {withCredentials: true})
+          console.log("RESPONSE from loadPopularProducts---->", response)
+          setPopularProducts(response.data.popularProducts)
+        }
+        catch(error){
+          console.log("error from  loadSlides--->", error.message)
+        }  
+      }
+      loadPopularProducts()
+    }, [])
+
     const bgImg = {
         backgroundImage:"url('/Hero-section-bg2.png')",
         backgroundSize:"cover"
@@ -72,9 +92,20 @@ export default function HomePage(){
 
         </div>
 
-        <Suspense fallback={<Fallback variant="products" height="h-56" />}>
-          <PopularProductsCarousal />
-        </Suspense>
+        <div className='my-16'>
+          <Suspense fallback={<Fallback variant="products" height="h-56" />}>
+            {/* <PopularProductsCarousal /> */}
+            {
+              popularproducts &&
+                <Carousal 
+                  products={popularproducts} 
+                  title='Most Popular Products' 
+                  subtitle='TOP FITNESS PICKS' 
+                  buttonLabel='ADD TO CART'
+                />
+            }
+          </Suspense>
+        </div>
 
         <div className="mb-8">
           <Suspense fallback={<Fallback variant="wave" height="h-32" />}>

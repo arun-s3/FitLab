@@ -12,7 +12,6 @@ import MuscleSelector from './MuscleSelector'
 import TrainingExercisesList from './TrainingExercisesList'
 import ExerciseDetails from './ExerciseDetails'
 import FilterPanel from './FilterPanel'
-import CompactFilterPanel from './CompactFilterPanel'
 import FeaturesDisplay from '../../../Components/FeaturesDisplay/FeaturesDisplay'
 import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
 import Footer from '../../../Components/Footer/Footer'
@@ -174,6 +173,11 @@ export default function FitnessTrainingPage(){
     console.log("selectedExercise----->", selectedExercise)
   }, [selectedExercise])
 
+  // const gotMuscleSelector = ()=> {
+  //   setTimeout(() => {
+  //         shopByCategoryRef.current?.scrollIntoView({ behavior: "smooth" })
+  //       }, 200)
+  // }
 
   const saveMusclesAndEquipments = (items)=>{
     setAvailableMuscles(items.muscles || [])
@@ -236,23 +240,6 @@ export default function FitnessTrainingPage(){
                     isLoading={loading}
                     error={error}
                   >
-                    <div className="hidden md:block">
-                
-                      <CompactFilterPanel
-                        selectedMuscles={selectedMuscles}
-                        onMusclesChange={setSelectedMuscles}
-                        selectedEquipments={selectedEquipments}
-                        onEquipmentsChange={setSelectedEquipments}
-                        sortBy={sort.by}
-                        onSortByChange={(value)=> setSort(sorts=> ({...sorts, by: value}))}
-                        sortOrder={sort.order}
-                        onSortOrderChange={(value)=> setSort(sorts=> ({...sorts, order: value}))}
-                        availableMuscles={availableMuscles}
-                        availableEquipments={availableEquipments}
-                      />
-
-                    </div>
-                    <div className="md:hidden mb-6">
                 
                       <FilterPanel
                         selectedMuscles={selectedMuscles}
@@ -266,8 +253,6 @@ export default function FitnessTrainingPage(){
                         availableMuscles={availableMuscles}
                         availableEquipments={availableEquipments}
                       />
-
-                    </div>
                 
                   </TrainingExercisesList>
                 </>

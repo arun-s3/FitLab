@@ -6,6 +6,7 @@ import { Zap, Package } from "lucide-react"
 import axios from 'axios'
 
 import ExerciseDifficultyStars from './ExerciseDifficultyStars'
+import ExerciseForceType from './ExerciseForceType'
 import {CustomHashLoader} from '../../../Components/Loader/Loader'
 
 
@@ -88,12 +89,12 @@ export default function ExerciseCard({exercise, index, onChooseExercise}){
               whileHover={{ scale: 1.005 }}
               className="group bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-lg hover:border-purple-300 transition-all duration-300 cursor-pointer"
             >
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 p-6">
-                <div className="md:col-span-1">
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 p-6">
+                <div className="lg:col-span-1">
                   <motion.div
                     whileHover={{ scale: 1.05 }}
                     className={`relative ${isLoading && 'flex justify-center items-center'} 
-                      ${thumbnail === exercise.gifUrl ? 'h-[13rem]' : 'h-48 md:h-40'} bg-slate-100 
+                      ${thumbnail === exercise.gifUrl ? 'h-[13rem]' : 'h-48 lg:h-40'} bg-slate-100 
                       rounded-lg overflow-hidden`}
                   >
                     {
@@ -113,9 +114,9 @@ export default function ExerciseCard({exercise, index, onChooseExercise}){
                     <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                   </motion.div>
                 </div>
-                <div className="md:col-span-3 flex flex-col justify-between">
+                <div className="lg:col-span-3 flex flex-col justify-between">
                   <div className="mb-4">
-                    <h4 className="text-xl md:text-2xl capitalize font-bold text-slate-900 mb-2 group-hover:text-secondary transition-colors"
+                    <h4 className="text-xl lg:text-2xl capitalize font-bold text-slate-900 mb-2 group-hover:text-secondary transition-colors"
                       onClick={()=> onChooseExercise({...exercise, thumbnail})}
                     >
                       {exercise.name}
@@ -128,7 +129,7 @@ export default function ExerciseCard({exercise, index, onChooseExercise}){
                         </p>
                       )}
                   </div>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                  <div className="grid xs-sm2:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                       
                     <ExerciseDifficultyStars exercise={exercise}/>
 
@@ -143,26 +144,9 @@ export default function ExerciseCard({exercise, index, onChooseExercise}){
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-slate-100 rounded-lg">
-                        <Zap size={18} className="text-orange-500" />
-                      </div>
-                      <div>
-                        <p className="text-xs text-slate-500">Type</p>
-                        <p className="text-sm font-semibold text-slate-900 capitalize">
-                          {exercise.force || "Mixed"}
-                        </p>
-                      </div>
-                    </div>
-                    {
-                      exercise?.category &&
-                        <div>
-                          <p className="text-xs text-slate-500 mb-1">Category</p>
-                          <span className="inline-block text-xs font-semibold bg-slate-100 text-slate-700 px-3 py-1 rounded-full capitalize">
-                            {exercise.category || "Strength"}
-                          </span>
-                        </div>
-                    }
+                    
+                    <ExerciseForceType exercise={exercise}/>
+
                  </div>
                   {exercise.secondaryMuscles &&
                     Array.isArray(exercise.secondaryMuscles) &&
@@ -187,7 +171,7 @@ export default function ExerciseCard({exercise, index, onChooseExercise}){
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={()=> onChooseExercise({...exercise, thumbnail})}
-                      className="w-full md:w-auto bg-purple-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-purple-700 transition-colors"
+                      className="w-full lg:w-auto bg-purple-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-purple-700 transition-colors"
                     >
                       View Details
                     </motion.button>

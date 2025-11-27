@@ -65,7 +65,7 @@ export default function TrainingExercisesList({selectedBodyParts, exercises, isL
               transition={{ duration: 0.5 }}
               key={selectedBodyParts[0] || "exercises-list"}
             >
-              <div className="mb-10 flex items-center justify-between">
+              <div className="mb-10 flex flex-col x-lg:flex-row gap-8 items-center justify-between">
                 <div>
                   <h3 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">
                     {
@@ -114,7 +114,11 @@ export default function TrainingExercisesList({selectedBodyParts, exercises, isL
                   {
                     exercises && exercises.length > 0 && exercises.map((exercise, index) => (
 
-                      <ExerciseCard exercise={exercise} index={index} onChooseExercise={onSelectExercise}/>
+                      <ExerciseCard 
+                        exercise={exercise} 
+                        index={index} 
+                        onChooseExercise={onSelectExercise}
+                      />
 
                   ))}
 

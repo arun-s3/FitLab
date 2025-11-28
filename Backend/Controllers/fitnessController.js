@@ -119,17 +119,6 @@ const getExerciseVideos = async (req, res, next) => {
     let videoResults = []
 
     const response = `https://youtube.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(name + " exercise")}&type=video&maxResults=3&key=${process.env.GOOGLE_API_KEY}`
-    // const response = await axios.get(
-    //   `https://youtube.googleapis.com/youtube/v3/search`, {
-    //     params: {
-    //       part: "snippet",
-    //       q: name + " exercise",
-    //       type: "video",
-    //       maxResults: 4,
-    //       key: process.env.GOOGLE_API_KEY,
-    //     }
-    //   }
-    // );
 
     const YTresponse = await axios.get(response)
     console.log("YouTube API response received")

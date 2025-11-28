@@ -21,7 +21,6 @@ import OrderStepper from '../../../Components/OrderStepper/OrderStepper'
 import FeaturesDisplay from '../../../Components/FeaturesDisplay/FeaturesDisplay'
 import {addToCart, reduceFromCart, removeFromCart, getTheCart, removeCoupon, resetCartStates} from '../../../Slices/cartSlice'
 import {getBestCoupon} from '../../../Slices/couponSlice'
-
 import Footer from '../../../Components/Footer/Footer'
 import AuthPrompt from '../../../Components/AuthPrompt/AuthPrompt'
 

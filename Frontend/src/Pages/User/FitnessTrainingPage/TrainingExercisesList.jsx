@@ -1,6 +1,4 @@
-import React, {useEffect, useState} from 'react'
-import {Link} from 'react-router-dom'
-import {useDispatch, useSelector} from 'react-redux'
+import React, {useEffect} from 'react'
 import {motion, AnimatePresence} from 'framer-motion'
 
 import axios from 'axios'

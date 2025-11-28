@@ -1,6 +1,4 @@
-import React, {useEffect, useState, useRef} from 'react'
-import {useLocation, Link} from 'react-router-dom'
-import {useDispatch, useSelector} from 'react-redux'
+import React, {useEffect, useState} from 'react'
 
 import axios from 'axios'
 
@@ -13,7 +11,6 @@ import TrainingExercisesList from './TrainingExercisesList'
 import ExerciseDetails from './ExerciseDetails'
 import FilterPanel from './FilterPanel'
 import FeaturesDisplay from '../../../Components/FeaturesDisplay/FeaturesDisplay'
-import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
 import Footer from '../../../Components/Footer/Footer'
 
 
@@ -41,16 +38,7 @@ export default function FitnessTrainingPage(){
   const [totalPages, setTotalPages] = useState(1) 
   const exercisesPerPage = 3
 
-  const exerciseAPiKey = import.meta.env.VITE_EXERCISEDB_RAPIDAPI_KEY
   const exerciseAPiUrl = import.meta.env.VITE_EXERCISEDB_URL
-
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
-  const {user} = useSelector(state=> state.user)
-
-  const dispatch = useDispatch()
-
-  const location = useLocation()
 
   useEffect(()=> {
     async function loadBodyParts(){
@@ -104,7 +92,7 @@ export default function FitnessTrainingPage(){
           return response.data.data
         }
       }catch (error) {
-      	console.error("Error while loading body parts", error.message)
+      	console.error("Error while loading exercises", error.message)
       }
   }
 
@@ -121,24 +109,6 @@ export default function FitnessTrainingPage(){
     }
     setLoading(false)
   }
-  
-  // const searchExercises = async()=> { 
-  //   try {
-  //       console.log("Inside searchExercises()...")
-  //       const response = await axios.get(
-  //         `${exerciseAPiUrl}/bodyparts/${selectedBodyParts}/exercises?offset=${firstExerciseIndex}&limit=${exercisesPerPage}`
-  //       )
-  //       console.log("fetchExercises response----->", response.data)
-  //       if(response.data.success){
-  //         console.log("Exercises--->", response.data)
-  //         const totalPagesRequired = Math.ceil(response.data.metadata.totalExercises / exercisesPerPage)
-  //         setTotalPages(totalPagesRequired)
-  //         return response.data.data
-  //       }
-  //     }catch (error) {
-  //     	console.error("Error while loading body parts", error.message)
-  //     }
-  // }
 
   useEffect(() => {
     if (searchQuery) {
@@ -169,16 +139,6 @@ export default function FitnessTrainingPage(){
     }
   }, [currentPage])
 
-  useEffect(() => {
-    console.log("selectedExercise----->", selectedExercise)
-  }, [selectedExercise])
-
-  // const gotMuscleSelector = ()=> {
-  //   setTimeout(() => {
-  //         shopByCategoryRef.current?.scrollIntoView({ behavior: "smooth" })
-  //       }, 200)
-  // }
-
   const saveMusclesAndEquipments = (items)=>{
     setAvailableMuscles(items.muscles || [])
     setAvailableEquipments(items.equipments || [])
@@ -201,7 +161,7 @@ export default function FitnessTrainingPage(){
     
       <BreadcrumbBar heading='Fitness Training'/>
 
-      <main>
+      <main className='bg-gradient-to-br from-white via-blue-50 to-gray-100'>
         
         <div className="px-[1rem] py-[3rem]">
 
@@ -268,11 +228,11 @@ export default function FitnessTrainingPage(){
 
         </div>
 
-        {/* <div className="fixed bottom-[2rem] right-[2rem] z-50">
+        <div className="fixed bottom-[2rem] right-[2rem] z-50">
               
           <TextChatBox />
 
-        </div> */}
+        </div>
 
       </main>
 

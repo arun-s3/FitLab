@@ -1,8 +1,7 @@
 import React, {useState, useEffect} from 'react'
-import {Link} from 'react-router-dom'
 import {motion} from 'framer-motion'
 
-import { Zap, Package } from "lucide-react"
+import {Package} from "lucide-react"
 import axios from 'axios'
 
 import ExerciseDifficultyStars from './ExerciseDifficultyStars'
@@ -165,8 +164,6 @@ export default function ExerciseCard({exercise, index, onChooseExercise}){
                         </div>
                       </div>
                     )}
-                  <Link
-                  >
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
@@ -175,7 +172,6 @@ export default function ExerciseCard({exercise, index, onChooseExercise}){
                     >
                       View Details
                     </motion.button>
-                  </Link>
                 </div>
               </div>
             </motion.div>

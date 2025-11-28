@@ -1,18 +1,12 @@
-import React, {useEffect, useState, useRef} from 'react'
-import {useDispatch, useSelector} from 'react-redux'
+import React, {useEffect, useState} from 'react'
 import {motion, AnimatePresence} from 'framer-motion'
 
-import {ChevronLeft, ChevronRight, Play, Search} from 'lucide-react'
-
+import {ChevronLeft, ChevronRight} from 'lucide-react'
 
 
 export default function FitnessCarousal(){
 
   const [carouselIdx, setCarouselIdx] = useState(0)
-
-  const {user} = useSelector(state=> state.user)
-
-  const dispatch = useDispatch()
 
   const CAROUSEL_SLIDES = [
     {
@@ -104,8 +98,6 @@ export default function FitnessCarousal(){
               key={carouselIdx}
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
-              // transition={{ duration: 0.7 }}
-              // exit={{ opacity: 0, x: -100 }}
               className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center"
             >
               <motion.div 
@@ -113,7 +105,6 @@ export default function FitnessCarousal(){
                 initial={{ opacity: 0, x: -100 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.7 }}
-                // exit={{ opacity: 0, y: 10 }}
               >
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
@@ -144,17 +135,6 @@ export default function FitnessCarousal(){
                   {CAROUSEL_SLIDES[carouselIdx].description}
                 </motion.p>
 
-                {/* <motion.button
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="inline-block bg-purple-600 text-white text-[15px] px-8 py-3 rounded-lg font-semibold
-                   hover:bg-purple-700 transition-colors"
-                >
-                  Start Learning
-                </motion.button> */}
               </motion.div>
 
               <motion.div

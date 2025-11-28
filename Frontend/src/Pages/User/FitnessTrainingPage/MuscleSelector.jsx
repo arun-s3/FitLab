@@ -17,7 +17,7 @@ export default function MuscleSelector({bodyParts, searchedBodyPart, setSearched
       setSearchedBodyPart(searchedKeyword)
     }
 
-
+    
     return (
         <>  
             <motion.div

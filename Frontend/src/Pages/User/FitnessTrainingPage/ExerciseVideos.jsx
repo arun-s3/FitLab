@@ -57,11 +57,7 @@ export default function ExerciseVideos({exercise}) {
               transition={{ duration: 0.6 }}
               className="relative px-4 md:px-8 flex flex-col x-lg:flex-row gap-6"
             >
-              <div className="relative w-full aspect-video rounded-[12px] overflow-hidden"> {/*bg-gradient-to-br from-slate-700 to-slate-800 */}
-                {/* {
-                  !playVideo &&
-                    <div className="absolute inset-0 bg-black/40" />
-                } */}
+              <div className="relative w-full aspect-video rounded-[12px] overflow-hidden"> 
                 {
                   !playVideo &&
                     <div className="absolute inset-0 flex items-center justify-center">
@@ -116,7 +112,6 @@ export default function ExerciseVideos({exercise}) {
                         >
                           <div className="group block">
                             <div className="relative h-[14rem] x-lg:h-44 rounded-lg mb-2 group-hover:shadow-lg transition-all">
-                              {/* <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors" /> */}
                               <div className="absolute inset-0 flex items-center justify-center">
                                 <Play className="text-white fill-white" size={24} />
                               </div>

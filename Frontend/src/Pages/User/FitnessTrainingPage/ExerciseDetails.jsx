@@ -83,7 +83,6 @@ export default function ExerciseDetails({exercise, onGoBack}) {
           <img
             src={exercise.thumbnail}
             className="h-full w-full object-cover rounded-[7px]"
-            // onLoad={()=> setIsLoading(false)}
           />
         </div>
       </div>
@@ -104,9 +103,7 @@ export default function ExerciseDetails({exercise, onGoBack}) {
                 {
                   exercise.instructions.map(step=> (
                     <li className="before:content-['▶'] before:text-primaryDark before:mr-2">
-                      {/* <IoIosFitness className='text-primaryDark w-[12px] h-[12px]'/> */}
                       {step}
-                      {/* <p className='text-[14px] text-[#757584]'>  </p> */}
                     </li>
                   ))
                 }
@@ -124,7 +121,6 @@ export default function ExerciseDetails({exercise, onGoBack}) {
                         e.target.onerror = null
                         setHideGif(true)
                       }}
-                      // onLoad={()=> setIsLoading(false)}
                     />
                   </div>
               }
@@ -162,7 +158,6 @@ export default function ExerciseDetails({exercise, onGoBack}) {
           <motion.div variants={itemVariants} className=''>
             <div className="bg-white backdrop-blur-sm border border-secondaryLight2 rounded-xl p-6 md:p-8 sticky top-32">
               <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-                {/* <span className="text-dropdownBorder">⚡</span>  */}
                 <span className='text-[#4b4a55] whitespace-nowrap'> Target Muscles </span>
               </h3>
 

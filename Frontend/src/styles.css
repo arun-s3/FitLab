@@ -1377,6 +1377,10 @@ select{
   top: 26%;
 }
 
+.top-\[26px\]{
+  top: 26px;
+}
+
 .top-\[2px\]{
   top: 2px;
 }

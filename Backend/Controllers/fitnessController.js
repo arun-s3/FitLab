@@ -1,4 +1,6 @@
 const Fitness = require('../Models/fitnessModel')
+const FitnessTracker = require("../Models/fitnessTrackerModel")
+
 const fs = require('fs')
 const path = require('path')
 const axios = require("axios")
@@ -18,7 +20,7 @@ const {errorHandler} = require('../Utils/errorHandler')
 //       },
 //     })
 
-//     return res.data?.results?.[0]?.thumbnail || null;
+//     return res.data?.results?.[0]?.thumbnail || null
 //   } catch (err) {
 //     console.log("Brave fetch error:", err.response?.data || err.message)
 //     return null
@@ -151,5 +153,133 @@ const getExerciseVideos = async (req, res, next) => {
 }
 
 
+const addExercise = async (req, res, next) => {
+  try {
+    console.log("Inside addExercise...")
+    const userId = req.user._id
 
-module.exports = {getExerciseThumbnail, getExerciseVideos}
+    const { name, bodyPart, equipment, sets, notes } = req.body.exercise
+    console.log("req.body.exercise-------->", JSON.stringify(req.body.exercise))
+
+    if (!name || !bodyPart || !Array.isArray(sets) || sets.length === 0) {
+      return next(errorHandler(400, "Exercise name, body part, and at least one set are required!"));
+    }
+
+    for (const s of sets) {
+      if (!s.reps || isNaN(s.reps)) {
+        return next(errorHandler(400, "Each set must include valid reps!"));
+      }
+
+      if (s.rpe && (s.rpe < 1 || s.rpe > 10)) {
+        return next(errorHandler(400, "RPE must be between 1 and 10!"));
+      }
+    }
+
+    const totalVolume = sets.reduce((acc, s) => {
+      const w = Number(s.weight) || 0
+      const r = Number(s.reps) || 0
+      return acc + w * r
+    }, 0)
+    
+    console.log("totalVolume-------->", totalVolume)
+
+
+    const todayStart = new Date(new Date().setHours(0, 0, 0, 0))
+    const todayEnd = new Date(new Date().setHours(23, 59, 59, 999))
+
+    let tracker = await FitnessTracker.findOne({
+      userId,
+      date: { $gte: todayStart, $lte: todayEnd }
+    })
+
+    if (!tracker) {
+      tracker = new FitnessTracker({
+        userId,
+        exercises: [],
+        totalWorkoutVolume: 0,
+      })
+    }
+
+    tracker.exercises.push({
+      name,
+      bodyPart,
+      equipment: equipment || null,
+      sets: sets.map(s => ({
+        weight: s.weight || 0,
+        reps: s.reps,
+        rpe: s.rpe || null
+      })),
+      notes: notes || "",
+      totalVolume,
+    })
+
+    tracker.totalVolume += totalVolume
+
+    await tracker.save();
+
+    return res.status(201).json({
+      message: "Exercise added successfully!",
+      tracker
+    })
+
+  }
+  catch (error) {
+    console.log("Error adding exercise:", error.message)
+    next(error)
+  }
+}
+
+
+const listExercises = async (req, res, next) => {
+  try {
+    console.log("Inside listExercises...")
+    const userId = req.user._id
+
+    const page = Math.max(parseInt(req.query.page) || 1, 1)
+    const limit = Math.max(parseInt(req.query.limit) || 5, 1)
+    const skip = (page - 1) * limit
+
+    const workouts = await FitnessTracker.find({ userId }).sort({ date: -1 })
+
+    if (!workouts.length) {
+      return res.status(404).json({ message: "No exercises found" })
+    }
+
+    const allExercises = []
+    workouts.forEach(workout => {
+      workout.exercises.forEach(ex => {
+        allExercises.push({
+          ...ex.toObject(),
+          workoutId: workout._id,
+          workoutDate: workout.date
+        })
+      })
+    })
+
+    const totalExercises = allExercises.length
+    const totalPages = Math.ceil(totalExercises / limit)
+
+    const exercises = allExercises.slice(skip, skip + limit)
+
+    return res.status(200).json({
+      message: "Exercises fetched successfully",
+      exercises,
+      pagination: {
+        totalExercises,
+        totalPages,
+        currentPage: page,
+        perPage: limit
+      }
+    });
+
+  }
+  catch (error) {
+    console.error("Error fetching exercises:", error.message)
+    next(error)
+  }
+}
+
+
+
+
+module.exports = {getExerciseThumbnail, getExerciseVideos, addExercise, listExercises}

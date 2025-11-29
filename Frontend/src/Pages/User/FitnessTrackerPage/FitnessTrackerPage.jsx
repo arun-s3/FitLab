@@ -4,6 +4,7 @@ import { motion } from "framer-motion"
 import Header from "../../../Components/Header/Header"
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
 import FitnessLayout from "./FitnessLayout"
+import WorkoutSessionCard from "./WorkoutSessionCard"
 import FitnessNavigation from "./FitnessNavigation"
 import FeaturesDisplay from '../../../Components/FeaturesDisplay/FeaturesDisplay'
 import Footer from '../../../Components/Footer/Footer'
@@ -41,7 +42,13 @@ export default function FitnessTrackerPage() {
             <FitnessNavigation currentPage={currentPage} setCurrentPage={setCurrentPage} />
 
             <FitnessLayout>
+              {currentPage === "tracker" && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
 
+                  <WorkoutSessionCard />
+
+                </motion.div>
+              )}
             </FitnessLayout>
 
         </main>

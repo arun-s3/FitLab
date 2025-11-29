@@ -4,7 +4,6 @@ import { motion } from "framer-motion"
 import {Zap, Heart, ChartLine, ChartNoAxesCombined} from 'lucide-react'
 
 
-
 export default function FitnessNav({ currentPage, setCurrentPage }) {
     
   const tabs = [

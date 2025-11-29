@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import {debounce} from 'lodash'
 
 import axios from 'axios'
-import {Search, Plus, Zap} from "lucide-react"
+import {Search, Plus, Zap, Trash} from "lucide-react"
 import {IoIosFitness} from "react-icons/io"
 import {IoBody} from "react-icons/io5"
 import {toast as sonnerToast} from 'sonner'
@@ -23,14 +23,18 @@ export default function ExerciseForm({ onAddExercise }) {
 
     const [searchResults, setSearchResults] = useState({
       bodyParts: [],
-      equipment: [],
+      equipments: [],
       exercises: []
     })
 
     const [bodyParts, setBodyParts] = useState([])
     const [equipments, setEquipments] = useState([])
 
+    const [sets, setSets] = useState( [{ weight: "", reps: "", rpe: "5" }])
+
     const exerciseAPiUrl = import.meta.env.VITE_EXERCISEDB_URL
+
+    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
     useEffect(()=> {
       console.log("searchResults----->", searchResults)
@@ -114,7 +118,7 @@ export default function ExerciseForm({ onAddExercise }) {
     const debouncedSearch = useRef(
         debounce((name)=> {
           fetchExercises(name)
-        }, 900) 
+        }, 600) 
     ).current;
 
     const exerciseSearchHandler = (name)=> {
@@ -130,7 +134,7 @@ export default function ExerciseForm({ onAddExercise }) {
       setFormData((prev) => ({ ...prev, [name]: value }))
 
       const makeItemsEmpty = ()=> {
-          setSearchResults({bodyParts: [], equipment: [], exercises: []})
+          setSearchResults({bodyParts: [], equipments: [], exercises: []})
       }
 
       if (name === "name") {
@@ -153,47 +157,79 @@ export default function ExerciseForm({ onAddExercise }) {
       if (name === "equipment") {
         if (value.trim()) {
           const filtered = equipments.filter((eq) => eq.toLowerCase().includes(value.toLowerCase()))
-          setSearchResults((prev) => ({ ...prev, equipment: filtered }))
+          setSearchResults((prev) => ({ ...prev, equipments: filtered }))
         } else {
           makeItemsEmpty()
         }
       }
     }
 
+
     const handleSelectResult = (type, value) => {
       setFormData((prev) => ({ ...prev, [type]: value }))
-      setSearchResults((prev) => ({ ...prev, [type]: [] }))
+      if(type === 'name'){
+        setSearchResults((prev) => ({ ...prev, exercises: [] }))
+      }else{
+        setSearchResults((prev) => ({ ...prev, [type]: [] }))
+      }
     }
 
-    const handleSubmit = (e) => {
+    const handleSetChange = (index, field, value) => {
+      if (value === "" || /^[0-9]+$/.test(value)) {
+        const updated = [...sets]
+        updated[index][field] = value
+        setSets(updated)
+      }
+    }
+
+    const addSet = () => {
+      setSets(prev => [...prev, { weight: "", reps: "", rpe: "5" }])
+    }
+
+    const removeSet = (index) => {
+      if (sets.length === 1) return
+      const updated = sets.filter((_, i) => i !== index)
+      setSets(updated)
+    }
+
+    const handleSubmit = async(e) => {
       e.preventDefault()
-      if (!formData.name || !formData.weight || !formData.sets || !formData.reps) {
+      if (!formData.name || sets.length === 0 || sets.every(set=> !set.weight || !set.rpe || !set.reps)) {
         sonnerToast.error("Please fill in all required fields")
         return
       }
-
-      onAddExercise({
+      if(sets.some(set=> set.weight <= 0 || set.reps <= 0)){
+        sonnerToast.error("Please enter a valid weight/reps")
+        return
+      }
+      const exercise = {
         name: formData.name,
         bodyPart: formData.bodyPart,
         equipment: formData.equipment,
-        weight: Number.parseInt(formData.weight),
-        sets: Number.parseInt(formData.sets),
-        reps: Number.parseInt(formData.reps),
-        rpe: Number.parseInt(formData.rpe),
+        sets: sets.map(s => ({
+          weight: Number(s.weight),
+          reps: Number(s.reps),
+          rpe: Number(s.rpe)
+        })),
         notes: formData.notes || "",
-      })
-
+      }
+      try { 
+        const response = await axios.post(`${baseApiUrl}/fitness/tracker/add`, {exercise}, { withCredentials: true })
+        if(response.status === 201){
+          sonnerToast.success("New exercise succesfully added!")
+          onAddExercise()
+        }
+      }catch (error) {
+        console.error("Error during ading exercise", error.message)
+      }
       setFormData({
         name: "",
         bodyPart: "",
         equipment: "",
-        weight: "",
-        sets: "",
-        reps: "",
-        rpe: "5",
         notes: "",
       })
-      setSearchResults({bodyParts: [], equipment: [], exercises: []})
+      setSets([{ weight: "", reps: "", rpe: "5" }])
+      setSearchResults({bodyParts: [], equipments: [], exercises: []})
     }
 
     const SearchableInput = ({ name, placeholder, icon: Icon, searchKey }) => (
@@ -207,7 +243,7 @@ export default function ExerciseForm({ onAddExercise }) {
           placeholder={placeholder}
           value={formData[name]}
           onChange={handleChange}
-          onBlur={()=> setSearchResults({bodyParts: [], equipment: []})}
+          onBlur={()=> setSearchResults({bodyParts: [], equipments: []})}
           // onFocus={() => formData[name] && setShowResults((prev) => ({ ...prev, [searchKey]: true }))}
           className="w-full text-[14px] bg-gray-50 border border-gray-300 rounded-lg pl-10 pr-4 py-2 text-gray-900
            placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
@@ -250,53 +286,136 @@ export default function ExerciseForm({ onAddExercise }) {
 
       <div className="space-y-3">
         
-        <SearchableInput name="name" placeholder="Exercise name" icon={Search} searchKey="exercises" />
+        {/* <SearchableInput name="name" placeholder="Exercise name" icon={Search} searchKey="exercises" /> */}
 
         {/* <SearchableInput name="bodyPart" placeholder="Body part" icon={IoBody} searchKey="bodyParts" /> */}
 
-        {/* <div className="relative">
-        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-          <IoBody className="w-[15px] h-[15px]" />
-        </div>
-        <input
-          type="text"
-          name="bodyPart"
-          placeholder={"Body part"}
-          value={formData.bodyPart}
-          onChange={handleChange}
-          onBlur={()=> setSearchResults({bodyParts: [], equipment: [], exercises:[]})}
-          // onFocus={() => formData[name] && setShowResults((prev) => ({ ...prev, [searchKey]: true }))}
-          className="w-full text-[14px] bg-gray-50 border border-gray-300 rounded-lg pl-10 pr-4 py-2 text-gray-900
-           placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
-        />
+        <div className="relative">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+              <Search className="w-[15px] h-[15px]" />
+            </div>
+            <input
+              type="text"
+              name="name"
+              placeholder="Exercise name"
+              value={formData.name}
+              onChange={handleChange}
+              onBlur={()=> setSearchResults({bodyParts: [], equipments: [], exercises:[]})}
+              // onFocus={() => formData[name] && setShowResults((prev) => ({ ...prev, [searchKey]: true }))}
+              className="w-full text-[14px] bg-gray-50 border border-gray-300 rounded-lg pl-10 pr-4 py-2 text-gray-900
+               placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
+            />
 
-        <AnimatePresence>
-          {searchResults.bodyParts.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto"
-            >
-              {searchResults.bodyParts.map((item, index) => (
+            <AnimatePresence>
+              {searchResults.exercises.length > 0 && (
                 <motion.div
-                  key={item}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className="px-4 py-3 hover:bg-purple-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors"
-                  onClick={() => handleSelectResult(name, item)}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto"
                 >
-                  <p className="text-gray-900 font-medium text-sm">{item}</p>
+                  {searchResults.exercises.map((item, index) => (
+                    <motion.div
+                      key={item}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="px-4 py-3 hover:bg-purple-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors"
+                      onClick={()=> handleSelectResult('name', item)}
+                    >
+                      <p className="text-gray-900 font-medium text-sm">{item}</p>
+                    </motion.div>
+                  ))}
                 </motion.div>
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div> */}
+              )}
+            </AnimatePresence>
+      </div>
+      <div className="relative">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+              <IoBody className="w-[15px] h-[15px]" />
+            </div>
+            <input
+              type="text"
+              name="bodyPart"
+              placeholder={"Body part"}
+              value={formData.bodyPart}
+              onChange={handleChange}
+              onBlur={()=> setSearchResults({bodyParts: [], equipments: [], exercises:[]})}
+              // onFocus={() => formData[name] && setShowResults((prev) => ({ ...prev, [searchKey]: true }))}
+              className="w-full text-[14px] bg-gray-50 border border-gray-300 rounded-lg pl-10 pr-4 py-2 text-gray-900
+               placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
+            />
+    
+            <AnimatePresence>
+              {searchResults.bodyParts.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto"
+                >
+                  {searchResults.bodyParts.map((item, index) => (
+                    <motion.div
+                      key={item}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="px-4 py-3 hover:bg-purple-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors"
+                      onClick={() => handleSelectResult('bodyPart', item)}
+                    >
+                      <p className="text-gray-900 font-medium text-sm">{item}</p>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+      </div>
+      <div className="relative">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+              <IoIosFitness className="w-[15px] h-[15px]" />
+            </div>
+            <input
+              type="text"
+              name="equipment"
+              placeholder={"Equipment"}
+              value={formData.equipment}
+              onChange={handleChange}
+              onBlur={()=> setSearchResults({bodyParts: [], equipments: [], exercises:[]})}
+              // onFocus={() => formData[name] && setShowResults((prev) => ({ ...prev, [searchKey]: true }))}
+              className="w-full text-[14px] bg-gray-50 border border-gray-300 rounded-lg pl-10 pr-4 py-2 text-gray-900
+               placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
+            />
+    
+            <AnimatePresence>
+              {searchResults.equipments.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto"
+                >
+                  {searchResults.equipments.map((item, index) => (
+                    <motion.div
+                      key={item}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="px-4 py-3 hover:bg-purple-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors"
+                      onClick={() => handleSelectResult('equipment', item)}
+                    >
+                      <p className="text-gray-900 font-medium text-sm">{item}</p>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+      </div>
 
-        <SearchableInput name="equipment" placeholder="Equipment" icon={IoIosFitness} searchKey="equipment" />
+        {/* <SearchableInput name="equipment" placeholder="Equipment" icon={IoIosFitness} searchKey="equipment" /> */}
 
+      </div>
+
+      {/* <div className="grid grid-cols-3 gap-2">
         <input
           type="number"
           name="weight"
@@ -305,18 +424,6 @@ export default function ExerciseForm({ onAddExercise }) {
           onChange={handleChange}
           className="w-full text-[14px] bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 text-gray-900
            placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
-        />
-      </div>
-
-      <div className="grid grid-cols-3 gap-2">
-        <input
-          type="number"
-          name="sets"
-          placeholder="Sets"
-          value={formData.sets}
-          onChange={handleChange}
-          className="bg-gray-50 text-[14px] border border-gray-300 rounded-lg px-3 py-2 text-gray-900 
-            placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
         />
 
         <input
@@ -341,6 +448,79 @@ export default function ExerciseForm({ onAddExercise }) {
           />
           <p className="text-gray-600 text-xs text-center mt-1 font-semibold">RPE: {formData.rpe}/10</p>
         </div>
+      </div>     */}
+
+      <div className="space-y-3">
+        <AnimatePresence>
+          {sets.map((set, index) => (
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ease: 'easeOut', duration: 0.3}}
+              key={index} 
+              className="relative grid grid-cols-3 gap-2"
+            >
+            
+              <input
+                type="number"
+                name="weight"
+                placeholder="Weight (kg)"
+                value={sets[index].weight}
+                onChange={(e) =>
+                  handleSetChange(index, "weight", e.target.value)
+                }
+                className="w-full text-[14px] bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 text-gray-900
+                placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
+              />
+              <input
+                type="number"
+                name="reps"
+                placeholder="Reps"
+                value={sets[index].reps}
+                onChange={(e) =>
+                  handleSetChange(index, "reps", e.target.value)
+                }
+                className="bg-gray-50 text-[14px] border border-gray-300 rounded-lg px-3 py-2 text-gray-900 placeholder-gray-500
+                  focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
+              />
+              <div>
+                <input
+                  type="range"
+                  name="rpe"
+                  min="1"
+                  max="10"
+                  placeholder="RPE"
+                  value={sets[index].rpe}
+                  onChange={(e) =>
+                    handleSetChange(index, "rpe", e.target.value)
+                  }
+                  className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-purple-600"
+                />
+                <p className="text-gray-600 text-xs text-center mt-1 font-semibold">RPE: {sets[index].rpe}/10</p>
+              </div>
+              {
+                index >= 1 &&
+                  <button
+                    type="button"
+                    onClick={() => removeSet(index)}
+                    className="absolute right-0 top-[26px]"
+                  >
+                    <Trash className="text-red-500 w-[15px] h-[15px]"/>
+                  </button>
+              }
+
+            </motion.div>
+          ))}
+        </AnimatePresence>
+
+        <button
+          type="button"
+          onClick={addSet}
+          className="-mt-[5px] text-purple-600 font-medium text-sm hover:underline"
+        >
+          + Add Set
+        </button>
       </div>
 
       <textarea

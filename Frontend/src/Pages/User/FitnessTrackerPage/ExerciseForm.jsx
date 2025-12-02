@@ -3,21 +3,20 @@ import { motion, AnimatePresence } from "framer-motion"
 import {debounce} from 'lodash'
 
 import axios from 'axios'
-import {Search, Plus, Zap, Trash} from "lucide-react"
+import {Search, ChevronDown, Plus, Zap, Trash} from "lucide-react"
 import {IoIosFitness} from "react-icons/io"
 import {IoBody} from "react-icons/io5"
 import {toast as sonnerToast} from 'sonner'
 
+import useFlexiDropdown from '../../../Hooks/FlexiDropdown'
+import {CustomHashLoader} from '../../../Components/Loader/Loader'
 
-export default function ExerciseForm({ onAddExercise }) {
+
+export default function ExerciseForm({ onAddOrUpdateExercise, editExerciseData = null, onExerciseUpdation}) {
     const [formData, setFormData] = useState({
         name: "",
         bodyPart: "",
         equipment: "",
-        weight: "",
-        sets: "",
-        reps: "",
-        rpe: "5",
         notes: "",
     })
 
@@ -31,6 +30,10 @@ export default function ExerciseForm({ onAddExercise }) {
     const [equipments, setEquipments] = useState([])
 
     const [sets, setSets] = useState( [{ weight: "", reps: "", rpe: "5" }])
+
+    const [loading, setLoading] = useState(false)
+
+    const {openDropdowns, dropdownRefs, toggleDropdown} = useFlexiDropdown(['exerciseNamesDropdown', 'bodyPartsDropdown', 'equipmentsDropdown'])
 
     const exerciseAPiUrl = import.meta.env.VITE_EXERCISEDB_URL
 
@@ -53,12 +56,14 @@ export default function ExerciseForm({ onAddExercise }) {
           if (bodyPartsResponse.status === 'fulfilled'){
             const bodyParts = bodyPartsResponse.value.data.data.map(data=> data.name)
             console.log("bodyParts--->", bodyParts)
+            // setBodyParts([Cardio, Full-body, ...bodyParts])
             setBodyParts(bodyParts)
           }
           console.log("equipmentsResponse------->", equipmentsResponse)
           if (equipmentsResponse.status === 'fulfilled'){
             const equipments = equipmentsResponse.value.data.data.map(data=> data.name)
             console.log("equipments--->", equipments)
+            // setEquipments([None, Bodyweight, ...equipments])
             setEquipments(equipments)
           }
         }catch (error) {
@@ -68,28 +73,23 @@ export default function ExerciseForm({ onAddExercise }) {
       loadBodyPartsAndEquipments()
     }, [])
 
+    useEffect(()=> {
+      if(editExerciseData && Object.keys(editExerciseData).length > 0){
+        console.log("Start editing...")
+        setFormData({
+          name: editExerciseData.name,
+          equipment: editExerciseData.equipment,
+          bodyPart: editExerciseData.bodyPart,
+          notes: editExerciseData.notes
+        })
+        setSets(editExerciseData.sets)
+      }
+    }, [editExerciseData])
+
     const fetchExercises = async(name)=> { 
       try {
           console.log("Inside fetchExercises()...")    
-        
-        //   const response = await axios.get(
-        //     `${exerciseAPiUrl}/exercises/search`,
-        //     {
-        //       params: {
-        //         offset: 0,          
-        //         limit: 20,   
-        //         q: name          
-        //       }
-        //     }
-        //   );
-        //   const response = await axios.get(
-        //     `${exerciseAPiUrl}/exercises/search`,
-        //     {
-        //       params: {
-        //         q: name  // search query
-        //       }
-        //     }
-        //   );
+
           const response = await axios.get(
             `${exerciseAPiUrl}/exercises/filter`,
             {
@@ -164,6 +164,11 @@ export default function ExerciseForm({ onAddExercise }) {
       }
     }
 
+    const getAllResults = (resultsOf)=> {
+      const allBodyParts = ["cardio", "full-body", ...bodyParts]
+      const allEquipments = ["none", "bodyweight", ...equipments]
+      setSearchResults((prev) => ({ ...prev, [resultsOf]: resultsOf === 'bodyParts' ? allBodyParts : allEquipments}))
+    }
 
     const handleSelectResult = (type, value) => {
       setFormData((prev) => ({ ...prev, [type]: value }))
@@ -192,9 +197,51 @@ export default function ExerciseForm({ onAddExercise }) {
       setSets(updated)
     }
 
+    const addNewExercise = async(exercise)=> { 
+      try { 
+        console.log("Inside addNewExercise()...")
+        const response = await axios.post(`${baseApiUrl}/fitness/tracker/exercise-library/add`, {exercise}, { withCredentials: true })
+        if(response.status === 201){
+          sonnerToast.success("New exercise succesfully added!")
+          onAddOrUpdateExercise()
+          setLoading(false)
+        }
+        if(response.status === 400){
+          sonnerToast.error(error.response.data.message)
+          console.log("Error---->", error.response.data.message)
+        }
+      }catch (error) {
+        console.error("Error during ading exercise", error.message)
+        setLoading(false)
+        sonnerToast.error('Something wet wrong! Please retry later.')
+      }
+    }
+
+    const updateExercise = async(exercise, id)=> { 
+      try { 
+        console.log("Inside updateExercise()...")
+        const response = await axios.put(`${baseApiUrl}/fitness/tracker/exercise-library/update`, {exercise, id}, { withCredentials: true })
+        if(response.status === 200){
+          sonnerToast.success("Exercise succesfully updated!")
+          onAddOrUpdateExercise()
+          setLoading(false)
+          onExerciseUpdation()
+        }
+        if(response.status === 400 || response.status === 404){
+          sonnerToast.error(error.response.data.message)
+          console.log("Error---->", error.response.data.message)
+        }
+      }catch (error) {
+        console.error("Error during ading exercise", error.message)
+        setLoading(false)
+        sonnerToast.error('Something wet wrong! Please retry later.')
+      }
+    }
+
     const handleSubmit = async(e) => {
       e.preventDefault()
-      if (!formData.name || sets.length === 0 || sets.every(set=> !set.weight || !set.rpe || !set.reps)) {
+      setLoading(true)
+      if (!formData.name || sets.length === 0 || sets.some(set=> !set.reps)) {
         sonnerToast.error("Please fill in all required fields")
         return
       }
@@ -207,21 +254,21 @@ export default function ExerciseForm({ onAddExercise }) {
         bodyPart: formData.bodyPart,
         equipment: formData.equipment,
         sets: sets.map(s => ({
-          weight: Number(s.weight),
+          weight: Number(s.weight) || 0,
           reps: Number(s.reps),
-          rpe: Number(s.rpe)
+          rpe: Number(s.rpe) || 0
         })),
         notes: formData.notes || "",
       }
-      try { 
-        const response = await axios.post(`${baseApiUrl}/fitness/tracker/add`, {exercise}, { withCredentials: true })
-        if(response.status === 201){
-          sonnerToast.success("New exercise succesfully added!")
-          onAddExercise()
-        }
-      }catch (error) {
-        console.error("Error during ading exercise", error.message)
+      
+      console.log("editExerciseData---->", editExerciseData)
+
+      if(!editExerciseData){
+        await addNewExercise(exercise)
+      }else{
+        await updateExercise(exercise, editExerciseData._id)
       }
+      
       setFormData({
         name: "",
         bodyPart: "",
@@ -232,48 +279,6 @@ export default function ExerciseForm({ onAddExercise }) {
       setSearchResults({bodyParts: [], equipments: [], exercises: []})
     }
 
-    const SearchableInput = ({ name, placeholder, icon: Icon, searchKey }) => (
-      <div className="relative">
-        <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-          <Icon className="w-[15px] h-[15px]" />
-        </div>
-        <input
-          type="text"
-          name={name}
-          placeholder={placeholder}
-          value={formData[name]}
-          onChange={handleChange}
-          onBlur={()=> setSearchResults({bodyParts: [], equipments: []})}
-          // onFocus={() => formData[name] && setShowResults((prev) => ({ ...prev, [searchKey]: true }))}
-          className="w-full text-[14px] bg-gray-50 border border-gray-300 rounded-lg pl-10 pr-4 py-2 text-gray-900
-           placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
-        />
-
-        <AnimatePresence>
-          {searchResults[searchKey].length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto"
-            >
-              {searchResults[searchKey].map((item, index) => (
-                <motion.div
-                  key={item}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className="px-4 py-3 hover:bg-purple-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors"
-                  onClick={() => handleSelectResult(name, item)}
-                >
-                  <p className="text-gray-900 font-medium text-sm">{item}</p>
-                </motion.div>
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    )
 
   return (
     <motion.form
@@ -285,34 +290,33 @@ export default function ExerciseForm({ onAddExercise }) {
       <h3 className="text-gray-900 font-semibold text-lg">Add Exercise</h3>
 
       <div className="space-y-3">
-        
-        {/* <SearchableInput name="name" placeholder="Exercise name" icon={Search} searchKey="exercises" /> */}
 
-        {/* <SearchableInput name="bodyPart" placeholder="Body part" icon={IoBody} searchKey="bodyParts" /> */}
-
-        <div className="relative">
+        <div className="relative" ref={dropdownRefs.exerciseNamesDropdown}>
             <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
               <Search className="w-[15px] h-[15px]" />
             </div>
             <input
               type="text"
-              name="name"
+              name="name" 
               placeholder="Exercise name"
               value={formData.name}
-              onChange={handleChange}
+              onChange={(e)=> {
+                handleChange(e)
+                toggleDropdown('exerciseNamesDropdown')
+              }}
               onBlur={()=> setSearchResults({bodyParts: [], equipments: [], exercises:[]})}
-              // onFocus={() => formData[name] && setShowResults((prev) => ({ ...prev, [searchKey]: true }))}
               className="w-full text-[14px] bg-gray-50 border border-gray-300 rounded-lg pl-10 pr-4 py-2 text-gray-900
                placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
             />
 
             <AnimatePresence>
-              {searchResults.exercises.length > 0 && (
+              {openDropdowns.exerciseNamesDropdown && searchResults.exercises.length > 0 && (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto"
+                  className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50
+                   max-h-48 overflow-y-auto"
                 >
                   {searchResults.exercises.map((item, index) => (
                     <motion.div
@@ -323,36 +327,46 @@ export default function ExerciseForm({ onAddExercise }) {
                       className="px-4 py-3 hover:bg-purple-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors"
                       onClick={()=> handleSelectResult('name', item)}
                     >
-                      <p className="text-gray-900 font-medium text-sm">{item}</p>
+                      <p className="text-gray-900 font-medium text-sm capitalize">{item}</p>
                     </motion.div>
                   ))}
                 </motion.div>
               )}
             </AnimatePresence>
       </div>
-      <div className="relative">
+      <div className="relative" ref={dropdownRefs.bodyPartsDropdown}>
             <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
               <IoBody className="w-[15px] h-[15px]" />
             </div>
             <input
               type="text"
               name="bodyPart"
-              placeholder={"Body part"}
+              placeholder={"Body part (Recommended)"}
               value={formData.bodyPart}
-              onChange={handleChange}
+              onChange={(e)=> {
+                handleChange(e)
+                toggleDropdown('bodyPartsDropdown')
+              }}
               onBlur={()=> setSearchResults({bodyParts: [], equipments: [], exercises:[]})}
-              // onFocus={() => formData[name] && setShowResults((prev) => ({ ...prev, [searchKey]: true }))}
               className="w-full text-[14px] bg-gray-50 border border-gray-300 rounded-lg pl-10 pr-4 py-2 text-gray-900
                placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
             />
+            <ChevronDown 
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 w-[15px] h-[15px] text-secondary cursor-pointer" 
+              onClick={()=> {
+                getAllResults('bodyParts')
+                toggleDropdown('bodyPartsDropdown')
+              }}
+            />
     
             <AnimatePresence>
-              {searchResults.bodyParts.length > 0 && (
+              {openDropdowns.bodyPartsDropdown && searchResults.bodyParts.length > 0 && (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto"
+                  className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50
+                   max-h-48 overflow-y-auto"
                 >
                   {searchResults.bodyParts.map((item, index) => (
                     <motion.div
@@ -363,36 +377,46 @@ export default function ExerciseForm({ onAddExercise }) {
                       className="px-4 py-3 hover:bg-purple-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors"
                       onClick={() => handleSelectResult('bodyPart', item)}
                     >
-                      <p className="text-gray-900 font-medium text-sm">{item}</p>
+                      <p className="text-gray-900 font-medium text-sm capitalize">{item}</p>
                     </motion.div>
                   ))}
                 </motion.div>
               )}
             </AnimatePresence>
       </div>
-      <div className="relative">
+      <div className="relative" ref={dropdownRefs.equipmentsDropdown}>
             <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
               <IoIosFitness className="w-[15px] h-[15px]" />
             </div>
             <input
               type="text"
               name="equipment"
-              placeholder={"Equipment"}
+              placeholder={"Equipment (Recommended)"}
               value={formData.equipment}
-              onChange={handleChange}
+              onChange={(e)=> {
+                handleChange(e)
+                toggleDropdown('equipmentsDropdown')
+              }}
               onBlur={()=> setSearchResults({bodyParts: [], equipments: [], exercises:[]})}
-              // onFocus={() => formData[name] && setShowResults((prev) => ({ ...prev, [searchKey]: true }))}
               className="w-full text-[14px] bg-gray-50 border border-gray-300 rounded-lg pl-10 pr-4 py-2 text-gray-900
                placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
             />
-    
+            <ChevronDown  
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 w-[15px] h-[15px] text-secondary cursor-pointer" 
+              onClick={()=> {
+                getAllResults('equipments')
+                toggleDropdown('equipmentsDropdown')
+              }} 
+            />
+
             <AnimatePresence>
-              {searchResults.equipments.length > 0 && (
+              {openDropdowns.equipmentsDropdown && searchResults.equipments.length > 0 && (
                 <motion.div
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto"
+                  className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg 
+                    z-50 max-h-48 overflow-y-auto"
                 >
                   {searchResults.equipments.map((item, index) => (
                     <motion.div
@@ -403,7 +427,7 @@ export default function ExerciseForm({ onAddExercise }) {
                       className="px-4 py-3 hover:bg-purple-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors"
                       onClick={() => handleSelectResult('equipment', item)}
                     >
-                      <p className="text-gray-900 font-medium text-sm">{item}</p>
+                      <p className="text-gray-900 font-medium text-sm capitalize">{item}</p>
                     </motion.div>
                   ))}
                 </motion.div>
@@ -411,44 +435,7 @@ export default function ExerciseForm({ onAddExercise }) {
             </AnimatePresence>
       </div>
 
-        {/* <SearchableInput name="equipment" placeholder="Equipment" icon={IoIosFitness} searchKey="equipment" /> */}
-
       </div>
-
-      {/* <div className="grid grid-cols-3 gap-2">
-        <input
-          type="number"
-          name="weight"
-          placeholder="Weight (kg)"
-          value={formData.weight}
-          onChange={handleChange}
-          className="w-full text-[14px] bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 text-gray-900
-           placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
-        />
-
-        <input
-          type="number"
-          name="reps"
-          placeholder="Reps"
-          value={formData.reps}
-          onChange={handleChange}
-          className="bg-gray-50 text-[14px] border border-gray-300 rounded-lg px-3 py-2 text-gray-900 placeholder-gray-500
-             focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
-        />
-
-        <div>
-          <input
-            type="range"
-            name="rpe"
-            min="1"
-            max="10"
-            value={formData.rpe}
-            onChange={handleChange}
-            className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-purple-600"
-          />
-          <p className="text-gray-600 text-xs text-center mt-1 font-semibold">RPE: {formData.rpe}/10</p>
-        </div>
-      </div>     */}
 
       <div className="space-y-3">
         <AnimatePresence>
@@ -490,7 +477,7 @@ export default function ExerciseForm({ onAddExercise }) {
                   name="rpe"
                   min="1"
                   max="10"
-                  placeholder="RPE"
+                  placeholder="RPE (Optional)"
                   value={sets[index].rpe}
                   onChange={(e) =>
                     handleSetChange(index, "rpe", e.target.value)
@@ -538,12 +525,25 @@ export default function ExerciseForm({ onAddExercise }) {
 
       <motion.button
         type="submit"
-        className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg"
+        className="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 px-4 rounded-lg flex 
+          items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg"
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
-        <Plus className="w-5 h-5" />
-        <span>Add Exercise</span>
+ 
+        {
+          loading 
+            ? <CustomHashLoader loading={loading} color="#efff00" customStyle={{borderColor: '#efff00'}}/> 
+            : (
+              <> 
+                <Plus className="w-5 h-5" />
+                <span>
+                  { !editExerciseData ? 'Add Exercise' : 'Update Exercise' }
+                </span>
+              </>
+            )
+        }  
+        
       </motion.button>
     </motion.form>
   )

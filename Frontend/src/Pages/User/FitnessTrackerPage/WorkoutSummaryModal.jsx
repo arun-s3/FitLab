@@ -1,14 +1,11 @@
 import React from "react"
 import { motion } from "framer-motion"
 
-const XIcon = () => (
-  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-  </svg>
-)
+import {X} from "lucide-react"
+
 
 const ClockIcon = () => (
-  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <svg className="w-6 h-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -19,19 +16,19 @@ const ClockIcon = () => (
 )
 
 const DumbbellIcon = () => (
-  <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+  <svg className="w-6 h-6 text-primaryDark" fill="currentColor" viewBox="0 0 24 24">
     <path d="M4 6h2v12H4V6zm14 0h2v12h-2V6zM8 7h8v10H8V7z" />
   </svg>
 )
 
 const FlameIcon = () => (
-  <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+  <svg className="w-6 h-6 text-secondary" fill="currentColor" viewBox="0 0 24 24">
     <path d="M12 2c-1.1 0-2 .9-2 2 0 2.3 1.97 4.9 2 5 .03-.1 2-2.7 2-5 0-1.1-.9-2-2-2zm0 10c-3.3 0-6 2.7-6 6s2.7 6 6 6 6-2.7 6-6-2.7-6-6-6z" />
   </svg>
 )
 
 const TrendingIcon = () => (
-  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <svg className="w-6 h-6 text-primaryDark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
   </svg>
 )
@@ -86,29 +83,31 @@ export default function WorkoutSummaryModal({ stats, onClose }) {
       onClick={onClose}
     >
       <motion.div
-        className="bg-white rounded-2xl p-8 border border-gray-200 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto"
+        className="bg-white rounded-[12px] p-8 border border-gray-200 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto"
         variants={modalVariants}
         initial="hidden"
         animate="visible"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-3xl font-bold text-gray-900">Workout Complete!</h2>
+          <h2 className="text-[28px] tacking-[0.5px] font-bold text-gray-900">Workout Complete!</h2>
           <motion.button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
-            whileHover={{ scale: 1.1 }}
+            whileHover={{ rotate: 90, scale: 1.1 }}
+            transition={{ type: "spring", stiffness: 300 }}
           >
-            <XIcon />
+            <X className="size-5 text-slate-600 dark:text-slate-400" />
           </motion.button>
         </div>
 
-        <div className="space-y-3 mb-6">
+        <div className="mb-6">
           <StatCard
             icon={ClockIcon}
             label="Duration"
             value={formatTime(stats.duration)}
-            color="from-blue-500 to-blue-600"
+            textColor="text-secondary"
+            iconBg="bg-purple-50"
             custom={0}
             variants={statVariants}
           />
@@ -116,15 +115,17 @@ export default function WorkoutSummaryModal({ stats, onClose }) {
             icon={DumbbellIcon}
             label="Total Volume"
             value={`${stats.totalVolume.toLocaleString()} kg`}
-            color="from-purple-500 to-purple-600"
+            textColor="text-primaryDark"
+            iconBg="bg-yellow-50"
             custom={1}
             variants={statVariants}
           />
           <StatCard
             icon={FlameIcon}
             label="Est. Calories"
-            value={`${stats.estimatedCalories} kcal`}
-            color="from-orange-500 to-orange-600"
+            value={`~ ${stats.estimatedCalories} kcal`}
+            textColor="text-secondary"
+            iconBg="bg-purple-50"
             custom={2}
             variants={statVariants}
           />
@@ -132,7 +133,8 @@ export default function WorkoutSummaryModal({ stats, onClose }) {
             icon={TrendingIcon}
             label="Total Reps"
             value={stats.totalReps}
-            color="from-green-500 to-green-600"
+            textColor="text-primaryDark"
+            iconBg="bg-yellow-50"
             custom={3}
             variants={statVariants}
           />
@@ -151,7 +153,7 @@ export default function WorkoutSummaryModal({ stats, onClose }) {
             </div>
             <div className="space-y-1">
               {stats.missedSets.map((missed, idx) => (
-                <p key={idx} className="text-amber-700 text-xs">
+                <p key={idx} className="text-amber-700 text-xs capitalize">
                   {missed.exerciseName} - Set {missed.set} of {missed.totalSets}
                 </p>
               ))}
@@ -161,7 +163,7 @@ export default function WorkoutSummaryModal({ stats, onClose }) {
 
         <motion.button
           onClick={onClose}
-          className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold py-3 px-6 rounded-lg transition-all shadow-md hover:shadow-lg"
+          className="w-full bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white font-bold py-3 px-6 rounded-lg transition-all shadow-md hover:shadow-lg"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >
@@ -172,21 +174,21 @@ export default function WorkoutSummaryModal({ stats, onClose }) {
   )
 }
 
-function StatCard({ icon: Icon, label, value, color, custom, variants }) {
+function StatCard({ icon: Icon, label, value, textColor, iconBg, custom, variants }) {
   return (
     <motion.div
       custom={custom}
       variants={variants}
       initial="hidden"
       animate="visible"
-      className={`bg-gradient-to-r ${color} rounded-lg p-4 flex items-center gap-4`}
+      className={`bg-gradient-to-r rounded-lg p-[12px] flex items-center gap-4`}
     >
-      <div className="bg-white/20 rounded-lg p-3 flex-shrink-0">
-        <Icon />
+      <div className={`rounded-lg p-3 flex-shrink-0 ${iconBg && iconBg}`}>
+        <Icon className={`${textColor && textColor}`}/>
       </div>
       <div>
-        <p className="text-white/70 text-sm">{label}</p>
-        <p className="text-white text-lg font-bold">{value}</p>
+        <p className="text-muted text-sm">{label}</p>
+        <p className={`text-lg ${textColor && textColor} font-bold`}>{value}</p>
       </div>
     </motion.div>
   )

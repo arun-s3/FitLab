@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const ExerciseSchema = require("./ExerciseModel");
+const ExerciseSchema = require("./exerciseModel");
 
 const FitnessTrackerSchema = new mongoose.Schema(
   {
@@ -12,7 +12,7 @@ const FitnessTrackerSchema = new mongoose.Schema(
       type: Date,
       default: Date.now
     },
-    duration: {
+    totalDuration: {
       type: Number,
       default: 0
     },

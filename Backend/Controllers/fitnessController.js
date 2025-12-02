@@ -1,5 +1,7 @@
 const Fitness = require('../Models/fitnessModel')
 const FitnessTracker = require("../Models/fitnessTrackerModel")
+const ExerciseTemplate = require("../Models/exerciseTemplateModel")
+
 
 const fs = require('fs')
 const path = require('path')
@@ -159,30 +161,12 @@ const addExercise = async (req, res, next) => {
     const userId = req.user._id
 
     const { name, bodyPart, equipment, sets, notes } = req.body.exercise
-    console.log("req.body.exercise-------->", JSON.stringify(req.body.exercise))
 
-    if (!name || !bodyPart || !Array.isArray(sets) || sets.length === 0) {
-      return next(errorHandler(400, "Exercise name, body part, and at least one set are required!"));
+    console.log("req.body.exercise--->", JSON.stringify(req.body.exercise))
+
+    if (!name || !Array.isArray(sets)|| sets.some(set=> !set.reps) || sets.length === 0) {
+      return next(errorHandler(400, "Exercise name, and at least one set with reps are required!"))
     }
-
-    for (const s of sets) {
-      if (!s.reps || isNaN(s.reps)) {
-        return next(errorHandler(400, "Each set must include valid reps!"));
-      }
-
-      if (s.rpe && (s.rpe < 1 || s.rpe > 10)) {
-        return next(errorHandler(400, "RPE must be between 1 and 10!"));
-      }
-    }
-
-    const totalVolume = sets.reduce((acc, s) => {
-      const w = Number(s.weight) || 0
-      const r = Number(s.reps) || 0
-      return acc + w * r
-    }, 0)
-    
-    console.log("totalVolume-------->", totalVolume)
-
 
     const todayStart = new Date(new Date().setHours(0, 0, 0, 0))
     const todayEnd = new Date(new Date().setHours(23, 59, 59, 999))
@@ -207,20 +191,40 @@ const addExercise = async (req, res, next) => {
       sets: sets.map(s => ({
         weight: s.weight || 0,
         reps: s.reps,
-        rpe: s.rpe || null
+        rpe: s.rpe || null,
+        completed: false,
+        completedAt: null
       })),
       notes: notes || "",
-      totalVolume,
+      duration: 0,
+      totalVolume: 0
     })
 
-    tracker.totalVolume += totalVolume
-
     await tracker.save();
+
+    let template = await ExerciseTemplate.findOne({ userId, name });
+
+    if (!template) {
+      await ExerciseTemplate.create({
+        userId,
+        name,
+        bodyPart,
+        equipment,
+        sets,
+        notes,
+        lastUsedAt: new Date()
+      })
+    } else {
+      template.sets = sets
+      template.notes = notes
+      template.lastUsedAt = new Date()
+      await template.save()
+    }
 
     return res.status(201).json({
       message: "Exercise added successfully!",
       tracker
-    })
+    });
 
   }
   catch (error) {
@@ -230,51 +234,264 @@ const addExercise = async (req, res, next) => {
 }
 
 
-const listExercises = async (req, res, next) => {
+const updateExerciseTemplate = async (req, res, next) => {
   try {
-    console.log("Inside listExercises...")
+    console.log("Inside updateExerciseTemplate...")
     const userId = req.user._id
 
-    const page = Math.max(parseInt(req.query.page) || 1, 1)
-    const limit = Math.max(parseInt(req.query.limit) || 5, 1)
-    const skip = (page - 1) * limit
+    const { name, bodyPart, equipment, sets, notes } = req.body.exercise
 
-    const workouts = await FitnessTracker.find({ userId }).sort({ date: -1 })
+    console.log("req.body.id--->", JSON.stringify(req.body.id))
 
-    if (!workouts.length) {
-      return res.status(404).json({ message: "No exercises found" })
+    if (!req.body.id) {
+      return next(errorHandler(400, "Template ID is required!"))
     }
 
-    const allExercises = []
-    workouts.forEach(workout => {
-      workout.exercises.forEach(ex => {
-        allExercises.push({
-          ...ex.toObject(),
-          workoutId: workout._id,
-          workoutDate: workout.date
-        })
-      })
+    const template = await ExerciseTemplate.findOne({_id: req.body.id, userId})
+
+    if (!template) {
+      return next(errorHandler(404, "Exercise template not found!"))
+    }
+
+    if (sets && Array.isArray(sets)) {
+      for (const s of sets) {
+        if (s.reps && isNaN(s.reps)) {
+          return next(errorHandler(400, "Each set must include valid reps!"))
+        }
+        if (s.rpe && (s.rpe < 1 || s.rpe > 10)) {
+          return next(errorHandler(400, "RPE must be between 1 and 10!"))
+        }
+      }
+    }
+
+    if (name) template.name = name.trim()
+    if (bodyPart) template.bodyPart = bodyPart.trim()
+    if (equipment !== undefined)
+      template.equipment = equipment.trim() || null
+    if (notes !== undefined) template.notes = notes
+
+    if (sets && Array.isArray(sets)) {
+      template.sets = sets.map(s => ({
+        weight: Number(s.weight) || 0,
+        reps: Number(s.reps),
+        rpe: s.rpe || null
+      }))
+    }
+
+    template.lastUsedAt = new Date() 
+
+    await template.save();
+
+    res.status(200).json({message: "Exercise template updated successfully!", template});
+
+  }
+  catch (error) {
+    console.log("Error updating exercise template:", error.message)
+    next(error)
+  }
+}
+
+
+const updatePartialExercise = async (req, res, next) => {
+  try {
+    console.log("Inside updatePartialExercise...")
+
+    const userId = req.user._id
+    const { exerciseId, sets, duration } = req.body
+
+    console.log("req.body--->", JSON.stringify(req.body))
+
+    if (!exerciseId) {
+      return next(errorHandler(400, "Exercise ID is required!"))
+    }
+
+    const todayStart = new Date()
+    todayStart.setHours(0, 0, 0, 0)
+
+    const todayEnd = new Date()
+    todayEnd.setHours(23, 59, 59, 999)
+
+    let tracker = await FitnessTracker.findOne({
+      userId,
+      date: { $gte: todayStart, $lte: todayEnd }
     })
 
-    const totalExercises = allExercises.length
-    const totalPages = Math.ceil(totalExercises / limit)
+    if (!tracker) {
+      return next(errorHandler(404, "No exercise tracker found for today!"))
+    }
 
-    const exercises = allExercises.slice(skip, skip + limit)
+    const exercise = tracker.exercises.id(exerciseId)
+    if (!exercise) {
+      return next(errorHandler(404, "Exercise not found!"))
+    }
+
+    tracker.totalWorkoutVolume -= (exercise.totalVolume || 0)
+
+    if (sets && Array.isArray(sets)) {
+      sets.forEach((s, index) => {
+        if (exercise.sets[index]) {
+          exercise.sets[index].weight = Number(s.weight) || 0
+          exercise.sets[index].reps = Number(s.reps)
+          exercise.sets[index].rpe = s.rpe || null
+          exercise.sets[index].completed = Boolean(s.completed)
+
+          if (s.completed) {
+            exercise.sets[index].completedAt = new Date()
+          }
+        }
+      })
+    }
+
+    const allCompleted = exercise.sets.every(s => s.completed === true)
+
+    exercise.exerciseCompleted = allCompleted
+
+    if (allCompleted) {
+      exercise.exerciseCompletedAt = new Date()
+      if (!exercise.duration && duration) {
+        exercise.duration = Number(duration)
+      }
+    }
+
+    exercise.totalVolume = exercise.sets.reduce(
+      (acc, s) => acc + (Number(s.weight) || 0) * (Number(s.reps) || 0),
+      0
+    )
+
+    tracker.totalWorkoutVolume += exercise.totalVolume
+
+    await tracker.save();
 
     return res.status(200).json({
-      message: "Exercises fetched successfully",
-      exercises,
+      message: "Exercise progress updated!",
+      exercise,
+      tracker
+    });
+
+  }
+  catch (error) {
+    console.log("Error updating partial exercise:", error.message);
+    next(error)
+  }
+}
+
+
+const getUserExerciseLibrary = async (req, res, next) => {
+  try {
+    console.log("Inside getUserExerciseLibrary...")
+
+    const userId = req.user._id
+
+    const page = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 5
+    const skip = (page - 1) * limit
+
+    const sortQuery = {
+      lastUsedAt: -1, 
+      updatedAt: -1, 
+    }
+
+    const totalExercises = await ExerciseTemplate.countDocuments({ userId })
+
+    const exercises = await ExerciseTemplate.find({ userId })
+      .sort(sortQuery)
+      .skip(skip)
+      .limit(limit)
+
+    console.log(`totalExercises-----------> ${totalExercises} and exercises-----------> ${JSON.stringify(exercises)}`)
+
+    return res.status(200).json({
+      success: true,
+      page,
+      limit,
+      totalExercises,
+      totalPages: Math.ceil(totalExercises / limit),
+      exercises, 
+    });
+
+  }
+  catch (error) {
+    console.error("Error fetching exercise templates:", error)
+    next(error)
+  }
+}
+
+
+const getWorkoutHistory = async (req, res, next) => {
+  try {
+    console.log("Inside getWorkoutHistory...")
+    const userId = req.user._id
+
+    const page = parseInt(req.query.page) || 1
+    const limit = req.query?.limit || 5 
+    const skip = (page - 1) * limit
+
+    const todayStart = new Date(new Date().setHours(0, 0, 0, 0))
+    const todayEnd = new Date(new Date().setHours(23, 59, 59, 999))
+
+    const todayWorkouts = await FitnessTracker.find({
+      userId,
+      date: { $gte: todayStart, $lte: todayEnd }
+    }).sort({ updatedAt: -1 })
+
+    const olderWorkouts = await FitnessTracker.find({ userId,
+      date: { $lt: todayStart }
+    })
+      .sort({ updatedAt: -1 })
+      .skip(skip)
+      .limit(limit)
+
+    const totalOlderCount = await FitnessTracker.countDocuments({
+      userId,
+      date: { $lt: todayStart }
+    });
+
+    const totalPages = Math.ceil(totalOlderCount / limit)
+
+    return res.status(200).json({
+      success: true,
+      todayWorkouts,
+      olderWorkouts,
       pagination: {
-        totalExercises,
-        totalPages,
         currentPage: page,
-        perPage: limit
+        totalPages,
+        totalOlderCount,
+        hasMore: page < totalPages
       }
     });
 
   }
   catch (error) {
-    console.error("Error fetching exercises:", error.message)
+    console.error("Error fetching workout history:", error.message)
+    next(error)
+  }
+}
+
+
+const deleteExerciseTemplate = async (req, res, next) => {
+  try {
+    console.log("Inside deleteExerciseTemplate...")
+    const userId = req.user._id
+    const { exerciseTemplateId } = req.params
+
+    if (!exerciseTemplateId) {
+      return next(errorHandler(400, "Exercise Template ID is required!"));
+    }
+
+    const deletedTemplate = await ExerciseTemplate.findOneAndDelete({
+      _id: exerciseTemplateId,
+      userId
+    })
+
+    if (!deletedTemplate) {
+      return next(errorHandler(404, "Exercise template not found!"));
+    }
+
+    return res.status(200).json({success: true, message: "Exercise removed from library successfully!"});
+
+  }
+  catch (error){
+    console.error("Error deleting exercise template:", error.message)
     next(error)
   }
 }
@@ -282,4 +499,6 @@ const listExercises = async (req, res, next) => {
 
 
 
-module.exports = {getExerciseThumbnail, getExerciseVideos, addExercise, listExercises}
+
+module.exports = {getExerciseThumbnail, getExerciseVideos, addExercise, updateExerciseTemplate, updatePartialExercise,
+  getUserExerciseLibrary, getWorkoutHistory, deleteExerciseTemplate}

@@ -6,6 +6,7 @@ import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
 import FitnessLayout from "./FitnessLayout"
 import WorkoutSessionCard from "./WorkoutSessionCard"
 import FitnessNavigation from "./FitnessNavigation"
+import BMICalculator from "./BMICalculator"
 import FeaturesDisplay from '../../../Components/FeaturesDisplay/FeaturesDisplay'
 import Footer from '../../../Components/Footer/Footer'
 
@@ -47,6 +48,13 @@ export default function FitnessTrackerPage() {
 
                   <WorkoutSessionCard />
 
+                </motion.div>
+              )}
+              {currentPage === "bmi" && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+
+                  <BMICalculator />
+                  
                 </motion.div>
               )}
             </FitnessLayout>

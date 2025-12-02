@@ -3,82 +3,103 @@ import { motion, AnimatePresence } from "framer-motion"
 
 import axios from 'axios'
 import {toast as sonnerToast} from 'sonner'
+import {Trash} from "lucide-react"
+import {IoIosFitness} from "react-icons/io"
+import {IoBarbellSharp} from "react-icons/io5"
+import {IoBody} from "react-icons/io5"
+import {FiEdit3} from "react-icons/fi"
+import {Play} from 'lucide-react'
 
 import Timer from "./Timer"
 import ExerciseForm from "./ExerciseForm"
 import WorkoutSummaryModal from "./WorkoutSummaryModal"
+import DeleteConfirmationModal from "./DeleteConfirmationModal"
 
-const PlayIcon = () => (
-  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-    <path d="M8 5v14l11-7z" />
-  </svg>
-)
-
-const XIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-  </svg>
-)
 
 export default function WorkoutSessionCard() {
 
-  const [startTime, setStartTime] = useState(null)
   const [exercises, setExercises] = useState([])
   const [selectedExerciseId, setSelectedExerciseId] = useState(null)
+  const [selectedExercise, setSelectedExercise] = useState(null)
+
+  const [startTime, setStartTime] = useState(null)
   const [currentSet, setCurrentSet] = useState(0)
-  const [showSummary, setShowSummary] = useState(false)
+  const [restartTimer, setRestartTimer] = useState(false)
+  
   const [sessionStats, setSessionStats] = useState(null)
-  const [missedSets, setMissedSets] = useState([])
+  
+  const [showSummary, setShowSummary] = useState(false)
+
+  const [editingExercise, setEditingExercise] = useState(null)
+
+  const [openExerciseDeleteModal, setOpenExerciseDeleteModal] = useState({exercise: null})
 
   const limit = 5
   const [currentPage, setCurrentPage] = useState(1)
 
+  const [loading, setLoading] = useState(false)
 
   const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
   const getExercises = async()=> {
-    console.log("Inside getExercises...")
+    console.log("Inside getExercises...") 
     try { 
-      const response = await axios.get(`${baseApiUrl}/fitness/tracker/list?page=${currentPage}&limit=${limit}`, { withCredentials: true })
+      const response = await axios.get(`${baseApiUrl}/fitness/tracker/exercise-library/list?page=${currentPage}&limit=${limit}`, { withCredentials: true })
       if(response.status === 200){
         console.log("response.data.exercises----------->", response.data.exercises)
         setExercises(response.data.exercises)
-        sonnerToast.success("New exercise succesfully added!")
-        onAddExercise()
+        setLoading(false)
       }
       if(response.status === 404){
         setExercises([])
+        setLoading(false)
+        sonnerToast.error(error.response.data.message)
+        console.log("Error---->", error.response.data.message)
       }
     }catch (error) {
       console.error("Error during ading exercise", error.message)
+      sonnerToast.error('Something wet wrong! Please retry later.')
     }
   }
 
   useEffect(()=> {
+    setLoading(true)
     getExercises()
   }, [])
 
-  const handleAddExercise = async(exercise) => {
+  const handleExerciseListUpdate = async() => {
+    setLoading(true)
     getExercises()
   }
 
-  const handleRemoveExercise = (id) => {
-    setExercises(exercises.filter((e) => e.id !== id))
-    if (selectedExerciseId === id) {
-      setSelectedExerciseId(null)
-      setCurrentSet(0)
+  const handleDeleteExercise = async(exerciseTemplateId)=> { 
+    try { 
+      const response = await axios.delete(`${baseApiUrl}/fitness/tracker/exercise-library/delete/${exerciseTemplateId}`,{ withCredentials: true })
+      if(response.status === 200){
+        console.log("response.data.exercises----------->", response.data.exercises)
+        sonnerToast.success('Exercise deleted successfully!')
+        getExercises()
+      }
+      if(response.status === 400 || response.status === 404){
+        sonnerToast.error(error.response.data.message)
+        console.log("Error---->", error.response.data.message)
+      }
+    }catch (error) {
+      console.error("Error during ading exercise", error.message)
+      sonnerToast.error('Something wet wrong! Please retry later.')
     }
   }
 
   const handleSelectExercise = (id) => {
     setSelectedExerciseId(id)
+    const selectedExercise = exercises ? exercises.find((e) => e._id === id) : null
+    setSelectedExercise(selectedExercise)
     setStartTime(Date.now())
     setCurrentSet(0)
   }
 
   const handleCompleteSet = () => {
-    const selectedExercise = exercises.find((e) => e.id === selectedExerciseId)
-    if (selectedExercise && currentSet < selectedExercise.sets - 1) {
+    if (selectedExercise && currentSet < selectedExercise.sets.length) {
       setCurrentSet(currentSet + 1)
     } else {
       setSelectedExerciseId(null)
@@ -86,26 +107,26 @@ export default function WorkoutSessionCard() {
     }
   }
 
-  const handleStopExercise = () => {
-    const selectedExercise = exercises.find((e) => e.id === selectedExerciseId)
-    if (selectedExercise && currentSet < selectedExercise.sets) {
-      const missed = []
-      for (let i = currentSet; i < selectedExercise.sets; i++) {
-        missed.push({
-          exerciseName: selectedExercise.name,
-          set: i + 1,
-          totalSets: selectedExercise.sets,
-        })
-      }
-      setMissedSets([...missedSets, ...missed])
-    }
-    setSelectedExerciseId(null)
+  const handleRestartExercise = () => {
+    console.log("Inside handleRestartExercise()")
+    setStartTime(Date.now())
     setCurrentSet(0)
+    setRestartTimer(true)
   }
 
   const handleFinishWorkout = () => {
+    console.log("Inside handleFinishWorkout")
+    const missedSets = []
+    for (let i = currentSet; i < selectedExercise.sets.length; i++) {
+      missedSets.push({
+        exerciseName: selectedExercise.name,
+        set: i + 1,
+        totalSets: selectedExercise.sets.length,
+      })
+    }
+    console.log("missedSets---->", missedSets)
     const duration = Math.floor((Date.now() - startTime) / 1000)
-    const totalVolume = exercises.reduce((acc, e) => acc + e.weight * e.reps * e.sets, 0)
+    const totalVolume = selectedExercise.sets.reduce((acc, set) => acc + set.weight * set.reps, 0)
     const estimatedCalories = Math.round((duration / 60) * 8 + totalVolume * 0.1)
 
     setSessionStats({
@@ -113,16 +134,16 @@ export default function WorkoutSessionCard() {
       totalVolume,
       estimatedCalories,
       exerciseCount: exercises.length,
-      totalReps: exercises.reduce((acc, e) => acc + e.reps * e.sets, 0),
-      missedSets: missedSets,
+      totalReps: selectedExercise.sets.reduce((acc, set) => acc + set.reps, 0),
+      missedSets,
     })
 
     setShowSummary(true)
-    setExercises([])
-    setMissedSets([])
+    setSelectedExerciseId(null)
+    setSelectedExercise(null)
+    setCurrentSet(0)
   }
 
-  const selectedExercise = exercises.find((e) => e.id === selectedExerciseId)
 
   return (
     <>
@@ -130,7 +151,13 @@ export default function WorkoutSessionCard() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-1">
-              <ExerciseForm onAddExercise={handleAddExercise} />
+
+              <ExerciseForm 
+                onAddOrUpdateExercise={handleExerciseListUpdate} 
+                editExerciseData={editingExercise}
+                onExerciseUpdation={()=> setEditingExercise(null)}
+              />
+
             </div>
 
             <div className="lg:col-span-1">
@@ -140,61 +167,132 @@ export default function WorkoutSessionCard() {
                 className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-gray-900 font-semibold text-lg">Exercises</h3>
-                  <motion.button
-                    onClick={() => {
-                      setExercises([])
-                      setSelectedExerciseId(null)
-                      setMissedSets([])
-                    }}
-                    className="text-red-500 hover:text-red-600 transition-colors"
-                    whileHover={{ scale: 1.1 }}
-                  >
-                    <XIcon />
-                  </motion.button>
+                  <h3 className="text-gray-900 font-semibold text-lg"> My Exercise Library </h3>
                 </div>
 
                 <div className="space-y-2 max-h-96 overflow-y-auto">
-                  {exercises.length === 0 ? (
+
+                  {
+                    loading && 
+                    (
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-center py-12">
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+                          className="w-12 h-12 border-4 border-slate-200 border-t-secondary rounded-full"
+                        />
+                      </motion.div>
+                    )
+                  }
+                  
+                  {!loading && exercises?.length === 0 ? (
                     <p className="text-gray-400 text-center py-6">No exercises added yet</p>
                   ) : (
-                    exercises.map((ex) => (
+                    !loading && exercises && exercises.map((exercise) => (
                       <motion.div
-                        key={ex.workoutId}
+                        key={exercise._id}
                         initial={{ x: -20, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
                         className={`rounded-lg p-4 border-2 cursor-pointer transition-all ${
-                          selectedExerciseId === ex.workoutId
-                            ? "bg-blue-50 border-blue-500"
+                          selectedExerciseId === exercise._id
+                            ? "bg-purple-50 border-purple-500"
                             : "bg-gray-50 border-gray-200 hover:border-gray-300" 
                         }`}
-                        onClick={() => handleSelectExercise(ex.workoutId)}
                       >
                         <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <p className="text-gray-900 font-semibold">{ex.name}</p>
+                          <div className="flex-1"> 
+                            <p className="flex items-center gap-[5px]">
+                              <IoBarbellSharp className="w-[20px] h-[20px] text-primaryDark"/>
+                              <span className="text-secondary text-[14px] font-medium capitalize"> {exercise.name} </span>
+                            </p>
+                            <ul className="list-disc ml-8">
                             {
-                              ex.sets.map((set, index)=> (
-                                <p className="text-gray-600 text-sm">
-                                  {index + 1} × {set.reps} @ {set.weight}kg ({set.rpe}/10 RPE)
-                                </p>
+                              exercise.sets.map((set, index)=> (
+                                <li className="text-gray-600 text-[13px] mt-[5px]">
+                                  {`Set-${index + 1}: ${set.reps} reps  with ${set.weight}kg (${set.rpe}/10 RPE)`}
+                                </li>
                               ))
                             }
-                            {ex.notes && <p className="text-gray-500 text-xs mt-1">{ex.notes}</p>}
+                            </ul>
+                            {exercise.notes && <p className="ml-4 text-gray-500 capitalize text-xs tracking-[0.3px] mt-1">{exercise.notes}</p>}
+                            <div className="ml-8 mt-1 flex items-center gap-8">
+                              {
+                                exercise.equipment &&
+                                  <p className="flex items-center gap-[5px]">
+                                    <IoIosFitness className="w-[16px] h-[16px] text-[#b87be3]"/>
+                                    <span className="text-muted text-[13px] capitalize"> {exercise.equipment} </span>
+                                  </p>
+                              }
+                              {
+                                exercise.bodyPart &&
+                                  <p className="flex items-center gap-[5px]">
+                                    <IoBody className="w-[13px] h-[13px] text-[#b87be3]"/>
+                                    <span className="text-muted text-[13px] capitalize"> {exercise.bodyPart} </span>
+                                  </p>
+                              }
+                            </div>
+                          </div> 
+                          <div className="h-full flex flex-col gap-4">
+                            <motion.button
+                              onClick={(e) => {
+                                if(selectedExerciseId !== exercise._id){
+                                  e.stopPropagation()
+                                  setOpenExerciseDeleteModal({exercise})
+                                }
+                              }}
+                              className={`text-red-500 hover:text-red-600 ml-2 
+                                ${selectedExerciseId === exercise._id && 'cursor-not-allowed'}`}
+                              whileHover={{ scale: 1.1 }}
+                            >
+                              <Trash className="w-[15px] h-[15px]"/>
+                            </motion.button>
+                            <motion.button
+                              onClick={(e) => {
+                                if(selectedExerciseId !== exercise._id){
+                                  e.stopPropagation()
+                                  setEditingExercise(exercise)
+                                }
+                              }}
+                              className={`text-muted hover:text-gray-600 ml-2
+                                ${selectedExerciseId === exercise._id && 'cursor-not-allowed'}`}
+                              whileHover={{ scale: 1.1 }}
+                            >
+                              <FiEdit3 className="w-[15px] h-[15px]"/>
+                            </motion.button>
                           </div>
-                          <motion.button
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleRemoveExercise(ex.workoutId)
-                            }}
-                            className="text-red-500 hover:text-red-600 ml-2"
-                            whileHover={{ scale: 1.1 }}
-                          >
-                            <XIcon />
-                          </motion.button>
                         </div>
+                        
+                        <motion.div whileTap={{ scale: 0.98 }} className="mt-[10px] ml-[3px]">
+                            <button
+                              className={`flex items-center gap-[5px] hover:bg-green-400 transition duration-300
+                               hover:text-white text-[11px] font-medium tracking-[0.2px] px-[9px] py-[7px] 
+                               rounded-[6px] !disabled:cursor-not-allowed 
+                               ${selectedExerciseId === exercise._id 
+                                  ? 'bg-green-400 text-white cursor-not-allowed' 
+                                  : 'bg-primary text-secondary'
+                                }`}
+                              onClick={()=> handleSelectExercise(exercise._id)}>
+                                 {
+                                  loading 
+                                    ? <CustomHashLoader loading={loading}/> 
+                                    : (
+                                      <>
+                                        {
+                                          selectedExerciseId !== exercise._id &&
+                                            <Play className="w-[17px] h-[17px]"/>
+                                        }
+                                        <span> 
+                                          { selectedExerciseId === exercise._id ? 'Started' : 'Start Exercise' }
+                                        </span>
+                                      </>
+                                    )
+                                 }  
+                            </button>
+                        </motion.div>
+
                       </motion.div>
-                    ))
+                    )
+                  )
                   )}
                 </div>
               </motion.div>
@@ -210,15 +308,19 @@ export default function WorkoutSessionCard() {
                     className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm"
                   >
                     <p className="text-gray-600 text-sm font-medium mb-2">Current Exercise</p>
-                    <p className="text-gray-900 font-bold text-lg mb-4">{selectedExercise.name}</p>
+                    <p className="text-gray-900 font-bold text-lg mb-4 capitalize">{selectedExercise.name}</p>
 
-                    <div className="bg-blue-50 rounded-lg p-4 mb-4 border border-blue-200">
-                      <p className="text-blue-900 text-sm font-semibold">
-                        Set {currentSet + 1} of {selectedExercise.sets}
+                    <div className="bg-purple-50 rounded-lg p-4 mb-4 border border-purple-200">
+                      <p className="text-purple-900 text-sm font-semibold">
+                        Set {currentSet + 1} of {selectedExercise.sets.length}
                       </p>
                     </div>
 
-                    <Timer onSetComplete={handleCompleteSet} />
+                    <Timer 
+                      onSetComplete={handleCompleteSet} 
+                      restartTimer={restartTimer} 
+                      afterRestart={()=> setRestartTimer(false)}
+                    />
 
                     <div className="flex gap-2 mt-4">
                       <motion.button
@@ -231,32 +333,52 @@ export default function WorkoutSessionCard() {
                       </motion.button>
 
                       <motion.button
-                        onClick={handleStopExercise}
+                        onClick={handleRestartExercise}
                         className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 px-4 rounded-lg transition-all shadow-md hover:shadow-lg"
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                       >
-                        Stop
+                        Restart
                       </motion.button>
                     </div>
+                    <motion.button
+                      onClick={handleFinishWorkout}
+                      disabled={exercises && exercises?.length === 0}
+                      className="mt-4 w-full bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-lg transition-all shadow-md hover:shadow-lg"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      Finish Workout
+                    </motion.button>
                   </motion.div>
                 )}
               </AnimatePresence>
 
-              <motion.button
-                onClick={handleFinishWorkout}
-                disabled={exercises.length === 0}
-                className="w-full bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-lg transition-all shadow-md hover:shadow-lg"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                Finish Workout
-              </motion.button>
+              <RecentWorkouts />
+
             </div>
           </div>
       </motion.div>
 
-      {showSummary && <WorkoutSummaryModal stats={sessionStats} onClose={() => setShowSummary(false)} />}
+      {
+        showSummary && 
+          <WorkoutSummaryModal 
+            stats={sessionStats} 
+            onClose={() => setShowSummary(false)} 
+          />
+      }
+      {
+        openExerciseDeleteModal && openExerciseDeleteModal.exercise &&
+          <DeleteConfirmationModal 
+            exercise={openExerciseDeleteModal.exercise}
+            isOpen={openExerciseDeleteModal.exercise}
+            onCancel={()=> setOpenExerciseDeleteModal({exercise: null})}
+            onConfirm={()=> {
+              handleDeleteExercise(openExerciseDeleteModal.exercise._id)
+              setOpenExerciseDeleteModal({exercise: null})
+            }}
+          />
+      }
     </>
   )
 }

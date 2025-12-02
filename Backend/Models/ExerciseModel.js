@@ -30,7 +30,15 @@ const ExerciseSchema = new mongoose.Schema({
           min: 1,
           max: 10,
           default: null
-        }
+        },
+      completed: {
+        type: Boolean, 
+        default: false 
+      },
+      completedAt: {
+         type: Date,
+         default: null 
+      }
     }
   ],
   notes: {
@@ -41,7 +49,19 @@ const ExerciseSchema = new mongoose.Schema({
   totalVolume: {
     type: Number,
     default: 0
-  }
+  },
+  exerciseCompleted: {
+    type: Boolean, 
+    default: false 
+  },
+  exerciseCompletedAt: {
+     type: Date,
+     default: null 
+  },
+  duration: {
+     type: Number,
+     default: null 
+  },
 })
 
 module.exports = ExerciseSchema

@@ -13,29 +13,39 @@ const PlayIcon = () => (
   </svg>
 )
 
-export default function Timer({ onSetComplete }) {
+export default function Timer({ onSetComplete, restartTimer = false, afterRestart }) {
     
   const [elapsed, setElapsed] = useState(0)
   const [isRunning, setIsRunning] = useState(true)
 
+  let interval
+
   useEffect(() => {
     if (!isRunning) return
 
-    const interval = setInterval(() => {
+    interval = setInterval(() => {
       setElapsed((prev) => prev + 1)
     }, 1000)
 
     return () => clearInterval(interval)
   }, [isRunning])
 
+  useEffect(() => {
+    if(restartTimer){
+      clearInterval(interval)
+      setElapsed(0)
+      afterRestart()
+    }
+  }, [restartTimer])
+
   const minutes = Math.floor(elapsed / 60)
   const seconds = elapsed % 60
 
   return (
-    <motion.div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-6 border border-blue-300 text-center">
+    <motion.div className="bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg p-6 border border-purple-300 text-center">
       <p className="text-gray-600 font-semibold text-sm mb-3">Set Duration</p>
       <motion.div
-        className="text-5xl font-bold text-blue-600 mb-4"
+        className="text-5xl font-bold text-purple-600 mb-4"
         animate={{ scale: [1, 1.02, 1] }}
         transition={{ duration: 0.5, repeat: Number.POSITIVE_INFINITY, repeatDelay: 1 }}
       >
@@ -45,7 +55,7 @@ export default function Timer({ onSetComplete }) {
       <div className="flex gap-2">
         <motion.button
           onClick={() => setIsRunning(!isRunning)}
-          className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg"
+          className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg"
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >

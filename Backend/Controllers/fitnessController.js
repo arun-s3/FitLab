@@ -292,88 +292,105 @@ const updateExerciseTemplate = async (req, res, next) => {
 }
 
 
-const updatePartialExercise = async (req, res, next) => {
+const updateWorkoutInfo = async (req, res, next) => {
   try {
-    console.log("Inside updatePartialExercise...")
+    console.log("Inside updateWorkoutInfo...")
 
     const userId = req.user._id
-    const { exerciseId, sets, duration } = req.body
+    const { exerciseId, selectedExercise, sets, completedTillIndex, duration } = req.body.workoutInfo
 
-    console.log("req.body--->", JSON.stringify(req.body))
+    console.log("req.body.workoutInfo--->", JSON.stringify(req.body.workoutInfo))
 
     if (!exerciseId) {
       return next(errorHandler(400, "Exercise ID is required!"))
     }
 
-    const todayStart = new Date()
-    todayStart.setHours(0, 0, 0, 0)
-
-    const todayEnd = new Date()
-    todayEnd.setHours(23, 59, 59, 999)
+    const todayStart = new Date().setHours(0, 0, 0, 0)
+    const todayEnd = new Date().setHours(23, 59, 59, 999)
 
     let tracker = await FitnessTracker.findOne({
       userId,
-      date: { $gte: todayStart, $lte: todayEnd }
+      date: { $gte: todayStart, $lte: todayEnd },
     })
 
     if (!tracker) {
-      return next(errorHandler(404, "No exercise tracker found for today!"))
+      console.log("No tracker found! Creatine new tracker")
+      tracker = await FitnessTracker.create({
+        userId,
+        exercises: [],
+        totalWorkoutVolume: 0,
+      })
     }
 
-    const exercise = tracker.exercises.id(exerciseId)
+    let exercise = tracker.exercises.id(exerciseId)
+
     if (!exercise) {
-      return next(errorHandler(404, "Exercise not found!"))
+      console.log("No such exercise found! Pushing new exercise...")
+      tracker.exercises.push({
+        name: selectedExercise.name,
+        bodyPart: selectedExercise.bodyPart,
+        equipment: selectedExercise.equipment || null,
+        sets: sets.map((s) => ({
+          weight: s.weight || 0,
+          reps: s.reps,
+          rpe: s.rpe || null,
+          completed: false,
+          completedAt: null,
+        })),
+        notes: selectedExercise.notes || "",
+        duration: 0,
+        totalVolume: 0,
+      })
+
+      await tracker.save();
+      exercise = tracker.exercises[tracker.exercises.length - 1]
     }
 
-    tracker.totalWorkoutVolume -= (exercise.totalVolume || 0)
+    tracker.totalWorkoutVolume -= exercise.totalVolume
+
+    console.log("tracker.totalWorkoutVolume---->", tracker.totalWorkoutVolume)
 
     if (sets && Array.isArray(sets)) {
       sets.forEach((s, index) => {
-        if (exercise.sets[index]) {
+        if (exercise.sets[index] && index < completedTillIndex) {
           exercise.sets[index].weight = Number(s.weight) || 0
           exercise.sets[index].reps = Number(s.reps)
           exercise.sets[index].rpe = s.rpe || null
-          exercise.sets[index].completed = Boolean(s.completed)
-
-          if (s.completed) {
-            exercise.sets[index].completedAt = new Date()
-          }
+          exercise.sets[index].completed = true
+          exercise.sets[index].completedAt = new Date()
         }
       })
     }
 
-    const allCompleted = exercise.sets.every(s => s.completed === true)
-
+    const allCompleted = exercise.sets.every((s) => s.completed)
     exercise.exerciseCompleted = allCompleted
 
+    if (duration !== undefined) {
+      exercise.duration = Number(duration)
+    }
     if (allCompleted) {
       exercise.exerciseCompletedAt = new Date()
-      if (!exercise.duration && duration) {
-        exercise.duration = Number(duration)
-      }
     }
 
     exercise.totalVolume = exercise.sets.reduce(
-      (acc, s) => acc + (Number(s.weight) || 0) * (Number(s.reps) || 0),
+      (acc, s) => acc + (s.weight || 0) * (s.reps || 0),
       0
     )
 
     tracker.totalWorkoutVolume += exercise.totalVolume
 
+    console.log("tracker.totalWorkoutVolume now---->", tracker.totalWorkoutVolume)
+
     await tracker.save();
 
-    return res.status(200).json({
-      message: "Exercise progress updated!",
-      exercise,
-      tracker
-    });
-
+    return res.status(200).json({message: "Exercise progress updated!", exercise, tracker});
   }
   catch (error) {
-    console.log("Error updating partial exercise:", error.message);
+    console.error("Error updating exercise progress:", error.message)
     next(error)
   }
 }
+
 
 
 const getUserExerciseLibrary = async (req, res, next) => {
@@ -432,7 +449,11 @@ const getWorkoutHistory = async (req, res, next) => {
     const todayWorkouts = await FitnessTracker.find({
       userId,
       date: { $gte: todayStart, $lte: todayEnd }
-    }).sort({ updatedAt: -1 })
+    })
+    .sort({ updatedAt: -1 })
+    .lean()
+
+    console.log("todayWorkouts---->", JSON.stringify(todayWorkouts))
 
     const olderWorkouts = await FitnessTracker.find({ userId,
       date: { $lt: todayStart }
@@ -440,6 +461,7 @@ const getWorkoutHistory = async (req, res, next) => {
       .sort({ updatedAt: -1 })
       .skip(skip)
       .limit(limit)
+      .lean()
 
     const totalOlderCount = await FitnessTracker.countDocuments({
       userId,
@@ -500,5 +522,5 @@ const deleteExerciseTemplate = async (req, res, next) => {
 
 
 
-module.exports = {getExerciseThumbnail, getExerciseVideos, addExercise, updateExerciseTemplate, updatePartialExercise,
+module.exports = {getExerciseThumbnail, getExerciseVideos, addExercise, updateExerciseTemplate, updateWorkoutInfo,
   getUserExerciseLibrary, getWorkoutHistory, deleteExerciseTemplate}

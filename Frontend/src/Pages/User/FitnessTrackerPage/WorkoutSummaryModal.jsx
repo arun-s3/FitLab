@@ -1,4 +1,4 @@
-import React from "react"
+import React, {useState, useEffect} from "react"
 import { motion } from "framer-motion"
 
 import {X} from "lucide-react"
@@ -39,7 +39,35 @@ const WarningIcon = () => (
   </svg>
 )
 
-export default function WorkoutSummaryModal({ stats, onClose }) {
+function StatCard({ icon: Icon, label, value, textColor, iconBg, custom, variants }) {
+  return (
+    <motion.div
+      custom={custom}
+      variants={variants}
+      initial="hidden"
+      animate="visible"
+      className={`bg-gradient-to-r rounded-lg p-[12px] flex items-center gap-4`}
+    >
+      <div className={`rounded-lg p-3 flex-shrink-0 ${iconBg && iconBg}`}>
+        <Icon className={`${textColor && textColor}`}/>
+      </div>
+      <div>
+        <p className="text-muted text-sm">{label}</p>
+        <p className={`text-lg ${textColor && textColor} font-bold`}>{value}</p>
+      </div>
+    </motion.div>
+  )
+}
+
+
+export default function WorkoutSummaryModal({ stats, onClose, recalculateCalories }) {
+
+  const [userWeight, setUserWeight] = useState(70)
+  const [estimatedCalories, setEstimatedCalories] = useState(0)
+
+  useEffect(()=> {
+    setEstimatedCalories(stats.estimatedCalories)
+  }, [stats.estimatedCalories])
     
   const formatTime = (seconds) => {
     const hours = Math.floor(seconds / 3600)
@@ -74,6 +102,13 @@ export default function WorkoutSummaryModal({ stats, onClose }) {
     }),
   }
 
+  const handleChange = (e) => {
+    const value = e.target.value.trim()
+      if (value === "" || /^[0-9]+$/.test(value)) {
+        setUserWeight(value)
+      }
+  }
+
   return (
     <motion.div
       className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
@@ -101,7 +136,7 @@ export default function WorkoutSummaryModal({ stats, onClose }) {
           </motion.button>
         </div>
 
-        <div className="mb-6">
+        <div className="mb-[10px]">
           <StatCard
             icon={ClockIcon}
             label="Duration"
@@ -120,15 +155,19 @@ export default function WorkoutSummaryModal({ stats, onClose }) {
             custom={1}
             variants={statVariants}
           />
-          <StatCard
-            icon={FlameIcon}
-            label="Est. Calories"
-            value={`~ ${stats.estimatedCalories} kcal`}
-            textColor="text-secondary"
-            iconBg="bg-purple-50"
-            custom={2}
-            variants={statVariants}
-          />
+          {
+            estimatedCalories &&
+              <StatCard
+                icon={FlameIcon}
+                label="Est. Calories"
+                value={`~ ${estimatedCalories} kcal`}
+                textColor="text-secondary"
+                iconBg="bg-purple-50"
+                custom={2}
+                variants={statVariants}
+              />
+          }
+
           <StatCard
             icon={TrendingIcon}
             label="Total Reps"
@@ -138,6 +177,29 @@ export default function WorkoutSummaryModal({ stats, onClose }) {
             custom={3}
             variants={statVariants}
           />
+        </div>
+
+        <div className="relative mb-6 flex flex-col items-start gap-[5px]">
+          <label className="text-[13px] text-muted"> Enter your weight for the best calorie results: </label>
+          <input
+            type="number"
+            name="weight" 
+            placeholder="Weight"
+            value={userWeight}
+            onChange={handleChange}
+            className="w-[10rem] text-[14px] bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 text-gray-900
+              placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all"
+          />
+          <button 
+            className="absolute right-[13.5rem] top-[2.8rem] transform -translate-y-1/2 w-fit bg-purple-600 hover:bg-purple-700
+              text-white text-[12px] font-semibold py-[5px] px-[7px] rounded-[5px] transition-all shadow-md hover:shadow-lg cursor-pointer"
+            onClick={()=> {
+              const estimatedCalories = recalculateCalories(userWeight)
+              setEstimatedCalories(estimatedCalories)
+            }}
+          >
+            Apply
+          </button>
         </div>
 
         {stats.missedSets && stats.missedSets.length > 0 && (
@@ -170,26 +232,6 @@ export default function WorkoutSummaryModal({ stats, onClose }) {
           Continue
         </motion.button>
       </motion.div>
-    </motion.div>
-  )
-}
-
-function StatCard({ icon: Icon, label, value, textColor, iconBg, custom, variants }) {
-  return (
-    <motion.div
-      custom={custom}
-      variants={variants}
-      initial="hidden"
-      animate="visible"
-      className={`bg-gradient-to-r rounded-lg p-[12px] flex items-center gap-4`}
-    >
-      <div className={`rounded-lg p-3 flex-shrink-0 ${iconBg && iconBg}`}>
-        <Icon className={`${textColor && textColor}`}/>
-      </div>
-      <div>
-        <p className="text-muted text-sm">{label}</p>
-        <p className={`text-lg ${textColor && textColor} font-bold`}>{value}</p>
-      </div>
     </motion.div>
   )
 }

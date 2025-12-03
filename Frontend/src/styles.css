@@ -1213,6 +1213,10 @@ select{
   right: 1.5rem;
 }
 
+.right-\[13\.5rem\]{
+  right: 13.5rem;
+}
+
 .right-\[15px\]{
   right: 15px;
 }
@@ -4259,6 +4263,14 @@ select{
 
 .gap-\[8px\]{
   gap: 8px;
+}
+
+.gap-20{
+  gap: 5rem;
+}
+
+.gap-14{
+  gap: 3.5rem;
 }
 
 .gap-x-6{
@@ -9681,11 +9693,6 @@ select{
 .hover\:\!border-yellow-300:hover{
   --tw-border-opacity: 1 !important;
   border-color: rgb(253 224 71 / var(--tw-border-opacity)) !important;
-}
-
-.hover\:border-blue-300:hover{
-  --tw-border-opacity: 1;
-  border-color: rgb(147 197 253 / var(--tw-border-opacity));
 }
 
 .hover\:border-gray-300:hover{

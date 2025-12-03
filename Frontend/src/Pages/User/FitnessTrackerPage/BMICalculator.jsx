@@ -46,8 +46,10 @@ export default function BMICalculator() {
     const bodyFat = Number.parseFloat(formData.bodyFat)
     const glucose = Number.parseFloat(formData.glucose)
 
+    // BMI Calculation
     const bmi = weight / (height / 100) ** 2
 
+    // BMI Category
     let bmiCategory = ""
     let bmiColor = ""
     if (bmi < 18.5) {
@@ -64,6 +66,7 @@ export default function BMICalculator() {
       bmiColor = "text-red-600"
     }
 
+    // WHR (Waist-to-Hip Ratio)
     const whr = (waist / hip).toFixed(2)
     let wherCategory = ""
     if (formData.gender === "male") {
@@ -72,6 +75,7 @@ export default function BMICalculator() {
       wherCategory = whr < 0.85 ? "Good" : "High"
     }
 
+    // Blood Pressure Category
     let bpCategory = ""
     let bpColor = ""
     if (systolic < 120 && diastolic < 80) {
@@ -88,6 +92,7 @@ export default function BMICalculator() {
       bpColor = "text-red-600"
     }
 
+    // Glucose Category
     let glucoseCategory = ""
     let glucoseColor = ""
     if (glucose < 100) {
@@ -101,6 +106,7 @@ export default function BMICalculator() {
       glucoseColor = "text-red-600"
     }
 
+    // Body Fat Category
     let bodyFatCategory = ""
     let bodyFatColor = ""
     if (formData.gender === "male") {
@@ -196,6 +202,7 @@ export default function BMICalculator() {
       transition={{ duration: 0.5 }}
     >
       <div className="max-w-6xl mx-auto">
+        {/* Header */}
         <motion.div className="text-center mb-8" variants={itemVariants} initial="hidden" animate="visible">
           <div className="flex items-center justify-center gap-3 mb-4">
             <HeartIcon />
@@ -205,6 +212,7 @@ export default function BMICalculator() {
         </motion.div>
 
         <div className="grid md:grid-cols-2 gap-8">
+          {/* Form Section */}
           <motion.div
             className="bg-white rounded-2xl shadow-lg shadow-gray-200/50 p-8"
             variants={itemVariants}
@@ -212,6 +220,7 @@ export default function BMICalculator() {
             animate="visible"
           >
             <form onSubmit={calculateBMI} className="space-y-6">
+              {/* Gender */}
               <motion.div variants={itemVariants}>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Gender</label>
                 <div className="flex gap-4">
@@ -234,6 +243,7 @@ export default function BMICalculator() {
                 </div>
               </motion.div>
 
+              {/* Age */}
               <motion.div variants={itemVariants}>
                 <label htmlFor="age" className="block text-sm font-semibold text-gray-700 mb-2">
                   Age (years)
@@ -250,6 +260,7 @@ export default function BMICalculator() {
                 />
               </motion.div>
 
+              {/* Height */}
               <motion.div variants={itemVariants}>
                 <label htmlFor="height" className="block text-sm font-semibold text-gray-700 mb-2">
                   Height (cm)
@@ -266,6 +277,7 @@ export default function BMICalculator() {
                 />
               </motion.div>
 
+              {/* Weight */}
               <motion.div variants={itemVariants}>
                 <label htmlFor="weight" className="block text-sm font-semibold text-gray-700 mb-2">
                   Weight (kg)
@@ -282,6 +294,7 @@ export default function BMICalculator() {
                 />
               </motion.div>
 
+              {/* Waist Circumference */}
               <motion.div variants={itemVariants}>
                 <label htmlFor="waistCircumference" className="block text-sm font-semibold text-gray-700 mb-2">
                   Waist Circumference (cm)
@@ -298,6 +311,7 @@ export default function BMICalculator() {
                 />
               </motion.div>
 
+              {/* Hip Circumference */}
               <motion.div variants={itemVariants}>
                 <label htmlFor="hipCircumference" className="block text-sm font-semibold text-gray-700 mb-2">
                   Hip Circumference (cm)
@@ -314,6 +328,7 @@ export default function BMICalculator() {
                 />
               </motion.div>
 
+              {/* Blood Pressure */}
               <motion.div variants={itemVariants} className="grid grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="systolic" className="block text-sm font-semibold text-gray-700 mb-2">
@@ -347,6 +362,7 @@ export default function BMICalculator() {
                 </div>
               </motion.div>
 
+              {/* Body Fat Percentage */}
               <motion.div variants={itemVariants}>
                 <label htmlFor="bodyFat" className="block text-sm font-semibold text-gray-700 mb-2">
                   Body Fat (%)
@@ -364,6 +380,7 @@ export default function BMICalculator() {
                 />
               </motion.div>
 
+              {/* Glucose */}
               <motion.div variants={itemVariants}>
                 <label htmlFor="glucose" className="block text-sm font-semibold text-gray-700 mb-2">
                   Glucose (mg/dL)
@@ -380,6 +397,7 @@ export default function BMICalculator() {
                 />
               </motion.div>
 
+              {/* Buttons */}
               <motion.div className="flex gap-4 pt-6" variants={itemVariants}>
                 <motion.button
                   type="submit"
@@ -402,8 +420,10 @@ export default function BMICalculator() {
             </form>
           </motion.div>
 
+          {/* Results Section */}
           {showResults && results && (
             <motion.div className="space-y-4" variants={containerVariants} initial="hidden" animate="visible">
+              {/* BMI Card */}
               <motion.div className="bg-white rounded-2xl shadow-lg shadow-gray-200/50 p-8" variants={itemVariants}>
                 <h3 className="text-sm font-semibold text-gray-600 mb-4">BMI</h3>
                 <div className="flex items-end gap-4">
@@ -415,6 +435,7 @@ export default function BMICalculator() {
                 </div>
               </motion.div>
 
+              {/* WHR Card */}
               <motion.div className="bg-white rounded-2xl shadow-lg shadow-gray-200/50 p-8" variants={itemVariants}>
                 <h3 className="text-sm font-semibold text-gray-600 mb-4">Waist-to-Hip Ratio</h3>
                 <div className="flex items-center justify-between">
@@ -429,6 +450,7 @@ export default function BMICalculator() {
                 </div>
               </motion.div>
 
+              {/* Blood Pressure Card */}
               <motion.div className="bg-white rounded-2xl shadow-lg shadow-gray-200/50 p-8" variants={itemVariants}>
                 <h3 className="text-sm font-semibold text-gray-600 mb-4">Blood Pressure</h3>
                 <div className="flex items-center justify-between">
@@ -441,6 +463,7 @@ export default function BMICalculator() {
                 </div>
               </motion.div>
 
+              {/* Body Fat Card */}
               <motion.div className="bg-white rounded-2xl shadow-lg shadow-gray-200/50 p-8" variants={itemVariants}>
                 <h3 className="text-sm font-semibold text-gray-600 mb-4">Body Fat Percentage</h3>
                 <div className="flex items-center justify-between">
@@ -451,6 +474,7 @@ export default function BMICalculator() {
                 </div>
               </motion.div>
 
+              {/* Glucose Card */}
               <motion.div className="bg-white rounded-2xl shadow-lg shadow-gray-200/50 p-8" variants={itemVariants}>
                 <h3 className="text-sm font-semibold text-gray-600 mb-4">Blood Glucose</h3>
                 <div className="flex items-center justify-between">
@@ -464,6 +488,7 @@ export default function BMICalculator() {
             </motion.div>
           )}
 
+          {/* Empty State */}
           {!showResults && (
             <motion.div
               className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-lg shadow-gray-200/50 p-8 flex items-center justify-center"

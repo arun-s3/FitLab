@@ -13,7 +13,9 @@ import {Play} from 'lucide-react'
 import Timer from "./Timer"
 import ExerciseForm from "./ExerciseForm"
 import WorkoutSummaryModal from "./WorkoutSummaryModal"
+import RecentWorkouts from "./RecentWorkouts"
 import DeleteConfirmationModal from "./DeleteConfirmationModal"
+import {estimateCalories} from "../../../Utils/exerciseFunctions"
 
 
 export default function WorkoutSessionCard() {
@@ -31,6 +33,8 @@ export default function WorkoutSessionCard() {
   const [showSummary, setShowSummary] = useState(false)
 
   const [editingExercise, setEditingExercise] = useState(null)
+
+  const [refreshHistory, setRefreshHistory] = useState(false)
 
   const [openExerciseDeleteModal, setOpenExerciseDeleteModal] = useState({exercise: null})
 
@@ -85,8 +89,8 @@ export default function WorkoutSessionCard() {
         console.log("Error---->", error.response.data.message)
       }
     }catch (error) {
-      console.error("Error during ading exercise", error.message)
-      sonnerToast.error('Something wet wrong! Please retry later.')
+      console.error("Error during adding exercise", error.message)
+      sonnerToast.error('Something went wrong! Please retry later.')
     }
   }
 
@@ -114,6 +118,24 @@ export default function WorkoutSessionCard() {
     setRestartTimer(true)
   }
 
+  const saveWorkoutInfos = async(workoutInfo)=> {
+    try {   
+      console.log("Inside saveWorkoutInfos()..")
+      const response = await axios.post(`${baseApiUrl}/fitness/tracker/workout/add`, {workoutInfo}, { withCredentials: true })
+      if(response.status === 200){
+        console.log("Saved workout details")
+        setRefreshHistory(true)
+      }
+      if(response.status === 400 || response.status === 404){
+        sonnerToast.error("Some error occured while saving the wokout details")
+        console.log("Error---->", error.response.data.message)
+      }
+    }catch (error) {
+      console.error("Error during saving workoutInfo", error.message)
+      sonnerToast.error('Something went wrong! Please retry later.')
+    }
+  }
+
   const handleFinishWorkout = () => {
     console.log("Inside handleFinishWorkout")
     const missedSets = []
@@ -127,7 +149,17 @@ export default function WorkoutSessionCard() {
     console.log("missedSets---->", missedSets)
     const duration = Math.floor((Date.now() - startTime) / 1000)
     const totalVolume = selectedExercise.sets.reduce((acc, set) => acc + set.weight * set.reps, 0)
-    const estimatedCalories = Math.round((duration / 60) * 8 + totalVolume * 0.1)
+
+    const {bodyPart, equipment, sets} = selectedExercise
+    const estimatedCalories = estimateCalories(bodyPart, equipment, sets, duration)
+
+    const completedTillIndex = currentSet < selectedExercise.sets.length ? currentSet : null
+    console.log("completedTillIndex---->", completedTillIndex)
+    const workoutInfo = {exerciseId: selectedExercise._id, selectedExercise, sets, completedTillIndex, duration}
+
+    saveWorkoutInfos(workoutInfo)
+
+    // const estimatedCalories = Math.round((duration / 60) * 8 + totalVolume * 0.1)
 
     setSessionStats({
       duration,
@@ -136,15 +168,17 @@ export default function WorkoutSessionCard() {
       exerciseCount: exercises.length,
       totalReps: selectedExercise.sets.reduce((acc, set) => acc + set.reps, 0),
       missedSets,
+      exercise: selectedExercise
     })
 
     setShowSummary(true)
+
     setSelectedExerciseId(null)
     setSelectedExercise(null)
     setCurrentSet(0)
   }
 
-
+  
   return (
     <>
       <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.5 }}>
@@ -354,17 +388,24 @@ export default function WorkoutSessionCard() {
                 )}
               </AnimatePresence>
 
-              <RecentWorkouts />
+              <RecentWorkouts 
+                refreshHistory={refreshHistory} 
+                stopRefreshHistory={()=> setRefreshHistory(false)}
+              />
 
             </div>
           </div>
       </motion.div>
-
+                    
       {
         showSummary && 
           <WorkoutSummaryModal 
             stats={sessionStats} 
-            onClose={() => setShowSummary(false)} 
+            recalculateCalories={(userWeight)=> {
+              const {bodyPart, equipment, sets} = sessionStats.exercise
+              return estimateCalories(bodyPart, equipment, sets, sessionStats.duration, userWeight)
+            }}
+            onClose={()=> setShowSummary(false)} 
           />
       }
       {

@@ -13,7 +13,7 @@ const PlayIcon = () => (
   </svg>
 )
 
-export default function Timer({ onSetComplete, restartTimer = false, afterRestart }) {
+export default function Timer({ onSetComplete, restartTimer = false, afterRestart, startTimerFrom}) {
     
   const [elapsed, setElapsed] = useState(0)
   const [isRunning, setIsRunning] = useState(true)
@@ -37,6 +37,12 @@ export default function Timer({ onSetComplete, restartTimer = false, afterRestar
       afterRestart()
     }
   }, [restartTimer])
+
+  useEffect(() => {
+    if(startTimerFrom){
+      setElapsed(startTimerFrom)
+    }
+  }, [startTimerFrom])
 
   const minutes = Math.floor(elapsed / 60)
   const seconds = elapsed % 60

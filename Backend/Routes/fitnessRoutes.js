@@ -2,7 +2,7 @@ const express = require('express')
 const fitnessRouter = express.Router()
 const {isLogin, isLogout} = require('../Middlewares/Authentication')
 const {getExerciseThumbnail, getExerciseVideos, addExercise, updateExerciseTemplate, getUserExerciseLibrary, deleteExerciseTemplate,
-    updateWorkoutInfo, getWorkoutHistory} = require('../Controllers/fitnessController')
+    updateWorkoutInfo, getWorkoutHistory, updateHealthProfile} = require('../Controllers/fitnessController')
 
 
 fitnessRouter.get('/thumbnail/:name', getExerciseThumbnail)
@@ -14,6 +14,9 @@ fitnessRouter.delete('/tracker/exercise-library/delete/:exerciseTemplateId', isL
 
 fitnessRouter.post('/tracker/workout/add', isLogin, updateWorkoutInfo)
 fitnessRouter.get('/tracker/workout/list', isLogin, getWorkoutHistory)
+
+fitnessRouter.post('/tracker/health/update', isLogin, updateHealthProfile)
+
 
 
 // fitnessRouter.get('/exercises', getAllExercises)

@@ -8,7 +8,7 @@ import {IoIosFitness} from "react-icons/io"
 import {IoBarbellSharp} from "react-icons/io5"
 import {IoBody} from "react-icons/io5"
 import {FiEdit3} from "react-icons/fi"
-import {Play} from 'lucide-react'
+import {Play, TvMinimal} from 'lucide-react'
 
 import Timer from "./Timer"
 import ExerciseForm from "./ExerciseForm"
@@ -16,6 +16,8 @@ import WorkoutSummaryModal from "./WorkoutSummaryModal"
 import RecentWorkouts from "./RecentWorkouts"
 import DeleteConfirmationModal from "./DeleteConfirmationModal"
 import {estimateCalories} from "../../../Utils/exerciseFunctions"
+import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
+
 
 
 export default function WorkoutSessionCard() {
@@ -27,6 +29,7 @@ export default function WorkoutSessionCard() {
   const [startTime, setStartTime] = useState(null)
   const [currentSet, setCurrentSet] = useState(0)
   const [restartTimer, setRestartTimer] = useState(false)
+  const [startTimerFrom, setStartTimerFrom] = useState(0)
   
   const [sessionStats, setSessionStats] = useState(null)
   
@@ -38,8 +41,9 @@ export default function WorkoutSessionCard() {
 
   const [openExerciseDeleteModal, setOpenExerciseDeleteModal] = useState({exercise: null})
 
-  const limit = 5
   const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(20) 
+  const limit = 3
 
   const [loading, setLoading] = useState(false)
 
@@ -52,6 +56,7 @@ export default function WorkoutSessionCard() {
       if(response.status === 200){
         console.log("response.data.exercises----------->", response.data.exercises)
         setExercises(response.data.exercises)
+        setTotalPages(response.data.totalPages)
         setLoading(false)
       }
       if(response.status === 404){
@@ -70,6 +75,15 @@ export default function WorkoutSessionCard() {
     setLoading(true)
     getExercises()
   }, [])
+
+  const navigateToExerciseGuide = (exerciseName) => {
+    const stateValue = {exerciseName}
+    const encodedExerciseName = encodeURIComponent(JSON.stringify(stateValue))
+    const url = `/fitness/training?name=${encodedExerciseName}`
+
+    window.open(url, "_blank", "noopener,noreferrer")
+  }
+
 
   const handleExerciseListUpdate = async() => {
     setLoading(true)
@@ -118,21 +132,31 @@ export default function WorkoutSessionCard() {
     setRestartTimer(true)
   }
 
+  const handleResumeTodayWorkout = (workout, resumeFromSet)=> {
+    console.log("Inside handleResumeTodayWorkout()..resumeFromSet--->", resumeFromSet)
+    setSelectedExerciseId(workout._id)
+    setSelectedExercise(workout)
+    setStartTime(Date.now())
+    setCurrentSet(resumeFromSet)
+    setStartTimerFrom(workout.duration)
+  }
+
   const saveWorkoutInfos = async(workoutInfo)=> {
     try {   
       console.log("Inside saveWorkoutInfos()..")
       const response = await axios.post(`${baseApiUrl}/fitness/tracker/workout/add`, {workoutInfo}, { withCredentials: true })
       if(response.status === 200){
         console.log("Saved workout details")
-        setRefreshHistory(true)
       }
       if(response.status === 400 || response.status === 404){
         sonnerToast.error("Some error occured while saving the wokout details")
         console.log("Error---->", error.response.data.message)
       }
+      setRefreshHistory(true)
     }catch (error) {
       console.error("Error during saving workoutInfo", error.message)
       sonnerToast.error('Something went wrong! Please retry later.')
+      setRefreshHistory(true)
     }
   }
 
@@ -147,7 +171,12 @@ export default function WorkoutSessionCard() {
       })
     }
     console.log("missedSets---->", missedSets)
-    const duration = Math.floor((Date.now() - startTime) / 1000)
+    let duration = Math.floor((Date.now() - startTime) / 1000)
+    if(startTimerFrom){
+      duration = Math.floor(duration + Number(startTimerFrom))
+    }  
+    console.log("duration---->", duration)
+
     const totalVolume = selectedExercise.sets.reduce((acc, set) => acc + set.weight * set.reps, 0)
 
     const {bodyPart, equipment, sets} = selectedExercise
@@ -296,40 +325,71 @@ export default function WorkoutSessionCard() {
                           </div>
                         </div>
                         
-                        <motion.div whileTap={{ scale: 0.98 }} className="mt-[10px] ml-[3px]">
-                            <button
-                              className={`flex items-center gap-[5px] hover:bg-green-400 transition duration-300
-                               hover:text-white text-[11px] font-medium tracking-[0.2px] px-[9px] py-[7px] 
-                               rounded-[6px] !disabled:cursor-not-allowed 
-                               ${selectedExerciseId === exercise._id 
-                                  ? 'bg-green-400 text-white cursor-not-allowed' 
-                                  : 'bg-primary text-secondary'
-                                }`}
-                              onClick={()=> handleSelectExercise(exercise._id)}>
-                                 {
-                                  loading 
-                                    ? <CustomHashLoader loading={loading}/> 
-                                    : (
-                                      <>
-                                        {
-                                          selectedExerciseId !== exercise._id &&
-                                            <Play className="w-[17px] h-[17px]"/>
-                                        }
-                                        <span> 
-                                          { selectedExerciseId === exercise._id ? 'Started' : 'Start Exercise' }
-                                        </span>
-                                      </>
-                                    )
-                                 }  
-                            </button>
-                        </motion.div>
+                        <div className="w-full flex items-center justify-between">
+                          <motion.div whileTap={{ scale: 0.98 }} className="mt-[10px] ml-[3px]">
+                              <button
+                                className={`flex items-center gap-[5px] hover:bg-green-400 transition duration-300
+                                 hover:text-white text-[11px] font-medium tracking-[0.2px] px-[9px] py-[7px] 
+                                 rounded-[6px] !disabled:cursor-not-allowed 
+                                 ${selectedExerciseId === exercise._id 
+                                    ? 'bg-green-400 text-white cursor-not-allowed' 
+                                    : 'bg-primary text-secondary'
+                                  }`}
+                                onClick={()=> handleSelectExercise(exercise._id)}
+                                >
+                                   {
+                                    loading 
+                                      ? <CustomHashLoader loading={loading}/> 
+                                      : (
+                                        <>
+                                          {
+                                            selectedExerciseId !== exercise._id &&
+                                              <Play className="w-[17px] h-[17px]"/>
+                                          }
+                                          <span> 
+                                            { selectedExerciseId === exercise._id ? 'Started' : 'Start Exercise' }
+                                          </span>
+                                        </>
+                                      )
+                                   }  
+                              </button>
+                          </motion.div>
+                          <motion.div whileTap={{ scale: 0.98 }} className="mt-[10px] ml-[3px]">
+                              <button
+                                className={`flex items-center gap-[5px] bg-primary text-secondary hover:bg-green-400 
+                                 hover:text-white text-[11px] font-medium tracking-[0.2px] px-[9px] py-[7px] 
+                                 rounded-[6px] transition duration-300 !disabled:cursor-not-allowed 
+                                 ${selectedExerciseId === exercise._id && 'hidden'}`}
+                                onClick={()=> navigateToExerciseGuide(exercise.name)}
+                                >
+                                  <TvMinimal className="w-[17px] h-[17px]"/>
+                                  <span> View Guide </span>
+                              </button>
+                          </motion.div>
+                        </div>
 
                       </motion.div>
                     )
                   )
                   )}
                 </div>
+
+                {
+                exercises.length > 0 && totalPages &&
+                  <PaginationV2 
+                    miniVersion={true}
+                    headerStyle='!mt-4'
+                    currentPage={currentPage} 
+                    totalPages={totalPages} 
+                    onPageChange={(page)=> {
+                      setCurrentPage(page)
+                      setTimeout(()=> getExercises(), 700)
+                    }} 
+                  />
+                }
+
               </motion.div>
+
             </div>
 
             <div className="lg:col-span-1 space-y-4">
@@ -354,6 +414,7 @@ export default function WorkoutSessionCard() {
                       onSetComplete={handleCompleteSet} 
                       restartTimer={restartTimer} 
                       afterRestart={()=> setRestartTimer(false)}
+                      startTimerFrom={startTimerFrom} 
                     />
 
                     <div className="flex gap-2 mt-4">
@@ -391,6 +452,7 @@ export default function WorkoutSessionCard() {
               <RecentWorkouts 
                 refreshHistory={refreshHistory} 
                 stopRefreshHistory={()=> setRefreshHistory(false)}
+                resumeTodayWorkout={handleResumeTodayWorkout}
               />
 
             </div>

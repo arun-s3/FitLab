@@ -1,4 +1,5 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect, useRef} from 'react'
+import {useLocation} from 'react-router-dom'
 import {motion} from 'framer-motion'
 
 import {Search} from "lucide-react"
@@ -7,15 +8,46 @@ import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
 import {CustomHashLoader} from '../../../Components/Loader/Loader'
 
 
-export default function MuscleSelector({bodyParts, searchedBodyPart, setSearchedBodyPart, onSearchBodyPart, selectedBodyParts, listExercises}){
+export default function MuscleSelector({bodyParts, setSearchedBodyPart, onSearchBodyPart, selectedBodyParts, listExercises, isLoading}){
 
     const [searchedKeyword, setSearchedKeyword] = useState(null)
     const [loading, setLoading] = useState(false)
+
+    const searchRef = useRef(null)
+    const applyRef = useRef(null)
+
+    const location = useLocation()
   
     const searchKeyword = ()=> {
       console.log('searchData--->', searchedKeyword)
       setSearchedBodyPart(searchedKeyword)
     }
+
+    useEffect(()=> {
+      if(location && location.search){
+        const queryParams = new URLSearchParams(location.search)
+        const name = queryParams.get("name")
+        const parsedName = name ? JSON.parse(decodeURIComponent(name)) : null
+      
+        console.log("exerciseName----->", parsedName.exerciseName)
+        if(parsedName.exerciseName){
+          setSearchedKeyword(parsedName.exerciseName)
+          setTimeout(()=> applyRef.current?.click(), 500)
+          setTimeout(() => {
+            searchRef.current?.scrollIntoView({ behavior: "smooth" })
+          }, 200)
+        }
+      }
+    }, [location])
+
+    useEffect(()=> {
+      if(searchedKeyword && isLoading){
+        setLoading(true)
+      }
+      if(!isLoading){
+        setLoading(false)
+      }
+    }, [isLoading, searchedKeyword])
 
     
     return (
@@ -25,6 +57,7 @@ export default function MuscleSelector({bodyParts, searchedBodyPart, setSearched
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
+              ref={searchRef}
               className="text-center mb-8"
             >
               <h2 className="text-4xl md:text-5xl font-bold mb-[5px] text-slate-900">
@@ -59,7 +92,11 @@ export default function MuscleSelector({bodyParts, searchedBodyPart, setSearched
                   className="w-full pl-12 pr-4 py-[10px] rounded-lg border-2 border-slate-200 focus:border-secondary
                     focus:outline-none text-slate-900 text-[15px] placeholder:text-[14px] placeholder-slate-500 transition-colors"
                 />
-                  <motion.div whileTap={{ scale: 0.98 }} onClick={searchKeyword}>
+                  <motion.div 
+                    whileTap={{ scale: 0.98 }} 
+                    ref={applyRef}
+                    onClick={searchKeyword}
+                  >
                       <SiteButtonSquare 
                           tailwindClasses={`hover:!bg-primaryDark transition duration-300`} 
                           customStyle={{paddingInline:'50px', paddingBlock:'12px', borderRadius:'7px'}}

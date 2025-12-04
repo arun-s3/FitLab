@@ -39,7 +39,8 @@ const userSchema = mongoose.Schema({
         type:Date
     },
     gender:{ 
-        type:String
+        type:String,
+        enum:["male", "female"]
     },
     isAdmin:{
         type:Boolean, 

@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react'
+import {useLocation} from 'react-router-dom'
 
 import axios from 'axios'
 
@@ -112,6 +113,7 @@ export default function FitnessTrainingPage(){
 
   useEffect(() => {
     if (searchQuery) {
+      console.log("searchQuery--->", searchQuery)
       loadExercises()
     }
   }, [searchQuery])
@@ -184,6 +186,7 @@ export default function FitnessTrainingPage(){
                         onSearchBodyPart={setSelectedBodyParts}
                         selectedBodyParts={selectedBodyParts}
                         listExercises={loadExercises}
+                        isLoading={loading}
                       />
                   }
 

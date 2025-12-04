@@ -1,34 +1,43 @@
 import React, {useState, useEffect} from 'react'
 import { motion } from "framer-motion"
 
-import {Clock, Flame, Dumbbell} from 'lucide-react'
+import {Clock, Flame, Dumbbell, Play} from 'lucide-react'
 import {IoIosFitness} from "react-icons/io"
 import {format} from "date-fns"
 import axios from 'axios'
 
 import {estimateCalories} from "../../../Utils/exerciseFunctions"
+import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
 
 
-export default function RecentWorkouts({refreshHistory, stopRefreshHistory}) {
+export default function RecentWorkouts({refreshHistory, stopRefreshHistory, resumeTodayWorkout}) {
 
   const [todayWorkouts, setTodayWorkouts] = useState([])
   const [olderWorkouts, setOlderWorkouts] = useState([])
 
   const [userWeight, setUserWeight] = useState(70)
 
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(20) 
+  const limit = 2
+
   const [loading, setLoading] = useState(false)
+
+  const [selectedWorkoutId, setSelectedWorkoutId] = useState(null) 
+  const [loadingResume, setLoadingResume] = useState(false)
 
   const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
   async function listWorkoutHistory(){
     try {   
       console.log("Inside listWorkoutHistory()..")
-      const response = await axios.get(`${baseApiUrl}/fitness/tracker/workout/list`, { withCredentials: true })
+      const response = await axios.get(`${baseApiUrl}/fitness/tracker/workout/list?page=${currentPage}&limit=${limit}`, { withCredentials: true })
       if(response.status === 200){
         console.log("response.data.todayWorkouts--->", response.data.todayWorkouts)
-        console.log("response.data.olderWorkouts--->", response.data.olderWorkouts)
+        console.log("response.data.olderWorkouts--->", response.data.olderWorkouts) 
         setTodayWorkouts(response.data.todayWorkouts)
         setOlderWorkouts(response.data.olderWorkouts)
+        setTotalPages(response.data.pagination.totalPages)
         stopRefreshHistory()
         setLoading(false)
       }
@@ -47,11 +56,24 @@ export default function RecentWorkouts({refreshHistory, stopRefreshHistory}) {
   useEffect(()=> {
     if(refreshHistory){
       setLoading(true)
+      setSelectedWorkoutId(null)
       listWorkoutHistory()
     }
   }, [refreshHistory])
 
-  function HistoryCard({workout, date = null}){
+  useEffect(()=> {
+      listWorkoutHistory()
+  }, [currentPage])
+
+  const handleResumeWorkout = (workout)=> {
+    console.log("Inside handleResumeWorkout----->")
+    setSelectedWorkoutId(workout._id)
+    const resumeFromSet = workout.sets.findIndex(set=> !set.completed)
+    console.log("resumeFromSet----->", resumeFromSet)
+    resumeTodayWorkout(workout, resumeFromSet)
+  }
+
+  function HistoryCard({workout, date = null, allowResumeExercise = false, workoutCompleted}){
 
     return (
       <motion.div
@@ -98,6 +120,41 @@ export default function RecentWorkouts({refreshHistory, stopRefreshHistory}) {
               </p>
             </div>
           </div>
+
+          {
+            allowResumeExercise && !workoutCompleted &&
+              <motion.div whileTap={{ scale: 0.98 }} className="mt-[10px] ml-[3px] flex items-center justify-between gap-[10px]">
+                <button
+                  className={`flex items-center gap-[5px] hover:bg-green-400 transition duration-300
+                   hover:text-white text-[11px] font-medium tracking-[0.2px] px-[9px] py-[7px] 
+                   rounded-[6px] !disabled:cursor-not-allowed 
+                   ${selectedWorkoutId === workout._id 
+                      ? 'bg-green-400 text-white cursor-not-allowed' 
+                      : 'bg-primary text-secondary'
+                    }`}
+                  onClick={()=> handleResumeWorkout(workout)}>
+                     {
+                      loadingResume 
+                        ? <CustomHashLoader loading={loadingResume}/> 
+                        : (
+                          <> 
+                            {
+                              selectedWorkoutId !== workout._id &&
+                                <Play className="w-[17px] h-[17px]"/>
+                            }
+                            <span> 
+                              { selectedWorkoutId === workout._id ? 'Resumed' : 'Resume Exercise' }
+                            </span>
+                          </>
+                        )
+                     }  
+                </button>
+                <p className='text-[11px] text-red-500 tracking-[0.3px]'>
+                   {`Workout: only completed ${workout.sets.findIndex(set=> !set.completed)}/${workout.sets.length}`} 
+                </p>
+              </motion.div>
+
+          }
         </motion.div>
     )
   }
@@ -148,19 +205,30 @@ export default function RecentWorkouts({refreshHistory, stopRefreshHistory}) {
         
         {!loading && todayWorkouts && todayWorkouts.length > 0 && todayWorkouts.map((workouts) => (
             workouts.exercises.map(exercise=> (
-              <HistoryCard workout={exercise} />
+              <HistoryCard workout={exercise} allowResumeExercise={true} workoutCompleted={workouts.exerciseCompleted}/>
             ))
         ))}
 
       </HistoryWrapper>
 
-      <HistoryWrapper heading="Older Workouts" headerStyle="mt-8">
+      <HistoryWrapper heading="Workout History" headerStyle="mt-8">
         
         {!loading && olderWorkouts && olderWorkouts.length > 0 && olderWorkouts.map((workouts) => (
             workouts.exercises.map(exercise=> (
               <HistoryCard workout={exercise} date={workouts.date}/>
             ))
         ))}
+
+        {
+          olderWorkouts.length > 0 && totalPages &&
+            <PaginationV2 
+              miniVersion={true}
+              headerStyle='!mt-4'
+              currentPage={currentPage} 
+              totalPages={totalPages} 
+              onPageChange={(page)=> setCurrentPage(page)} 
+            />
+        }
 
       </HistoryWrapper>
 

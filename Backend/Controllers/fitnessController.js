@@ -1,6 +1,7 @@
 const Fitness = require('../Models/fitnessModel')
 const FitnessTracker = require("../Models/fitnessTrackerModel")
 const ExerciseTemplate = require("../Models/exerciseTemplateModel")
+const HealthProfile = require("../Models/healthProfileModel")
 
 
 const fs = require('fs')
@@ -366,7 +367,9 @@ const updateWorkoutInfo = async (req, res, next) => {
     exercise.exerciseCompleted = allCompleted
 
     if (duration !== undefined) {
-      exercise.duration = Number(duration)
+      const updatedDuration = Number(duration)
+      exercise.duration = updatedDuration
+      tracker.totalDuration = Number(tracker.totalDuration || 0) + updatedDuration;
     }
     if (allCompleted) {
       exercise.exerciseCompletedAt = new Date()
@@ -443,6 +446,8 @@ const getWorkoutHistory = async (req, res, next) => {
     const limit = req.query?.limit || 5 
     const skip = (page - 1) * limit
 
+    console.log(`page-----------> ${page} and limit-----------> ${limit}`)
+
     const todayStart = new Date(new Date().setHours(0, 0, 0, 0))
     const todayEnd = new Date(new Date().setHours(23, 59, 59, 999))
 
@@ -469,6 +474,9 @@ const getWorkoutHistory = async (req, res, next) => {
     });
 
     const totalPages = Math.ceil(totalOlderCount / limit)
+
+    console.log(`totalPages-----------> ${totalPages} and totalOlderCount-----------> ${totalOlderCount}`)
+
 
     return res.status(200).json({
       success: true,
@@ -519,8 +527,80 @@ const deleteExerciseTemplate = async (req, res, next) => {
 }
 
 
+const updateHealthProfile = async (req, res, next) => {
+  try {
+    console.log("Inside upsertHealthProfile...")
+    const userId = req.user._id
+
+    const {
+      gender,
+      age,
+      height,
+      weight,
+      waistCircumference,
+      hipCircumference,
+      bloodPressure,
+      bodyFatPercentage,
+      glucose,
+    } = req.body.healthProfile
+
+    if (!gender || !age || !height || !weight) {
+      return next(errorHandler(400, "Gender, age, height, and weight are required!"))
+    }
+
+    let healthProfile = await HealthProfile.findOne({ userId })
+
+    if (!healthProfile) {
+      console.log("No health profile found! Creating new one...")
+      healthProfile = await HealthProfile.create({
+        userId,
+        gender,
+        age,
+        height,
+        weight,
+        waistCircumference: waistCircumference || null,
+        hipCircumference: hipCircumference || null,
+        bloodPressure: {
+          systolic: bloodPressure?.systolic ?? null,
+          diastolic: bloodPressure?.diastolic ?? null,
+        },
+        bodyFatPercentage: bodyFatPercentage || null,
+        glucose: glucose || null,
+      })
+
+      return res.status(201).json({
+        success: true,
+        message: "Health profile created successfully!",
+        healthProfile,
+      });
+    }
+
+    healthProfile.gender = gender
+    healthProfile.age = age
+    healthProfile.height = height
+    healthProfile.weight = weight
+    healthProfile.waistCircumference = waistCircumference ?? healthProfile.waistCircumference
+    healthProfile.hipCircumference = hipCircumference ?? healthProfile.hipCircumference
+    healthProfile.bloodPressure.systolic = bloodPressure?.systolic ?? healthProfile.bloodPressure.systolic
+    healthProfile.bloodPressure.diastolic = bloodPressure?.diastolic ?? healthProfile.bloodPressure.diastolic
+    healthProfile.bodyFatPercentage = bodyFatPercentage ?? healthProfile.bodyFatPercentage
+    healthProfile.glucose = glucose ?? healthProfile.glucose
+
+    await healthProfile.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Health profile updated successfully!",
+      healthProfile,
+    });
+  }
+  catch (error) {
+    console.error("Error updating/creating health profile:", error.message)
+    next(error)
+  }
+}
 
 
 
 module.exports = {getExerciseThumbnail, getExerciseVideos, addExercise, updateExerciseTemplate, updateWorkoutInfo,
-  getUserExerciseLibrary, getWorkoutHistory, deleteExerciseTemplate}
+  getUserExerciseLibrary, getWorkoutHistory, deleteExerciseTemplate, updateHealthProfile}

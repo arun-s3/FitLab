@@ -35,7 +35,6 @@ const CalendarIcon = () => (
   </svg>
 )
 
-// Mock data - replace with real data from your backend
 const mockStats = {
   week: {
     workoutsThisWeek: 4,

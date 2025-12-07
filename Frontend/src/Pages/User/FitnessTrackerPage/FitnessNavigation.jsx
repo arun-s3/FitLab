@@ -8,8 +8,8 @@ export default function FitnessNav({ currentPage, setCurrentPage }) {
     
   const tabs = [
     { id: "tracker", label: "Workout", icon: Zap },
-    { id: "dashboard", label: "Dashboard", icon: ChartNoAxesCombined  },
     { id: "bmi", label: "Health", icon: Heart },
+    { id: "dashboard", label: "Dashboard", icon: ChartNoAxesCombined  },
   ]
 
   return (
@@ -21,20 +21,6 @@ export default function FitnessNav({ currentPage, setCurrentPage }) {
     >
       <div className="max-w-7xl px-4">
         <div className="flex items-center justify-between py-4">
-          {/* <h2 className="text-xl font-bold text-gray-900">Fitness Tracker</h2> */}
-          {/* <img 
-            src='/fitness-tracker.png'
-            className="w-[25px] h-[25px]"
-          /> */}
-            {/* <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="mb-8"
-            >
-              <p className="text-gray-600 text-[16px] text-secondary">Track your progress, crush your goals</p>
-            </motion.div> */}
-
           <div className="px-[10px] py-[7px] flex items-center gap-1 bg-gray-100 p-1 rounded-[9px]">
             {tabs.map((tab) => {
               const Icon = tab.icon

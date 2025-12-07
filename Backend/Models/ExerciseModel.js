@@ -50,6 +50,10 @@ const ExerciseSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  calories: {
+    type: Number,
+    default: 0
+  },
   exerciseCompleted: {
     type: Boolean, 
     default: false 

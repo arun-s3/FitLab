@@ -3,7 +3,7 @@ const userRouter = express.Router()
 const {isLogin, isLogout} = require('../Middlewares/Authentication')
 const upload = require('../Utils/multer')
 const {tester, createUser, sendOtp, verifyOtp, loginUser, clearAllCookies, updateForgotPassword, resetPassword, updateUserDetails, googleSignin,
-     updateProfilePic, signout, getUserId,searchUsernames, totalUsersCount, generateUniqueGuestUser, verifyAndDeleteGuestUser,
+     updateProfilePic, signout, getUserId,searchUsernames, totalUsersCount, generateUniqueGuestUser, verifyAndDeleteGuestUser, updateUserWeight,
      googleSignout} = require('../Controllers/userController')
 
 userRouter.get('/test', tester)
@@ -17,6 +17,7 @@ userRouter.post('/update', isLogin, updateUserDetails)
 userRouter.post('/password/reset', isLogin, updateForgotPassword)
 userRouter.post('/password/update', isLogin, resetPassword)
 userRouter.put('/profilePic', isLogin, upload.single('image'), updateProfilePic)
+userRouter.put('/update/weight', isLogin, updateUserWeight)
 userRouter.get('/signout', isLogin, signout)
 userRouter.get('/search/:searchTerm', isLogin, searchUsernames)
 userRouter.get('/getUserid', isLogin, getUserId) 

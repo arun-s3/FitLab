@@ -2,11 +2,16 @@ const express = require('express')
 const fitnessRouter = express.Router()
 const {isLogin, isLogout} = require('../Middlewares/Authentication')
 const {getExerciseThumbnail, getExerciseVideos, addExercise, updateExerciseTemplate, getUserExerciseLibrary, deleteExerciseTemplate,
-    updateWorkoutInfo, getWorkoutHistory, updateHealthProfile} = require('../Controllers/fitnessController')
+    updateWorkoutInfo, updateCaloriesForExercise, getWorkoutHistory, addOrUpdateDailyHealthProfile, 
+    getLatestHealthProfile} = require('../Controllers/fitnessController')
+
+const {getWeeklyStats, getMonthlyStats, getWorkoutFrequencyStats, getWorkoutVolumeStats,
+     getCaloriesStats, getWeightInsights, getBodyPartInsights, getHealthScoreInsights} = require('../Controllers/fitnessDashboardController')
 
 
 fitnessRouter.get('/thumbnail/:name', getExerciseThumbnail)
 fitnessRouter.get('/videos/:name', getExerciseVideos)
+
 fitnessRouter.post('/tracker/exercise-library/add', isLogin, addExercise)
 fitnessRouter.get('/tracker/exercise-library/list', isLogin, getUserExerciseLibrary)
 fitnessRouter.put('/tracker/exercise-library/update', isLogin, updateExerciseTemplate)
@@ -14,9 +19,19 @@ fitnessRouter.delete('/tracker/exercise-library/delete/:exerciseTemplateId', isL
 
 fitnessRouter.post('/tracker/workout/add', isLogin, updateWorkoutInfo)
 fitnessRouter.get('/tracker/workout/list', isLogin, getWorkoutHistory)
+fitnessRouter.post('/tracker/workout/save-calories', isLogin, updateCaloriesForExercise)
 
-fitnessRouter.post('/tracker/health/update', isLogin, updateHealthProfile)
+fitnessRouter.post('/tracker/health/update', isLogin, addOrUpdateDailyHealthProfile)
+fitnessRouter.get('/tracker/health', isLogin, getLatestHealthProfile)
 
+fitnessRouter.get('/tracker/stats/week', isLogin, getWeeklyStats)
+fitnessRouter.get('/tracker/stats/month', isLogin, getMonthlyStats)
+fitnessRouter.get('/tracker/stats/workouts', isLogin, getWorkoutFrequencyStats)
+fitnessRouter.get('/tracker/stats/volume', isLogin, getWorkoutVolumeStats)
+fitnessRouter.get('/tracker/stats/calories', isLogin, getCaloriesStats) 
+fitnessRouter.get('/tracker/stats/weight', isLogin, getWeightInsights) 
+fitnessRouter.get('/tracker/stats/exerciseBreakdown', isLogin, getBodyPartInsights)
+fitnessRouter.get('/tracker/stats/health', isLogin, getHealthScoreInsights) 
 
 
 // fitnessRouter.get('/exercises', getAllExercises)

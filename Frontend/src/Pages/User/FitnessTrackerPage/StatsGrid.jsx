@@ -1,5 +1,8 @@
-import React from "react"
-import {motion} from "framer-motion"
+import React, {useState, useEffect} from "react"
+import './FitnessTrackerStyles.css'
+import {motion, AnimatePresence} from "framer-motion"
+
+import axios from 'axios'
 
 const TrendingIcon = () => (
   <svg className="w-5 h-5 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -35,51 +38,80 @@ const CalendarIcon = () => (
   </svg>
 )
 
-const mockStats = {
-  week: {
-    workoutsThisWeek: 4,
-    totalVolumeWeek: 12500,
-    caloriesBurned: 1840,
-    currentStreak: 4,
-  },
-  month: {
-    workoutsThisMonth: 16,
-    totalVolumeMonth: 52000,
-    caloriesBurned: 8200,
-    currentStreak: 4,
-  },
-}
-
 export default function StatsGrid({ timeRange }) {
-    
-  const stats = mockStats[timeRange]
 
-  const statCards = [
+  const [loading, setLoading] = useState(false)
+
+  const [statCards, setStatCards] = useState([
     {
       label: "Workouts",
-      value: timeRange === "week" ? stats.workoutsThisWeek : stats.workoutsThisMonth,
+      value: null,
       icon: CalendarIcon,
       color: "from-blue-500 to-blue-600",
     },
     {
       label: "Total Volume",
-      value: `${(timeRange === "week" ? stats.totalVolumeWeek : stats.totalVolumeMonth) / 1000}k kg`,
+      value: null,
       icon: TrendingIcon,
       color: "from-purple-500 to-purple-600",
     },
     {
       label: "Calories Burned",
-      value: stats.caloriesBurned,
+      value: null,
       icon: ZapIcon,
-      color: "from-orange-500 to-orange-600",
+      color: "from-primaryDark to-orange-400",
     },
     {
       label: "Current Streak",
-      value: `${stats.currentStreak} days`,
+      value: null,
       icon: AwardIcon,
       color: "from-green-500 to-green-600",
     },
-  ]
+  ])
+
+    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+  
+    useEffect(() => {
+      const fetchAllStats = async ()=> {
+        console.log("Inside fetchAllStats()..")
+    
+        setLoading(true) 
+        try{
+          const response = await axios.get(`${baseApiUrl}/fitness/tracker/stats/${timeRange}`, { withCredentials: true })
+          if(response.status === 200){
+            console.log("response.data.weekStats------->", response.data.weekStats)
+            const {totalWorkouts, totalVolumes, totalCaloriesBurned, currentStreak} = response.data.stats
+            setStatCards((prev) =>
+              prev.map((card) => {
+                if (card.label === "Workouts") {
+                  return { ...card, value: totalWorkouts };
+                }
+                if (card.label === "Total Volume") {
+                  return { ...card, value: totalVolumes };
+                }
+                if (card.label === "Calories Burned") {
+                  return { ...card, value: `${totalCaloriesBurned} kcal` };
+                }
+                if (card.label === "Current Streak") {
+                  return { ...card, value: `${currentStreak} days` };
+                }
+                return card;
+              })
+            )
+            setLoading(false)
+          }
+          if(response.status === 400 || response.status === 404){
+            console.log("Error---->", error.response.data.message)
+            setLoading(false)
+          }
+        }catch(error){
+          console.error("Error during saving workoutInfo", error.message)
+          setLoading(false)
+        }
+      }
+    
+      fetchAllStats();
+    }, [timeRange])
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -107,22 +139,45 @@ export default function StatsGrid({ timeRange }) {
       initial="hidden"
       animate="visible"
     >
-      {statCards.map((card, i) => {
-        const Icon = card.icon
-        return (
-          <motion.div
-            key={i}
-            variants={itemVariants}
-            className={`bg-gradient-to-br ${card.color} rounded-xl p-6 border border-white/10 shadow-lg text-white`}
-          >
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-white/70 font-semibold">{card.label}</h3>
-              <Icon />
-            </div>
-            <p className="text-3xl font-bold">{card.value}</p>
-          </motion.div>
-        )
-      })}
+      {
+        !loading ?
+          statCards.map((card, index) => {
+            const Icon = card.icon
+            return (
+              <motion.div
+                key={index}
+                variants={itemVariants}
+                className={`bg-gradient-to-br ${card.color} rounded-xl p-6 border shadow-lg text-white 
+                 ${index === 0 ? 'border-primary' : 'border-white/10'}`}
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-white/70 font-semibold">{card.label}</h3>
+                  <Icon />
+                </div>
+                <p className="text-3xl font-bold">{card.value}</p>
+              </motion.div>
+            )
+          })
+        :
+          statCards.map((card, index) => {
+            return (
+              <AnimatePresence>
+                <motion.div
+                  key={index}
+                  variants={itemVariants}
+                  className={`skeleton-loader ${card.color} rounded-xl p-6 border shadow-lg text-white
+                    ${index === 0 ? 'border-primary' : 'border-white/10'} `}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-white/70 font-semibold invisible">{card.label}</h3>
+                    <div className={`invisible h-[15px] w-[15px] p-3 rounded-full `}></div>
+                  </div>
+                  <p className="text-3xl font-bold invisible">{card.value}</p>
+                </motion.div>
+              </AnimatePresence>
+            )
+          })
+      }
     </motion.div>
   )
 }

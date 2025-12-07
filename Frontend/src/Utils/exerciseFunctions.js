@@ -71,14 +71,14 @@ export const normalizeEquipment = (equipment = "") => {
 
 export function estimateCalories(bodyPart, equipment = "None", sets = [], duration = 0, userWeight = 75){
 
-  console.log("Inside estimateCalories()")
-  console.log(`bodyPart----> ${bodyPart} and equipment----> ${equipment} and duration--> ${duration}`)
+  // console.log("Inside estimateCalories()")
+  // console.log(`bodyPart----> ${bodyPart} and equipment----> ${equipment} and duration--> ${duration}`)
 
   const bodyPartFactor = MET_BY_BODY_PART[normalizeBodyPart(bodyPart)] || 1
   const equipmentFactor = EQUIPMENT_MULTIPLIER[normalizeEquipment(equipment)] || 1
   const durationMin = Math.max(duration / 60, 1)
 
-  console.log(`bodyPartFactor--> ${bodyPartFactor}, equipmentFactor--> ${equipmentFactor} and durationMin--> ${durationMin}`)
+  // console.log(`bodyPartFactor--> ${bodyPartFactor}, equipmentFactor--> ${equipmentFactor} and durationMin--> ${durationMin}`)
 
   let totalWeight = 0
   let totalReps = 0

@@ -116,7 +116,7 @@ export default function RecentWorkouts({refreshHistory, stopRefreshHistory, resu
             <div className="bg-white rounded p-2 text-center border border-gray-200">
               <p className="text-gray-500 mb-1">Calories</p>
               <p className="text-gray-900 font-semibold">
-                {estimateCalories(workout.bodyPart, workout.equipment, workout.sets, workout.duration, userWeight) + ' kcal'}
+                {(workout?.calories || estimateCalories(workout.bodyPart, workout.equipment, workout.sets, workout.duration, userWeight)) + ' kcal'}
               </p>
             </div>
           </div>

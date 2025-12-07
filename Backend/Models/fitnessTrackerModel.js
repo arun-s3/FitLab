@@ -17,6 +17,10 @@ const FitnessTrackerSchema = new mongoose.Schema(
       default: 0
     },
     exercises: [ExerciseSchema],
+    totalCalories: {
+      type: Number,
+      default: 0
+    },
     totalWorkoutVolume: {
       type: Number,
       default: 0

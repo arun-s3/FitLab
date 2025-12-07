@@ -5,6 +5,7 @@ import Header from "../../../Components/Header/Header"
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
 import FitnessLayout from "./FitnessLayout"
 import WorkoutSessionCard from "./WorkoutSessionCard"
+import Dashboard from "./Dashboard"
 import FitnessNavigation from "./FitnessNavigation"
 import BMICalculator from "./BMICalculator"
 import FeaturesDisplay from '../../../Components/FeaturesDisplay/FeaturesDisplay'
@@ -47,6 +48,13 @@ export default function FitnessTrackerPage() {
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
 
                   <WorkoutSessionCard />
+
+                </motion.div>
+              )}
+              {currentPage === "dashboard" && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+
+                  <Dashboard />
 
                 </motion.div>
               )}

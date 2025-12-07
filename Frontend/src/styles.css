@@ -6130,12 +6130,6 @@ select{
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
 
-.from-blue-200{
-  --tw-gradient-from: #bfdbfe var(--tw-gradient-from-position);
-  --tw-gradient-to: rgb(191 219 254 / 0) var(--tw-gradient-to-position);
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
-}
-
 .from-blue-400{
   --tw-gradient-from: #60a5fa var(--tw-gradient-from-position);
   --tw-gradient-to: rgb(96 165 250 / 0) var(--tw-gradient-to-position);
@@ -6262,15 +6256,15 @@ select{
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
 
-.from-orange-500{
-  --tw-gradient-from: #f97316 var(--tw-gradient-from-position);
-  --tw-gradient-to: rgb(249 115 22 / 0) var(--tw-gradient-to-position);
-  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
-}
-
 .from-primary{
   --tw-gradient-from: rgba(215, 241, 72, 1) var(--tw-gradient-from-position);
   --tw-gradient-to: rgba(215, 241, 72, 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+.from-primaryDark{
+  --tw-gradient-from: #f1c40f var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(241 196 15 / 0) var(--tw-gradient-to-position);
   --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
 }
 
@@ -6502,10 +6496,6 @@ select{
   --tw-gradient-to: #eff6ff var(--tw-gradient-to-position);
 }
 
-.to-blue-500{
-  --tw-gradient-to: #3b82f6 var(--tw-gradient-to-position);
-}
-
 .to-blue-600{
   --tw-gradient-to: #2563eb var(--tw-gradient-to-position);
 }
@@ -6586,16 +6576,16 @@ select{
   --tw-gradient-to: #ffedd5 var(--tw-gradient-to-position);
 }
 
+.to-orange-400{
+  --tw-gradient-to: #fb923c var(--tw-gradient-to-position);
+}
+
 .to-orange-50{
   --tw-gradient-to: #fff7ed var(--tw-gradient-to-position);
 }
 
 .to-orange-500{
   --tw-gradient-to: #f97316 var(--tw-gradient-to-position);
-}
-
-.to-orange-600{
-  --tw-gradient-to: #ea580c var(--tw-gradient-to-position);
 }
 
 .to-pink-100{
@@ -8660,18 +8650,6 @@ select{
   color: rgb(133 77 14 / var(--tw-text-opacity));
 }
 
-.text-\[\]{
-  color: ;
-}
-
-.text-\[3\]{
-  color: 3;
-}
-
-.text-\[30\]{
-  color: 30;
-}
-
 .line-through{
   text-decoration-line: line-through;
 }
@@ -8886,16 +8864,6 @@ select{
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 
-.shadow-blue-500\/50{
-  --tw-shadow-color: rgb(59 130 246 / 0.5);
-  --tw-shadow: var(--tw-shadow-colored);
-}
-
-.shadow-blue-600\/30{
-  --tw-shadow-color: rgb(37 99 235 / 0.3);
-  --tw-shadow: var(--tw-shadow-colored);
-}
-
 .shadow-gray-200\/50{
   --tw-shadow-color: rgb(229 231 235 / 0.5);
   --tw-shadow: var(--tw-shadow-colored);
@@ -8913,6 +8881,11 @@ select{
 
 .shadow-orange-100{
   --tw-shadow-color: #ffedd5;
+  --tw-shadow: var(--tw-shadow-colored);
+}
+
+.shadow-purple-500\/50{
+  --tw-shadow-color: rgb(168 85 247 / 0.5);
   --tw-shadow: var(--tw-shadow-colored);
 }
 
@@ -9434,16 +9407,6 @@ select{
 
 .placeholder\:text-secondary::placeholder{
   color: rgba(159, 42, 240, 1);
-}
-
-.placeholder\:text-gray-300::-moz-placeholder{
-  --tw-text-opacity: 1;
-  color: rgb(209 213 219 / var(--tw-text-opacity));
-}
-
-.placeholder\:text-gray-300::placeholder{
-  --tw-text-opacity: 1;
-  color: rgb(209 213 219 / var(--tw-text-opacity));
 }
 
 .before\:absolute::before{
@@ -10397,11 +10360,6 @@ select{
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 
-.hover\:shadow-blue-600\/30:hover{
-  --tw-shadow-color: rgb(37 99 235 / 0.3);
-  --tw-shadow: var(--tw-shadow-colored);
-}
-
 .hover\:shadow-purple-600\/30:hover{
   --tw-shadow-color: rgb(147 51 234 / 0.3);
   --tw-shadow: var(--tw-shadow-colored);
@@ -10455,11 +10413,6 @@ select{
 .focus\:border-blue-400:focus{
   --tw-border-opacity: 1;
   border-color: rgb(96 165 250 / var(--tw-border-opacity));
-}
-
-.focus\:border-blue-500:focus{
-  --tw-border-opacity: 1;
-  border-color: rgb(59 130 246 / var(--tw-border-opacity));
 }
 
 .focus\:border-orange-500\/50:focus{
@@ -13720,6 +13673,10 @@ select{
     font-size: 40px;
   }
 
+  .md\:text-\[42px\]{
+    font-size: 42px;
+  }
+
   .md\:text-base{
     font-size: 1rem;
     line-height: 1.5rem;
@@ -13735,25 +13692,9 @@ select{
     line-height: 1.25rem;
   }
 
-  .md\:text-\[42px\]{
-    font-size: 42px;
-  }
-
   .md\:text-black{
     --tw-text-opacity: 1;
     color: rgb(0 0 0 / var(--tw-text-opacity));
-  }
-
-  .md\:text-\[\]{
-    color: ;
-  }
-
-  .md\:text-\[4\]{
-    color: 4;
-  }
-
-  .md\:text-\[42\]{
-    color: 42;
   }
 
   .md\:before\:content-none::before{

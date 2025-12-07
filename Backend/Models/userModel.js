@@ -42,6 +42,11 @@ const userSchema = mongoose.Schema({
         type:String,
         enum:["male", "female"]
     },
+    weight: {  
+      type:Number,
+      min:1,
+      max:400,
+    },
     isAdmin:{
         type:Boolean, 
         required:true,

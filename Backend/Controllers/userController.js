@@ -2,6 +2,7 @@ const User = require('../Models/userModel')
 const bcryptjs = require('bcryptjs')
 const nodemailer = require("nodemailer")
 const cloudinary = require('../Utils/cloudinary')
+const HealthProfile = require("../Models/healthProfileModel")
 
 // const crypto = require("crypto");
 const {errorHandler} = require('../Utils/errorHandler')
@@ -375,6 +376,48 @@ const updateProfilePic = async (req, res, next) => {
   }
 }
 
+
+const updateUserWeight = async (req, res, next) => {
+  try {
+    console.log("Inside updateUserWeight...")
+    const userId = req.user._id
+    const { weight } = req.body.userWeight
+
+    if (weight < 1 || weight > 400) {
+      return next(errorHandler(400, "Weight must be between 1 and 400 kg!"))
+    }
+
+    await User.updateOne({_id: userId}, {weight})
+
+    const todayStart = new Date()
+    todayStart.setHours(0, 0, 0, 0)
+
+    const todayEnd = new Date()
+    todayEnd.setHours(23, 59, 59, 999)
+
+    const latestProfile = await HealthProfile.findOne({userId, date: { $gte: todayStart, $lte: todayEnd }});
+
+    if (latestProfile) {
+      console.log("Updating today's health profile weight...")
+      latestProfile.weight = weight
+      await latestProfile.save()
+    } else {
+      console.log("No health profile today, hence skipping profile weight update")
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Weight updated successfully!",
+    });
+
+  }
+  catch (error) {
+    console.error("Error updating weight:", error.message)
+    next(error)
+  }
+}
+
+
 const googleSignin = async(req,res,next)=>{
     try{
         const {username, email, sub:googleId, picture:profilePic} = req.body
@@ -541,4 +584,5 @@ const signout = (req,res,next)=>{
 
 
 module.exports = {tester, createUser, sendOtp, verifyOtp, loginUser, clearAllCookies, updateUserDetails, updateForgotPassword, resetPassword,
-     updateProfilePic, googleSignin, getUserId, searchUsernames, totalUsersCount, generateUniqueGuestUser, verifyAndDeleteGuestUser, signout}
+     updateProfilePic, googleSignin, getUserId, searchUsernames, totalUsersCount, generateUniqueGuestUser, updateUserWeight,
+     verifyAndDeleteGuestUser, signout}

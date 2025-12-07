@@ -89,6 +89,21 @@ export const updateUserProfilePic = createAsyncThunk('updateUserProfilePic', asy
     }
 } )
 
+export const updateUserWeight = createAsyncThunk('updateUserWeight', async({userWeight},thunkAPI)=>{
+    try{
+        console.log("inside updateUserWeight of createAsyncThunk")
+        const response = await axios.put('/update/weight', {userWeight}, {withCredentials:true})
+        console.log("returning success response from updateUserWeight createAsyncThunk..."+JSON.stringify(response)) 
+        console.log("userDetails from updateUserWeight createAsyncThunk--"+JSON.stringify(userWeight))
+        return {userWeight}
+    }
+    catch(error){
+        console.log("inside catch of updateUserWeight from userSlice")
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
+        return thunkAPI.rejectWithValue(errorMessage)
+    }
+} )
+
 // export const resetPassword = resetPasswords('updateUserDetails', async({currentPassword, newPassword, confirmPassword}, thunkAPI)=>{
 //     try{
 //         console.log("inside updateUserDetails of createAsyncThunk")
@@ -109,6 +124,7 @@ const initialState = {
     user: null,
     userUpdated: false,
     userDpUpdated: false,
+    userWeightUpdated: false,
     currentPath: '',
     error:null,
     loading:false,
@@ -127,6 +143,7 @@ const userSlice = createSlice({
             state.success = false
             state.userUpdated = false
             state.userDpUpdated = false
+            state.userWeightUpdated = false
             console.log("state(success) after reset-->"+state.success)
         },
         changePath: (state, action)=> {
@@ -219,6 +236,26 @@ const userSlice = createSlice({
                 state.loading = false
                 state.success = false
                 console.log("error from userSlice- updateUserDetails.rejected after assignment-->"+ state.error)
+        })
+        .addCase(updateUserWeight.pending, (state,action)=>{
+                state.loading = true
+                state.success = false
+                console.log("loading from userSlice updateUserWeight.pending--"+state.loading)
+        })
+        .addCase(updateUserWeight.fulfilled, (state,action)=>{
+                state.loading = false
+                state.error = null
+                state.success = true 
+                console.log("userData from userSlice-updateUserWeight.fulfilled-action.payload.userWeight-->", action.payload.userWeight)
+                state.user.weight = action.payload.userWeight.weight
+                state.userWeightUpdated = true
+                console.log("userData from userSlice-updateUserWeight.fulfilled-user-->"+JSON.stringify(state.user))
+        })
+        .addCase(updateUserWeight.rejected, (state,action)=>{
+                state.error = action.payload
+                state.loading = false
+                state.success = false
+                console.log("error from userSlice- updateUserWeight.rejected after assignment-->"+ state.error)
         })
         .addCase(signout.fulfilled, (state,action)=>{
                 console.log("inside signout.fulfilled, action.payload"+JSON.stringify(action.payload))

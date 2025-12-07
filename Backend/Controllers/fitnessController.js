@@ -1,3 +1,4 @@
+const User = require('../Models/userModel')
 const Fitness = require('../Models/fitnessModel')
 const FitnessTracker = require("../Models/fitnessTrackerModel")
 const ExerciseTemplate = require("../Models/exerciseTemplateModel")
@@ -395,6 +396,51 @@ const updateWorkoutInfo = async (req, res, next) => {
 }
 
 
+const updateCaloriesForExercise = async (req, res, next) => {
+  try {
+    console.log("Inside updateCaloriesForExercise...")
+    const userId = req.user._id
+    const { fitnessTrackerId, exerciseId, calories } = req.body.calorieDetails
+
+    console.log("req.body.calorieDetails--->", JSON.stringify(req.body.calorieDetails))
+
+    if (!fitnessTrackerId || !exerciseId || calories == null) {
+      return next(errorHandler(400, "fitnessTrackerId, exerciseId and calories are required"))
+    }
+
+    if (calories < 0) {
+      return next(errorHandler(400, "Calories must be a positive number"))
+    }
+
+    const workout = await FitnessTracker.findOne({_id: fitnessTrackerId, userId})
+
+    if (!workout) {
+      return next(errorHandler(404, "Workout not found"))
+    }
+
+    const exercise = workout.exercises.id(exerciseId)
+    if (!exercise) {
+      return next(errorHandler(404, "Exercise not found"))
+    }
+
+    exercise.calories = calories
+
+    workout.totalCalories = workout.exercises.reduce( (sum, ex) => sum + (ex.calories || 0), 0 )
+    
+    console.log("workout.totalCalories now---->", workout.totalCalories)
+
+    await workout.save();
+
+    return res.status(200).json({success: true, message: "Calories updated successfully!", totalCalories: workout.totalCalories});
+
+  }
+  catch (error) {
+    console.error("Error updating calories:", error)
+    next(error)
+  }
+}
+
+
 
 const getUserExerciseLibrary = async (req, res, next) => {
   try {
@@ -527,9 +573,9 @@ const deleteExerciseTemplate = async (req, res, next) => {
 }
 
 
-const updateHealthProfile = async (req, res, next) => {
+const addOrUpdateDailyHealthProfile = async (req, res, next) => {
   try {
-    console.log("Inside upsertHealthProfile...")
+    console.log("Inside addOrUpdateDailyHealthProfile...")
     const userId = req.user._id
 
     const {
@@ -544,63 +590,92 @@ const updateHealthProfile = async (req, res, next) => {
       glucose,
     } = req.body.healthProfile
 
-    if (!gender || !age || !height || !weight) {
-      return next(errorHandler(400, "Gender, age, height, and weight are required!"))
+    console.log("req.body.healthProfile----->", req.body.healthProfile)
+
+    if (!age || !height || !weight) {
+      return next(
+        errorHandler(400, "Age, height and weight are required fields")
+      )
     }
 
-    let healthProfile = await HealthProfile.findOne({ userId })
+    if (gender){
+      const user = await User.findById(userId).select("gender")
+      if (!user) {
+        return next(errorHandler(404, "Please sign up or sign in to track your health!"));
+      }
+      if (!user.gender) {
+        await User.findByIdAndUpdate(userId, { gender }, { new: true });
+        console.log("User gender set for the first time.")
+      } else {
+        console.log("User already has gender — not changing it.")
+      }
+    }
+    
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
 
-    if (!healthProfile) {
-      console.log("No health profile found! Creating new one...")
-      healthProfile = await HealthProfile.create({
-        userId,
-        gender,
-        age,
-        height,
-        weight,
-        waistCircumference: waistCircumference || null,
-        hipCircumference: hipCircumference || null,
-        bloodPressure: {
-          systolic: bloodPressure?.systolic ?? null,
-          diastolic: bloodPressure?.diastolic ?? null,
-        },
-        bodyFatPercentage: bodyFatPercentage || null,
-        glucose: glucose || null,
-      })
+    const latestProfile = await HealthProfile.findOne({ userId }).sort({ date: -1 })
 
-      return res.status(201).json({
-        success: true,
-        message: "Health profile created successfully!",
-        healthProfile,
-      });
+    const profilePayload = {
+      userId,
+      age,
+      height,
+      weight,
+      waistCircumference: waistCircumference ?? null,
+      hipCircumference: hipCircumference ?? null,
+      bloodPressure: {
+        systolic: bloodPressure?.systolic ?? null,
+        diastolic: bloodPressure?.diastolic ?? null,
+      },
+      bodyFatPercentage: bodyFatPercentage ?? null,
+      glucose: glucose ?? null,
     }
 
-    healthProfile.gender = gender
-    healthProfile.age = age
-    healthProfile.height = height
-    healthProfile.weight = weight
-    healthProfile.waistCircumference = waistCircumference ?? healthProfile.waistCircumference
-    healthProfile.hipCircumference = hipCircumference ?? healthProfile.hipCircumference
-    healthProfile.bloodPressure.systolic = bloodPressure?.systolic ?? healthProfile.bloodPressure.systolic
-    healthProfile.bloodPressure.diastolic = bloodPressure?.diastolic ?? healthProfile.bloodPressure.diastolic
-    healthProfile.bodyFatPercentage = bodyFatPercentage ?? healthProfile.bodyFatPercentage
-    healthProfile.glucose = glucose ?? healthProfile.glucose
+    if (latestProfile) {
+      const profileDate = new Date(latestProfile.date)
+      profileDate.setHours(0, 0, 0, 0)
 
-    await healthProfile.save();
+      if (profileDate.getTime() === today.getTime()) {
+        const updatedProfile = await HealthProfile.findByIdAndUpdate( latestProfile._id, profilePayload, { new: true } );
 
-    return res.status(200).json({
-      success: true,
-      message: "Health profile updated successfully!",
-      healthProfile,
-    });
+        return res.status(200).json({success: true, message: "Health profile updated for today!"});
+      }
+    }
+
+    const newProfile = await HealthProfile.create({...profilePayload, date: Date.now()})
+
+    return res.status(201).json({success: true, message: "New daily health profile created!"});
   }
   catch (error) {
-    console.error("Error updating/creating health profile:", error.message)
+    console.error("Error saving daily health profile:", error.message)
+    next(error)
+  }
+}
+
+
+const getLatestHealthProfile = async (req, res, next) => {
+  try {
+    console.log("Inside getLatestHealthProfile...")
+    const userId = req.user._id
+
+    const latestProfile = await HealthProfile.findOne({ userId })
+      .sort({ date: -1 }) 
+      .lean();
+
+    if (!latestProfile) {
+      return next(errorHandler(404, "No health profile found for this user!"))
+    }
+
+    return res.status(200).json({success: true, latestProfile});
+
+  }
+  catch (error) {
+    console.error("Error getting latest health profile:", error.message)
     next(error)
   }
 }
 
 
 
-module.exports = {getExerciseThumbnail, getExerciseVideos, addExercise, updateExerciseTemplate, updateWorkoutInfo,
-  getUserExerciseLibrary, getWorkoutHistory, deleteExerciseTemplate, updateHealthProfile}
+module.exports = {getExerciseThumbnail, getExerciseVideos, addExercise, updateExerciseTemplate, updateWorkoutInfo, updateCaloriesForExercise,
+  getUserExerciseLibrary, getWorkoutHistory, deleteExerciseTemplate, addOrUpdateDailyHealthProfile, getLatestHealthProfile}

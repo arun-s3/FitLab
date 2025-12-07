@@ -1,11 +1,12 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
+import {useDispatch, useSelector} from 'react-redux'
 import { motion } from "framer-motion"
 
-const HeartIcon = () => (
-  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-  </svg>
-)
+import axios from 'axios'
+import {toast as sonnerToast} from 'sonner'
+
+import {updateUserWeight} from '../../../Slices/userSlice'
+
 
 export default function BMICalculator() {
     
@@ -25,6 +26,31 @@ export default function BMICalculator() {
   const [results, setResults] = useState(null)
   const [showResults, setShowResults] = useState(false)
 
+  const dispatch = useDispatch()
+
+  const {user} = useSelector(state=> state.user)
+
+  const baseApiUrl = import.meta.env.VITE_API_BASE_URL 
+
+  useEffect(()=> {
+    getLatestHealthProfile()
+  }, [])
+
+  useEffect(()=> {
+    if(user && user.gender){
+      console.log("User has already set gender")
+      setFormData((prev) => ({...prev, gender: user.gender}))
+    }
+    if(user && user.weight){
+      console.log("User has already set gender")
+      setFormData((prev) => ({...prev, weight: user.weight}))
+    }
+  }, [user])
+
+  useEffect(()=> {
+      console.log("formData-------->", formData)
+  }, [formData])
+
   const handleChange = (e) => {
     const { name, value } = e.target
     if (value === "" || /^[0-9]+$/.test(value)){
@@ -35,8 +61,49 @@ export default function BMICalculator() {
     } 
   }
 
+  const updateHealthProfile = async(healthProfile)=> {
+    console.log("Inside updateHealthProfile...") 
+    try { 
+      const response = await axios.post(`${baseApiUrl}/fitness/tracker/health/update`, {healthProfile}, { withCredentials: true })
+      if(response.status === 200 || response.status === 201){
+        sonnerToast.success("Your health profile updated!")
+        sonnerToast.info("Keep your health profile updated every week/month for accurate insights and trackig. We'll remind you weekly.", {duration: 5500})
+        const userWeightObj = {weight: healthProfile.weight}
+        dispatch(updateUserWeight({userWeight: userWeightObj}))
+        setLoading(false)
+      }
+      if(response.status === 400 || response.status === 404){
+        sonnerToast.error(error.response.data.message)
+        console.log("Error---->", error.response.data.message)
+      }
+    }catch (error) {
+      console.error("Error updating health profile:", error.message)
+    }
+  }
+
+  const getLatestHealthProfile = async()=> {
+    console.log("Inside getLatestHealthProfile...") 
+    try { 
+      const response = await axios.get(`${baseApiUrl}/fitness/tracker/health`, { withCredentials: true })
+      if(response.status === 200){
+        console.log("response.data.latestProfile------>", response.data.latestProfile)
+        const {bodyFatPercentage, bloodPressure, ...rest} = response.data.latestProfile
+        const {systolic, diastolic} = bloodPressure
+        const latestProfileDatas = {bodyFat: bodyFatPercentage, systolic, diastolic, ...rest}
+        console.log("latestProfileDatas------>", latestProfileDatas)
+        setFormData((prev) => ({...prev, ...latestProfileDatas}))
+        sonnerToast.info("Your latest health indicators are shown. Update fields as needed!", {duration: 7000})
+      }
+      if(response.status === 404){
+        console.log("Error---->", error.response.data.message)
+      }
+    }catch (error) {
+      console.error("Error updating health profile:", error.message)
+    }
+  }
+
   const calculateBMI = (e) => {
-    e.preventDefault()
+    e && e.preventDefault()
 
     const weight = Number.parseFloat(formData.weight)
     const height = Number.parseFloat(formData.height)
@@ -155,6 +222,23 @@ export default function BMICalculator() {
       bodyFatColor,
     })
     setShowResults(true)
+
+    const healthProfile = {
+      gender: formData.gender,
+      age,
+      height,
+      weight,
+      waistCircumference: waist ?? null,
+      hipCircumference: hip ?? null,
+      bloodPressure: {
+        systolic: systolic ?? null,
+        diastolic: diastolic ?? null,
+      },
+      bodyFatPercentage: bodyFat ?? null,
+      glucose: glucose ?? null,
+    }
+
+    updateHealthProfile(healthProfile)
   }
 
   const resetForm = () => {
@@ -246,7 +330,7 @@ export default function BMICalculator() {
                   value={formData.age}
                   onChange={handleChange}
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg placeholder:text-gray-400 focus:border-purple-500 focus:outline-none transition-colors"
-                  placeholder="25"
+                  placeholder='25'
                   required
                 />
               </motion.div>
@@ -262,7 +346,7 @@ export default function BMICalculator() {
                   value={formData.height}
                   onChange={handleChange}
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg placeholder:text-gray-400 focus:border-purple-500 focus:outline-none transition-colors"
-                  placeholder="175"
+                  placeholder='175'
                   required
                 />
               </motion.div>
@@ -278,7 +362,7 @@ export default function BMICalculator() {
                   value={formData.weight}
                   onChange={handleChange}
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg placeholder:text-gray-400 focus:border-purple-500 focus:outline-none transition-colors"
-                  placeholder="70"
+                  placeholder='70'
                   required
                 />
               </motion.div>
@@ -294,7 +378,7 @@ export default function BMICalculator() {
                   value={formData.waistCircumference}
                   onChange={handleChange}
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg placeholder:text-gray-400 focus:border-purple-500 focus:outline-none transition-colors"
-                  placeholder="80"
+                  placeholder='80'
                   required
                 />
               </motion.div>
@@ -310,7 +394,7 @@ export default function BMICalculator() {
                   value={formData.hipCircumference}
                   onChange={handleChange}
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg placeholder:text-gray-400 focus:border-purple-500 focus:outline-none transition-colors"
-                  placeholder="90"
+                  placeholder='90'
                   required
                 />
               </motion.div>
@@ -327,7 +411,7 @@ export default function BMICalculator() {
                     value={formData.systolic}
                     onChange={handleChange}
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg placeholder:text-gray-400 focus:border-purple-500 focus:outline-none transition-colors"
-                    placeholder="120"
+                    placeholder='120'
                     required
                   />
                 </div>
@@ -342,7 +426,7 @@ export default function BMICalculator() {
                     value={formData.diastolic}
                     onChange={handleChange}
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg placeholder:text-gray-400 focus:border-purple-500 focus:outline-none transition-colors"
-                    placeholder="80"
+                    placeholder='80'
                     required
                   />
                 </div>
@@ -360,7 +444,7 @@ export default function BMICalculator() {
                   onChange={handleChange}
                   step="0.1"
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg placeholder:text-gray-400 focus:border-purple-500 focus:outline-none transition-colors"
-                  placeholder="20"
+                  placeholder='20'
                   required
                 />
               </motion.div>
@@ -376,7 +460,7 @@ export default function BMICalculator() {
                   value={formData.glucose}
                   onChange={handleChange}
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg placeholder:text-gray-400 focus:border-purple-500 focus:outline-none transition-colors"
-                  placeholder="100"
+                  placeholder='100'
                   required
                 />
               </motion.div>

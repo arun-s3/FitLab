@@ -1,7 +1,11 @@
 import React, {useState, useEffect} from "react"
+import {useDispatch, useSelector} from 'react-redux'
 import { motion } from "framer-motion"
 
 import {X} from "lucide-react"
+import axios from 'axios'
+
+import {updateUserWeight} from '../../../Slices/userSlice'
 
 
 const ClockIcon = () => (
@@ -65,10 +69,49 @@ export default function WorkoutSummaryModal({ stats, onClose, recalculateCalorie
   const [userWeight, setUserWeight] = useState(70)
   const [estimatedCalories, setEstimatedCalories] = useState(0)
 
-  useEffect(()=> {
-    setEstimatedCalories(stats.estimatedCalories)
-  }, [stats.estimatedCalories])
-    
+  const dispatch = useDispatch()
+
+  const {user, userWeightUpdated} = useSelector(state=> state.user)
+
+  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+
+  useEffect(() => {
+    if (user?.weight) {
+      console.log("User has weight set")
+      const estimatedCalories = recalculateCalories(user.weight)
+      setUserWeight(user.weight)
+      setEstimatedCalories(estimatedCalories)
+      return; 
+    }
+    if (stats?.estimatedCalories) {
+      console.log("Using stats estimatedCalories")
+      setEstimatedCalories(stats.estimatedCalories)
+    }
+  }, [user, stats])
+
+  const saveCaloriesInfo = async(fitnessTrackerId, exerciseId, calories)=> {
+    try {   
+      console.log("Inside saveCaloriesInfo()..")
+      const calorieDetails = {fitnessTrackerId, exerciseId, calories}
+      const response = await axios.post(`${baseApiUrl}/fitness/tracker/workout/save-calories`, {calorieDetails}, { withCredentials: true })
+      if(response.status === 200){
+        console.log("Saved calorie details")
+      }
+      if(response.status === 400){
+        sonnerToast.error(error.response.data.message)
+        console.log("Error---->", error.response.data.message)
+      }
+    }catch (error) {
+      console.error("Error during saving caloriesInfo", error.message)
+    }
+  }
+
+  useEffect(() => {
+    if (estimatedCalories) {
+      saveCaloriesInfo(stats.trackerId, stats.exerciseId, estimatedCalories)
+    }
+  }, [estimatedCalories])
+
   const formatTime = (seconds) => {
     const hours = Math.floor(seconds / 3600)
     const minutes = Math.floor((seconds % 3600) / 60)
@@ -108,6 +151,7 @@ export default function WorkoutSummaryModal({ stats, onClose, recalculateCalorie
         setUserWeight(value)
       }
   }
+
 
   return (
     <motion.div
@@ -196,6 +240,8 @@ export default function WorkoutSummaryModal({ stats, onClose, recalculateCalorie
             onClick={()=> {
               const estimatedCalories = recalculateCalories(userWeight)
               setEstimatedCalories(estimatedCalories)
+              const userWeightObj = {weight: userWeight}
+              dispatch(updateUserWeight({userWeight: userWeightObj}))
             }}
           >
             Apply

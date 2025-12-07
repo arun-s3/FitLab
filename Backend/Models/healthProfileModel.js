@@ -6,50 +6,41 @@ const HealthProfileSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      unique: true 
     },
-
-    gender: {
-      type: String,
-      enum: ["male", "female"],
-      required: true
+    date: {
+      type: Date,
+      default: Date.now
     },
-
     age: {
       type: Number,
       min: 1,
       max: 120,
       required: true
     },
-
     height: {  // in cm
       type: Number,
       min: 30,
       max: 250,
       required: true
     },
-
     weight: {  // in kg
       type: Number,
       min: 1,
       max: 400,
       required: true
     },
-
     waistCircumference: { // in cm
       type: Number,
       min: 10,
       max: 200,
       default: null
     },
-
     hipCircumference: { // in cm
       type: Number,
       min: 10,
       max: 200,
       default: null
     },
-
     bloodPressure: { 
       systolic: { // in mmHg
         type: Number,
@@ -64,7 +55,6 @@ const HealthProfileSchema = new mongoose.Schema(
         default: null
       }
     },
-
     bodyFatPercentage: {
       type: Number,
       min: 1,

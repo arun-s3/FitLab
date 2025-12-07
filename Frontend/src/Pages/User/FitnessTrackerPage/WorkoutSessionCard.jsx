@@ -147,6 +147,8 @@ export default function WorkoutSessionCard() {
       const response = await axios.post(`${baseApiUrl}/fitness/tracker/workout/add`, {workoutInfo}, { withCredentials: true })
       if(response.status === 200){
         console.log("Saved workout details")
+        console.log("response.data.tracker------->", response.data.tracker)
+        return {trackerId: response.data.tracker._id, exerciseId: response.data.exercise._id}
       }
       if(response.status === 400 || response.status === 404){
         sonnerToast.error("Some error occured while saving the wokout details")
@@ -160,7 +162,7 @@ export default function WorkoutSessionCard() {
     }
   }
 
-  const handleFinishWorkout = () => {
+  const handleFinishWorkout = async() => {
     console.log("Inside handleFinishWorkout")
     const missedSets = []
     for (let i = currentSet; i < selectedExercise.sets.length; i++) {
@@ -186,7 +188,9 @@ export default function WorkoutSessionCard() {
     console.log("completedTillIndex---->", completedTillIndex)
     const workoutInfo = {exerciseId: selectedExercise._id, selectedExercise, sets, completedTillIndex, duration}
 
-    saveWorkoutInfos(workoutInfo)
+    const {trackerId, exerciseId} = await saveWorkoutInfos(workoutInfo)
+
+    console.log(`trackerId---->${trackerId} and exerciseId---->${exerciseId}`)
 
     // const estimatedCalories = Math.round((duration / 60) * 8 + totalVolume * 0.1)
 
@@ -197,7 +201,9 @@ export default function WorkoutSessionCard() {
       exerciseCount: exercises.length,
       totalReps: selectedExercise.sets.reduce((acc, set) => acc + set.reps, 0),
       missedSets,
-      exercise: selectedExercise
+      exercise: selectedExercise,
+      trackerId,
+      exerciseId
     })
 
     setShowSummary(true)

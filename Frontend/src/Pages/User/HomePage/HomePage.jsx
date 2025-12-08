@@ -1,11 +1,13 @@
 import React, {useState, useEffect, useRef, lazy, Suspense} from 'react'
 import {useLocation} from "react-router-dom"
+import {motion} from "framer-motion"
 
 import axios from 'axios'
 
 import Header from '../../../Components/Header/Header'
 import HeroSection from './HeroSection'
 import Footer from "../../../Components/Footer/Footer"
+import TextChatBox from '../TextChatBox/TextChatBox'
 import Fallback from '../../../Components/FallbackSuspense/Fallback'
 
 const Carousal = lazy(() => import("../../../Components/Carousal/Carousal"))
@@ -22,6 +24,8 @@ export default function HomePage(){
 
     const [showHighlights, setShowHighlights] = useState(false)
     const [popularproducts, setPopularProducts] = useState([])
+
+    const [openChatBox, setOpenChatBox] = useState(true)
     
     const highlightsRef = useRef(null)
 
@@ -86,7 +90,10 @@ export default function HomePage(){
           style={bgImg}
         >
 
-            <Header goToShopByCategorySec={()=> shopByCategoryRef.current?.scrollIntoView({ behavior: "smooth" })}/>
+            <Header 
+              goToShopByCategorySec={()=> shopByCategoryRef.current?.scrollIntoView({ behavior: "smooth" })}
+              pageChatBoxStatus={openChatBox}
+            />
 
             <HeroSection />
 
@@ -146,6 +153,22 @@ export default function HomePage(){
         </Suspense>
         
         <Footer/>
+
+        {
+          openChatBox &&
+              <motion.div 
+                initial={{ x: 5, opacity: 0 }}
+                animate={{ x:0, opacity: 1 }}
+                transition={{delay: 2.8, ease: 'easeOut'}}
+                exit={{ opacity: 0 }}
+                className="fixed bottom-[2rem] right-[2rem] z-50"
+              >
+              
+                <TextChatBox closeable={true} 
+                    onCloseChat={()=> setOpenChatBox(false)}/>
+
+              </motion.div>
+        }
         
       </section>
     )

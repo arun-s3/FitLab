@@ -676,6 +676,52 @@ const getLatestHealthProfile = async (req, res, next) => {
 }
 
 
+const checkWeeklyHealthProfile = async (req, res, next) => {
+  try {
+    console.log("Inside checkWeeklyHealthProfile...")
+    const userId = req.user._id
+
+    const user = await User.findById(userId)
+
+    let daysSinceRegistered = 0
+
+    if(user){
+      console.log("User logged in...")
+      const createdAt = new Date(user.createdAt)
+      const today = new Date()
+
+      daysSinceRegistered = Math.floor( (today - createdAt) / (1000 * 60 * 60 * 24) )
+    }
+    console.log("daysSinceRegistered---->", daysSinceRegistered)
+
+    const isNewUser = daysSinceRegistered < 7
+
+    const now = new Date()
+    const startOfWeek = new Date(now)
+    startOfWeek.setDate(now.getDate() - now.getDay())
+    startOfWeek.setHours(0, 0, 0, 0)
+
+    const latestEntry = await HealthProfile.findOne({
+      userId,
+      createdAt: { $gte: startOfWeek }, 
+    }).sort({ createdAt: -1 })
+
+    console.log(`hasEntryThisWeek-----${latestEntry ? true : false} and isNewUser-----${isNewUser}`)
+
+    return res.status(200).json({
+      success: true,
+      isNewUser,
+      hasEntryThisWeek: latestEntry ? true : false,
+      latestEntry: latestEntry || null, 
+    });
+  }
+  catch (error) {
+    console.error("checkWeeklyHealthProfile Error:", error.message);
+    next(error)
+  }
+}
+
+
 
 module.exports = {getExerciseThumbnail, getExerciseVideos, addExercise, updateExerciseTemplate, updateWorkoutInfo, updateCaloriesForExercise,
-  getUserExerciseLibrary, getWorkoutHistory, deleteExerciseTemplate, addOrUpdateDailyHealthProfile, getLatestHealthProfile}
+  getUserExerciseLibrary, getWorkoutHistory, deleteExerciseTemplate, addOrUpdateDailyHealthProfile, getLatestHealthProfile, checkWeeklyHealthProfile}

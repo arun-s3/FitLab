@@ -529,11 +529,10 @@ const getHealthScoreInsights = async (req, res, next) => {
     });
   }
   catch (error) {
-    console.log("MHS Insights Error:", error.message)
+    console.log("Health Insights Error:", error.message)
     next(error)
   }
 }
-
 
 
 

@@ -1,5 +1,6 @@
 import React from 'react'
 import './HeroSection.css'
+import {useNavigate} from 'react-router-dom'
 
 import {FaFacebook, FaInstagramSquare, FaLinkedin} from "react-icons/fa"
 import {CiFacebook, CiInstagram, CiLinkedin} from "react-icons/ci"
@@ -8,6 +9,8 @@ import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
 
 
 export default function HeroSection(){
+
+    const navigate = useNavigate()
 
     return(
         <div>
@@ -33,7 +36,10 @@ export default function HeroSection(){
                 </p>
                 <button 
                     className='hero-button text-black font-[500] text-[12px] mob:text-[13px] sm:text-descReg1 tracking-[0.5px] 
-                      bg-primary rounded-[7px] shadow-[0_0_20px_var(--PRIMARY)] py-[9px] px-[22px] sm:py-[12px] sm:px-[30px]'> 
+                      bg-primary  hover:bg-primaryDark rounded-[7px] shadow-[0_0_20px_var(--PRIMARY)]
+                        py-[9px] px-[22px] sm:py-[12px] sm:px-[30px] transition-all duration-300'
+                    onClick={()=> setTimeout(()=> navigate('/shop'), 700)}
+                > 
                     Start Looking 
                 </button>
             </div>

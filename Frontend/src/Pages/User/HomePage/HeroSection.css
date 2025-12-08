@@ -50,20 +50,27 @@ h1 {
 }
 
 /* Typewriter Effect - Only for last word */
-@keyframes typing {
+/* @keyframes typing {
   from {
     width: 0;
   }
   to {
     width: 100%;
   }
-}
+} */
 
 @keyframes blink {
   50% {
     border-color: transparent;
   }
 }
+
+@keyframes hide-cursor {
+  to {
+    border-right-color: transparent;
+  }
+}
+
 
 /* Subtitle animation */
 .hero-subtitle {
@@ -84,7 +91,7 @@ h1 {
   border-right: 2px solid var(--SECONDARY);
   /* instead of width: 0 → 100%, use ch-based steps */
   width: 0ch;
-  animation: typing 2.8s steps(20, end) forwards, blink 0.8s step-end infinite alternate;
+  animation: typing 2.8s steps(20, end) forwards, blink 0.8s step-end infinite alternate, hide-cursor 8s linear forwards 8s;
   animation-delay: 1s;
 }
 

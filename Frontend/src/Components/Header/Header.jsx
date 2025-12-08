@@ -10,7 +10,8 @@ import {CiUser} from "react-icons/ci"
 import {IoCartOutline} from "react-icons/io5"
 import {MdFavoriteBorder} from "react-icons/md"
 import {HiOutlineMenu, HiOutlineX} from "react-icons/hi"
-import {User, Heart, Headset, CreditCard, LogIn} from "lucide-react"
+import { MdSportsGymnastics } from "react-icons/md"
+import {User, Heart, Headset, Store, Activity, ShoppingBag, CreditCard, LogIn} from "lucide-react"
 
 import Logo from '../Logo/Logo'
 import UserHead from '../UserHead/UserHead'
@@ -23,7 +24,7 @@ import {SocketContext} from '../../Components/SocketProvider/SocketProvider'
 
 
 
-export default function Header({customStyle, goToShopByCategorySec}){
+export default function Header({customStyle, goToShopByCategorySec, pageChatBoxStatus = false}){
 
     const [isCartOpen, setIsCartOpen] = useState(false)
 
@@ -35,6 +36,14 @@ export default function Header({customStyle, goToShopByCategorySec}){
     const navigate = useNavigate()
     const dispatch = useDispatch()
     const location = useLocation()
+
+    const {isConnected} = useContext(SocketContext)
+
+    useEffect(()=> {
+        if(pageChatBoxStatus && openChatBox){
+            setOpenChatBox(false)
+        }
+    }, [pageChatBoxStatus, openChatBox])
 
     // const {setOpenVideoCallModal, VideoCallCommonModal} = useContext(SocketContext)
     // const {socket} = socketContextItems
@@ -54,16 +63,20 @@ export default function Header({customStyle, goToShopByCategorySec}){
 
     const menuItems = [
         {label: 'Home', path: '/'},
-        {label: 'Shop By Categories', handleClick: ()=> jumpToShopByCategorySec(),
+        {label: 'Browse Categories', handleClick: ()=> jumpToShopByCategorySec(),
              mobileLabel: 'Browse', className: 'hidden lg:hidden xl:inline-block', mobileClassName: 'xl:hidden'},
-        {label: 'Products', path: '/shop'},
+        {label: 'Shop', path: '/shop'},
+        {label: 'Wallet', path: '/wallet'},
+        {label: 'Fitness Training', path: '/fitness/training', 
+            mobileLabel: 'Training', className: 'hidden lg:hidden x-lg:inline-block', mobileClassName: 'x-lg:hidden'},
+        {label: 'Tracker', path: '/fitness/tracker'},
         {label: 'Support', path: '/support'},
         {label: 'About Us', path: '/about'}
     ]
 
 
     return(
-        <motion.div className="flex justify-between items-center relative lg:sticky text-white padding-main z-10" 
+        <motion.div className="flex justify-between items-center relative lg:sticky text-white px-[30px] z-10" 
             id='headerMenu'  
             style={customStyle}
             initial={{ opacity: 0, y: -20 }}
@@ -82,13 +95,13 @@ export default function Header({customStyle, goToShopByCategorySec}){
             </motion.div>
 
             <motion.nav 
-                className='hidden lg:block lg:ml-[-50px] xl:ml-[-20px] x-xl:ml-0'
+                className='hidden lg:block ml-0 lg:ml-[-75px] x-lg:ml-[-50px]'
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.7, duration: 0.8, ease: "easeOut" }}
             >
                 <motion.ul 
-                    className="inline-flex items-center lg:gap-[15px] xl:gap-[22px] x-xl:gap-[30px] list-none 
+                    className="inline-flex items-center lg:gap-[15px] xl:gap-[22px] xx-xl:gap-[30px] list-none 
                       lg:text-[14px] x-xl:text-descReg1 tracking-[0.2px]" 
                     id='menu'
                     initial="hidden"
@@ -104,6 +117,7 @@ export default function Header({customStyle, goToShopByCategorySec}){
                         menuItems.map((item, i)=> (
                             <motion.li
                                 key={i}
+                                className={`${item.label === 'Support' && 'flex items-center gap-[5px]'}`}
                                 variants={{
                                   hidden: { opacity: 0, y: -8 },
                                   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
@@ -126,13 +140,21 @@ export default function Header({customStyle, goToShopByCategorySec}){
                                 > 
                                     {item.label} 
                                 </Link>
+                                
+                                { item.label === 'Support' &&
+                                    <motion.div
+                                        className={`w-[5px] h-[5px] rounded-full ${isConnected ? "bg-green-400" : "bg-red-400"}`}
+                                        animate={{ scale: [1, 1.4, 1] }}
+                                        transition={{ repeat: Number.POSITIVE_INFINITY, duration: 2 }}
+                                    />
+                                }
                             </motion.li>
                         ))
                     }
                 </motion.ul>
             </motion.nav>
             <motion.div 
-                className="hidden sm:inline-flex sm:gap-[20px] md:gap-[2.5rem] lg:gap-[12px] x-xl:gap-[15px] sm:ml-[20rem] lg:ml-0 mt-[25px] 
+                className="hidden sm:inline-flex sm:gap-[20px] md:gap-[2.5rem] lg:gap-[12px] x-xl:gap-[15px] sm:ml-[17rem] lg:ml-0 mt-[25px] 
                     lg:mt-0 items-center" 
                 id="icons"
                 initial="hidden"
@@ -144,11 +166,14 @@ export default function Header({customStyle, goToShopByCategorySec}){
                   },
                 }}
             >
-                <i>
+                {/* <i> 
                     <IoIosSearch className='h-[23px] w-[23px] lg:h-[20px] lg:w-[20px] xl:h-[22px] xl:w-[22px] s-xl:h-[23px] s-xl:w-[23px]'/>
-                </i>
+                </i> */} 
                 <i onClick={()=> navigate('/account')}>
                     <User className='h-[22px] w-[22px] lg:h-[20px] lg:w-[20px] xl:w-[22px] xl:h-[21px] x-xl:w-[21px] x-xl:h-[22px]'/>
+                </i>
+                <i onClick={()=> navigate('/shop')} className='inline-block lg:hidden'>
+                    <Store className='h-[20px] w-[20px'/>
                 </i>
                 <i className='relative' 
                     onClick={()=> setOpenChatBox()} 
@@ -168,14 +193,20 @@ export default function Header({customStyle, goToShopByCategorySec}){
                     {/* <MdFavoriteBorder style={{fontSize:'25px'}}/> */}
                     <Heart className='w-[20px] h-[20px] lg:w-[19px] lg:h-[19px] x-xl:h-[20px] x-xl:w-[20px]'/>
                 </i>
-                <i onClick={()=> navigate('/wallet')}>
+                {/* <i onClick={()=> navigate('/wallet')}>
                     <CreditCard className='w-[23px] h-[23px] lg:w-[21px] lg:h-[21px] xl:w-[22px] xl:h-[22px] x-xl:w-[23px] x-xl:h-[23px]'/>
+                </i> */}
+                <i onClick={()=> navigate('/fitness/training')} className='inline-block lg:hidden'>
+                    <MdSportsGymnastics className='h-[20px] w-[20px]'/>
+                </i>
+                <i onClick={()=> navigate('/fitness/tracker')} className='inline-block lg:hidden'>
+                    <Activity className='h-[20px] w-[20px]'/>
                 </i>
                 <i onClick={()=> setOpenChatBox(true)}>
                     <Headset className='w-[21px] h-[21px] lg:w-[19px] lg:h-[19px] xl:w-[20px] xl:h-[20px] x-xl:w-[21px] x-xl:h-[21px]'/>
                 </i>
                 <motion.div 
-                    className='hidden lg:inline-block'
+                    className='hidden lg:inline-block ml-0 xx-lg:ml-[-7px] xxx-lg:ml-[-20px] deskt:ml-0'
                     initial={{ opacity: 0, x: 10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 1.4, duration: 0.6, ease: "easeOut" }}
@@ -222,12 +253,12 @@ export default function Header({customStyle, goToShopByCategorySec}){
 
                 {
                     openChatBox &&
-                    <div className="fixed bottom-[2rem] right-[2rem] z-50">
-                  
-                        <TextChatBox closeable={true} 
-                            onCloseChat={()=> setOpenChatBox(false)}/>
-                          
-                    </div>
+                        <div className="fixed bottom-[2rem] right-[2rem] z-50">
+                        
+                            <TextChatBox closeable={true} 
+                                onCloseChat={()=> setOpenChatBox(false)}/>
+
+                        </div>
                 }
 
                 {/* { */}

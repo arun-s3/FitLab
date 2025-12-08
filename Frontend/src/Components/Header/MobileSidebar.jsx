@@ -5,7 +5,8 @@ import {motion, AnimatePresence, useScroll, useSpring} from "framer-motion"
 
 import {Menu, ArrowUpRight, Home, LineChart, Info, BookText, PhoneCall, ShoppingCart, Bookmark, UserIcon, ChevronRight, LogIn, UserPlus,
   X, LayoutGrid, Package, LifeBuoy, User, CreditCard, BadgePercent, Clock, Search, Headset, Newspaper, Video, CircleUserRound, MapPin,
-  MessageSquare, LogOut} from "lucide-react"
+  Activity, MessageSquare, LogOut} from "lucide-react"
+import {MdSportsGymnastics} from "react-icons/md"
 import {IoBagCheckOutline} from "react-icons/io5"
 
 import CartSidebar from '../../Components/CartSidebar/CartSidebar'
@@ -36,6 +37,24 @@ export default function MobileSidebar() {
     {Icon: Home, label:'Home', path: '/'},
     {Icon: ShoppingCart, label:'Shopping Cart', path: null},
     {Icon: User, label:'User Profile', path: '/account'} ,
+  ]
+
+  const menuItems = [
+    { label: "Home", Icon: Home, path: '/'  },
+    { label: "Shop by Categories", Icon: LayoutGrid, path: '/shop'  },
+    { label: "Products", Icon: Package, path: '/shop'  },
+    { label: "Fitness Training", Icon: MdSportsGymnastics, path: '/fitness/training' },
+    { label: "Tracker", Icon: Activity, path: '/fitness/tracker' },
+    { label: "About Us", Icon: Info, path: '/'  },
+  ]
+
+  const userBrowsableItems = [
+    { label: "Account", Icon: CircleUserRound, path: '/account' },
+    { label: "Wallet", Icon: CreditCard, path: '/wallet' },
+    { label: "Coupons", Icon: BadgePercent, path: '/coupons' },
+    { label: "Checkout", Icon: IoBagCheckOutline, path: '/checkout' },
+    { label: "Order History", Icon: Clock, path: '/orders' },
+    { label: "Manage Addresses", Icon: MapPin, path: '/account/addresses' },
   ]
 
   useEffect(()=> {
@@ -215,7 +234,7 @@ export default function MobileSidebar() {
                   </div>
 
                   <nav className="mt-4 flex flex-col">
-                    <div className="px-5">
+                    <div className={`px-5 ${!user && 'hidden'}`}>
                       <div className="mb-2 flex items-center justify-between">
                         <p className="text-xs font-medium uppercase tracking-wide text-white/60"> Browse </p>
                         <span className="text-white/40 cursor-pointer"
@@ -235,14 +254,7 @@ export default function MobileSidebar() {
                             show: { transition: { staggerChildren: 0.06 } },
                           }}
                         >
-                          {[
-                            { label: "Account", Icon: CircleUserRound, path: '/account' },
-                            { label: "Wallet", Icon: CreditCard, path: '/wallet' },
-                            { label: "Coupons", Icon: BadgePercent, path: '/coupons' },
-                            { label: "Checkout", Icon: IoBagCheckOutline, path: '/checkout' },
-                            { label: "Order History", Icon: Clock, path: '/orders' },
-                            { label: "Manage Addresses", Icon: MapPin, path: '/account/addresses' },
-                          ].map(({ label, Icon, path }) => (
+                          {userBrowsableItems.map(({ label, Icon, path }) => (
                             <motion.li
                               key={label}
                               variants={{ hidden: { opacity: 0, x: 16 }, show: { opacity: 1, x: 0 } }}
@@ -288,13 +300,7 @@ export default function MobileSidebar() {
                             show: { transition: { staggerChildren: 0.06 } },
                           }}
                         >
-                          {[
-                            { label: "Home", Icon: Home, path: '/'  },
-                            { label: "Shop by Categories", Icon: LayoutGrid, path: '/shop'  },
-                            { label: "Products", Icon: Package, path: '/shop'  },
-                            { label: "Blogs", Icon: Newspaper, path: '/'  },
-                            { label: "About Us", Icon: Info, path: '/'  },
-                          ].map(({ label, Icon, path }) => (
+                          {menuItems.map(({ label, Icon, path }) => (
                             <motion.li
                               key={label}
                               variants={{ hidden: { opacity: 0, x: 16 }, show: { opacity: 1, x: 0 } }}

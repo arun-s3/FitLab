@@ -231,11 +231,11 @@ export default function FitnessTrainingPage(){
 
         </div>
 
-        <div className="fixed bottom-[2rem] right-[2rem] z-50">
+        {/* <div className="fixed bottom-[2rem] right-[2rem] z-50">
               
           <TextChatBox />
 
-        </div>
+        </div> */}
 
       </main>
 

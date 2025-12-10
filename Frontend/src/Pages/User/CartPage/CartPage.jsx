@@ -18,6 +18,7 @@ import BestCouponModal from './Modals/BestCouponModal'
 import RemoveCouponModal from './Modals/RemoveCouponModal'
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
 import OrderStepper from '../../../Components/OrderStepper/OrderStepper'
+import OfferShowcase from '../../../Components/OfferShowcase/OfferShowcase'
 import FeaturesDisplay from '../../../Components/FeaturesDisplay/FeaturesDisplay'
 import {addToCart, reduceFromCart, removeFromCart, getTheCart, removeCoupon, resetCartStates} from '../../../Slices/cartSlice'
 import {getBestCoupon} from '../../../Slices/couponSlice'
@@ -168,7 +169,7 @@ export default function ShoppingCartPage(){
     <section id='ShoppingCartPage'>
       <header style={headerBg} className='h-[5rem]'>
     
-        <Header />
+        <Header pageChatBoxStatus={true}/>
     
       </header>
     
@@ -282,6 +283,12 @@ export default function ShoppingCartPage(){
             }
 
         </div>
+
+        <OfferShowcase 
+          sectionStyle="!pl-12" 
+          containerStyle="!mx-1 !max-w-full"
+          headlineStyle="!text-[1.5rem] !text-secondary"
+        />
 
         <div className="fixed bottom-[2rem] right-[2rem] z-50">
               

@@ -578,7 +578,7 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
                    border-dropdownBorder rounded-[4px]">
                     { 
                       products.length > 0 ?
-                      products.map(product=> (
+                      products.filter(product=> !product.variantOf).map(product=> (
                         <li key={product._id} className="flex items-center gap-[7px]">
                             <input type='checkbox' id='selectProducts' className="h-[15px] w-[15px] border border-primary rounded-[3px]
                               focus:ring-0 focus:outline-none checked:bg-primary checked:border-primary checked:text-white 

@@ -232,7 +232,7 @@ export default function ExerciseDetails({exercise, onGoBack}) {
                 title='Recommended products for this muscle' 
                 titleStyle='text-secondary'
                 imageStyle='!rounded-[12px]'
-                buttonLabel='ADD TO CART'
+                buttonLabel='BUY'
                 size='small'
               />
           }

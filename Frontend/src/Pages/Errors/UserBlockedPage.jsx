@@ -209,8 +209,10 @@ export default function BlockedPage(){
 
         <div className="fixed bottom-[2rem] right-[2rem] z-50">
       
-            <TextChatBox closeable={true} 
-                onCloseChat={()=> setOpenChatBox(false)}/>
+            <TextChatBox 
+              openChats={true}
+              closeable={true} 
+              onCloseChat={()=> setOpenChatBox(false)}/>
               
         </div>
     }

@@ -80,9 +80,9 @@ export default function OfferList({ offers, onEdit, onDelete, onSort, onDeactiva
                 }
                 {
                   offer?.description ?
-                  <div className="flex items-center gap-[10px]">
+                  <div className="flex items-center gap-[10px] min-w-0">
                     <MessageSquareQuote className='w-[15px] h-[15px] text-muted'/>
-                    <span className='text-[12.5px] text-gray-500 capitalize line-clamp-2'> {offer.description} </span>
+                    <span className='text-[12.5px] text-gray-500 capitalize line-clamp-2 overflow-hidden text-ellipsis min-w-0'> {offer.description} </span>
                   </div>
                   : null
                 }
@@ -112,7 +112,7 @@ export default function OfferList({ offers, onEdit, onDelete, onSort, onDeactiva
                           <ul className={`absolute bottom-[100%] left-[50%] py-[10px] px-[22px] list-disc bg-white
                             ${offer?.applicableProducts?.length > 6 ? "h-[10rem] overflow-y-scroll" : "h-fit"} 
                               border border-dropdownBorder rounded-[4px] z-[10]`}>
-                            {offer?.applicableProducts?.map((product)=> (
+                            {offer?.applicableProducts?.filter(product=> !product.variantOf).map((product)=> (
                               <li key={product.title} className="capitalize text-primaryDark">
                                 {product.title}
                               </li>

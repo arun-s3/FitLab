@@ -1,9 +1,13 @@
 import React from 'react'
+import {useNavigate} from "react-router-dom"
 import { motion } from "framer-motion"
 
 import { ArrowRight } from "lucide-react"
 
 export default function SpecialOfferSection() {
+
+  const navigate = useNavigate()
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -81,8 +85,9 @@ export default function SpecialOfferSection() {
                 hover:bg-yellow-300 transition-colors duration-300 flex items-center gap-2 group"
               whileHover="hover"
               variants={buttonHoverVariants}
+              onClick={()=> navigate('/shop')}
             >
-              Register Now!
+              Shop Now!
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </motion.button>
           </motion.div>

@@ -108,36 +108,39 @@ export default function SimilarProductsCarousal({titleColor = null, referencePro
             Similar Products
           </h2>
 
-          <div className="relative h-[auto] min-h-[400px] cursor-pointer">
-            <AnimatePresence custom={direction} initial={false}>
-              <motion.div
-                key={currentProductIndex}
-                className="relative grid grid-cols-1 justify-items-center sm:justify-items-start
-                 sm:grid-cols-2 md:grid-cols-4 gap-[1.5rem]"
-                custom={direction}
-                variants={containerVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-              >
-                {similarProducts
-                  .slice(currentProductIndex, currentProductIndex + 4)
-                  .map((product, i) => (
-                    <motion.div
-                      key={product.id}
-                      className={`${i === similarProducts.length-1 && 'relative'} border rounded-[17px] overflow-hidden bg-white`}
-                      variants={cardVariants}
-                      initial="hidden"
-                      animate="visible"
-                      custom={i}
-                      onClick={()=> navigate(
-                        {pathname: '/shop/product', search: `?id=${product.id}`}, 
-                        {state: {product}}
-                      )}
-                      whileHover="hover"
-                      whileTap="rest"
-                    >
-                      {product.discount && (
+          <div className="relative h-auto min-h-[400px] cursor-pointer">
+
+  <AnimatePresence custom={direction} initial={false}>
+    <motion.div
+      key={currentProductIndex}
+      className="relative grid grid-cols-1 justify-items-center sm:justify-items-start
+      sm:grid-cols-2 md:grid-cols-4 gap-[1.5rem]"
+      custom={direction}
+      variants={containerVariants}
+      initial="enter"
+      animate="center"
+      exit="exit"
+    >
+      {similarProducts
+        .slice(currentProductIndex, currentProductIndex + 4)
+        .map((product, i) => (
+          <motion.div
+            key={product.id}
+            className="border rounded-[17px] overflow-hidden bg-white"
+            variants={cardVariants}
+            initial="hidden"
+            animate="visible"
+            custom={i}
+            onClick={() =>
+              navigate(
+                { pathname: '/shop/product', search: `?id=${product.id}` },
+                { state: { product } }
+              )
+            }
+            whileHover="hover"
+            whileTap="rest"
+          >
+            {product.discount && (
                         <span className="absolute top-[8px] left-[8px] bg-purple-600 text-white px-[8px] py-[4px] 
                          rounded-[4px] text-[14px] z-20">
                           {product.discount}
@@ -162,37 +165,30 @@ export default function SimilarProductsCarousal({titleColor = null, referencePro
                           <p className="font-bold mt-[4px]">{product.price}</p>
                         </div>
                       </div>
-                                        <motion.button
-              variants={buttonVariants}
-              initial="rest"
-              whileHover="hover"
-              whileTap="tap" 
-              className="absolute right-1/2 sm:right-[2%] bottom-[-35px] sm:bottom-0 sm:top-[33%] transform !rotate-90 
-               sm:!rotate-0 -translate-y-1/2 h-[40px] bg-white p-[8px] border border-inputBorderLow rounded-full shadow-md"
-              onClick={handleNextProduct}
-            >
-              <ChevronRight className="w-[1.5rem] h-[1.5rem]" />
-            </motion.button>
+          </motion.div>
+        ))}
+    </motion.div>
+  </AnimatePresence>
 
-                    </motion.div>
-                  ))}
+  {/* ⬇️ Place navigation buttons here — OUTSIDE the map */}
+  <button
+    className="absolute right-[2%] top-[50%] -translate-y-1/2 bg-white p-[8px] border border-inputBorderLow 
+    rounded-full shadow-md transform-gpu transition hover:scale-110 active:scale-95"
+    onClick={handleNextProduct}
+  >
+    <ChevronRight className="w-[1.5rem] h-[1.5rem]" />
+  </button>
 
-              </motion.div>
-            </AnimatePresence>
+  <button
+    className="absolute left-[2%] top-[50%] -translate-y-1/2 bg-white p-[8px] border border-inputBorderLow 
+    rounded-full shadow-md transform-gpu transition hover:scale-110 active:scale-95"
+    onClick={handlePrevProduct}
+  >
+    <ChevronLeft className="w-[1.5rem] h-[1.5rem]" />
+  </button>
+</div>
 
-            <motion.button
-              variants={buttonVariants}
-              initial="rest"
-              whileHover="hover"
-              whileTap="tap"
-              className="absolute left-1/2 sm:left-[0.5%] top-[-20px] sm:top-[33%] transform !rotate-90 sm:!rotate-0
-               sm:-translate-y-1/2 bg-white p-[8px] border border-inputBorderLow rounded-full shadow-md"
-              onClick={handlePrevProduct}
-            >
-              <ChevronLeft className="w-[1.5rem] h-[1.5rem]" />
-            </motion.button>
 
-          </div>
         </section>
       )
     )

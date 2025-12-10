@@ -1,5 +1,6 @@
 const category = require('../Models/categoryModel')
 const Category = require('../Models/categoryModel')
+const Product = require('../Models/productModel')
 const cloudinary = require('../Utils/cloudinary')
 const {errorHandler} = require('../Utils/errorHandler')
 
@@ -498,7 +499,54 @@ const updateCategory = async (req, res, next) => {
         next(error)
     }
   }
+  
+
+const countProductsByCategory = async (req, res, next) => {
+  try {
+    console.log("Inside countProductsByCategory controller")
+    const { categoryId } = req.params 
+    if (!categoryId) return next(errorHandler(400, "Category ID is required!"))
+
+    const category = await Category.findById(categoryId) 
+    if (!category) return next(errorHandler(404, "Category not found!"))
+        
+    const getAllSubcategoryNames = async (categoryId, collected = []) => {
+      const category = await Category.findById(categoryId)
+      if (!category) return collected
+
+      collected.push(category.name) 
+
+      for (const subId of category.subCategory) {
+        await getAllSubcategoryNames(subId, collected) 
+      }
+
+      return collected;
+    }
+
+    const allCategoryNames = await getAllSubcategoryNames(categoryId)
+
+    console.log("Categories found-->", JSON.stringify(allCategoryNames))
+
+    const count = await Product.countDocuments({
+      category: { $in: allCategoryNames }
+    });
+
+    console.log("Product count-->", count)
+
+    return res.status(200).json({
+      success: true,
+      categoriesIncluded: allCategoryNames,
+      productCount: count
+    });
+
+  }
+  catch (error) {
+    console.error("Error in countProductsByCategory:", error)
+    next(error)
+  }
+}
+
 
 
 module.exports = {createCategory, getAllCategories, getFirstLevelCategories, findCategoryById, getCategoryIdByName,
-            getCategoryNames, getNestedSubcategoryNames, toggleCategoryStatus, updateCategory}
+            getCategoryNames, getNestedSubcategoryNames, toggleCategoryStatus, updateCategory, countProductsByCategory}

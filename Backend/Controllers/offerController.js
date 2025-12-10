@@ -6,7 +6,7 @@ const Category = require('../Models/categoryModel')
 const User = require('../Models/userModel')
 const cloudinary = require('../Utils/cloudinary')
 
-const {calculateBestOffer} = require('./controllerUtils/offersAndDiscountsUtils')
+const {calculateBestOffer, findUserGroup} = require('./controllerUtils/offersAndDiscountsUtils')
 const {errorHandler} = require('../Utils/errorHandler') 
 
 
@@ -109,79 +109,185 @@ const createOffer = async (req, res, next)=> {
 }
 
 
+// const getAllOffers = async (req, res, next) => {
+//     try {
+//         console.log("Inside getAllOffers of offerController")
+
+//         const { queryOptions = {} } = req.body
+//         const {
+//           page = 1,
+//           limit = 6,
+//           startDate,
+//           endDate,
+//           sort = -1,
+//           sortBy = "createdAt",
+//           discountType, 
+//           applicableType,
+//           minimumOrderValue,
+//           usedCount,
+//           status,
+//           searchData 
+//         } = queryOptions
+
+//         const skip = (page - 1) * limit
+//         console.log("queryOptions--->", JSON.stringify(queryOptions))
+
+//         let filterConditions = {}
+//         if (startDate){
+//             filterConditions.startDate = { $gte: new Date(startDate) }
+//         }
+//         if (endDate){
+//             filterConditions.endDate = { $lte: new Date(endDate) }
+//         }   
+//         if (discountType && discountType !== 'all'){
+//             filterConditions.discountType = discountType
+//         }   
+//         if (applicableType && applicableType !== 'all'){
+//             filterConditions.applicableType = applicableType
+//         }
+//         if (minimumOrderValue){
+//             filterConditions.minimumOrderValue = { $lte: minimumOrderValue }
+//         }
+//         if (usedCount){
+//             filterConditions.usedCount = { $lte: usedCount }
+//         }
+//         if (status !== 'all'){
+//             filterConditions.status = status
+//         }
+//         if (searchData){
+//             filterConditions.name = { $regex: searchData, $options: "i" }
+//         }
+
+//         let sortOptions = {}
+//         if (["name", "startDate", "endDate", "redemptionCount"].includes(sortBy)) {
+//           sortOptions[sortBy] = sort
+//         } else {
+//           sortOptions.createdAt = sort
+//         }
+
+//         const offers = await Offer.find(filterConditions)
+//           .skip(skip)
+//           .limit(parseInt(limit))
+//           .sort(sortOptions)
+//           .populate("applicableProducts", "title price")
+//           .populate("applicableCategories", "name")
+//           .populate("usedBy.userId", "username email")
+
+//         const totalOffers = await Offer.countDocuments(filterConditions)
+
+//         res.status(200).json({ success: true, offers, totalOffers })
+//     }
+//     catch (error) {
+//       console.error("Error listing offers:", error.message)
+//       next(error)
+//     }
+// }
+
 const getAllOffers = async (req, res, next) => {
-    try {
-        console.log("Inside getAllOffers of offerController")
+  try {
+    console.log("Inside getAllOffers of offerController")
 
-        const { queryOptions = {} } = req.body
-        const {
-          page = 1,
-          limit = 6,
-          startDate,
-          endDate,
-          sort = -1,
-          sortBy = "createdAt",
-          discountType, 
-          applicableType,
-          minimumOrderValue,
-          usedCount,
-          status,
-          searchData 
-        } = queryOptions
+    const { queryOptions = {} } = req.body
+    const {
+      page = 1,
+      limit = 6,
+      startDate,
+      endDate,
+      sort = -1,
+      sortBy = "createdAt",
+      discountType,
+      applicableType,
+      minimumOrderValue,
+      usedCount,
+      status,
+      searchData,
+      targetUserGroup,
+      userId
+    } = queryOptions
 
-        const skip = (page - 1) * limit
-        console.log("queryOptions--->", JSON.stringify(queryOptions))
+    console.log("queryOptions--->", JSON.stringify(queryOptions))
 
-        let filterConditions = {}
-        if (startDate){
-            filterConditions.startDate = { $gte: new Date(startDate) }
-        }
-        if (endDate){
-            filterConditions.endDate = { $lte: new Date(endDate) }
-        }   
-        if (discountType && discountType !== 'all'){
-            filterConditions.discountType = discountType
-        }   
-        if (applicableType && applicableType !== 'all'){
-            filterConditions.applicableType = applicableType
-        }
-        if (minimumOrderValue){
-            filterConditions.minimumOrderValue = { $lte: minimumOrderValue }
-        }
-        if (usedCount){
-            filterConditions.usedCount = { $lte: usedCount }
-        }
-        if (status !== 'all'){
-            filterConditions.status = status
-        }
-        if (searchData){
-            filterConditions.name = { $regex: searchData, $options: "i" }
-        }
+    const skip = (page - 1) * limit
 
-        let sortOptions = {}
-        if (["name", "startDate", "endDate", "redemptionCount"].includes(sortBy)) {
-          sortOptions[sortBy] = sort
-        } else {
-          sortOptions.createdAt = sort
-        }
+    let filterConditions = {}
 
-        const offers = await Offer.find(filterConditions)
-          .skip(skip)
-          .limit(parseInt(limit))
-          .sort(sortOptions)
-          .populate("applicableProducts", "title price")
-          .populate("applicableCategories", "name")
-          .populate("usedBy.userId", "username email")
+    if (startDate) filterConditions.startDate = { $gte: new Date(startDate) }
+    if (endDate) filterConditions.endDate = { $lte: new Date(endDate) }
 
-        const totalOffers = await Offer.countDocuments(filterConditions)
-
-        res.status(200).json({ success: true, offers, totalOffers })
+    if (discountType && discountType !== "all") {
+      filterConditions.discountType = discountType
     }
-    catch (error) {
-      console.error("Error listing offers:", error.message)
-      next(error)
+
+    if (applicableType && applicableType !== "all") {
+      filterConditions.applicableType = applicableType
     }
+
+    if (minimumOrderValue) {
+      filterConditions.minimumOrderValue = { $lte: minimumOrderValue }
+    }
+
+    if (usedCount) {
+      filterConditions.usedCount = { $lte: usedCount }
+    }
+
+    if (status && status !== "all") {
+      filterConditions.status = status
+    }
+
+    if (searchData) {
+      filterConditions.name = { $regex: searchData, $options: "i" }
+    }
+
+    if (userId) {
+      const group = await findUserGroup(userId)
+      console.log("User Group for filtering:", group)
+
+      filterConditions = {
+        ...filterConditions,
+        $or: [
+          { targetUserGroup: "all" },
+          { targetUserGroup: group }
+        ]
+      }
+    } else if (targetUserGroup && targetUserGroup !== "all") {
+      filterConditions.targetUserGroup = targetUserGroup
+    }
+
+    let sortOptions = {}
+    if (["name", "startDate", "endDate", "redemptionCount"].includes(sortBy)) {
+      sortOptions[sortBy] = sort
+    } else {
+      sortOptions.createdAt = sort
+    }
+
+    const offers = await Offer.find(filterConditions)
+      .skip(skip)
+      .limit(parseInt(limit))
+      .sort(sortOptions)
+      .populate("applicableProducts", "title subtitle price thumbnail variantOf variants")
+      .populate("applicableCategories", "name description image")
+      .populate("usedBy.userId", "username email");
+
+    const totalOffers = await Offer.countDocuments(filterConditions)
+
+    console.log("totalOffers--->", totalOffers)
+    console.log("Offers--->", JSON.stringify(offers, null, 2))
+    console.log("OFFER NAMES--->", offers.map(offer=> offer.name))
+
+
+    return res.status(200).json({
+      success: true,
+      offers,
+      totalOffers,
+      appliedUserGroup: userId ? await findUserGroup(userId) : targetUserGroup || "all",
+    });
+  }
+  catch (error){
+    console.error("Error listing offers:", error.message)
+    next(error)
+  }
 }
+
   
 
 const updateOffer = async (req, res, next)=> {
@@ -383,6 +489,4 @@ const toggleOfferStatus = async (req, res, next)=> {
 
 
 
-
-
-module.exports = {createOffer, getAllOffers, updateOffer, deleteOffer, getBestOffer, toggleOfferStatus }
+module.exports = {createOffer, getAllOffers, updateOffer, deleteOffer, getBestOffer, toggleOfferStatus}

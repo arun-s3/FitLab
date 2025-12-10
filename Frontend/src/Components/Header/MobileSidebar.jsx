@@ -3,9 +3,8 @@ import {useSelector, useDispatch} from 'react-redux'
 import {Link, useNavigate} from 'react-router-dom'
 import {motion, AnimatePresence, useScroll, useSpring} from "framer-motion"
 
-import {Menu, ArrowUpRight, Home, LineChart, Info, BookText, PhoneCall, ShoppingCart, Bookmark, UserIcon, ChevronRight, LogIn, UserPlus,
-  X, LayoutGrid, Package, LifeBuoy, User, CreditCard, BadgePercent, Clock, Search, Headset, Newspaper, Video, CircleUserRound, MapPin,
-  Activity, MessageSquare, LogOut} from "lucide-react"
+import {Menu, ArrowUpRight, Home, Info, ShoppingCart, ChevronRight, LogIn, UserPlus, X, LayoutGrid, Package, User, CreditCard, 
+  BadgePercent, Clock, Video, CircleUserRound, MapPin, Activity, MessageSquare, LogOut} from "lucide-react"
 import {MdSportsGymnastics} from "react-icons/md"
 import {IoBagCheckOutline} from "react-icons/io5"
 
@@ -338,11 +337,12 @@ export default function MobileSidebar() {
                       showOptions.support && 
                         [
                           { label: "Video and Text Chat", Icon: Video },
-                          { label: "Text Chat", Icon: MessageSquare },
-                        ].map(({ label, Icon }) => (
+                          { label: "Text Chat", Icon: MessageSquare, styleClasses: 'inline-block sm:hidden' },
+                        ].map(({ label, Icon, styleClasses = '' }) => (
                           <button
                             key={label}
-                            className="group flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-sm hover:bg-white/5"
+                            className={`group flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-sm
+                               hover:bg-white/5 ${styleClasses && styleClasses}`}
                             onClick={()=> {
                               if(label === 'Text Chat'){
                                 setOpenChatBox(true)

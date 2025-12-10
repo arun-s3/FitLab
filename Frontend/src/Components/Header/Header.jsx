@@ -39,12 +39,6 @@ export default function Header({customStyle, goToShopByCategorySec, pageChatBoxS
 
     const {isConnected} = useContext(SocketContext)
 
-    useEffect(()=> {
-        if(pageChatBoxStatus && openChatBox){
-            setOpenChatBox(false)
-        }
-    }, [pageChatBoxStatus, openChatBox])
-
     // const {setOpenVideoCallModal, VideoCallCommonModal} = useContext(SocketContext)
     // const {socket} = socketContextItems
 
@@ -58,6 +52,8 @@ export default function Header({customStyle, goToShopByCategorySec, pageChatBoxS
         if(location.pathname !== '/' ){
             console.log("Navigating now...")
             setTimeout(() => navigate('/', { state: { scrollTo: "shopByCategories" }}), 0)
+        }else{
+            goToShopByCategorySec()
         }
     }
 
@@ -76,7 +72,7 @@ export default function Header({customStyle, goToShopByCategorySec, pageChatBoxS
 
 
     return(
-        <motion.div className="flex justify-between items-center relative lg:sticky text-white px-[30px] z-10" 
+        <motion.div className="flex justify-between items-center relative lg:sticky text-white px-[30px] overflow-x-clip z-10" 
             id='headerMenu'  
             style={customStyle}
             initial={{ opacity: 0, y: -20 }}
@@ -252,7 +248,7 @@ export default function Header({customStyle, goToShopByCategorySec, pageChatBoxS
                     retractedView={true} />
 
                 {
-                    openChatBox &&
+                    openChatBox && !pageChatBoxStatus &&
                         <div className="fixed bottom-[2rem] right-[2rem] z-50">
                         
                             <TextChatBox closeable={true} 

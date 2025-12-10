@@ -49,7 +49,7 @@ export default function TextChatBox({closeable, onCloseChat, boxHeight, boxWidth
           transition={{ type: "spring", stiffness: 260, damping: 20 }}
           whileHover={{ scale: 1.1 }}   
           whileTap={{ scale: 0.9 }}
-          className={` ${isOpen ? 'bg-transparent p-0 shadow-none' : 'bg-white p-[1rem] shadow-lg'} 
+          className={` ${isOpen ? 'bg-transparent p-0 shadow-none' : 'bg-none x-sm:bg-white p-0 x-sm:p-[1rem] shadow-none x-sm:shadow-lg'} 
             relative rounded-2xl flex items-center gap-[12px] hover:shadow-xl 
               transition-all duration-200 transform hover:-translate-y-px ${isStatic && 'hidden'} `} onClick={toggleChat}>       {/* onClick={()=> setShowChat(true)} */}
             <div className="w-[2.5rem] h-[2.5rem] flex items-center justify-center bg-gradient-to-r
@@ -58,7 +58,7 @@ export default function TextChatBox({closeable, onCloseChat, boxHeight, boxWidth
             </div>
           {
             !isOpen &&
-            <div className="text-left">
+            <div className="text-left hidden x-sm:inline-block">
                 <h3 className="text-[14px] font-[650] text-gray-800">Send us a message</h3>
                 <p className="text-[13px] leading-[20px] text-gray-500">We typically reply within a day</p>
             </div>
@@ -70,8 +70,9 @@ export default function TextChatBox({closeable, onCloseChat, boxHeight, boxWidth
           />
           {
             closeable && !isOpen &&
-            <X className={`absolute -top-[1.7rem] right-0 p-1 w-[20px] h-[20px] text-secondary bg-white shadow-sm 
-              rounded-full cursor-pointer z-[70] hover:scale-105 hover:transition hover:duration-150 hover:ease-in`}
+            <X className={`absolute -top-[0.9rem] x-sm:-top-[1.7rem] -right-[9px] x-sm:right-0 p-1 w-[16px] x-sm:w-[20px] h-[16px] x-sm:h-[20px]
+               text-secondary bg-white shadow-sm rounded-full cursor-pointer z-[70] hover:scale-105 hover:transition
+                hover:duration-150 hover:ease-in`}
                 onClick={()=> onCloseChat()}/>
           }
         </button>
@@ -80,8 +81,8 @@ export default function TextChatBox({closeable, onCloseChat, boxHeight, boxWidth
         {isOpen && (
           <motion.div
             className={` ${!isStatic && 'fixed bottom-24 right-6'} z-50 ${boxWidth ? `w-[${boxWidth}rem]` : 'w-96'}
-              ${boxHeight ? `!h-[${boxHeight}px]` : '!h-96'} bg-white rounded-lg shadow-sm border border-gray-200 
-                flex flex-col overflow-hidden`}
+              ${boxHeight ? `!h-[${boxHeight}px]` : '!h-96'} bg-white rounded-lg shadow-sm border
+               border-gray-200 flex flex-col overflow-hidden`}
             initial={{ opacity: 0, y: 50, scale: 0.9 }}
             animate={{
               opacity: 1,

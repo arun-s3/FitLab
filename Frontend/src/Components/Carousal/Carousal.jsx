@@ -1,12 +1,15 @@
 import React, {useState} from "react"
+import {useNavigate} from 'react-router-dom'
 import {motion, AnimatePresence} from "framer-motion"
 
 import {ChevronLeft, ChevronRight, IndianRupee} from "lucide-react"
 
 
-export default function Carousal({products, title, subtitle, buttonLabel, size, titleStyle, imageStyle}) {
+export default function Carousal({products, title, subtitle, buttonLabel, buttonAction, size, titleStyle, imageStyle}) {
 
   const [currentIndex, setCurrentIndex] = useState(0)
+
+  const navigate = useNavigate()
 
   const nextSlide = () => {
     setCurrentIndex((prev) => (prev + 1) % products.length)
@@ -109,6 +112,10 @@ export default function Carousal({products, title, subtitle, buttonLabel, size, 
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.2 }}
                           className="absolute top-6 left-6"
+                          onClick={()=> ()=> navigate(
+                        {pathname: '/shop/product', search: `?id=${product.id}`}, 
+                        {state: {product}}
+                      )}
                         >
                           <button className="bg-primaryDark hover:bg-green-500 text-white font-semibold px-6 py-2 
                             rounded-[7px] text-sm transition-colors duration-200 shadow-md">

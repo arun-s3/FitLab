@@ -11,6 +11,7 @@ import Header from '../../../Components/Header/Header'
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
 import ProductDetailSection from './ProductDetail'
 import ReviewPanel from './ReviewsPanel'
+import OfferShowcase from '../../../Components/OfferShowcase/OfferShowcase'
 import SimilarProductsCarousal from '../../../Components/ProductsCarousal/SimilarProductsCarousal'
 import {capitalizeFirstLetter} from '../../../Utils/helperFunctions'
 import {addToCart, getTheCart, resetCartStates} from '../../../Slices/cartSlice'
@@ -141,7 +142,7 @@ export default function ProductDetailPage(){
         <BreadcrumbBar heading='Product Details'/>
 
         <motion.main 
-          className='flex gap-[2rem] px-[10px] xxs-sm:px-[4rem] mb-[10rem]'
+          className='flex gap-[2rem] px-[10px] xxs-sm:px-[4rem] mb-4'
           variants={sectionVariants}
           initial="hidden"
           animate="show"
@@ -279,6 +280,12 @@ export default function ProductDetailPage(){
             </div>
 
         </motion.main>
+
+        <OfferShowcase 
+          sectionStyle="!pl-20 !pt-4" 
+          containerStyle="!mx-1 !max-w-full"
+          headlineStyle="!text-[1.5rem]"
+        />
         
         <Footer/>
 

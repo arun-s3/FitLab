@@ -15,6 +15,7 @@ const LatestProductsCarousel = lazy(() => import("./LatestProductsCarousel"))
 const BrandsCarousal = lazy(() => import("./BrandsCarousal"))
 const FitnessQuoteSection = lazy(() => import("./FitnessQuoteSection"))
 const ShopByCategories = lazy(() => import("./ShopByCategories"))
+const OfferShowcase = lazy(() => import("../../../Components/OfferShowcase/OfferShowcase"))
 const FitlabHighlights = lazy(() => import("./FitlabHighlights"))
 const SpecialOfferSection = lazy(() => import("./SpecialOfferSection"))
 const TestimonialSection = lazy(() => import("./TestimonialSection"))
@@ -108,7 +109,7 @@ export default function HomePage(){
                   products={popularproducts} 
                   title='Most Popular Products' 
                   subtitle='TOP FITNESS PICKS' 
-                  buttonLabel='ADD TO CART'
+                  buttonLabel='BUY'
                 />
             }
           </Suspense>
@@ -138,7 +139,13 @@ export default function HomePage(){
           </Suspense>
         </div>
 
-        <div ref={highlightsRef} className="mt-8">
+        <div>
+          <Suspense fallback={<Fallback variant="products" height="h-56" />}>
+            <OfferShowcase />
+          </Suspense>
+        </div>
+
+        <div ref={highlightsRef}>
           <Suspense fallback={<Fallback variant="pulse" height="h-64" />}>
             {showHighlights && <FitlabHighlights />}
           </Suspense>

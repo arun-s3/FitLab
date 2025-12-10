@@ -721,7 +721,7 @@ export default function AdminCreateOfferPage(){
                                 onMouseLeave={()=> setInsideProductResults(false)} ref={productSearchRef}>
                               { 
                                 products.length > 0 ?
-                                products.map(product=> (
+                                products.filter(product=> !product.variantOf).map(product=> (
                                   <li key={product._id} className="flex items-center gap-[7px]">
                                       <input type='checkbox' id='selectProducts' className="h-[13px] w-[13px] border border-primary rounded-[3px]
                                         focus:ring-0 focus:outline-none checked:bg-primary checked:border-primary checked:text-white 

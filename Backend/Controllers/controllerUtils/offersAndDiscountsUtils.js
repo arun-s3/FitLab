@@ -162,4 +162,4 @@ const calculateBestOffer = async (userId, productId, quantity)=> {
 }
 
 
-module.exports = {calculateBestOffer}
+module.exports = {findUserGroup, calculateBestOffer}

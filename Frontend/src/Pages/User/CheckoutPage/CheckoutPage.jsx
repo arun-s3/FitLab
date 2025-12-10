@@ -412,7 +412,7 @@ const handleRetryPayment = ()=> {
         <section id='CheckoutPage'>
             <header style={headerBg} className='h-[5rem]'>
                 
-                <Header />
+                <Header pageChatBoxStatus={openChatBox}/>
                 
             </header>
                 

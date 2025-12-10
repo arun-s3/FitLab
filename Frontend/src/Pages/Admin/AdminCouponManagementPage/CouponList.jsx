@@ -93,7 +93,7 @@ export default function CouponList({ coupons, onEdit, onDelete, onDeactivate, on
                               <ul className={`absolute bottom-[100%] left-[50%] py-[10px] px-[22px] list-disc bg-white
                                 ${coupon?.applicableProducts?.length > 6 ? "h-[10rem] overflow-y-scroll" : "h-fit"} 
                                   border border-dropdownBorder rounded-[4px] z-[10]`}>
-                                {coupon?.applicableProducts?.map((product) => (
+                                {coupon?.applicableProducts?.filter(product=> !product.variantOf).map((product) => (
                                   <li key={product.title} className="capitalize text-primaryDark">
                                     {product.title}
                                   </li>

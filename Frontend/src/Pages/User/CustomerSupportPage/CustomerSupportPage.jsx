@@ -63,7 +63,7 @@ export default function CustomerSupportPage(){
         
                 <header className='relative h-[17rem] pt-4' style={bgImg}>
                         
-                    <Header/>
+                    <Header pageChatBoxStatus={true}/>
 
                     <div className="absolute top-[7.5rem] w-full text-[3rem] font-bold text-center
                      text-inputBorderLow">

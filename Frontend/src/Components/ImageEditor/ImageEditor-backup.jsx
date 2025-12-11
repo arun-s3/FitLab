@@ -1,27 +1,26 @@
 import React,{useState, useEffect, useRef} from 'react'
-import './ImageEditor.css'
 import {useLocation,useSearchParams} from 'react-router-dom'
 import {useDispatch} from 'react-redux'
-import Cropper from "react-easy-crop"
-import {getCroppedImg} from "../ImageCropper/ImageCropperUtilities"
-
-import {LuUndo2} from "react-icons/lu"
-import {LuRedo2} from "react-icons/lu"
-
 import Panel from './Panel'
 import ColorAdjuster from './ColorAdjuster'
 import Filters from './Filters'
 import RotationAndFilpTool from './RotationAndFilpTool'
 import ColorCorrection from './ColorCorrection'
-import ImageCropper from './Cropper'
-import Logo from '../Logo/Logo'
-import {SiteButtonSquare} from '../SiteButtons/SiteButtons'
 
+import './ImageEditor.css'
+import Logo from '../Logo/Logo'
+
+import {FaUndoAlt} from "react-icons/fa"
+import {FaRedoAlt} from "react-icons/fa"
+import {LuUndo2} from "react-icons/lu"
+import {LuRedo2} from "react-icons/lu"
+import {SiteButtonSquare} from '../SiteButtons/SiteButtons'
 
 export default function ImageEditor(){
 
     const headerBg = {
         backgroundImage: "url('/Background.png')",
+        // backgroundSize: 'cover'
     }
 
     const [showControlPanel, setShowControlPanel] = useState(true)
@@ -57,10 +56,14 @@ export default function ImageEditor(){
     const [rotate, setRotate] = useState(0)
     const [scaleX, setScaleX] = useState(1)
     const [scaleY, setScaleY] = useState(1)
+    const [adjustedScaleX, setAdjustedScaleX] = useState(1)
+    const [adjustedScaleY, setAdjustedScaleY] = useState(1)
 
     const [channelR, setChannelR] = useState(0)      
     const [channelG, setChannelG] = useState(0)
     const [channelB, setChannelB] = useState(0)
+    const [overlayColor, setOverlayColor] = useState({ r: 0, g: 0, b: 0 })
+    const [overlayIntensity, setOverlayIntensity] = useState(0)
 
     const [temperature, setTemperature] = useState(0) // -100 (cool) / +100 (warm)
     const [tint, setTint] = useState(0)               // -100 (magenta) / +100 (green)
@@ -70,26 +73,60 @@ export default function ImageEditor(){
     const [tintR, setTintR] = useState(0)
     const [tintG, setTintG] = useState(0)
     const [hueRotate, setHueRotate] = useState(0)     // -180/180 degrees
+    
 
-    const [crop, setCrop] = useState({ x: 0, y: 0 })
-    const [zoom, setZoom] = useState(1)
-    const [croppedAreaPixels, setCroppedAreaPixels] = useState(null)
-    const [uncroppedImage, setUncroppedImage] = useState(null)
-    const [resetCrop, setResetCrop] = useState(false)
 
-    const [previewURL, setPreviewURL] = useState(null)
+    const dispatch = useDispatch()
 
+    const location = useLocation()
+
+    // useEffect(()=>{
+    //     console.log("(useLocation)location.search-->"+location.search)
+    //     const params = new URLSearchParams(location.search)
+    //     const encodedImageURL = params.get('image')
+    //     if (encodedImageURL) {
+    //       const imageURL = decodeURIComponent(encodedImageURL)
+    //       const name = params.get('name')
+    //       setImage({name, url: imageURL})  
+    //     }
+    // },[])
+    
+    useEffect(()=>{
+        // console.log("Color Tones-->"+ JSON.stringify(colorTones))
+        // console.log("")
+        // console.log(" `brightness( ${colorTones.brightness}% )`-->"+  `brightness( ${colorTones.brightness}% )`)
+        // console.log("brightness(${colorTones.brightness}%) contrast(${colorTones.contrast}%) saturate(${colorTones.saturation}%)`" + `brightness(${colorTones.brightness}%) contrast(${colorTones.contrast}%) saturate(${colorTones.saturation}%)` )
+    })
+    // const changeHandler = (e)=>{
+    //     setColorTones({...colorTones, [e.target.id.toString()] : e.target.value})
+    // }
+    // useEffect(()=>{
+    //     console.log("Inside useEffect")
+    //     window.addEventListener('message', (event) => {
+    //         if (event.data.type === 'target-img') {
+    //             const targetImage = event.data.blob
+    //             console.log("RECEIVED TARGET IMAGE FROM PARENT WINDOW-->", JSON.stringify(targetImage))
+    //             const reader = new FileReader()
+    //             reader.onload = ()=>{
+    //                 console.log("Inside fileReader")
+    //                 const base64URL = reader.result
+    //                 setImage({name, url: base64URL})  
+    //             }
+    //             reader.readAsDataURL(targetImage) 
+    //         }
+    //     })        
+    // },[])
 useEffect(() => {
     window.opener.postMessage('child-ready', '*');
     const messageHandler = (event) => {
         if (event.data.type === 'target-img') {
-            const { blob, name } = event.data
-            console.log("RECIEVED IMAGE FROM FILE-UPLOAD ON CHILD READY-->", JSON.stringify({ blob, name }))
+            const { blob, name } = event.data;
+            console.log("RECIEVED IMAGE FROM FILE-UPLOAD ON CHILD READY-->", JSON.stringify({ blob, name }));
             const reader = new FileReader()
             reader.onload = ()=>{
                 console.log("Inside fileReader")
                 const base64URL = reader.result
-                setImage({name, url: base64URL})  
+                setImage({name, url: base64URL});  
                 console.log("MADE A BASE64URL from BLOB FOR EDITING-->", JSON.stringify({name, url: base64URL}))
             }
             reader.readAsDataURL(blob) 
@@ -111,8 +148,8 @@ useEffect(() => {
 
 useEffect(()=>{
     if(apply){
-        console.log("inside useEffect for loadStartInterval ")
-        loadStartInterval.current = setInterval(()=>{setLoadStart(num=> num>=90? 90 : num+15)}, 250)
+    console.log("inside useEffect for loadStartInterval ")
+    loadStartInterval.current = setInterval(()=>{setLoadStart(num=> num>=90? 90 : num+15)}, 250)
     }
 },[apply])
 
@@ -142,16 +179,14 @@ useEffect(()=>{
 },[rotate])
 
 useEffect(() => {
+    const overlayR = (channelR / 100) * 128
+    const overlayG = (channelG / 100) * 128
+    const overlayB = (channelB / 100) * 128
 
-    applyEffects({previewMode: true})
+    setOverlayColor({r: overlayR, g: overlayG, b: overlayB})
 
-}, [channelR, channelG, channelB, brightness, contrast, saturate, grayscale, blur, sepia, opacity, rotate, scaleX, scaleY,
-     tempR, tempG, tempB, tintR, tintG, hueRotate])
-
-useEffect(()=>{
-   console.log("previewURL-->", previewURL)
-   console.log("image.url-->", image.url)
-},[previewURL])
+    setOverlayIntensity(Math.abs(channelR + channelG + channelB) / 300)
+}, [channelR, channelG, channelB])
 
 useEffect(() => {
     const warm = Math.max(0, temperature)
@@ -168,22 +203,13 @@ useEffect(() => {
     setTintG(40 * (green / 100))
 }, [temperature, tint])
 
-useEffect(()=>{
-   console.log("resetCrop-->", resetCrop)
-   if(resetCrop && !croppedAreaPixels){
-    console.log("croppedAreaPixels is null")
-    applyEffects({previewMode: true})
-    setResetCrop(false)
-   }
-},[resetCrop, croppedAreaPixels])
+
 
 async function applyColorCorrections(canvas, ctx, options = {}) {
 
-  console.log("Inside applyColorCorrections...")
-
   const {channelR = 0, channelG = 0, channelB = 0, tempR = 0, tempG = 0, tempB = 0, tintR = 0, tintG = 0, hueRotate = 0} = options
 
-  const width = canvas.width
+  const width = canvas.width;
   const height = canvas.height
   const imageData = ctx.getImageData(0, 0, width, height)
   const data = imageData.data
@@ -240,88 +266,74 @@ async function applyColorCorrections(canvas, ctx, options = {}) {
   }
 }
 
-const applyEffects = ({ previewMode = false })=> {
-  console.log("Inside applyEffects, previewMode---->", previewMode)
 
-  const canvas = canvasRef.current
-  const ctx = canvas.getContext("2d")
-  const img = new Image()
-
-  if (!previewMode) setApply(true)
-
-  img.crossOrigin = "Anonymous"
-
-  if(croppedAreaPixels){
-    console.log("croppedAreaPixels exists")
-    img.src = previewURL
-    setCroppedAreaPixels(null)
-  }else{
+const applyEffects = ()=>{
+    setApply(true)
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext('2d')
+    const img = new Image()
     img.src = image.url
-  }
+    img.onload = async()=>{
+        canvas.width = img.width
+        canvas.height = img.height
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        ctx.filter = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturate}%) grayscale(${grayscale}%) 
+                        blur(${blur/5}px) sepia(${sepia}%) opacity(${opacity/100})`
+        ctx.save()
+        if(scaleX < 0){
+            console.log("scalex applying-->",scaleX)
+            ctx.translate(canvas.width, 0)
+            ctx.scale(-1,1)
+        }
+        if(scaleY < 0){
+            console.log("scalex applying-->",scaleY)
+            ctx.translate(0, canvas.height)
+            ctx.scale(1,-1)
+        }
+        ctx.drawImage(img, 0, 0, img.width, img.height)
 
-  img.onload = async () => {
-    console.log("Inside img.onload...")
-    let drawWidth = img.width
-    let drawHeight = img.height
+        if(rotate){
+            ctx.translate(canvas.width, canvas.height)
+            const radians = rotate * Math.PI/180
+            console.log("RADIANS-->"+ radians)
+            if (rotate === 90 || rotate === 270) {
+                canvas.width = img.naturalHeight * scaleX
+                canvas.height = img.naturalWidth * scaleY
+              } else {
+                canvas.width = img.naturalWidth * scaleX
+                canvas.height = img.naturalHeight * scaleY
+              }
 
-    let rotation = ((rotate % 360) + 360) % 360 // normalizing angle
-    const radians = rotation * Math.PI / 180
+              ctx.translate(canvas.width / 2, canvas.height / 2)
+              ctx.rotate(radians)
 
-    if (rotation === 90 || rotation === 270) {   // For final canvas size
-      canvas.width = img.height * Math.abs(scaleY)
-      canvas.height = img.width * Math.abs(scaleX)
-    } else {
-      canvas.width = img.width * Math.abs(scaleX)
-      canvas.height = img.height * Math.abs(scaleY)
+              ctx.filter = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturate}%) grayscale(${grayscale}%) 
+                blur(${blur/5}px) sepia(${sepia}%) opacity(${opacity/100})`;
+
+              ctx.drawImage(
+                img,
+                -img.naturalWidth / 2,
+                -img.naturalHeight / 2,
+                img.naturalWidth * scaleX,
+                img.naturalHeight * scaleY
+              );
+        }
+        // await applyColorCorrections(canvas, ctx, {channelR, channelG, channelB, temperature, tint, hueRotate});
+        await applyColorCorrections(canvas, ctx, { channelR, channelG, channelB, tempR, tempG, tempB, tintR, tintG, hueRotate});
+
+        // const blobUrl = canvas.toDataURL('image/png')
+        // console.log("blobUrl-->" + blobUrl)
+        // imgRef.current.src = blobUrl
+        // let blobUrl = ''
+        canvas.toBlob((blob)=>{
+            // const blobUrl = URL.createObjectURL(blob)
+            // console.log("blobURL ceated from canvas-->",blobUrl)
+            const imageData = {name: image.name, size: blob.size, blob}   //, url: blobUrl
+            window.opener.postMessage({ type: 'edited-image', payload: imageData }, '*');
+            console.log("EDITED IMAGE SET BACK TO FILE-UPLOAD-->", JSON.stringify(imageData))
+        },'image/png')
     }
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-    ctx.filter = `
-      brightness(${brightness}%)
-      contrast(${contrast}%)
-      saturate(${saturate}%)
-      grayscale(${grayscale}%)
-      blur(${blur / 5}px)
-      sepia(${sepia}%)
-      opacity(${opacity / 100})
-    `;
-
-    ctx.save();
-
-    ctx.translate(canvas.width / 2, canvas.height / 2)
-
-    if (rotation !== 0) {
-      ctx.rotate(radians) 
-    }
-
-    ctx.scale(scaleX, scaleY)
-
-    ctx.drawImage(
-      img,
-      -img.width / 2,
-      -img.height / 2,
-      img.width,
-      img.height
-    );
-
-    ctx.restore();
-
-    await applyColorCorrections(canvas, ctx, {channelR, channelG, channelB, tempR, tempG, tempB, tintR, tintG, hueRotate});
-
-    canvas.toBlob((blob) => {
-      if (!previewMode) {
-        const imageData = {name: image.name, size: blob.size, blob}
-        window.opener.postMessage({ type: "edited-image", payload: imageData }, "*")
-        console.log("EDITED IMAGE SET BACK TO FILE-UPLOAD-->", JSON.stringify(imageData))
-      } else {
-        const url = URL.createObjectURL(blob);
-        setPreviewURL(url)
-      }
-    }, "image/png")
-  }
 }
-
 const panelHandler = (e, panel)=>{
     setShowPanel(showPanel=> {
         console.log("panel==>"+panel)
@@ -334,45 +346,8 @@ const panelHandler = (e, panel)=>{
         console.log("showPanel NOW-->"+JSON.stringify({...newShowPanel, [panel]: !showPanel[panel]}))
         return {...newShowPanel, [panel]: !showPanel[panel]}
     })
+    showPanel[panel] ? e.currentTarget.style.backgroundColor = 'rgba(215, 241, 72, 1)' :  e.currentTarget.style.backgroundColor = '#f3efef'
 }
-
-const onCropCompleteHandler = (_, croppedAreaPixels) => {
-    setCroppedAreaPixels(croppedAreaPixels)
-}
-
-const handleCrop = async () => {
-  console.log("Cropping the image")
-
-  if (!croppedAreaPixels) {
-    console.error("Cropping area not defined yet!")
-    return
-  }
-
-  const croppedImageURL  = await getCroppedImg(previewURL || image.url, croppedAreaPixels)
-  console.log("croppedImageURL :", croppedImageURL )
-
-  setPreviewURL(croppedImageURL )
-
-  const response = await fetch(croppedImageURL )
-  const blob = await response.blob()
-
-  console.log("Actual Blob:", blob)
-
-  if(!uncroppedImage){
-    setUncroppedImage(image) 
-  }
-  const reader = new FileReader();
-
-  reader.onload = () => {
-    const base64URL = reader.result
-    setImage({name: image.name, url: base64URL});
-    console.log("Base64 from cropped blob:", base64URL)
-  };
-
-reader.readAsDataURL(blob)
-}
-
-
 
  return(
         <section id='image-editor' className='h-screen w-full'>
@@ -385,7 +360,7 @@ reader.readAsDataURL(blob)
             <div className='fixed h-screen flex'>
             <nav className='h-screen w-[4rem] border-r-2 border-r-borderLight rounded-tr-[20px] bg-[#f3efef]'>
 
-                <Panel panelHandler={panelHandler} subPanelStatus={showPanel}/>
+                <Panel panelHandler={panelHandler} />
 
             </nav>
             <main className='flex h-screen absolute left-[4rem] w-[90%]'>
@@ -406,52 +381,26 @@ reader.readAsDataURL(blob)
                             setters={{setChannelR, setChannelG, setChannelB, setTemperature, setTint, setHueRotate}}
                           />
                       }
-                      { showPanel.cropper && 
-                            <ImageCropper zoom={zoom} setZoom={setZoom} crop={crop} setCrop={setCrop}
-                                onResetAll={()=> {
-                                    setImage(uncroppedImage)
-                                    setCroppedAreaPixels(null)
-                                    setPreviewURL(null)
-                                    setZoom(1)
-                                    setCrop({ x: 0, y: 0 })
-                                    setResetCrop(true)
-                                    // setTimeout(()=> , 700)
-                                    // setTimeout(()=> {
-                                    //     setTimeout(()=> applyEffects({previewMode: true}), 700)
-                                    // }, 800)
-                                }}
-                            />
-                      }
   
                     </div>
                 }
                 <div className='h-[85%] w-full content-panel'>
-                    
                     <figure className='h-[97%] w-full p-[2rem] flex justify-center items-center bg-grayLightMuted'>
-                        {
-                            !showPanel.cropper ?
-                            <>
-                                <img src={previewURL || image.url} alt='current image' className='max-w-[700px] h-full' ref={previewRef}/>
-                                <img ref={imgRef}/>
-                            </>
-                            :
-                            <>
-                                <div className='relative w-full max-w-[1000px] h-[95%]'>
-                                    <Cropper image={previewURL || image.url} crop={crop} zoom={zoom} aspect={1} onCropChange={setCrop}
-                                                      onZoomChange={setZoom} onCropComplete={onCropCompleteHandler} />
-                                </div>
-                                <button className='absolute bottom-[8.1rem] left-[17.4rem] px-[18px] py-1 text-white text-[15px] 
-                                    font-medium tracking-[0.3px] bg-secondary rounded-[4px] hover:bg-purple-700 transition duration-300' 
-                                    onClick={handleCrop}
-                                >
-                                        Crop 
-                                </button>
-                            </>
-                            
-                        }
-                        <canvas ref={canvasRef} className='hidden'/>
-                    </figure>
+                        <img src={image.url} alt='current image' className='max-w-[700px] h-full' ref={previewRef}
+                            style={{filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturate}%) 
+                                        grayscale(${grayscale}%) blur(${blur/5}px) sepia(${sepia}%) opacity(${opacity/100})`,
+                                    transform: `rotate(${rotate}deg) scaleX(${scaleX}) scaleY(${scaleY})`}}/>
 
+                        <div className="absolute inset-0 pointer-events-none"
+                            style={{
+                                backgroundColor: `rgba(${overlayColor.r}, ${overlayColor.g}, ${overlayColor.b}, ${overlayIntensity})`,
+                                mixBlendMode: "color"
+                            }}
+                        />
+
+                        <canvas ref={canvasRef} className='hidden'/>
+                        <img ref={imgRef}/>
+                    </figure>
                     <div className='h-auto w-full border-t-2 border-l-borderLight px-[1.5rem] pt-[15px] py-[10px] flex justify-between items-center'>
                         <div className='flex items-center gap-[1rem] undoredo'>
                             <i>
@@ -465,7 +414,7 @@ reader.readAsDataURL(blob)
                             <SiteButtonSquare customStyle={{width:'6rem', paddingBlock:'6px'}}>
                                  Cancel 
                             </SiteButtonSquare>
-                            <SiteButtonSquare customStyle={{width:'6rem', paddingBlock:'6px'}} clickHandler={()=> applyEffects({previewMode: false})}>
+                            <SiteButtonSquare customStyle={{width:'6rem', paddingBlock:'6px'}} clickHandler={()=> applyEffects()}>
                                  <span className={ (loadStart || loading) ? 'text-secondary' : '' }> 
                                     { loadStart? loadStart+'%': loading? loading+'%' : 'Apply'}
                                  </span>

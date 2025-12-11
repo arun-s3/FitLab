@@ -7,6 +7,12 @@ export default function RotationAndFilpTool({setters}){
 
     const {setRotate, setScaleX, setScaleY} = setters
 
+    const resetAll = () => {
+      setRotate(0)
+      setScaleX(1)
+      setScaleY(1)
+    }
+
     return(
         <div id='rotation-tool'>
             <div className=' mt-[1rem] pb-[10px]'>
@@ -30,6 +36,14 @@ export default function RotationAndFilpTool({setters}){
                         <LuFlipVertical />
                     </i>
                 </div>
+            </div>
+            <div className="flex gap-2 mt-12">
+              <button 
+                className="px-[18px] py-1 text-white text-[15px] font-medium tracking-[0.3px] bg-secondary rounded-[4px]
+                 hover:bg-purple-700 transition duration-300" 
+                onClick={resetAll}>
+                    Reset
+              </button>
             </div>
         </div>
     )

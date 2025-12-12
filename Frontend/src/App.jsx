@@ -79,20 +79,15 @@ export default function App(){
 
                 <Route element={<UserRoutesWrapper />} >
 
-                    {/* <Route path='test' element={AdminCategoryListPage} /> */}
-                    <Route path='test-cropper' element={<TestImageCropper/>}/>
-                    <Route path='test-address' element={<TestAddressPage/>}/>
-                    <Route path='test' element={<TestRandomPage/>}/>
-                    <Route path='signup'>
-                        <Route index element={<SignUpAndInPage type='signup' />} />
-                    </Route>
-                    <Route path='signin' element={<SignUpAndInPage type='signin' />}/>
-                    <Route path='forgot-password' element={<ForgotAndResetPasswordPage/>}/>
-
                     <Route path='image-editor' element={<ImageEditor/>} />
 
                     <Route element={<SocketProvider/>}>
                         <Route element={<GlobalVideoCallModalLayout/>}>
+                            <Route path='signup'>
+                                <Route index element={<SignUpAndInPage type='signup' />} />
+                            </Route>
+                            <Route path='signin' element={<SignUpAndInPage type='signin' />}/>
+                            <Route path='forgot-password' element={<ForgotAndResetPasswordPage/>}/>
                             <Route index element={<HomePage/>}/>
                             <Route path='cart' element={<CartPage/>} />
                             <Route element={<ProtectedUserRoutes/>}>

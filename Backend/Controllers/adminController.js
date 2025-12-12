@@ -1,4 +1,6 @@
 const User = require('../Models/userModel')
+const Order = require('../Models/orderModel')
+const Address = require('../Models/addressModel')
 const bcryptjs = require('bcryptjs')
 const {errorHandler} = require('../Utils/errorHandler')
 const {generateToken, verifyToken} = require('../Utils/jwt')
@@ -102,24 +104,53 @@ const signoutAdmin = (req,res,next)=>{
 //     }
 // }
 
-const showUsers = async (req, res, next)=> {
+const showUsers = async (req, res, next) => {
   try {
     console.log("Inside getAllUsers of userController")
 
-    let {page = 1, limit = 6, searchData} = req.body.queryOptions
+    let { page = 1, limit = 6, searchData } = req.body.queryOptions
     page = parseInt(page)
     limit = parseInt(limit)
 
     const skip = (page - 1) * limit
 
-    const filter = {isAdmin: false}
-    if(searchData){
-        filter.username = { $regex: searchData, $options: "i" }
+    const filter = { isAdmin: false }
+    if (searchData) {
+      filter.username = { $regex: searchData, $options: "i" }
     }
-    
-    const users = await User.find(filter, {password: 0}).skip(skip).limit(limit)
 
-    const totalUsers = await User.countDocuments()
+    const users = await User.aggregate([
+      { $match: filter },
+
+      {
+        $lookup: {
+          from: "wallets",
+          localField: "_id",
+          foreignField: "userId",
+          as: "wallet",
+        },
+      },
+
+      {
+        $addFields: {
+          walletBalance: {
+            $ifNull: [{ $arrayElemAt: ["$wallet.balance", 0] }, 0]
+          }
+        },
+      },
+
+      {
+        $project: {
+          password: 0,
+          wallet: 0,
+        },
+      },
+
+      { $skip: skip },
+      { $limit: limit }
+    ]);
+
+    const totalUsers = await User.countDocuments(filter)
 
     return res.status(200).json({
       success: true,
@@ -127,9 +158,10 @@ const showUsers = async (req, res, next)=> {
       currentPage: page,
       totalPages: Math.ceil(totalUsers / limit),
       totalUsers,
-    })
+    });
+
   }
-  catch (error){
+  catch (error) {
     console.error("Error fetching users:", error.message)
     next(error)
   }
@@ -247,4 +279,132 @@ const toggleBlockUser = async(req,res,next)=>{
     }
 }
 
-module.exports = {tester, signinAdmin, signoutAdmin, showUsers, showUsersofStatus, deleteUser, deleteUserList, toggleBlockUser}
+
+const getUserStats = async (req, res, next) => {
+  try {
+    console.log("Inside getUserStats of userController")
+    const {userId} = req.params
+
+    const orders = await Order.find({ userId }).sort({ createdAt: -1 })
+
+    if (!orders.length) {
+      const address =
+        (await Address.findOne({ userId, defaultAddress: true })) ||
+        (await Address.findOne({ userId }));
+
+      return res.status(200).json({
+        success: true,
+        stats: {
+          totalOrders: 0,
+          activeOrders: 0,
+          totalReturns: 0,
+          totalRefunds: 0,
+          totalCancelled: 0,
+          totalProductsReturned: 0,
+          totalProductsRefunded: 0,
+          totalProductsCancelled: 0,
+          totalMoneySpent: 0,
+          totalMoneySaved: 0,
+          lastOrder: null,
+          address: address || null,
+        },
+      });
+    }
+
+    let totalMoneySpent = 0
+    let totalMoneySaved = 0
+
+    let activeOrders = 0
+    let totalReturns = 0
+    let totalRefunds = 0
+    let totalCancelled = 0
+
+    let totalProductsReturned = 0
+    let totalProductsRefunded = 0
+    let totalProductsCancelled = 0
+
+    orders.forEach((order) => {
+      if (order.orderStatus !== "cancelled") {
+        totalMoneySpent += order.absoluteTotalWithTaxes || 0
+      }
+
+      totalMoneySaved += order.couponDiscount || 0
+      totalMoneySaved += order.discount || 0
+
+      order.products.forEach((p) => {
+        totalMoneySaved += p.offerDiscount || 0
+
+        if (p.productStatus === "returning" && p.productReturnStatus === "accepted") {
+          totalProductsReturned++
+        }
+
+        if (p.productStatus === "refunded") {
+          totalProductsRefunded++
+        }
+
+        if (p.productStatus === "cancelled") {
+          totalProductsCancelled++
+        }
+      })
+
+      if (["processing", "confirmed", "shipped"].includes(order.orderStatus)) {
+        activeOrders++
+      }
+
+      if (
+        (order.orderStatus === "returning" && order.orderReturnStatus === "accepted") ||
+        order.products.some((p) => p.productStatus === "returning" && p.productReturnStatus === "accepted")
+      ) {
+        totalReturns++
+      }
+
+      if (
+        order.orderStatus === "refunded" ||
+        order.products.some((p) => p.productStatus === "refunded")
+      ) {
+        totalRefunds++
+      }
+
+      if (
+        order.orderStatus === "cancelled" ||
+        order.products.some((p) => p.productStatus === "cancelled")
+      ) {
+        totalCancelled++
+      }
+    });
+
+    const lastOrder = orders[0]
+
+    const address =
+      (await Address.findOne({ userId, defaultAddress: true })) ||
+      (await Address.findOne({ userId }))
+
+    return res.status(200).json({
+      success: true,
+      stats: {
+        totalOrders: orders.length,
+        activeOrders,
+        totalReturns,
+        totalRefunds,
+        totalCancelled,
+
+        totalProductsReturned,
+        totalProductsRefunded,
+        totalProductsCancelled,
+
+        totalMoneySpent,
+        totalMoneySaved,
+        lastOrder,
+      },
+      address: address || null
+    });
+  }
+  catch (error) {
+    console.log("Dashboard Error:", error.message)
+    next(error)
+  }
+}
+
+
+
+module.exports = {tester, signinAdmin, signoutAdmin, showUsers, showUsersofStatus, deleteUser, deleteUserList, toggleBlockUser, getUserStats}

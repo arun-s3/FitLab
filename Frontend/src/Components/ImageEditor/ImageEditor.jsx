@@ -1,10 +1,11 @@
 import React,{useState, useEffect, useRef} from 'react'
 import './ImageEditor.css'
-import {useLocation,useSearchParams} from 'react-router-dom'
-import {useDispatch} from 'react-redux'
+import {useLocation, useSearchParams} from 'react-router-dom'
+import {useDispatch, useSelector} from 'react-redux'
+
+import {toast as sonnerToast} from 'sonner'
 import Cropper from "react-easy-crop"
 import {getCroppedImg} from "../ImageCropper/ImageCropperUtilities"
-
 import {LuUndo2} from "react-icons/lu"
 import {LuRedo2} from "react-icons/lu"
 
@@ -79,6 +80,10 @@ export default function ImageEditor(){
 
     const [previewURL, setPreviewURL] = useState(null)
 
+    const [warnedAdultery, setWarnedAdultery] = useState(false)
+
+    const {admin} = useSelector(state=> state.admin)
+
 useEffect(() => {
     window.opener.postMessage('child-ready', '*');
     const messageHandler = (event) => {
@@ -122,7 +127,16 @@ useEffect(()=>{
     }else{
         setShowControlPanel(true)
     }
-},[showPanel])
+    if(showPanel.colorChannels && admin && admin.isAdmin && !warnedAdultery){
+        sonnerToast.warning("Product Image Accuracy Warning", 
+            {
+                description: `Please make only subtle color adjustments. Avoid altering the product’s appearance in a way that may mislead customers.
+                    Edits should enhance clarity, not change how the product truly looks.`,
+                duration:12000
+            })
+        setWarnedAdultery(true)
+    }
+},[showPanel, showPanel.colorChannels])
 
 useEffect(()=>{
     console.log("ROtation in radians", rotate * Math.PI/180)
@@ -415,10 +429,6 @@ reader.readAsDataURL(blob)
                                     setZoom(1)
                                     setCrop({ x: 0, y: 0 })
                                     setResetCrop(true)
-                                    // setTimeout(()=> , 700)
-                                    // setTimeout(()=> {
-                                    //     setTimeout(()=> applyEffects({previewMode: true}), 700)
-                                    // }, 800)
                                 }}
                             />
                       }
@@ -453,14 +463,14 @@ reader.readAsDataURL(blob)
                     </figure>
 
                     <div className='h-auto w-full border-t-2 border-l-borderLight px-[1.5rem] pt-[15px] py-[10px] flex justify-between items-center'>
-                        <div className='flex items-center gap-[1rem] undoredo'>
+                        {/* <div className='flex items-center gap-[1rem] undoredo'>
                             <i>
                                 <LuUndo2/>
                             </i>
                             <i>
                                 <LuRedo2/>
                             </i>
-                        </div>
+                        </div> */}
                         <div className='flex items-center gap-[1.3rem]'>
                             <SiteButtonSquare customStyle={{width:'6rem', paddingBlock:'6px'}}>
                                  Cancel 

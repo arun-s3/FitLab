@@ -1,13 +1,8 @@
-import React, {useEffect, useState, useRef} from 'react'
+import React, {useEffect, useState, useRef, useContext} from 'react'
 import {useOutletContext} from 'react-router-dom'
 import './AdminCustomersPage.css'
-import axios from '../../../Utils/axiosConfig'
 import {useSelector, useDispatch} from 'react-redux'
-
-import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
-import Modal from '../../../Components/Modal/Modal'
-import {SitePrimaryMinimalButtonWithShadow} from '../../../Components/SiteButtons/SiteButtons'
-import {showUsers, showUsersofStatus, toggleBlockUser, deleteUser, deleteUsersList, resetStates} from '../../../Slices/adminSlice'
+import {motion} from "framer-motion"
 
 import {IoArrowBackSharp} from "react-icons/io5"
 import {RiArrowDropDownLine} from 'react-icons/ri'
@@ -17,11 +12,22 @@ import {FaTrashAlt} from "react-icons/fa"
 import {LuCaseSensitive} from "react-icons/lu"
 import {VscCaseSensitive} from "react-icons/vsc"
 import {CiSquareChevRight} from "react-icons/ci"
+import {RiSpamLine} from "react-icons/ri"
+import {SquareChartGantt} from 'lucide-react'
 import {toast as sonnerToast} from 'sonner'
+import axios from 'axios'
+
+import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
+import Modal from '../../../Components/Modal/Modal'
+import {SitePrimaryMinimalButtonWithShadow} from '../../../Components/SiteButtons/SiteButtons'
+import {showUsers, showUsersofStatus, toggleBlockUser, deleteUser, deleteUsersList, resetStates} from '../../../Slices/adminSlice'
+import {AdminSocketContext} from '../../../Components/AdminSocketProvider/AdminSocketProvider'
+import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
 
 export default function AdminCustomersPageV1() {
-    const dispatch = useDispatch();
-    const { adminLoading, adminError, adminSuccess, adminMessage, allUsers } = useSelector(state => state.admin);
+
+    const dispatch = useDispatch()
+    const { adminLoading, adminError, adminSuccess, adminMessage, allUsers, totalUsers } = useSelector(state => state.admin)
 
     const [localUsers, setLocalUsers] = useState([]);
     const [tempUsers, setTempUsers] = useState([])
@@ -35,6 +41,8 @@ export default function AdminCustomersPageV1() {
 
     const [matchCase, setMatchCase] = useState(false)
 
+    const [searchData, setSearchData] = useState(null)
+
     const [activeSorter, setActiveSorter] = useState({field:'',order:''})
 
     const statusDropdownRef = useRef(null)
@@ -43,8 +51,18 @@ export default function AdminCustomersPageV1() {
 
     const [openModal, setOpenModal] = useState(false)
 
+    const limit = 6
+    const [currentPage, setCurrentPage] = useState(1)
+    const [totalPages, setTotalPages] = useState(20) 
+
+    const [openUserDetailsModal, setOpenUserDetailsModal] = useState({customerData: null, orderStats: null, address: null})
+
     const {setPageBgUrl} = useOutletContext() 
     setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.95),rgba(255,255,255,0.95)), url('/admin-bg13.png')`)
+
+    const {activeUsers} = useContext(AdminSocketContext)
+
+    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
     const mainBgImg = {
         colorImage : "linear-gradient(to right,rgba(255,255,255),rgba(255,255,255))"
@@ -61,6 +79,17 @@ export default function AdminCustomersPageV1() {
             setTempUsers(allUsers)
         }
     }, [allUsers])
+
+    useEffect(()=> {
+      if(totalUsers){
+        console.log(`totalUsers------>${totalUsers}, limit------>${limit}`)
+        setTotalPages(Math.ceil(totalUsers/limit))
+      }
+    }, [totalUsers])
+
+    useEffect(()=> {
+        dispatch(showUsers({queryOptions: {page: currentPage, limit, searchData}}))
+    },[currentPage])
 
     useEffect(() => {
         console.log("Inside useEffect for tempUsers");
@@ -143,9 +172,12 @@ export default function AdminCustomersPageV1() {
     const searchHandler = (e)=>{
         console.log("Inside searchHandler")
         if(e.target.value.trim()==""){
-            dispatch(showUsers());
+            console.log("Empty search, hence dispatching...")
+            setSearchData(null)
+            dispatch(showUsers({queryOptions: {page: currentPage, limit}}))
         }
         else{
+            setSearchData(e.target.value.trim())
             if(matchCase){
                 console.log("Inside searchHandler matchCase true case")
                 const searchRegex = new RegExp(`^(${e.target.value.trim()})`) 
@@ -172,33 +204,36 @@ export default function AdminCustomersPageV1() {
             }
             else {
                 setActiveSorter({field:type, order})
-                sortUsers(type, order, false)
+                // sortUsers(type, order, false)
             }
             
     }
 
-    const sortUsers = (type, order, returnData)=> {
+    const sortUsers = (type, order, returnData) => {
         console.log("Sorting.....")
-        console.log(`type-->${type}, order-->${order}`)
-        console.log("tempUsers now inside sortUsers-->", tempUsers)
-        const sortedNames = order==1? tempUsers.map(user=>user[type]).sort() 
-                                        : typeof tempUsers[0][type] == "string"? tempUsers.map(user=>user[type]).sort((a,b)=>b.localeCompare(a))
-                                                                         : tempUsers.map(user=>user[type]).sort((a,b)=>b-a)
-        const sortedUsers = []
-        for(let i=0; i<sortedNames.length; i++){
-            for(let user in tempUsers){ 
-                if(tempUsers[user][type] == sortedNames[i])
-                    sortedUsers.push(tempUsers[user])
-            }
-        }
-        console.log("SortedNames-->"+sortedNames)
-        console.log("sortedUsers-->"+JSON.stringify(sortedUsers)) 
-        if(returnData){
-            return sortedUsers
+
+        const sortedUsers = [...tempUsers].sort((a, b) => {
+          const valA = a[type]
+          const valB = b[type]
+
+          if (typeof valA === "string") {
+            return order === 1 ? valA.localeCompare(valB) : valB.localeCompare(valA)
+          }
+
+          return order === 1 
+            ? valA - valB
+            : valB - valA
+        })
+
+        console.log("sortedUsers -->", sortedUsers)
+
+        if (returnData){
+          return sortedUsers
         }else{
-            setLocalUsers(sortedUsers)
+          setLocalUsers(sortedUsers)
         }
     }
+
 
     const statusDropdownToggle = (e)=>{
         setShowStatusDropdown(false)
@@ -215,6 +250,25 @@ export default function AdminCustomersPageV1() {
         dispatch(showUsersofStatus({status}))
     }
 
+    const getUserStats = async(user)=> { 
+      try { 
+        const response = await axios.get(`${baseApiUrl}/admin/stats/${user._id}`,{ withCredentials: true })
+        if(response.status === 200){
+          console.log("response.data.stats----------->", response.data.stats)
+          setOpenUserDetailsModal({customerData: user, orderStats: response.data.stats, address: response.data.address})
+        
+        }
+        // if(response.status === 400 || response.status === 404){
+        //   sonnerToast.error(error.response.data.message)
+        //   console.log("Error---->", error.response.data.message)
+        // }
+      }catch (error) {
+        console.error("Error while getting user stats", error.message)
+        sonnerToast.error('Something went wrong! Please retry later.')
+      }
+    }
+
+
     return (
         <section className='h-screen z-[-1]' id='AdminCustomersPage'>
             {/* <h1 className='text-h3Semibold mb-[2rem]'>Customers</h1> */}
@@ -224,8 +278,8 @@ export default function AdminCustomersPageV1() {
             <main className='p-[1rem] border border-secondary flex items-center justify-center w-[80%] 
                                     rounded-[9px] gap-[5px]' style={mainBgImg}>
                 { openModal &&
-                    <Modal openModal={openModal} setOpenModal={setOpenModal} title='Important' content='You are about to delete a customer. Do this only if he/she is a recognized spammer.
-                        Also confirm as many times as possible' instruction="If you are sure, write 'sure' and press 'Ok', else click 'Close' button"
+                    <Modal openModal={openModal} setOpenModal={setOpenModal} title='Important' content="You are about to mark this customer as a fraudster or spammer. Use this option only if the user has been identified as engaging in fraudulent behavior, criminal activity, suspicious actions, or poses a risk to the platform. The customer will be flagged and automatically blocked. You can remove this flag later, but you will also need to manually unblock the user."
+                        instruction="If you are sure, write 'sure' and press 'Ok', else click 'Close' button"
                             okButtonText='Ok' closeButtonText='Cancel' typeTest={true} typeValue='sure' contentCapitalize={true}
                                 activateProcess={deleteHandler}/>
                 }
@@ -287,7 +341,7 @@ export default function AdminCustomersPageV1() {
                         <tr className='secondaryLight-box border border-[rgb(220, 230, 166)] font-[500] text-secondary table-header'>
                             <td>
                                 <div className='flex items-center'>
-                                    <span>Name</span>
+                                    <span>Username</span>
                                     <i className='flex flex-col h-[5px]'>
                                         <FaSortUp  onClick = {(e)=>{ sortHandler(e,"username",1)}} 
                                                 style={{height: activeSorter.field === "username" && activeSorter.order === 1 ?'15px':'10px',
@@ -334,13 +388,13 @@ export default function AdminCustomersPageV1() {
                                 <div className='flex items-center'>
                                     <span>Wallet</span>
                                     <i className='flex flex-col h-[5px]'>
-                                        <FaSortUp onClick = {(e)=>sortHandler(e,"wallet",1)}
-                                            style={{height: activeSorter.field === "wallet" && activeSorter.order === 1 ?'15px':'10px',
-                                                        color: activeSorter.field === "wallet" && activeSorter.order === 1 ? 
+                                        <FaSortUp onClick = {(e)=>sortHandler(e,"walletBalance",1)}
+                                            style={{height: activeSorter.field === "walletBalance" && activeSorter.order === 1 ?'15px':'10px',
+                                                        color: activeSorter.field === "walletBalance" && activeSorter.order === 1 ? 
                                                             'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
-                                        <FaSortDown onClick = {(e)=>sortHandler(e,"wallet",-1)}
-                                            style={{height: activeSorter.field === "wallet" && activeSorter.order === -1 ?'15px':'10px',
-                                                         color: activeSorter.field === "wallet" && activeSorter.order === -1 ? 
+                                        <FaSortDown onClick = {(e)=>sortHandler(e,"walletBalance",-1)}
+                                            style={{height: activeSorter.field === "walletBalance" && activeSorter.order === -1 ?'15px':'10px',
+                                                         color: activeSorter.field === "walletBalance" && activeSorter.order === -1 ? 
                                                             'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
                                     </i>
                                 </div>
@@ -372,28 +426,78 @@ export default function AdminCustomersPageV1() {
                         {   
                             localUsers.length > 0 ? localUsers.map((user,index) =>
                                 <tr key={user._id} className={`${(index % 2 == 0)? 'bg-[#eee]': 'bg-transparent'} cursor-pointer hover:bg-[#f3f7df]`}>
-                                    <td>{user.username}</td>
+                                    <td>
+                                        <div className='flex items-center gap-[5px]'>
+                                            <span> {user.username} </span>
+                                            {
+                                                (
+                                                    ()=> {
+                                                        const isOnline = activeUsers 
+                                                            && activeUsers.find(activeUser=> activeUser.username === user.username && activeUser.isOnline)
+                                                        return (
+                                                            <motion.span
+                                                                className={`w-[5px] h-[5px] rounded-full 
+                                                                   ${ isOnline
+                                                                       ? "bg-green-500" 
+                                                                       : "bg-red-500 scale-110"
+                                                                   }`}
+                                                                animate={isOnline ? {scale: [1, 1.2], opacity: [0.5, 1]} : {scale: [1, 1.1], opacity: [0.4, 1]}}
+                                                                transition={{ duration: 1.5, repeat: Infinity, ease: "easeOut" }}
+                                                            />
+                                                        )
+                                                    }
+                                                )()
+                                            }
+                                        </div>
+                                    </td>
                                     <td>{user.email}</td>
                                     <td>{user.mobile}</td>
-                                    <td>--</td>
+                                    <td>{user?.walletBalance || "--"}</td>
                                     <td>
                                         <div className='flex items-center gap-[10px] text-[14px] action-buttons'>
                                             <SitePrimaryMinimalButtonWithShadow type='button' tailwindClasses='basis-[103px]' 
                                                             clickHandler={() => toggleBlockHandler(user._id)}>
                                                 {user.isBlocked ? "Unblock" : "Block"} <MdBlock style={user.isBlocked? {color:'#22c55e'}:{color:'#e74c3c'}}/>
                                             </SitePrimaryMinimalButtonWithShadow>
-                                            <SitePrimaryMinimalButtonWithShadow type='button' clickHandler={() => preDeleteHandler(user._id)} 
+                                            {/* <SitePrimaryMinimalButtonWithShadow type='button' clickHandler={() => preDeleteHandler(user._id)} 
                                                     customStyle={{paddingBlock: '5px'}} tailwindClasses='text-red-500 '>
-                                                <MdDeleteOutline/>
-                                            </SitePrimaryMinimalButtonWithShadow>
+                                                <RiSpamLine/>
+                                            </SitePrimaryMinimalButtonWithShadow> */}
+                                            <motion.button whileTap={{ scale: 0.98 }} 
+                                                className="px-[16px] py-[2px] text-white text-[14px] font-[400] tracking-[0.3px] bg-secondary
+                                                    rounded-[4px] flex items-center gap-[5px] hover:bg-purple-700 transition duration-300
+                                                    !border !border-dropdownBorder !shadow-md"
+                                                onClick={()=> getUserStats(user)} 
+                                            >   
+                                                Details
+                                                <SquareChartGantt className='w-[15px] h-[15px] !text-white'/>
+                                            </motion.button>
+                                            <motion.button whileTap={{ scale: 0.98 }} 
+                                                className="px-[9px] py-[5px] text-white text-[15px] font-medium tracking-[0.3px] bg-secondary
+                                                    rounded-[4px] hover:bg-purple-700 transition duration-300 !border !border-dropdownBorder 
+                                                    !shadow-md" 
+                                            >
+                                                  <RiSpamLine className='!text-white'/>
+                                            </motion.button>
                                         </div>
-                                    </td>
+                                    </td> 
                                 </tr>
                             ) :<tr><td>No Records!</td></tr>
                         }
                     </tbody>
                 </table>
+
             </main>
+
+            <div className='mt-8 mb-4 w-[80%]'>
+
+                {
+                  totalPages &&
+                    <PaginationV2 currentPage={currentPage} totalPages={totalPages} onPageChange={(page)=> setCurrentPage(page)} />
+                }
+
+            </div>
+
         </section>
     );
 }

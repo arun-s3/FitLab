@@ -1,10 +1,9 @@
-import React, {useEffect, useState, useRef} from "react"
+import React, {useEffect, useState} from "react"
 import './Modal.css'
 
-import useModalHelpers from '../../Hooks/ModalHelpers'
 import {SitePrimaryWhiteTextButton} from "../SiteButtons/SiteButtons"
 
-export default function Modal({openModal, setOpenModal, title, content, instruction, okButtonText, closeButtonText, contentCapitalize,
+export default function Modal({children, openModal, setOpenModal, title, content, instruction, okButtonText, closeButtonText, contentCapitalize,
    clickTest, typeTest, typeValue, activateProcess}){
 
   const [modelIsOpen, setModelIsOpen] = useState(false)
@@ -14,9 +13,6 @@ export default function Modal({openModal, setOpenModal, title, content, instruct
     setModelIsOpen(false) 
     setOpenModal(false)
   }
-
-  const modalRef = useRef(null)
-  useModalHelpers({open: openModal, onClose: closeModal, modalRef})
 
   useEffect(()=>{
     if(openModal){
@@ -45,7 +41,7 @@ export default function Modal({openModal, setOpenModal, title, content, instruct
   }
 
   return (
-    <main id="message-modal" ref={modalRef}>
+    <main id="message-modal">
 
       {modelIsOpen && (
         <div className="modal-main">
@@ -54,6 +50,9 @@ export default function Modal({openModal, setOpenModal, title, content, instruct
             <p className={`text-gray-600 mb-6 ${contentCapitalize ? 'capitalize' :''} text-[13px]`}  style={{wordSpacing:'0.5px'}}>
               {content}
             </p>
+
+            {children}
+            
             {
               typeTest &&
               <>

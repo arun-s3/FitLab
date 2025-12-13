@@ -4,40 +4,41 @@ import './AdminCustomersPage.css'
 import {useSelector, useDispatch} from 'react-redux'
 import {motion} from "framer-motion"
 
-import {IoArrowBackSharp} from "react-icons/io5"
 import {RiArrowDropDownLine} from 'react-icons/ri'
-import {MdBlock, MdDeleteOutline} from 'react-icons/md'
+import {MdBlock} from 'react-icons/md'
 import {FaSortUp,FaSortDown} from "react-icons/fa6"
-import {FaTrashAlt} from "react-icons/fa"
-import {LuCaseSensitive} from "react-icons/lu"
 import {VscCaseSensitive} from "react-icons/vsc"
 import {CiSquareChevRight} from "react-icons/ci"
 import {RiSpamLine} from "react-icons/ri"
-import {SquareChartGantt} from 'lucide-react'
+import {MdSettingsBackupRestore} from "react-icons/md"
+import {SquareChartGantt, MessageSquare} from 'lucide-react'
 import {toast as sonnerToast} from 'sonner'
 import axios from 'axios'
 
 import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
 import Modal from '../../../Components/Modal/Modal'
+import CustomerDetailsModal from './CustomerDetailsModal'
+import useFlexiDropdown from '../../../Hooks/FlexiDropdown'
 import {SitePrimaryMinimalButtonWithShadow} from '../../../Components/SiteButtons/SiteButtons'
-import {showUsers, showUsersofStatus, toggleBlockUser, deleteUser, deleteUsersList, resetStates} from '../../../Slices/adminSlice'
+import {showUsers, toggleBlockUser, updateRiskyUserStatus, resetStates} from '../../../Slices/adminSlice'
 import {AdminSocketContext} from '../../../Components/AdminSocketProvider/AdminSocketProvider'
+import {camelToCapitalizedWords} from "../../../Utils/helperFunctions"
 import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
+
 
 export default function AdminCustomersPageV1() {
 
     const dispatch = useDispatch()
-    const { adminLoading, adminError, adminSuccess, adminMessage, allUsers, totalUsers } = useSelector(state => state.admin)
+    const { adminLoading, adminError, adminMessage, allUsers, totalUsers } = useSelector(state => state.admin)
 
     const [localUsers, setLocalUsers] = useState([]);
     const [tempUsers, setTempUsers] = useState([])
 
-    const [trashUserList, setTrashUserList] = useState(false)
-
-    const [deleteDelay, setDeleteDelay ] = useState(null)
-    const [deleteThisId, setDeleteThisId] = useState(null)
-    const [initiateDeleteHandler, setInitiateDeleteHandler] = useState(false)
+    const [timerDelay, setTimerDelay] = useState(null)
+    const [suspiciousId, setSuspiciousId] = useState(null)
     let timerId = useRef(null)
+
+    const {openDropdowns, dropdownRefs, toggleDropdown} = useFlexiDropdown(['limitDropdown', 'statusDropdown'])
 
     const [matchCase, setMatchCase] = useState(false)
 
@@ -45,19 +46,20 @@ export default function AdminCustomersPageV1() {
 
     const [activeSorter, setActiveSorter] = useState({field:'',order:''})
 
-    const statusDropdownRef = useRef(null)
-    const statusButtonRef = useRef(null)
-    const [showStatusDropdown, setShowStatusDropdown] = useState(false)
+    const [status, setStatus] = useState('all')
 
     const [openModal, setOpenModal] = useState(false)
 
-    const limit = 6
+    const [limit, setLimit] = useState(6)
     const [currentPage, setCurrentPage] = useState(1)
     const [totalPages, setTotalPages] = useState(20) 
 
     const [openUserDetailsModal, setOpenUserDetailsModal] = useState({customerData: null, orderStats: null, address: null})
 
-    const {setPageBgUrl} = useOutletContext() 
+    const [riskyUserNotes, setRiskyUserNotes] = useState(null) 
+
+    const {setPageBgUrl, setHeaderZIndex} = useOutletContext()  
+    setHeaderZIndex(0)
     setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.95),rgba(255,255,255,0.95)), url('/admin-bg13.png')`)
 
     const {activeUsers} = useContext(AdminSocketContext)
@@ -70,12 +72,13 @@ export default function AdminCustomersPageV1() {
 
     useEffect(() => {
         console.log("Dispatching showUsers()--- ")
-        dispatch(showUsers({queryOptions: {page: 1, limit: 6}}))
+        dispatch(showUsers({queryOptions: {page: 1, limit: 6, status: 'all'}}))
     }, [dispatch, adminMessage])
 
     useEffect(() => {
         console.log("Setting localUsers to allUsers--- ")
         if (allUsers) {
+            console.log("allUsers---->", allUsers)
             setTempUsers(allUsers)
         }
     }, [allUsers])
@@ -88,8 +91,8 @@ export default function AdminCustomersPageV1() {
     }, [totalUsers])
 
     useEffect(()=> {
-        dispatch(showUsers({queryOptions: {page: currentPage, limit, searchData}}))
-    },[currentPage])
+        dispatch(showUsers({queryOptions: {page: currentPage, limit, searchData, status}}))
+    },[currentPage, status, limit])
 
     useEffect(() => {
         console.log("Inside useEffect for tempUsers");
@@ -100,15 +103,9 @@ export default function AdminCustomersPageV1() {
             console.log(`Field: ${activeSorter.field}, Order: ${activeSorter.order}`);
             tempUserList = sortUsers(activeSorter.field, activeSorter.order, true);
         }
-        const status = statusButtonRef.current?.textContent?.trim().toLowerCase();
-        if (status && status !== 'status' && status !== 'all') {
-            const isBlocked = status === 'blocked';
-            tempUserList = tempUserList.filter(user => user.isBlocked === isBlocked);
-        }
-    
-        setLocalUsers(tempUserList);
+        setLocalUsers(tempUserList)
 
-    }, [tempUsers, activeSorter.field, activeSorter.order, statusButtonRef.current?.textContent]);
+    }, [tempUsers, activeSorter.field, activeSorter.order]);
     
 
     useEffect(() => {
@@ -131,25 +128,25 @@ export default function AdminCustomersPageV1() {
         dispatch(toggleBlockUser(id));
     }
 
-    const preDeleteHandler = (id)=> {
+    const preSuspicionHandler = (id)=> {
         setOpenModal(true)
-        setDeleteThisId(id)
+        setSuspiciousId(id)
     }
 
-    const deleteHandler = (clearTimer=false) => {
-        if(deleteThisId){
-            setDeleteDelay(15);
-            const id = deleteThisId
-            console.log("Set delete delay to 10 seconds");
-            sonnerToast.warning("You are about to delete a customer")
+    const suspicionHandler = (clearTimer=false) => {
+        if(suspiciousId){
+            setTimerDelay(15);
+            const id = suspiciousId
+            console.log("Set timer delay to 10 seconds");
+            sonnerToast.warning("You are about to mark a customer suspicious/fraudstar/criminal")
             
             timerId.current = setInterval(() => {
-                setDeleteDelay(prevCount => {
+                setTimerDelay(prevCount => {
                     if (prevCount <= 1) {
                         clearInterval(timerId.current); 
-                        dispatch(deleteUser(id)); 
-                        setLocalUsers(prevUsers => prevUsers.filter(user => user._id !== id));
-                        console.log("User deletion dispatched");
+                        const riskDetails = {userId: suspiciousId, riskyUserNotes, riskyUserStatus: true}
+                        dispatch(updateRiskyUserStatus({riskDetails}))
+                        console.log("User suspicious marker dispatched");
                         return null;
                     } else {
                         console.log(`Countdown: ${prevCount - 1} seconds remaining`);
@@ -160,12 +157,12 @@ export default function AdminCustomersPageV1() {
         }
     }
 
-    const undoDeleteHandler = ()=>{
+    const undoSuspicionChargeHandler = ()=>{
         if(timerId.current){
             clearInterval(timerId.current)
-            setDeleteDelay(0)
+            setTimerDelay(0)
             timerId.current = null
-            setDeleteThisId(null)
+            setSuspiciousId(null)
         }
     }
 
@@ -234,20 +231,9 @@ export default function AdminCustomersPageV1() {
         }
     }
 
-
-    const statusDropdownToggle = (e)=>{
-        setShowStatusDropdown(false)
-        e.target.tagName=='BUTTON'?e.target.parentElement.style.borderBottomLeftRadius = e.target.parentElement.style.borderBottomRightRadius = showStatusDropdown?'8px' : '0px'
-                                  :e.target.style.borderBottomLeftRadius = e.target.style.borderBottomRightRadius = showStatusDropdown?'8px' : '0px'
-        statusDropdownRef.current.style.display = 'inline-block'
-        setShowStatusDropdown(!showStatusDropdown)
-    }
-
     const statusSelector = (status)=> {
         console.log("Inside statusSelector--")
-        statusButtonRef.current.textContent = status
-        console.log("dispatching-- showUsersofStatus({status})")
-        dispatch(showUsersofStatus({status}))
+        setStatus(status) 
     }
 
     const getUserStats = async(user)=> { 
@@ -256,32 +242,47 @@ export default function AdminCustomersPageV1() {
         if(response.status === 200){
           console.log("response.data.stats----------->", response.data.stats)
           setOpenUserDetailsModal({customerData: user, orderStats: response.data.stats, address: response.data.address})
-        
+          console.log("Opening customer detail modal..")
+          setHeaderZIndex(300)
         }
-        // if(response.status === 400 || response.status === 404){
-        //   sonnerToast.error(error.response.data.message)
-        //   console.log("Error---->", error.response.data.message)
-        // }
       }catch (error) {
         console.error("Error while getting user stats", error.message)
         sonnerToast.error('Something went wrong! Please retry later.')
       }
     }
 
+    const restoreUser = (id)=> {
+        console.log("Inside restoreUser()...")
+        const riskDetails = {userId: id, riskyUserStatus: false}
+        dispatch(updateRiskyUserStatus({riskDetails}))
+    }
+
 
     return (
         <section className='h-screen z-[-1]' id='AdminCustomersPage'>
-            {/* <h1 className='text-h3Semibold mb-[2rem]'>Customers</h1> */}
             <header>
                 <AdminTitleSection heading='Customers' subHeading='View, Update, and Oversee Customer accounts'/>
             </header>
             <main className='p-[1rem] border border-secondary flex items-center justify-center w-[80%] 
                                     rounded-[9px] gap-[5px]' style={mainBgImg}>
                 { openModal &&
-                    <Modal openModal={openModal} setOpenModal={setOpenModal} title='Important' content="You are about to mark this customer as a fraudster or spammer. Use this option only if the user has been identified as engaging in fraudulent behavior, criminal activity, suspicious actions, or poses a risk to the platform. The customer will be flagged and automatically blocked. You can remove this flag later, but you will also need to manually unblock the user."
+                    <Modal openModal={openModal} setOpenModal={setOpenModal} title='Important' content="You are about to mark this customer
+                        as a fraudster/criminal. Use this option only if the user has been identified as engaging in fraudulent behavior, 
+                        criminal activity, suspicious actions, or poses a risk to the platform."
                         instruction="If you are sure, write 'sure' and press 'Ok', else click 'Close' button"
-                            okButtonText='Ok' closeButtonText='Cancel' typeTest={true} typeValue='sure' contentCapitalize={true}
-                                activateProcess={deleteHandler}/>
+                            okButtonText='Ok' closeButtonText='Cancel' typeTest={true} typeValue='sure' contentCapitalize={false}
+                                activateProcess={suspicionHandler}>
+                        <p className='text-red-500 -mt-4 mb-6 text-[12px]'> 
+                            The customer will be flagged and automatically blocked. You can remove this flag later, 
+                            but you will also need to manually unblock the user. 
+                        </p>
+                        <textarea type="text" rows={3} cols={2} maxLength={500} 
+                            placeholder="Customer suspicions/offences or criminal activities (required)" value={riskyUserNotes}
+                            onChange={(e)=> setRiskyUserNotes(e.target.value)} className="w-full text-[14px] bg-gray-50 border border-gray-300 
+                              rounded-lg px-4 py-2 text-gray-900 placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2
+                              focus:ring-purple-200 placeholder:text-[11px] transition-all mb-4 resize-none"
+                        />
+                    </Modal>
                 }
                 <table cellSpacing={10} cellPadding={10} className='border-spacing-[24px]'>
                     <thead>
@@ -299,37 +300,58 @@ export default function AdminCustomersPageV1() {
                             </td>
                             <td></td>
                             <td>
-                                <div className='inline-flex relative items-center justify-between secondaryLight-box cursor-pointer 
-                                     text-[13px] px-[11px] w-[75%] h-[35px] border-solid bottom-0 border-secondary customer-dropdown' 
-                                                 style={showStatusDropdown? {borderWidth:'1px', borderBottom:'0', borderBottomLeftRadius:'0px', borderBottomRightRadius:'0px', background:'white', boxShadow:'2px -5px 6px rgba(72, 69, 75, 0.2)'}:{border:0, borderBottomLeftRadius:'8px', borderBottomRightRadius:'8px'}}
-                                                 onClick={(e)=>{statusDropdownToggle(e)}}>
-                                    
-                                    <div className='absolute top-full left-[-1px] w-[101.5%] rounded-none rounded-bl-[8px] rounded-br-[8px] 
-                                       secondaryLight-box cursor-pointer border border-secondary border-t-0 pb-[10px] hidden' ref={statusDropdownRef}
-                                                                style={showStatusDropdown? {display:'inline-block', background:'white', boxShadow:'2px 5px 6px rgba(72, 69, 75, 0.2)'}: null}>
-                                        <ul className='list-none text-[11px] text-secondary font-[450]'>
-                                            <li className='text-right flex items-center pl-[20px] hover:bg-primary' onClick={()=> statusSelector('active')}>
-                                               <span className='flex items-center gap-[10px]'> <CiSquareChevRight/> <span>Active</span> </span> 
-                                            </li>
-
-                                            <li className='text-right flex items-center pl-[20px] hover:bg-primary' onClick={()=> statusSelector('blocked')}> 
-                                                <span className='flex items-center gap-[10px]'> <CiSquareChevRight/> <span>Blocked</span> </span> 
-                                            </li>
-                                            
-                                            <li className='text-right flex items-center pl-[20px] hover:bg-primary' onClick={()=> statusSelector('all')}> 
-                                            <span className='flex items-center gap-[10px]'> <CiSquareChevRight/> <span>All</span> </span> 
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <button className='ml-[15px] capitalize' ref={statusButtonRef} >Status</button>
-                                    <RiArrowDropDownLine style={{color:'rgba(159, 42, 240, 1)'}}/>
+                                <div className='w-[9rem] inline-flex relative items-center justify-between secondaryLight-box cursor-pointer 
+                                     text-[13px] px-[11px] h-[35px] border-solid bottom-0 border-secondary customer-dropdown' 
+                                    onClick={(e)=> toggleDropdown('statusDropdown')} ref={dropdownRefs.statusDropdown}
+                                >
+                                    {
+                                        openDropdowns.statusDropdown && 
+                                            <ul className='list-none w-full px-[10px] py-[1rem] absolute top-[44px] right-0 flex flex-col
+                                                 gap-[10px] justify-center  text-[10px] bg-white border border-borderLight2 
+                                                 rounded-[8px] z-[5] cursor-pointer'>
+                                                {
+                                                 ['active', 'blocked', 'all'].map(statusType=> (
+                                                   <li key={`${statusType}`} className={`px-[8px] py-[5px] flex items-center gap-[8px]
+                                                        rounded-[5px] hover:text-primaryDark hover:bg-[#F5FBD2] 
+                                                         ${statusType === status ? 'text-primaryDark' : 'text-muted'}`}
+                                                    onClick={()=>  statusSelector(statusType)}
+                                                    > 
+                                                     <CiSquareChevRight/>
+                                                     <span className='text-[12px]'> { camelToCapitalizedWords(statusType) } </span>
+                                                   </li>
+                                                 ))
+                                                }
+                                            </ul>
+                                    }
+                                    {
+                                        status &&
+                                            <button className='ml-[15px] whitespace-nowrap capitalize'> {`Status: ${status}`} </button>
+                                    }
+                                    <RiArrowDropDownLine style={{color:'rgba(159, 42, 240, 1)'}} className='w-[15px] h-[15px]'/>
                                 </div>
                             </td>  
                             <td>
-                                <div className='inline-flex items-center justify-between secondaryLight-box cursor-pointer
-                                                                                            text-[13px] px-[11px] w-[75%] h-[35px] customer-dropdown'> 
-                                    <button className='ml-[15px]'>Show Entries: </button>
+                                <div className='relative w-[10rem] inline-flex items-center justify-between secondaryLight-box cursor-pointer
+                                  text-[13px] px-[11px] h-[35px] customer-dropdown' onClick={(e)=> toggleDropdown('limitDropdown')}
+                                   ref={dropdownRefs.limitDropdown}
+                                > 
+                                    {
+                                        limit &&
+                                            <button className='ml-[15px]'> {`Show Entries:  ${limit}`} </button>
+                                    }
                                     <RiArrowDropDownLine style={{color:'rgba(159, 42, 240, 1) '}}/>
+                                    {
+                                        limit && openDropdowns.limitDropdown && 
+                                            <ul className='absolute top-[44px] right-[3px] py-[10px] w-[30%] rounded-b-[4px] flex 
+                                                flex-col items-center gap-[10px] text-[12px] bg-white border border-dropdownBorder rounded-[6px] 
+                                                  cursor-pointer'>
+                                                    {
+                                                      [6, 10, 15, 20, 25, 30, 35, 40].map( limit=> (
+                                                        <li onClick={()=> setLimit(limit)}> {limit} </li>
+                                                      ))
+                                                    }
+                                            </ul>
+                                    }
                                 </div>
                             </td>
                         </tr>
@@ -403,12 +425,12 @@ export default function AdminCustomersPageV1() {
                                 <p className=''>{showUsers && adminLoading?"LOADING...":""}</p>
                                 <p className=''>
                                     <span className='text-[12px]'>
-                                    {deleteDelay?
+                                    {timerDelay?
                                         (<span className='text-red-500 ml-[6px] tracking-[0.3px] whitespace-nowrap align-[1px]'>
                                             <span className='text-green-500 font-bold mr-[4px] cursor-pointer'
-                                                         onClick={(e)=> undoDeleteHandler()}>
+                                                         onClick={(e)=> undoSuspicionChargeHandler()}>
                                                 Undo?
-                                            </span> Deleting in {deleteDelay} seconds...`
+                                            </span> Flagging suspicious in {timerDelay} seconds...`
                                         </span>
                                         ) : null
                                     }
@@ -455,14 +477,21 @@ export default function AdminCustomersPageV1() {
                                     <td>{user?.walletBalance || "--"}</td>
                                     <td>
                                         <div className='flex items-center gap-[10px] text-[14px] action-buttons'>
-                                            <SitePrimaryMinimalButtonWithShadow type='button' tailwindClasses='basis-[103px]' 
+                                            {
+                                                !user?.riskyUserStatus 
+                                                    ? <SitePrimaryMinimalButtonWithShadow type='button' tailwindClasses='basis-[103px] !hover:bg-yellow-400' 
                                                             clickHandler={() => toggleBlockHandler(user._id)}>
-                                                {user.isBlocked ? "Unblock" : "Block"} <MdBlock style={user.isBlocked? {color:'#22c55e'}:{color:'#e74c3c'}}/>
-                                            </SitePrimaryMinimalButtonWithShadow>
-                                            {/* <SitePrimaryMinimalButtonWithShadow type='button' clickHandler={() => preDeleteHandler(user._id)} 
-                                                    customStyle={{paddingBlock: '5px'}} tailwindClasses='text-red-500 '>
-                                                <RiSpamLine/>
-                                            </SitePrimaryMinimalButtonWithShadow> */}
+                                                            {user.isBlocked ? "Unblock" : "Block"} 
+                                                            <MdBlock style={user.isBlocked? {color:'#22c55e'}:{color:'#e74c3c'}}/>
+                                                        </SitePrimaryMinimalButtonWithShadow>
+                                                    :  <SitePrimaryMinimalButtonWithShadow type='button' 
+                                                            tailwindClasses='basis-[103px] whitespace-nowrap !hover:bg-yellow-400' 
+                                                            clickHandler={()=> restoreUser(user._id)}
+                                                        > 
+                                                                Restore user
+                                                            <MdSettingsBackupRestore className='!text-green-500 w-[17px] h-[17px]' />
+                                                        </SitePrimaryMinimalButtonWithShadow>
+                                            } 
                                             <motion.button whileTap={{ scale: 0.98 }} 
                                                 className="px-[16px] py-[2px] text-white text-[14px] font-[400] tracking-[0.3px] bg-secondary
                                                     rounded-[4px] flex items-center gap-[5px] hover:bg-purple-700 transition duration-300
@@ -472,13 +501,25 @@ export default function AdminCustomersPageV1() {
                                                 Details
                                                 <SquareChartGantt className='w-[15px] h-[15px] !text-white'/>
                                             </motion.button>
+                                            {
+                                                !user?.riskyUserStatus &&
+                                                    <motion.button whileTap={{ scale: 0.98 }} 
+                                                        className="px-[9px] py-[5px] text-white text-[15px] font-medium tracking-[0.3px] bg-secondary
+                                                            rounded-[4px] hover:bg-purple-700 transition duration-300 !border !border-dropdownBorder 
+                                                            !shadow-md" 
+                                                        onClick={() => preSuspicionHandler(user._id)}
+                                                    >
+                                                          <RiSpamLine className='!text-white'/>
+                                                    </motion.button>
+                                            }
+
                                             <motion.button whileTap={{ scale: 0.98 }} 
-                                                className="px-[9px] py-[5px] text-white text-[15px] font-medium tracking-[0.3px] bg-secondary
-                                                    rounded-[4px] hover:bg-purple-700 transition duration-300 !border !border-dropdownBorder 
-                                                    !shadow-md" 
-                                            >
-                                                  <RiSpamLine className='!text-white'/>
+                                                className="px-[9px] py-[5px] bg-gray-100 rounded-[4px] flex items-center gap-[5px]
+                                                    hover:bg-gray-200 transition duration-150 !border !border-dropdownBorder !shadow-md"
+                                            >   
+                                                <MessageSquare className='w-[15px] h-[15px] !text-muted'/>
                                             </motion.button>
+
                                         </div>
                                     </td> 
                                 </tr>
@@ -497,6 +538,17 @@ export default function AdminCustomersPageV1() {
                 }
 
             </div>
+
+                <CustomerDetailsModal 
+                    isOpen={openUserDetailsModal.customerData}
+                    onClose={()=> {
+                        setOpenUserDetailsModal({customerData: null, orderStats: null, address: null})
+                        setHeaderZIndex(0)
+                    }}
+                    customerData={openUserDetailsModal.customerData}
+                    orderStats={openUserDetailsModal.orderStats}
+                    address={openUserDetailsModal.address}
+                />
 
         </section>
     );

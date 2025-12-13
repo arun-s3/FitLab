@@ -163,7 +163,7 @@ export default function App(){
                                         <Route index element={<AdminOfferManagementPage/>} />
                                         <Route path='add' element={<AdminCreateOfferPage/>} />
                                     </Route>
-                                    <Route path='support' element={<AdminTextChatSupportPage/>} >
+                                    <Route path='support'>
                                         <Route path='text' element={<AdminTextChatSupportPage/>} />
                                         <Route path='video' element={<AdminVideoChatSupportPage/>} />
                                     </Route>

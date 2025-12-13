@@ -42,20 +42,6 @@ export const showUsers = createAsyncThunk('showUsers', async({queryOptions}, thu
     }
 })
 
-export const showUsersofStatus = createAsyncThunk('showUsersofStatus', async({status}, thunkAPI)=>{
-    try{
-        console.log("Inside createAsyncThunk for showUsersofStatus")
-        const response = await axios.get(`/admin/customersOfStatus/?status=${status}`,{withCredentials:true})
-        console.log("Response from createAsyncThunk for showUsersofStatus-->"+JSON.stringify(response.data))
-        return response.data
-    }
-    catch(error){
-        console.log("inside catch of createAsyncThunk for showUsersofStatus")
-        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
-        return thunkAPI.rejectWithValue(errorMessage)
-    }
-})
-
 export const toggleBlockUser = createAsyncThunk('toggleBlockUser', async(id,thunkAPI)=>{
     try{
         console.log("Inside createAsyncThunk for toggleBlockUser")
@@ -70,29 +56,16 @@ export const toggleBlockUser = createAsyncThunk('toggleBlockUser', async(id,thun
     }
 })
 
-export const deleteUser = createAsyncThunk('deleteUser', async(id,thunkAPI)=>{
-    try{
-        console.log("Inside createAsyncThunk for deleteUser")
-        const response = await axios.get(`/admin/deleteuser?id=${id}`,{withCredentials:true})
-        console.log("Response from createAsyncThunk for deleteUser-->"+JSON.stringify(response.data))
+export const updateRiskyUserStatus = createAsyncThunk('updateRiskyUserStatus', async({riskDetails} ,thunkAPI)=>{
+    try{ 
+        console.log("Inside createAsyncThunk for updateRiskyUserStatus")
+        console.log("riskDetails---->", riskDetails)
+        const response = await axios.put(`/admin/risk/${riskDetails.userId}`, {riskDetails}, {withCredentials:true})
+        console.log("Response from createAsyncThunk for updateRiskyUserStatus-->"+JSON.stringify(response.data))
         return response.data
     }
     catch(error){
-        console.log("inside catch of createAsyncThunk for deleteUser")
-        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
-        return thunkAPI.rejectWithValue(errorMessage)
-    }
-})
-
-export const deleteUsersList = createAsyncThunk('deleteUser', async(userList,thunkAPI)=>{
-    try{
-        console.log("Inside createAsyncThunk for deleteUser")
-        const response = await axios.post('/admin/deleteuserslist',userList, {withCredentials:true})
-        console.log("Response from createAsyncThunk for deleteUser-->"+JSON.stringify(response.data))
-        return response.data
-    }
-    catch(error){
-        console.log("inside catch of createAsyncThunk for deleteUser")
+        console.log("inside catch of createAsyncThunk for updateRiskyUserStatus")
         const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
@@ -177,26 +150,6 @@ const adminSlice = createSlice({
             state.success = false
             state.adminError = true
         })
-        .addCase(showUsersofStatus.pending, (state,action)=>{
-            console.log("Inside showUsersofStatus.pending")
-            state.adminLoading = true
-            state.success = false
-            state.adminError = false
-        })
-        .addCase(showUsersofStatus.fulfilled, (state,action)=>{
-            console.log("Inside showUsersofStatus.fulfilled")
-            state.adminLoading = false
-            state.success = true
-            state.adminError = false
-            state.allUsers = action.payload.users
-            console.log("allUsers from showUsersofStatus.fulfilled"+JSON.stringify(action.payload))
-        })
-        .addCase(showUsersofStatus.rejected, (state,action)=>{
-            console.log("Inside showUsers.rejected")
-            state.adminLoading = false
-            state.success = false
-            state.adminError = true
-        })
         .addCase(toggleBlockUser.pending, (state,action)=>{
             console.log("Inside toggleBlockUser.pending")
             state.adminLoading = true
@@ -217,26 +170,35 @@ const adminSlice = createSlice({
             state.success = false
             state.adminError = true
         })
-        .addCase(deleteUser.pending||deleteUsersList.pending, (state,action)=>{
-            console.log("Inside deleteUser.pending")
-            state.adminLoading = true
-            state.success = false
-            state.adminError = false
+        .addCase(updateRiskyUserStatus.pending, (state, action) => {
+          console.log("Inside updateRiskyUserStatus.pending")
+          state.adminLoading = true
+          state.success = false
+          state.adminError = false
         })
-        .addCase(deleteUser.fulfilled||deleteUsersList.fulfilled, (state,action)=>{
-            console.log("Inside deleteUser.fulfilled")
-            state.adminLoading = false
-            state.success = true
-            state.adminError = false
-            state.adminMessage = action.payload.message
-            console.log("allUsers from deleteUser.fulfilled"+JSON.stringify(action.payload))
+        .addCase(updateRiskyUserStatus.fulfilled, (state, action) => {
+          console.log("Inside updateRiskyUserStatus.fulfilled")
+          state.adminLoading = false
+          state.success = true
+          state.adminError = false
+          state.adminMessage = action.payload.message
+
+          if (action.payload.updatedUser) {
+            const updated = action.payload.updatedUser
+            const index = state.allUsers?.findIndex(u=> u._id === updated._id)
+            if (index !== -1) {
+              state.allUsers[index] = updated
+            }
+          }
         })
-        .addCase(deleteUser.rejected||deleteUserLists.rejected, (state,action)=>{
-            console.log("Inside deleteUser.rejected")
-            state.adminLoading = false
-            state.success = false
-            state.adminError = true
+        .addCase(updateRiskyUserStatus.rejected, (state, action) => {
+          console.log("Inside updateRiskyUserStatus.rejected")
+          state.adminLoading = false
+          state.success = false
+          state.adminError = true
+          state.adminMessage = action.payload
         })
+
     }
 
 })

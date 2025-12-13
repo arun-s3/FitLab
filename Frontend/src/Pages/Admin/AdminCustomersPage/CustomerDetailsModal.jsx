@@ -1,13 +1,18 @@
-import React from "react"
+import React, {useRef} from "react"
 import { motion, AnimatePresence } from "framer-motion"
 
-import {X, User, Phone, Calendar, MapPin, Wallet, ShieldCheck, ShieldAlert, ShoppingBag, Package, RotateCcw, DollarSign, XCircle,
+import {X, User, Phone, Calendar, MapPin, Wallet, ShieldCheck, ShieldAlert, ShoppingBag, Package, RotateCcw, IndianRupee , XCircle,
   TrendingUp, Ticket, Clock} from "lucide-react"
+
+import useModalHelpers from '../../../Hooks/ModalHelpers'
 
 
 export default function CustomerDetailsModal({ isOpen, onClose, customerData, orderStats, address }){
     
   if (!customerData) return null
+
+  const modalRef = useRef(null)
+  useModalHelpers({open: isOpen, onClose, modalRef})
 
   const { profilePic, firstName, lastName, gender, mobile, dob, isVerified, walletBalance = 0 } = customerData
 
@@ -85,9 +90,9 @@ export default function CustomerDetailsModal({ isOpen, onClose, customerData, or
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
-              className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden pointer-events-auto"
+              className="bg-white rounded-[9px] shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-hidden pointer-events-auto"
             >
-              <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-5 flex items-center justify-between">
+              <div className="bg-gradient-to-r from-purple-500 to-purple-600 px-6 py-5 flex items-center justify-between">
                 <motion.h2
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -96,15 +101,17 @@ export default function CustomerDetailsModal({ isOpen, onClose, customerData, or
                 >
                   Customer Details
                 </motion.h2>
-                <button
+                <motion.button
+                  whileHover={{ rotate: 90, scale: 1.1 }}
+                  transition={{ type: "spring", stiffness: 300 }}
                   onClick={onClose}
                   className="p-2 hover:bg-white hover:bg-opacity-20 rounded-full transition-all duration-200"
                 >
                   <X className="w-6 h-6 text-white" />
-                </button>
+                </motion.button>
               </div>
 
-              <div className="overflow-y-auto max-h-[calc(90vh-80px)] p-6">
+              <div className="overflow-y-auto max-h-[calc(90vh-80px)] p-6" ref={modalRef}>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -197,8 +204,8 @@ export default function CustomerDetailsModal({ isOpen, onClose, customerData, or
                       </div>
 
                       <div className="flex items-start gap-3 bg-white p-3 rounded-lg shadow-sm mt-4">
-                        <div className="p-2 bg-red-100 rounded-lg">
-                          <MapPin className="w-4 h-4 text-red-600" />
+                        <div className="p-2 bg-yellow-100 rounded-lg">
+                          <MapPin className="w-4 h-4 text-yellow-600" />
                         </div>
                         <div className="flex-1">
                           <p className="text-xs text-gray-500 font-medium mb-1">Address</p>
@@ -211,15 +218,15 @@ export default function CustomerDetailsModal({ isOpen, onClose, customerData, or
 
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
                   <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                    <ShoppingBag className="w-5 h-5 text-indigo-600" />
-                    Order Statistics
+                    <ShoppingBag className="w-5 h-5 text-purple-600" />
+                    Order Stats
                   </h3>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                    <StatCard icon={ShoppingBag} label="Total Orders" value={totalOrders} color="indigo" />
+                    <StatCard icon={ShoppingBag} label="Total Orders" value={totalOrders} color="purple" />
                     <StatCard icon={Package} label="Active Orders" value={activeOrders} color="blue" />
-                    <StatCard icon={RotateCcw} label="Total Returns" value={totalReturns} color="amber" />
-                    <StatCard icon={DollarSign} label="Total Refunds" value={totalRefunds} color="emerald" />
+                    <StatCard icon={RotateCcw} label="Total Returns" value={totalReturns} color="orange" />
+                    <StatCard icon={IndianRupee} label="Total Refunds" value={totalRefunds} color="yellow" />
                     <StatCard icon={XCircle} label="Total Cancelled" value={totalCancelled} color="red" />
                     <StatCard
                       icon={TrendingUp}
@@ -253,12 +260,12 @@ export default function CustomerDetailsModal({ isOpen, onClose, customerData, or
                         color="orange"
                       />
                       <StatCard
-                        icon={DollarSign}
+                        icon={IndianRupee}
                         label="Products Refunded"
                         value={totalProductsRefunded}
-                        color="teal"
+                        color="purple"
                       />
-                      <StatCard icon={XCircle} label="Products Cancelled" value={totalProductsCancelled} color="rose" />
+                      <StatCard icon={XCircle} label="Products Cancelled" value={totalProductsCancelled} color="red" />
                     </div>
                   </motion.div>
 
@@ -267,17 +274,17 @@ export default function CustomerDetailsModal({ isOpen, onClose, customerData, or
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.5 }}
-                      className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl p-5 border border-indigo-200"
+                      className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-5 border border-purple-200"
                     >
                       <div className="flex items-center gap-2 mb-4">
-                        <Clock className="w-5 h-5 text-indigo-600" />
+                        <Clock className="w-5 h-5 text-purple-600" />
                         <h4 className="text-lg font-bold text-gray-900">Last Order</h4>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="bg-white p-4 rounded-lg shadow-sm">
                           <p className="text-xs text-gray-500 font-medium mb-1">Order ID</p>
-                          <p className="text-sm font-bold text-indigo-600">{lastOrder.fitlabOrderId || "N/A"}</p>
+                          <p className="text-sm font-bold text-purple-600">{lastOrder.fitlabOrderId || "N/A"}</p>
                         </div>
 
                         <div className="bg-white p-4 rounded-lg shadow-sm">
@@ -301,7 +308,7 @@ export default function CustomerDetailsModal({ isOpen, onClose, customerData, or
                                 : lastOrder.orderStatus === "cancelled"
                                   ? "bg-red-100 text-red-700"
                                   : lastOrder.orderStatus === "shipped"
-                                    ? "bg-blue-100 text-blue-700"
+                                    ? "bg-blue-100 text-purple-700"
                                     : "bg-yellow-100 text-yellow-700"
                             }`}
                           >

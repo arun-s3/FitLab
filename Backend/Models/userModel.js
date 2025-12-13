@@ -1,6 +1,5 @@
 const mongoose = require('mongoose')
 
-// const imageUrl = URL.createObjectURL('/DefaultDp.png')
 const userSchema = mongoose.Schema({
     username:{
         type:String,
@@ -60,7 +59,17 @@ const userSchema = mongoose.Schema({
     isBlocked:{
         type:Boolean,
         default:false
+    },
+    riskyUserStatus: {
+      type: Boolean,
+      default:false
+    },
+    riskyUserNotes: {
+      type: String,
+      default: null,
+      maxlength: 500
     }
+
 },{timestamps:true})
 
 const user = new mongoose.model('User', userSchema)

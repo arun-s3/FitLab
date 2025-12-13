@@ -108,7 +108,10 @@ const showUsers = async (req, res, next) => {
   try {
     console.log("Inside getAllUsers of userController")
 
-    let { page = 1, limit = 6, searchData } = req.body.queryOptions
+    let { page = 1, limit = 6, searchData, status = "all" } = req.body.queryOptions
+
+    console.log("req.body.queryOptions------------->", JSON.stringify(req.body.queryOptions))
+
     page = parseInt(page)
     limit = parseInt(limit)
 
@@ -117,6 +120,10 @@ const showUsers = async (req, res, next) => {
     const filter = { isAdmin: false }
     if (searchData) {
       filter.username = { $regex: searchData, $options: "i" }
+    }
+
+    if (status.toLowerCase() !== "all") {
+      filter.isBlocked = status.toLowerCase() === "blocked"
     }
 
     const users = await User.aggregate([
@@ -151,6 +158,8 @@ const showUsers = async (req, res, next) => {
     ]);
 
     const totalUsers = await User.countDocuments(filter)
+
+    console.log("totalUsers------------->", totalUsers)
 
     return res.status(200).json({
       success: true,
@@ -190,67 +199,6 @@ const showUsersofStatus = async(req,res,next)=> {
     }
 }
 
-const deleteUser = async(req,res,next)=>{
-    try{
-        console.log("Inside deleteUser controller")
-        const {id} = req.query 
-        const userData = await User.findOne({_id:id},{password:0})
-        console.log("User-->"+JSON.stringify(userData))
-        if(userData){
-            if(userData.isAdmin){
-                res.status(403).json({message:"Can't delete Admin"})
-            }
-            else{
-                await User.deleteOne({_id:id})
-                res.status(200).json({message:"Successfully deleted!"})
-            }
-        }   
-        else{
-            next(errorHandler(400,"User not found!"))
-        }
-    }
-    catch(error){
-        console.log("Inside deleteUser controller")
-        next(error)
-    }
-}
-
-const deleteUserList = async(req,res,next)=>{
-    try{
-        console.log("Inside deleteUserList controller")
-        console.log("req,body-->"+JSON.stringify(req.body))
-        const {userList} = req.body
-        console.log('userLIst-->'+JSON.stringify(userList))
-        const userDocs = []
-        for(let i=0; i<userList.length; i++){
-            console.log("inside for-loop of deleteUserList controller")
-            userDocs[i] = await User.findOne({_id:userList[i]},{password:0})
-            console.log("userList[i]-->"+userList[i])
-            console.log("userDocs[i]-->"+JSON.stringify(userDocs))
-        }
-        console.log("userDocs after for-loop-->"+userDocs)
-        console.log("userDocs.filter(doc=>doc.isAdmin)-->"+userDocs.filter(doc=>!doc.isAdmin))
-        if(userDocs.filter(doc=>!doc.isAdmin)){
-            if(userDocs && userDocs.length==userList.length){
-                for(let i=0; i<userList.length; i++){
-                    User.deleteOne({_id:userList[i]}).exec().then(result=>{
-                        console.log("Deleted successfully--"+result)
-                        res.status(200).json({message:"Successfully deleted!"})}).catch(error=>console.log("Error during deletion--"+error))
-                    
-                }
-            }
-            else{
-                next(errorHandler(400,"Some users not found!"))
-            }
-        }
-        else{
-            next(errorHandler(403,"Admin cannot be deleted!"))
-        }
-    }
-    catch(error){
-        next(error)
-    }
-}
 
 const toggleBlockUser = async(req,res,next)=>{
     try{
@@ -277,6 +225,51 @@ const toggleBlockUser = async(req,res,next)=>{
         console.log("Inside toggleBlockUser controller")
         next(error)
     }
+}
+
+
+const updateRiskyUserStatus = async (req, res, next)=> {
+  try {
+    console.log("Inside updateRiskyUserStatus of userController")
+
+    const { userId } = req.params
+    const { riskyUserStatus, riskyUserNotes } = req.body.riskDetails
+
+    console.log("Updating risky status for user:", userId)
+
+    const user = await User.findById(userId)
+    if (!user) {
+      return next(errorHandler(404, "User not found!"))
+    }
+
+    if(typeof riskyUserStatus === "boolean" && riskyUserStatus === true){
+        if (!riskyUserNotes?.trim()) {
+          return next(errorHandler(404, "Please provide the user's suspicious activities!"))
+        }
+        user.riskyUserStatus = true
+        user.isBlocked = true
+    }
+
+    if(typeof riskyUserStatus === "boolean" && riskyUserStatus === false){
+        user.riskyUserStatus = false
+    }
+
+    if (riskyUserNotes?.trim() && riskyUserNotes.length > 1) {
+      user.riskyUserNotes = riskyUserNotes
+    }
+
+    await user.save();
+
+    return res.status(200).json({
+        success: true,
+        message: riskyUserStatus ? "The user has been marked suspicious" : "User is no longer suspicious!",
+        updatedUser: user
+    });
+  }
+  catch (error) {
+    console.error("Error updating risky user status:", error.message)
+    next(error)
+  }
 }
 
 
@@ -407,4 +400,5 @@ const getUserStats = async (req, res, next) => {
 
 
 
-module.exports = {tester, signinAdmin, signoutAdmin, showUsers, showUsersofStatus, deleteUser, deleteUserList, toggleBlockUser, getUserStats}
+module.exports = {tester, signinAdmin, signoutAdmin, showUsers, showUsersofStatus, toggleBlockUser, updateRiskyUserStatus, 
+    getUserStats}

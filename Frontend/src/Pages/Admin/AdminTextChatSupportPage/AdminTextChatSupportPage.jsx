@@ -3,8 +3,9 @@ import {useOutletContext} from 'react-router-dom'
 import {motion, AnimatePresence} from "framer-motion"
 import {debounce} from 'lodash'
 
-import {Users, Send, Search, Clock, User, Headphones, Circle, MessageSquare, Settings, Bell} from "lucide-react"
+import {Users, Send, Search, Clock, User, Headphones, Circle, MessageSquare, Settings, Bell, History} from "lucide-react"
 import axios from 'axios'
+import {toast as sonnerToast} from 'sonner'
 
 import {AdminSocketContext} from '../../../Components/AdminSocketProvider/AdminSocketProvider'
 import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
@@ -24,6 +25,12 @@ export default function AdminTextChatSupportPage() {
   const [textOrReply, setTextOrReply] = useState('Text')
   const [lastSeen, setLastSeen] = useState('')
 
+  const [offlineUsers, setOfflineUsers] = useState([])
+
+  const [currentHistoryPage, setCurrentHistoryPage] = useState(1)
+  const limit = 4
+  const [hasMoreUsersChats, setHasMoreUsersChats] = useState(true)
+
   const {setPageBgUrl} = useOutletContext() 
   setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.93),rgba(255,255,255,0.93)), url('/admin-bg8.png')`)
 
@@ -38,6 +45,7 @@ export default function AdminTextChatSupportPage() {
       activeUsers,
       messages, 
       newMessage, 
+      setMessages,
       typingUsers, 
       unreadCounts,
       setUnreadCounts, 
@@ -45,7 +53,8 @@ export default function AdminTextChatSupportPage() {
       setNotifications,
       messagesEndRef, 
       handleTyping,
-      handleSendMessage
+      handleSendMessage,
+      handleSendOfflineMessage
   } = useContext(AdminSocketContext)
 
   const {openDropdowns, dropdownRefs, toggleDropdown} = useFlexiDropdown(['searchResultDropdown'])
@@ -81,11 +90,6 @@ export default function AdminTextChatSupportPage() {
 
   useEffect(()=> {
     if(socket){
-      // socket.on("updated-activeUsers", (updater) => {
-      //   console.log("Inside updated-activeUsers")
-      //   setActiveUsers(updater.users)
-      //   handleUserSelect(updater.user)
-      // })
       socket.on("receive-message", (message) => {
         const selected = selectedUserRef.current
         console.log(`Now message.sender is ${message.sender} and selectedUser.username is ${selected?.username}`)
@@ -150,8 +154,87 @@ export default function AdminTextChatSupportPage() {
     }
   },[typingUsers, selectedUser, activeUsers, notifications])
 
+  // useEffect(()=> {
+  //   if(activeUsers && activeUsers.length > 0){
+  //     if(offlineUsers && offlineUsers.length > 0){
+  //       activeUsers.forEach(user=> {
+  //         if(offlineUsers.some(offlineUser=> offlineUser.username === user.username)){
+  //           offlineUsers.filter(offlineUser=>Z)
+  //         }
+  //       })
+  //     }
+  //   }
+  // }, [activeUsers, offlineUsers])
+
+  useEffect(() => {
+    if (!activeUsers?.length) return
+    
+    setOfflineUsers(prev =>
+      prev.filter(
+        offlineUser =>
+          !activeUsers.some(
+            activeUser => activeUser.username === offlineUser.username
+          )
+      )
+    )
+  }, [activeUsers])
+
+
+  useEffect(() => {
+    if (!selectedUser || !activeUsers?.length) return
+
+    const matchedUser = activeUsers.find(
+      user => user.username === selectedUser.username
+    )
+
+    if (matchedUser && !selectedUser.socketId) {
+      console.log('Selectig the same user from activeUsers')
+      setSelectedUser(matchedUser)
+      setLastSeen(matchedUser.lastSeen)
+    }
+  }, [activeUsers, selectedUser])
+
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
+
+  const getAdminChatHistory = async()=> {
+    console.log("Inside getAdminChatHistory()...") 
+    if (!hasMoreUsersChats) return 
+    try { 
+      const response = await axios.get(`${baseApiUrl}/chat/history?page=${currentHistoryPage}&limit=${limit}`, { withCredentials: true })
+      if(response.status === 200){
+        const usersDatas = response.data.users.map(user=> ({
+          username: user.username, userId: user._id, lastSeen: user.lastSeen, isOnline: false, socketId: null, isOfflineMsg: true
+        }))
+        setOfflineUsers(users=> [...users, ...usersDatas])
+        setMessages(response.data.chats)
+        setHasMoreUsersChats(response.data.hasMore)
+        setCurrentHistoryPage(page=> page + 1)
+      }
+    }catch (error) {
+      console.error("Error while sending message to the user:", error.message)
+      sonnerToast.error('Something went wrong! Please retry later.')
+    }
+  }
+
+  const getOfflineUser = async(username)=> {
+    console.log("Inside getOfflineUser()...") 
+    try { 
+      const response = await axios.get(`${baseApiUrl}/user/${username}`, { withCredentials: true })
+      if(response.status === 200){
+        console.log("response.data.user----------->", response.data.user)
+        return response.data.user
+      }
+      if(response.status === 404){
+        console.log("Error---->", error.response.data.message)
+        sonnerToast.error(error.response.data.message)
+      }
+    }catch (error) {
+      console.log("Error while getting user-->", error.message)
+      sonnerToast.error('Something went wrong! Please retry later.')
+    }
   }
 
   const fetchUsernameList = (searchTerm)=> {
@@ -189,17 +272,23 @@ export default function AdminTextChatSupportPage() {
     } 
   }
 
-  const selectSearchedUser = (username)=> {
+  const selectSearchedUser = async(username)=> {
     console.log("Insdie selectSearchedUser...")
     const user = activeUsers.find(user=> user.username === username && user.isOnline)
     if(user){
       setInitialActiveUser(user)
       handleUserSelect(user)
-      // if(socket){
-      //   socket.emit("update-and-sort-activeUsers", user)
-      // }
     }else{
-      // sendOfflineMessage(username)
+      const user = await getOfflineUser(username)
+
+      const userData = {username, userId: user._id, lastSeen: user.lastSeen, isOnline: false, socketId: null, isOfflineMsg: true}
+      setOfflineUsers(users=> [...users, userData])
+
+      socket.emit("load-chat-history-with-user", userData.userId)
+
+      setInitialActiveUser(userData)
+      setSelectedUser(userData)
+      setLastSeen(user?.lastSeen || null)
     }
   }
 
@@ -233,7 +322,7 @@ export default function AdminTextChatSupportPage() {
 
         <main className="mr-4 p-4 border border-primaryDark rounded-[7px]">
 
-            <div className="h-screen bg-gray-100 flex">
+        <div className="h-screen bg-gray-100 flex">
       <div className={`${guestCount > 0 ? 'w-[22rem]' : 'w-80'} p-[7px] bg-white border border-dropdownBorder 
         rounded-[5px] flex flex-col`}>
         <div className="p-4 border-b border-gray-200 bg-purple-500 text-white rounded-[3px]"> {/*rgb(187, 103, 245) */}
@@ -322,7 +411,7 @@ export default function AdminTextChatSupportPage() {
         <div className="flex-1 overflow-y-auto">
           <AnimatePresence>
             {
-              [...activeUsers].sort((a, b) => {
+              [...activeUsers, ...offlineUsers].sort((a, b) => {
                   if (!initialActiveUser) return 0;
                   if (a.userId === initialActiveUser.userId) return -1;
                   if (b.userId === initialActiveUser.userId) return 1;
@@ -334,9 +423,11 @@ export default function AdminTextChatSupportPage() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
-                    className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${
-                      selectedUser?.socketId === user.socketId ? "bg-blue-50 border-l-4 border-l-blue-500" : ""
-                    }`}
+                    className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors
+                      ${!selectedUser?.isOfflineMsg 
+                          ? selectedUser?.socketId === user.socketId ? "bg-blue-50 border-l-4 border-l-blue-500" : ""
+                          : selectedUser.username === user.username ? "bg-blue-50 border-l-4 border-l-blue-500" : ""
+                      }`}
                     onClick={() => handleUserSelect(user)}
                   >
                     <div className="flex items-center justify-between">
@@ -403,6 +494,17 @@ export default function AdminTextChatSupportPage() {
                   </motion.div>
             ))}
           </AnimatePresence>
+
+          {
+            hasMoreUsersChats &&
+              <div className="w-full py-[10px] flex items-center justify-center gap-[10px] bg-gray-200 text-muted 
+                hover:text-secondary transition-colors duration-300 cursor-pointer"
+                 onClick={()=> getAdminChatHistory()}
+              >
+                <History className="text-inherit w-[18px] h-[18px]"/>
+                <span className="text-[14px] tracking-[0.3px] text-inherit font-inherit"> Show Chat History </span>
+              </div>
+          }
 
           {activeUsers.length === 0 && (
             <div className="p-8 text-center text-gray-500">
@@ -492,9 +594,17 @@ export default function AdminTextChatSupportPage() {
                 </motion.div>
               )}
               <div ref={messagesEndRef} />
-            </div>
+            </div> 
 
-            <form onSubmit={(e)=> handleSendMessage(e, selectedUser)} className="p-4 border-t border-gray-200 bg-white">
+            <form onSubmit={(e)=> {
+              if(selectedUser.socketId){
+                handleSendMessage(e, selectedUser)
+              }else if(selectedUser?.isOfflineMsg){
+                handleSendOfflineMessage(e, selectedUser)
+              }
+            }} 
+              className="p-4 border-t border-gray-200 bg-white"
+            >
               <div className="flex space-x-3">
                 <input
                   type="text"

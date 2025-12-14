@@ -37,7 +37,7 @@ export default function Header({customStyle, goToShopByCategorySec, pageChatBoxS
     const dispatch = useDispatch()
     const location = useLocation()
 
-    const {isConnected} = useContext(SocketContext)
+    const {isAdminOnline} = useContext(SocketContext)
 
     // const {setOpenVideoCallModal, VideoCallCommonModal} = useContext(SocketContext)
     // const {socket} = socketContextItems
@@ -139,7 +139,7 @@ export default function Header({customStyle, goToShopByCategorySec, pageChatBoxS
                                 
                                 { item.label === 'Support' &&
                                     <motion.div
-                                        className={`w-[5px] h-[5px] rounded-full ${isConnected ? "bg-green-400" : "bg-red-400"}`}
+                                        className={`w-[5px] h-[5px] rounded-full ${isAdminOnline ? "bg-green-400" : "bg-red-400"}`}
                                         animate={{ scale: [1, 1.4, 1] }}
                                         transition={{ repeat: Number.POSITIVE_INFINITY, duration: 2 }}
                                     />

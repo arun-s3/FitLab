@@ -64,6 +64,13 @@ export default function AdminSocketProvider() {
       socket.emit("admin-permits-user-connection", roomId)
     })
 
+    socket.on("chat-history-with-user", (messages) => {
+      console.log("chat-history with user receieved----->", messages)
+      if(messages.length > 0){
+        setMessages(msgs=> ({...msgs, [messages[0].sender]: messages}))
+      }
+    })
+
     socket.on("active-users-update", (users) => {
       setActiveUsers(users)
     })
@@ -179,6 +186,32 @@ export default function AdminSocketProvider() {
     }
   }
 
+  const handleSendOfflineMessage = (e, selectedUser)=> {
+    e.preventDefault()
+    const messageData = {
+      roomId: selectedUser.userId,
+      message: newMessage,
+      sender: adminName,
+      targetSocketId: null,
+    }
+
+    socket.emit("admin-send-message", messageData)
+    setNewMessage("")
+
+    setMessages((prev) => ({
+      ...prev,
+      [selectedUser.username]: [...(prev[selectedUser.username] || []),
+        {
+          id: Date.now(),
+          message: newMessage,
+          sender: adminName,
+          timestamp: new Date().toISOString(),
+          isAdmin: true,
+        },
+      ],
+    }))
+  }
+
 
 
   return (
@@ -189,6 +222,7 @@ export default function AdminSocketProvider() {
           activeUsers,
           setActiveUsers,
           messages, 
+          setMessages,
           newMessage, 
           typingUsers, 
           unreadCounts, 
@@ -198,6 +232,7 @@ export default function AdminSocketProvider() {
           messagesEndRef, 
           handleTyping,
           handleSendMessage,
+          handleSendOfflineMessage,
         }}
       >
   

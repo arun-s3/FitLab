@@ -68,8 +68,11 @@ const userSchema = mongoose.Schema({
       type: String,
       default: null,
       maxlength: 500
+    },
+    lastSeen: {
+        type: Date,
+        default: Date.now
     }
-
 },{timestamps:true})
 
 const user = new mongoose.model('User', userSchema)

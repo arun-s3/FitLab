@@ -2,19 +2,36 @@ const mongoose = require("mongoose")
 
 
 const textChatBoxSchema = new mongoose.Schema({
+  roomId: {
+    type: String, // userId or guestId
+    required: true,
+    index: true,
+  },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User", 
     required: true,
   },
-  sender: {
-    type: String,
-    enum: ["user", "admin"],
+  isGuest: {
+    type: Boolean,
+    default: false,
+  },
+  isAdmin: {
+    type: Boolean,
     required: true,
   },
-  text: {
+  sender: {
     type: String,
     required: true,
+  },
+  message: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  isRead: {
+    type: Boolean,
+    default: false,
   },
   timestamp: {
     type: Date,

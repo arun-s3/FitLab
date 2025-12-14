@@ -14,7 +14,7 @@ export default function TextChatBox({closeable, onCloseChat, boxHeight, boxWidth
 
   const inputRef = useRef(null)
 
-  const {isConnected, messages, newMessage, isTyping, messagesEndRef, handleSendMessage, handleTyping} = useContext(SocketContext)
+  const {isConnected, isAdminOnline, messages, newMessage, isTyping, messagesEndRef, handleSendMessage, handleTyping} = useContext(SocketContext)
 
   useEffect(()=> {
     console.log("new message--->", newMessage)
@@ -64,7 +64,7 @@ export default function TextChatBox({closeable, onCloseChat, boxHeight, boxWidth
             </div>
           }
           <motion.div
-            className={`absolute -top-[7px] -left-[7px] w-[8px] h-[8px] rounded-full ${isConnected ? "bg-green-400" : "bg-red-400"}`}
+            className={`absolute -top-[7px] -left-[7px] w-[8px] h-[8px] rounded-full ${isAdminOnline ? "bg-green-400" : "bg-red-400"}`}
             animate={{ scale: [1, 1.2, 1] }}
             transition={{ repeat: Number.POSITIVE_INFINITY, duration: 2 }}
           />
@@ -102,13 +102,13 @@ export default function TextChatBox({closeable, onCloseChat, boxHeight, boxWidth
                     {
                       isStatic &&
                       <motion.div
-                      className={`w-[8px] h-[8px] rounded-full ${isConnected ? "bg-green-400" : "bg-red-400"}`}
+                      className={`w-[8px] h-[8px] rounded-full ${isAdminOnline ? "bg-green-400" : "bg-red-400"}`}
                       animate={{ scale: [1, 1.2, 1] }}
                       transition={{ repeat: Number.POSITIVE_INFINITY, duration: 2 }}
                       />
                     }
                   </h3>
-                  <p className="text-xs opacity-90">{isConnected ? "Online" : "Connecting..."}</p>
+                  <p className="text-xs opacity-90">{!isConnected ? "Connecting..." : isAdminOnline ? "Online" : "Support agent unavailable"}</p>
                 </div>
               </div>
               <div className={`flex items-center space-x-2 ${isStatic && 'hidden'}`}>
@@ -177,17 +177,16 @@ export default function TextChatBox({closeable, onCloseChat, boxHeight, boxWidth
                   <div className="flex space-x-2">
                     <input
                       type="text"
-                      value={newMessage}
+                      value={newMessage} 
                       onChange={(e)=> handleTyping(e)}
-                      placeholder="Type your message..."
+                      placeholder={isAdminOnline ? "Type your message..." : `Type your message (Offline — we’ll reply soon)`}
                       className={`flex-1 border border-gray-300 rounded-lg px-3 ${isStatic ? 'py-[9px]' : 'py-2'} text-[13px] text-black focus:outline-none focus:ring-2
                         ${isStatic ? 'placeholder:text-[13px]' : 'placeholder:text-[12px]'} focus:ring-blue-500 focus:border-transparent`}
-                      disabled={!isConnected}
                       ref={inputRef}
                     />
                     <motion.button
                       type="submit"
-                      disabled={!newMessage.trim() || !isConnected}
+                      disabled={!newMessage.trim() || !isAdminOnline}
                       className={`${isStatic ? 'w-[3rem]' : 'w-[2.5rem]'} flex justify-center items-center bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white p-2 rounded-lg transition-colors duration-200`}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}

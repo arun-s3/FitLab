@@ -513,6 +513,32 @@ const totalUsersCount = async(req, res, next)=> {
     }
 }
 
+
+const getUserByUsername = async (req, res, next)=> {
+  try {
+    console.log("Inside getUserByUsername controller...")
+
+    const {username} = req.params
+
+    if (!username) {
+      return next(errorHandler(400, "Username is required"))
+    }
+
+    const user = await User.findOne({ username }).select("-password -__v")
+
+    if (!user) {
+      return next(errorHandler(404, "User not found"))
+    }
+
+    return res.status(200).json({success: true, user})
+  }
+  catch (error) {
+    console.error("Error fetching user by username:", error.message)
+    next(error)
+  }
+}
+
+
 const guestUsersByIP = new Map(); 
 const generatedUsernames = new Set();
 
@@ -584,5 +610,5 @@ const signout = (req,res,next)=>{
 
 
 module.exports = {tester, createUser, sendOtp, verifyOtp, loginUser, clearAllCookies, updateUserDetails, updateForgotPassword, resetPassword,
-     updateProfilePic, googleSignin, getUserId, searchUsernames, totalUsersCount, generateUniqueGuestUser, updateUserWeight,
+     updateProfilePic, googleSignin, getUserId, searchUsernames, totalUsersCount, getUserByUsername, generateUniqueGuestUser, updateUserWeight,
      verifyAndDeleteGuestUser, signout}

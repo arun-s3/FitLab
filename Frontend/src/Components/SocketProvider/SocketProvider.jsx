@@ -31,6 +31,8 @@ export default function SocketProvider() {
     const [username, setUsername] = useState(null)  
     const [roomId, setRoomId] = useState(null) 
 
+    const [isAdminOnline, setIsAdminOnline] = useState(false)
+
     const [userWasGuest, setUserWasGuest] = useState({wasGuest: false, credentials: {}})
 
     const [messages, setMessages] = useState([
@@ -117,9 +119,18 @@ export default function SocketProvider() {
             socket.emit("joinFitlab", roomId)
           }
         })
+
+        socket.on("admin-status", status=> {
+          setIsAdminOnline(status)
+        })
     
         socket.on("disconnect", () => {
           setIsConnected(false)
+        })
+
+        socket.on("chat-history", (messages) => {
+          console.log("chat-history receieved----->", messages)
+          setMessages(messages)
         })
         
         socket.on("receive-message", (message) => {
@@ -233,6 +244,7 @@ export default function SocketProvider() {
     <SocketContext.Provider value={{
         socket,
         isConnected,
+        isAdminOnline,
         userId: roomId,
         username,
         messages,

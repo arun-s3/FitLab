@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react"
-import {useSelector, useDispatch} from 'react-redux'
 import { motion } from "framer-motion"
 
 import { Bell, Package, Tag, TrendingUp, AlertCircle, X } from "lucide-react"
@@ -8,8 +7,6 @@ import { Bell, Package, Tag, TrendingUp, AlertCircle, X } from "lucide-react"
 export default function NotificationItem({ notification, index, onMarkAsRead, onDelete }) {
 
   const [isHovered, setIsHovered] = useState(false)
-
-  const {user} = useSelector((state)=>state.user)
 
   const notificationIcons = {
     'admin': AlertCircle,
@@ -89,7 +86,7 @@ export default function NotificationItem({ notification, index, onMarkAsRead, on
       transition={{ delay: index * 0.05, duration: 0.2 }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      onClick={() => !notification.isRead && onMarkAsRead(notification._id, user._id)}
+      onClick={() => !notification.isRead && onMarkAsRead(notification._id)}
       className={`relative px-4 py-3 cursor-pointer transition-colors ${
         notification.isRead ? "bg-white hover:bg-gray-50" : "bg-purple-50 hover:bg-purple-100"
       }`}

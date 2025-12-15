@@ -104,6 +104,10 @@ export default function SocketProvider() {
       console.log("openSemiAutoRechargeModal--->", openSemiAutoRechargeModal)
     }, [openSemiAutoRechargeModal])
 
+    useEffect(()=> {
+      console.log("notifications from SocketProvider--->", notifications)
+    }, [notifications])
+
     useEffect(() => {
         const socket = io(baseApiUrl)
     
@@ -188,20 +192,32 @@ export default function SocketProvider() {
         }) 
 
         socket.on("notification-marked-read", (id) => {
-          console.log("Notification marked read")
-          const updatedNotifications = notifications.map(notification=> {
-            if(notification._id === id){
-              notification.isRead = true
-            }
-            return notification
-          })
-          setNotifications(updatedNotifications)
+          console.log("Notification id marked read----->", id)
+          setNotifications(prev =>
+            prev.map(notification=> notification._id === id ? { ...notification, isRead: true } : notification)
+          )
         })
 
         socket.on("all-notifications-marked-read", () => {
           console.log("All Notification marked read")
-          const updatedNotifications = notifications.map(notification=> notification.isRead = true)
+          setNotifications(prev =>
+            prev.map(notification => ({
+              ...notification,
+              isRead: true,
+            }))
+          )
+          const updatedNotifications = notifications.map(notification=> ({...notification, isRead: true}))
           setNotifications(updatedNotifications)
+        }) 
+
+        socket.on("notification-deleted", (id) => {
+          console.log("All Notification marked read")
+          setNotifications(notifications=> notifications.filter(notification=> notification._id !== id))
+        }) 
+
+        socket.on('notification-error', (message)=> {
+          console.log("Notification error-->", message)
+          sonnerToast.error(message)
         }) 
 
         setSocket(socket)
@@ -270,6 +286,10 @@ export default function SocketProvider() {
       const markAllNotificationRead = (userId)=> {
         socket.emit("mark-all-notifications-read", userId)
       }
+
+      const deleteNotification = (id, userId)=> {
+        socket.emit("delete-notification", {notificationId: id, userId} )
+      }
     
 
   return (
@@ -297,8 +317,10 @@ export default function SocketProvider() {
         setOpenNotificationModal,
         openNotificationModal,
         notifications,
+        setNotifications,
         markNotificationRead,
-        markAllNotificationRead
+        markAllNotificationRead,
+        deleteNotification
         // VideoCallCommonModal : <VideoCallCommonModal/>
       }}
     >

@@ -38,7 +38,7 @@ export default function Header({customStyle, goToShopByCategorySec, pageChatBoxS
     const dispatch = useDispatch()
     const location = useLocation()
 
-    const {isAdminOnline, notifications, markNotificationRead, markAllNotificationRead} = useContext(SocketContext)
+    const {isAdminOnline, notifications, setNotifications, markNotificationRead, markAllNotificationRead, deleteNotification} = useContext(SocketContext)
 
     // const {setOpenVideoCallModal, VideoCallCommonModal} = useContext(SocketContext)
     // const {socket} = socketContextItems
@@ -153,8 +153,8 @@ export default function Header({customStyle, goToShopByCategorySec, pageChatBoxS
             </motion.nav>
 
             <motion.div 
-                className="hidden sm:inline-flex sm:gap-[20px] md:gap-[2.5rem] lg:gap-[12px] x-xl:gap-[15px] sm:ml-[17rem] lg:ml-0 mt-[25px] 
-                    lg:mt-0 items-center" 
+                className="hidden sm:inline-flex sm:gap-[20px] l-md:gap-[2rem] x-md:gap-[2.5rem] lg:gap-[12px] x-xl:gap-[15px]
+                    sm:ml-[13rem] x-sm:ml-[17rem] lg:ml-0 mt-[25px] lg:mt-0 items-center" 
                 id="icons"
                 initial="hidden"
                 animate="visible"
@@ -206,9 +206,11 @@ export default function Header({customStyle, goToShopByCategorySec, pageChatBoxS
                 </i>
                 
                 <NotificationBell 
-                    notificationSets={notifications} 
-                    onNotificationRead={markNotificationRead}
+                    notifications={notifications} 
+                    setNotifications={setNotifications}
+                    onNotificationRead={(id)=> markNotificationRead(id, user._id)}
                     onAllNotifcationsRead={()=> markAllNotificationRead(user._id)}
+                    onNotificationDelete={(id)=> deleteNotification(id, user._id)}
                 />
 
                 <motion.div 
@@ -246,6 +248,18 @@ export default function Header({customStyle, goToShopByCategorySec, pageChatBoxS
                   }
                 </motion.div>
             </motion.div>
+
+            <div className='inline-block sm:hidden'>
+                <NotificationBell 
+                    notifications={notifications} 
+                    setNotifications={setNotifications}
+                    onNotificationRead={(id)=> markNotificationRead(id, user._id)}
+                    onAllNotifcationsRead={()=> markAllNotificationRead(user._id)}
+                    onNotificationDelete={(id)=> deleteNotification(id, user._id)}
+                    containerStyle='absolute top-[27px] right-20'
+                    bellStyle='w-[20px] h-[20px]'
+                />
+            </div>
 
             <div className='mt-[25px] lg:hidden'>
 

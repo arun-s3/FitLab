@@ -30,21 +30,7 @@ export default function AdminSocketProvider() {
 
   const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
-
-  // const handleUserSelect = (user)=> {
-  //   setSelectedUser(user)
-  //   setLastSeen(user.lastSeen)
-  //   setUnreadCounts((prev) => ({
-  //     ...prev,
-  //     [user.socketId]: 0,
-  //   }))
-
-    // if (socket) {
-    //   socket.emit("user-join-room", user.userId)
-    // }
-  // }
-
-
+  
   useEffect(() => {
     const socket = io(baseApiUrl)
 

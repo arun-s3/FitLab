@@ -267,8 +267,6 @@ async function textChatBoxSocket(io) {
       socket.on("disconnect", async() => {
         console.log("User disconnected:", socket.id)
 
-        // adminSessions.delete(socket.id)
-
         if(adminSessions.has(socket.id)){
           activeUsers.forEach(async (userData)=> {
             io.to(userData.userId).emit("admin-status", false)

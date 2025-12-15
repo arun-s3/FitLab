@@ -24,16 +24,8 @@ async function notificationSocket(io) {
               console.log("Inside admin-send-notification...")
               const {userId, title, message, type, referenceModel = null, referenceId = null} = data
             
-              // 1️⃣ Save notification (offline-safe)
               const notification = await Notification.create({userId, title, message, type, referenceModel, referenceId, isRead: false})
-            
-              // 2️⃣ Emit if user is online
-              // for (const user of onlineUsers.values()) {
-              //   if (String(user.userId) === String(userId)) {
-              //     console.log("Emiting receive-notification...")
-              //     io.to(user.socketId).emit("receive-notification", notification)
-              //   }
-              // }
+
               io.to(userId.toString()).emit("receive-notification", notification)
             
               socket.emit("notification-sent", { success: true })
@@ -73,6 +65,31 @@ async function notificationSocket(io) {
               console.error("Notification error:", error.message)
             }
           })
+
+          socket.on("delete-notification", async ({ notificationId, userId }) => {
+            try {
+              console.log("Inside delete-notification...")
+            
+              if (!notificationId || !userId) {
+                return socket.emit("notification-error", "Invalid data")
+              }
+            
+              // 1️⃣ Delete from DB
+              const deleted = await Notification.findOneAndDelete({_id: notificationId, userId})
+            
+              if (!deleted) {
+                return socket.emit("notification-error", "Notification not found")
+              }
+            
+              io.to(userId.toString()).emit("notification-deleted", notificationId)
+            
+            }
+            catch (error) {
+              console.log("Notification delete error:", error.message)
+              socket.emit("notification-error", "Failed to delete notification. Please try again.")
+            }
+          })
+
 
           socket.on("disconnect", () => {
             onlineUsers.delete(socket.id)

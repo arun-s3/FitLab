@@ -52,12 +52,12 @@ async function textChatBoxSocket(io) {
         
         if(!usernameJoined){
           activeUsers.set(socket.id, {
-            socketId: socket.id,
-            userId: userData.userId,
-            username: userData.username,
-            joinedAt: new Date().toISOString(),
-            lastSeen: new Date().toISOString(),
-            isOnline: true,
+              socketId: socket.id,
+              userId: userData.userId,
+              username: userData.username,
+              joinedAt: new Date().toISOString(),
+              lastSeen: new Date().toISOString(),
+              isOnline: true,
             }
           )
           if(userData.username.startsWith('guest')){

@@ -419,7 +419,7 @@ export default function AdminTextChatSupportPage() {
                 })
                 .map((user) => (
                   <motion.div
-                    key={user.socketId}
+                    key={user.socketId || user.username}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}

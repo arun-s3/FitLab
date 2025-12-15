@@ -53,6 +53,8 @@ export default function SocketProvider() {
 
     const [forceEndScheduledSession, setForceEndScheduledSession] = useState(false)
 
+    const [notifications, setNotifications] = useState([])
+
     const [openNotificationModal, setOpenNotificationModal] = useState({
       header: null, content: null, icon: null, type: null, duration: 6000, walletRecharged: false
     })
@@ -90,7 +92,7 @@ export default function SocketProvider() {
       }else{
         fetchGuestId()
       }
-    }, [])
+    }, [userToken])
     
     useEffect(()=> {
         console.log("username--->", username)
@@ -116,7 +118,7 @@ export default function SocketProvider() {
             socket.emit("user-login", { userId: roomId, username })
             console.log("User going to join room....")
             socket.emit("user-join-room", roomId)
-            socket.emit("joinFitlab", roomId)
+            socket.emit("joinFitlab", {userId: roomId, username})
           }
         })
 
@@ -170,7 +172,7 @@ export default function SocketProvider() {
             header: "Wallet Auto-Recharged", content: `Wallet recharged with ₹${data.amount} through ${data.method}`, icon: Wallet,
             type: "success", duration: 6000, walletRecharged: true
           })
-        })
+        }) 
 
         socket.on("warnRazorpayRecharge", (data) => {
           console.log("Warning on Razorpay recharge", data)
@@ -178,7 +180,29 @@ export default function SocketProvider() {
           if(!openSemiAutoRechargeModal.status){
             setOpenSemiAutoRechargeModal({status: true, walletAmount: data.balance, autoRechargeAmount: data.amount})
           }
+        }) 
+
+        socket.on("receive-notification", (data) => {
+          console.log("Received notification", data)
+          setNotifications(prev=> [...prev, data])
+        }) 
+
+        socket.on("notification-marked-read", (id) => {
+          console.log("Notification marked read")
+          const updatedNotifications = notifications.map(notification=> {
+            if(notification._id === id){
+              notification.isRead = true
+            }
+            return notification
+          })
+          setNotifications(updatedNotifications)
         })
+
+        socket.on("all-notifications-marked-read", () => {
+          console.log("All Notification marked read")
+          const updatedNotifications = notifications.map(notification=> notification.isRead = true)
+          setNotifications(updatedNotifications)
+        }) 
 
         setSocket(socket)
 
@@ -238,6 +262,14 @@ export default function SocketProvider() {
           socket.emit("typing", { roomId, isTyping: false, sender: username })
         }, 2000)
       }
+
+      const markNotificationRead = (id, userId)=> {
+        socket.emit("mark-notification-read", {notificationId: id, userId} )
+      }
+
+      const markAllNotificationRead = (userId)=> {
+        socket.emit("mark-all-notifications-read", userId)
+      }
     
 
   return (
@@ -263,7 +295,10 @@ export default function SocketProvider() {
         openSemiAutoRechargeModal, 
         setOpenSemiAutoRechargeModal,
         setOpenNotificationModal,
-        openNotificationModal
+        openNotificationModal,
+        notifications,
+        markNotificationRead,
+        markAllNotificationRead
         // VideoCallCommonModal : <VideoCallCommonModal/>
       }}
     >

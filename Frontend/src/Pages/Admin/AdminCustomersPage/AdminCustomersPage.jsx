@@ -18,6 +18,7 @@ import axios from 'axios'
 import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
 import Modal from '../../../Components/Modal/Modal'
 import CustomerDetailsModal from './CustomerDetailsModal'
+import CustomerMessageModal from './CustomerMessageModal'
 import useFlexiDropdown from '../../../Hooks/FlexiDropdown'
 import {SitePrimaryMinimalButtonWithShadow} from '../../../Components/SiteButtons/SiteButtons'
 import {showUsers, toggleBlockUser, updateRiskyUserStatus, resetStates} from '../../../Slices/adminSlice'
@@ -55,6 +56,7 @@ export default function AdminCustomersPageV1() {
     const [totalPages, setTotalPages] = useState(20) 
 
     const [openUserDetailsModal, setOpenUserDetailsModal] = useState({customerData: null, orderStats: null, address: null})
+    const [openMessageModal, setOpenMessageModal] = useState({customer: null})
 
     const [riskyUserNotes, setRiskyUserNotes] = useState(null) 
 
@@ -516,6 +518,7 @@ export default function AdminCustomersPageV1() {
                                             <motion.button whileTap={{ scale: 0.98 }} 
                                                 className="px-[9px] py-[5px] bg-gray-100 rounded-[4px] flex items-center gap-[5px]
                                                     hover:bg-gray-200 transition duration-150 !border !border-dropdownBorder !shadow-md"
+                                                onClick={()=> setOpenMessageModal({customer: user})}
                                             >   
                                                 <MessageSquare className='w-[15px] h-[15px] !text-muted'/>
                                             </motion.button>
@@ -548,6 +551,12 @@ export default function AdminCustomersPageV1() {
                     customerData={openUserDetailsModal.customerData}
                     orderStats={openUserDetailsModal.orderStats}
                     address={openUserDetailsModal.address}
+                />
+
+                <CustomerMessageModal 
+                    isOpen={openMessageModal.customer} 
+                    onClose={()=> setOpenMessageModal({customer: null})} 
+                    customer={openMessageModal.customer} 
                 />
 
         </section>

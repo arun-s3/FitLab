@@ -2,6 +2,8 @@ import React, {useState, useEffect, useRef, createContext} from "react"
 import {Outlet} from 'react-router-dom'
 import { io } from "socket.io-client"
 
+import {toast as sonnerToast} from 'sonner'
+
 
 export const AdminSocketContext = createContext();
 
@@ -127,6 +129,15 @@ export default function AdminSocketProvider() {
       setGuestCount(count)
     }) 
 
+    socket.on('notification-sent', (data)=> {
+      sonnerToast.success("Notification sent to the user!")
+    }) 
+
+    socket.on('notification-error', (message)=> {
+      console.log("Notification error-->", message)
+      sonnerToast.error(message)
+    }) 
+
     setSocket(socket)
 
     return () => {
@@ -212,6 +223,10 @@ export default function AdminSocketProvider() {
     }))
   }
 
+  const sendUserNotification = (data)=> {
+    console.log("Emiting admin-send-notification...")
+    socket.emit("admin-send-notification", data)
+  }
 
 
   return (
@@ -233,6 +248,7 @@ export default function AdminSocketProvider() {
           handleTyping,
           handleSendMessage,
           handleSendOfflineMessage,
+          sendUserNotification
         }}
       >
   

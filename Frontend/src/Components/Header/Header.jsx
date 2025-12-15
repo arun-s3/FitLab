@@ -15,6 +15,7 @@ import {User, Heart, Headset, Store, Activity, ShoppingBag, CreditCard, LogIn} f
 
 import Logo from '../Logo/Logo'
 import UserHead from '../UserHead/UserHead'
+import NotificationBell from './NotificationBell'
 import VideoCallCommonModal from '../../Pages/User/VideoCallCommonModal/VideoCallCommonModal'
 import {SiteButton} from '../SiteButtons/SiteButtons'
 import MobileSidebar from './MobileSidebar'
@@ -37,7 +38,7 @@ export default function Header({customStyle, goToShopByCategorySec, pageChatBoxS
     const dispatch = useDispatch()
     const location = useLocation()
 
-    const {isAdminOnline} = useContext(SocketContext)
+    const {isAdminOnline, notifications, markNotificationRead, markAllNotificationRead} = useContext(SocketContext)
 
     // const {setOpenVideoCallModal, VideoCallCommonModal} = useContext(SocketContext)
     // const {socket} = socketContextItems
@@ -147,8 +148,10 @@ export default function Header({customStyle, goToShopByCategorySec, pageChatBoxS
                             </motion.li>
                         ))
                     }
+
                 </motion.ul>
             </motion.nav>
+
             <motion.div 
                 className="hidden sm:inline-flex sm:gap-[20px] md:gap-[2.5rem] lg:gap-[12px] x-xl:gap-[15px] sm:ml-[17rem] lg:ml-0 mt-[25px] 
                     lg:mt-0 items-center" 
@@ -201,6 +204,13 @@ export default function Header({customStyle, goToShopByCategorySec, pageChatBoxS
                 <i onClick={()=> setOpenChatBox(true)}>
                     <Headset className='w-[21px] h-[21px] lg:w-[19px] lg:h-[19px] xl:w-[20px] xl:h-[20px] x-xl:w-[21px] x-xl:h-[21px]'/>
                 </i>
+                
+                <NotificationBell 
+                    notificationSets={notifications} 
+                    onNotificationRead={markNotificationRead}
+                    onAllNotifcationsRead={()=> markAllNotificationRead(user._id)}
+                />
+
                 <motion.div 
                     className='hidden lg:inline-block ml-0 xx-lg:ml-[-7px] xxx-lg:ml-[-20px] deskt:ml-0'
                     initial={{ opacity: 0, x: 10 }}

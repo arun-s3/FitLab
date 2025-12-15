@@ -14,7 +14,7 @@ export default function CustomerDetailsModal({ isOpen, onClose, customerData, or
   const modalRef = useRef(null)
   useModalHelpers({open: isOpen, onClose, modalRef})
 
-  const { profilePic, firstName, lastName, gender, mobile, dob, isVerified, walletBalance = 0 } = customerData
+  const { profilePic, firstName, lastName, username, gender, mobile, dob, isVerified, walletBalance = 0 } = customerData
 
   const {
     totalOrders = 0,
@@ -131,7 +131,7 @@ export default function CustomerDetailsModal({ isOpen, onClose, customerData, or
                           "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png" ||
                           "/placeholder.svg"
                         }
-                        alt={`${firstName} ${lastName}`}
+                        alt={`${firstName && lastName ? `${firstName} ${lastName}` : `${username}` }`}
                         className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
                       />
                       <div className="absolute -bottom-1 -right-1">
@@ -150,7 +150,7 @@ export default function CustomerDetailsModal({ isOpen, onClose, customerData, or
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="text-2xl font-bold text-gray-900">
-                          {firstName} {lastName}
+                          {`${firstName && lastName ? `${firstName} ${lastName}` : `${username}` }`}
                         </h3>
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-semibold ${

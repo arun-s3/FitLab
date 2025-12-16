@@ -14,6 +14,7 @@ import Timer from "./Timer"
 import ExerciseForm from "./ExerciseForm"
 import WorkoutSummaryModal from "./WorkoutSummaryModal"
 import RecentWorkouts from "./RecentWorkouts"
+import WorkoutInsights from "./AIModules/WorkoutInsights"
 import DeleteConfirmationModal from "./DeleteConfirmationModal"
 import {estimateCalories} from "../../../Utils/exerciseFunctions"
 import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
@@ -67,7 +68,7 @@ export default function WorkoutSessionCard() {
       }
     }catch (error) {
       console.error("Error during ading exercise", error.message)
-      sonnerToast.error('Something wet wrong! Please retry later.')
+      sonnerToast.error('Something went wrong! Please retry later.')
     }
   }
 
@@ -463,6 +464,9 @@ export default function WorkoutSessionCard() {
 
             </div>
           </div>
+
+          <WorkoutInsights />
+
       </motion.div>
                     
       {

@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion"
 
 import { AlertCircle, TrendingUp, BarChart3, X } from "lucide-react"
 
+import useModalHelpers from '../../../Hooks/ModalHelpers'
+
 
 export default function HealthReminderModal({isOpen, isNewUser = true, onUpdateHealthMetrics, onClose}) {
 

@@ -2,7 +2,7 @@ import React from 'react'
 import {HashLoader, PropagateLoader, PacmanLoader, ScaleLoader, PuffLoader} from 'react-spinners'
 
 
-export function CustomHashLoader({loading, color, customStyle}){
+export function CustomHashLoader({loading, color, customStyle, size}){
 
     const loaderCssOverride= {
         display: "block",
@@ -12,7 +12,7 @@ export function CustomHashLoader({loading, color, customStyle}){
     };
 
     return(
-        <HashLoader loading={loading} cssOverride={loaderCssOverride} size={20}
+        <HashLoader loading={loading} cssOverride={loaderCssOverride} size={size ? size : 20}
                                                      color={color? color : "rgba(159, 42, 240, 1)"} data-testid="loader"/> 
     )
 }

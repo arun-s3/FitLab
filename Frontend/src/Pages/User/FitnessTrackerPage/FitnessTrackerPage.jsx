@@ -36,7 +36,6 @@ export default function FitnessTrackerPage() {
             style={{
                 backgroundImage: "linear-gradient(to right, rgba(255,255,255,0.94), rgba(250,245,255,0.94), rgba(243,244,246,0.94)), url('/fitness-tracker-bg.png')",
                 backgroundSize: "cover",
-                // backgroundPosition: "center",
                 backgroundRepeat: "no-repeat"
             }}
         >
@@ -69,7 +68,7 @@ export default function FitnessTrackerPage() {
 
         </main>
 
-        <FeaturesDisplay />
+        <FeaturesDisplay topRoom={false}/>
         
         <Footer/>
         

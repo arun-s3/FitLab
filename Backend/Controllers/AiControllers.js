@@ -1,10 +1,18 @@
 const openai = require("../Utils/openai")
 const FitnessTracker = require("../Models/fitnessTrackerModel")
 const ExerciseTemplate = require("../Models/exerciseTemplateModel")
-const {buildLastWorkoutPrompt} = require("../AI/buildLastWorkoutPrompts")
-const axios = require("axios")
 
-const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent"
+const {buildLastWorkoutPrompt} = require("../AI/buildLastWorkoutPrompts")
+const {parseAIJsonResponse} = require("./controllerUtils/aiUtils")
+
+const axios = require("axios")
+                    
+// const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent"
+// const GEMINI_URL =
+//   "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent"
+
+const GEMINI_URL =
+  "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent"
 
 
 const chatWithAI = async (req, res, next)=> {
@@ -35,6 +43,8 @@ const chatWithAI = async (req, res, next)=> {
 
 async function callGemini(prompt) {
   try {
+    console.log("Inside callGemini...")
+
     const res = await axios.post(
       `${GEMINI_URL}?key=${process.env.GEMINI_API_KEY}`,
       {
@@ -43,16 +53,21 @@ async function callGemini(prompt) {
             role: "user",
             parts: [{ text: prompt }]
           }
-        ]
+        ],
+        generationConfig: {
+          maxOutputTokens: 512,
+          temperature: 0.7
+        }
       },
       {
-        timeout: 8000
+        timeout: 50000 
       }
     )
 
     return res.data.candidates[0].content.parts[0].text
   }
   catch (error) {
+    console.error("Gemini error:", error.response?.status, error.response?.data || error.message)
     error.isGeminiError = true
     throw error
   }
@@ -64,6 +79,8 @@ async function callOpenRouter(prompt, model = "anthropic/claude-3.5-sonnet") {
     {
       model,
       messages: [{ role: "user", content: prompt }],
+      max_tokens: 600,  
+      temperature: 0.7
     },
     {
       headers: {
@@ -71,7 +88,7 @@ async function callOpenRouter(prompt, model = "anthropic/claude-3.5-sonnet") {
         // "HTTP-Referer": process.env.OPENROUTER_SITE_URL,
         // "X-Title": process.env.OPENROUTER_APP_NAME,
       },
-      timeout: 10000,
+      timeout: 50000,
     }
   )
 
@@ -95,8 +112,9 @@ async function generateAIResponse(prompt) {
     for (const model of fallbackModels) {
       try {
         return await callOpenRouter(prompt, model)
-      } catch (err) {
-        console.error(`Fallback model failed: ${model}`)
+      }
+      catch (err) {
+        console.error(`Fallback model failed: ${model}`, err.response?.status, err.response?.data || err.message)
       }
     }
 
@@ -105,74 +123,50 @@ async function generateAIResponse(prompt) {
 }
 
 
-const askAI = async (req, res, next) => {
+const askAIForAnalysis = async (req, res, next) => {
   try {
-    console.log("Inside askAI...")
+    console.log("Inside askAIForAnalysis...")
 
-    const userId = req.user._id
+    const {analysisType, trackerId, lastWorkout} = req.body.analysisRequirement
 
-    const startOfDay = new Date()
-    startOfDay.setHours(0, 0, 0, 0)
+    console.log("req.body.analysisRequirement---->", JSON.stringify(req.body.analysisRequirement))
 
-    const endOfDay = new Date()
-    endOfDay.setHours(23, 59, 59, 999)
+    let aiAnalysis = null
 
-    const result = await FitnessTracker.aggregate([
-      {
-        $match: {
-          userId,
-          date: { $gte: startOfDay, $lte: endOfDay }
+    if(analysisType === 'latestWorkout'){
+      const prompt = buildLastWorkoutPrompt(lastWorkout)
+      console.log("prompt to feed in ths models---->", prompt)
+
+      const aiResponse = await generateAIResponse(prompt)
+
+      const aiAnalysis = parseAIJsonResponse(aiResponse)
+
+      console.log("typeof aiResponse:", typeof aiResponse)
+      console.log("aiResponse---->", JSON.stringify(aiAnalysis))
+
+      await FitnessTracker.updateOne(
+        {_id: trackerId, "exercises._id": lastWorkout._id},
+        {
+          $set: {"exercises.$.aiAnalysis": aiAnalysis}
         }
-      },
-      { $unwind: "$exercises" },
-      {
-        $addFields: {
-          activityTime: {
-            $ifNull: [
-              "$exercises.exerciseCompletedAt",
-              "$updatedAt"
-            ]
-          }
-        }
-      },
-      {
-        $sort: {
-          activityTime: -1
-        }
-      },
-      { $limit: 1 },
-      {
-        $project: {
-          _id: 0,
-          exercise: "$exercises",
-          workoutDate: "$date",
-          activityTime: 1
-        }
-      }
-    ]);
+      )
 
-    if (!result.length) {
-      return res.status(200).json({success: true, message: "No exercise found for today", data: null});
+      await FitnessTracker.updateOne(
+        { _id: trackerId, "exercises._id": lastWorkout._id },
+        { $set: { "exercises.$.aiAnalysis": aiAnalysis } }
+      )
+
+      return res.status(200).json({success: true, aiResponse: aiAnalysis})
     }
- 
-    console.log("result[0]---->", JSON.stringify(result[0]))
-
-    const lastWorkout = result[0].exercise
-    console.log("lastWorkout---->", JSON.stringify(lastWorkout))
-
-    const prompt = buildLastWorkoutPrompt(lastWorkout)
-    const aiResponse = await callGemini(prompt)
-
-    console.log("aiResponse---->", JSON.stringify(aiResponse))
-
-    res.status(200).json({success: true, aiResponse});
+    
+    res.status(200).json({success: false, message: "Unsupported analysis type"});
   }
   catch (error) {
     next(error)
-    console.error("Error getting latest health profile:", error.message)
+    console.error("Error asking AI models:", error.message)
   }
 }
 
 
 
-module.exports = {chatWithAI, askAI}
+module.exports = {chatWithAI, askAIForAnalysis}

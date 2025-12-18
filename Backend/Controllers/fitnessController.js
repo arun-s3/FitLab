@@ -544,24 +544,82 @@ const getWorkoutHistory = async (req, res, next) => {
 }
 
 
-const getLatestWorkout = async (req, res, next)=> {
+// const getLatestWorkout = async (req, res, next)=> {
+//   try {
+//     console.log("Inside getLatestWorkout...")
+
+//     const userId = req.user._id
+    
+//     const startOfDay = new Date()
+//     startOfDay.setHours(0, 0, 0, 0)
+
+//     const endOfDay = new Date()
+//     endOfDay.setHours(23, 59, 59, 999)
+
+//     const result = await FitnessTracker.aggregate([
+//       {
+//         $match: {
+//           userId,
+//           date: { $gte: startOfDay, $lte: endOfDay }
+//         }
+//       },
+//       { $unwind: "$exercises" },
+//       {
+//         $addFields: {
+//           activityTime: {
+//             $ifNull: [
+//               "$exercises.exerciseCompletedAt",
+//               "$updatedAt"
+//             ]
+//           }
+//         }
+//       },
+//       {
+//         $sort: {
+//           activityTime: -1
+//         }
+//       },
+//       { $limit: 1 },
+//       {
+//         $project: {
+//           fitnessTrackerId: "$_id",
+//           exercise: "$exercises",
+//           workoutDate: "$date",
+//           activityTime: 1
+//         }
+//       }
+//     ]);
+
+//     if (!result.length) {
+//       return res.status(200).json({success: true, message: "No exercise found for today", data: null});
+//     }
+  
+//     console.log("result[0]---->", JSON.stringify(result[0]))
+
+//     const lastWorkout = result[0].exercise
+//     console.log("lastWorkout---->", JSON.stringify(lastWorkout))
+
+//     const { fitnessTrackerId, exercise } = result[0]
+
+//     console.log("fitnessTrackerId---->", fitnessTrackerId)
+
+//     return res.status(200).json({success: true, latestWorkout: exercise, trackerId: fitnessTrackerId});
+//   }
+//   catch (error) {
+//     console.error("Error fetching workout history:", error.message)
+//     next(error)
+//   }
+// }
+
+const getLatestWorkout = async (req, res, next) => {
   try {
     console.log("Inside getLatestWorkout...")
 
     const userId = req.user._id
-    
-    const startOfDay = new Date()
-    startOfDay.setHours(0, 0, 0, 0)
-
-    const endOfDay = new Date()
-    endOfDay.setHours(23, 59, 59, 999)
 
     const result = await FitnessTracker.aggregate([
       {
-        $match: {
-          userId,
-          date: { $gte: startOfDay, $lte: endOfDay }
-        }
+        $match: { userId }
       },
       { $unwind: "$exercises" },
       {
@@ -579,7 +637,7 @@ const getLatestWorkout = async (req, res, next)=> {
           activityTime: -1
         }
       },
-      { $limit: 1 },
+      { $limit: 2 },
       {
         $project: {
           fitnessTrackerId: "$_id",
@@ -588,28 +646,32 @@ const getLatestWorkout = async (req, res, next)=> {
           activityTime: 1
         }
       }
-    ]);
+    ])
 
     if (!result.length) {
-      return res.status(200).json({success: true, message: "No exercise found for today", data: null});
+      return res.status(200).json({
+        success: true,
+        message: "No workouts found",
+        data: null
+      })
     }
-  
-    console.log("result[0]---->", JSON.stringify(result[0]))
-
-    const lastWorkout = result[0].exercise
-    console.log("lastWorkout---->", JSON.stringify(lastWorkout))
 
     const { fitnessTrackerId, exercise } = result[0]
+    const prevExercise = result?.[1]?.exercise || null
 
-    console.log("fitnessTrackerId---->", fitnessTrackerId)
-
-    return res.status(200).json({success: true, latestWorkout: exercise, trackerId: fitnessTrackerId});
+    return res.status(200).json({
+      success: true,
+      latestWorkout: exercise,
+      trackerId: fitnessTrackerId,
+      prevExercise
+    })
   }
   catch (error) {
-    console.error("Error fetching workout history:", error.message)
+    console.error("Error fetching latest workout:", error.message)
     next(error)
   }
 }
+
 
 
 const deleteExerciseTemplate = async (req, res, next) => {
@@ -725,16 +787,23 @@ const getLatestHealthProfile = async (req, res, next) => {
   try {
     console.log("Inside getLatestHealthProfile...")
     const userId = req.user._id
+    console.log("IuserId---->", userId)
 
-    const latestProfile = await HealthProfile.findOne({ userId })
+    const profiles = await HealthProfile.find({ userId })
       .sort({ date: -1 }) 
+      .limit(2)
       .lean();
+    console.log("profiles---->", JSON.stringify(profiles))
 
-    if (!latestProfile) {
+    if (!profiles.length) {
       return next(errorHandler(404, "No health profile found for this user!"))
     }
 
-    return res.status(200).json({success: true, latestProfile});
+    return res.status(200).json({
+      success: true,
+      latestProfile: profiles[0],
+      prevProfile: profiles?.[1] || null
+    });
 
   }
   catch (error) {

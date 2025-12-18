@@ -10,7 +10,7 @@ import {toast as sonnerToast} from 'sonner'
 import {camelToCapitalizedWords} from '../../../Utils/helperFunctions'
 
 
-export default function MonthlyWeeklyCharts({ title, dataKey, timeRange }) {
+export default function MonthlyWeeklyCharts({ title, dataKey, timeRange, onFetchedDatas }) {
 
   const chartConfig = {
     workouts: { color: "#3b82f6", name: "Workouts" },
@@ -52,6 +52,7 @@ export default function MonthlyWeeklyCharts({ title, dataKey, timeRange }) {
           console.log(`${dataKey} weeklyDatas------>`, weeklyDatas)
           console.log(`${dataKey} monthlyDatas------>`, monthlyDatas)
           setchartDatas({week: weeklyDatas, month: monthlyDatas})
+          onFetchedDatas(dataKey, {week: weeklyDatas, month: monthlyDatas})
         }
         if(response.status === 400 || response.status === 404){
           sonnerToast.error("Some error occured while loading the charts")

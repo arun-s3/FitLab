@@ -1,8 +1,10 @@
 const openai = require("../Utils/openai")
 const FitnessTracker = require("../Models/fitnessTrackerModel")
 const ExerciseTemplate = require("../Models/exerciseTemplateModel")
+const HealthProfile = require("../Models/healthProfileModel")
 
 const {buildLastWorkoutPrompt} = require("../AI/buildLastWorkoutPrompts")
+const {buildLatestHealthPrompt} = require("../AI/buildLatestHealthPrompts")
 const {parseAIJsonResponse} = require("./controllerUtils/aiUtils")
 
 const axios = require("axios")
@@ -97,29 +99,31 @@ async function callOpenRouter(prompt, model = "anthropic/claude-3.5-sonnet") {
 
 
 async function generateAIResponse(prompt) {
-  try {
-    return await callGemini(prompt)
-  }
-  catch (error) {
-    console.error("Gemini failed, switching to fallback...")
+  const openRouterModels = [
+    "openai/gpt-4.1-mini",
+    "anthropic/claude-3.5-sonnet",
+    "mistralai/mistral-large"
+  ]
 
-    const fallbackModels = [
-      "openai/gpt-4.1-mini",
-      "anthropic/claude-3.5-sonnet",
-      "mistralai/mistral-large"
-    ]
-
-    for (const model of fallbackModels) {
-      try {
-        return await callOpenRouter(prompt, model)
-      }
-      catch (err) {
-        console.error(`Fallback model failed: ${model}`, err.response?.status, err.response?.data || err.message)
-      }
+  for (const model of openRouterModels) {
+    try {
+      console.log(`Trying OpenRouter model: ${model}`)
+      const response = await callOpenRouter(prompt, model)
+      console.log(`OpenRouter success: ${model}`)
+      return response
+    }catch (error) {
+      console.log(`OpenRouter model failed: ${model}`, error.response?.status, error.response?.data || error.message)
     }
-
-    throw new Error("All AI providers failed")
   }
+
+  try {
+    console.log("Falling back to Gemini")
+    return await callGemini(prompt)
+  }catch (error) {
+    console.log(`Gemini failed: ${model}`, error.response?.status, error.response?.data || error.message)
+  }
+
+  throw new Error("All AI providers failed")
 }
 
 
@@ -127,14 +131,13 @@ const askAIForAnalysis = async (req, res, next) => {
   try {
     console.log("Inside askAIForAnalysis...")
 
-    const {analysisType, trackerId, lastWorkout} = req.body.analysisRequirement
+    const {analysisType, trackerId, lastWorkout, prevWorkout, latestProfile, prevProfile} = req.body.analysisRequirement
 
     console.log("req.body.analysisRequirement---->", JSON.stringify(req.body.analysisRequirement))
 
-    let aiAnalysis = null
-
     if(analysisType === 'latestWorkout'){
-      const prompt = buildLastWorkoutPrompt(lastWorkout)
+      const isRelativeAnalysis = Boolean(prevWorkout)
+      const prompt = buildLastWorkoutPrompt(lastWorkout,  isRelativeAnalysis ? prevWorkout : null)
       console.log("prompt to feed in ths models---->", prompt)
 
       const aiResponse = await generateAIResponse(prompt)
@@ -147,13 +150,30 @@ const askAIForAnalysis = async (req, res, next) => {
       await FitnessTracker.updateOne(
         {_id: trackerId, "exercises._id": lastWorkout._id},
         {
-          $set: {"exercises.$.aiAnalysis": aiAnalysis}
+          $set: {"exercises.$.aiAnalysis": aiAnalysis, "exercises.$.relativeAnalysis": isRelativeAnalysis}
         }
       )
 
-      await FitnessTracker.updateOne(
-        { _id: trackerId, "exercises._id": lastWorkout._id },
-        { $set: { "exercises.$.aiAnalysis": aiAnalysis } }
+      return res.status(200).json({success: true, aiResponse: aiAnalysis})
+    }
+
+    if(analysisType === 'latestHealthProfile'){
+      const isRelativeAnalysis = Boolean(prevProfile)
+      const prompt = buildLatestHealthPrompt(latestProfile,  isRelativeAnalysis ? prevProfile : null)
+      console.log("prompt to feed in ths models---->", prompt)
+
+      const aiResponse = await generateAIResponse(prompt)
+
+      const aiAnalysis = parseAIJsonResponse(aiResponse)
+
+      console.log("typeof aiResponse:", typeof aiResponse)
+      console.log("aiResponse---->", JSON.stringify(aiAnalysis))
+
+      await HealthProfile.updateOne(
+        { _id: latestProfile._id },
+        {
+          $set: {aiAnalysis, relativeAnalysis: isRelativeAnalysis}
+        }
       )
 
       return res.status(200).json({success: true, aiResponse: aiAnalysis})

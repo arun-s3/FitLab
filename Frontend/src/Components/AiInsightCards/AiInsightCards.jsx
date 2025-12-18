@@ -1,64 +1,11 @@
 import React, { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 
-import {TrendingUp, Flame, Award, Zap, Bot, Heart, Dumbbell, Timer, Battery} from "lucide-react"
-import {MdTipsAndUpdates} from "react-icons/md"
+import {Bot} from "lucide-react"
 import axios from 'axios'
 
-import {CustomHashLoader} from '../../../../Components/Loader/Loader'
+import {CustomHashLoader} from '../Loader/Loader'
 
-const insightsTemplates = [
-  {
-    id: 1,
-    icon: Flame,
-    title: "Performance & Effort Quality",
-    description: "",
-    color: "bg-orange-500",
-    textColor: "text-orange-500",
-    bgLight: "bg-orange-50",
-    bgDark: "dark:bg-orange-950/30",
-  },
-  {
-    id: 2,
-    icon: Battery,
-    title: "Volume & Efficiency",
-    description: "",
-    color: "bg-lime-500",
-    textColor: "text-lime-500",
-    bgLight: "bg-lime-50",
-    bgDark: "dark:bg-lime-950/30",
-  },
-  {
-    id: 3,
-    icon: Timer,
-    title: "Workout Duration",
-    description: "",
-    color: "bg-slate-500",
-    textColor: "text-slate-500",
-    bgLight: "bg-slate-50",
-    bgDark: "dark:bg-slate-950/30",
-  },
-  {
-    id: 4,
-    icon: Award,
-    title: "Overall Workout Score",
-    description: "",
-    color: "bg-purple-500",
-    textColor: "text-purple-500",
-    bgLight: "bg-purple-50",
-    bgDark: "dark:bg-purple-950/30",
-  },
-  {
-    id: 5,
-    icon: MdTipsAndUpdates,
-    title: "Suggestions",
-    description: "",
-    color: "bg-green-500",
-    textColor: "text-green-500",
-    bgLight: "bg-green-50",
-    bgDark: "dark:bg-green-950/30",
-  },
-]
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -115,7 +62,7 @@ const cardVariants = {
   tap: { scale: 0.98 },
 }
 
-export default function WorkoutInsights() {
+export default function AiInsightCards({insightsTemplates, requiredSourceDatas, existingAiInsights, sectionTitle, sectionSubtitle, sourceDatasLoading}){
 
   const [selectedInsight, setSelectedInsight] = useState(null)
 
@@ -130,6 +77,7 @@ export default function WorkoutInsights() {
     console.log("aiResponseTopics----------->", aiResponseTopics)
     const insightsDatas = aiResponseTopics.map(topic=> {
       const insightTemplate = insightsTemplates.find(template=> template.title === topic)
+      console.log("insightTemplate found---->", insightTemplate)
       return {...insightTemplate, description: aiResponse[topic]}
     })
     console.log("insightsDatas----------->", insightsDatas)
@@ -140,24 +88,10 @@ export default function WorkoutInsights() {
       console.log("Inside getAiInsights...") 
       setLoading(true)
       try { 
-        const latestWorkoutResponse = await axios.get(`${baseApiUrl}/fitness/tracker/workout/latest`, { withCredentials: true })
-        if(latestWorkoutResponse.status === 200){ 
-          console.log("latestWorkoutResponse.data------->", latestWorkoutResponse.data) 
-          const latestWorkout = latestWorkoutResponse.data.latestWorkout
-
-          if (latestWorkout?.aiAnalysis && Object.keys(latestWorkout.aiAnalysis).length > 0){
-            console.log("Returning cached AI response")
-            createInsightCards(latestWorkout.aiAnalysis)
-          }else{
-            const analysisRequirement = {analysisType: 'latestWorkout', trackerId: latestWorkoutResponse.data.trackerId, lastWorkout: latestWorkout} 
-
-            const AiInsightResponse = await axios.post(`${baseApiUrl}/ai/ask`, {analysisRequirement}, { withCredentials: true})
-
-            if(AiInsightResponse.status === 200){
-              console.log("AiInsightResponse.data.aiResponse----------->", AiInsightResponse.data.aiResponse)
-              createInsightCards(AiInsightResponse.data.aiResponse)
-            }
-          }
+        const AiInsightResponse = await axios.post(`${baseApiUrl}/ai/ask`, {analysisRequirement: requiredSourceDatas}, { withCredentials: true})
+        if(AiInsightResponse.status === 200){
+          console.log("AiInsightResponse.data.aiResponse----------->", AiInsightResponse.data.aiResponse)
+          createInsightCards(AiInsightResponse.data.aiResponse)
         }
       }catch (error) {
         console.error("Error while fetching insights", error.message)
@@ -167,16 +101,27 @@ export default function WorkoutInsights() {
   }
 
   useEffect(()=> {
-    getAiInsights()
-  }, [])
+    console.log("insightsTemplates---------->",insightsTemplates)
+    console.log("existingAiInsights---------->",existingAiInsights)
+    console.log("requiredSourceDatas---------->",requiredSourceDatas)
+    if(insightsTemplates && insightsTemplates.length > 0 && existingAiInsights){
+        createInsightCards(existingAiInsights)
+    }else if(insightsTemplates && insightsTemplates.length > 0  && requiredSourceDatas){
+        getAiInsights()
+    }
+  }, [insightsTemplates, existingAiInsights, requiredSourceDatas])
+
+  useEffect(()=> {
+    console.log("requiredSourceDatas---------->",requiredSourceDatas)
+  }, [requiredSourceDatas])
 
   useEffect(()=> {
     console.log("insights----------->", insights)
   }, [insights])
 
-  if (loading) {
+  if (sourceDatasLoading || loading) {
     return (
-      <div className="w-full mt-6 max-w-7xl mx-auto py-8 sm:px-6 border border-dropdownBorder rounded-xl">
+      <div className="w-full bg-whitesmoke mt-6 max-w-7xl mx-auto py-8 sm:px-6 border border-dropdownBorder rounded-xl">
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="w-full flex justify-between items-center mb-6">
           <div>
             <div className="flex items-center gap-3 mb-3">
@@ -184,8 +129,8 @@ export default function WorkoutInsights() {
                 <Bot className="w-[1.8rem] h-[1.8rem] text-white" />
               </div>
               <div>
-                <h2 className="text-[21px] font-bold text-gray-900 dark:text-white">AI Workout Insights</h2>
-                <p className="-mt-[3px] text-[14px] text-gray-600 dark:text-gray-400">Personalized insights generated from your recent workout</p>
+                <h2 className="text-[21px] font-bold text-gray-900 dark:text-white"> {sectionTitle} </h2>
+                <p className="-mt-[3px] text-[14px] text-gray-600 dark:text-gray-400"> {sectionSubtitle} </p>
               </div>
             </div>
             <div className="flex gap-4 items-center">
@@ -194,16 +139,16 @@ export default function WorkoutInsights() {
             </div>
           </div>
           <div className="mr-8">
-              <CustomHashLoader loading={loading} size={30}/>
+              <CustomHashLoader loading={sourceDatasLoading || loading} size={30}/>
           </div>
         </motion.div>
 
         <div className="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3, 4, 5].map((i) => (
+          {Array.from({ length: insightsTemplates.length }).map((_, i) => (
             <div
-              key={i}
+              key={i+1}
               className={`bg-white min-h-[19rem] dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700
-                 ${i === 5 && 'col-span-2'}`}
+                 ${i+1 === 5 && 'col-span-2'}`}
             >
               <div className="animate-pulse">
                 <div className="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-xl mb-4" />
@@ -221,7 +166,7 @@ export default function WorkoutInsights() {
   }
 
   return (
-    <div className="w-full mt-6 max-w-7xl mx-auto py-8 sm:px-6 border border-dropdownBorder rounded-xl">
+    <div className="w-full bg-whitesmoke mt-6 max-w-7xl mx-auto py-8 sm:px-6 border border-dropdownBorder rounded-xl">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -232,13 +177,13 @@ export default function WorkoutInsights() {
           <motion.div
             whileHover={{ rotate: 360 }}
             transition={{ duration: 0.6 }}
-            className="bg-gradient-to-br from-purple-500 to-purple-600 flex gap-[8px] rounded-xl p-2 shadow-lg"
+            className="bg-gradient-to-br from-purple-500 to-purple-600 flex gap-[8px] rounded-[7px] p-2 shadow-lg"
           >
             <Bot className="w-6 h-6 text-white" />
           </motion.div>
           <div>
-            <h2 className="text-[21px] font-bold text-gray-900 dark:text-white">AI Workout Insights</h2>
-            <p className="text-gray-600 -mt-[3px] text-[14px] dark:text-gray-400">Personalized insights generated from your workout</p>
+            <h2 className="text-[21px] font-bold text-gray-900 dark:text-white"> {sectionTitle} </h2>
+            <p className="text-gray-600 -mt-[3px] text-[14px] dark:text-gray-400"> {sectionSubtitle} </p>
           </div>
         </div>
       </motion.div>
@@ -273,7 +218,7 @@ export default function WorkoutInsights() {
                     ${index === 5 && 'col-span-2'}
                     ${
                       isSelected
-                        ? `${insight.textColor.replace("text-", "border-")} shadow-xl`
+                        ? `${insight.textColor?.replace("text-", "border-") || "border-gray-300"} shadow-xl`
                         : "border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-lg"
                     }
                   `}

@@ -1,5 +1,6 @@
 function parseAIJsonResponse(aiText) {
-    
+  
+  console.log("aiText-------->", aiText)
   if (!aiText || typeof aiText !== "string") return null
 
   try {

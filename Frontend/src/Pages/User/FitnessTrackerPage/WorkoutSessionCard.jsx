@@ -14,7 +14,7 @@ import Timer from "./Timer"
 import ExerciseForm from "./ExerciseForm"
 import WorkoutSummaryModal from "./WorkoutSummaryModal"
 import RecentWorkouts from "./RecentWorkouts"
-import WorkoutInsights from "./AiModules/WorkoutInsights"
+import WorkoutAiInsights from "./AiModules/WorkoutAiInsights"
 import DeleteConfirmationModal from "./DeleteConfirmationModal"
 import {estimateCalories} from "../../../Utils/exerciseFunctions"
 import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
@@ -465,7 +465,7 @@ export default function WorkoutSessionCard() {
             </div>
           </div>
 
-          <WorkoutInsights />
+          <WorkoutAiInsights />
 
       </motion.div>
                     

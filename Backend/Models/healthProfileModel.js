@@ -68,6 +68,14 @@ const HealthProfileSchema = new mongoose.Schema(
       max: 500,
       default: null
     },
+    aiAnalysis: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null
+    },
+    relativeAnalysis: {
+      type: Boolean,
+      default: false
+    }
   },
   { timestamps: true }
 )

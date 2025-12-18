@@ -66,15 +66,15 @@ const ExerciseSchema = new mongoose.Schema({
      type: Number,
      default: null 
   },
-  // aiAnalysis: {
-  //   type: Map,
-  //   of: [String],
-  //   default: {}
-  // }
   aiAnalysis: {
     type: mongoose.Schema.Types.Mixed,
     default: null
+  },
+  relativeAnalysis: {
+    type: Boolean,
+    default: false
   }
+
 
 })
 

@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 import axios from 'axios'
 import {toast as sonnerToast} from 'sonner'
 
+import HealthAiInsights from "./AiModules/HealthAiInsights"
 import {updateUserWeight} from '../../../Slices/userSlice'
 
 
@@ -565,6 +566,13 @@ export default function BMICalculator() {
             </motion.div>
           )}
         </div>
+
+        <div className="mt-6">
+
+          <HealthAiInsights/>
+
+        </div>
+
       </div>
     </motion.div>
   )

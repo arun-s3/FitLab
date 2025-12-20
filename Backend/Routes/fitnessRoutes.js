@@ -36,9 +36,5 @@ fitnessRouter.get('/tracker/stats/exerciseBreakdown', isLogin, getBodyPartInsigh
 fitnessRouter.get('/tracker/stats/health', isLogin, getHealthScoreInsights) 
 
 
-// fitnessRouter.get('/exercises', getAllExercises)
-
-
-
 module.exports = fitnessRouter
 

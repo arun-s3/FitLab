@@ -1,11 +1,17 @@
 const openai = require("../Utils/openai")
 const FitnessTracker = require("../Models/fitnessTrackerModel")
-const ExerciseTemplate = require("../Models/exerciseTemplateModel")
+const ExerciseTemplate = require("../Models/exerciseTemplateModel") 
 const HealthProfile = require("../Models/healthProfileModel")
+const AiFitnessInsight = require("../Models/aiFitnessInsightModel")
+const AiBusinessInsight = require("../Models/aibusinessInsightsModel")
 
-const {buildLastWorkoutPrompt} = require("../AI/buildLastWorkoutPrompts")
+const {errorHandler} = require('../Utils/errorHandler') 
+
+const {buildLastWorkoutPrompt} = require("../AI/buildLastWorkoutPrompts") 
 const {buildLatestHealthPrompt} = require("../AI/buildLatestHealthPrompts")
-const {parseAIJsonResponse} = require("./controllerUtils/aiUtils")
+const {buildPeriodFitnessPrompts} = require("../AI/buildPeriodFitnessPrompts")
+const {buildBusinessPrompts} = require("../AI/buildBusinessPrompts")
+const {parseAIJsonResponse, getPeriodRange} = require("./controllerUtils/aiUtils")
 
 const axios = require("axios")
                     
@@ -81,7 +87,7 @@ async function callOpenRouter(prompt, model = "anthropic/claude-3.5-sonnet") {
     {
       model,
       messages: [{ role: "user", content: prompt }],
-      max_tokens: 600,  
+      max_tokens: 1500,  
       temperature: 0.7
     },
     {
@@ -131,9 +137,13 @@ const askAIForAnalysis = async (req, res, next) => {
   try {
     console.log("Inside askAIForAnalysis...")
 
-    const {analysisType, trackerId, lastWorkout, prevWorkout, latestProfile, prevProfile} = req.body.analysisRequirement
+    const userId = req.user._id
 
-    console.log("req.body.analysisRequirement---->", JSON.stringify(req.body.analysisRequirement))
+    const {
+      analysisType, trackerId, lastWorkout, prevWorkout, latestProfile, prevProfile, fitnessProfile, periodType, dashboardDatas
+    } = req.body.analysisRequirement
+
+    // console.log("req.body.analysisRequirement---->", JSON.stringify(req.body.analysisRequirement))
 
     if(analysisType === 'latestWorkout'){
       const isRelativeAnalysis = Boolean(prevWorkout)
@@ -177,8 +187,56 @@ const askAIForAnalysis = async (req, res, next) => {
       )
 
       return res.status(200).json({success: true, aiResponse: aiAnalysis})
+    } 
+
+    if(analysisType === 'periodFitnessProfile'){
+      const prompt = buildPeriodFitnessPrompts(fitnessProfile, periodType)
+      // console.log("prompt to feed in ths models---->", prompt)
+
+      const aiResponse = await generateAIResponse(prompt)
+
+      const aiAnalysis = parseAIJsonResponse(aiResponse)
+
+      console.log("SUCCESSFUL----typeof aiResponse:", typeof aiResponse)
+      console.log("aiResponse---->", JSON.stringify(aiAnalysis))
+
+      const {periodStart, periodEnd} = getPeriodRange(periodType)
+
+      const insightDoc = await AiFitnessInsight.findOneAndUpdate(
+        {userId, periodType, periodStart},
+        {
+          $set: {userId, periodType, periodStart, periodEnd, insights: aiAnalysis}
+        },
+        {upsert: true, new: true}
+      )
+
+      return res.status(200).json({success: true, aiResponse: aiAnalysis})
     }
     
+    if(analysisType === 'fitlabDashboardDatas'){
+      const prompt = buildBusinessPrompts(dashboardDatas)
+      console.log("prompt to feed in ths models---->", prompt)
+
+      const aiResponse = await generateAIResponse(prompt)
+
+      const aiAnalysis = parseAIJsonResponse(aiResponse)
+
+      console.log("typeof aiResponse:", typeof aiResponse)
+      console.log("aiResponse---->", JSON.stringify(aiAnalysis))
+
+      const {periodStart, periodEnd} = getPeriodRange("month")
+
+      const insightDoc = await AiBusinessInsight.findOneAndUpdate(
+        { periodStart },
+        {
+          $set: {periodStart, periodEnd, insights: aiAnalysis}
+        },
+        { upsert: true, new: true }
+      )
+
+      return res.status(200).json({success: true, aiResponse: aiAnalysis})
+    }
+
     res.status(200).json({success: false, message: "Unsupported analysis type"});
   }
   catch (error) {
@@ -188,5 +246,60 @@ const askAIForAnalysis = async (req, res, next) => {
 }
 
 
+const getTodayAiFitnessInsights = async (req, res, next) => {
+  try {
+    console.log("Inside getTodayAiFitnessInsights...")
 
-module.exports = {chatWithAI, askAIForAnalysis}
+    const userId = req.user._id
+
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    const insights = await AiFitnessInsight.find({
+      userId,
+      periodStart: { $lte: today },
+      periodEnd: { $gte: today },
+      periodType: { $in: ["week", "month"] }
+    })
+      .lean()
+
+    const weeklyInsight = insights.find(i => i.periodType === "week") || null
+    const monthlyInsight = insights.find(i => i.periodType === "month") || null
+
+    console.log(`weeklyInsight----->${weeklyInsight} and monthlyInsight----->${monthlyInsight}`)
+
+    return res.status(200).json({
+      success: true,
+      week: weeklyInsight,
+      month: monthlyInsight
+    })
+  }
+  catch (error) {
+    console.error("Error fetching AI fitness insights:", error.message)
+    next(error)
+  }
+}
+
+
+const getTodayBusinessInsight = async (req, res, next) => {
+  try {
+    console.log("Inside getTodayBusinessInsight...")
+
+    const today = new Date()
+
+    const businessInsightDoc = await AiBusinessInsight.findOne({
+      periodStart: { $lte: today },
+      periodEnd: { $gte: today }
+    }).lean()
+
+    return res.status(200).json({success: true, businessInsightDoc});
+  }
+  catch (error) {
+    console.error("Error fetching today's business insights:", error.message)
+    next(error)
+  }
+}
+
+
+
+module.exports = {chatWithAI, askAIForAnalysis, getTodayAiFitnessInsights, getTodayBusinessInsight}

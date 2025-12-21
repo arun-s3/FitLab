@@ -15389,6 +15389,10 @@ select{
     background-color: rgb(66 32 6 / var(--tw-bg-opacity));
   }
 
+  .dark\:bg-yellow-950\/30{
+    background-color: rgb(66 32 6 / 0.3);
+  }
+
   .dark\:bg-zinc-800{
     --tw-bg-opacity: 1;
     background-color: rgb(39 39 42 / var(--tw-bg-opacity));

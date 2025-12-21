@@ -2,6 +2,8 @@ const openai = require("../Utils/openai")
 const FitnessTracker = require("../Models/fitnessTrackerModel")
 const ExerciseTemplate = require("../Models/exerciseTemplateModel") 
 const HealthProfile = require("../Models/healthProfileModel")
+const Order = require("../Models/orderModel")
+const Wishlist = require("../Models/wishlistModel")
 const AiFitnessInsight = require("../Models/aiFitnessInsightModel")
 const AiBusinessInsight = require("../Models/aibusinessInsightsModel")
 
@@ -179,6 +181,10 @@ const askAIForAnalysis = async (req, res, next) => {
       console.log("typeof aiResponse:", typeof aiResponse)
       console.log("aiResponse---->", JSON.stringify(aiAnalysis))
 
+      if (!aiAnalysis || typeof aiAnalysis !== "object") {
+        return next(errorHandler(502, "Failed to analyze workout"))
+      }
+
       await HealthProfile.updateOne(
         { _id: latestProfile._id },
         {
@@ -199,6 +205,10 @@ const askAIForAnalysis = async (req, res, next) => {
 
       console.log("SUCCESSFUL----typeof aiResponse:", typeof aiResponse)
       console.log("aiResponse---->", JSON.stringify(aiAnalysis))
+
+      if (!aiAnalysis || typeof aiAnalysis !== "object") {
+        return next(errorHandler(502, "Failed to health profile"))
+      }
 
       const {periodStart, periodEnd} = getPeriodRange(periodType)
 
@@ -224,6 +234,10 @@ const askAIForAnalysis = async (req, res, next) => {
       console.log("typeof aiResponse:", typeof aiResponse)
       console.log("aiResponse---->", JSON.stringify(aiAnalysis))
 
+      if (!aiAnalysis || typeof aiAnalysis !== "object") {
+        return next(errorHandler(502, "Failed to analyze the business"))
+      }
+
       const {periodStart, periodEnd} = getPeriodRange("month")
 
       const insightDoc = await AiBusinessInsight.findOneAndUpdate(
@@ -242,6 +256,117 @@ const askAIForAnalysis = async (req, res, next) => {
   catch (error) {
     next(error)
     console.error("Error asking AI models:", error.message)
+  }
+}
+
+
+const askAICoach = async (req, res, next) => {
+  try {
+    console.log("Inside askAICoach...")
+
+    const userId = req.user._id
+    const { query, coachSessionState } = req.body
+
+    if (!query || typeof query !== "string") {
+      return next(errorHandler(400, "Invalid coach query"))
+    }
+
+    /* ------------------ Recent Workouts (last 4) ------------------ */
+
+    const recentWorkouts = await FitnessTracker.find({ userId }) 
+      .sort({ date: -1 })
+      .limit(4)
+      .select({
+        date: 1,
+        totalDuration: 1,
+        totalCalories: 1,
+        totalWorkoutVolume: 1,
+        exercises: 1
+      })
+      .lean()
+
+    /* ------------------ Recent Health profile ------------------ */      
+    
+    const healthProfile = await HealthProfile.find({ userId })
+      .sort({ date: -1 }) 
+      .limit(1)
+      .lean();
+
+    /* ------------------ Recent Orders (last 4) ------------------ */
+    const recentOrders = await Order.find({ userId })
+      .sort({ createdAt: -1 })
+      .limit(4)
+      .select({
+        createdAt: 1,
+        orderStatus: 1,
+        orderTotal: 1,
+        products: {
+          title: 1,
+          category: 1,
+          quantity: 1
+        }
+      })
+      .lean()
+
+    /* ------------------ Wishlist (last 3 lists only) ------------------ */
+    const wishlistDoc = await Wishlist.findOne({ userId })
+      .select({
+        lists: { $slice: -3 }
+      })
+      .populate({
+        path: "lists.products.product",
+        select: "title"
+      })
+      .lean()
+    
+    const wishlistItems = (wishlistDoc?.lists || []).map(list => ({
+      name: list.name,
+      description: list.description,
+      products: (list.products || [])
+        .slice(-3)
+        .map(item => ({
+          title: item.product?.title
+        }))
+    }))
+
+    /* ------------------ Derived Insights ------------------ */
+    const ALLOWED_GOALS = new Set([
+      "weight_loss", "muscle_gain", "general_fitness", "endurance", "strength", "flexibility", "recovery", "not_set"
+    ])
+
+    let userGoal = req.user.fitnessGoal
+
+    if (!ALLOWED_GOALS.has(userGoal)) {
+      userGoal = "not_set"
+    }
+
+    /* ------------------ Build Prompt ------------------ */
+    const prompt = buildAICoachPrompt({
+      userQuery: query,
+      coachSessionState,
+      recentWorkouts,
+      healthProfile,
+      recentOrders,
+      wishlistItems,
+      userGoal
+    })
+
+    const aiResponse = await generateAIResponse(prompt)
+    const parsedResponse = parseAIJsonResponse(aiResponse)
+
+    if (!parsedResponse ||  typeof parsedResponse !== "object" || !parsedResponse.responseText) {
+      return next(errorHandler(502, "Invalid AI coach response"))
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: parsedResponse.responseText,
+      coachSessionState: parsedResponse.updatedCoachSessionState
+    })
+  }
+  catch (error) {
+    console.error("AI Coach error:", error.message)
+    next(error)
   }
 }
 
@@ -302,4 +427,4 @@ const getTodayBusinessInsight = async (req, res, next) => {
 
 
 
-module.exports = {chatWithAI, askAIForAnalysis, getTodayAiFitnessInsights, getTodayBusinessInsight}
+module.exports = {chatWithAI, askAIForAnalysis, askAICoach, getTodayAiFitnessInsights, getTodayBusinessInsight}

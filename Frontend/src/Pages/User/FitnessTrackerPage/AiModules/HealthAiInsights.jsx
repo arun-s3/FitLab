@@ -17,6 +17,8 @@ export default function HealthAiInsights() {
     
     const [loading, setLoading] = useState(false)
 
+    const [error, setError] = useState(null)
+
     const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
     const insightsTemplates = [
@@ -111,6 +113,7 @@ export default function HealthAiInsights() {
           }
         }catch (error) {
           console.error("Error while fetching latest health datas", error.message)
+          setError("Something went wrong while finding your health profiles! Please check your network and retry later")
         }finally{
           setLoading(false)
         }
@@ -132,6 +135,7 @@ export default function HealthAiInsights() {
                     sectionTitle="AI Health Insights"
                     sectionSubtitle="Personalized insights generated from your recent health metrics"
                     sourceDatasLoading={loading}
+                    parentFetchError={error}
                 />
 
             }

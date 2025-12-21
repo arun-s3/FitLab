@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { motion } from "framer-motion"
 
 import {Bot} from "lucide-react"
@@ -62,7 +62,8 @@ const cardVariants = {
   tap: { scale: 0.98 },
 }
 
-export default function AiInsightCards({insightsTemplates, requiredSourceDatas, existingAiInsights, sectionTitle, sectionSubtitle, sourceDatasLoading}){
+export default function AiInsightCards({insightsTemplates, requiredSourceDatas, existingAiInsights, sectionTitle, sectionSubtitle, cardStyles,
+  sourceDatasLoading, excludeAndReturnItemTitles = null, onReturnExclusiveDatas, parentFetchError = null}){
 
   const [selectedInsight, setSelectedInsight] = useState(null)
 
@@ -70,53 +71,90 @@ export default function AiInsightCards({insightsTemplates, requiredSourceDatas, 
 
   const [loading, setLoading] = useState(false)
 
+  const [error, setError] = useState(null)
+
+  const hasReturnedExclusive = useRef(false)
+  const hasCreatedCards = useRef(false)
+
   const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
   const createInsightCards = (aiResponse)=> {
-    const aiResponseTopics = Object.keys(aiResponse)
-    console.log("aiResponseTopics----------->", aiResponseTopics)
+    let aiResponseTopics = Object.keys(aiResponse)
+
+    if(excludeAndReturnItemTitles && !hasReturnedExclusive.current){
+        // onReturnExclusiveDatas(aiResponse[excludeAndReturnItemTitles])
+        const excludedDatas = aiResponseTopics.reduce((accObj, topic)=> {
+          if(excludeAndReturnItemTitles.some(title=> title === topic)){
+            accObj[topic] = aiResponse[topic]
+          }
+          return accObj
+        }, {})
+        console.log("excludedDatas from insights----->", excludedDatas) 
+        onReturnExclusiveDatas(excludedDatas)
+        hasReturnedExclusive.current = true
+        aiResponseTopics = aiResponseTopics.filter(topic=> !excludeAndReturnItemTitles.includes(topic))
+    }
+
+    console.log(`aiResponseTopics of ${sectionTitle}----------->`, aiResponseTopics)
+    console.log(`insightsTemplates inside createInsightCards() of ${sectionTitle}----------->`, insightsTemplates)
+
     const insightsDatas = aiResponseTopics.map(topic=> {
       const insightTemplate = insightsTemplates.find(template=> template.title === topic)
       console.log("insightTemplate found---->", insightTemplate)
+      if (!insightTemplate) {
+        console.warn(`No template found for topic: ${topic}`)
+        return 
+      }
       return {...insightTemplate, description: aiResponse[topic]}
     })
-    console.log("insightsDatas----------->", insightsDatas)
-    setInsights(insightsDatas)
+
+    console.log(`insightsDatas of ${sectionTitle}----------->`, insightsDatas)
+
+    const filteredInsightData = insightsDatas.filter(data=> data?.title)
+    console.log(`filteredInsightData of ${sectionTitle}----------->`, filteredInsightData)
+    setInsights(filteredInsightData)
   }
 
   const getAiInsights = async()=> {
       console.log("Inside getAiInsights...") 
       setLoading(true)
       try { 
-        const AiInsightResponse = await axios.post(`${baseApiUrl}/ai/ask`, {analysisRequirement: requiredSourceDatas}, { withCredentials: true})
+        const AiInsightResponse = await axios.post(`${baseApiUrl}/ai/analyze`, {analysisRequirement: requiredSourceDatas}, { withCredentials: true})
         if(AiInsightResponse.status === 200){
           console.log("AiInsightResponse.data.aiResponse----------->", AiInsightResponse.data.aiResponse)
           createInsightCards(AiInsightResponse.data.aiResponse)
         }
+        if(AiInsightResponse.status === 404 || AiInsightResponse.status === 502){
+            sonnerToast.error(error.response.data.message)
+            setError(error.response.data.message)
+        } 
       }catch (error) {
         console.error("Error while fetching insights", error.message)
+        setError("Something went wrong while finding your health profiles! Please check your network and retry later")
       }finally{
         setLoading(false)
       }
   }
 
   useEffect(()=> {
-    console.log("insightsTemplates---------->",insightsTemplates)
-    console.log("existingAiInsights---------->",existingAiInsights)
-    console.log("requiredSourceDatas---------->",requiredSourceDatas)
-    if(insightsTemplates && insightsTemplates.length > 0 && existingAiInsights){
+    console.log(`insightsTemplates of ${sectionTitle}---------->`,insightsTemplates)
+    console.log(`existingAiInsights of ${sectionTitle}---------->`,existingAiInsights)
+    console.log(`requiredSourceDatas of ${sectionTitle}---------->`,requiredSourceDatas)
+    if(insightsTemplates && insightsTemplates.length > 0 && existingAiInsights && !hasCreatedCards.current){
+        hasCreatedCards.current = true  
         createInsightCards(existingAiInsights)
-    }else if(insightsTemplates && insightsTemplates.length > 0  && requiredSourceDatas){
-        getAiInsights()
+    }else if(insightsTemplates && insightsTemplates.length > 0  && requiredSourceDatas && !hasCreatedCards.current){
+      hasCreatedCards.current = true  
+      getAiInsights()
     }
   }, [insightsTemplates, existingAiInsights, requiredSourceDatas])
 
   useEffect(()=> {
-    console.log("requiredSourceDatas---------->",requiredSourceDatas)
+    console.log(`requiredSourceDatas of ${sectionTitle}---------->`,requiredSourceDatas)
   }, [requiredSourceDatas])
 
   useEffect(()=> {
-    console.log("insights----------->", insights)
+    console.log(`insights of ${sectionTitle}----------->`, insights)
   }, [insights])
 
   if (sourceDatasLoading || loading) {
@@ -192,10 +230,15 @@ export default function AiInsightCards({insightsTemplates, requiredSourceDatas, 
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        className={`${parentFetchError || error 
+            ? 'flex justify-center items-center text-[13px] text-red-500 tracking-[0.5px]' 
+            : cardStyles 
+            ? cardStyles 
+            : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'}`
+          }
       >
         {
-          insights && insights.length > 0 && insights.map((insight, index) => {
+          !error && insights && insights.length > 0 && insights.map((insight, index) => {
             const IconComponent = insight.icon
             const isSelected = selectedInsight?.id === insight.id
 
@@ -251,7 +294,7 @@ export default function AiInsightCards({insightsTemplates, requiredSourceDatas, 
                   {isSelected && (
                     <motion.div
                       layoutId="selectedBorder"
-                      className={`absolute inset-0 rounded-2xl border-2 ${insight.textColor.replace("text-", "border-")}`}
+                      className={`absolute inset-0 rounded-2xl border-2 ${insight?.textColor?.replace("text-", "border-")}`}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
@@ -261,7 +304,15 @@ export default function AiInsightCards({insightsTemplates, requiredSourceDatas, 
               </motion.div>
             )
           }
-        )}
+        )} 
+
+        {
+          parentFetchError || error && 
+            <p className="w-full text-[15px] text-red-500 text-center tracking-[0.4px]">
+              {parentFetchError || error}
+            </p>
+        }
+
       </motion.div>
 
     </div>

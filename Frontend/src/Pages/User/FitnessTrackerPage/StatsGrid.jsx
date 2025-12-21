@@ -38,7 +38,7 @@ const CalendarIcon = () => (
   </svg>
 )
 
-export default function StatsGrid({ timeRange }) {
+export default function StatsGrid({ timeRange, onFetchedDatas }) {
 
   const [loading, setLoading] = useState(false)
 
@@ -81,6 +81,7 @@ export default function StatsGrid({ timeRange }) {
           if(response.status === 200){
             console.log("response.data.weekStats------->", response.data.weekStats)
             const {totalWorkouts, totalVolumes, totalCaloriesBurned, currentStreak} = response.data.stats
+            onFetchedDatas("stats", {totalWorkouts, totalVolumes, totalCaloriesBurned, currentStreak})
             setStatCards((prev) =>
               prev.map((card) => {
                 if (card.label === "Workouts") {

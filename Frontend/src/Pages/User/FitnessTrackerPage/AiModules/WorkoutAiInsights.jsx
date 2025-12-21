@@ -15,6 +15,8 @@ export default function WorkoutAiInsights() {
     
     const [loading, setLoading] = useState(false)
 
+    const [error, setError] = useState(null)
+
     const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
     const insightsTemplates = [
@@ -100,6 +102,7 @@ export default function WorkoutAiInsights() {
           }
         }catch (error) {
           console.error("Error while fetching latest workout", error.message)
+          setError("Something went wrong while finding your workout history! Please check your network and retry later")
         }finally{
           setLoading(false)
         }
@@ -121,6 +124,7 @@ export default function WorkoutAiInsights() {
                     sectionTitle="AI Workout Insights"
                     sectionSubtitle="Personalized insights generated from your recent workouts"
                     sourceDatasLoading={loading}
+                    parentFetchError={error}
                 />
 
             }

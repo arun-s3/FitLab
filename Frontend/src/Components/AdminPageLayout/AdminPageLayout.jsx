@@ -14,6 +14,7 @@ import {RiDiscountPercentLine} from "react-icons/ri"
 import {GrGallery} from "react-icons/gr"
 import {RiArrowDropDownLine} from "react-icons/ri"
 import {CiSquareChevRight} from "react-icons/ci"
+import {RiRobot2Line} from "react-icons/ri"
 import {MapPinned, Headset} from "lucide-react"
 
 import AdminHeader from '../AdminHeader/AdminHeader'
@@ -48,7 +49,7 @@ export default function AdminPageLayout(){
 
     const [showSubmenu, setShowSubmenu] = useState({
         dashboard:false, customerHeatmap:false, customers:false, product: false, category: false, couponManager:false, orders:false,
-        offers:false, banners:false, support:false, settings:false
+        aiInsights: false, offers:false, banners:false, support:false, settings:false
     })
         
     const menuItems = [
@@ -67,6 +68,12 @@ export default function AdminPageLayout(){
       label: "Customer Heatmap",
       icon: MapPinned,
       path: '/admin/dashboard/heatmap'
+    },
+    {
+      id: "aiInsights",
+      label: "AI Analysis",
+      icon: RiRobot2Line,
+      path: '/admin/ai'
     },
     {
       id: "customers",
@@ -116,11 +123,11 @@ export default function AdminPageLayout(){
         { id: "list-edit-offers", label: "List/Edit Offers", path: '/admin/offers' },
       ],
     },
-    {
-      id: "banners",
-      label: "Banners",
-      icon: GrGallery,
-    },
+    // {
+    //   id: "banners",
+    //   label: "Banners",
+    //   icon: GrGallery,
+    // },
     {
       id: "support",
       label: "Support",

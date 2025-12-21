@@ -31,6 +31,7 @@ import UserRoutesWrapper from './Components/UserRoutesWrapper/UserRoutesWrapper'
 import ProtectedUserRoutes from './Components/ProtectedUserRoutes/ProtectedUserRoutes'
 import RestrictedEntryRoutes from './Components/RestrictedEntryRoutes/RestrictedEntryRoutes'
 
+import AdminRoutesWrapper from './Components/AdminRoutesWrapper/AdminRoutesWrapper'
 import AdminSignInPage from './Pages/Admin/AdminSignInPage/AdminSignInPage'
 import AdminPageLayout from './Components/AdminPageLayout/AdminPageLayout'
 import PrivateAdminRoutes from './Components/PrivateAdminRoutes/PrivateAdminRoutes'
@@ -50,7 +51,7 @@ import AdminOfferManagementPage from './Pages/Admin/AdminOfferManagementPage/Adm
 import AdminCreateOfferPage from './Pages/Admin/AdminCreateOfferPage/AdminCreateOfferPage'
 import AdminTextChatSupportPage from './Pages/Admin/AdminTextChatSupportPage/AdminTextChatSupportPage'
 import AdminVideoChatSupportPage from './Pages/Admin/AdminVideoChatSupportPage/AdminVideoChatSupportPage'
-import AdminRoutesWrapper from './Components/AdminRoutesWrapper/AdminRoutesWrapper'
+import AdminAiInsightsPage from './Pages/Admin/AdminAiInsightsPage/AdminAiInsightsPage'
 
 import ErrorPage403 from './Pages/Errors/403ErrorPage'
 import ErrorPage401 from './Pages/Errors/401ErrorPage'
@@ -146,6 +147,7 @@ export default function App(){
                                         <Route path="operations" element={<AdminDashboardPage insightType='operations'/>} />
                                         <Route path="heatmap" element={<AdminDashboardHeatmapPage/>} />
                                     </Route>
+                                    <Route path="ai" element={<AdminAiInsightsPage/>} />
                                     <Route path="customers" element={<AdminCustomersPage/>} />
                                     <Route path='products'>
                                         <Route index element={<AdminProductListPage/>} />

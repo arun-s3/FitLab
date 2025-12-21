@@ -3,7 +3,7 @@ import {motion} from "framer-motion"
 
 import MonthlyWeeklyChart from "./MonthlyWeeklyCharts"
 import StatsGrid from "./StatsGrid"
-import DashboardAiInsights from "./AiModules/DashboardAiInsights"
+import FitnessAiInsights from "./AiModules/FitnessAiInsights"
 
 
 export default function Dashboard() {
@@ -48,7 +48,7 @@ export default function Dashboard() {
         </button>
       </motion.div>
 
-      <StatsGrid timeRange={timeRange} />
+      <StatsGrid timeRange={timeRange} onFetchedDatas={tempSaveForAiInsight}/>
 
       <motion.div  
         className="grid grid-cols-1 lg:grid-cols-2 gap-6"
@@ -58,7 +58,7 @@ export default function Dashboard() {
       >
         <MonthlyWeeklyChart title="Workout Frequency" dataKey="workouts" timeRange={timeRange} onFetchedDatas={tempSaveForAiInsight}/>
         <MonthlyWeeklyChart title="Total Volume Lifted" dataKey="volume" timeRange={timeRange} onFetchedDatas={tempSaveForAiInsight}/>
-      </motion.div>
+      </motion.div> 
 
       <motion.div
         className="grid grid-cols-1 lg:grid-cols-2 gap-6"
@@ -82,7 +82,7 @@ export default function Dashboard() {
 
       <div className="mt-6">
       
-        <DashboardAiInsights receivedSourceDatas={dashboardDatas}/>
+        <FitnessAiInsights receivedSourceDatas={dashboardDatas} periodType={timeRange} />
       
       </div>
 

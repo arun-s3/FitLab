@@ -1,4 +1,6 @@
-const CoachSessionSchema = new mongoose.Schema({
+const mongoose = require("mongoose")
+
+const AiCoachSessionSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.ObjectId,
     ref: "User",
@@ -45,3 +47,6 @@ const CoachSessionSchema = new mongoose.Schema({
     }
   }
 }, { timestamps: true })
+
+
+module.exports = mongoose.model("AiCoachSession", AiCoachSessionSchema)

@@ -21,6 +21,7 @@ import {SiteButton} from '../SiteButtons/SiteButtons'
 import MobileSidebar from './MobileSidebar'
 import CartSidebar from '../../Components/CartSidebar/CartSidebar'
 import TextChatBox from '../../Pages/User/TextChatBox/TextChatBox'
+import CoachPlus from '../../Pages/User/Coach+/Coach+'
 import {SocketContext} from '../../Components/SocketProvider/SocketProvider'
 
 
@@ -30,6 +31,8 @@ export default function Header({customStyle, goToShopByCategorySec, pageChatBoxS
     const [isCartOpen, setIsCartOpen] = useState(false)
 
     const [openChatBox, setOpenChatBox] = useState(false)
+
+    const [openCoach, setopenCoach] = useState(false)
     
     const {userToken,user} = useSelector((state)=>state.user)
     const {cart} = useSelector(state=> state.cart)    
@@ -38,7 +41,8 @@ export default function Header({customStyle, goToShopByCategorySec, pageChatBoxS
     const dispatch = useDispatch()
     const location = useLocation()
 
-    const {isAdminOnline, notifications, setNotifications, markNotificationRead, markAllNotificationRead, deleteNotification} = useContext(SocketContext)
+    const {isAdminOnline, isConnected, notifications, setNotifications, markNotificationRead, markAllNotificationRead,
+         deleteNotification} = useContext(SocketContext)
 
     // const {setOpenVideoCallModal, VideoCallCommonModal} = useContext(SocketContext)
     // const {socket} = socketContextItems
@@ -67,8 +71,9 @@ export default function Header({customStyle, goToShopByCategorySec, pageChatBoxS
         {label: 'Fitness Training', path: '/fitness/training', 
             mobileLabel: 'Training', className: 'hidden lg:hidden x-lg:inline-block', mobileClassName: 'x-lg:hidden'},
         {label: 'Tracker', path: '/fitness/tracker'},
+        {label: 'Coach+', handleClick: ()=> setopenCoach(status=> !status)},
         {label: 'Support', path: '/support'},
-        {label: 'About Us', path: '/about'}
+        // {label: 'About Us', path: '/about'}
     ]
 
 
@@ -114,7 +119,7 @@ export default function Header({customStyle, goToShopByCategorySec, pageChatBoxS
                         menuItems.map((item, i)=> (
                             <motion.li
                                 key={i}
-                                className={`${item.label === 'Support' && 'flex items-center gap-[5px]'}`}
+                                className={`${ (item.label === 'Support' || item.label === 'Coach+') && 'flex items-center gap-[5px]'}`}
                                 variants={{
                                   hidden: { opacity: 0, y: -8 },
                                   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
@@ -141,6 +146,13 @@ export default function Header({customStyle, goToShopByCategorySec, pageChatBoxS
                                 { item.label === 'Support' &&
                                     <motion.div
                                         className={`w-[5px] h-[5px] rounded-full ${isAdminOnline ? "bg-green-400" : "bg-red-400"}`}
+                                        animate={{ scale: [1, 1.4, 1] }}
+                                        transition={{ repeat: Number.POSITIVE_INFINITY, duration: 2 }}
+                                    />
+                                }
+                                { item.label === 'Coach+' &&
+                                    <motion.div
+                                        className={`w-[5px] h-[5px] rounded-full ${isConnected ? "bg-green-400" : "bg-red-400"}`}
                                         animate={{ scale: [1, 1.4, 1] }}
                                         transition={{ repeat: Number.POSITIVE_INFINITY, duration: 2 }}
                                     />
@@ -276,6 +288,16 @@ export default function Header({customStyle, goToShopByCategorySec, pageChatBoxS
                         <div className="fixed bottom-[2rem] right-[2rem] z-50">
                         
                             <TextChatBox closeable={true} 
+                                onCloseChat={()=> setOpenChatBox(false)}/>
+
+                        </div>
+                }
+
+                {
+                    openCoach &&
+                        <div className="fixed bottom-[2rem] left-[2rem] z-50">
+                        
+                            <CoachPlus closeable={true} 
                                 onCloseChat={()=> setOpenChatBox(false)}/>
 
                         </div>

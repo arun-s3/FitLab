@@ -69,7 +69,7 @@ const userSchema = mongoose.Schema({
       default: null,
       maxlength: 500
     },
-    goal: {
+    fitnessGoal: {
       type: String,
       enum: ["weight_loss", "muscle_gain", "general_fitness", "endurance", "strength", "flexibility", "recovery", "not_set"],
       default: "not_set"

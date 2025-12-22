@@ -4,8 +4,11 @@ const ExerciseTemplate = require("../Models/exerciseTemplateModel")
 const HealthProfile = require("../Models/healthProfileModel")
 const Order = require("../Models/orderModel")
 const Wishlist = require("../Models/wishlistModel")
+
+const {generateAIResponse} = require("../AI/aiOrchestrator")
 const AiFitnessInsight = require("../Models/aiFitnessInsightModel")
-const AiBusinessInsight = require("../Models/aibusinessInsightsModel")
+const AiBusinessInsight = require("../Models/aibusinessInsightsModel") 
+const AiCoachSession = require("../Models/aiCoachSessionModel") 
 
 const {errorHandler} = require('../Utils/errorHandler') 
 
@@ -13,7 +16,7 @@ const {buildLastWorkoutPrompt} = require("../AI/buildLastWorkoutPrompts")
 const {buildLatestHealthPrompt} = require("../AI/buildLatestHealthPrompts")
 const {buildPeriodFitnessPrompts} = require("../AI/buildPeriodFitnessPrompts")
 const {buildBusinessPrompts} = require("../AI/buildBusinessPrompts")
-const {parseAIJsonResponse, getPeriodRange} = require("./controllerUtils/aiUtils")
+const {parseAIJsonResponse, getPeriodRange, DEFAULT_COACH_STATE, validateCoachSessionState} = require("./controllerUtils/aiUtils")
 
 const axios = require("axios")
                     
@@ -21,8 +24,8 @@ const axios = require("axios")
 // const GEMINI_URL =
 //   "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent"
 
-const GEMINI_URL =
-  "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent"
+// const GEMINI_URL =
+//   "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent"
 
 
 const chatWithAI = async (req, res, next)=> {
@@ -51,88 +54,88 @@ const chatWithAI = async (req, res, next)=> {
 }
 
 
-async function callGemini(prompt) {
-  try {
-    console.log("Inside callGemini...")
+// async function callGemini(prompt) {
+//   try {
+//     console.log("Inside callGemini...")
 
-    const res = await axios.post(
-      `${GEMINI_URL}?key=${process.env.GEMINI_API_KEY}`,
-      {
-        contents: [
-          {
-            role: "user",
-            parts: [{ text: prompt }]
-          }
-        ],
-        generationConfig: {
-          maxOutputTokens: 512,
-          temperature: 0.7
-        }
-      },
-      {
-        timeout: 50000 
-      }
-    )
+//     const res = await axios.post(
+//       `${GEMINI_URL}?key=${process.env.GEMINI_API_KEY}`,
+//       {
+//         contents: [
+//           {
+//             role: "user",
+//             parts: [{ text: prompt }]
+//           }
+//         ],
+//         generationConfig: {
+//           maxOutputTokens: 512,
+//           temperature: 0.7
+//         }
+//       },
+//       {
+//         timeout: 50000 
+//       }
+//     )
 
-    return res.data.candidates[0].content.parts[0].text
-  }
-  catch (error) {
-    console.error("Gemini error:", error.response?.status, error.response?.data || error.message)
-    error.isGeminiError = true
-    throw error
-  }
-}
-
-
-async function callOpenRouter(prompt, model = "anthropic/claude-3.5-sonnet") {
-  const res = await axios.post("https://openrouter.ai/api/v1/chat/completions",
-    {
-      model,
-      messages: [{ role: "user", content: prompt }],
-      max_tokens: 1500,  
-      temperature: 0.7
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        // "HTTP-Referer": process.env.OPENROUTER_SITE_URL,
-        // "X-Title": process.env.OPENROUTER_APP_NAME,
-      },
-      timeout: 50000,
-    }
-  )
-
-  return res.data.choices[0].message.content
-}
+//     return res.data.candidates[0].content.parts[0].text
+//   }
+//   catch (error) {
+//     console.error("Gemini error:", error.response?.status, error.response?.data || error.message)
+//     error.isGeminiError = true
+//     throw error
+//   }
+// }
 
 
-async function generateAIResponse(prompt) {
-  const openRouterModels = [
-    "openai/gpt-4.1-mini",
-    "anthropic/claude-3.5-sonnet",
-    "mistralai/mistral-large"
-  ]
+// async function callOpenRouter(prompt, model = "anthropic/claude-3.5-sonnet") {
+//   const res = await axios.post("https://openrouter.ai/api/v1/chat/completions",
+//     {
+//       model,
+//       messages: [{ role: "user", content: prompt }],
+//       max_tokens: 1500,  
+//       temperature: 0.7
+//     },
+//     {
+//       headers: {
+//         Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+//         // "HTTP-Referer": process.env.OPENROUTER_SITE_URL,
+//         // "X-Title": process.env.OPENROUTER_APP_NAME,
+//       },
+//       timeout: 50000,
+//     }
+//   )
 
-  for (const model of openRouterModels) {
-    try {
-      console.log(`Trying OpenRouter model: ${model}`)
-      const response = await callOpenRouter(prompt, model)
-      console.log(`OpenRouter success: ${model}`)
-      return response
-    }catch (error) {
-      console.log(`OpenRouter model failed: ${model}`, error.response?.status, error.response?.data || error.message)
-    }
-  }
+//   return res.data.choices[0].message.content
+// }
 
-  try {
-    console.log("Falling back to Gemini")
-    return await callGemini(prompt)
-  }catch (error) {
-    console.log(`Gemini failed: ${model}`, error.response?.status, error.response?.data || error.message)
-  }
 
-  throw new Error("All AI providers failed")
-}
+// async function generateAIResponse(prompt) {
+//   const openRouterModels = [
+//     "openai/gpt-4.1-mini",
+//     "anthropic/claude-3.5-sonnet",
+//     "mistralai/mistral-large"
+//   ]
+
+//   for (const model of openRouterModels) {
+//     try {
+//       console.log(`Trying OpenRouter model: ${model}`)
+//       const response = await callOpenRouter(prompt, model)
+//       console.log(`OpenRouter success: ${model}`)
+//       return response
+//     }catch (error) {
+//       console.log(`OpenRouter model failed: ${model}`, error.response?.status, error.response?.data || error.message)
+//     }
+//   }
+
+//   try {
+//     console.log("Falling back to Gemini")
+//     return await callGemini(prompt)
+//   }catch (error) {
+//     console.log(`Gemini failed: ${model}`, error.response?.status, error.response?.data || error.message)
+//   }
+
+//   throw new Error("All AI providers failed")
+// }
 
 
 const askAIForAnalysis = async (req, res, next) => {
@@ -265,13 +268,14 @@ const askAICoach = async (req, res, next) => {
     console.log("Inside askAICoach...")
 
     const userId = req.user._id
-    const { query, coachSessionState } = req.body
+    const { query } = req.body
 
     if (!query || typeof query !== "string") {
       return next(errorHandler(400, "Invalid coach query"))
     }
 
-    /* ------------------ Recent Workouts (last 4) ------------------ */
+    const sessionDoc = await AiCoachSession.findOne({ userId }).lean()
+    const coachSessionState = sessionDoc?.state || DEFAULT_COACH_STATE
 
     const recentWorkouts = await FitnessTracker.find({ userId }) 
       .sort({ date: -1 })
@@ -284,15 +288,12 @@ const askAICoach = async (req, res, next) => {
         exercises: 1
       })
       .lean()
-
-    /* ------------------ Recent Health profile ------------------ */      
     
     const healthProfile = await HealthProfile.find({ userId })
       .sort({ date: -1 }) 
       .limit(1)
       .lean();
 
-    /* ------------------ Recent Orders (last 4) ------------------ */
     const recentOrders = await Order.find({ userId })
       .sort({ createdAt: -1 })
       .limit(4)
@@ -308,7 +309,6 @@ const askAICoach = async (req, res, next) => {
       })
       .lean()
 
-    /* ------------------ Wishlist (last 3 lists only) ------------------ */
     const wishlistDoc = await Wishlist.findOne({ userId })
       .select({
         lists: { $slice: -3 }
@@ -329,7 +329,6 @@ const askAICoach = async (req, res, next) => {
         }))
     }))
 
-    /* ------------------ Derived Insights ------------------ */
     const ALLOWED_GOALS = new Set([
       "weight_loss", "muscle_gain", "general_fitness", "endurance", "strength", "flexibility", "recovery", "not_set"
     ])
@@ -340,7 +339,6 @@ const askAICoach = async (req, res, next) => {
       userGoal = "not_set"
     }
 
-    /* ------------------ Build Prompt ------------------ */
     const prompt = buildAICoachPrompt({
       userQuery: query,
       coachSessionState,
@@ -358,10 +356,18 @@ const askAICoach = async (req, res, next) => {
       return next(errorHandler(502, "Invalid AI coach response"))
     }
 
+    const validatedSessionState = validateCoachSessionState( parsedResponse.updatedCoachSessionState ) 
+
+    await AiCoachSession.findOneAndUpdate(
+      {userId},
+      {state: validatedSessionState, updatedAt: new Date()},
+      {upsert: true, new: true}
+    )
+
     return res.status(200).json({
       success: true,
       message: parsedResponse.responseText,
-      coachSessionState: parsedResponse.updatedCoachSessionState
+      coachSessionState: validatedSessionState
     })
   }
   catch (error) {

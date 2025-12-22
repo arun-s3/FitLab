@@ -1,6 +1,8 @@
 const TextChat = require('../Models/textChatBoxModel')
 const User = require('../Models/userModel')
 
+const {runAICoach} = require("../Services/aiCoach.service")
+
 const activeUsers = new Map()
 const adminSessions = new Set() 
 
@@ -259,8 +261,8 @@ async function textChatBoxSocket(io) {
           }else{
             socket.emit("loaded-admin-chat-history", messageData)
           }
-        } catch (err) {
-          console.error("Error loading chat history", err)
+        } catch (error) {
+          console.error("Error loading chat history", error)
         }
       })
 
@@ -290,6 +292,34 @@ async function textChatBoxSocket(io) {
 
         }
       })
+
+      socket.on("coach-ask", async (messageData) => {
+        try {
+          console.log("Inside on coach-ask, messageData----->", JSON.stringify(messageData))
+
+          const { message, userGoal, userId } = messageData
+
+          io.to(userId).emit("coach-loading", true)
+          const response = await runAICoach({userId, query: message, userGoal})
+
+          console.log("Emiting coach-response")
+          const coachMessageToUser = ({
+            roomId: messageData.roomId,
+            userId: messageData.userId,
+            timestamp: messageData.timestamp,
+            sender: "Coach+",
+            message: response.message,
+            isCoach: true,
+            isGuest: false
+          })
+          io.to(userId).emit("coach-response", coachMessageToUser) 
+          io.to(userId).emit("coach-loading", false)
+        }
+        catch (error) {
+          socket.emit("coach-error", { message: error.message })
+        }
+      })
+
     })
 
   }

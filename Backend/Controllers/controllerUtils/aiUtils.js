@@ -1,3 +1,6 @@
+const {CoachSessionStateSchema, DEFAULT_COACH_STATE} = require("../../AI/Constants/coachSessionState")
+
+
 function parseAIJsonResponse(aiText) {
   
   console.log("aiText-------->", aiText)
@@ -22,6 +25,7 @@ function parseAIJsonResponse(aiText) {
     return null
   }
 }
+
 
 function getPeriodRange(periodType, baseDate = new Date()) {
   const date = new Date(baseDate)
@@ -53,4 +57,36 @@ function getPeriodRange(periodType, baseDate = new Date()) {
 }
 
 
-module.exports = {parseAIJsonResponse, getPeriodRange}
+function validateCoachSessionState(state = {}) {
+  const validated = {}
+
+  validated.focus = CoachSessionStateSchema.focus.includes(state.focus)
+    ? state.focus
+    : DEFAULT_COACH_STATE.focus
+
+  validated.lastRecommendation =
+    CoachSessionStateSchema.lastRecommendation.includes(state.lastRecommendation)
+      ? state.lastRecommendation
+      : DEFAULT_COACH_STATE.lastRecommendation
+
+  validated.intensity = CoachSessionStateSchema.intensity.includes(state.intensity)
+    ? state.intensity
+    : DEFAULT_COACH_STATE.intensity
+
+  validated.timeScope = CoachSessionStateSchema.timeScope.includes(state.timeScope)
+    ? state.timeScope
+    : DEFAULT_COACH_STATE.timeScope
+
+  validated.riskFlag = CoachSessionStateSchema.riskFlag.includes(state.riskFlag)
+    ? state.riskFlag
+    : DEFAULT_COACH_STATE.riskFlag
+
+  validated.confidence = CoachSessionStateSchema.confidence.includes(state.confidence)
+    ? state.confidence
+    : DEFAULT_COACH_STATE.confidence
+
+  return validated
+}
+
+
+module.exports = {parseAIJsonResponse, getPeriodRange, validateCoachSessionState}

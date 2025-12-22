@@ -1117,6 +1117,10 @@ select{
   left: 28%;
 }
 
+.left-\[2rem\]{
+  left: 2rem;
+}
+
 .left-\[300px\]{
   left: 300px;
 }
@@ -2485,6 +2489,10 @@ select{
 
 .\!h-\[2\.2rem\]{
   height: 2.2rem !important;
+}
+
+.\!h-\[30rem\]{
+  height: 30rem !important;
 }
 
 .h-0{

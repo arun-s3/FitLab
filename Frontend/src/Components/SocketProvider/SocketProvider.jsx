@@ -23,7 +23,7 @@ export default function SocketProvider() {
 
     // const socket = useMemo(()=> io(baseApiUrl), [])
 
-    const {userToken} = useSelector((state)=> state.user)
+    const {userToken, user} = useSelector((state)=> state.user)
 
     const [socket, setSocket] = useState(null)
 
@@ -44,7 +44,23 @@ export default function SocketProvider() {
           isAdmin: true,
         },
     ])
-    const [newMessage, setNewMessage] = useState("")
+    const [newMessage, setNewMessage] = useState("") 
+
+    const [coachMessages, setCoachMessages] = useState([
+        {
+          id: 1,
+          message: `👋 Hi! I’m your FitLab Coach+. I’ve reviewed your recent activity and I’m here to help with 
+            workouts, recovery, supplements and fitness guidance—based on your activities and goals.
+            What would you like to focus on today?`,
+          sender: "Coach",
+          timestamp: new Date().toISOString(),
+          isCoach: true,
+        },
+    ]) 
+    const [newCoachMessage, setNewCoachMessage] = useState("") 
+    const [isCoachLoading, setIsCoachLoading] = useState(false)
+    const [coachError, setCoachError] = useState("") 
+
     const [isTyping, setIsTyping] = useState(false)
 
     const [openVideoCallModal, setOpenVideoCallModal] = useState(false)
@@ -129,9 +145,16 @@ export default function SocketProvider() {
         socket.on("admin-status", status=> {
           setIsAdminOnline(status)
         })
+
+        socket.on("connect_error", (error) => {
+          console.error("Server unreachable:", error.message)
+          setIsConnected(false)
+          setIsAdminOnline(false)
+        })
     
         socket.on("disconnect", () => {
           setIsConnected(false)
+          setIsAdminOnline(false)
         })
 
         socket.on("chat-history", (messages) => {
@@ -168,6 +191,21 @@ export default function SocketProvider() {
           console.log("Emiting unNotifiedSupportCaling...")
           socket.emit("unNotifiedSupportCalling")
         }) 
+
+        socket.on('coach-response', (message)=> {
+          console.log("coach-response-->", message)
+          setCoachMessages((prev) => [...prev, message]) 
+        })
+      
+        socket.on('coach-loading', (status)=> {
+          console.log("coach-loading....")
+          setIsCoachLoading(status)
+        })
+      
+        socket.on('coach-error', (message)=> {
+          console.log("coach-error-->", message)
+          setCoachError(message)
+        })
 
         socket.on("walletRechargeSuccess", (data) => {
           console.log("AUTO-RECHARGE SUCCESS!", data)
@@ -217,7 +255,7 @@ export default function SocketProvider() {
 
         socket.on('notification-error', (message)=> {
           console.log("Notification error-->", message)
-          sonnerToast.error(message)
+          sonnerToast.error(message) 
         }) 
 
         setSocket(socket)
@@ -234,6 +272,13 @@ export default function SocketProvider() {
     useEffect(() => {
         scrollToBottom()
     }, [messages])
+
+    useEffect(() => {
+      console.log("newCoachMessage-->", newCoachMessage)
+      console.log("coachMessages-->", coachMessages)
+      console.log("isCoachLoading-->", isCoachLoading)
+      console.log("coachError-->", coachError)
+    }, [coachMessages, newCoachMessage, isCoachLoading, coachError])
     
     
       const handleSendMessage = (e) => {
@@ -279,6 +324,31 @@ export default function SocketProvider() {
         }, 2000)
       }
 
+      const handleSendMessageToCoach = (e) => {
+        console.log("Inside handleSendMessage...") 
+        e.preventDefault()
+        if (!newCoachMessage.trim() || !socket) return 
+    
+        const messageData = {
+          roomId,
+          message: newCoachMessage,
+          sender: username,
+          userId: user._id,
+          userGoal: user.fitnessGoal, 
+          timestamp: new Date().toISOString(),
+          isCoach: false,
+        }
+    
+        socket.emit("coach-ask", messageData)
+        setCoachMessages((prev) => [...prev, messageData])
+    
+        setNewCoachMessage("")
+      }
+
+      const handleUserTypingForCoach = (e) => { 
+        setNewCoachMessage(e.target.value)
+      }
+
       const markNotificationRead = (id, userId)=> {
         socket.emit("mark-notification-read", {notificationId: id, userId} )
       }
@@ -306,6 +376,12 @@ export default function SocketProvider() {
         typingTimeoutRef,
         handleTyping,
         handleSendMessage,
+        coachMessages,
+        newCoachMessage,
+        isCoachLoading,
+        coachError,
+        handleSendMessageToCoach,
+        handleUserTypingForCoach,
         openVideoCallModal,
         setOpenVideoCallModal,
         scheduledVideoCallSessionId,

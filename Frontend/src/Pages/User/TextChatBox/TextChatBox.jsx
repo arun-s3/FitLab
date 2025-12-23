@@ -42,6 +42,13 @@ export default function TextChatBox({closeable, onCloseChat, boxHeight, boxWidth
     })
   }
 
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      handleSendMessage()
+    }
+  }
+
+
   return (
     <>
         <button 
@@ -52,7 +59,7 @@ export default function TextChatBox({closeable, onCloseChat, boxHeight, boxWidth
           whileTap={{ scale: 0.9 }}
           className={` ${isOpen ? 'bg-transparent p-0 shadow-none' : 'bg-none x-sm:bg-white p-0 x-sm:p-[1rem] shadow-none x-sm:shadow-lg'} 
             relative rounded-2xl flex items-center gap-[12px] hover:shadow-xl 
-              transition-all duration-200 transform hover:-translate-y-px ${isStatic && 'hidden'} `} onClick={toggleChat}>       {/* onClick={()=> setShowChat(true)} */}
+              transition-all duration-200 transform hover:-translate-y-px ${isStatic && 'hidden'} `} onClick={toggleChat}>       
             <div className="w-[2.5rem] h-[2.5rem] flex items-center justify-center bg-gradient-to-r
                from-primary to-[#f3d14b] rounded-full">
               <MessageSquare className="w-[20px] h-[20px] text-white" />
@@ -82,7 +89,7 @@ export default function TextChatBox({closeable, onCloseChat, boxHeight, boxWidth
         {isOpen && (
           <motion.div
             className={` ${!isStatic && 'fixed bottom-24 right-6'} z-50 ${boxWidth ? `w-[${boxWidth}rem]` : 'w-96'}
-              ${boxHeight ? `!h-[${boxHeight}px]` : '!h-[30rem]'} bg-white rounded-lg shadow-sm border
+              ${boxHeight ? `!h-[${boxHeight}px]` : '!h-[550px]'} bg-white rounded-lg shadow-sm border
                border-gray-200 flex flex-col overflow-hidden`}
             initial={{ opacity: 0, y: 50, scale: 0.9 }}
             animate={{
@@ -94,9 +101,10 @@ export default function TextChatBox({closeable, onCloseChat, boxHeight, boxWidth
             exit={{ opacity: 0, y: 50, scale: 0.9 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
           >
-            <div className={`bg-purple-500 text-white ${isStatic ? 'p-[1.4rem]' : 'p-4'} flex items-center justify-between`}>
+            <div className={`bg-gradient-to-r from-purple-500 to-purple-600 text-white ${isStatic ? 'p-[1.4rem]' : 'p-6'} 
+              flex items-center justify-between`}>
               <div className="flex items-center space-x-2">
-                <Headphones size={isStatic ? 22 : 20} />
+                <Headphones size={isStatic ? 36 : 38} className="p-[7px] rounded-full bg-purple-400"/>
                 <div>
                   <h3 className="flex items-center gap-[5px]"> 
                     <span className={`font-semibold ${isStatic ? 'text-[15px]' : 'text-sm'}`}> FitLab Support </span>
@@ -115,13 +123,13 @@ export default function TextChatBox({closeable, onCloseChat, boxHeight, boxWidth
                 </div>
               </div>
               <div className={`flex items-center space-x-2 ${isStatic && 'hidden'}`}>
-                {
+                {/* {
                   isMinimized ? 
                     <Maximize2 size={20} className="hover:bg-white hover:text-secondary p-1 rounded transition-colors cursor-pointer"
                        onClick={()=> setIsMinimized(false)}/> 
                     : <Minimize2 size={20} className="hover:bg-white hover:text-secondary p-1 rounded transition-colors cursor-pointer"
                         onClick={()=> setIsMinimized(true)}/>
-                  }
+                  } */}
                 <button onClick={toggleChat} className="hover:bg-white hover:text-secondary p-1 rounded transition-colors">
                   <X size={16} />
                 </button>
@@ -182,6 +190,7 @@ export default function TextChatBox({closeable, onCloseChat, boxHeight, boxWidth
                       type="text"
                       value={newMessage} 
                       onChange={(e)=> handleTyping(e)}
+                      onKeyPress={handleKeyPress}
                       placeholder={isAdminOnline ? "Type your message..." : `Type your message (Offline — we’ll reply soon)`}
                       className={`flex-1 border border-gray-300 rounded-lg px-3 ${isStatic ? 'py-[9px]' : 'py-2'} text-[13px] text-black focus:outline-none focus:ring-2
                         ${isStatic ? 'placeholder:text-[13px]' : 'placeholder:text-[12px]'} focus:ring-blue-500 focus:border-transparent`}

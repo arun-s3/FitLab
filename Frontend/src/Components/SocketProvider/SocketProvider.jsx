@@ -324,9 +324,9 @@ export default function SocketProvider() {
         }, 2000)
       }
 
-      const handleSendMessageToCoach = (e) => {
+      const handleSendMessageToCoach = () => {
         console.log("Inside handleSendMessage...") 
-        e.preventDefault()
+        // e.preventDefault()
         if (!newCoachMessage.trim() || !socket) return 
     
         const messageData = {

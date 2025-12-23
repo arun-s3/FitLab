@@ -298,7 +298,8 @@ export default function Header({customStyle, goToShopByCategorySec, pageChatBoxS
                         <div className="fixed bottom-[2rem] left-[2rem] z-50">
                         
                             <CoachPlus closeable={true} 
-                                onCloseChat={()=> setOpenChatBox(false)}/>
+                                autoOpen={true}
+                                onCloseChat={()=> setopenCoach(false)}/>
 
                         </div>
                 }

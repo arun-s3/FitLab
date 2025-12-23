@@ -71,8 +71,7 @@ function buildAICoachPrompt({
         - If riskFlag is not "none", reduce intensity and suggest rest or clarification.
         - If unsure, choose safer defaults.
         
-
-        `
+      `
 }
 
 module.exports = {buildAICoachPrompt}

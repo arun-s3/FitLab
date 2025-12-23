@@ -1,38 +1,54 @@
-import React, {useState, useEffect, useRef, useContext} from "react"
-import {motion, AnimatePresence} from "framer-motion"
+import React, { useState, useRef, useEffect, useContext } from "react"
+import { motion, AnimatePresence } from "framer-motion"
+
+import { Bot, X, Send, User } from "lucide-react"
+import {toast as sonnerToast} from 'sonner'
 
 import {SocketContext} from '../../../Components/SocketProvider/SocketProvider'
+import AnimatedBotIcon from "./AnimatedBot"
 
-import {MessageSquare, X, Bot, Send, User, Headphones, Minimize2, Maximize2} from "lucide-react"
 
-
-export default function CoachPlus({closeable, onCloseChat, boxHeight, boxWidth, focusByDefault = false, isStatic = false, openChats = false}){
+export default function CoachPlus({autoOpen, onCloseChat}) {
 
   const [isOpen, setIsOpen] = useState(false)
-  const [isMinimized, setIsMinimized] = useState(false)
 
+  const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
 
-  const {isConnected, coachMessages, newCoachMessage, isCoachLoading, coachError, messagesEndRef, 
-      handleSendMessageToCoach, handleUserTypingForCoach} = useContext(SocketContext)
+  const {isConnected, coachMessages, newCoachMessage, isCoachLoading, coachError, 
+        handleSendMessageToCoach, handleUserTypingForCoach} = useContext(SocketContext)
+
 
   useEffect(()=> {
     console.log("newCoachMessage--->", newCoachMessage)
   },[newCoachMessage])
+  
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
 
-  useEffect(()=> {
-    if(isStatic || openChats){
-      setIsOpen(true)
-    }
-    if(focusByDefault){
+  useEffect(() => {
+    scrollToBottom()
+  }, [coachMessages])
+
+  useEffect(() => {
+    if (isOpen && inputRef.current) {
       inputRef.current.focus()
     }
-  }, [isStatic, focusByDefault, openChats])
+  }, [isOpen])
 
-  const toggleChat = () => {
-    setIsOpen(!isOpen)
-    setIsMinimized(false)
-  }
+  useEffect(()=> {
+    if(autoOpen){
+      setIsOpen(true)
+      console.log("autoOpen--->", autoOpen)
+    }
+  }, [autoOpen])
+
+  useEffect(() => {
+    if(coachError){
+      sonnerToast.error(coachError)
+    }
+  }, [coachError])
 
   const formatTime = (timestamp) => {
     return new Date(timestamp).toLocaleTimeString([], {
@@ -41,200 +57,201 @@ export default function CoachPlus({closeable, onCloseChat, boxHeight, boxWidth, 
     })
   }
 
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault()
+      handleSendMessage()
+    }
+  }
+
 
   return (
     <>
-        <motion.button 
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: "spring", stiffness: 260, damping: 20 }}
-          whileHover={{ scale: 1.1 }}   
-          whileTap={{ scale: 0.9 }}
-          id="CoachPlus"
-          className={` ${isOpen ? 'bg-transparent p-0 shadow-none' : 'bg-none x-sm:bg-white p-0 x-sm:p-[1rem] shadow-none x-sm:shadow-lg'} 
-            relative rounded-2xl flex items-center gap-[12px] hover:shadow-xl 
-              transition-all duration-200 transform hover:-translate-y-px ${isStatic && 'hidden'} `} onClick={toggleChat}>       {/* onClick={()=> setShowChat(true)} */}
-            <div className="w-[2.5rem] h-[2.5rem] flex items-center justify-center bg-gradient-to-r
-               from-primary to-[#f3d14b] rounded-full">
-              <MessageSquare className="w-[20px] h-[20px] text-white" />
-            </div>
-          {
-            !isOpen &&
-            <div className="text-left hidden x-sm:inline-block">
-                <h3 className="text-[14px] font-[650] text-gray-800">Send us a message</h3>
-                <p className="text-[13px] leading-[20px] text-gray-500">We typically reply within a day</p>
-            </div>
-          }
-          <motion.div
-            className={`absolute -top-[7px] -left-[7px] w-[8px] h-[8px] rounded-full ${isConnected ? "bg-green-400" : "bg-red-400"}`}
-            animate={{ scale: [1, 1.2, 1] }}
-            transition={{ repeat: Number.POSITIVE_INFINITY, duration: 2 }}
-          />
-          {
-            closeable && !isOpen &&
-            <X className={`absolute -top-[0.9rem] x-sm:-top-[1.7rem] -right-[9px] x-sm:right-0 p-1 w-[16px] x-sm:w-[20px] h-[16px] x-sm:h-[20px]
-               text-secondary bg-white shadow-sm rounded-full cursor-pointer z-[70] hover:scale-105 hover:transition
-                hover:duration-150 hover:ease-in`}
-                onClick={()=> onCloseChat()}/>
-          }
-        </motion.button>
+      <motion.button
+        onClick={()=> setIsOpen(status=> !status)}
+        className={`fixed ${isOpen ? 'bottom-[10px]' : 'bottom-6'} left-6 z-50 flex h-14 w-14 items-center justify-center 
+          rounded-full bg-purple-600 text-white shadow-lg hover:bg-purple-700 focus:outline-none focus:ring-4 focus:ring-purple-300`}
+        whileHover={!isOpen && { scale: 1.1 }}
+        whileTap={!isOpen && { scale: 0.9 }}
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: isOpen ? 0.9 : 1, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 260, damping: 20 }}
+      >
+        <AnimatedBotIcon/>
+        <motion.div
+          className={`absolute -top-[7px] -left-[7px] w-[8px] h-[8px] rounded-full ${isConnected ? "bg-green-400" : "bg-red-400"}`}
+          animate={{ scale: [1, 1.2, 1] }}
+          transition={{ repeat: Number.POSITIVE_INFINITY, duration: 2 }}
+        />
+        {
+          !isOpen &&
+          <X className={`absolute -top-[0.9rem] x-sm:-top-[1.7rem] -right-[9px] x-sm:right-0 p-1 w-[16px] x-sm:w-[20px] h-[16px] x-sm:h-[20px]
+             text-secondary bg-white shadow-sm rounded-full cursor-pointer z-[70] hover:scale-105 hover:transition
+              hover:duration-150 hover:ease-in`}
+              onClick={()=> onCloseChat()}/>
+        }
+      </motion.button>
 
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className={` ${!isStatic && 'fixed bottom-24 left-6'} z-50 ${boxWidth ? `w-[${boxWidth}rem]` : 'w-96'}
-              ${boxHeight ? `!h-[${boxHeight}px]` : '!h-96'} bg-white rounded-lg shadow-sm border
-               border-gray-200 flex flex-col overflow-hidden`}
-            initial={{ opacity: 0, y: 50, scale: 0.9 }}
-            animate={{
-              opacity: 1,
-              y: 0,
-              scale: 1,
-              height: isMinimized ? 60 : boxHeight ? boxHeight : 384,
-            }}
-            exit={{ opacity: 0, y: 50, scale: 0.9 }}
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className={`fixed ${isOpen ? 'bottom-16 left-12' : 'bottom-6 left-6'} z-50 flex h-[600px] w-full max-w-[400px] 
+              flex-col overflow-hidden rounded-2xl bg-white shadow-2xl`}
           >
-            <div className={`bg-purple-500 text-white ${isStatic ? 'p-[1.4rem]' : 'p-4'} flex items-center justify-between`}>
-              <div className="flex items-center space-x-2">
-                <Headphones size={isStatic ? 22 : 20} />
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="flex items-center justify-between bg-gradient-to-r from-purple-600 to-purple-700 px-6 py-4 text-white"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm">
+                  <Bot className="h-5 w-5" />
+                </div>
                 <div>
-                  <h3 className="flex items-center gap-[5px]"> 
-                    <span className={`font-semibold ${isStatic ? 'text-[15px]' : 'text-sm'}`}> Coach+ </span>
-                    {
-                      isStatic &&
-                      <motion.div
-                      className={`w-[8px] h-[8px] rounded-full ${isConnected ? "bg-green-400" : "bg-red-400"}`}
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ repeat: Number.POSITIVE_INFINITY, duration: 2 }}
-                      />
-                    }
-                  </h3>
-                  <p className="text-xs opacity-90">{!isConnected ? "Connecting..." : isConnected ? "Online" : "Coach+ service unavailable"}</p>
+                  <h3 className="text-lg font-semibold"> Coach+ </h3>
+                  <p className="text-xs text-purple-100">
+                    {!isConnected ? "Connecting..." : isConnected ? "Online" : "Coach+ service unavailable"}
+                  </p>
                 </div>
               </div>
-              <div className={`flex items-center space-x-2 ${isStatic && 'hidden'}`}>
-                {
-                  isMinimized ? 
-                    <Maximize2 size={20} className="hover:bg-white hover:text-secondary p-1 rounded transition-colors cursor-pointer"
-                       onClick={()=> setIsMinimized(false)}/> 
-                    : <Minimize2 size={20} className="hover:bg-white hover:text-secondary p-1 rounded transition-colors cursor-pointer"
-                        onClick={()=> setIsMinimized(true)}/>
-                  }
-                <button onClick={toggleChat} className="hover:bg-white hover:text-secondary p-1 rounded transition-colors">
-                  <X size={16} />
-                </button>
-              </div>
+              <motion.button
+                onClick={() => setIsOpen(false)}
+                className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50"
+                whileHover={{ scale: 1.1, rotate: 90 }}
+                whileTap={{ scale: 0.9 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                <X className="h-5 w-5" />
+              </motion.button>
+            </motion.div>
+
+            <div className="flex-1 overflow-y-auto bg-gray-50 p-4 space-y-4">
+              <AnimatePresence initial={false}>
+                {coachMessages.map((message, index) => (
+                  <motion.div
+                    key={message.id}
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 500,
+                      damping: 30,
+                      delay: index * 0.05,
+                    }} 
+                    className={`flex ${message.isCoach ? "justify-start" : "justify-end"}`}
+                  >
+                    <div
+                      className={`max-w-xs lg:max-w-md px-3 py-2 rounded-lg ${
+                        message.isCoach ? "bg-white text-gray-800 border border-gray-200" : "bg-purple-600 text-white"
+                      }`}
+                    >
+                      <div className="flex items-center space-x-1 mb-1">
+                        {message.isCoach ? <Bot size={12} /> : <User size={12} />}
+                        <span className="text-xs opacity-75">{message.sender}</span>
+                      </div>
+                      <p className="text-sm">{message.message}</p>
+                      <p className="text-[10px] opacity-75 mt-1">{formatTime(message.timestamp)}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+
+              <AnimatePresence>
+                {isCoachLoading && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="flex justify-start"
+                  >
+                    <div className="flex gap-2">
+                      <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gray-300 text-gray-700">
+                        <Bot className="h-4 w-4" />
+                      </div>
+                      <div className="flex items-center gap-1 rounded-2xl bg-white px-4 py-2 border border-gray-200">
+                        <motion.div
+                          animate={{ scale: [1, 1.2, 1] }}
+                          transition={{
+                            duration: 0.6,
+                            repeat: Number.POSITIVE_INFINITY,
+                            repeatDelay: 0.2,
+                          }}
+                          className="h-2 w-2 rounded-full bg-gray-400"
+                        />
+                        <motion.div
+                          animate={{ scale: [1, 1.2, 1] }}
+                          transition={{
+                            duration: 0.6,
+                            repeat: Number.POSITIVE_INFINITY,
+                            repeatDelay: 0.2,
+                            delay: 0.2,
+                          }}
+                          className="h-2 w-2 rounded-full bg-gray-400"
+                        />
+                        <motion.div
+                          animate={{ scale: [1, 1.2, 1] }}
+                          transition={{
+                            duration: 0.6,
+                            repeat: Number.POSITIVE_INFINITY,
+                            repeatDelay: 0.2,
+                            delay: 0.4,
+                          }}
+                          className="h-2 w-2 rounded-full bg-gray-400"
+                        />
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <div ref={messagesEndRef} />
             </div>
 
-            {!isMinimized && (
-              <>
-                <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50">
-                  {coachMessages.map((message) => (
-                    <motion.div
-                      key={message.id}
-                      className={`flex ${message.isCoach ? "justify-start" : "justify-end"}`}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      <div
-                        className={`max-w-xs lg:max-w-md px-3 py-2 rounded-lg ${
-                          message.isCoach ? "bg-white text-gray-800 border border-gray-200" : "bg-blue-600 text-white"
-                        }`}
-                      >
-                        <div className="flex items-center space-x-1 mb-1">
-                          {message.isCoach ? <Headphones size={12} /> : <User size={12} />}
-                          <span className="text-xs opacity-75">{message.sender}</span>
-                        </div>
-                        <p className="text-sm">{message.message}</p>
-                        <p className="text-[10px] opacity-75 mt-1">{formatTime(message.timestamp)}</p>
-                      </div>
-                    </motion.div>
-                  ))}
-
-                  {isCoachLoading && (
-                    <motion.div 
-                      className="flex justify-start" 
-                      initial={{ opacity: 0 }} 
-                      animate={{ opacity: 1 }}
-                    >
-                      
-                      <div className="flex gap-2">
-                        <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gray-300 text-gray-700">
-                          <Bot className="h-4 w-4" />
-                        </div>
-                        <div className="flex items-center gap-1 rounded-2xl bg-white px-4 py-2 border border-gray-200">
-                          <motion.div
-                            animate={{ scale: [1, 1.2, 1] }}
-                            transition={{
-                              duration: 0.6,
-                              repeat: Number.POSITIVE_INFINITY,
-                              repeatDelay: 0.2,
-                            }}
-                            className="h-2 w-2 rounded-full bg-gray-400"
-                          />
-                          <motion.div
-                            animate={{ scale: [1, 1.2, 1] }}
-                            transition={{
-                              duration: 0.6,
-                              repeat: Number.POSITIVE_INFINITY,
-                              repeatDelay: 0.2,
-                              delay: 0.2,
-                            }}
-                            className="h-2 w-2 rounded-full bg-gray-400"
-                          />
-                          <motion.div
-                            animate={{ scale: [1, 1.2, 1] }}
-                            transition={{
-                              duration: 0.6,
-                              repeat: Number.POSITIVE_INFINITY,
-                              repeatDelay: 0.2,
-                              delay: 0.4,
-                            }}
-                            className="h-2 w-2 rounded-full bg-gray-400"
-                          />
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                  <div ref={messagesEndRef} />
-                </div>
-
-                <form onSubmit={(e)=> handleSendMessageToCoach(e)} className={`p-4 border-t border-gray-200 bg-white`}>
-                  <div className="flex space-x-2">
-                    <input
-                      type="text"
-                      value={newCoachMessage} 
-                      onChange={(e)=> handleUserTypingForCoach(e)}
-                      placeholder={isConnected ? "Type your message..." : `Type your message (Offline — we’ll reply soon)`}
-                      className={`flex-1 border border-gray-300 rounded-lg px-3 ${isStatic ? 'py-[9px]' : 'py-2'} text-[13px] text-black focus:outline-none focus:ring-2
-                        ${isStatic ? 'placeholder:text-[13px]' : 'placeholder:text-[12px]'} focus:ring-blue-500 focus:border-transparent`}
-                      ref={inputRef}
-                    />
-                    <motion.button
-                      type="submit"
-                      disabled={!newCoachMessage.trim() || !isConnected}
-                      className={`${isStatic ? 'w-[3rem]' : 'w-[2.5rem]'} flex justify-center items-center bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white p-2 rounded-lg transition-colors duration-200`}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <Send size={isStatic ? 18 : 16} />
-                    </motion.button>
-                  </div>
-                </form>
-              </>
-            )}
-{/* 
-            {
-              closeable && isOpen &&
-              <X className="absolute top-[5px] left-[5px] p-1 w-[20px] h-[20px] text-secondary bg-white shadow-sm rounded-full 
-              cursor-pointer hover:scale-105 hover:transition hover:duration-150 hover:ease-in"
-                onClick={()=> onCloseChat()}/>
-            } */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="border-t border-gray-200 bg-white p-4"
+            >
+              <div className="flex items-end gap-2">
+                <textarea
+                  ref={inputRef}
+                  value={newCoachMessage} 
+                  onChange={(e)=> handleUserTypingForCoach(e)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Type your message..."
+                  rows={1}
+                  className="flex-1 resize-none !text-[13px] rounded-[7px] border border-gray-300 bg-gray-50 px-4 py-3 text-sm
+                   text-gray-800 placeholder-gray-400 focus:border-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20"
+                  style={{
+                    minHeight: "44px",
+                    maxHeight: "120px",
+                  }}
+                />
+                <motion.button
+                  onClick={handleSendMessageToCoach}
+                  disabled={!newCoachMessage.trim() || !isConnected}
+                  className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-purple-600 text-white
+                   hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:bg-gray-300
+                    disabled:cursor-not-allowed"
+                  whileHover={{ scale: newCoachMessage.trim() ? 1.05 : 1 }}
+                  whileTap={{ scale: newCoachMessage.trim() ? 0.95 : 1 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                >
+                  <Send className="h-5 w-5" />
+                </motion.button>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
     </>
   )
 }
+

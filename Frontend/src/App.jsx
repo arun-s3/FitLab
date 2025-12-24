@@ -2,15 +2,13 @@ import React from 'react'
 import {BrowserRouter, Route, Routes, Navigate} from 'react-router-dom'
 
 import HomePage from './Pages/User/HomePage/HomePage'
+import AboutUsPage from './Pages/User/AboutUsPage/AboutUsPage'
 import SignUpAndInPage from './Pages/User/SignUpAndInPage/SignUpAndInPage'
 import OtpVerificationPage from './Pages/User/OtpVerificationPage/OtpVerificationPage'
 import ForgotAndResetPasswordPage from './Pages/User/ForgotAndResetPasswordPage/ForgotAndResetPasswordPage'
 import UserAccountPage from './Pages/User/UserAccountPage/UserAccountPage'
 import ProductListPage from './Pages/User/ProductListPage/ProductListPage'
 import PrivateUserRoutes from './Components/PrivateUserRoutes/PrivateUserRoutes'
-import TestImageCropper from './Pages/User/TesterPages/TestImageCropper'
-import TestAddressPage from './Pages/User/TesterPages/TestAddressPage'
-import TestRandomPage from './Pages/User/TesterPages/TestRandomPage'
 import AddressManagementPage from './Pages/User/AddressManagementPage/AddressManagementPage'
 import AddressListingPage from './Pages/User/AddressListingPage/AddressListingPage'
 import ProductDetailPage from './Pages/User/ProductDetailPage/ProductDetailPage'
@@ -90,6 +88,7 @@ export default function App(){
                             <Route path='signin' element={<SignUpAndInPage type='signin' />}/>
                             <Route path='forgot-password' element={<ForgotAndResetPasswordPage/>}/>
                             <Route index element={<HomePage/>}/>
+                            <Route path='about' element={<AboutUsPage/>}/>
                             <Route path='cart' element={<CartPage/>} />
                             <Route element={<ProtectedUserRoutes/>}>
                                 <Route path='shop'>

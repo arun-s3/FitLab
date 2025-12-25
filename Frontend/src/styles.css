@@ -865,12 +865,12 @@ select{
   bottom: -0.25rem;
 }
 
-.-bottom-12{
-  bottom: -3rem;
-}
-
 .-bottom-3{
   bottom: -0.75rem;
+}
+
+.-bottom-\[2\.9rem\]{
+  bottom: -2.9rem;
 }
 
 .-bottom-\[31px\]{
@@ -943,10 +943,6 @@ select{
 
 .bottom-0{
   bottom: 0px;
-}
-
-.bottom-10{
-  bottom: 2.5rem;
 }
 
 .bottom-16{
@@ -6776,10 +6772,6 @@ select{
   --tw-gradient-to: #d1d5db var(--tw-gradient-to-position);
 }
 
-.to-gray-400{
-  --tw-gradient-to: #9ca3af var(--tw-gradient-to-position);
-}
-
 .to-gray-50{
   --tw-gradient-to: #f9fafb var(--tw-gradient-to-position);
 }
@@ -7013,6 +7005,11 @@ select{
 .object-cover{
   -o-object-fit: cover;
      object-fit: cover;
+}
+
+.object-\[left_-25px_top_0rem\]{
+  -o-object-position: left -25px top 0rem;
+     object-position: left -25px top 0rem;
 }
 
 .\!p-2{
@@ -7390,6 +7387,11 @@ select{
   padding-bottom: 0.375rem;
 }
 
+.py-10{
+  padding-top: 2.5rem;
+  padding-bottom: 2.5rem;
+}
+
 .py-12{
   padding-top: 3rem;
   padding-bottom: 3rem;
@@ -7585,16 +7587,16 @@ select{
   padding-bottom: 0px;
 }
 
+.pb-10{
+  padding-bottom: 2.5rem;
+}
+
 .pb-12{
   padding-bottom: 3rem;
 }
 
 .pb-2{
   padding-bottom: 0.5rem;
-}
-
-.pb-20{
-  padding-bottom: 5rem;
 }
 
 .pb-4{
@@ -8100,8 +8102,8 @@ select{
   font-size: 50px;
 }
 
-.text-\[74px\]{
-  font-size: 74px;
+.text-\[55px\]{
+  font-size: 55px;
 }
 
 .text-\[8px\]{
@@ -8204,6 +8206,10 @@ select{
 
 .font-\[650\]{
   font-weight: 650;
+}
+
+.font-\[700\]{
+  font-weight: 700;
 }
 
 .font-black{
@@ -9677,6 +9683,11 @@ select{
   font-size: 21px;
 }
 
+.first-letter\:text-orange-500::first-letter{
+  --tw-text-opacity: 1;
+  color: rgb(249 115 22 / var(--tw-text-opacity));
+}
+
 .placeholder\:text-\[10px\]::-moz-placeholder{
   font-size: 10px;
 }
@@ -10288,11 +10299,6 @@ select{
 .hover\:bg-orange-50:hover{
   --tw-bg-opacity: 1;
   background-color: rgb(255 247 237 / var(--tw-bg-opacity));
-}
-
-.hover\:bg-orange-600:hover{
-  --tw-bg-opacity: 1;
-  background-color: rgb(234 88 12 / var(--tw-bg-opacity));
 }
 
 .hover\:bg-pink-500:hover{
@@ -14119,6 +14125,10 @@ select{
     font-size: 14px;
   }
 
+  .md\:text-\[15px\]{
+    font-size: 15px;
+  }
+
   .md\:text-\[16px\]{
     font-size: 16px;
   }
@@ -14161,6 +14171,10 @@ select{
 
   .md\:text-\[42px\]{
     font-size: 42px;
+  }
+
+  .md\:text-\[50px\]{
+    font-size: 50px;
   }
 
   .md\:text-\[54px\]{

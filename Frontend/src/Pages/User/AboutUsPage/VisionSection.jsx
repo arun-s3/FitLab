@@ -4,7 +4,7 @@ import { useInView } from "framer-motion"
 
 import BrandMarquee from "./BrandMarquee"
 
-const VisionCard = ({ icon, number, title, description, delay }) => {
+const VisionCard = ({ image, number, title, description, delay }) => {
 
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, amount: 0.5 })
@@ -19,7 +19,7 @@ const VisionCard = ({ icon, number, title, description, delay }) => {
     >
       <div className="relative h-64 overflow-hidden">
         <img
-          src={icon || "/placeholder.svg"}
+          src={image || "/placeholder.svg"}
           alt={title}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
         />
@@ -53,7 +53,7 @@ export default function VisionSection() {
             <div className="h-1 w-8 bg-orange-500" />
             <span className="text-orange-500 font-semibold tracking-widest">OUR VISION</span>
           </div>
-          <h2 className="text-5xl md:text-6xl font-bold text-gray-900 max-w-3xl">Transform Your Fitness Journey</h2>
+          <h2 className="text-[28px] md:text-[50px] font-bold text-gray-900 max-w-3xl">Transform Your Fitness Journey</h2>
         </motion.div>
 
         <motion.p
@@ -69,28 +69,28 @@ export default function VisionSection() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <VisionCard
-            icon="/gym-equipment-dumbbells-in-modern-fitness-studio.jpg"
+            image="/AboutUs/fitnessProducts.jpg"
             number="2000+"
             title="Fitness Products"
             description="Strength, cardio, accessories, and supplements across deeply nested categories for every training need."
             delay={0}
           />
-          <VisionCard
-            icon="/personal-trainer-coaching-session-fitness-gym.jpg"
+          <VisionCard 
+            image="/AboutUs/personalizedCoach.jpg"
             number="1 AI"
             title="Personalized Coach+"
             description="An intelligent fitness coach delivering goal-based workouts, insights, and real-time guidance."
             delay={0.1}
           />
           <VisionCard
-            icon="/fitness-community-group-workout-class.jpg"
+            image="/AboutUs/smartFitnessModules.png"
             number="10+"
             title="Smart Fitness Modules"
             description="Wishlists, wallets, lending, tracking, dashboards, chat, video support, and social fitness tools."
             delay={0.2}
           />
-          <VisionCard
-            icon="/modern-gym-building-fitness-facility-exterior.jpg"
+          <VisionCard 
+            image="/AboutUs/fitnessEcosystem.png"
             number="100%"
             title="Fitness Ecosystem"
             description="Shopping, training, health tracking, AI insights, and payments—unified in one seamless platform."
@@ -104,7 +104,7 @@ export default function VisionSection() {
           animate={isInView ? { opacity: 1 } : { opacity: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
         >
-          <p className="ml-8 text-sm text-gray-500 mb-6">TRUSTED BRANDS & PARTNERS</p>
+          <p className="ml-8 text-[15px] font-[700] text-gray-500 mb-6">TRUSTED BRANDS AND PARTNERS</p>
           <BrandMarquee />
         </motion.div>
       </div>

@@ -1,4 +1,6 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
+import {useLocation} from 'react-router-dom'
+
 import { motion } from "framer-motion"
 
 import Header from "../../../Components/Header/Header"
@@ -20,6 +22,17 @@ export default function FitnessTrackerPage() {
     backgroundImage: "url('/header-bg.png')",
     backgrounSize: 'cover'
   }
+
+  const location = useLocation()
+
+  useEffect(() => {
+    if (location.state?.goTo){
+      setTimeout(() => {
+        setCurrentPage(location.state.goTo)
+      }, 200)
+    }
+  }, [location])
+
 
   return (
     <section id='FitnessTrackerPage'>

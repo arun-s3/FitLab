@@ -48,7 +48,7 @@ export default function HeroSection() {
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8, delay: 0.6, ease: 'easeOut' }}
-        className="absolute -bottom-12 right-0 px-8 py-6 text-[74px] bg-white text-black font-bold  
+        className="absolute -bottom-[2.9rem] right-0 px-8 py-6 text-[55px] bg-white text-black font-bold first-letter:text-orange-500  
             overline decoration-[3px] decoration-orange-500 rounded-tl-[23px]"
       >
             About Us

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion"
 
 import {Plus, Minus} from "lucide-react"
 
-import FaqDatas from './FaqDatas'
+import FaqDatas from '../../../../data/FaqDatas'
 import ContactUsModule from "./ContactUsModule"
 
 

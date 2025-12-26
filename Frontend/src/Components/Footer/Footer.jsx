@@ -47,7 +47,7 @@ export default function Footer() {
           <ul className="list-none text-descReg1 lg:text-[13px] xl:text-descReg1 whitespace-nowrap">
             <li><h6 className="text-secondary text-descReg1 lg:text-[13px] xl:text-descReg1"> SUPPORT </h6></li>
             <li className='block lg:hidden xl:block'>
-                <Link> Help &amp; Support </Link>
+                <Link> Help, Faqs &amp; Support </Link>
             </li>
             <li className='hidden lg:block xl:hidden'>
                 <Link> Help Desk </Link>
@@ -59,7 +59,7 @@ export default function Footer() {
                 <Link> T &amp; C </Link>
             </li>
             <li> <Link> Privacy Policy </Link> </li>
-            <li> <Link> Help </Link> </li>
+            <li> <Link> About Us </Link> </li>
           </ul>
         </nav>
 

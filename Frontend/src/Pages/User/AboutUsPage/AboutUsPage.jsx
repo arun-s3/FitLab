@@ -11,7 +11,7 @@ const StatsSection = lazy(() => import("./StatsSection"))
 const VisionSection = lazy(() => import("./VisionSection"))
 const ReviewsSection = lazy(() => import("./ReviewsSection"))
 const TimelineSection = lazy(() => import("./TimelineSection"))
-const CoreValues = lazy(() => import("./CoreValues"))
+const CoreValuesSection = lazy(() => import("./CoreValuesSection"))
 const FeaturesSection = lazy(() => import("./FeaturesSection"))
 
 import Fallback from '../../../Components/FallbackSuspense/Fallback'
@@ -61,7 +61,7 @@ export default function AboutUsPage() {
           </Suspense>
 
           <Suspense fallback={<Fallback variant="pulse" height="h-32" />}>
-            <CoreValues />
+            <CoreValuesSection />
           </Suspense>
 
           <Suspense fallback={<Fallback variant="products" height="h-32" />}>

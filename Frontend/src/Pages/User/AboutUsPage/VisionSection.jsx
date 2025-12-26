@@ -23,7 +23,7 @@ const VisionCard = ({ image, number, title, description, delay }) => {
           alt={title}
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
         />
-        <div className="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-30 transition-all duration-300" />
+        {/* <div className="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-30 transition-all duration-300" /> */}
       </div>
 
       <div className="p-6">
@@ -77,9 +77,9 @@ export default function VisionSection() {
           />
           <VisionCard 
             image="/AboutUs/personalizedCoach.jpg"
-            number="1 AI"
+            number="100%"
             title="Personalized Coach+"
-            description="An intelligent fitness coach delivering goal-based workouts, insights, and real-time guidance."
+            description="A smart fitness companion delivering goal-based workouts, adaptive insights, and real-time guidance."
             delay={0.1}
           />
           <VisionCard

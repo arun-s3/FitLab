@@ -67,7 +67,7 @@ export default function  FeaturesSection() {
     {
       id: 6, 
       icon: Tag,
-      image: "/AboutUs/smartCouponsOffersEngine.jpg",
+      image: "/AboutUs/smartCouponsOffersEngine.png",
       title: "Smart Coupons & Offers Engine",
       description:
         "Always get the best deal — automatically. Multiple coupons and offers are intelligently evaluated at checkout.",
@@ -118,9 +118,9 @@ export default function  FeaturesSection() {
       id: 11,
       icon: Cpu, 
       image: "/AboutUs/coachPlus.png",
-      title: "Coach+ — Your Personalized AI Fitness Companion",
+      title: "Coach+ — Your Personalized Fitness Companion",
       description:
-        "Not just a bot — a training partner. Coach+ provides personalized fitness guidance, workout insights, and contextual recommendations.",
+        "Your intelligent training partner for consistent progress. Coach+ provides personalized fitness guidance, workout insights, and contextual recommendations.",
       color: "from-rose-400 to-red-400",
       learnMoreLink: ()=> setopenCoach(true)
     },

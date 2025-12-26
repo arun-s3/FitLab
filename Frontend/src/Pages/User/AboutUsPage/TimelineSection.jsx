@@ -76,6 +76,7 @@ export default function TimelineSection() {
           <h2 className="text-[28px] md:text-[50px] font-bold text-gray-900 max-w-3xl">Building the Future of Fitness, Step by Step</h2>
         </motion.div>
 
+        
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
@@ -85,18 +86,23 @@ export default function TimelineSection() {
           From a simple idea to a full-scale fitness ecosystem, FitLab’s journey reflects continuous innovation—uniting technology, 
           commerce, coaching, and community to help people train smarter and live healthier.
         </motion.p>
-
-        <div className="relative">
-          {events.map((event, idx) => (
-            <TimelineEvent
-              key={idx}
-              year={event.year}
-              title={event.title}
-              description={event.description}
-              isActive={idx === 0}
-              delay={idx * 0.1}
-            />
-          ))}
+        <div className="flex justify-between">
+          <div className="relative">
+            {events.map((event, idx) => (
+              <TimelineEvent
+                key={idx}
+                year={event.year}
+                title={event.title}
+                description={event.description}
+                isActive={idx === 0}
+                delay={idx * 0.1}
+              />
+            ))}
+          </div>
+          <div className="flex flex-col gap-4">
+            <img className="w-[26rem] object-cover rounded-[9px]" src='/AboutUs/office3.jpg'/>
+            <img className="w-[26rem] object-cover rounded-[9px]" src='/AboutUs/office2.jpg'/>
+          </div>
         </div>
       </div>
     </section>

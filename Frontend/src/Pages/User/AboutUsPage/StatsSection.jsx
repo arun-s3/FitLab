@@ -37,8 +37,8 @@ export default function StatsSection() {
         </motion.h2>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          <StatCard number="50K+" label="Active Members" delay={0} />
-          <StatCard number="1000+" label="Premium Products" delay={0.1} />
+          <StatCard number="5K+" label="Active Members" delay={0} />
+          <StatCard number="1200+" label="Premium Products" delay={0.1} />
           <StatCard number="2.5+" label="Years Experience" delay={0.2} />
           <StatCard number="95%" label="Customer Satisfaction" delay={0.3} />
         </div>

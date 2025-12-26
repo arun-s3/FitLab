@@ -15,6 +15,7 @@ const LatestProductsCarousel = lazy(() => import("./LatestProductsCarousel"))
 const BrandsCarousal = lazy(() => import("./BrandsCarousal"))
 const FitnessQuoteSection = lazy(() => import("./FitnessQuoteSection"))
 const ShopByCategories = lazy(() => import("./ShopByCategories"))
+const FeaturesSection = lazy(() => import("./FeaturesSection"))
 const OfferShowcase = lazy(() => import("../../../Components/OfferShowcase/OfferShowcase"))
 const FitlabHighlights = lazy(() => import("./FitlabHighlights"))
 const SpecialOfferSection = lazy(() => import("./SpecialOfferSection"))
@@ -136,6 +137,12 @@ export default function HomePage(){
         <div id="shopByCategoriesSection" ref={shopByCategoryRef}>
           <Suspense fallback={<Fallback variant="products" height="h-64" />}>
             <ShopByCategories />
+          </Suspense>
+        </div>
+        
+        <div>
+          <Suspense fallback={<Fallback variant="products" height="h-64" />}>
+            <FeaturesSection />
           </Suspense>
         </div>
 

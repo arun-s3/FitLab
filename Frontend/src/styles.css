@@ -3468,6 +3468,10 @@ select{
   width: 26px;
 }
 
+.w-\[26rem\]{
+  width: 26rem;
+}
+
 .w-\[275px\]{
   width: 275px;
 }
@@ -8441,6 +8445,11 @@ select{
   color: rgb(102 99 99 / var(--tw-text-opacity));
 }
 
+.text-\[\#666\]{
+  --tw-text-opacity: 1;
+  color: rgb(102 102 102 / var(--tw-text-opacity));
+}
+
 .text-\[\#6C6C77\]{
   --tw-text-opacity: 1;
   color: rgb(108 108 119 / var(--tw-text-opacity));
@@ -11210,12 +11219,30 @@ select{
   color: rgba(159, 42, 240, 1);
 }
 
+.group:hover .group-hover\:text-slate-700{
+  --tw-text-opacity: 1;
+  color: rgb(51 65 85 / var(--tw-text-opacity));
+}
+
+.group:hover .group-hover\:text-slate-900{
+  --tw-text-opacity: 1;
+  color: rgb(15 23 42 / var(--tw-text-opacity));
+}
+
 .group:hover .group-hover\:text-white\/60{
   color: rgb(255 255 255 / 0.6);
 }
 
+.group:hover .group-hover\:opacity-10{
+  opacity: 0.1;
+}
+
 .group:hover .group-hover\:opacity-100{
   opacity: 1;
+}
+
+.group:hover .group-hover\:opacity-5{
+  opacity: 0.05;
 }
 
 .group:hover .group-hover\:shadow-lg{
@@ -13336,6 +13363,11 @@ select{
     padding-right: 30px;
   }
 
+  .sm\:py-16{
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+
   .sm\:py-3{
     padding-top: 0.75rem;
     padding-bottom: 0.75rem;
@@ -13365,6 +13397,11 @@ select{
 
   .sm\:pt-8{
     padding-top: 2rem;
+  }
+
+  .sm\:text-3xl{
+    font-size: 1.875rem;
+    line-height: 2.25rem;
   }
 
   .sm\:text-4xl{
@@ -13416,6 +13453,11 @@ select{
 
   .sm\:text-descReg1{
     font-size: 15px;
+  }
+
+  .sm\:text-lg{
+    font-size: 1.125rem;
+    line-height: 1.75rem;
   }
 
   .sm\:text-sm{
@@ -13688,6 +13730,10 @@ select{
 
   .md\:mt-16{
     margin-top: 4rem;
+  }
+
+  .md\:mt-20{
+    margin-top: 5rem;
   }
 
   .md\:mt-4{
@@ -14068,6 +14114,11 @@ select{
   .md\:py-16{
     padding-top: 4rem;
     padding-bottom: 4rem;
+  }
+
+  .md\:py-20{
+    padding-top: 5rem;
+    padding-bottom: 5rem;
   }
 
   .md\:py-4{

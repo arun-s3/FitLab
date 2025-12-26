@@ -37,24 +37,40 @@ export default function FitlabHighlights() {
     },
   }
 
+  // const bulletPoints = [
+  //   `We constantly embrace innovation in our products each time we bring you something new, or in upgrades, to our existing product line`,
+  //   `Access professional-grade training videos covering every muscle group, cardio routines, and weight loss programs — all 
+  //       designed to help you achieve results efficiently and safely at your own pace`,
+  //   `Get expert help anytime, anywhere. Our dedicated support team is available round the clock through chat or video to guide you`,
+  //   `Stay on top of your progress with our intelligent AI tracker that monitors your workouts, adapts to your performance, 
+  //       and offers personalized insights to help you train smarter and reach your goals faster.`
+  // ]
+
+  // const bulletPointsRight = [
+  //   "Our team is always on standby to help you find the right gym equipment that best fits your specific requirements.",
+  //   "Our advanced logistics process ensures on-time delivery of all fitness products in their prime condition pan India",
+  // ]
+
   const bulletPoints = [
-    `We constantly embrace innovation in our products each time we bring you something new, or in upgrades, to our existing product line`,
-    `Access professional-grade training videos covering every muscle group, cardio routines, and weight loss programs — all 
-        designed to help you achieve results efficiently and safely at your own pace`,
-    `Get expert help anytime, anywhere. Our dedicated support team is available round the clock through chat or video to guide you`,
-    `Stay on top of your progress with our intelligent AI tracker that monitors your workouts, adapts to your performance, 
-        and offers personalized insights to help you train smarter and reach your goals faster.`
+    "We continuously innovate across fitness, commerce, and training—shipping meaningful upgrades and new capabilities that evolve with your goals.",
+
+    "Train with structure and confidence using guided workouts, professional demonstrations, reusable templates, timers, and performance tracking—all in one place.",
+
+    "Go beyond workouts with a comprehensive health profile that tracks key body metrics and feeds into progress dashboards and actionable insights.",
+
+    "Stay consistent with Coach+, your personalized fitness companion that adapts to your performance and delivers goal-driven guidance and recommendations."
   ]
 
   const bulletPointsRight = [
-    "Our team is always on standby to help you find the right gym equipment that best fits your specific requirements.",
-    "Our advanced logistics process ensures on-time delivery of all fitness products in their prime condition pan India",
+    "Shop smarter with an exercise-driven fitness marketplace—discover equipment based on how you train, prioritize goals using smart wishlists, and never miss the best deal with automatic coupons.",
+    
+    "Enjoy a frictionless end-to-end experience with unified payments, flexible checkout options, real-time order tracking, peer-powered financial support, and instant chat or video assistance whenever needed."
   ]
 
   const stats = [
-    { number: "12+", label: "Years of Experience" },
+    { number: "2.5+", label: "Years of Experience" },
     { number: "1200+", label: "Gym Equipments" },
-    { number: "7000+", label: "Satisfied Customers" },
+    { number: "5000+", label: "Satisfied Customers" },
   ]
 
   return (

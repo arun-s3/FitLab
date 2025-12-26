@@ -3,6 +3,7 @@ import {BrowserRouter, Route, Routes, Navigate} from 'react-router-dom'
 
 import HomePage from './Pages/User/HomePage/HomePage'
 import AboutUsPage from './Pages/User/AboutUsPage/AboutUsPage'
+import ContactUsPage from './Pages/User/ContactUsPage/ContactUsPage'
 import SignUpAndInPage from './Pages/User/SignUpAndInPage/SignUpAndInPage'
 import OtpVerificationPage from './Pages/User/OtpVerificationPage/OtpVerificationPage'
 import ForgotAndResetPasswordPage from './Pages/User/ForgotAndResetPasswordPage/ForgotAndResetPasswordPage'
@@ -89,6 +90,7 @@ export default function App(){
                             <Route path='forgot-password' element={<ForgotAndResetPasswordPage/>}/>
                             <Route index element={<HomePage/>}/>
                             <Route path='about' element={<AboutUsPage/>}/>
+                            <Route path='contact' element={<ContactUsPage/>}/>
                             <Route path='cart' element={<CartPage/>} />
                             <Route element={<ProtectedUserRoutes/>}>
                                 <Route path='shop'>

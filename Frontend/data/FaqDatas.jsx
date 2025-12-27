@@ -1,5 +1,6 @@
-import { Dumbbell, Heart, CreditCard, ShoppingBag, Pill, Truck} from "lucide-react"
+import {Dumbbell, Activity, Cpu, Heart, CreditCard, Tag, Truck, Users, ShoppingBag,  MessageCircle} from "lucide-react"
 
+import {MdSportsGymnastics} from "react-icons/md"
 
 
 const FaqDatas = ()=> {
@@ -10,183 +11,249 @@ const FaqDatas = ()=> {
         icon: Dumbbell,
         questions: [
           {
-            question: "What types of strength equipment do you sell?",
+            question: "What types of strength equipment are available on FitLab?",
             answer:
-              "We offer a comprehensive range of strength equipment including dumbbells, barbells, weight plates, power racks, squat stands, bench presses, resistance bands, kettlebells, and cable machines. All equipment is commercial-grade and suitable for home gyms.",
+              "FitLab offers a wide range of strength equipment including dumbbells, barbells, weight plates, racks, benches, resistance bands, kettlebells, and functional training tools. Products are organized into deeply nested categories so users can easily find equipment based on training style and experience level."
           },
           {
-            question: "Do you provide assembly service for heavy equipment?",
+            question: "How do I know which strength equipment suits my workout?",
             answer:
-              "Yes! We offer professional assembly service for all major strength equipment. Our certified technicians will deliver, assemble, and test your equipment to ensure it's ready for use. Assembly service is available for an additional fee and can be selected during checkout.",
+              "FitLab enables exercise-based product discovery, allowing you to explore equipment based on exercises, muscle groups, difficulty levels, and training goals—making it easier to choose the right gear for your routine."
           },
           {
-            question: "What's the weight capacity of your equipment?",
+            question: "Are detailed specifications provided for strength products?",
             answer:
-              "Our strength equipment is built to commercial standards with weight capacities ranging from 300lbs to 1000lbs depending on the item. Each product page includes detailed specifications including maximum weight capacity, dimensions, and safety ratings.",
+              "Yes. Each product page includes detailed specifications such as dimensions, material, weight capacity, usage recommendations, and safety guidelines to help you make informed decisions."
           },
           {
-            question: "Do you offer equipment warranties?",
+            question: "Can I save or plan strength equipment purchases?",
             answer:
-              "All our strength equipment comes with manufacturer warranties ranging from 1-10 years depending on the brand and product type. We also offer extended warranty options for additional peace of mind. Warranty details are clearly listed on each product page.",
-          },
-          {
-            question: "Can I try the equipment before purchasing?",
-            answer:
-              "We have showrooms in major cities where you can test select equipment. Additionally, we offer a 30-day satisfaction guarantee - if you're not completely satisfied with your purchase, you can return it for a full refund (return shipping fees may apply).",
-          },
-        ],
+              "Absolutely. You can add products to smart wishlists, assign priorities, customize thumbnails, and plan purchases over time or share lists with others."
+          }
+        ]
       },
-    "Cardio Machines": {
-      icon: Heart,
-      questions: [
-        {
-          question: "What cardio machines do you have available?",
-          answer:
-            "Our cardio collection includes treadmills, elliptical trainers, stationary bikes, rowing machines, stair climbers, and air bikes. We carry both commercial-grade and home-use models from top brands like NordicTrack, Peloton, Concept2, and Life Fitness.",
-        },
-        {
-          question: "Do your cardio machines require special electrical setup?",
-          answer:
-            "Most of our cardio machines plug into standard household outlets (110V). Some commercial-grade treadmills may require 220V outlets. We clearly specify power requirements on each product page and can arrange electrical consultation if needed.",
-        },
-        {
-          question: "What's included with cardio machine delivery?",
-          answer:
-            "Standard delivery includes curbside drop-off. We also offer white-glove delivery service which includes delivery to your desired room, unpacking, assembly, and basic setup. This service is highly recommended for larger cardio machines.",
-        },
-        {
-          question: "Do you offer financing options for expensive cardio equipment?",
-          answer:
-            "Yes! We partner with leading financing companies to offer 0% APR financing for qualified customers. Options include 6, 12, 18, and 24-month payment plans. You can apply for financing during checkout and get instant approval decisions.",
-        },
-        {
-          question: "What maintenance is required for cardio machines?",
-          answer:
-            "We provide detailed maintenance guides with every purchase. Most machines require basic cleaning and occasional lubrication. We also offer annual maintenance packages and have a network of certified repair technicians for warranty and post-warranty service.",
-        },
-      ],
-    },
-    "Accessories & Gear": {
-      icon: ShoppingBag,
-      questions: [
-        {
-          question: "What gym accessories do you sell?",
-          answer:
-            "We carry a wide range of accessories including yoga mats, resistance bands, foam rollers, gym gloves, lifting belts, straps, gym bags, water bottles, towels, and recovery tools. We also stock specialty items like gymnastic rings, suspension trainers, and agility equipment.",
-        },
-        {
-          question: "Do you offer bulk discounts for gym accessories?",
-          answer:
-            "Yes! We offer tiered discounts for bulk purchases. Buy 5+ items and save 10%, 10+ items save 15%, and 20+ items save 20%. This is perfect for outfitting home gyms, small studios, or corporate fitness centers. Discounts are automatically applied at checkout.",
-        },
-        {
-          question: "What's your return policy for accessories?",
-          answer:
-            "Accessories can be returned within 30 days of purchase in original, unused condition with original packaging. Items like resistance bands, gloves, and personal care items are final sale for hygiene reasons. Return shipping is free for defective items.",
-        },
-        {
-          question: "Do you carry eco-friendly and sustainable products?",
-          answer:
-            "We have a dedicated eco-friendly section featuring products made from recycled materials, natural rubber, organic cotton, and sustainable bamboo. Look for our 'Green Choice' badge on qualifying products throughout our store.",
-        },
-        {
-          question: "Can I get personalized recommendations for accessories?",
-          answer:
-            "Yes! Our fitness experts offer free consultations to help you choose the right accessories for your workout style and goals. You can chat with us online, call our customer service, or visit our showrooms for personalized recommendations.",
-        },
-      ],
-    },
-    "Supplements & Nutrition": {
-      icon: Pill,
-      questions: [
-        {
-          question: "What types of supplements do you carry?",
-          answer:
-            "We stock a comprehensive range including protein powders, pre-workouts, post-workout recovery, vitamins, minerals, creatine, BCAAs, fat burners, and meal replacement shakes. All products are from verified, reputable brands and third-party tested for purity.",
-        },
-        {
-          question: "Are your supplements safe and tested?",
-          answer:
-            "Yes! All our supplements are from FDA-registered facilities and undergo rigorous third-party testing for purity, potency, and safety. We only partner with brands that follow Good Manufacturing Practices (GMP) and provide certificates of analysis.",
-        },
-        {
-          question: "Do you offer subscription services for supplements?",
-          answer:
-            "Yes! Our auto-delivery subscription service saves you 15% on every order and ensures you never run out of your favorite supplements. You can customize delivery frequency, pause, or cancel anytime. Free shipping is included on all subscription orders.",
-        },
-        {
-          question: "Can you help me choose the right supplements for my goals?",
-          answer:
-            "Our certified nutritionists and fitness experts provide free consultations to help you select supplements based on your fitness goals, dietary restrictions, and current routine. We also offer detailed product guides and comparison tools.",
-        },
-        {
-          question: "What's your policy on expired or damaged supplements?",
-          answer:
-            "We guarantee fresh products with at least 12 months until expiration. If you receive expired or damaged supplements, we'll replace them immediately at no cost. We also offer a satisfaction guarantee - if you're not happy with a product, return it within 30 days for a full refund.",
-        },
-      ],
-    },
-    "Shipping & Delivery": {
-      icon: Truck,
-      questions: [
-        {
-          question: "What are your shipping options and costs?",
-          answer:
-            "We offer standard shipping (5-7 business days), expedited shipping (2-3 business days), and next-day delivery in select areas. Free standard shipping on orders over $99. Large equipment may require freight shipping with scheduled delivery appointments.",
-        },
-        {
-          question: "Do you deliver to all locations?",
-          answer:
-            "We ship to all 50 US states, Canada, and select international locations. Some oversized items may have shipping restrictions. Hawaii, Alaska, and international orders may incur additional shipping fees. Check our shipping calculator at checkout for exact costs.",
-        },
-        {
-          question: "How do you handle large equipment delivery?",
-          answer:
-            "Large equipment is shipped via freight carriers with scheduled delivery appointments. We offer curbside delivery (standard) or white-glove service (delivery to room of choice, unpacking, and assembly). You'll receive tracking information and delivery appointment scheduling.",
-        },
-        {
-          question: "What if my order arrives damaged?",
-          answer:
-            "We carefully package all items, but if something arrives damaged, contact us within 48 hours with photos. We'll arrange immediate replacement or refund. For large equipment, our delivery team will inspect items with you upon delivery and note any damage.",
-        },
-        {
-          question: "Can I track my order?",
-          answer:
-            "Yes! You'll receive tracking information via email once your order ships. You can also track orders in your account dashboard. For large equipment, we'll provide freight tracking numbers and coordinate delivery appointments directly with you.",
-        },
-      ],
-    },
-    "Orders & Payment": {
-      icon: CreditCard,
-      questions: [
-        {
-          question: "What payment methods do you accept?",
-          answer:
-            "We accept all major credit cards (Visa, MasterCard, American Express, Discover), PayPal, Apple Pay, Google Pay, and Shop Pay. For large purchases, we also offer financing options and accept bank transfers. All transactions are secured with 256-bit SSL encryption.",
-        },
-        {
-          question: "Can I modify or cancel my order after placing it?",
-          answer:
-            "Orders can be modified or cancelled within 2 hours of placement if they haven't entered our fulfillment process. After that, you can return items according to our return policy. Contact customer service immediately if you need to make changes.",
-        },
-        {
-          question: "Do you offer price matching?",
-          answer:
-            "Yes! We offer price matching on identical items from authorized retailers. The item must be in stock at both stores, and we'll match the price plus beat it by 5%. Price matching requests must be submitted before purchase with proof of competitor pricing.",
-        },
-        {
-          question: "What's your return and refund policy?",
-          answer:
-            "Most items can be returned within 30 days in original condition for a full refund. Large equipment has a 14-day return window due to shipping costs. Supplements and personal care items are final sale. Return shipping is free for defective items, customer pays return shipping otherwise.",
-        },
-        {
-          question: "Do you offer corporate or bulk pricing?",
-          answer:
-            "Yes! We offer special pricing for gyms, corporate wellness programs, schools, and bulk purchasers. Contact our business sales team for custom quotes on large orders. We also provide dedicated account management and flexible payment terms for qualified business customers.",
-        },
-      ],
-    } 
-  }
+    
+      "Cardio & Training Equipment": {
+        icon: Heart,
+        questions: [
+          {
+            question: "What types of cardio and conditioning equipment can I find?",
+            answer:
+              "FitLab features cardio and conditioning equipment such as skipping ropes, resistance trainers, rowing trainers, agility tools, and endurance-focused accessories suited for both home and gym training."
+          },
+          {
+            question: "How does FitLab help me choose cardio equipment?",
+            answer:
+              "Products can be explored based on workout type, intensity, muscle involvement, and fitness level—helping you align equipment choices with your training goals."
+          }
+        ]
+      },
+    
+      "Workout Tracking & Health": {
+        icon: Activity,
+        questions: [
+          {
+            question: "Does FitLab help me track my workouts?",
+            answer:
+              "Yes. FitLab includes a workout tracking engine where you can create reusable workout templates, track sessions using timers, and monitor performance trends over time."
+          },
+          {
+            question: "What health metrics can I track on FitLab?",
+            answer:
+              "You can maintain a comprehensive health profile including height, weight, BMI, blood pressure, and body composition metrics—all organized in one place."
+          },
+          {
+            question: "How do dashboards and insights help me improve?",
+            answer:
+              "FitLab’s dashboards visualize workout history, health metrics, and progress patterns, helping you identify trends and make data-driven fitness decisions."
+          }
+        ]
+      },
+
+      "Fitness Training & Exercises": {
+        icon: MdSportsGymnastics,
+        questions: [
+          {
+            question: "What does the Fitness Training section offer?",
+            answer:
+              "The Fitness Training section helps users explore exercises based on body parts, muscle groups, and training goals, with structured exercise libraries."
+          },
+          {
+            question: "What details are available for each exercise?",
+            answer:
+              "Each exercise includes detailed instructions, muscle focus, difficulty level, demonstrations, videos, GIFs, and execution tips."
+          },
+          {
+            question: "Can exercises be filtered or searched?",
+            answer:
+              "Yes. Exercises can be filtered by equipment, body part, muscle group, exercise type, and difficulty to help users quickly find what they need."
+          },
+          {
+            question: "Can training help with equipment selection?",
+            answer:
+              "Yes. Users can discover exercises first and then explore related equipment directly, making shopping aligned with training needs."
+          }
+        ]
+      },
+    
+      "Coach+ Personal Fitness Companion": {
+        icon: Cpu,
+        questions: [
+          {
+            question: "What is Coach+ on FitLab?",
+            answer:
+              "Coach+ is a personalized fitness companion designed to support your training journey with goal-based guidance, workout insights, and contextual recommendations."
+          },
+          {
+            question: "Is Coach+ a replacement for a human trainer?",
+            answer:
+              "Coach+ complements your training by providing intelligent guidance and insights, but it does not replace certified medical or professional coaching advice."
+          }
+        ]
+      },
+    
+      "Smart Shopping & Wishlists": {
+        icon: Heart,
+        questions: [
+          {
+            question: "What makes FitLab shopping different?",
+            answer:
+              "FitLab connects training and shopping. Instead of browsing randomly, you can discover products based on exercises, goals, and fitness plans."
+          },
+          {
+            question: "How do smart wishlists work?",
+            answer:
+              "You can create multiple wishlists, customize thumbnails, assign priorities to lists and individual products, and share them to plan fitness goals more effectively."
+          }
+        ]
+      },
+    
+      "Wallet & Payments": {
+        icon: CreditCard,
+        questions: [
+          {
+            question: "What payment options does FitLab support?",
+            answer:
+              "FitLab supports multiple secure payment gateways including Razorpay, Stripe, and PayPal. Users can also pay directly using their FitLab wallet or choose Cash on Delivery where applicable."
+          },
+          {
+            question: "What is the FitLab Wallet?",
+            answer:
+              "The FitLab Wallet is a unified digital wallet that allows users to store balance, make faster checkouts, track transactions, and use wallet funds across shopping, subscriptions, and services."
+          },
+          {
+            question: "Does the wallet support auto-recharge?",
+            answer:
+              "Yes. FitLab offers both fully automatic and semi-automatic wallet recharge options. Users can configure auto-recharge thresholds or manually approve recharges based on their preference."
+          },
+          {
+            question: "Can I use wallet balance along with other payment methods?",
+            answer:
+              "Yes. Wallet balance can be combined with other payment methods during checkout if the wallet balance is insufficient for the full order value."
+          }
+        ]
+      },
+
+      "Coupons & Offers": {
+        icon: Tag,
+        questions: [
+          {
+            question: "Where can I find available coupons?",
+            answer:
+              "FitLab provides a dedicated Coupons page that shows all coupons currently eligible for your account based on usage, order value, and validity."
+          },
+          {
+            question: "How are offers displayed on FitLab?",
+            answer:
+              "Active offers are highlighted across the homepage, product listings, and promotional sections to ensure users never miss ongoing deals."
+          },
+          {
+            question: "Does FitLab automatically apply the best coupon?",
+            answer:
+              "Yes. During checkout, FitLab intelligently evaluates all eligible coupons and automatically applies the best available discount to your order."
+          },
+          {
+            question: "Can I change or remove the applied coupon?",
+            answer:
+              "Absolutely. Users can replace the auto-applied coupon with another eligible one or remove it entirely before completing checkout."
+          }
+        ]
+      },
+
+      "Shopping & Product Discovery": {
+        icon: ShoppingBag,
+        questions: [
+          {
+            question: "How can I filter products on the shopping page?",
+            answer:
+              "Products can be filtered by price range, muscle group, brand, category, sub-category, popularity, ratings, and reviews."
+          },
+          {
+            question: "Can I shop based on training goals?",
+            answer:
+              "Yes. FitLab allows users to discover products based on exercises, muscle groups, and workout styles for more purposeful shopping."
+          },
+          {
+            question: "Are product reviews visible?",
+            answer:
+              "Yes. Users can view ratings and reviews on product pages to make informed purchasing decisions."
+          }
+        ]
+      },
+    
+      "Orders & Delivery": {
+        icon: Truck,
+        questions: [
+          {
+            question: "What checkout options are available?",
+            answer:
+              "FitLab supports checkout using Razorpay, Stripe, PayPal, wallet balance, and Cash on Delivery for eligible locations and products."
+          },
+          {
+            question: "Can I track my order after placing it?",
+            answer:
+              "Yes. Users can track order status in real time from the Orders section, including processing, shipped, out-for-delivery, and delivered stages."
+          },
+          {
+            question: "Can I cancel or modify an order?",
+            answer:
+              "Orders can be cancelled or modified before they enter the shipping stage. Once shipped, standard return policies apply."
+          },
+          {
+            question: "Is Cash on Delivery available for all products?",
+            answer:
+              "Cash on Delivery availability depends on product type, order value, and delivery location. Eligible orders will show the option during checkout."
+          }
+        ]
+      },
+    
+      "Peer Fitness Economy": {
+        icon: Users,
+        questions: [
+          {
+            question: "What is the peer-powered fitness economy?",
+            answer:
+              "FitLab enables a trust-based ecosystem where users can lend or receive financial support within the platform, making fitness more accessible."
+          }
+        ]
+      },
+    
+      "Support & Assistance": {
+        icon: MessageCircle,
+        questions: [
+          {
+            question: "How can I get help if I’m stuck?",
+            answer:
+              "FitLab offers real-time assistance through chat and video support, ensuring users receive help whenever they need it."
+          },
+          {
+            question: "Is support available for both shopping and fitness features?",
+            answer:
+              "Yes. Our support team assists with product selection, orders, platform usage, fitness tracking features, and general queries."
+          }
+        ]
+      }
+    }
 }
 
 

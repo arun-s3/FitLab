@@ -26,7 +26,7 @@ import {SocketContext} from '../../Components/SocketProvider/SocketProvider'
 
 
 
-export default function Header({customStyle, goToShopByCategorySec, pageChatBoxStatus = false}){
+export default function Header({lighterLogo, customStyle, goToShopByCategorySec, pageChatBoxStatus = false}){
 
     const [isCartOpen, setIsCartOpen] = useState(false)
 
@@ -92,7 +92,7 @@ export default function Header({customStyle, goToShopByCategorySec, pageChatBoxS
                 transition={{ delay: 0.4, duration: 0.8, ease: "easeOut" }}
             >
                 <Link to='/' className='absolute top-[5px] max-xs-sm:left-0 lg:static'>
-                    <img src="/Logo_main.png" alt="Fitlab" className="h-[5rem] "/>   {/*mt-[10px]*/}
+                    <img src={!lighterLogo ? "/Logo_main.png" : "/logoDesign1.png"} alt="Fitlab" className="h-[5rem] "/>   {/*mt-[10px]*/}
                 </Link>
             </motion.div>
 

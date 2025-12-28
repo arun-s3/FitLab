@@ -45,7 +45,7 @@ export default function ContactUsPage(){
 
 
   return (
-    <section id='ShoppingCartPage'>
+    <section id='ContactUsPage'>
     
         <header style={headerBg} className='h-[5rem]'>
         

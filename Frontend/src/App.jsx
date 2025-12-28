@@ -4,6 +4,7 @@ import {BrowserRouter, Route, Routes, Navigate} from 'react-router-dom'
 import HomePage from './Pages/User/HomePage/HomePage'
 import AboutUsPage from './Pages/User/AboutUsPage/AboutUsPage'
 import ContactUsPage from './Pages/User/ContactUsPage/ContactUsPage'
+import PrivacyPolicyPage from './Pages/User/PrivacyPolicyPage/PrivacyPolicyPage'
 import SignUpAndInPage from './Pages/User/SignUpAndInPage/SignUpAndInPage'
 import OtpVerificationPage from './Pages/User/OtpVerificationPage/OtpVerificationPage'
 import ForgotAndResetPasswordPage from './Pages/User/ForgotAndResetPasswordPage/ForgotAndResetPasswordPage'
@@ -91,6 +92,7 @@ export default function App(){
                             <Route index element={<HomePage/>}/>
                             <Route path='about' element={<AboutUsPage/>}/>
                             <Route path='contact' element={<ContactUsPage/>}/>
+                            <Route path='privacy' element={<PrivacyPolicyPage/>}/>
                             <Route path='cart' element={<CartPage/>} />
                             <Route element={<ProtectedUserRoutes/>}>
                                 <Route path='shop'>

@@ -596,6 +596,45 @@ const verifyAndDeleteGuestUser = async(req, res, next)=> {
 }
 
 
+const updateTermsAcceptance = async (req, res, next) => {
+  try {
+    console.log("Inside updateTermsAcceptance controller")
+
+    const userId = req.user._id
+    const { hasAcceptedTerms, termsVersion } = req.body.consent
+
+    const user = await User.findById(userId)
+    if (!user) {
+      return next(errorHandler(404, "User not found"))
+    }
+
+    user.hasAcceptedTerms = hasAcceptedTerms
+
+    if (hasAcceptedTerms) {
+      user.termsAcceptedAt = new Date()
+      user.termsVersion = termsVersion || user.termsVersion
+    } else {
+      user.termsAcceptedAt = null
+      user.termsVersion = null
+    }
+
+    await user.save()
+
+    return res.status(200).json({
+      success: true,
+      message: "Terms acceptance updated successfully",
+      hasAcceptedTerms: user.hasAcceptedTerms,
+      termsAcceptedAt: user.termsAcceptedAt,
+      termsVersion: user.termsVersion,
+    }) 
+  }
+  catch (error) {
+    console.error("Error updating terms acceptance:", error.message)
+    next(error)
+  }
+}
+
+
 const signout = (req,res,next)=>{
     console.log("JWT Cookie from signout controller-->"+req.cookies.jwt)
     try{
@@ -611,4 +650,4 @@ const signout = (req,res,next)=>{
 
 module.exports = {tester, createUser, sendOtp, verifyOtp, loginUser, clearAllCookies, updateUserDetails, updateForgotPassword, resetPassword,
      updateProfilePic, googleSignin, getUserId, searchUsernames, totalUsersCount, getUserByUsername, generateUniqueGuestUser, updateUserWeight,
-     verifyAndDeleteGuestUser, signout}
+     verifyAndDeleteGuestUser, updateTermsAcceptance, signout}

@@ -60,7 +60,7 @@ export default function CoachPlus({autoOpen, onCloseChat}) {
   const handleKeyPress = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
-      handleSendMessage()
+      handleSendMessageToCoach()
     }
   }
 
@@ -247,6 +247,32 @@ export default function CoachPlus({autoOpen, onCloseChat}) {
                   <Send className="h-5 w-5" />
                 </motion.button>
               </div>
+
+              <motion.p 
+                className="mt-[8px] ml-[3px] text-muted text-[10px]"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4, delay: 0.6 }}
+              >  
+              By using Coach+, you agree to FitLab’s 
+                <a 
+                  href="/terms" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="mx-[3px] text-secondary hover:underline decoration-secondary transition duration-300 underline-offset-2"
+                >
+                  Terms & Conditions 
+                </a> and 
+                <a 
+                  href="/privacy" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="ml-[3px] text-secondary hover:underline decoration-secondary transition duration-300 underline-offset-2"
+                >
+                  Privacy Policy 
+                </a>
+              </motion.p>
+
             </motion.div>
           </motion.div>
         )}

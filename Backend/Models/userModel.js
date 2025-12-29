@@ -77,6 +77,16 @@ const userSchema = mongoose.Schema({
     lastSeen: {
         type: Date,
         default: Date.now
+    },
+    hasAcceptedTerms: {
+      type: Boolean,
+      default: false
+    },
+    termsAcceptedAt: {
+      type: Date,
+    },
+    termsVersion: {
+      type: String
     }
 },{timestamps:true})
 

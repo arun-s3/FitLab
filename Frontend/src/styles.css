@@ -1643,6 +1643,11 @@ select{
   margin-right: 1.5rem;
 }
 
+.mx-\[3px\]{
+  margin-left: 3px;
+  margin-right: 3px;
+}
+
 .mx-\[3rem\]{
   margin-left: 3rem;
   margin-right: 3rem;
@@ -1774,6 +1779,10 @@ select{
 
 .-ml-\[1\.5rem\]{
   margin-left: -1.5rem;
+}
+
+.-ml-\[1\.7rem\]{
+  margin-left: -1.7rem;
 }
 
 .-mr-4{
@@ -3130,6 +3139,10 @@ select{
 
 .min-h-10{
   min-height: 2.5rem;
+}
+
+.min-h-12{
+  min-height: 3rem;
 }
 
 .min-h-96{
@@ -5604,6 +5617,10 @@ select{
   border-right-color: rgb(222 226 231 / var(--tw-border-opacity));
 }
 
+.border-t-dropdownBorder{
+  border-top-color: rgba(210, 199, 215, 0.52);
+}
+
 .border-t-gray-500{
   --tw-border-opacity: 1;
   border-top-color: rgb(107 114 128 / var(--tw-border-opacity));
@@ -6153,6 +6170,11 @@ select{
 .bg-teal-200{
   --tw-bg-opacity: 1;
   background-color: rgb(153 246 228 / var(--tw-bg-opacity));
+}
+
+.bg-teal-600{
+  --tw-bg-opacity: 1;
+  background-color: rgb(13 148 136 / var(--tw-bg-opacity));
 }
 
 .bg-transparent{
@@ -7700,6 +7722,10 @@ select{
   padding-left: 3rem;
 }
 
+.pl-16{
+  padding-left: 4rem;
+}
+
 .pl-2{
   padding-left: 0.5rem;
 }
@@ -8117,6 +8143,10 @@ select{
 
 .text-\[26px\]{
   font-size: 26px;
+}
+
+.text-\[27px\]{
+  font-size: 27px;
 }
 
 .text-\[28px\]{
@@ -8981,6 +9011,11 @@ select{
   color: rgb(15 23 42 / var(--tw-text-opacity));
 }
 
+.text-teal-600{
+  --tw-text-opacity: 1;
+  color: rgb(13 148 136 / var(--tw-text-opacity));
+}
+
 .text-transparent{
   color: transparent;
 }
@@ -9088,6 +9123,10 @@ select{
   text-decoration-thickness: 3px;
 }
 
+.underline-offset-2{
+  text-underline-offset: 2px;
+}
+
 .placeholder-\[13px\]::-moz-placeholder{
   color: 13px;
 }
@@ -9152,6 +9191,10 @@ select{
 
 .accent-purple-600{
   accent-color: #9333ea;
+}
+
+.accent-teal-600{
+  accent-color: #0d9488;
 }
 
 .opacity-0{
@@ -10488,6 +10531,11 @@ select{
   background-color: rgb(30 41 59 / var(--tw-bg-opacity));
 }
 
+.hover\:bg-teal-700:hover{
+  --tw-bg-opacity: 1;
+  background-color: rgb(15 118 110 / var(--tw-bg-opacity));
+}
+
 .hover\:bg-white:hover{
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
@@ -10798,6 +10846,11 @@ select{
 .hover\:text-slate-700:hover{
   --tw-text-opacity: 1;
   color: rgb(51 65 85 / var(--tw-text-opacity));
+}
+
+.hover\:text-teal-700:hover{
+  --tw-text-opacity: 1;
+  color: rgb(15 118 110 / var(--tw-text-opacity));
 }
 
 .hover\:text-white:hover{
@@ -11217,6 +11270,12 @@ select{
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
+.group:hover .group-hover\:scale-125{
+  --tw-scale-x: 1.25;
+  --tw-scale-y: 1.25;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
 .group:hover .group-hover\:scale-\[1\.02\]{
   --tw-scale-x: 1.02;
   --tw-scale-y: 1.02;
@@ -11251,6 +11310,11 @@ select{
 
 .group:hover .group-hover\:bg-opacity-30{
   --tw-bg-opacity: 0.3;
+}
+
+.group:hover .group-hover\:text-gray-900{
+  --tw-text-opacity: 1;
+  color: rgb(17 24 39 / var(--tw-text-opacity));
 }
 
 .group:hover .group-hover\:text-orange-300{
@@ -13431,6 +13495,11 @@ select{
     padding-bottom: 0.75rem;
   }
 
+  .sm\:py-6{
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+  }
+
   .sm\:py-8{
     padding-top: 2rem;
     padding-bottom: 2rem;
@@ -13451,6 +13520,10 @@ select{
 
   .sm\:pr-6{
     padding-right: 1.5rem;
+  }
+
+  .sm\:pt-10{
+    padding-top: 2.5rem;
   }
 
   .sm\:pt-8{
@@ -13750,8 +13823,16 @@ select{
     z-index: 0;
   }
 
+  .md\:col-span-1{
+    grid-column: span 1 / span 1;
+  }
+
   .md\:col-span-2{
     grid-column: span 2 / span 2;
+  }
+
+  .md\:col-span-3{
+    grid-column: span 3 / span 3;
   }
 
   .md\:mb-0{
@@ -14962,6 +15043,10 @@ select{
   .lg\:py-\[6px\]{
     padding-top: 6px;
     padding-bottom: 6px;
+  }
+
+  .lg\:pt-12{
+    padding-top: 3rem;
   }
 
   .lg\:text-left{

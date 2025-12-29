@@ -1,5 +1,6 @@
 import {FileText, Eye, Shield, CreditCard, Activity, Users, Globe, Lock, RefreshCcw, Mail, RotateCcw, Cookie} from "lucide-react"
 
+export const lastUpdated = "28 December 2025" ;
 
 const PrivacyPolicies = [
   {

@@ -381,12 +381,20 @@ export default function ContactForm({isSupportConnected, isCoachConnected, onSub
                   transition={{ duration: 0.4, delay: 0.6 }}
                   className="text-xs text-gray-500 text-center"
                 >
-                  By contacting us, you agree to our{" "}
-                  <a href="#" className="text-purple-600 hover:underline">
+                  By contacting us, you agree to Fitlab's{" "}
+                  <a href="/terms" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-secondary hover:underline decoration-secondary transition duration-150 underline-offset-2"
+                  >
                     Terms of Service
                   </a>{" "}
                   and{" "}
-                  <a href="#" className="text-purple-600 hover:underline">
+                  <a href="/privacy" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-secondary hover:underline decoration-secondary transition duration-150 underline-offset-2"
+                  >
                     Privacy Policy
                   </a>
                 </motion.p>

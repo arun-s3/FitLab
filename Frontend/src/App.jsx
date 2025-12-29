@@ -5,6 +5,7 @@ import HomePage from './Pages/User/HomePage/HomePage'
 import AboutUsPage from './Pages/User/AboutUsPage/AboutUsPage'
 import ContactUsPage from './Pages/User/ContactUsPage/ContactUsPage'
 import PrivacyPolicyPage from './Pages/User/PrivacyPolicyPage/PrivacyPolicyPage'
+import TermsAndConditionsPage from './Pages/User/TermsAndConditions/TermsAndConditionsPage'
 import SignUpAndInPage from './Pages/User/SignUpAndInPage/SignUpAndInPage'
 import OtpVerificationPage from './Pages/User/OtpVerificationPage/OtpVerificationPage'
 import ForgotAndResetPasswordPage from './Pages/User/ForgotAndResetPasswordPage/ForgotAndResetPasswordPage'
@@ -93,6 +94,7 @@ export default function App(){
                             <Route path='about' element={<AboutUsPage/>}/>
                             <Route path='contact' element={<ContactUsPage/>}/>
                             <Route path='privacy' element={<PrivacyPolicyPage/>}/>
+                            <Route path='terms' element={<TermsAndConditionsPage/>}/>
                             <Route path='cart' element={<CartPage/>} />
                             <Route element={<ProtectedUserRoutes/>}>
                                 <Route path='shop'>

@@ -104,6 +104,21 @@ export const updateUserWeight = createAsyncThunk('updateUserWeight', async({user
     }
 } )
 
+export const updateTermsAcceptance = createAsyncThunk('updateTermsAcceptance', async({consent},thunkAPI)=>{
+    try{
+        console.log("inside updateTermsAcceptance of createAsyncThunk")
+        const response = await axios.post('/terms', {consent}, {withCredentials:true})
+        console.log("returning success response from updateTermsAcceptance createAsyncThunk..."+JSON.stringify(response)) 
+        console.log("userDetails from updateTermsAcceptance createAsyncThunk--", consent)
+        return response.data
+    }
+    catch(error){
+        console.log("inside catch of updateTermsAcceptance from userSlice")
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
+        return thunkAPI.rejectWithValue(errorMessage)
+    }
+} ) 
+
 // export const resetPassword = resetPasswords('updateUserDetails', async({currentPassword, newPassword, confirmPassword}, thunkAPI)=>{
 //     try{
 //         console.log("inside updateUserDetails of createAsyncThunk")
@@ -125,6 +140,7 @@ const initialState = {
     userUpdated: false,
     userDpUpdated: false,
     userWeightUpdated: false,
+    updatedTermsAcceptance: false,
     currentPath: '',
     error:null,
     loading:false,
@@ -144,6 +160,7 @@ const userSlice = createSlice({
             state.userUpdated = false
             state.userDpUpdated = false
             state.userWeightUpdated = false
+            state.updatedTermsAcceptance = false
             console.log("state(success) after reset-->"+state.success)
         },
         changePath: (state, action)=> {
@@ -252,6 +269,27 @@ const userSlice = createSlice({
                 console.log("userData from userSlice-updateUserWeight.fulfilled-user-->"+JSON.stringify(state.user))
         })
         .addCase(updateUserWeight.rejected, (state,action)=>{
+                state.error = action.payload
+                state.loading = false
+                state.success = false
+                console.log("error from userSlice- updateUserWeight.rejected after assignment-->"+ state.error)
+        })
+        .addCase(updateTermsAcceptance.pending, (state,action)=>{
+                state.loading = true
+                state.success = false
+                console.log("loading from userSlice updateTermsAcceptance.pending--"+state.loading)
+        })
+        .addCase(updateTermsAcceptance.fulfilled, (state,action)=>{
+                state.loading = false
+                state.error = null
+                state.success = true 
+                state.user.hasAcceptedTerms = action.payload.hasAcceptedTerms
+                state.user.termsAcceptedAt = action.payload.termsAcceptedAt
+                state.user.termsVersion = action.payload.termsVersion
+                state.updatedTermsAcceptance = true
+                console.log("hasAcceptedTerms from userSlice-updateTermsAcceptance.fulfilled-user-->"+action.payload.hasAcceptedTerms)
+        })
+        .addCase(updateTermsAcceptance.rejected, (state,action)=>{
                 state.error = action.payload
                 state.loading = false
                 state.success = false

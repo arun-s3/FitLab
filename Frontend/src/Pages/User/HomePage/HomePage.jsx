@@ -94,7 +94,7 @@ export default function HomePage(){
 
             <Header 
               goToShopByCategorySec={()=> shopByCategoryRef.current?.scrollIntoView({ behavior: "smooth" })}
-              pageChatBoxStatus={openChatBox}
+              currentPageChatBoxStatus={openChatBox}
             />
 
             <HeroSection />

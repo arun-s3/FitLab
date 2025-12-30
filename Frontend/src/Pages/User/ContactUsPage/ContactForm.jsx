@@ -4,6 +4,8 @@ import { motion } from "framer-motion"
 import {Mail, Phone, Send} from "lucide-react"
 import {toast as sonnerToast} from 'sonner'
 
+import useTermsConsent from "../../../Hooks/useTermsConsent"
+import TermsDisclaimer from "../../../Components/TermsDisclaimer/TermsDisclaimer"
 import {camelToCapitalizedWords} from '../../../Utils/helperFunctions'
 import {CustomHashLoader} from '../../../Components/Loader/Loader'
 
@@ -28,6 +30,8 @@ export default function ContactForm({isSupportConnected, isCoachConnected, onSub
     })
 
     const [loading, setLoading] = useState(false)
+
+    const {acceptTermsOnFirstAction} = useTermsConsent()
 
     const supportOptions = [
       {
@@ -89,6 +93,7 @@ export default function ContactForm({isSupportConnected, isCoachConnected, onSub
     const submitDetails = async(e)=> {
       setLoading(true)
       e.preventDefault()
+      acceptTermsOnFirstAction()
       console.log("formData---->", formData)
       const fields = Object.keys(formData)
       console.log("fields---->", fields)
@@ -375,29 +380,8 @@ export default function ContactForm({isSupportConnected, isCoachConnected, onSub
                   }
                 </motion.button>
               
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.4, delay: 0.6 }}
-                  className="text-xs text-gray-500 text-center"
-                >
-                  By contacting us, you agree to Fitlab's{" "}
-                  <a href="/terms" 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="text-secondary hover:underline decoration-secondary transition duration-150 underline-offset-2"
-                  >
-                    Terms of Service
-                  </a>{" "}
-                  and{" "}
-                  <a href="/privacy" 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="text-secondary hover:underline decoration-secondary transition duration-150 underline-offset-2"
-                  >
-                    Privacy Policy
-                  </a>
-                </motion.p>
+                <TermsDisclaimer />
+
               </form>
             </motion.div>
           </div>

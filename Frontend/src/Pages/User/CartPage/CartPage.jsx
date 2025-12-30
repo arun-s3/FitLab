@@ -169,7 +169,7 @@ export default function ShoppingCartPage(){
     <section id='ShoppingCartPage'>
       <header style={headerBg} className='h-[5rem]'>
     
-        <Header pageChatBoxStatus={true}/>
+        <Header currentPageChatBoxStatus={true}/>
     
       </header>
     

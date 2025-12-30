@@ -86,7 +86,8 @@ export default function ExerciseCard({exercise, index, onChooseExercise}){
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.08 }}
               whileHover={{ scale: 1.005 }}
-              className="group bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-lg hover:border-purple-300 transition-all duration-300 cursor-pointer"
+              className="group bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-lg
+                over:border-purple-300 transition-all duration-300 cursor-pointer"
             >
               <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 p-6">
                 <div className="lg:col-span-1">
@@ -110,7 +111,8 @@ export default function ExerciseCard({exercise, index, onChooseExercise}){
                         />
                       ) 
                     }
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 
+                      group-hover:opacity-100 transition-opacity" />
                   </motion.div>
                 </div>
                 <div className="lg:col-span-3 flex flex-col justify-between">
@@ -168,7 +170,8 @@ export default function ExerciseCard({exercise, index, onChooseExercise}){
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={()=> onChooseExercise({...exercise, thumbnail})}
-                      className="w-full lg:w-auto bg-purple-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-purple-700 transition-colors"
+                      className="max-w-40 lg:w-auto bg-purple-600 text-white px-6 py-2 rounded-lg font-semibold
+                        hover:bg-purple-700 transition-colors"
                     >
                       View Details
                     </motion.button>

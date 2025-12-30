@@ -26,7 +26,9 @@ import {SocketContext} from '../../Components/SocketProvider/SocketProvider'
 
 
 
-export default function Header({lighterLogo, customStyle, goToShopByCategorySec, pageChatBoxStatus = false}){
+export default function Header({lighterLogo, customStyle, goToShopByCategorySec, currentPageChatBoxStatus = false,
+    currentPageCoachStatus = false
+}){
 
     const [isCartOpen, setIsCartOpen] = useState(false)
 
@@ -284,7 +286,7 @@ export default function Header({lighterLogo, customStyle, goToShopByCategorySec,
                     retractedView={true} />
 
                 {
-                    openChatBox && !pageChatBoxStatus &&
+                    openChatBox && !currentPageChatBoxStatus &&
                         <div className="fixed bottom-[2rem] right-[2rem] z-50">
                         
                             <TextChatBox closeable={true} 
@@ -294,7 +296,7 @@ export default function Header({lighterLogo, customStyle, goToShopByCategorySec,
                 }
 
                 {
-                    openCoach &&
+                    openCoach && !currentPageCoachStatus &&
                         <div className="fixed bottom-[2rem] left-[2rem] z-50">
                         
                             <CoachPlus closeable={true} 

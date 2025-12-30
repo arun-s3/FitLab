@@ -18,7 +18,8 @@ import WorkoutAiInsights from "./AiModules/WorkoutAiInsights"
 import DeleteConfirmationModal from "./DeleteConfirmationModal"
 import {estimateCalories} from "../../../Utils/exerciseFunctions"
 import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
-
+import useTermsConsent from "../../../Hooks/useTermsConsent"
+import TermsDisclaimer from "../../../Components/TermsDisclaimer/TermsDisclaimer"
 
 
 export default function WorkoutSessionCard() {
@@ -47,6 +48,8 @@ export default function WorkoutSessionCard() {
   const limit = 3
 
   const [loading, setLoading] = useState(false)
+
+  const {acceptTermsOnFirstAction} = useTermsConsent()
 
   const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
@@ -110,6 +113,7 @@ export default function WorkoutSessionCard() {
   }
 
   const handleSelectExercise = (id) => {
+    acceptTermsOnFirstAction()
     setSelectedExerciseId(id)
     const selectedExercise = exercises ? exercises.find((e) => e._id === id) : null
     setSelectedExercise(selectedExercise)
@@ -135,6 +139,7 @@ export default function WorkoutSessionCard() {
 
   const handleResumeTodayWorkout = (workout, resumeFromSet)=> {
     console.log("Inside handleResumeTodayWorkout()..resumeFromSet--->", resumeFromSet)
+    acceptTermsOnFirstAction()
     setSelectedExerciseId(workout._id)
     setSelectedExercise(workout)
     setStartTime(Date.now())
@@ -164,6 +169,7 @@ export default function WorkoutSessionCard() {
   }
 
   const handleFinishWorkout = async() => {
+    acceptTermsOnFirstAction()
     console.log("Inside handleFinishWorkout")
     const missedSets = []
     for (let i = currentSet; i < selectedExercise.sets.length; i++) {
@@ -397,6 +403,8 @@ export default function WorkoutSessionCard() {
 
               </motion.div>
 
+              <TermsDisclaimer startWith="By using fitness tracker" style='!mt-4'/>
+
             </div>
 
             <div className="lg:col-span-1 space-y-4">
@@ -464,9 +472,13 @@ export default function WorkoutSessionCard() {
 
             </div>
           </div>
+          
+          <div className="mt-12">
 
-          <WorkoutAiInsights />
+            <WorkoutAiInsights />
 
+          </div>
+                
       </motion.div>
                     
       {

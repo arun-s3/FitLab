@@ -12,6 +12,7 @@ import NotificationModal from "../NotificationModal/NotificationModal"
 import {decryptData} from '../../Utils/decryption'
 import SemiAutoRechargeModal from "../SemiAutoRechargeModal/SemiAutoRechargeModal"
 import VideoCallCommonModal from '../../Pages/User/VideoCallCommonModal/VideoCallCommonModal'
+import useTermsConsent from "../../Hooks/useTermsConsent"
 
 export const SocketContext = createContext();
 
@@ -80,6 +81,8 @@ export default function SocketProvider() {
 
     const messagesEndRef = useRef(null)             
     const typingTimeoutRef = useRef(null)
+
+    const {acceptTermsOnFirstAction} = useTermsConsent()
 
     
     useEffect(()=> { 
@@ -342,6 +345,8 @@ export default function SocketProvider() {
         setCoachMessages((prev) => [...prev, messageData])
     
         setNewCoachMessage("")
+
+        acceptTermsOnFirstAction()
       }
 
       const handleUserTypingForCoach = (e) => { 

@@ -3,10 +3,13 @@ import {useSelector} from 'react-redux'
 import {motion, AnimatePresence} from "framer-motion"
 
 import {MapPin, Minus} from 'lucide-react'
+import {toast as sonnerToast} from 'sonner'
 
 import PaypalPayment from '../PaymentPages/PayPalPayment'
 import {SiteSecondaryFillImpButton} from '../../../Components/SiteButtons/SiteButtons'
 import {CustomHashLoader} from '../../../Components/Loader/Loader'
+import useTermsConsent from "../../../Hooks/useTermsConsent"
+import TermsDisclaimer from "../../../Components/TermsDisclaimer/TermsDisclaimer"
 
 
 export default function OrderSummary({shippingAddress, paymentMethod, onApplyDiscount, placeOrder, onPaymentError, isLoading}){
@@ -18,6 +21,11 @@ export default function OrderSummary({shippingAddress, paymentMethod, onApplyDis
     const [isCouponFocused, setIsCouponFocused] = useState(false)
 
     const {cart} = useSelector(state=> state.cart)
+
+    const [userTermsConsent, setUserTermsConsent] = useState(false)
+
+    const {acceptTermsOnFirstAction} = useTermsConsent()
+    
 
     return (
         <motion.div 
@@ -163,9 +171,17 @@ export default function OrderSummary({shippingAddress, paymentMethod, onApplyDis
                           <span> Total </span>
                           <span> ₹{cart.absoluteTotalWithTaxes.toFixed(2)} </span>
                         </motion.div>
+
+                        <TermsDisclaimer 
+                          fontSize='12px' 
+                          style='!mt-8 !mb-[10px] !items-center gap-[10px]' 
+                          checkboxType={true}
+                          onChecked={(status)=> setUserTermsConsent(status)}
+                        />
+
                     </div>
                     <motion.div
-                      className="mt-6"
+                      className=""
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: 0.3, duration: 0.35 }}
@@ -178,8 +194,15 @@ export default function OrderSummary({shippingAddress, paymentMethod, onApplyDis
                           whileTap={{ scale: 0.96 }}
                         >
                           <SiteSecondaryFillImpButton
-                            className={`px-[50px] py-[9px] rounded-[7px] ${paymentMethod === 'cards' && 'hidden'}`} 
-                            clickHandler={()=> placeOrder()}
+                            className={`!mt-0 px-[50px] py-[9px] rounded-[7px] ${paymentMethod === 'cards' && 'hidden'}`} 
+                            clickHandler={()=> {
+                              if(userTermsConsent){
+                                acceptTermsOnFirstAction()
+                                placeOrder()
+                              }else{
+                                sonnerToast.warning("Please review and accept our Terms & Conditions and Privacy Policy to continue.", {duration: 5500})
+                              }
+                            }}
                           >
 
                               { isLoading 

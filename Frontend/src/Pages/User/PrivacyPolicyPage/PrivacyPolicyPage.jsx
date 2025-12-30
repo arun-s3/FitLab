@@ -20,7 +20,7 @@ export default function PrivacyPolicyPage() {
     
         <header className='h-[5rem] bg-gradient-to-r from-purple-600 to-purple-800'>
 
-          <Header lighterLogo={true} pageChatBoxStatus={true}/>
+          <Header lighterLogo={true} currentPageChatBoxStatus={true}/>
 
         </header>
 

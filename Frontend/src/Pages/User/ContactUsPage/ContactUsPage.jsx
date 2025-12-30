@@ -49,7 +49,7 @@ export default function ContactUsPage(){
     
         <header style={headerBg} className='h-[5rem]'>
         
-            <Header pageChatBoxStatus={true}/>
+            <Header currentPageChatBoxStatus={true}/>
         
         </header>
         

@@ -5,6 +5,7 @@ import axios from 'axios'
 
 import Header from '../../../Components/Header/Header'
 import TextChatBox from '../TextChatBox/TextChatBox'
+import CoachPlus from '../Coach+/Coach+'
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
 import FitnessCarousal from './FitnessCarousal'
 import MuscleSelector from './MuscleSelector'
@@ -39,7 +40,11 @@ export default function FitnessTrainingPage(){
   const [totalPages, setTotalPages] = useState(1) 
   const exercisesPerPage = 3
 
+  const [openCoach, setopenCoach] = useState(true)
+
   const exerciseAPiUrl = import.meta.env.VITE_EXERCISEDB_URL
+
+  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
   useEffect(()=> {
     async function loadBodyParts(){
@@ -66,31 +71,46 @@ export default function FitnessTrainingPage(){
           return
         }     
 
-        const response = await axios.get(
-          `${exerciseAPiUrl}/exercises/filter`,
-          {
-            params: {
-              offset: firstExerciseIndex,          
-              limit: exercisesPerPage,             
+        // const response = await axios.get(
+        //   `${exerciseAPiUrl}/exercises/filter`,
+        //   {
+        //     params: {
+        //       offset: firstExerciseIndex,          
+        //       limit: exercisesPerPage,             
             
-              muscles: selectedMuscles.length > 0 ? selectedMuscles.join(",") : undefined,        
-              bodyParts: selectedBodyParts.length > 0 ? selectedBodyParts.join(",") : undefined,    
-              equipment: selectedEquipments.length > 0 ? selectedEquipments.join(",") : undefined,   
+        //       muscles: selectedMuscles.length > 0 ? selectedMuscles.join(",") : undefined,        
+        //       bodyParts: selectedBodyParts.length > 0 ? selectedBodyParts.join(",") : undefined,    
+        //       equipment: selectedEquipments.length > 0 ? selectedEquipments.join(",") : undefined,   
             
-              search: options?.searchQueryRemoved ? undefined : searchQuery || undefined,
+        //       search: options?.searchQueryRemoved ? undefined : searchQuery || undefined,
             
-              sortBy: sort.by ? sort.by : undefined,
-              sortOrder: sort.order ? sort.order : undefined,
-            }
-          }
-        );
+        //       sortBy: sort.by ? sort.by : undefined,
+        //       sortOrder: sort.order ? sort.order : undefined,
+        //     }
+        //   }
+        // );
 
-        console.log("fetchExercises response----->", response.data)
-        if(response.data.success){
-          console.log("Exercises--->", response.data)
-          const totalPagesRequired = Math.ceil(response.data.metadata.totalExercises / exercisesPerPage)
+        const queryDetails = {
+          offset: firstExerciseIndex, 
+          limit: exercisesPerPage, 
+          muscles: selectedMuscles.length > 0 ? selectedMuscles.join(",") : undefined,  
+          bodyParts: selectedBodyParts.length > 0 ? selectedBodyParts.join(",") : undefined,    
+          equipment: selectedEquipments.length > 0 ? selectedEquipments.join(",") : undefined,   
+        
+          search: options?.searchQueryRemoved ? undefined : searchQuery || undefined,
+        
+          sortBy: sort.by ? sort.by : undefined,
+          sortOrder: sort.order ? sort.order : undefined,
+        }
+
+        const response = await axios.post(`${baseApiUrl}/fitness/exercises/list`, {queryDetails}, {withCredentials: true})
+
+        console.log("fetchExercises response----->", response.data.data)
+        if(response.data.data.success){
+          console.log("Exercises--->", response.data.data)
+          const totalPagesRequired = Math.ceil(response.data.data.metadata.totalExercises / exercisesPerPage)
           setTotalPages(totalPagesRequired)
-          return response.data.data
+          return response.data.data.data
         }
       }catch (error) {
       	console.error("Error while loading exercises", error.message)
@@ -157,7 +177,7 @@ export default function FitnessTrainingPage(){
     <section id='FitnessTrainingPage'>
       <header style={headerBg} className='h-[5rem]'>
     
-        <Header />
+        <Header currentPageCoachStatus={true}/>
     
       </header>
     
@@ -165,10 +185,10 @@ export default function FitnessTrainingPage(){
 
       <main className='bg-gradient-to-br from-white via-blue-50 to-gray-100'>
         
-        <div className="px-[1rem] py-[3rem]">
+        <div className="px-[1rem] py-[3rem] bg-white">
 
           
-          <div className="min-h-screen bg-white text-slate-900">
+          <div className="min-h-screen text-slate-900">
 
             {
               !selectedExercise ?
@@ -231,15 +251,19 @@ export default function FitnessTrainingPage(){
 
         </div>
 
-        {/* <div className="fixed bottom-[2rem] right-[2rem] z-50">
-              
-          <TextChatBox />
-
-        </div> */}
+        {
+            openCoach &&
+                <div className="fixed bottom-[2rem] left-[2rem] z-50">
+                
+                    <CoachPlus closeable={true} 
+                        autoOpen={false}
+                        onCloseChat={()=> setopenCoach(false)}/>
+                </div>
+        }
 
       </main>
 
-      <FeaturesDisplay />
+      <FeaturesDisplay/>
 
       <Footer/>
 

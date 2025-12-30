@@ -7,6 +7,7 @@ import ExerciseCard from './ExerciseCard'
 import {capitalizeFirstLetter} from '../../../Utils/helperFunctions'
 
 import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
+import TermsDisclaimer from "../../../Components/TermsDisclaimer/TermsDisclaimer"
 
 
 export default function TrainingExercisesList({selectedBodyParts, exercises, isLoading, error, currentPage, totalPages, onSelectExercise,
@@ -134,6 +135,11 @@ export default function TrainingExercisesList({selectedBodyParts, exercises, isL
                   <p className="text-lg text-slate-500">No exercises found!</p>
                 </motion.div>
               )}
+
+              <TermsDisclaimer 
+                style='mt-6 !text-right'
+                startWith="By using this fitness training service"
+              />
 
               {
                 totalPages &&

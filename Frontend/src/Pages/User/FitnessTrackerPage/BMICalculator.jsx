@@ -7,6 +7,8 @@ import {toast as sonnerToast} from 'sonner'
 
 import HealthAiInsights from "./AiModules/HealthAiInsights"
 import {updateUserWeight} from '../../../Slices/userSlice'
+import useTermsConsent from "../../../Hooks/useTermsConsent"
+import TermsDisclaimer from "../../../Components/TermsDisclaimer/TermsDisclaimer"
 
 
 export default function BMICalculator() {
@@ -30,6 +32,8 @@ export default function BMICalculator() {
   const dispatch = useDispatch()
 
   const {user} = useSelector(state=> state.user)
+
+  const {acceptTermsOnFirstAction} = useTermsConsent()
 
   const baseApiUrl = import.meta.env.VITE_API_BASE_URL 
 
@@ -63,6 +67,7 @@ export default function BMICalculator() {
   }
 
   const updateHealthProfile = async(healthProfile)=> {
+    acceptTermsOnFirstAction()
     console.log("Inside updateHealthProfile...") 
     try { 
       const response = await axios.post(`${baseApiUrl}/fitness/tracker/health/update`, {healthProfile}, { withCredentials: true })
@@ -485,6 +490,9 @@ export default function BMICalculator() {
                   Reset
                 </motion.button>
               </motion.div>
+
+              <TermsDisclaimer startWith="By using health tracker" style='!mt-4'/>
+
             </form>
           </motion.div>
 
@@ -567,7 +575,7 @@ export default function BMICalculator() {
           )}
         </div>
 
-        <div className="mt-6">
+        <div className="mt-12">
 
           <HealthAiInsights/>
 

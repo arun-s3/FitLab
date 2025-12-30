@@ -6,6 +6,7 @@ import {toast as sonnerToast} from 'sonner'
 
 import {SocketContext} from '../../../Components/SocketProvider/SocketProvider'
 import AnimatedBotIcon from "./AnimatedBot"
+import TermsDisclaimer from "../../../Components/TermsDisclaimer/TermsDisclaimer"
 
 
 export default function CoachPlus({autoOpen, onCloseChat}) {
@@ -248,7 +249,7 @@ export default function CoachPlus({autoOpen, onCloseChat}) {
                 </motion.button>
               </div>
 
-              <motion.p 
+              {/* <motion.p 
                 className="mt-[8px] ml-[3px] text-muted text-[10px]"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -271,7 +272,13 @@ export default function CoachPlus({autoOpen, onCloseChat}) {
                 >
                   Privacy Policy 
                 </a>
-              </motion.p>
+              </motion.p> */}
+
+              <TermsDisclaimer 
+                fontSize='10px' 
+                style='mt-[8px] !text-left'
+                startWith="By using Coach+"
+              />
 
             </motion.div>
           </motion.div>

@@ -11,6 +11,8 @@ const axios = require("axios")
 
 const {errorHandler} = require('../Utils/errorHandler')
 
+const EXERCISE_API_URL = process.env.EXERCISEDB_URL
+
 
 // const fetchFromBrave = async (query) => {
 //   try {
@@ -152,6 +154,59 @@ const getExerciseVideos = async (req, res, next) => {
   }
   catch (error) {
     console.log("Error in getExerciseVideos:", error.message)
+    next(error)
+  }
+}
+
+
+const getExercisesList = async (req, res, next) => {
+  try {
+    console.log("Inside getExercisesList controller")
+
+    const {
+      offset = 0,
+      limit = 10,
+      muscles,
+      bodyParts,
+      equipment,
+      search,
+      sortBy,
+      sortOrder
+    } = req.body.queryDetails
+
+    console.log("Query params:", req.query)
+
+    const response = await axios.get(
+      `${EXERCISE_API_URL}/exercises/filter`,
+      {
+        params: {
+          offset: Number(offset),
+          limit: Number(limit),
+
+          muscles: muscles || undefined,
+          bodyParts: bodyParts || undefined,
+          equipment: equipment || undefined,
+
+          search: search || undefined,
+
+          sortBy: sortBy || undefined,
+          sortOrder: sortOrder || undefined
+        },
+        timeout: 15000
+      }
+    )
+
+    return res.status(200).json({
+      success: true,
+      count: response.data?.length || 0,
+      data: response.data
+    })
+  } 
+  catch (error) {
+    console.error("Error fetching exercises:", error.response?.status, error.response?.data || error.message)
+    if (error.response?.status === 429) {
+      return next(errorHandler(429, "Too many requests. Please try again later."))
+    }
     next(error)
   }
 }
@@ -860,6 +915,6 @@ const checkWeeklyHealthProfile = async (req, res, next) => {
 
 
 
-module.exports = {getExerciseThumbnail, getExerciseVideos, addExercise, updateExerciseTemplate, updateWorkoutInfo, updateCaloriesForExercise,
-  getUserExerciseLibrary, getWorkoutHistory, getLatestWorkout, deleteExerciseTemplate, addOrUpdateDailyHealthProfile, getLatestHealthProfile, 
-  checkWeeklyHealthProfile}
+module.exports = {getExerciseThumbnail, getExerciseVideos, getExercisesList, addExercise, updateExerciseTemplate, updateWorkoutInfo, 
+  updateCaloriesForExercise, getUserExerciseLibrary, getWorkoutHistory, getLatestWorkout, deleteExerciseTemplate, addOrUpdateDailyHealthProfile,
+  getLatestHealthProfile, checkWeeklyHealthProfile}

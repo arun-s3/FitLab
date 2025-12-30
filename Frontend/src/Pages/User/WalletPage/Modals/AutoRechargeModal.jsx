@@ -11,6 +11,8 @@ import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js"
 import useModalHelpers from '../../../../Hooks/ModalHelpers'
 import {resetWalletStates} from '../../../../Slices/walletSlice'
 import {CustomHashLoader} from '../../../../Components/Loader/Loader'
+import useTermsConsent from "../../../../Hooks/useTermsConsent"
+import TermsDisclaimer from "../../../../Components/TermsDisclaimer/TermsDisclaimer"
 
 
 export default function AutoRechargeModal({ isOpen, onClose, onSave, currentSettings = null }) {
@@ -29,6 +31,9 @@ export default function AutoRechargeModal({ isOpen, onClose, onSave, currentSett
 
   const [isLoading, setIsLoading] = useState(false)
 
+  const [userTermsConsent, setUserTermsConsent] = useState(false)
+  const [warnUserForConsent, setWarnUserForConsent] = useState(false)
+
   const stripe = useStripe()
   const elements = useElements()
 
@@ -38,6 +43,8 @@ export default function AutoRechargeModal({ isOpen, onClose, onSave, currentSett
 
   const modalRef = useRef(null)
   useModalHelpers({open: isOpen, onClose, modalRef})
+
+  const {acceptTermsOnFirstAction} = useTermsConsent()
 
   const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
@@ -154,6 +161,12 @@ export default function AutoRechargeModal({ isOpen, onClose, onSave, currentSett
     }
   }, [isOpen])
 
+  useEffect(() => {
+    if (warnUserForConsent) {
+      setTimeout(()=> setWarnUserForConsent(false), 5000)
+    }
+  }, [warnUserForConsent])
+
   const paymentOptions = [
     {name: 'razorpay', iconSrc: './razorpay.png'}, {name: 'stripe', iconSrc: './stripe.png'}
   ]
@@ -209,6 +222,7 @@ export default function AutoRechargeModal({ isOpen, onClose, onSave, currentSett
 
   const handleSubmit = (e) => {
     setIsLoading(true)
+    acceptTermsOnFirstAction()
     e.preventDefault()
 
     if (validateForm()) {
@@ -446,7 +460,7 @@ export default function AutoRechargeModal({ isOpen, onClose, onSave, currentSett
                                         <div>
                                           <span className={`mr-4 text-[11px] mob:text-[12px] font-medium capitalize text-muted`}>
                                             {
-                                              `(${option.name === 'stripe' ? 'Recommended' : 'Semi-auto'})`
+                                              `(${option.name === 'stripe' ? 'Fully Auto' : 'Semi-auto'})`
                                             }
                                           </span>
                                           <input
@@ -494,11 +508,26 @@ export default function AutoRechargeModal({ isOpen, onClose, onSave, currentSett
                                     </p>
                                   </div>
                                 </div>
+
+                                <TermsDisclaimer 
+                                  fontSize='11px' 
+                                  style='mt-[8px]' 
+                                  checkboxType={true}
+                                  acknowledgeStatementEndsWith= "and authorize FitLab to automatically recharge my wallet as per the selected settings."
+                                  onChecked={(status)=> setUserTermsConsent(status)}
+                                />
+                                  
+                                <p className="absolute bottom-[26px] h-[5px] text-[10px] text-red-500">
+                                  {warnUserForConsent && 
+                                     "* Please review and accept our Terms & Conditions and Privacy Policy to continue."
+                                  }
+                                </p>
+
                               </>
                             )}
                           </div>
                           
-                          <div className="flex flex-col mob:flex-row justify-end gap-2 mob:gap-3 p-4 border-t dark:border-gray-700">
+                          <div className="flex flex-col mob:flex-row !justify-end gap-2 mob:gap-3 p-4 border-t dark:border-gray-700">
                             <button
                               type="button"
                               onClick={onClose}
@@ -509,10 +538,21 @@ export default function AutoRechargeModal({ isOpen, onClose, onSave, currentSett
                             >
                               Cancel
                             </button>
+                            <div  
+                              className="min-w-28"
+                              onMouseEnter={()=> {
+                                if(!userTermsConsent){
+                                  setWarnUserForConsent(true)
+                                }else{
+                                  setWarnUserForConsent(false)
+                                }
+                              }}
+                            >
                             <button
                               type="submit"
-                              className="min-w-28 px-4 py-2 text-[12px] mob:text-[13px] font-medium text-white bg-secondary rounded-md 
-                                hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-secondary"
+                              disabled={!userTermsConsent}
+                              className="w-full px-4 py-2 text-[12px] mob:text-[13px] font-medium text-white bg-secondary rounded-md 
+                                hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-secondary disabled:cursor-not-allowed"
                             >
                                { 
                                   isLoading 
@@ -520,6 +560,7 @@ export default function AutoRechargeModal({ isOpen, onClose, onSave, currentSett
                                     : 'Save Settings'
                                }
                             </button>
+                            </div>
                           </div>
                         </form>
                       )}

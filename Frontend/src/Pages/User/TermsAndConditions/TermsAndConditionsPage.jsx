@@ -64,7 +64,7 @@ export default function TermsAndConditionsPage() {
         
       <header style={headerBg} className='h-[5rem] bg-gray-100'>
 
-        <Header pageChatBoxStatus={true}/>
+        <Header currentPageChatBoxStatus={true}/>
 
       </header>
 

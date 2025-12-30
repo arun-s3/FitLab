@@ -11,6 +11,8 @@ import PaypalPayment from '../../PaymentPages/PayPalPayment'
 import StripePayment from '../../PaymentPages/StripePayment'
 import {addFundsToWallet} from '../../../../Slices/walletSlice'
 import useModalHelpers from '../../../../Hooks/ModalHelpers'
+import useTermsConsent from "../../../../Hooks/useTermsConsent"
+import TermsDisclaimer from "../../../../Components/TermsDisclaimer/TermsDisclaimer"
 
 
 export default function WalletFundingModal({showFundingModal, closeFundingModal, paymentVia, setPaymentVia}){
@@ -24,6 +26,8 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
     const [PaypalPaymentStarted, setPaypalPaymentStarted] = useState(false)
     const [stripePaymentStarted, setStripePaymentStarted] = useState(false)
 
+    const [userTermsConsent, setUserTermsConsent] = useState(false)
+
     const [error, setError] = useState('')
 
     const dispatch = useDispatch()
@@ -32,6 +36,8 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
 
     const modalRef = useRef(null)
     useModalHelpers({open: showFundingModal, onClose: closeFundingModal, modalRef})
+
+    const {acceptTermsOnFirstAction} = useTermsConsent()
 
     useEffect(()=> {
       const script = document.createElement("script")
@@ -191,7 +197,7 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.15, duration: 0.35 }}
                   ref={modalRef}
-                  className={`${paymentMethod === 'cards' ? 'p-0' : 'p-4 sm:p-6'}`}
+                  className={`${paymentMethod === 'cards' ? 'p-0' : 'p-4 sm:p-6 max-h-[28rem] overflow-y-auto'}`}
                 >
                   <div className="flex border-b mb-4 sm:mb-6 text-sm sm:text-[15px]">
                     <motion.button 
@@ -360,9 +366,16 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }} 
                       className={`w-full py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white font-medium 
-                        text-[13px] sm:text-[14px] rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 
+                        text-[13px] sm:text-[15px] rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 
                         ${error && amount < 1 && 'cursor-not-allowed'}`}
-                      onClick={()=> validateAndContinue(()=> handlRazorpayPayment())}>
+                      onClick={()=> {
+                        if(userTermsConsent){
+                          acceptTermsOnFirstAction()
+                          validateAndContinue(()=> handlRazorpayPayment())
+                        }else{
+                          sonnerToast.warning("Please review and accept our Terms & Conditions and Privacy Policy to continue.", {duration: 5500})
+                        }
+                      }}>
                         Add Money
                     </motion.button>
                     
@@ -372,10 +385,17 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
                       <motion.button 
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }} 
-                        className={`w-full py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white font-medium 
+                        className={`w-full py-2 px-4 bg-purple-600 hover:bg-purple-700 text-[15px] text-white font-medium 
                           rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2
                           ${error && amount < 1 && 'cursor-not-allowed'}`}
-                        onClick={()=> validateAndContinue(()=> setPaymentMethod('paypal'))}
+                        onClick={()=> {
+                          if(userTermsConsent){
+                            acceptTermsOnFirstAction()
+                             validateAndContinue(()=> setPaymentMethod('paypal'))
+                          }else{
+                            sonnerToast.warning("Please review and accept our Terms & Conditions and Privacy Policy to continue.", {duration: 5500})
+                          }
+                        }}
                       >
                           Continue Via Paypal
                       </motion.button> 
@@ -387,8 +407,15 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
                         whileTap={{ scale: 0.98 }} 
                         className={`w-full py-2 px-4 bg-purple-600 hover:bg-purple-700 text-white text-[13px] sm:text-[14px] font-medium 
                           rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2
-                          ${error && amount < 3.10 && 'cursor-not-allowed'}`}
-                        onClick={()=> validateAndContinue(()=> setPaymentMethod('cards'), 3.10)}
+                          ${error && amount < 3.10 && 'cursor-not-allowed'}`} 
+                        onClick={()=> {
+                          if(userTermsConsent){
+                            acceptTermsOnFirstAction()
+                            validateAndContinue(()=> setPaymentMethod('cards'), 3.10)
+                          }else{
+                            sonnerToast.warning("Please review and accept our Terms & Conditions and Privacy Policy to continue.", {duration: 5500})
+                          }
+                        }}
                       >
                         Continue 
                       </motion.button>
@@ -414,6 +441,13 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
                     </div>
                   }
                   
+                  <TermsDisclaimer 
+                    fontSize='11px' 
+                    style='mt-[8px]' 
+                    checkboxType={true}
+                    acknowledgeStatementEndsWith= "and authorize this wallet top-up."
+                    onChecked={(status)=> setUserTermsConsent(status)}
+                  />
 
                 </motion.div>
               </motion.div>

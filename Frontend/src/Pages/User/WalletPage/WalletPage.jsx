@@ -188,7 +188,7 @@ export default function WalletPage() {
 
                 <WalletUtilitySection membershipCredits={membershipCredits}/>
 
-                <AutoRechargeFeature />
+                {/* <AutoRechargeFeature /> */}
 
                 <CardExistsWarningModal
                   isOpen={openCardExistsModal}

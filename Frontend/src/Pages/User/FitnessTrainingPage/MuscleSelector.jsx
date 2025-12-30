@@ -140,6 +140,7 @@ export default function MuscleSelector({bodyParts, setSearchedBodyPart, onSearch
                   {bodyPart}
                 </motion.button>
               ))}
+
             </motion.div>
         </>
     )

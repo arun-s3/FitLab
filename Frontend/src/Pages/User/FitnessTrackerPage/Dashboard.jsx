@@ -80,7 +80,7 @@ export default function Dashboard() {
         <MonthlyWeeklyChart title="Exercise Breakdown" dataKey="exerciseBreakdown" timeRange={timeRange} onFetchedDatas={tempSaveForAiInsight}/>
       </motion.div>
 
-      <div className="mt-6">
+      <div className="!mt-14">
       
         <FitnessAiInsights receivedSourceDatas={dashboardDatas} periodType={timeRange} />
       

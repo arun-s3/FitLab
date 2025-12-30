@@ -344,7 +344,7 @@ export default function OrderHistoryPage(){
         <section id='OrderHistoryPage' className='bg-gradient-to-br from-gray-50 to-gray-100'>
             <header style={headerBg} className='h-[5rem]'>
                 
-                <Header pageChatBoxStatus={true}/>
+                <Header currentPageChatBoxStatus={true}/>
                 
             </header>
                 

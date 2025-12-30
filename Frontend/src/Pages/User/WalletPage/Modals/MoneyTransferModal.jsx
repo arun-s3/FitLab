@@ -8,6 +8,8 @@ import {toast as sonnerToast} from 'sonner'
 import {addPeerAccount, sendMoneyToUser, requestMoneyFromUser, resetWalletStates} from '../../../../Slices/walletSlice'
 import {decryptData} from '../../../../Utils/decryption'
 import useModalHelpers from '../../../../Hooks/ModalHelpers'
+import useTermsConsent from "../../../../Hooks/useTermsConsent"
+import TermsDisclaimer from "../../../../Components/TermsDisclaimer/TermsDisclaimer"
 
 
 export default function MoneyTransferModal({isTransferModalOpen, setIsTransferModalOpen, walletBalance, selectedPeerAccount, setSelectedPeerAccount,
@@ -25,6 +27,8 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
     const [transferSuccess, setTransferSuccess] = useState(false)
 
     const [error, setError] = useState(false)
+
+    const [userTermsConsent, setUserTermsConsent] = useState(false)
 
     const dispatch = useDispatch()
     const {safeWallet, walletLoading, walletError, peerAccountAdded, moneySent, moneyRequested} = useSelector(state=> state.wallet)
@@ -140,7 +144,14 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
 
     const handleTransferSubmit = (e) => {
         e.preventDefault()
-    
+
+        if(!userTermsConsent){
+          sonnerToast.warning("Please review and accept our Terms & Conditions and Privacy Policy to continue.", {duration: 5500})
+          return
+        }
+
+        acceptTermsOnFirstAction()
+
         const numAmount = Number.parseFloat(transferAmount)
         if (isNaN(numAmount) || numAmount <= 0 || numAmount > walletBalance) {
           setError(true)
@@ -418,7 +429,7 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
 
                     <div className="space-y-2">
                       <label htmlFor="amount" className="block text-[14px] font-medium">
-                        Amount to Send
+                        {!isRequester ? 'Amount to Send' : 'Amount you want to receive'}
                       </label>
                       <div className="relative">
                         <IndianRupee className="absolute left-3 top-1/2 -translate-y-1/2 h-[15px] w-[15px] dark:text-gray-400" />
@@ -440,10 +451,11 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
                           </span>
                         )}
                       </div>
-                    </div>
+                    </div> 
 
                     {
-                      !isRequester &&
+                      !isRequester ?
+                      <>
                       <div className="flex items-start mt-4">
                         <div className="flex items-center h-5">
                           <input id="confirmation" type="checkbox" checked={transferConfirmationChecked}
@@ -454,6 +466,17 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
                           I confirm that I want to send money to this recipient and the account details are correct.
                         </label>
                       </div>
+                      <TermsDisclaimer 
+                          acknowledgementStyle="!text-[12px] text-gray-600 ml-2 !text-left"
+                          checkboxType={true}
+                          acknowledgeStatementEndsWith= "and understand that this is a peer-to-peer financial transaction."
+                          onChecked={(status)=> setUserTermsConsent(status)}
+                        />
+                      </>
+                      :
+                      <p className='text-[10px] text-muted whitespace-nowrap'> 
+                        This is a request only. Funds will move only if the other user approves and sends money.
+                      </p>
                     }
 
                     {transferAmount &&

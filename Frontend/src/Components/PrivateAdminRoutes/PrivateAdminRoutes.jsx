@@ -8,7 +8,8 @@ export default function PrivateAdminRoutes(){
     const {admin} = useSelector(state=> state.admin)
     const {user} = useSelector(state=> state.user)
     
-    console.log("Inside PrivateAdminRoutes", user && !user.isAdmin)
+    console.log("Inside PrivateAdminRoutes, user exists who is not an admin", user && !user.isAdmin)
+    console.log("user---->", user)
 
     return  (
 

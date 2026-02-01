@@ -134,7 +134,7 @@ export default function App(){
                         </Route>
                     </Route>
 
-                    <Route path="*" element={<ErrorPage404 />} />
+                    {/* <Route path="*" element={<ErrorPage404 />} /> */}
 
                 </Route>
 
@@ -178,13 +178,13 @@ export default function App(){
                             </Route>
                     </Route>
 
-                    <Route path="*" element={<ErrorPage404 />} />
+                    {/* <Route path="*" element={<ErrorPage404 />} /> */}
 
                 </Route>
 
                 </Route>
 
-                <Route>
+                {/* <Route>
                     <Route element={<RestrictedEntryRoutes redirectTo={404}/>}>
                         <Route path='401' element={<ErrorPage401/>} />
                         <Route path='403' element={<ErrorPage403/>} />
@@ -192,7 +192,7 @@ export default function App(){
                     <Route path='404' element={<ErrorPage404/>} />
                 </Route>  
 
-                <Route path="*" element={<ErrorPage404 />} />  
+                <Route path="*" element={<ErrorPage404 />} />   */}
 
             </Routes>
         </BrowserRouter>

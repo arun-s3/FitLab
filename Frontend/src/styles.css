@@ -2425,6 +2425,10 @@ select{
   margin-top: 64px;
 }
 
+.mt-\[6px\]{
+  margin-top: 6px;
+}
+
 .mt-\[6rem\]{
   margin-top: 6rem;
 }
@@ -7666,6 +7670,10 @@ select{
   padding-left: 30px !important;
 }
 
+.\!pl-\[5px\]{
+  padding-left: 5px !important;
+}
+
 .\!pt-4{
   padding-top: 1rem !important;
 }
@@ -7994,6 +8002,10 @@ select{
   padding-top: 5px;
 }
 
+.pt-\[6px\]{
+  padding-top: 6px;
+}
+
 .pt-\[7px\]{
   padding-top: 7px;
 }
@@ -8060,6 +8072,10 @@ select{
 
 .\!text-\[13px\]{
   font-size: 13px !important;
+}
+
+.\!text-\[14px\]{
+  font-size: 14px !important;
 }
 
 .text-2xl{
@@ -10810,6 +10826,11 @@ select{
 .hover\:text-orange-200:hover{
   --tw-text-opacity: 1;
   color: rgb(254 215 170 / var(--tw-text-opacity));
+}
+
+.hover\:text-orange-400:hover{
+  --tw-text-opacity: 1;
+  color: rgb(251 146 60 / var(--tw-text-opacity));
 }
 
 .hover\:text-orange-600:hover{

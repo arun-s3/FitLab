@@ -22,7 +22,7 @@ app.use('/Public',express.static(path.join(__dirname,'/Public')))
 const session = require("express-session")
 app.use(
     session({
-      secret: "your_secret_key", 
+      secret: "fitlab", 
       resave: false,
       saveUninitialized: true,
       cookie: { maxAge: 300000 }

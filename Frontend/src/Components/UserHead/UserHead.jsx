@@ -3,7 +3,7 @@ import './UserHead.css'
 import {Link, useNavigate, useLocation} from 'react-router-dom'
 import {useSelector, useDispatch} from 'react-redux'
 
-import {Clock, CreditCard, BadgePercent, Home, LogOut, MapPin} from 'lucide-react'
+import {Clock, CreditCard, BadgePercent, Home, LogOut, MapPin, ShoppingCart, Heart} from 'lucide-react'
 import {IoMdArrowDropdown, IoMdArrowDropup} from "react-icons/io"
 import {IoBagCheckOutline} from "react-icons/io5"
 import {toast} from 'react-toastify'
@@ -32,8 +32,17 @@ export default function UserHead(){
         { icon: CreditCard, label: 'Wallet', path: '/wallet' },
         { icon: BadgePercent, label: 'Coupons', path: '/coupons' },
         { icon: IoBagCheckOutline, label: 'Checkout', path: '/checkout' },
-        { icon: Clock, label: 'Order History', path: '/orders' },
+        { icon: Clock, label: 'Orders', path: '/orders' },
+        { icon: ShoppingCart, label: 'Cart', path: '/cart' },
+        { icon: Heart, label: 'Wishlist', path: '/wishlist' },
         { icon: MapPin, label: 'Manage Addresses', path: '/account/addresses' },
+    ]
+
+    const fitlabMenuItems = [
+        { label: 'Privacy policy', path: '/privacy'},
+        { label: 'Terms & condition', path: '/terms'},
+        { label: 'Contact Us', path: '/contact'},
+        { label: 'About Us', path: '/about'},
     ]
 
     const toggleList = {
@@ -75,13 +84,6 @@ export default function UserHead(){
         }
     },[])
 
-    // useEffect(()=> {
-    //     if(!user){
-    //         const location = useLocation()
-    //         if(location.pathname !== '/')
-    //     }
-    // }, [user])
-
     const handleSignout = async()=> {
       try {
         console.log("Inside handleSignout")
@@ -118,26 +120,45 @@ export default function UserHead(){
                     </div>
                 </div>
                 <div className='absolute w-[200px] right-[-40px] pt-[5px] z-[20]' onMouseEnter={toggleList.showList}> 
-                    <ul className='py-[1rem] w-[175px] bg-white text-black pt-[5px] text-[14px] border border-dropdownBorder
+                    <ul className='py-[1rem] w-[175px] bg-white text-black pt-[5px] text-[13px] border border-dropdownBorder
                          rounded-[8px] hidden' id="userhead-list" ref={listRef} >
                         <li className='my-[3px]'> {user.email.length>15? user.email.slice(0,15)+"...": user.email} </li>
                         {
                             menuItems.map(item=> (
-                                <li className='hover:text-secondary hover:font-[500]'> 
-                                    <Link to={item.path} className='flex items-center gap-[10px]'> 
-                                        <item.icon className={` ${item.label === 'Checkout' ? 'h-[16px] w-[16px]' : 'h-[15px] w-[15px]'}
-                                         text-primaryDark hover:text-primary`} />  
+                                <li     
+                                     key={item.label}
+                                    className='hover:text-secondary hover:font-[500]'
+                                > 
+                                    <Link to={item.path} className='flex items-center gap-[6px]'> 
+                                        <item.icon className={` h-[14px] w-[14px]
+                                         text-orange-400 hover:text-primary`} />  
                                         <span> {item.label} </span>
                                     </Link>
                                 </li>
-                            ))
+                            )) 
                         }
-                        <li className='ml-[3px] pt-[12px] text-red-500 hover:text-[15px] hover:font-[500] border-t-[1px] 
-                            border-dotted border-secondary'>
+                        <li className="mt-[6px] border-t border-gray-200 pt-[6px] !pl-[5px]">
+                            <ul className='my-[3px]'>
+                                {
+                                    fitlabMenuItems.map(item=> (
+                                        <li 
+                                            key={item.label}
+                                            className='hover:text-orange-400 hover:font-[500] text-[13px]'
+                                        > 
+                                            <Link to={item.path} className='flex items-center gap-[10px]'> 
+                                                <span className=''> {item.label} </span>
+                                            </Link>
+                                        </li>
+                                    ))
+                                }
+                            </ul>
+                        </li>
+                        <li className='ml-[3px] pt-[12px] text-red-600 hover:text-[15px] hover:font-[500] border-t-[1px] 
+                            border-dotted border-secondary'> 
                             <Link onClick={handleSignout}
                                className='flex items-center gap-[10px]'>
                                 <LogOut className='h-[15px] w-[15px]' />  
-                                <span> Sign Out </span>
+                                <span className='!text-[14px]'> Sign Out </span>
                             </Link> 
                         </li>
                     </ul>

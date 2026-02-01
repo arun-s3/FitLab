@@ -34,7 +34,7 @@ export default function MobileSidebar() {
 
   const topBarIcons = [
     {Icon: Home, label:'Home', path: '/'},
-    {Icon: ShoppingCart, label:'Shopping Cart', path: null},
+    {Icon: ShoppingCart, label:'Shopping Cart', path: '/cart'},
     {Icon: User, label:'User Profile', path: '/account'} ,
   ]
 
@@ -44,7 +44,7 @@ export default function MobileSidebar() {
     { label: "Products", Icon: Package, path: '/shop'  },
     { label: "Fitness Training", Icon: MdSportsGymnastics, path: '/fitness/training' },
     { label: "Tracker", Icon: Activity, path: '/fitness/tracker' },
-    { label: "About Us", Icon: Info, path: '/'  },
+    { label: "About Us", Icon: Info, path: '/about'  },
   ]
 
   const userBrowsableItems = [
@@ -54,6 +54,12 @@ export default function MobileSidebar() {
     { label: "Checkout", Icon: IoBagCheckOutline, path: '/checkout' },
     { label: "Order History", Icon: Clock, path: '/orders' },
     { label: "Manage Addresses", Icon: MapPin, path: '/account/addresses' },
+  ]
+
+  const noticeItems = [
+    { label: "Privacy Policy", path: '/privacy'  },
+    { label: "Contact Us", path: '/contact'  },
+    { label: "About Us", path: '/about'  },
   ]
 
   useEffect(()=> {
@@ -376,18 +382,20 @@ export default function MobileSidebar() {
                       </div>
                     {
                       showOptions.notice &&
-                        <button
-                          className="group flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-sm hover:bg-white/5"
-                          onClick={() => setOpen(false)}
-                        >
-                          <span className="flex items-center gap-3 text-white/90">
-                            <span className="grid h-8 w-8 place-items-center rounded-md bg-white/5 ring-1 ring-white/10 text-white/80">
-                              <ChevronRight size={18} />
+                        noticeItems.map(item=> (
+                          <button
+                            className="group flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-sm hover:bg-white/5"
+                            onClick={() =>  {navigate(item.path);  setOpen(false)}}
+                          >
+                            <span className="flex items-center gap-3 text-white/90">
+                              <span className="grid h-8 w-8 place-items-center rounded-md bg-white/5 ring-1 ring-white/10 text-white/80">
+                                <ChevronRight size={18} />
+                              </span>
+                              {item.label}
                             </span>
-                            FAQ
-                          </span>
-                          <ChevronRight className="text-white/30 group-hover:text-white/60" size={18} />
-                        </button>
+                            <ChevronRight className="text-white/30 group-hover:text-white/60" size={18} />
+                          </button>
+                        ))
                     }
                     </div>
 

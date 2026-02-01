@@ -166,7 +166,7 @@ export default function HomePage(){
           <TestimonialSection />
         </Suspense>
         
-        <Footer/>
+        <Footer goToShopByCategorySec={()=> shopByCategoryRef.current?.scrollIntoView({ behavior: "smooth" })}/>
 
         {
           openChatBox &&

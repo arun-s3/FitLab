@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import './Footer.css'
 
 import { FaFacebook, FaTwitter, FaInstagram, FaPinterest, FaYoutube } from 'react-icons/fa'
@@ -7,7 +7,22 @@ import { FaFacebook, FaTwitter, FaInstagram, FaPinterest, FaYoutube } from 'reac
 import { SiteButtonSquare } from '../SiteButtons/SiteButtons'
 
 
-export default function Footer() {
+export default function Footer({goToShopByCategorySec}) {
+
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  const mainCategories = ["strength", "cardio", "supplements", "accessories"]
+
+  const jumpToShopByCategorySec = ()=> {
+    if(location.pathname !== '/' ){
+        console.log("Navigating now...")
+        setTimeout(() => navigate('/', { state: { scrollTo: "shopByCategories" }}), 0)
+    }else{
+        goToShopByCategorySec()
+    }
+  }
+
     
   return (
     <footer className="padding-main py-[2.3rem] text-white max-xs-sm2:overflow-x-hidden">
@@ -39,27 +54,33 @@ export default function Footer() {
          xl:gap-[4rem] items-center text-primary">
           <ul className="list-none text-descReg1 lg:text-[13px] xl:text-descReg1">
             <li> <h6 className="text-secondary text-descReg1 lg:text-[13px] xl:text-descReg1 whitespace-nowrap"> CATEGORY </h6></li>
-            <li> <Link> Strength </Link> </li>
-            <li> <Link> Cardio </Link> </li>
-            <li> <Link> Supplements </Link> </li>
-            <li> <Link> Accessories </Link> </li>
+            {
+              mainCategories.map(category=> (
+                <li 
+                  className='capitalize'
+                  onClick={()=> jumpToShopByCategorySec()}
+                >
+                   {category} 
+                </li>
+              ))
+            }
           </ul>
           <ul className="list-none text-descReg1 lg:text-[13px] xl:text-descReg1 whitespace-nowrap">
             <li><h6 className="text-secondary text-descReg1 lg:text-[13px] xl:text-descReg1"> SUPPORT </h6></li>
             <li className='block lg:hidden xl:block'>
-                <Link> Help, Faqs &amp; Support </Link>
+                <Link to="/support"> Help, Faqs &amp; Support </Link>
             </li>
             <li className='hidden lg:block xl:hidden'>
-                <Link> Help Desk </Link>
+                <Link to="/support"> Help Desk </Link>
             </li>
             <li className='block lg:hidden xl:block white'>
-                <Link> Terms &amp; Conditions </Link>
+                <Link to="/terms"> Terms &amp; Conditions </Link>
             </li>
             <li className='hidden lg:inline-block xl:hidden'>
-                <Link> T &amp; C </Link>
+                <Link to="/terms"> T &amp; C </Link>
             </li>
-            <li> <Link> Privacy Policy </Link> </li>
-            <li> <Link> About Us </Link> </li>
+            <li> <Link to="/privacy"> Privacy Policy </Link> </li>
+            <li> <Link to="/about"> About Us </Link> </li>
           </ul>
         </nav>
 

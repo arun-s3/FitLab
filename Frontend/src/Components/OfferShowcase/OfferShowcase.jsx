@@ -102,6 +102,8 @@ export default function OfferShowcase({sectionStyle, containerStyle, headlineSty
     }
   }
 
+  if(totalOffers === 0) return
+
   return (
     <section className={`w-full py-12 md:py-16 px-4 md:px-6 bg-gradient-to-b from-slate-50 to-white
        dark:from-slate-900 dark:to-slate-950 ${sectionStyle && sectionStyle}`}>

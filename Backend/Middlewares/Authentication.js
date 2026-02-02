@@ -1,37 +1,35 @@
 const {verifyToken} = require('../Utils/jwt')
 const User = require('../Models/userModel')
 
-const isLogin = async(req,res,next)=>{
-    try{
-        console.log("Inside isLogin JWT Cookie-->"+req.cookies.jwt)
-        if(req.cookies.jwt){
-            const token = req.cookies.jwt
-            console.log("Inside isLogin extracted token from cookie inside isLogin-->"+token)
-            const decoded = verifyToken(token)
-            console.log("Inside isLogin Verifying token inside isLogin-->"+decoded)
-            if(decoded){
-                const currentUser = await User.findOne({_id: decoded.userId},{password: 0})
-                if(currentUser.isBlocked){ 
-                    res.status(401).json({message:"You are Blocked! For more info, contact us"})
-                }
-                else{
-                    req.user = currentUser
-                    console.log("req.user from isLogin Authentication--->", req.user)
-                    next()
-                }
-            }
-            else{
-                console.log("Inside isLogin Can't verify token")
-                res.status(401).json({message:"Unauthorized!"})
-            }
+
+const isLogin = async (req, res, next) => {
+    try {
+        const token = req.cookies?.jwt
+        if (!token) {
+            return res.status(401).json({ message: "Unauthorized" })
         }
-        else{
-            console.log("Inside isLogin Can't find jwt cookie")
-            res.status(401).json({message:"Unauthorized!"})
+
+        let decoded
+        try {
+            decoded = verifyToken(token)
+        } catch (err) {
+            return res.status(401).json({ message: "Invalid or expired token" })
         }
-    }
-    catch(error){
-        console.log("User AuthError--"+error.message)
+
+        const currentUser = await User.findById(decoded.userId).select("-password")
+        if (!currentUser) {
+            return res.status(401).json({ message: "User not found" })
+        }
+
+        if (currentUser.isBlocked) {
+            return res.status(403).json({
+                message: "You are Blocked! For more info, contact support",
+            })
+        }
+
+        req.user = currentUser
+        next()
+    } catch (error) {
         next(error)
     }
 }

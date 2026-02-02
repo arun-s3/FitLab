@@ -25,32 +25,12 @@ const generateToken = (res, userId) => {
 
 const verifyToken = (token) => {
     try {
-        const tokenVerified = jwt.verify(
-            token,
-            process.env.JWTSECRET,
-            (err, decoded) => {
-                if (err) {
-                    console.log(
-                        "error inside verifyToken in jwt" + err.message
-                    );
-                    return false;
-                } else {
-                    console.log(
-                        "decoded token payload from verifyToken in jwt" +
-                            decoded
-                    );
-                    return decoded;
-                }
-            }
-        );
-        return tokenVerified;
+        return jwt.verify(token, process.env.JWTSECRET)
     } catch (error) {
-        error.statusCode = error.statusCode || 401;
-        error.message = error.message + "---Unauthorized user";
+        console.log("JWT verification failed:", error.message)
+        return null
     }
-};
+}
 
-const deleteToken = (res) => {
-    res.clearCookie("jwt").status(200).json({ message: "signed out" });
-};
+
 module.exports = { generateToken, verifyToken };

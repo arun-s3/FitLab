@@ -2121,10 +2121,6 @@ select{
   margin-left: 5px;
 }
 
-.ml-\[6\.7rem\]{
-  margin-left: 6.7rem;
-}
-
 .ml-\[6px\]{
   margin-left: 6px;
 }
@@ -2179,10 +2175,6 @@ select{
 
 .mr-\[1rem\]{
   margin-right: 1rem;
-}
-
-.mr-\[25px\]{
-  margin-right: 25px;
 }
 
 .mr-\[2px\]{
@@ -2443,6 +2435,14 @@ select{
 
 .mt-\[9px\]{
   margin-top: 9px;
+}
+
+.mr-auto{
+  margin-right: auto;
+}
+
+.-mr-\[25px\]{
+  margin-right: -25px;
 }
 
 .line-clamp-1{
@@ -3609,10 +3609,6 @@ select{
   width: 40px;
 }
 
-.w-\[430px\]{
-  width: 430px;
-}
-
 .w-\[45\%\]{
   width: 45%;
 }
@@ -3965,10 +3961,6 @@ select{
 
 .basis-\[37\%\]{
   flex-basis: 37%;
-}
-
-.basis-\[380px\]{
-  flex-basis: 380px;
 }
 
 .basis-\[40\%\]{
@@ -4424,10 +4416,6 @@ select{
 
 .gap-\[2rem\]{
   gap: 2rem;
-}
-
-.gap-\[3\.8rem\]{
-  gap: 3.8rem;
 }
 
 .gap-\[30px\]{
@@ -9175,14 +9163,6 @@ select{
   text-underline-offset: 2px;
 }
 
-.placeholder-\[13px\]::-moz-placeholder{
-  color: 13px;
-}
-
-.placeholder-\[13px\]::placeholder{
-  color: 13px;
-}
-
 .placeholder-gray-400::-moz-placeholder{
   --tw-placeholder-opacity: 1;
   color: rgb(156 163 175 / var(--tw-placeholder-opacity));
@@ -13334,6 +13314,26 @@ select{
     margin-top: 0px;
   }
 
+  .sm\:mr-\[\]{
+    margin-right: ;
+  }
+
+  .sm\:mr-\[25\]{
+    margin-right: 25;
+  }
+
+  .sm\:mr-\[25px\]{
+    margin-right: 25px;
+  }
+
+  .sm\:-mr-\[25px\]{
+    margin-right: -25px;
+  }
+
+  .sm\:mr-auto{
+    margin-right: auto;
+  }
+
   .sm\:block{
     display: block;
   }
@@ -13478,8 +13478,8 @@ select{
     gap: 10px;
   }
 
-  .sm\:gap-\[20px\]{
-    gap: 20px;
+  .sm\:gap-\[15px\]{
+    gap: 15px;
   }
 
   .sm\:space-y-4 > :not([hidden]) ~ :not([hidden]){
@@ -13661,6 +13661,10 @@ select{
 }
 
 @media (min-width: 700px){
+  .x-sm\:sticky{
+    position: sticky;
+  }
+
   .x-sm\:-top-\[1\.7rem\]{
     top: -1.7rem;
   }
@@ -13689,6 +13693,10 @@ select{
     margin-top: 5rem;
   }
 
+  .x-sm\:-mr-\[25px\]{
+    margin-right: -25px;
+  }
+
   .x-sm\:inline-block{
     display: inline-block;
   }
@@ -13699,6 +13707,14 @@ select{
 
   .x-sm\:flex{
     display: flex;
+  }
+
+  .x-sm\:inline-flex{
+    display: inline-flex;
+  }
+
+  .x-sm\:hidden{
+    display: none;
   }
 
   .x-sm\:h-\[1\.3rem\]{
@@ -13775,6 +13791,10 @@ select{
 
   .x-sm\:gap-\[3rem\]{
     gap: 3rem;
+  }
+
+  .x-sm\:gap-\[15px\]{
+    gap: 15px;
   }
 
   .x-sm\:gap-x-\[4rem\]{
@@ -14504,8 +14524,8 @@ select{
     justify-content: normal;
   }
 
-  .l-md\:gap-\[2rem\]{
-    gap: 2rem;
+  .l-md\:gap-\[1\.8rem\]{
+    gap: 1.8rem;
   }
 
   .l-md\:border-inputBorderLow{
@@ -14557,8 +14577,8 @@ select{
     gap: 1.5rem;
   }
 
-  .x-md\:gap-\[2\.5rem\]{
-    gap: 2.5rem;
+  .x-md\:gap-\[2\.2rem\]{
+    gap: 2.2rem;
   }
 
   .x-md\:rounded-\[8px\]{

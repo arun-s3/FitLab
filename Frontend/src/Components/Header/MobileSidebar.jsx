@@ -3,17 +3,18 @@ import {useSelector, useDispatch} from 'react-redux'
 import {Link, useNavigate} from 'react-router-dom'
 import {motion, AnimatePresence, useScroll, useSpring} from "framer-motion"
 
-import {Menu, ArrowUpRight, Home, Info, ShoppingCart, ChevronRight, LogIn, UserPlus, X, LayoutGrid, Package, User, CreditCard, 
+import {Menu, ArrowUpRight, Home, Info, ShoppingCart, Bot, ChevronRight, LogIn, UserPlus, X, LayoutGrid, Package, User, CreditCard, 
   BadgePercent, Clock, Video, CircleUserRound, MapPin, Activity, MessageSquare, LogOut} from "lucide-react"
 import {MdSportsGymnastics} from "react-icons/md"
 import {IoBagCheckOutline} from "react-icons/io5"
 
 import CartSidebar from '../../Components/CartSidebar/CartSidebar'
 import TextChatBox from '../../Pages/User/TextChatBox/TextChatBox'
+import CoachPlus from '../../Pages/User/Coach+/Coach+'
 import {signout} from '../../Slices/userSlice'
 
 
-export default function MobileSidebar() {
+export default function MobileSidebar({currentPageChatBoxStatus = false, currentPageCoachStatus = false}) {
 
 
   const [open, setOpen] = useState(false)
@@ -27,24 +28,28 @@ export default function MobileSidebar() {
   const [openChatBox, setOpenChatBox] = useState(false)
   const [isCartOpen, setIsCartOpen] = useState(false)
 
+  const [openCoach, setopenCoach] = useState(false)
+
   const {user} = useSelector((state)=> state.user)
   const dispatch = useDispatch()
 
   const navigate = useNavigate()
 
   const topBarIcons = [
-    {Icon: Home, label:'Home', path: '/'},
-    {Icon: ShoppingCart, label:'Shopping Cart', path: '/cart'},
-    {Icon: User, label:'User Profile', path: '/account'} ,
+      { Icon: Home, label: "Home", path: "/" },
+      { Icon: ShoppingCart, label: "Shopping Cart", path: "/cart" },
+      { Icon: Bot, label: "Coach+", handleClick: () => setopenCoach((status) => !status) },
+      { Icon: User, label: "User Profile", path: "/account" },
   ]
 
   const menuItems = [
-    { label: "Home", Icon: Home, path: '/'  },
-    { label: "Shop by Categories", Icon: LayoutGrid, path: '/shop'  },
-    { label: "Products", Icon: Package, path: '/shop'  },
-    { label: "Fitness Training", Icon: MdSportsGymnastics, path: '/fitness/training' },
-    { label: "Tracker", Icon: Activity, path: '/fitness/tracker' },
-    { label: "About Us", Icon: Info, path: '/about'  },
+      { label: "Home", Icon: Home, path: "/" },
+      { label: "Shop by Categories", Icon: LayoutGrid, path: "/shop" },
+      { label: "Products", Icon: Package, path: "/shop" },
+      { label: "Coach+", Icon: Bot, handleClick: () => setopenCoach((status) => !status) },
+      { label: "Fitness Training", Icon: MdSportsGymnastics, path: "/fitness/training" },
+      { label: "Tracker", Icon: Activity, path: "/fitness/tracker" },
+      { label: "About Us", Icon: Info, path: "/about" },
   ]
 
   const userBrowsableItems = [
@@ -87,7 +92,7 @@ export default function MobileSidebar() {
 
   return (
     <>
-      <header className="lg:mt-0 absolute sm:sticky right-[5px] sm:right-0 top-[25px] z-40">
+      <header className="lg:mt-0 mr-auto sm:-mr-[25px] x-sm:mr-auto absolute sm:sticky right-[5px] sm:right-0 top-[25px] z-40">
 
         <nav
           className="mx-auto flex items-center justify-between rounded-full px-4  text-white lg:px-6"
@@ -147,6 +152,7 @@ export default function MobileSidebar() {
                               onClick={()=> {
                                 item?.path && navigate(item.path)
                                 if(item.label === 'Shopping Cart') setIsCartOpen(true)
+                                if(item?.handleClick) item.handleClick()
                                 setOpen(false)
                               }}/>
                           </span>
@@ -305,7 +311,7 @@ export default function MobileSidebar() {
                             show: { transition: { staggerChildren: 0.06 } },
                           }}
                         >
-                          {menuItems.map(({ label, Icon, path }) => (
+                          {menuItems.map(({ label, Icon, path, handleClick = null }) => (
                             <motion.li
                               key={label}
                               variants={{ hidden: { opacity: 0, x: 16 }, show: { opacity: 1, x: 0 } }}
@@ -313,7 +319,11 @@ export default function MobileSidebar() {
                               <button
                                 className="group flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-sm
                                  hover:bg-white/5"
-                                onClick={()=> {navigate(path); setOpen(false)}}
+                                onClick={()=> {
+                                    if(!handleClick) navigate(path)
+                                    else handleClick()
+                                    setOpen(false)
+                                }}
                               >
                                 <span className="flex items-center gap-3 text-white/90">
                                   <span className="grid h-8 w-8 place-items-center rounded-md bg-white/5 ring-1 ring-white/10 text-white/80">
@@ -419,13 +429,25 @@ export default function MobileSidebar() {
         />
         
         {
-            openChatBox &&
+            openChatBox && !currentPageChatBoxStatus && 
             <div className="fixed bottom-[2rem] right-[2rem] z-50">
           
                 <TextChatBox closeable={true} 
                   onCloseChat={()=> setOpenChatBox(false)}
                 />
                   
+            </div>
+        }
+
+        {
+            openCoach && !currentPageCoachStatus && 
+        
+            <div className='fixed bottom-[2rem] left-[2rem] z-50'>
+                <CoachPlus 
+                    closeable={true} 
+                    autoOpen={true} 
+                    onCloseChat={() => setopenCoach(false)} 
+                />
             </div>
         }
 

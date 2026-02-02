@@ -638,7 +638,14 @@ const updateTermsAcceptance = async (req, res, next) => {
 const signout = (req,res,next)=>{
     console.log("JWT Cookie from signout controller-->"+req.cookies.jwt)
     try{
-        res.clearCookie('jwt').status(200).json({message:"signed out"})
+        const isProd = process.env.NODE_ENV === "production"
+        res.clearCookie("jwt", {
+            httpOnly: true,
+            secure: isProd,
+            sameSite: isProd ? "none" : "lax",
+            domain: isProd ? ".fitlab.co.in" : undefined,
+        })
+        res.status(200).json({ message: "signed out" })
     }
     catch(error){
         console.log("JWT Cookie inside signout controller catch-->"+req.cookies.jwt)

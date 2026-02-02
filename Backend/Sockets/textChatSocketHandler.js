@@ -19,7 +19,11 @@ async function textChatBoxSocket(io) {
         socket.emit("active-users-update", Array.from(activeUsers.values()))
         console.log("Admin connected:", socket.id)
 
-        socket.emit("admin-status", true)
+        activeUsers.forEach(async (userData) => {
+            io.to(userData.userId).emit("admin-status", false)
+        })
+
+        // socket.emit("admin-status", true)
       })
 
       const guestCounter = ()=> {

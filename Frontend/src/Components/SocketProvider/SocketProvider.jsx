@@ -157,10 +157,10 @@ export default function SocketProvider() {
           setIsAdminOnline(false)
         })
     
-        socket.on("disconnect", () => {
-          console.warn("⚠️ Socket disconnected:", reason);
-          setIsConnected(false)
-          setIsAdminOnline(false)
+        socket.on("disconnect", (reason) => {
+            console.warn("⚠️ Socket disconnected:", reason)
+            setIsConnected(false)
+            setIsAdminOnline(false)
         })
 
         socket.on("error", (err) => {

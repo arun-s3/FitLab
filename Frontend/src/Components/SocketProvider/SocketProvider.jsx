@@ -144,6 +144,10 @@ export default function SocketProvider() {
           }
         })
 
+        socket.on("connect_error", (err) => {
+          console.error("❌ Connection error:", err.message);
+        });
+
         socket.on("admin-status", status=> {
           setIsAdminOnline(status)
         })

@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const isProd = process.env.NODE_ENV === "production"
 
 const generateToken = (res, userId) => {
     try {
@@ -8,11 +9,12 @@ const generateToken = (res, userId) => {
         });
         console.log("Token made token inside jwt-->" + token);
         res.cookie("jwt", token, {
-            expires: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
             httpOnly: true,
-            sameSite: "strict",
-        });
-        // console.log("JWT cookie from generateToken-->"+res.cookie)
+            secure: isProd,
+            sameSite: isProd ? "none" : "lax",
+            domain: isProd ? ".fitlab.co.in" : undefined,
+            maxAge: 10 * 24 * 60 * 60 * 1000,
+        })
         return token;
     } catch (error) {
         error.statusCode = error.statusCode || 500;

@@ -127,9 +127,12 @@ export default function SocketProvider() {
     }, [notifications])
 
     useEffect(() => {
-        const socket = io(baseApiUrl)
+        const socket = io(baseApiUrl, {
+            withCredentials: true, 
+        })
     
         socket.on("connect", () => {
+          console.log("✅ Socket connected:", socket.id)
           setIsConnected(true)
           if(userWasGuest.wasGuest){
             console.log("Guest details before emiting delete-guest--->", userWasGuest)
@@ -144,10 +147,6 @@ export default function SocketProvider() {
           }
         })
 
-        socket.on("connect_error", (err) => {
-          console.error("❌ Connection error:", err.message);
-        });
-
         socket.on("admin-status", status=> {
           setIsAdminOnline(status)
         })
@@ -159,8 +158,13 @@ export default function SocketProvider() {
         })
     
         socket.on("disconnect", () => {
+          console.warn("⚠️ Socket disconnected:", reason);
           setIsConnected(false)
           setIsAdminOnline(false)
+        })
+
+        socket.on("error", (err) => {
+            console.error("🔥 Socket error:", err)
         })
 
         socket.on("chat-history", (messages) => {

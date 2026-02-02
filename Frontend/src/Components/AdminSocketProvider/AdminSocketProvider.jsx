@@ -32,7 +32,9 @@ export default function AdminSocketProvider() {
 
   
   useEffect(() => {
-    const socket = io(baseApiUrl)
+    const socket = io(baseApiUrl, {
+        withCredentials: true, 
+    })
 
     socket.on("connect", () => {
       setIsConnected(true)

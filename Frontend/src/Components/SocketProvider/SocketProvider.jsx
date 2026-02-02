@@ -120,11 +120,15 @@ export default function SocketProvider() {
 
     useEffect(()=> {
       console.log("openSemiAutoRechargeModal--->", openSemiAutoRechargeModal)
-    }, [openSemiAutoRechargeModal])
+    }, [openSemiAutoRechargeModal]) 
 
     useEffect(()=> {
       console.log("notifications from SocketProvider--->", notifications)
     }, [notifications])
+
+    useEffect(() => {
+        console.log("isAdminOnline--->", isAdminOnline)
+    }, [isAdminOnline])
 
     useEffect(() => {
         const socket = io(baseApiUrl, {

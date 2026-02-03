@@ -92,24 +92,6 @@ const signoutAdmin = (req,res,next)=>{
     }
 }
 
-// const showUsers = async(req,res,next)=>{
-//     try{
-//         console.log("Inside showUsers controller")
-//         const users = await User.find({isAdmin:false},{password:0})
-//         if(users){
-//             console.log("Users found-->"+JSON.stringify(users))
-//             res.status(200).json({users:users})
-//         }
-//         else{
-//             console.log("No records!")
-//             res.status(404).json({message:"Users not found!"})
-//         }
-//     }
-//     catch(error){
-//         console.log("Inside catch of showUsers controller")
-//         next(error)
-//     }
-// }
 
 const showUsers = async (req, res, next) => {
   try {

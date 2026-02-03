@@ -13,6 +13,7 @@ const generateToken = (res, userId) => {
             secure: isProd,
             sameSite: isProd ? "none" : "lax",
             domain: isProd ? ".fitlab.co.in" : undefined,
+            path: "/",
             maxAge: 10 * 24 * 60 * 60 * 1000,
         })
         return token;

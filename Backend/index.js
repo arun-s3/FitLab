@@ -19,15 +19,7 @@ app.use(nocache())
 const path = require('node:path')
 app.use('/Public',express.static(path.join(__dirname,'/Public')))
 
-const session = require("express-session")
-app.use(
-    session({
-      secret: "fitlab", 
-      resave: false,
-      saveUninitialized: true,
-      cookie: { maxAge: 300000 }
-    })
-)
+app.set("trust proxy", 1)
 
 app.use(express.json({limit: '10mb'}))
 app.use(express.urlencoded({extended: true, limit:'10mb'}))
@@ -40,7 +32,6 @@ app.use(cors({
     method:['GET','POST','PUT','PATCH','DELETE'],
     credentials:true
 }))
-
 
 const Server = require("socket.io").Server
 

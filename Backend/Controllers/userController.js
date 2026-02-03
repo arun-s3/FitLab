@@ -644,6 +644,7 @@ const signout = (req,res,next)=>{
             secure: isProd,
             sameSite: isProd ? "none" : "lax",
             domain: isProd ? ".fitlab.co.in" : undefined,
+            path: "/",
         })
         res.status(200).json({ message: "signed out" })
     }

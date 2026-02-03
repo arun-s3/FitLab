@@ -2201,6 +2201,10 @@ select{
   margin-right: 8px;
 }
 
+.mr-auto{
+  margin-right: auto;
+}
+
 .mt-0{
   margin-top: 0px;
 }
@@ -2435,14 +2439,6 @@ select{
 
 .mt-\[9px\]{
   margin-top: 9px;
-}
-
-.mr-auto{
-  margin-right: auto;
-}
-
-.-mr-\[25px\]{
-  margin-right: -25px;
 }
 
 .line-clamp-1{
@@ -13290,6 +13286,10 @@ select{
     margin-right: -1.5rem;
   }
 
+  .sm\:-mr-\[25px\]{
+    margin-right: -25px;
+  }
+
   .sm\:mb-0{
     margin-bottom: 0px;
   }
@@ -13314,26 +13314,6 @@ select{
     margin-top: 0px;
   }
 
-  .sm\:mr-\[\]{
-    margin-right: ;
-  }
-
-  .sm\:mr-\[25\]{
-    margin-right: 25;
-  }
-
-  .sm\:mr-\[25px\]{
-    margin-right: 25px;
-  }
-
-  .sm\:-mr-\[25px\]{
-    margin-right: -25px;
-  }
-
-  .sm\:mr-auto{
-    margin-right: auto;
-  }
-
   .sm\:block{
     display: block;
   }
@@ -13344,10 +13324,6 @@ select{
 
   .sm\:inline{
     display: inline;
-  }
-
-  .sm\:inline-flex{
-    display: inline-flex;
   }
 
   .sm\:hidden{
@@ -13476,10 +13452,6 @@ select{
 
   .sm\:gap-\[10px\]{
     gap: 10px;
-  }
-
-  .sm\:gap-\[15px\]{
-    gap: 15px;
   }
 
   .sm\:space-y-4 > :not([hidden]) ~ :not([hidden]){
@@ -13661,10 +13633,6 @@ select{
 }
 
 @media (min-width: 700px){
-  .x-sm\:sticky{
-    position: sticky;
-  }
-
   .x-sm\:-top-\[1\.7rem\]{
     top: -1.7rem;
   }
@@ -13691,10 +13659,6 @@ select{
 
   .x-sm\:mt-\[5rem\]{
     margin-top: 5rem;
-  }
-
-  .x-sm\:-mr-\[25px\]{
-    margin-right: -25px;
   }
 
   .x-sm\:inline-block{
@@ -13781,6 +13745,10 @@ select{
     justify-content: center;
   }
 
+  .x-sm\:gap-\[15px\]{
+    gap: 15px;
+  }
+
   .x-sm\:gap-\[2rem\]{
     gap: 2rem;
   }
@@ -13791,10 +13759,6 @@ select{
 
   .x-sm\:gap-\[3rem\]{
     gap: 3rem;
-  }
-
-  .x-sm\:gap-\[15px\]{
-    gap: 15px;
   }
 
   .x-sm\:gap-x-\[4rem\]{

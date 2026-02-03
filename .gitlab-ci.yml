@@ -11,7 +11,7 @@ build_frontend:
   script:
     - cd Frontend
     - rm -rf node_modules package-lock.json
-    - npm install
+    - npm install --include=dev
     - npm run build
     - echo "S3_BUCKET = ${S3_BUCKET}" 
     - echo "FRONTEND BUILD IS COMPLETED"

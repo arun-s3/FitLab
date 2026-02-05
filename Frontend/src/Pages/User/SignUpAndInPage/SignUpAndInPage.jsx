@@ -282,211 +282,249 @@ export default function SignUpAndInPage({type}){
     }
 
 
-    return(
-       <>
-        <motion.section 
-            style={bgImg}
-            className={`${type=='signup'? 'h-[165vh] sm:h-[145vh] before:h-[165vh] sm:before:h-[145vh]' : 'h-[120vh] before:h-[120vh]'}`}
-            id="signup-and-in"
-            variants={sectionVariants}
-            initial="hidden"
-            animate="visible"
-        >
+    return (
+        <>
+            <motion.section
+                style={bgImg}
+                className={`${type == "signup" ? "h-[165vh] sm:h-[145vh] before:h-[165vh] sm:before:h-[145vh]" : "h-[120vh] before:h-[120vh]"}`}
+                id='signup-and-in'
+                variants={sectionVariants}
+                initial='hidden'
+                animate='visible'>
+                <header>
+                    <Header />
+                </header>
 
-            <header>
-
-                <Header/>
-                
-            </header>
-        
-            <main 
-                className={`-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2
+                <main
+                    className={`-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2
                     rounded-[22px] px-[50px] sm:px-10 
-                    ${type=='signup'? 'w-[90%] sm:w-[70%] md:w-[50%] lg:w-[40%] my-[16rem] sm:my-[12rem] sm:border' 
-                        : 'w-[90%] x-md:w-[65%] lg:w-[50%] x-lg:w-[40%] my-[2%] before:h-[120vh]'}`}
-            >
-                 <motion.div
-                   className="absolute inset-0 border border-secondary rounded-[22px] pointer-events-none"
-                   initial={{ clipPath: "inset(0 100% 100% 0)" }}
-                   animate={{ clipPath: "inset(0 0% 0% 0)" }}
-                   transition={{ duration: 1.6, ease: "easeInOut" }}
-                 />
-                <motion.h1 
-                    className='text-secondary font-funCity text-3xl sm:text-4xl mb-[60px] text-left my-[50px]'
-                    variants={childVariants}
-                >
+                    ${
+                        type == "signup"
+                            ? "w-[90%] sm:w-[70%] md:w-[50%] lg:w-[40%] my-[16rem] sm:my-[12rem] sm:border"
+                            : "w-[90%] x-md:w-[65%] lg:w-[50%] x-lg:w-[40%] my-[2%] before:h-[120vh]"
+                    }`}>
+                    <motion.div
+                        className='absolute inset-0 border border-secondary rounded-[22px] pointer-events-none'
+                        initial={{ clipPath: "inset(0 100% 100% 0)" }}
+                        animate={{ clipPath: "inset(0 0% 0% 0)" }}
+                        transition={{ duration: 1.6, ease: "easeInOut" }}
+                    />
+                    <motion.h1
+                        className='text-secondary font-funCity text-3xl sm:text-4xl mb-[60px] text-left my-[50px]'
+                        variants={childVariants}>
                         SIGN
-                    <span className='font-funCity'> {type.slice(4).toUpperCase()} </span>
-                </motion.h1>
+                        <span className='font-funCity'> {type.slice(4).toUpperCase()} </span>
+                    </motion.h1>
 
-                <motion.form 
-                    className='flex flex-col gap-[15px] text-descReg1 items-start'
-                    onSubmit={(e)=>submitData(e)}
-                    variants={mainVariants}
-                >
-
-                    <motion.div className="w-full" variants={childVariants}>
-                    {type=='signup'? <>
-                                        <label htmlFor='email'> Enter your email address </label>
-                                        <input type="email" 
-                                            placeholder="Email Address"
-                                            id="email" 
-                                            onChange={(e)=>handleChange(e)} 
-                                            autoFocus
-                                            onBlur={(e)=>{handleInput(e)}} value={formData.email}
-                                        />
-                                    </>
-                                    :<> 
-                                        <label htmlFor='identifier'>Enter your username or email address</label>
-                                        <input type="text"
-                                            placeholder="Username or email address" 
-                                            id="identifier"  
-                                            autoComplete="off" 
-                                            ref={identifierRef}
-                                            onChange={(e)=>handleChange(e)} onBlur={(e)=>{handleInput(e)}} 
-                                        />
-                                     </>
-                        }
-                        <p className='error'></p>
-                    </motion.div>
-                    {
-                        type==="signup"? 
-                                        (<motion.div className='flex flex-col sm:flex-row gap-[20px] w-full' variants={childVariants}>
-                                            <div className="flex-1">
-                                                <label htmlFor='username'> User Name </label>
-                                                <input type="text" 
-                                                    placeholder="Username"
-                                                    id="username"
-                                                    className='w-full'
-                                                    onChange={(e)=>handleChange(e)} 
-                                                    onBlur={(e)=>{handleInput(e)}} value={formData.username} 
-                                                />
-                                                <p className='error'></p>
-                                            </div>
-                                            <div className="flex-1">
-                                                <label htmlFor='mobile'>Contact Number</label>
-                                                <input type="text" 
-                                                    placeholder="Contact Number"
-                                                    id="mobile" 
-                                                    onChange={(e)=>handleChange(e)} 
-                                                    className='w-full' 
-                                                    onBlur={(e)=>{handleInput(e)}} value={formData.mobile}
-                                                />
-                                                <p className='error'></p>
-                                            </div>
-                                        </motion.div>)
-                                      : <></>
-                    }
-                    
-                    <motion.div className='flex flex-col gap-[15px] w-full' variants={childVariants}>
-                        <div className='relative'>
-                            <label htmlFor='password'>Enter your Password</label>
-                            <input type={showPassword ? 'text' : 'password'} 
-                                placeholder="Password"
-                                id="password"
-                                onChange={(e)=>handleChange(e)} 
-                                autoComplete="off" ref={passwordRef}  
-                                onBlur={(e)=>{handleInput(e)}}
-                            />
-                            {
-                                showPassword 
-                                    ? <Eye 
-                                        className='absolute top-[45%] right-4 text-secondary w-[18px] h-[18px] cursor-pointer'
-                                         onClick={()=> setShowPassword(false)}
-                                       />
-                                    : <EyeOff 
-                                        className='absolute top-[45%] right-4 text-secondary w-[18px] h-[18px] cursor-pointer' 
-                                        onClick={()=> setShowPassword(true)}
-                                       />
-                            }
-                            <p className='error' ></p>
-                        </div>
-                        
-                        {
-                            type==="signup"?
-                                            (
-                                                <div className='relative'>   
-                                                    <label htmlFor='confirmPassword'> Confirm your Password </label>
-                                                    <input type={showConfirmPassword ? 'text' : 'password'} 
-                                                        placeholder="Password"
-                                                        id="confirmPassword" 
-                                                        onBlur={(e)=>{handleInput(e)}} onChange={(e)=>handleChange(e)}
-                                                    />
-                                                    {
-                                                        showConfirmPassword 
-                                                            ? <Eye 
-                                                                className='absolute top-[33%] right-4 text-secondary w-[18px] h-[18px] cursor-pointer'
-                                                                 onClick={()=> setShowConfirmPassword(false)}
-                                                               />
-                                                            : <EyeOff 
-                                                                className='absolute top-[33%] right-4 text-secondary w-[18px] h-[18px] cursor-pointer' 
-                                                                onClick={()=> setShowConfirmPassword(true)}
-                                                               />
-                                                    }
-                                                    <p className='error'></p>
-
-                                                    <p className='text-white mt-[1rem] text-subtitleSmall1 ml-[4px]'>
-                                                        Already have an account?
-                                                        <Link to={"/signin"} className='text-secondary ml-[10px] cursor-pointer font-medium'>
-                                                          Sign In
-                                                          </Link>
-                                                    </p>
-                                                </div>
-                                             )
-
-                                          :(
-                                            <div className='text-white mt-[5px] flex flex-col s-sm:flex-row justify-between text-subtitleSmall1'>
-                                                <p className='ml-0 s-sm:ml-[4px] mb-0 s-sm:mb-[5px]'>Don’t have an account yet?
-                                                    <Link to={"/signup"} className='text-secondary ml-[10px] cursor-pointer font-medium'>
-                                                      Sign Up</Link>
-                                                </p>
-                                                <Link to=""> Forgot Password</Link>
-                                            </div>
-                                           )
-                        }
-                    
-                    </motion.div>   
-                    <motion.div variants={childVariants} className='w-full'>
-                        <SiteButtonSquare 
-                            shouldSubmit={true}
-                            customStyle={{ width:'100%', display: 'flex', justifyContent:'center', alignItems:'center', 
-                            marginBottom: type ==='signup' ? '10px': '3rem'}}
-                        >
-                            { 
-                                loading? <CustomHashLoader loading={loading}/> : otpPageLoading ? 
-                                            <span className='flex justify-center items-center gap-[5px]'>  
-                                                <span className='text-secondary text-[11px] tracking-[0.3px] mb-[3px]'> 
-                                                    Redirecting to OTP Verification Page 
-                                                </span>
-                                                <CustomScaleLoader loading={true}/>
-                                            </span>
-                                        : 'Sign'+' '+type.slice(4,5).toUpperCase()+type.slice(5) 
-                            }
-                        </SiteButtonSquare>
-                    </motion.div>
-                    {
-                        type=="signup"? 
-                        <motion.div variants={childVariants} className='w-full'>
-                            <SiteSecondaryBorderButtonSquare 
-                                customStyle={{marginBottom:'60px', width:'100%', display:'flex',
-                                    justifyContent:'center', alignItems:'center'}} 
-                                tailwindClasses={'!text-[13px] xxs-sm:!text-[15px]'}
-                                clickHandler={()=>{ setGooglePromptLoading(true); googleLogin()}}>
-                                <img src="/google.png" 
-                                     alt="" className='mr-[15px] inline-block'/> 
-                                { 
-                                    (loading||googlePromptLoading) 
-                                    ? <CustomHashLoader loading={googlePromptLoading||loading}/> 
-                                    : "Continue with Google" 
-                                }
-                            </SiteSecondaryBorderButtonSquare>
+                    <motion.form
+                        className='flex flex-col gap-[15px] text-descReg1 items-start'
+                        onSubmit={(e) => submitData(e)}
+                        variants={mainVariants}>
+                        <motion.div className='w-full' variants={childVariants}>
+                            {type == "signup" ? (
+                                <>
+                                    <label htmlFor='email'> Enter your email address </label>
+                                    <input
+                                        type='email'
+                                        placeholder='Email Address'
+                                        id='email'
+                                        onChange={(e) => handleChange(e)}
+                                        autoFocus
+                                        onBlur={(e) => {
+                                            handleInput(e)
+                                        }}
+                                        value={formData.email}
+                                    />
+                                </>
+                            ) : (
+                                <>
+                                    <label htmlFor='identifier'>Enter your username or email address</label>
+                                    <input
+                                        type='text'
+                                        placeholder='Username or email address'
+                                        id='identifier'
+                                        autoComplete='off'
+                                        ref={identifierRef}
+                                        onChange={(e) => handleChange(e)}
+                                        onBlur={(e) => {
+                                            handleInput(e)
+                                        }}
+                                    />
+                                </>
+                            )}
+                            <p className='error'></p>
                         </motion.div>
-                        : <></>
-                    }
-                </motion.form>
-            </main>
-        </motion.section>
-        <Footer/>
-      </>
+                        {type === "signup" ? (
+                            <motion.div
+                                className='flex flex-col sm:flex-row gap-[20px] w-full'
+                                variants={childVariants}>
+                                <div className='flex-1'>
+                                    <label htmlFor='username'> User Name </label>
+                                    <input
+                                        type='text'
+                                        placeholder='Username'
+                                        id='username'
+                                        className='w-full'
+                                        onChange={(e) => handleChange(e)}
+                                        onBlur={(e) => {
+                                            handleInput(e)
+                                        }}
+                                        value={formData.username}
+                                    />
+                                    <p className='error'></p>
+                                </div>
+                                <div className='flex-1'>
+                                    <label htmlFor='mobile'>Contact Number</label>
+                                    <input
+                                        type='text'
+                                        placeholder='Contact Number'
+                                        id='mobile'
+                                        onChange={(e) => handleChange(e)}
+                                        className='w-full'
+                                        onBlur={(e) => {
+                                            handleInput(e)
+                                        }}
+                                        value={formData.mobile}
+                                    />
+                                    <p className='error'></p>
+                                </div>
+                            </motion.div>
+                        ) : (
+                            <></>
+                        )}
+
+                        <motion.div className='flex flex-col gap-[15px] w-full' variants={childVariants}>
+                            <div className='relative'>
+                                <label htmlFor='password'>Enter your Password</label>
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    placeholder='Password'
+                                    id='password'
+                                    onChange={(e) => handleChange(e)}
+                                    autoComplete='off'
+                                    ref={passwordRef}
+                                    onBlur={(e) => {
+                                        if (e.relatedTarget?.dataset?.passwordToggle) return
+                                        handleInput(e)
+                                    }}
+                                />
+                                <button
+                                    type='button'
+                                    data-password-toggle
+                                    onClick={() => setShowPassword((status) => !status)}
+                                    className='absolute top-[55%] -translate-y-1/2 right-4 text-secondary'>
+                                    {showPassword ? (
+                                        <Eye className='w-[18px] h-[18px]' />
+                                    ) : (
+                                        <EyeOff className='w-[18px] h-[18px]' />
+                                    )}
+                                </button>
+                                <p className='error'></p>
+                            </div>
+
+                            {type === "signup" ? (
+                                <div className='relative'>
+                                    <label htmlFor='confirmPassword'> Confirm your Password </label>
+                                    <input
+                                        type={showConfirmPassword ? "text" : "password"}
+                                        placeholder='Password'
+                                        id='confirmPassword'
+                                        onBlur={(e) => {
+                                            if (e.relatedTarget?.dataset?.passwordToggle) return
+                                            handleInput(e)
+                                        }}
+                                        onChange={(e) => handleChange(e)}
+                                    />
+                                    <button
+                                        type='button'
+                                        data-password-toggle
+                                        onClick={() => setShowConfirmPassword((status) => !status)}
+                                        className='absolute top-[40%] -translate-y-1/2 right-4 text-secondary'>
+                                        {showConfirmPassword ? (
+                                            <Eye className='w-[18px] h-[18px]' />
+                                        ) : (
+                                            <EyeOff className='w-[18px] h-[18px]' />
+                                        )}
+                                    </button>
+                                    <p className='error'></p>
+
+                                    <p className='text-white mt-[1rem] text-subtitleSmall1 ml-[4px]'>
+                                        Already have an account?
+                                        <Link
+                                            to={"/signin"}
+                                            className='text-secondary ml-[10px] cursor-pointer font-medium'>
+                                            Sign In
+                                        </Link>
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className='text-white mt-[5px] flex flex-col s-sm:flex-row justify-between text-subtitleSmall1'>
+                                    <p className='ml-0 s-sm:ml-[4px] mb-0 s-sm:mb-[5px]'>
+                                        Don’t have an account yet?
+                                        <Link
+                                            to={"/signup"}
+                                            className='text-secondary ml-[10px] cursor-pointer font-medium'>
+                                            Sign Up
+                                        </Link>
+                                    </p>
+                                    <Link to=''> Forgot Password</Link>
+                                </div>
+                            )}
+                        </motion.div>
+                        <motion.div variants={childVariants} className='w-full'>
+                            <SiteButtonSquare
+                                shouldSubmit={true}
+                                customStyle={{
+                                    width: "100%",
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    marginBottom: type === "signup" ? "10px" : "3rem",
+                                }}>
+                                {loading ? (
+                                    <CustomHashLoader loading={loading} />
+                                ) : otpPageLoading ? (
+                                    <span className='flex justify-center items-center gap-[5px]'>
+                                        <span className='text-secondary text-[11px] tracking-[0.3px] mb-[3px]'>
+                                            Redirecting to OTP Verification Page
+                                        </span>
+                                        <CustomScaleLoader loading={true} />
+                                    </span>
+                                ) : (
+                                    "Sign" + " " + type.slice(4, 5).toUpperCase() + type.slice(5)
+                                )}
+                            </SiteButtonSquare>
+                        </motion.div>
+                        {type == "signup" ? (
+                            <motion.div variants={childVariants} className='w-full'>
+                                <SiteSecondaryBorderButtonSquare
+                                    customStyle={{
+                                        marginBottom: "60px",
+                                        width: "100%",
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                    }}
+                                    tailwindClasses={"!text-[13px] xxs-sm:!text-[15px]"}
+                                    clickHandler={() => {
+                                        setGooglePromptLoading(true)
+                                        googleLogin()
+                                    }}>
+                                    <img src='/google.png' alt='' className='mr-[15px] inline-block' />
+                                    {loading || googlePromptLoading ? (
+                                        <CustomHashLoader loading={googlePromptLoading || loading} />
+                                    ) : (
+                                        "Continue with Google"
+                                    )}
+                                </SiteSecondaryBorderButtonSquare>
+                            </motion.div>
+                        ) : (
+                            <></>
+                        )}
+                    </motion.form>
+                </main>
+            </motion.section>
+            <Footer />
+        </>
     )
 }

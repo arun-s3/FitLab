@@ -12,7 +12,6 @@ import InventoryInsightsSection from './Components/InventoryInsightsSection'
 import CouponsInsightsSection from './Components/CouponsInsightsSection'
 import OffersInsightsSection from './Components/OffersInsightsSection'
 import PaymentsInsightsSection from './Components/PaymentsInsightsSection'
-import DateRangePicker from "./Components/DateRangePicker"
 
 import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
 
@@ -22,7 +21,7 @@ export const OperationsAnalyticsContext = createContext()
 
 export default function AdminDashboardPage({ insightType }){
 
-    const [dateRange, setDateRange] = useState("30d")
+    const [dashboardQuery, setDashboardQuery] = useState('')
 
     const {setPageBgUrl} = useOutletContext() 
     setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.96),rgba(255,255,255,0.96)), url('/admin-bg10.png')`)
@@ -37,78 +36,76 @@ export default function AdminDashboardPage({ insightType }){
     const operationsOverviewSubHeader = "Visualize and monitor key operational metrics including inventory levels, payment trends, offers, and coupon usage"
 
 
-    return(
+    return (
         <section id='adminDashboard'>
             <header>
-
-                {
-                  (()=> {
-                    const header = insightType === 'business' ? businessOverviewHeader : operationsOverviewHeader
-                    const subheader = insightType === 'business' ? businessOverviewSubHeader : operationsOverviewSubHeader
-                    return <AdminTitleSection heading={header} subHeading={subheader}/>
-                  }
-                  )()
-                }
-
+                {(() => {
+                    const header = insightType === "business" ? businessOverviewHeader : operationsOverviewHeader
+                    const subheader =
+                        insightType === "business" ? businessOverviewSubHeader : operationsOverviewSubHeader
+                    return <AdminTitleSection heading={header} subHeading={subheader} />
+                })()}
             </header>
 
-            <main className="flex-1 overflow-y-auto">
-
+            <main className='flex-1 overflow-y-auto'>
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                  className="p-6 space-y-8"
-                >
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-
-                    <div className="hidden md:flex h-[2.4rem] items-center gap-2 bg-gray-100 dark:bg-gray-700 px-3 py-1.5
-                     border border-dropdownBorder rounded-md flex-1 max-w-md">
-                        <Search size={18} className="text-gray-500 dark:text-gray-400" />
-                        <input type="text" placeholder="Search..." className="bg-transparent border-none outline-none w-full 
-                            text-sm placeholder:text-[13px]" />
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className='p-6 space-y-8'>
+                    <div className='flex flex-col md:flex-row md:items-center justify-between gap-4'>
+                        <div
+                            className={`hidden md:flex h-[2.4rem] items-center gap-2 bg-gray-100 dark:bg-gray-700 px-3 py-1.5
+                       rounded-md flex-1 max-w-md 
+                        ${dashboardQuery.trim() ? "border-2 border-secondary" : "border border-dropdownBorder"}`}>
+                            <Search size={18} className='text-gray-500 dark:text-gray-400' />
+                            <input
+                                type='text'
+                                placeholder='Search...'
+                                className='bg-transparent border-none outline-none w-full text-sm placeholder:text-[13px]
+                                focus:outline-none focus:border-none focus:ring-0'
+                                onChange={(e) => setDashboardQuery(e.target.value)}
+                            />
+                        </div>
                     </div>
-                    
-                    <DateRangePicker value={dateRange} onChange={setDateRange} />
 
-                  </div>
+                    <div className='flex flex-col gap-[3rem]'>
+                        {insightType === "business" ? (
+                            <BusinessAnalyticsContext.Provider
+                                value={{
+                                    dashboardQuery,
+                                    setDashboardQuery,
+                                    showBusinessAnalytics,
+                                    setShowBusinessAnalytics,
+                                }}>
+                                <SalesRevenueSection />
 
-                  <div className='flex flex-col gap-[3rem]'>
+                                <OrdersFulfillmentSection />
 
-                      {
-                        insightType === 'business' ?
-                          <BusinessAnalyticsContext.Provider value={{dateRange, showBusinessAnalytics, setShowBusinessAnalytics}}>
+                                <CustomerInsightsSection />
+                            </BusinessAnalyticsContext.Provider>
+                        ) : (
+                            insightType === "operations" && (
+                                <OperationsAnalyticsContext.Provider
+                                    value={{
+                                        dashboardQuery,
+                                        setDashboardQuery,
+                                        showOperationsAnalytics,
+                                        setShowOperationsAnalytics,
+                                    }}>
+                                    <InventoryInsightsSection />
 
-                            <SalesRevenueSection />
+                                    <CouponsInsightsSection />
 
-                            <OrdersFulfillmentSection />
+                                    <OffersInsightsSection />
 
-                            <CustomerInsightsSection />
-
-                          </BusinessAnalyticsContext.Provider>
-                          
-                          : insightType === 'operations' &&
-
-                            <OperationsAnalyticsContext.Provider value={{dateRange, showOperationsAnalytics, setShowOperationsAnalytics}}>
-
-                              <InventoryInsightsSection />
-
-                              <CouponsInsightsSection />
-
-                              <OffersInsightsSection />
-
-                              <PaymentsInsightsSection />
-
-                            </OperationsAnalyticsContext.Provider>
-                      }
-
-
-                  </div>
-
+                                    <PaymentsInsightsSection />
+                                </OperationsAnalyticsContext.Provider>
+                            )
+                        )}
+                    </div>
                 </motion.div>
-
             </main>
-
         </section>
     )
 }

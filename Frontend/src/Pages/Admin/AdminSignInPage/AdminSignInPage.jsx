@@ -165,19 +165,23 @@ export default function AdminSignInPage(){
                                     className='w-full'
                                     onChange={(e)=> handleChange(e)} 
                                     autoComplete="off"
-                                    onBlur={(e)=> handleInput(e)} />
+                                    oonBlur={(e) => {
+                                        if (e.relatedTarget?.dataset?.passwordToggle) return
+                                        handleInput(e)
+                                    }}
+                                />
 
-                                    {
-                                        showPassword 
-                                            ? <Eye 
-                                                className='absolute top-[45%] right-4 text-secondary w-[18px] h-[18px] cursor-pointer'
-                                                 onClick={()=> setShowPassword(false)}
-                                               />
-                                            : <EyeOff 
-                                                className='absolute top-[45%] right-4 text-secondary w-[18px] h-[18px] cursor-pointer' 
-                                                onClick={()=> setShowPassword(true)}
-                                               />
-                                    }
+                                    <button
+                                        type='button'
+                                        data-password-toggle
+                                        onClick={() => setShowPassword((status) => !status)}
+                                        className='absolute top-[55%] -translate-y-1/2 right-4 text-secondary'>
+                                        {showPassword ? (
+                                            <Eye className='w-[18px] h-[18px]' />
+                                        ) : (
+                                            <EyeOff className='w-[18px] h-[18px]' />
+                                        )}
+                                    </button>
 
                                 <p className='error' ></p>
                             </div>

@@ -96,7 +96,4 @@ const getCategoryStockDatas = async (req, res, next)=> {
 }
 
 
-
-
-
 module.exports = {getProductStockInsights, getLowStockProducts, getCategoryStockDatas}

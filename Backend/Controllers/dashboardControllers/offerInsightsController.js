@@ -5,7 +5,6 @@ const Product = require('../../Models/productModel')
 const {errorHandler} = require('../../Utils/errorHandler') 
 
 
-
 const getOfferRevenueStats = async (req, res, next)=> {
   try {
     const now = new Date()

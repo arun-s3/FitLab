@@ -39,7 +39,8 @@ export default function SignUpAndInPage({type}){
     const [otpPageLoading, setOtpPageLoading] = useState(false)
  
     const dispatch = useDispatch()
-    const {error, loading, success, userToken, googleSuccess} = useSelector((state)=>state.user)
+    const {error, loading, success, userToken, googleSuccess, user} = useSelector((state)=>state.user)
+    const {admin} = useSelector((state)=> state.admin)
 
     const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
@@ -70,7 +71,6 @@ export default function SignUpAndInPage({type}){
                     }) 
                     setOtpPageLoading(false)
                 }
-                // navigate('/signin',{replace:true})
         }
         if(type=='signup' && success && (!googleSuccess||googleSuccess)){
             setOtpPageLoading(true)
@@ -124,6 +124,19 @@ export default function SignUpAndInPage({type}){
             console.log("location----->", location)
         }
     }, [location])
+
+    useEffect(() => {
+        const userNotFilledForm = Object.keys(formData).length === 0
+        if (user && userNotFilledForm) {
+            navigate("/", { replace: true })
+        }
+        if (admin) {
+            navigate("/403", {
+                replace: true,
+                state: { NoDirectAccess: true },
+            })
+        }
+    }, [user, admin])
 
     const handleChange = (e)=>{
         setFormData({...formData, [e.target.id.toString()]:e.target.value})
@@ -408,6 +421,7 @@ export default function SignUpAndInPage({type}){
                                         handleInput(e)
                                     }}
                                 />
+                                <p className='error'></p>
                                 <button
                                     type='button'
                                     data-password-toggle
@@ -419,7 +433,6 @@ export default function SignUpAndInPage({type}){
                                         <EyeOff className='w-[18px] h-[18px]' />
                                     )}
                                 </button>
-                                <p className='error'></p>
                             </div>
 
                             {type === "signup" ? (
@@ -435,6 +448,7 @@ export default function SignUpAndInPage({type}){
                                         }}
                                         onChange={(e) => handleChange(e)}
                                     />
+                                    <p className='error'></p>
                                     <button
                                         type='button'
                                         data-password-toggle
@@ -446,7 +460,6 @@ export default function SignUpAndInPage({type}){
                                             <EyeOff className='w-[18px] h-[18px]' />
                                         )}
                                     </button>
-                                    <p className='error'></p>
 
                                     <p className='text-white mt-[1rem] text-subtitleSmall1 ml-[4px]'>
                                         Already have an account?

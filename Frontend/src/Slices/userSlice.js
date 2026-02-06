@@ -4,7 +4,7 @@ import axios from '../Utils/axiosConfig'
 export const signup = createAsyncThunk('userSignup', async(formData, thunkAPI)=>{
     try{
         console.log("Inside signup createAsyncThunk")
-        const response = await axios.post('/signup',formData)
+        const response = await axios.post('/signup',formData,{withCredentials:true})
         console.log("returning success response from signup createAsyncThunk..."+JSON.stringify(response))
         return response.data
     }
@@ -47,7 +47,7 @@ export const googleSignin = createAsyncThunk('googleSignin', async(userData,thun
 export const signout = createAsyncThunk('signout', async(googleId,thunkAPI)=>{
     // console.log("inside userSlice signout-userToken"+userToken)
     try{ 
-        console.log("inside userSlice googlesignout, googleId"+googleId)
+        // console.log("inside userSlice googlesignout, googleId"+googleId)
         const response = googleId? await axios.get('/googlesignout',{withCredentials:true}) 
                                  : await axios.get('/signout',{withCredentials:true})
         console.log("response from signout createAsyncThunk-->"+JSON.stringify(response.data))
@@ -183,6 +183,8 @@ const userSlice = createSlice({
                 state.error = null
                 state.loading = false
                 state.success = true
+                state.userToken = action.payload.token
+                state.user = action.payload.user
                 console.log("userData from userSlice-signup.fulfilled-user-->"+JSON.stringify(action.payload.user))
                 console.log("message from userSlice-signup.fulfilled->"+JSON.stringify(action.payload.message))
         })

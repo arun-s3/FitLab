@@ -21,6 +21,16 @@ app.use('/Public',express.static(path.join(__dirname,'/Public')))
 
 app.set("trust proxy", 1)
 
+const session = require("express-session")
+app.use(
+    session({
+        secret: process.env.SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false,
+        cookie: { maxAge: 1 * 24 * 60 * 60 * 1000 },
+    }),
+)
+
 app.use(express.json({limit: '10mb'}))
 app.use(express.urlencoded({extended: true, limit:'10mb'}))
 const cookieParser = require('cookie-parser')

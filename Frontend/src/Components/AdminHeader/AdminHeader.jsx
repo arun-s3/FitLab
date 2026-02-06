@@ -50,10 +50,10 @@ export default function AdminHeader({headerZIndex}){
             /> 
 
             <div className='flex gap-[15px] justify-between items-center'>
-                <i className='relative'>
+                {/* <i className='relative'>
                     <FaRegBell className='h-[15px] w-[24px] text-secondary mt-[2px]'/>
                     <span className='h-[5px] w-[5px] rounded-[10px] bg-gray-500 absolute top-[15%] right-[19%]'></span>
-                </i>
+                </i> */}
                 <div className='flex gap-[5px] justify-center items-center'>
                     <span className='w-[30px] h-auto rounded-[20px] relative'>
                         <img alt='admin-dp' 

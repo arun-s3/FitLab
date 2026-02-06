@@ -25,10 +25,10 @@ const securePassword = async(password)=>{
 const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-      user: "fitlab0101@gmail.com", 
-      pass: process.env.FITLABPASS, 
+        user: process.env.FITLAB_MAIL,
+        pass: process.env.FITLABPASS,
     },
-  })
+})
   
   const sendOtp = async (req, res, next) => {
     const {email} = req.body
@@ -45,10 +45,10 @@ const transporter = nodemailer.createTransport({
     console.log("req.session.otpExpiresAt mae at sendOtp--->",req.session.otpExpiresAt)
     try {
       await transporter.sendMail({
-        from: "arunsudhakaran01@gmail.com",
-        to: email,
-        subject: "OTP Code Verification",
-        text: `Your OTP code is ${otp}. It would be expired in 5 minutes.`,
+          from: "FitLab <fitlab0101@gmail.com>",
+          to: email,
+          subject: "OTP Code Verification",
+          text: `Your OTP code is ${otp}. It would be expired in 5 minutes.`,
       })
       return res.status(200).json({ message: "OTP sent successfully" });
     } catch (error) { 
@@ -121,10 +121,10 @@ const createUser = async(req,res,next)=>{
                     const mobileExists = await User.findOne({mobile})
                     const usernameExists = await User.findOne({username})
                     if(mobileExists){
-                        next(errorHandler(409, "Mobile number already exists!"))
+                        return next(errorHandler(409, "Mobile number already exists!"))
                     }
                     if(usernameExists){
-                        next(errorHandler(409, "Username already exists!"))
+                        return next(errorHandler(409, "Username already exists!"))
                     }
                     const spassword = await securePassword(password)
                     const newUser = new User({
@@ -138,17 +138,19 @@ const createUser = async(req,res,next)=>{
                     console.log("userData-->"+userData)
                 }
                 else{
-                    next(errorHandler(400, "Password and confirm password doesn't match"))
+                    return next(errorHandler(400, "Password and confirm password doesn't match"))
                 }
             }
             else{
                 console.log("User exists!")
-                next(errorHandler(409, "User already exists"))
+                return next(errorHandler(409, "User already exists"))
             }
         if(userData){
+            const token = generateToken(res, userData._id)
             console.log("Just befores response sent-->"+JSON.stringify(userData))
-                res.status(201).json({message:"success", user:userData})
-                console.log("Response sent from backend-->"+JSON.stringify(userData))
+
+            res.status(201).json({message:"success", user: userData, token})
+            console.log("Response sent from backend-->"+JSON.stringify(userData))
             }
             else{
                 next(errorHandler(500, "Internal Server Error"))

@@ -26,7 +26,7 @@ export default function AdminRoutesWrapper(){
           window.removeEventListener("storage", syncLogout)
         }
     }, [dispatch])
-
+    
 
     return (
         <Outlet />

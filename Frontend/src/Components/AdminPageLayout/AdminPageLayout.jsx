@@ -140,24 +140,10 @@ export default function AdminPageLayout(){
     },
   ]
 
-  const bottomMenuItems = [
-    {
-      id: "settings",
-      label: "Settings",
-      icon: IoSettingsOutline,
-    },
-    {
-      id: "logout",
-      label: "Logout",
-      icon: MdLogout,
-    },
-  ]
-
-
     useEffect(()=> {
         const {dashboard, product, category, offers, support} = showSubmenu
         if(dashboard || product || category || offers || support){
-            setTimeout(()=> setCompressList(true), 300)
+            setTimeout(()=> setCompressList(true), 450)
         }else{
              setCompressList(false)
         }
@@ -193,8 +179,15 @@ export default function AdminPageLayout(){
     }
 
     const child = {
-      hidden: { opacity: 0, x: -20 },
-      show: { opacity: 1, x: 0, transition: { duration: 0.2 } },
+        hidden: { opacity: 0, x: -20 },
+        show: {
+            opacity: 1,
+            x: [-20, 2, 0],
+            transition: {
+                duration: 0.4,
+                ease: [0.22, 1, 0.36, 1],
+            },
+        },
     }
 
 

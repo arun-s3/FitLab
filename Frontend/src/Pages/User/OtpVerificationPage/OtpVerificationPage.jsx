@@ -37,6 +37,8 @@ export default function OtpVerificationPage(){
 
     const [userEmail, setUserEmail] = useState('')
 
+    const {user} = useSelector((state)=> state.user)
+
     const location = useLocation()
     const navigate = useNavigate()
     const dispatch = useDispatch()
@@ -178,9 +180,9 @@ export default function OtpVerificationPage(){
                     setVerificationError(false)
                     setOtpBoxDisabled(false)
                     sonnerToast.success("You are successfully verified!")
-                    dispatch(makeUserVerified())
+                    if(user) dispatch(makeUserVerified())
                     location.state?.from === 'signup' 
-                        ? navigate('/signin',{replace:true}) 
+                        ? navigate('/',{replace:true}) 
                         : navigate('/cart',{
                             replace:true, state: {OtpVerified: true}
                         }) 
@@ -218,7 +220,7 @@ export default function OtpVerificationPage(){
         setvalues({})
         setLoading(false)
         stopTimer()
-        navigate('/signin',{replace:true})
+        navigate('/',{replace:true})
     }
 
     const resendOtp = async()=> {

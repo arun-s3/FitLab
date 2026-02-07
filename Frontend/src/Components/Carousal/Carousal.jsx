@@ -128,7 +128,7 @@ export default function Carousal({products, title, subtitle, buttonLabel, button
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.3 }}
-                            className="text-[16px] sm:text-[25px] font-bold mb-2 text-balance"
+                            className="text-[16px] sm:text-[25px] font-bold mb-2 text-balance line-clamp-2 break-words overflow-hidden"
                           >
                             {product.name}
                           </motion.h3>

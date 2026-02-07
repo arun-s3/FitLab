@@ -98,7 +98,7 @@ export default function OrderProuctsHub({order, product, onOpenOrderDetailsModal
                   </span>
                 } 
               </h4>
-              <p className="mb-[8px] text-[13px] text-gray-600">{product.subtitle}</p>
+              <p className="mb-[8px] text-[13px] text-gray-600 break-words whitespace-pre-wrap line-clamp-2">{product.subtitle}</p>
               {
               !product.productReturnStatus &&
                 <p className="w-fit text-[13px] text-gray-500 tracking-[0.3px] flex items-center gap-[4px]

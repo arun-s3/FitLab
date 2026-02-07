@@ -161,7 +161,7 @@ export default function SimilarProductsCarousal({titleColor = null, referencePro
 
                             <span className='text-secondary text-[13px]'> ({`${product.totalReviews}`}) </span>
                           </div>
-                          <h3 className="font-medium">{product.name}</h3>
+                          <h3 className="font-medium break-words whitespace-pre-wrap line-clamp-3">{product.name}</h3>
                           <p className="font-bold mt-[4px]">{product.price}</p>
                         </div>
                       </div>
@@ -170,10 +170,9 @@ export default function SimilarProductsCarousal({titleColor = null, referencePro
     </motion.div>
   </AnimatePresence>
 
-  {/* ⬇️ Place navigation buttons here — OUTSIDE the map */}
   <button
     className="absolute right-[2%] top-[50%] -translate-y-1/2 bg-white p-[8px] border border-inputBorderLow 
-    rounded-full shadow-md transform-gpu transition hover:scale-110 active:scale-95"
+        rounded-full shadow-md transform-gpu transition hover:scale-110 active:scale-95"
     onClick={handleNextProduct}
   >
     <ChevronRight className="w-[1.5rem] h-[1.5rem]" />

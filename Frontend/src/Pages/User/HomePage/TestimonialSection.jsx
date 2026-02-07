@@ -173,7 +173,7 @@ export default function TestimonialSection(){
 
                 <div className="h-full flex flex-col justify-between gap-8">
                   <p className="text-gray-600 text-base md:text-lg leading-relaxed mb-8 relative z-10 pr-8 pl-4 
-                      border-l-[3px] border-secondary">
+                      border-l-[3px] border-secondary line-clamp-3 break-words overflow-hidden">
                     {`" ${testimonial.comment} "`}
                   </p>
                 

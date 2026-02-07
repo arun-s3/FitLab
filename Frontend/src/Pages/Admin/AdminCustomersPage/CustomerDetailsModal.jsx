@@ -209,7 +209,9 @@ export default function CustomerDetailsModal({ isOpen, onClose, customerData, or
                         </div>
                         <div className="flex-1">
                           <p className="text-xs text-gray-500 font-medium mb-1">Address</p>
-                          <p className="text-sm text-gray-900 leading-relaxed">{formatAddress()}</p>
+                          <p className="text-sm text-gray-900 max-w-10 line-clamp-2 break-words overflow-hidden leading-relaxed">
+                            {formatAddress()}
+                          </p>
                         </div>
                       </div>
                     </div>

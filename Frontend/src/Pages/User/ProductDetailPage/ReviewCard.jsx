@@ -106,13 +106,13 @@ export default function ReviewCard({ review, index, onEdit }){
         </div>
       </div>
 
-      <h4 className="relative font-semibold text-gray-900 dark:text-white mb-3 text-[16px] flex items-center gap-[10px]">
-        <span> {review.title} </span>
+      <h4 className="relative font-semibold text-gray-900 dark:text-white mb-3 text-[16px] flex items-start gap-[10px]">
+        <span className="max-w-[90%]"> {review.title} </span>
         {
           review.userId.username === user.username &&
           <>
             <UserPen 
-              className="w-[15px] h-[15px] text-secondary cursor-pointer" 
+              className="mt-[4px] w-[15px] h-[15px] text-secondary cursor-pointer" 
               onMouseEnter={()=> setEditTooltip(true)}
               onMouseLeave={()=> setEditTooltip(false)}
               onClick={()=> {

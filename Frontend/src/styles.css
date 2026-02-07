@@ -3857,6 +3857,10 @@ select {
   max-width: 100% !important;
 }
 
+.max-w-10 {
+  max-width: 2.5rem;
+}
+
 .max-w-2xl {
   max-width: 42rem;
 }
@@ -3889,12 +3893,20 @@ select {
   max-width: 1000px;
 }
 
+.max-w-\[120px\] {
+  max-width: 120px;
+}
+
 .max-w-\[20rem\] {
   max-width: 20rem;
 }
 
 .max-w-\[24rem\] {
   max-width: 24rem;
+}
+
+.max-w-\[270px\] {
+  max-width: 270px;
 }
 
 .max-w-\[280px\] {
@@ -3919,6 +3931,10 @@ select {
 
 .max-w-\[45\%\] {
   max-width: 45%;
+}
+
+.max-w-\[67\%\] {
+  max-width: 67%;
 }
 
 .max-w-\[700px\] {
@@ -4035,6 +4051,10 @@ select {
 
 .basis-full {
   flex-basis: 100%;
+}
+
+.table-fixed {
+  table-layout: fixed;
 }
 
 .border-collapse {
@@ -4763,10 +4783,6 @@ select {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.text-ellipsis {
-  text-overflow: ellipsis;
 }
 
 .whitespace-normal {
@@ -13461,10 +13477,6 @@ select {
 
   .sm\:max-w-md {
     max-width: 28rem;
-  }
-
-  .sm\:flex-none {
-    flex: none;
   }
 
   .sm\:grid-cols-2 {

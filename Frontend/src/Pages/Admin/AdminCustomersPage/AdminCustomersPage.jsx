@@ -503,10 +503,19 @@ export default function AdminCustomersPageV1() {
                                                 Details
                                                 <SquareChartGantt className='w-[15px] h-[15px] !text-white'/>
                                             </motion.button>
+
+                                            <motion.button whileTap={{ scale: 0.98 }} 
+                                                className="px-[9px] py-[5px] bg-secondary rounded-[4px] flex items-center gap-[5px]
+                                                    hover:bg-purple-700 transition duration-150 !border !border-dropdownBorder !shadow-md"
+                                                onClick={()=> setOpenMessageModal({customer: user})}
+                                            >   
+                                                <MessageSquare className='w-[15px] h-[15px] !text-white'/>
+                                            </motion.button>
+
                                             {
                                                 !user?.riskyUserStatus &&
                                                     <motion.button whileTap={{ scale: 0.98 }} 
-                                                        className="px-[9px] py-[5px] text-white text-[15px] font-medium tracking-[0.3px] bg-secondary
+                                                        className="px-[9px] py-[5px] text-white text-[15px] font-medium tracking-[0.3px] bg-red-500
                                                             rounded-[4px] hover:bg-purple-700 transition duration-300 !border !border-dropdownBorder 
                                                             !shadow-md" 
                                                         onClick={() => preSuspicionHandler(user._id)}
@@ -514,15 +523,6 @@ export default function AdminCustomersPageV1() {
                                                           <RiSpamLine className='!text-white'/>
                                                     </motion.button>
                                             }
-
-                                            <motion.button whileTap={{ scale: 0.98 }} 
-                                                className="px-[9px] py-[5px] bg-gray-100 rounded-[4px] flex items-center gap-[5px]
-                                                    hover:bg-gray-200 transition duration-150 !border !border-dropdownBorder !shadow-md"
-                                                onClick={()=> setOpenMessageModal({customer: user})}
-                                            >   
-                                                <MessageSquare className='w-[15px] h-[15px] !text-muted'/>
-                                            </motion.button>
-
                                         </div>
                                     </td> 
                                 </tr>

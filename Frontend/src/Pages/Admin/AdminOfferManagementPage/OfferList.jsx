@@ -33,16 +33,16 @@ export default function OfferList({ offers, onEdit, onDelete, onSort, onDeactiva
 
   return (
     <div className="mt-[1.5rem] bg-white shadow-md rounded-lg overflow-hidden" id='CouponList'>
-      <table className="min-w-full divide-y divide-gray-200">
+      <table className="min-w-full divide-y divide-gray-200 table-fixed">
         <thead className="bg-inputBorderLow">
           <tr>
             { tableHeaders.map( (header)=> (
-              <th key={header.value} className="px-[12px] py-3 text-left text-[12px] font-medium text-gray-500 uppercase tracking-wider
+              <th key={header.value} className="p-3 max-w-[270px] text-left text-[12px] font-medium text-gray-500 uppercase tracking-wider
                  cursor-pointer" onClick={()=> {
                   header.sortBy && onSort(header.sortBy, order)
                   changeSortOrder()
                  }} >
-                <div className="flex items-center">
+                <div className="flex items-center min-w-0">
                   <span> {header.value} </span>
                   {header.icon && <ArrowUpDown className="h-4 w-4 ml-1 hover:text-purple-700 hover:scale-110 transition duration-100"/>}
                 </div>
@@ -58,11 +58,12 @@ export default function OfferList({ offers, onEdit, onDelete, onSort, onDeactiva
               <img src={ scaledImg.find(img=> img.id === offer._id).url } className='fixed top-[30%] left-[35%] w-[900px] h-[300px]
                  inset-0 bg-black bg-opacity-50 object-cover rounded-[4px] shadow-lg z-[100]'/> 
             }
-              <td className="pl-[1rem] py-4 flex flex-col gap-[10px] whitespace-nowrap border-r border-dashed border-[#A399A880]">
-                <div className="flex items-center gap-[10px]">
+              <td className="pl-4 py-4 max-w-[280px] border-r border-dashed border-[#A399A880]">
+                <div className="min-w-0 mb-4 flex items-center gap-[10px]">
                   <BadgePercent className='w-[15px] h-[15px] text-muted'/>
-                  <span className={`text-sm font-medium capitalize ${offer.status === 'active' ? 'text-green-500' : 'text-red-500' }`}>
-                    {offer != null && offer?.name && offer?.name.length > 13 ? offer.name.substring(0,10) + '...' : offer.name}  
+                  <span className={`text-sm font-medium capitalize line-clamp-2 break-words overflow-hidden block
+                        ${offer.status === 'active' ? 'text-green-500' : 'text-red-500' }`}>
+                    {offer != null && offer?.name && offer.name}  
                   </span>
                 </div>
                 {
@@ -80,15 +81,18 @@ export default function OfferList({ offers, onEdit, onDelete, onSort, onDeactiva
                 }
                 {
                   offer?.description ?
-                  <div className="flex items-center gap-[10px] min-w-0">
-                    <MessageSquareQuote className='w-[15px] h-[15px] text-muted'/>
-                    <span className='text-[12.5px] text-gray-500 capitalize line-clamp-2 overflow-hidden text-ellipsis min-w-0'> {offer.description} </span>
+                  <div className="mt-[10px] flex items-start gap-[10px] min-w-0">
+                    <MessageSquareQuote className='mt-[5px] w-[15px] h-[15px] text-muted'/>
+                    <span className='text-[12.5px] text-gray-500 capitalize line-clamp-2 break-words overflow-hidden'>
+                         {offer.description} 
+                    </span>
                   </div>
                   : null
                 }
-                <div>
 
-                <div className='flex items-start gap-[10px]'>
+                <div className='mt-[5px]'>
+
+                <div className='flex items-start gap-[10px] min-w-0'>
                   <Link2 className='w-[15px] h-[15px] text-muted'/>
                   <div>
                     <p className='text-[12.5px] text-gray-500 font-[500]'> Applicable to : </p>
@@ -113,7 +117,7 @@ export default function OfferList({ offers, onEdit, onDelete, onSort, onDeactiva
                             ${offer?.applicableProducts?.length > 6 ? "h-[10rem] overflow-y-scroll" : "h-fit"} 
                               border border-dropdownBorder rounded-[4px] z-[10]`}>
                             {offer?.applicableProducts?.filter(product=> !product.variantOf).map((product)=> (
-                              <li key={product.title} className="capitalize text-primaryDark">
+                              <li key={product.title} className="capitalize text-muted">
                                 {product.title}
                               </li>
                             ))}
@@ -134,7 +138,7 @@ export default function OfferList({ offers, onEdit, onDelete, onSort, onDeactiva
                             ${offer?.applicableCategories?.length > 6 ? "h-[10rem] overflow-y-scroll" : "h-fit"} border
                              border-dropdownBorder rounded-[4px] z-[10]`}>
                             {offer?.applicableCategories?.map((category)=> (
-                              <li key={category.name} className="capitalize text-primaryDark">
+                              <li key={category.name} className="capitalize text-muted">
                                 {category.name}
                               </li>
                             ))}
@@ -166,7 +170,7 @@ export default function OfferList({ offers, onEdit, onDelete, onSort, onDeactiva
                 </div>
                 {
                   offer?.maxDiscount ?
-                  <div className='flex items-center gap-[3px]'>
+                  <div className='flex items-center gap-[3px] min-w-0'>
                     <IndianRupee className='w-[13px] h-[13px] text-muted'/>
                     <p className='text-[11px] text-muted'>
                       Max Discount - {`${"₹" + offer.maxDiscount}`} 
@@ -176,7 +180,7 @@ export default function OfferList({ offers, onEdit, onDelete, onSort, onDeactiva
                 }
                 {
                   offer?.minimumOrderValue ?
-                  <div className='flex items-center gap-[3px]'>
+                  <div className='flex items-center gap-[3px] min-w-0'>
                     <ShoppingCart className='w-[13px] h-[13px] text-muted'/>
                     <p className='text-[11px] text-muted'>
                       Min Order - {`${"₹" + offer.minimumOrderValue}`} 

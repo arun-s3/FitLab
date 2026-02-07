@@ -84,7 +84,7 @@ export default function ListBoard({currentList, onNewCurrenList, onSearch, onUpd
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, ease: "easeOut" }}
-              className={`p-[12px] pl-[20px] bg-purple-50 border border-dashed border-secondary rounded-[7px] h-[20rem] 
+              className={`p-[12px] px-[20px] bg-purple-50 border border-dashed border-secondary rounded-[7px] h-[20rem] 
                 ${
                   wishlist.lists.length > 2
                     ? "md:h-[30rem] overflow-y-auto"

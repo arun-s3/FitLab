@@ -65,7 +65,8 @@ export default function CartTable({products, omIncQuantity, onDecQuantity, onRem
                               className="w-[4rem] h-[4rem] mob:w-[5rem] mob:h-[5rem] s-sm:w-[6rem] s-sm:h-[6rem] object-cover rounded
                                 transition hover:scale-105 duration-150 cursor-pointer"/>
                             <div className="min-w-0 hidden xs-sm:inline-block">
-                              <h3 className="text-[13px] s-sm:text-[15px] text-secondary font-medium capitalize truncate"> 
+                              <h3 className="text-[13px] s-sm:text-[15px] text-secondary font-medium capitalize 
+                                    break-words whitespace-pre-wrap line-clamp-3"> 
                                 {product.title}
                               </h3>
                               {

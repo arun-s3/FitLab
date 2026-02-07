@@ -104,10 +104,11 @@ export default function LatestProductsCarousel() {
                     transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                   >
                     <h2 className="text-[22px] mob:text-[24px] xxs-sm:text-[26px] sm:text-[30px] md:text-[35px] 
-                      font-semibold tracking-tight truncate text-white">
+                      font-semibold tracking-tight line-clamp-2 break-words overflow-hidden text-white">
                         {slides[index].title}
                     </h2>
-                    <p className="mt-2 mob:mt-3 text-[13px] mob:text-[14px] leading-relaxed truncate text-white/85">
+                    <p className="mt-2 mob:mt-3 text-[13px] mob:text-[14px] leading-relaxed line-clamp-3 break-words overflow-hidden
+                     text-white/85">
                         {slides[index].subtitle}
                     </p>
                     <button

@@ -138,7 +138,8 @@ export default function OfferShowcase({sectionStyle, containerStyle, headlineSty
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.1, duration: 0.4 }}
-                                className="text-[20px] md:text-[30px] capitalize font-bold text-slate-900 dark:text-white mb-2 text-balance"
+                                className="text-[20px] md:text-[30px] capitalize font-bold text-slate-900 dark:text-white mb-2 
+                                    text-balance line-clamp-2"
                               >
                                 {currentOffer.name}
                               </motion.h3>

@@ -29,7 +29,7 @@ export default function CouponList({ coupons, onEdit, onDelete, onDeactivate, on
       ${coupons.length > 0 ? 'bg-white shadow-md rounded-lg' : 'flex justify-center items-center'}`} id='CouponList'>
       {
         coupons.length > 0 ?
-          <table className="min-w-full divide-y divide-gray-200">
+          <table className="min-w-full divide-y divide-gray-200 table-fixed">
             <thead className="bg-inputBorderLow">
               <tr>
                 { tableHeaders.map( (header)=> (
@@ -49,9 +49,10 @@ export default function CouponList({ coupons, onEdit, onDelete, onDeactivate, on
             <tbody className="bg-white divide-y divide-gray-200">
               { coupons.map((coupon, index)=> (
                 <tr key={coupon?._id} className={`${(index % 2 == 0) ? 'bg-transparent': 'bg-[#eee]'} hover:bg-[rgb(249, 245, 252)]`}>
-                  <td className="pl-[1rem] py-4 whitespace-nowrap">
-                    <div className={`text-sm font-medium ${coupon.status === 'active' ? 'text-green-500' : 'text-red-500' } `}>
-                    {coupon && coupon?.code && coupon?.code.length > 13 ? coupon.code.substring(0,10) + '...' : coupon.code} 
+                  <td className="pl-[1rem] py-4 max-w-[120px]">
+                    <div className={`text-sm font-medium line-clamp-2 break-words overflow-hidden
+                         ${coupon.status === 'active' ? 'text-green-500' : 'text-red-500' } `}>
+                    {coupon && coupon?.code && coupon.code} 
                     </div>
                   </td>
                   <td className="px-6 py-4">

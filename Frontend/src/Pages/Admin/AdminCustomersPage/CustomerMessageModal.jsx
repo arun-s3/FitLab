@@ -40,10 +40,6 @@ export default function CustomerMessageModal({ isOpen, onClose, customer }) {
     }
   }
 
-  const handleOpenChat = () => {
-    console.log("Redirecting to chat page for customer:", customer)
-  }
-  
 
   return (
     <AnimatePresence>
@@ -195,16 +191,6 @@ export default function CustomerMessageModal({ isOpen, onClose, customer }) {
                   >
                     <Send className="w-4 h-4" />
                     Send Message
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={handleOpenChat}
-                    className="flex-1 sm:flex-none bg-primaryDark hover:bg-green-500 text-white rounded-[8px] px-4 py-3 
-                      transition-colors shadow-md hover:shadow-lg font-medium text-sm md:text-base flex items-center justify-center gap-2"
-                  >
-                    <MessageCircle className="w-4 h-4" />
-                    Open Chat
                   </motion.button>
                 </div>
               </motion.div>

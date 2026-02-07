@@ -36,8 +36,8 @@ export default function CouponList({coupons, onCouponApply}){
               whileHover={{scale: 1.02}}
             >
               <div className="p-4 bg-gray-50">
-                <div className="flex justify-between items-center">
-                  <h2 className="flex items-center gap-[5px] text-lg font-bold">
+                <div className="flex justify-between items-start">
+                  <h2 className="flex items-center gap-[5px] text-lg font-bold max-w-[67%]">
                     {coupon.code} 
                     {(cart?.couponUsed  === coupon._id || cart?.couponUsed?._id === coupon._id ) &&
                       <span className="ml-[5px] text-[15px] text-primaryDark"> (Applied) </span>

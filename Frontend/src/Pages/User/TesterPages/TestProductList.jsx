@@ -15,7 +15,7 @@ import {FaList} from "react-icons/fa";
 export default function ProductList(){
 
     const headerBg = {
-        backgroundImage: "url('/header-bg.png')",
+        backgroundImage: "url('/Images/header-bg.png')",
         backgrounSize: 'cover'
     }
 

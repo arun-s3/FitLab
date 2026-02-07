@@ -56,7 +56,7 @@ export default function AdminCouponManagementPage(){
 
     const {setHeaderZIndex, setPageBgUrl} = useOutletContext()
     setHeaderZIndex(0)
-    setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.94),rgba(255,255,255,0.94)), url('/admin-bg4.png')`)
+    setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.94),rgba(255,255,255,0.94)), url('/Images/admin-bg4.png')`)
 
     const {coupons: allCoupons, totalCoupons, couponDeactivated} = useSelector(state=> state.coupons)
     const dispatch = useDispatch()

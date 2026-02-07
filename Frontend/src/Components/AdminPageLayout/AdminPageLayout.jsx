@@ -28,7 +28,7 @@ export default function AdminPageLayout(){
     }
 
     const adminContentBgImg = {
-        backgroundImage: "linear-gradient(to right,rgba(255,255,255,0.9),rgba(255,255,255,0.9)), url('/admin-bg.jpg')"
+        backgroundImage: "linear-gradient(to right,rgba(255,255,255,0.9),rgba(255,255,255,0.9)), url('/Images/admin-bg.jpg')"
     }
 
     const dispatch = useDispatch()
@@ -43,7 +43,7 @@ export default function AdminPageLayout(){
 
     const createPageBg = (url)=> {
       return {
-        backgroundImage: `linear-gradient(to right,rgba(255,255,255,0.9),rgba(255,255,255,0.9)), url('/${url}')`
+        backgroundImage: `linear-gradient(to right,rgba(255,255,255,0.9),rgba(255,255,255,0.9)), url('/Images/${url}')`
       }
     }
 

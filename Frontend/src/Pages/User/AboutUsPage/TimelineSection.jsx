@@ -100,8 +100,8 @@ export default function TimelineSection() {
             ))}
           </div>
           <div className="flex flex-col gap-4">
-            <img className="w-[26rem] object-cover rounded-[9px]" src='/AboutUs/office3.jpg'/>
-            <img className="w-[26rem] object-cover rounded-[9px]" src='/AboutUs/office2.jpg'/>
+            <img className="w-[26rem] object-cover rounded-[9px]" src='/Images/AboutUs/office3.jpg'/>
+            <img className="w-[26rem] object-cover rounded-[9px]" src='/Images/AboutUs/office2.jpg'/>
           </div>
         </div>
       </div>

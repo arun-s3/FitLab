@@ -6347,8 +6347,8 @@ select {
   background-image: radial-gradient(circle at center, rgba(50,17,70,0.9) 0%, rgba(30,15,60,0.7) 15%, rgba(10,5,20,0.5) 30%, rgba(0,0,0,0) 55%);
 }
 
-.bg-\[url\(\'\/Error403Img\.jpg\'\)\] {
-  background-image: url('/Error403Img.jpg');
+.bg-\[url\(\'\/Images\/Error403Img\.jpg\'\)\] {
+  background-image: url('/Images/Error403Img.jpg');
 }
 
 .bg-gradient-to-b {

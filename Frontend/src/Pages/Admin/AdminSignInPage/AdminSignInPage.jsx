@@ -18,7 +18,7 @@ import {resetStates, adminSignin} from '../../../Slices/adminSlice'
 export default function AdminSignInPage(){
 
     const bgImg = {
-        backgroundImage:"url('/SignIn-bg.png')",
+        backgroundImage:"url('/Images/SignIn-bg.png')",
         backgroundSize:"cover"
     }
 
@@ -132,7 +132,7 @@ export default function AdminSignInPage(){
                 className='transform translate-x-[-50%] translate-y-[-50%] absolute top-[50%] left-[50%] my-[2%] flex gap-[2rem] 
                                     items-center'>
                 <div className='hidden x-lg:inline-block'>
-                    {/* <img src="/Logo_main.png" alt="Fitlab"/> */}
+                    {/* <img src="/Images/Logo_main.png" alt="Fitlab"/> */}
                     <Logo customStyle={{ height: "30rem", width: "30rem" }} />
                 </div>
                 <div className='rounded-[22px] px-[50px] admin-form w-[24rem] s-sm:w-[29rem] sm:w-[31.5rem]'>

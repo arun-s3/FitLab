@@ -23,7 +23,7 @@ export default function CouponPage(){
   setPageWrapperClasses('gap-[2rem] px-4 xx-md:px-[4rem] pb-[10rem]')
   setContentTileClasses('basis-full x-lg:basis-[75%] mt-[2rem] content-tile')
   setSidebarTileClasses('hidden x-lg:inline-block')
-  setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.96),rgba(255,255,255,0.96)), url('/admin-bg4.png')`)
+  setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.96),rgba(255,255,255,0.96)), url('/Images/admin-bg4.png')`)
 
   const {checkAuthOrOpenModal} = useContext(ProtectedUserContext)  
   

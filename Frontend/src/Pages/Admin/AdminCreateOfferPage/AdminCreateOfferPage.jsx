@@ -77,7 +77,7 @@ export default function AdminCreateOfferPage(){
   const dispatch = useDispatch()
 
   const {setPageBgUrl} = useOutletContext()
-  setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.94),rgba(255,255,255,0.94)), url('/admin-bg5.png')`)
+  setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.94),rgba(255,255,255,0.94)), url('/Images/admin-bg5.png')`)
   
 
   const userGroupValues = ["all", "newUsers", "returningUsers", "VIPUsers"]

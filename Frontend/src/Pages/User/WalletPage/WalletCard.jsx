@@ -105,7 +105,7 @@ export default function WalletCard({children}) {
           <div className="mb-1 t:text-[10px] mob:text-xs opacity-80">Total Balance</div>
 
           <motion.img
-            src="/Logo_main_light1.png"
+            src="/Images/Logo_main_light1.png"
             alt="Fitlab"
             className="absolute bottom-[-12px] right-0 h-[2.5rem] mob:h-[3rem] s-sm:h-[3.5rem] x-sm:h-[4rem]"
             initial={{ opacity: 0, x: 15 }}

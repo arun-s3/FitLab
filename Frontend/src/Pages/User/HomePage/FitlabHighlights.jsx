@@ -111,7 +111,7 @@ export default function FitlabHighlights() {
 
             <motion.div className="rounded-2xl overflow-hidden shadow-2xl" variants={imageVariants}>
               <img
-                src="./FitLabHighlightSectionImg2.png"
+                src="/Images/FitLabHighlightSectionImg2.png"
                 alt="Gym Equipment"
                 className="w-full h-auto object-cover"
               />
@@ -121,7 +121,7 @@ export default function FitlabHighlights() {
           <motion.div className="flex flex-col gap-6" variants={containerVariants}>
             <motion.div className="rounded-2xl overflow-hidden shadow-2xl" variants={imageVariants}>
               <img
-                src="./FitLabHighlightSectionImg1.png"
+                src="/Images/FitLabHighlightSectionImg1.png"
                 alt="Fitness Person"
                 className="w-full h-auto object-cover"
               />

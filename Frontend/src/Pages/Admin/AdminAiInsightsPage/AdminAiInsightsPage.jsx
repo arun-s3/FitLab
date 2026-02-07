@@ -35,7 +35,7 @@ export default function AdminAiInsightsPage(){
     const [error, setError] = useState(null)
 
     const {setPageBgUrl} = useOutletContext()
-    setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.94),rgba(255,255,255,0.94)), url('/admin-aiInsights.png')`)
+    setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.94),rgba(255,255,255,0.94)), url('/Images/admin-aiInsights.png')`)
 
     const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 

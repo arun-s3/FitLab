@@ -35,7 +35,7 @@ export default function TermsAndConditionsPage() {
   }, [error])
 
   const headerBg = {
-     backgroundImage: "url('/header-bg.png')",
+     backgroundImage: "url('/Images/header-bg.png')",
      backgrounSize: 'cover'
   }
 

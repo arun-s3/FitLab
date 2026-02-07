@@ -17,7 +17,7 @@ export default function  FeaturesSection() {
     {
       id: 1,
       icon: Zap,
-      image: "/AboutUs/smartFitnessCommerce.png",
+      image: "/Images/AboutUs/smartFitnessCommerce.png",
       title: "Smart Fitness Commerce",
       description:
         "Strength, cardio, accessories, and supplements — intelligently organized. Browse deeply nested product categories designed for both beginners and advanced athletes.",
@@ -27,7 +27,7 @@ export default function  FeaturesSection() {
     {
       id: 2,
       icon: Dumbbell,
-      image: "/AboutUs/exerciseDrivenShopping.png",
+      image: "/Images/AboutUs/exerciseDrivenShopping.png",
       title: "Exercise-Driven Shopping",
       description:
         "Shop equipment based on how you train, not just what you buy. Users can explore exercises by body part, equipment, difficulty, and variants.",
@@ -37,7 +37,7 @@ export default function  FeaturesSection() {
     {
       id: 3,
       icon: Heart,
-      image: "/AboutUs/wishlistMgmt.png",
+      image: "/Images/AboutUs/wishlistMgmt.png",
       title: "Advanced Wishlist Management",
       description:
         "Create multiple wishlists with custom thumbnails, set priorities for both lists and individual products, and easily edit, organize, and share them with others to plan fitness goals smarter.",
@@ -47,7 +47,7 @@ export default function  FeaturesSection() {
     {
       id: 4,
       icon: CreditCard,
-      image: "/AboutUs/walletAndPayments.png",
+      image: "/Images/AboutUs/walletAndPayments.png",
       title: "Intelligent Wallet & Payments",
       description:
         "One wallet. Multiple gateways. Zero friction. Supports Razorpay, Stripe, and PayPal with smart auto-recharge capabilities.",
@@ -57,7 +57,7 @@ export default function  FeaturesSection() {
     {
       id: 5,
       icon: Users,
-      image: "/AboutUs/peerFitnessEconomy.png",
+      image: "/Images/AboutUs/peerFitnessEconomy.png",
       title: "Peer-to-Peer Fitness Economy",
       description:
         "Borrow, lend, and support — powered by trust. FitLab enables users to give loans and receive funds within the platform.",
@@ -67,7 +67,7 @@ export default function  FeaturesSection() {
     {
       id: 6, 
       icon: Tag,
-      image: "/AboutUs/smartCouponsOffersEngine.png",
+      image: "/Images/AboutUs/smartCouponsOffersEngine.png",
       title: "Smart Coupons & Offers Engine",
       description:
         "Always get the best deal — automatically. Multiple coupons and offers are intelligently evaluated at checkout.",
@@ -77,7 +77,7 @@ export default function  FeaturesSection() {
     {
       id: 7, 
       icon: Truck,
-      image: "/AboutUs/flexibleCheckout.png",
+      image: "/Images/AboutUs/flexibleCheckout.png",
       title: "Flexible Checkout & Delivery Tracking",
       description:
         "Pay your way. Track every step. Supports Cash on Delivery, real-time order tracking, and transparent logistics visibility.",
@@ -87,7 +87,7 @@ export default function  FeaturesSection() {
     {
       id: 8,
       icon: Clock,
-      image: "/AboutUs/fitnessTrackerEngine.png",
+      image: "/Images/AboutUs/fitnessTrackerEngine.png",
       title: "Fitness Tracker & Workout Engine",
       description:
         "Train smarter with structure and precision. Create reusable exercise templates, track workouts with timers, and monitor progression.",
@@ -97,7 +97,7 @@ export default function  FeaturesSection() {
     {
       id: 9, 
       icon: Activity,
-      image: "/AboutUs/healthProfile.png",
+      image: "/Images/AboutUs/healthProfile.png",
       title: "Advanced Health Profile Tracking",
       description:
         "Your body, fully quantified. Track comprehensive health metrics including height, weight, blood pressure, and body fat.",
@@ -107,7 +107,7 @@ export default function  FeaturesSection() {
     {
       id: 10,
       icon: BarChart3, 
-      image: "/AboutUs/aiInisghts.png",
+      image: "/Images/AboutUs/aiInisghts.png",
       title: "AI-Powered Dashboards & Insights",
       description:
         "Turn raw fitness and business data into clarity. Interactive dashboards and AI-generated insights help you understand trends and opportunities.",
@@ -117,7 +117,7 @@ export default function  FeaturesSection() {
     {
       id: 11,
       icon: Cpu, 
-      image: "/AboutUs/coachPlus.png",
+      image: "/Images/AboutUs/coachPlus.png",
       title: "Coach+ — Your Personalized Fitness Companion",
       description:
         "Your intelligent training partner for consistent progress. Coach+ provides personalized fitness guidance, workout insights, and contextual recommendations.",
@@ -127,7 +127,7 @@ export default function  FeaturesSection() {
     {
       id: 12,
       icon: MessageCircle,
-      image: "/AboutUs/supportChat.png",
+      image: "/Images/AboutUs/supportChat.png",
       title: "Real-Time Support via Chat & Video",
       description: "Human help, when you need it. Instant chat and video support ensure users are never stuck.",
       color: "from-teal-400 to-cyan-400",

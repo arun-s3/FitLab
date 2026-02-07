@@ -60,7 +60,7 @@ export default function AdminOrderHistoryPage(){
   const dispatch = useDispatch()
 
   const {setHeaderZIndex, setPageBgUrl} = useOutletContext() 
-  setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.93),rgba(255,255,255,0.93)), url('/admin-ProductsListBg.jpg')`)
+  setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.93),rgba(255,255,255,0.93)), url('/Images/admin-ProductsListBg.jpg')`)
 
   const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 

@@ -23,7 +23,7 @@ export default function ErrorPage403({message = null}){
 
     return(
         <section id='ErrorPage403' 
-            className="h-screen bg-[url('/Error403Img.jpg')] bg-cover md:bg-none bg-[position:-10rem_0] 
+            className="h-screen bg-[url('/Images/Error403Img.jpg')] bg-cover md:bg-none bg-[position:-10rem_0] 
               xs-sm:bg-[position:-7rem_0] md:bg-[position:0_0] md:bg-[#FAD42B] relative before:content-[''] before:absolute before:top-0
               before:left-0 before:w-full before:h-full before:bg-gradient-to-b before:from-white/50 before:backdrop-blur-[2px]
               md:before:content-none md:static"
@@ -39,7 +39,7 @@ export default function ErrorPage403({message = null}){
                         transition={{ duration: 0.8, ease: "easeOut" }}
                     >
                         <motion.img alt='Error 403' 
-                            src='/Error403Img.jpg' 
+                            src='/Images/Error403Img.jpg' 
                             className='h-full w-auto md:h-[90%] md:w-[87%] xx-md:h-full xx-md:w-auto xx-md:ml-[-30px] lg:ml-0'
                             animate={{ y: [0, -4, 0] }}
                             transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}

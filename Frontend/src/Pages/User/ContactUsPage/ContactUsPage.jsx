@@ -15,7 +15,7 @@ import {SocketContext} from '../../../Components/SocketProvider/SocketProvider'
 export default function ContactUsPage(){
 
   const headerBg = {
-     backgroundImage: "url('/header-bg.png')",
+     backgroundImage: "url('/Images/header-bg.png')",
      backgrounSize: 'cover'
   }
 

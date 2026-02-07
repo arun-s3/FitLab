@@ -55,7 +55,7 @@ export default function AdminProductListPage(){
     const {products, message} = useSelector(state=> state.productStore)
 
     const {setHeaderZIndex, setPageBgUrl} = useOutletContext() 
-    setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.94),rgba(255,255,255,0.94)), url('/admin-ProductsListBg.jpg')`)
+    setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.94),rgba(255,255,255,0.94)), url('/Images/admin-ProductsListBg.jpg')`)
 
     const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 

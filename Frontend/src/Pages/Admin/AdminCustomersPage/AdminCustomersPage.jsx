@@ -62,7 +62,7 @@ export default function AdminCustomersPageV1() {
 
     const {setPageBgUrl, setHeaderZIndex} = useOutletContext()  
     setHeaderZIndex(0)
-    setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.95),rgba(255,255,255,0.95)), url('/admin-bg13.png')`)
+    setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.95),rgba(255,255,255,0.95)), url('/Images/admin-bg13.png')`)
 
     const {activeUsers} = useContext(AdminSocketContext)
 

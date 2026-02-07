@@ -9,7 +9,7 @@ import {House} from 'lucide-react'
 export default function BreadcrumbBar({heading}){
 
     const barBg = {
-        backgroundImage: "url('/breadcrumb-bg.png')",
+        backgroundImage: "url('/Images/breadcrumb-bg.png')",
         backgroundSize: 'cover',
         backgroundPositionY: '-20px'
     }

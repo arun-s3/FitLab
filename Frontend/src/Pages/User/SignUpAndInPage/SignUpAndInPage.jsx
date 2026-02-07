@@ -20,7 +20,7 @@ import {CustomHashLoader, CustomScaleLoader} from '../../../Components/Loader/Lo
 export default function SignUpAndInPage({type}){
 
     const bgImg = {
-        backgroundImage:"url('/SignIn-bg.png')",
+        backgroundImage:"url('/Images/SignIn-bg.png')",
         backgroundSize:"cover"
     }
 
@@ -523,7 +523,7 @@ export default function SignUpAndInPage({type}){
                                         setGooglePromptLoading(true)
                                         googleLogin()
                                     }}>
-                                    <img src='/google.png' alt='' className='mr-[15px] inline-block' />
+                                    <img src='/Images/google.png' alt='' className='mr-[15px] inline-block' />
                                     {loading || googlePromptLoading ? (
                                         <CustomHashLoader loading={googlePromptLoading || loading} />
                                     ) : (

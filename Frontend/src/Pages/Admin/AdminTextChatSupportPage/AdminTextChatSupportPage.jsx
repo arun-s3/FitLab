@@ -32,7 +32,7 @@ export default function AdminTextChatSupportPage() {
   const [hasMoreUsersChats, setHasMoreUsersChats] = useState(true)
 
   const {setPageBgUrl} = useOutletContext() 
-  setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.93),rgba(255,255,255,0.93)), url('/admin-bg8.png')`)
+  setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.93),rgba(255,255,255,0.93)), url('/Images/admin-bg8.png')`)
 
   const adminName = "Support Agent"
 

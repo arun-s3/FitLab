@@ -130,7 +130,7 @@ export default function ExerciseDetails({exercise, onGoBack}) {
               >
                 <div className={`w-[15rem] h-[10rem] border border-dashed border-secondaryLight2 rounded-[8px]`}>
                   <img
-                    src={`/Muscles/${exercise.targetMuscles[0]}.jpg`}
+                    src={`/Images/Muscles/${exercise.targetMuscles[0]}.jpg`}
                     onError={(e) => {
                       e.target.onerror = null
                       e.target.src = `/Muscles/${exercise.targetMuscles[0]}.png`
@@ -141,7 +141,7 @@ export default function ExerciseDetails({exercise, onGoBack}) {
                 </div>
                 <div className='mt-[10px] w-[15rem] h-[10rem] border border-dashed border-secondaryLight2 rounded-[8px]'>
                   <img
-                    src={`/Muscles/${exercise.targetMuscles?.[1] || exercise.secondaryMuscles?.[0]}.jpg`}
+                    src={`/Images/Muscles/${exercise.targetMuscles?.[1] || exercise.secondaryMuscles?.[0]}.jpg`}
                     onError={(e) => {
                       e.target.onerror = null
                       const fallbackImg = exercise.targetMuscles?.[1] || exercise.secondaryMuscles?.[0]

@@ -55,7 +55,7 @@ export default function AdminOfferManagementPage(){
 
     const {setHeaderZIndex, setPageBgUrl} = useOutletContext()
     setHeaderZIndex(0)
-    setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.94),rgba(255,255,255,0.94)), url('/admin-bg6.png')`)
+    setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.94),rgba(255,255,255,0.94)), url('/Images/admin-bg6.png')`)
 
     const {offers: allOffers, totalOffers} = useSelector(state=> state.offers)
     const dispatch = useDispatch()

@@ -24,7 +24,7 @@ export default function AdminDashboardPage({ insightType }){
     const [dashboardQuery, setDashboardQuery] = useState('')
 
     const {setPageBgUrl} = useOutletContext() 
-    setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.96),rgba(255,255,255,0.96)), url('/admin-bg10.png')`)
+    setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.96),rgba(255,255,255,0.96)), url('/Images/admin-bg10.png')`)
 
     const [showBusinessAnalytics, setShowBusinessAnalytics] = useState({sales: true, orders: true, customers: true})
     const [showOperationsAnalytics, setShowOperationsAnalytics] = useState({inventory: true, payments: true, coupons: true, offers: true})

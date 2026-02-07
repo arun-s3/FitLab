@@ -9,7 +9,7 @@ export default function RequestForm({ onImmediateRequest, onScheduleRequest }) {
 
 
   const bgImg = {
-    backgroundImage:"url('/videoSupport-bg.jpg')",
+    backgroundImage:"url('/Images/videoSupport-bg.jpg')",
     backgroundSize:"cover", 
   }
   const container = {

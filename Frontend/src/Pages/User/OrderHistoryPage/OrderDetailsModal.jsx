@@ -118,7 +118,7 @@ export default function OrderDetailsModal({ isOpen, onClose, order }){
               <div 
                 className="flex-1 overflow-y-auto px-8 py-8 space-y-8" 
                 ref={modalRef}
-                style={{backgroundImage: "linear-gradient(to right, rgba(255,255,255,0.95), rgba(255,255,255,0.95)), url('/admin-bg1.png')" }}
+                style={{backgroundImage: "linear-gradient(to right, rgba(255,255,255,0.95), rgba(255,255,255,0.95)), url('/Images/admin-bg1.png')" }}
               >
                 {/* Status Badges */}
                 <motion.div

@@ -19,7 +19,7 @@ import {SiteButtonSquare} from '../SiteButtons/SiteButtons'
 export default function ImageEditor(){
 
     const headerBg = {
-        backgroundImage: "url('/Background.png')",
+        backgroundImage: "url('/Images/Background.png')",
         // backgroundSize: 'cover'
     }
 

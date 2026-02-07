@@ -20,7 +20,7 @@ import Fallback from '../../../Components/FallbackSuspense/Fallback'
 export default function AboutUsPage() {
 
   const headerBg = {
-     backgroundImage: "url('/header-bg.png')",
+     backgroundImage: "url('/Images/header-bg.png')",
      backgrounSize: 'cover'
   }
 

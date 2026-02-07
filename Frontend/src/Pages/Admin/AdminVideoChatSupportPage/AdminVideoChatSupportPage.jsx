@@ -21,7 +21,7 @@ export default function AdminVideoChatSupportPage() {
   const [adminStatus, setAdminStatus] = useState("available")
 
   const {setPageBgUrl} = useOutletContext() 
-  setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.95),rgba(255,255,255,0.95)), url('/admin-bg9.png')`)
+  setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.95),rgba(255,255,255,0.95)), url('/Images/admin-bg9.png')`)
 
   const adminSocketContextItems = useContext(AdminSocketContext)
 

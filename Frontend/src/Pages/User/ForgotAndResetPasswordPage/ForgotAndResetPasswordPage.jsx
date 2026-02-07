@@ -67,7 +67,7 @@ export default function ForgotAndResetPasswordPage(){
     },[error])
 
     const bgImg = {
-        backgroundImage:"url('/ForgotPasswordBg.png')",
+        backgroundImage:"url('/Images/ForgotPasswordBg.png')",
         backgroundSize:"cover"
     }
 

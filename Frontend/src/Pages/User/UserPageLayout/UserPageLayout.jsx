@@ -23,7 +23,7 @@ export default function UserPageLayout(){
     const {user} = useSelector((state)=> state.user)
 
     const headerBg = {
-        backgroundImage: "url('/header-bg.png')",
+        backgroundImage: "url('/Images/header-bg.png')",
         backgrounSize: 'cover'
     }
 

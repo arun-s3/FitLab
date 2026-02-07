@@ -13,7 +13,7 @@ const categories = [
       `Building muscle requires strength and power. Free weights and other weight equipment are crucial. 
        They assist you gain muscle mass and strength by providing resistance exercise. 
        Exercising with weights improves your range of motion while also increasing your balance and stability.`,
-    image: "./StrengthCategoryPic.png"
+    image: "/Images/StrengthCategoryPic.png"
   },
   {
     id: 2,
@@ -22,7 +22,7 @@ const categories = [
       `Cardio exercises are a great way to lose weight. 
       They can be used in the comfort of your own home, and they allow you to customize your workout to suit your needs. 
       These exercise helps spend up on your metabolism and burning calories more quickly.`,
-    image: "./CardioCategoryPic.png"
+    image: "/Images/CardioCategoryPic.png"
   },
   {
     id: 3,
@@ -31,7 +31,7 @@ const categories = [
       `Muscle-building supplements can improve physical performance during resistance training and help stimulate muscle growth. 
       To maximize muscle growth and development, a process known as muscle hypertrophy, 
       it's important to maintain a balanced diet and an exercise routine featuring resistance training.`,
-    image: "./SupplementsCategoryPic.png"
+    image: "/Images/SupplementsCategoryPic.png"
   },
   {
     id: 4,
@@ -40,7 +40,7 @@ const categories = [
       `By having your workout gear right, you'll be set for a productive, safe and effective workout. 
       Improve your performance and comfort with the right accessories. Invest time to research workout gear and equipment. 
       Before making a purchase, take time to research workout gear to find the best for your goals and specific needs.`,
-    image: "./AccessoriesCategoryPic.png.png"
+    image: "/Images/AccessoriesCategoryPic.png.png"
   },
 ]
 

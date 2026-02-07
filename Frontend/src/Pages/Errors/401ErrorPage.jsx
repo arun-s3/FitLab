@@ -68,7 +68,7 @@ export default function ErrorPage401() {
                       animate={{ x: 0, opacity: 1 }}
                       transition={{ duration: 0.8, ease: "easeOut" }}>
                       <motion.img
-                          src='/Error401Img.png'
+                          src='/Images/Error401Img.png'
                           className='w-80 h-80 sm:w-96 sm:h-96 object-contain'
                           crossOrigin='anonymous'
                           animate={{ y: [0, -4, 0] }}
@@ -86,7 +86,7 @@ export default function ErrorPage401() {
                               401
                           </h1>
                           <motion.img
-                              src='/Error401Img3.png'
+                              src='/Images/Error401Img3.png'
                               className='w-[6rem] h-[6rem] sm:w-[8rem] sm:h-[8rem] inline-block lg:hidden'
                               crossOrigin='anonymous'
                               animate={{ y: [0, -4, 0] }}

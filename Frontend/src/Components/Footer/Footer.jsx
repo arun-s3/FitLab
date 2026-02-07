@@ -29,7 +29,7 @@ export default function Footer({goToShopByCategorySec}) {
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-14 items-start'>
               <div className='space-y-4 w-[380px]'>
                   <figure>
-                      <img src='/Logo_main.png' alt='Fitlab' className='h-[5rem]' />
+                      <img src='/Images/Logo_main.png' alt='Fitlab' className='h-[5rem]' />
                   </figure>
                   <p
                       className='ml-[28px] mt-[-2px] capitalize text-small font-sairaCondensed text-muted font-medium 

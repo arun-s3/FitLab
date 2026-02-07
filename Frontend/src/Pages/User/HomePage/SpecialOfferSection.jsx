@@ -57,7 +57,7 @@ export default function SpecialOfferSection() {
           <motion.div className="flex justify-center md:justify-start" variants={imageVariants}>
             <div className="w-full max-w-md rounded-3xl overflow-hidden shadow-2xl">
               <img
-                src="./TopOfferSection.png"
+                src="/Images/TopOfferSection.png"
                 alt="Dumbbells"
                 className="w-full h-auto object-cover"
               />

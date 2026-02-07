@@ -122,7 +122,7 @@ export default function UserSidebar({currentPath, openMenuByDefault = true, flex
                     {
                         user?.profilePic  
                             ? <img src={user.profilePic} alt='ProfilePic' className='w-full h-full object-cover rounded-[35px]'/> 
-                            : <img src='/DefaultDp.png' alt='ProfilePic' className='rounded-[35px]'/>
+                            : <img src='/Images/DefaultDp.png' alt='ProfilePic' className='rounded-[35px]'/>
                     }
                     <button 
                         className={`absolute bottom-[2px] right-[3px] p-[5px] rounded-[25px] bg-white 

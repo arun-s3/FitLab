@@ -34,8 +34,8 @@ export default function AdminCategoryListPage(){
   const [toggleTab, setToggleTab] = useState({goTo: 'all'})
 
   const {setPageBgUrl} = useOutletContext() 
-//   setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.95),rgba(255,255,255,0.95)), url('/admin-bg1.png')`)
-     setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.94),rgba(255,255,255,0.94)), url('/admin-ProductsListBg.jpg')`)
+//   setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.95),rgba(255,255,255,0.95)), url('/Images/admin-bg1.png')`)
+     setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.94),rgba(255,255,255,0.94)), url('/Images/admin-ProductsListBg.jpg')`)
 
   useEffect(() => {
     const getFitlabCategories =  async ()=>{

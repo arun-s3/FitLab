@@ -69,28 +69,28 @@ export default function VisionSection() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           <VisionCard
-            image="/AboutUs/fitnessProducts.jpg"
+            image="/Images/AboutUs/fitnessProducts.jpg"
             number="2000+"
             title="Fitness Products"
             description="Strength, cardio, accessories, and supplements across deeply nested categories for every training need."
             delay={0}
           />
           <VisionCard 
-            image="/AboutUs/personalizedCoach.jpg"
+            image="/Images/AboutUs/personalizedCoach.jpg"
             number="100%"
             title="Personalized Coach+"
             description="A smart fitness companion delivering goal-based workouts, adaptive insights, and real-time guidance."
             delay={0.1}
           />
           <VisionCard
-            image="/AboutUs/smartFitnessModules.png"
+            image="/Images/AboutUs/smartFitnessModules.png"
             number="10+"
             title="Smart Fitness Modules"
             description="Wishlists, wallets, lending, tracking, dashboards, chat, video support, and social fitness tools."
             delay={0.2}
           />
           <VisionCard 
-            image="/AboutUs/fitnessEcosystem.png"
+            image="/Images/AboutUs/fitnessEcosystem.png"
             number="100%"
             title="Fitness Ecosystem"
             description="Shopping, training, health tracking, AI insights, and payments—unified in one seamless platform."

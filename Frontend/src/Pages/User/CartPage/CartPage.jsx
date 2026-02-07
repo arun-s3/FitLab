@@ -50,7 +50,7 @@ export default function ShoppingCartPage(){
   const makeCheckoutRef = useRef()
 
   const headerBg = {
-     backgroundImage: "url('/header-bg.png')",
+     backgroundImage: "url('/Images/header-bg.png')",
      backgrounSize: 'cover'
   }
 

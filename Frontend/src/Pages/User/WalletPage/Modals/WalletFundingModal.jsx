@@ -297,7 +297,7 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
                           }}>
                         <div className="flex items-center">
                           <div className="bg-blue-100 p-2 rounded-full mr-3">
-                          <img src='./razorpay.png' className='w-[20px] h-[20px]'/>
+                          <img src='/Images/razorpay.png' className='w-[20px] h-[20px]'/>
                           </div>
                           <span className="font-medium text-[13px] sm:text-[14px] "> Razorpay </span>
                         </div>
@@ -317,7 +317,7 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
                         }}>
                         <div className="flex items-center">
                           <div className="bg-blue-100 p-2 rounded-full mr-3">
-                          <img src='/paypal.png' className='w-[20px] h-[20px]'/>
+                          <img src='/Images/paypal.png' className='w-[20px] h-[20px]'/>
                           </div>
                           <span className="font-medium text-[13px] sm:text-[14px] ">PayPal</span>
                         </div>

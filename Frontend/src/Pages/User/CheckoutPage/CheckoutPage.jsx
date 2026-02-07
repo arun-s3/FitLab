@@ -143,7 +143,7 @@ export default function CheckoutPage(){
     }, [productRemoved])
 
     const headerBg = {
-        backgroundImage: "url('/header-bg.png')",
+        backgroundImage: "url('/Images/header-bg.png')",
         backgrounSize: 'cover'
     }
 

@@ -9,57 +9,57 @@ export default function BrandsCarousal(){
     {
       id: 1,
       name: "Nike",
-      src: "./logos/nike-logo-black.jpg",
+      src: "/Images/logos/nike-logo-black.jpg",
     },
     {
       id: 2,
       name: "Adidas",
-      src: "./logos/adidas-logo.png",
+      src: "/Images/logos/adidas-logo.png",
     },
     {
       id: 4,
       name: "Under Armour",
-      src: "./logos/under-armour-inspired-logo.png",
+      src: "/Images/logos/under-armour-inspired-logo.png",
     },
     {
       id: 6,
       name: "New Balance",
-      src: "./logos/new-balance-logo.jpg",
+      src: "/Images/logos/new-balance-logo.jpg",
     },
     {
       id: 7,
       name: "Lululemon",
-      src: "./logos/lululemon-logo.png",
+      src: "/Images/logos/lululemon-logo.png",
     },
     {
       id: 8,
       name: "Gymshark",
-      src: "./logos/gymshark-logo.jpg",
+      src: "/Images/logos/gymshark-logo.jpg",
     },
     {
       id: 9,
       name: "Tuff Stuff",
-      src: "./logos/tuff-stuff-fitness-logo.jpg",
+      src: "/Images/logos/tuff-stuff-fitness-logo.jpg",
     },
     {
       id: 10,
       name: "True Fitness",
-      src: "./logos/true-fitness-logo.jpg",
+      src: "/Images/logos/true-fitness-logo.jpg",
     },
     {
       id: 15,
       name: "Unified Fitness",
-      src: "./logos/unified-fitness.jpg",
+      src: "/Images/logos/unified-fitness.jpg",
     },
     {
       id: 18,
       name: "Spirit",
-      src: "./logos/spirit-fitness-logo.jpg",
+      src: "/Images/logos/spirit-fitness-logo.jpg",
     },
     {
       id: 19,
       name: "Humane",
-      src: "./logos/humane-flooring-logo.jpg",
+      src: "/Images/logos/humane-flooring-logo.jpg",
     },
   ]
 

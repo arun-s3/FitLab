@@ -7,7 +7,7 @@ const features = [
   {
     id: 11,
     icon: Cpu,
-    image: "/AboutUs/coachPlus.png",
+    image: "/Images/AboutUs/coachPlus.png",
     title: "Coach+ Personal Fitness Companion",
     description:
       "A smart training partner built around your goals. Coach+ delivers personalized workout guidance, progress-based insights, and contextual recommendations.",
@@ -16,7 +16,7 @@ const features = [
   {
     id: 8,
     icon: Clock,
-    image: "/AboutUs/fitnessTrackerEngine.png",
+    image: "/Images/AboutUs/fitnessTrackerEngine.png",
     title: "Workout Tracking & Training Engine",
     description:
       "Train with structure and clarity. Build reusable workout templates, track sessions with timers, and monitor performance over time.",
@@ -25,7 +25,7 @@ const features = [
   {
     id: 9,
     icon: Activity,
-    image: "/AboutUs/healthProfile.png",
+    image: "/Images/AboutUs/healthProfile.png",
     title: "Comprehensive Health Profile",
     description:
       "Your fitness data, fully organized. Track key health metrics like height, weight, blood pressure, BMI, body composition, etc.",
@@ -34,7 +34,7 @@ const features = [
   {
     id: 1,
     icon: Zap,
-    image: "/AboutUs/smartFitnessCommerce.png",
+    image: "/Images/AboutUs/smartFitnessCommerce.png",
     title: "Smart Fitness Marketplace",
     description:
       "Discover strength, cardio, accessories, and supplements through intelligently structured and deeply nested categories.",
@@ -43,7 +43,7 @@ const features = [
   {
     id: 2,
     icon: Dumbbell,
-    image: "/AboutUs/exerciseDrivenShopping.png",
+    image: "/Images/AboutUs/exerciseDrivenShopping.png",
     title: "Exercise-Based Product Discovery",
     description:
       "Shop the way you train. Explore equipment by exercise type, body part, difficulty level, and movement variations.",
@@ -52,7 +52,7 @@ const features = [
   {
     id: 3,
     icon: Heart,
-    image: "/AboutUs/wishlistMgmt.png",
+    image: "/Images/AboutUs/wishlistMgmt.png",
     title: "Smart Wishlist Planning",
     description:
       "Organize fitness goals visually. Create multiple wishlists, customize thumbnails, set priorities for lists and products, and share plans effortlessly.",
@@ -61,7 +61,7 @@ const features = [
   {
     id: 10,
     icon: BarChart3,
-    image: "/AboutUs/aiInisghts.png",
+    image: "/Images/AboutUs/aiInisghts.png",
     title: "Insights & Performance Dashboards",
     description:
       "Turn activity and usage data into clarity. Interactive dashboards reveal trends, progress patterns, and actionable insights.",
@@ -70,7 +70,7 @@ const features = [
   {
     id: 4,
     icon: CreditCard,
-    image: "/AboutUs/walletAndPayments.png",
+    image: "/Images/AboutUs/walletAndPayments.png",
     title: "Unified Wallet & Payments",
     description:
       "One wallet, complete flexibility. Pay seamlessly using Razorpay, Stripe, or PayPal with smart auto-recharge support.",
@@ -79,7 +79,7 @@ const features = [
   {
     id: 6,
     icon: Tag,
-    image: "/AboutUs/smartCouponsOffersEngine.png",
+    image: "/Images/AboutUs/smartCouponsOffersEngine.png",
     title: "Automatic Coupons & Best Deals",
     description:
       "Never miss savings. Available coupons and offers are intelligently evaluated to apply the best deal at checkout.",
@@ -88,7 +88,7 @@ const features = [
   {
     id: 7,
     icon: Truck,
-    image: "/AboutUs/flexibleCheckout.png",
+    image: "/Images/AboutUs/flexibleCheckout.png",
     title: "Flexible Checkout & Order Tracking",
     description:
       "Choose how you pay and track every order. Supports Cash on Delivery with real-time delivery updates and visibility.",
@@ -97,7 +97,7 @@ const features = [
   {
     id: 5,
     icon: Users,
-    image: "/AboutUs/peerFitnessEconomy.png",
+    image: "/Images/AboutUs/peerFitnessEconomy.png",
     title: "Peer-Powered Fitness Economy",
     description:
       "A trust-driven ecosystem. Enable lending, borrowing, and financial support between users directly within FitLab.",
@@ -106,7 +106,7 @@ const features = [
   {
     id: 12,
     icon: MessageCircle,
-    image: "/AboutUs/supportChat.png",
+    image: "/Images/AboutUs/supportChat.png",
     title: "Instant Chat & Video Support",
     description:
       "Help without delays. Connect instantly through chat or video for real-time assistance whenever you need it.",

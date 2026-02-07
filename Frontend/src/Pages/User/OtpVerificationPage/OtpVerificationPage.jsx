@@ -46,7 +46,7 @@ export default function OtpVerificationPage(){
     const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
     const bgImg = {
-        backgroundImage:"url('/otp-bg.png')",
+        backgroundImage:"url('/Images/otp-bg.png')",
     }
 
     const [bgLoaded, setBgLoaded] = useState(false)
@@ -271,7 +271,7 @@ export default function OtpVerificationPage(){
                   <motion.div
                     id="otp-verify-bg"
                     className="absolute inset-0 h-[130vh] x-xl:bg-cover"
-                    style={{ backgroundImage: `url('/otp-bg.png')` }}
+                    style={{ backgroundImage: `url('/Images/otp-bg.png')` }}
                     initial={{ opacity: 0, scale: 1.05 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0 }}

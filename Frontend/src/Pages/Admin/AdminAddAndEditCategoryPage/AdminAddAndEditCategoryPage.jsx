@@ -64,7 +64,7 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
     const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
     const {setPageBgUrl} = useOutletContext() 
-    setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.95),rgba(255,255,255,0.95)), url('/admin-bg1.png')`)
+    setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.95),rgba(255,255,255,0.95)), url('/Images/admin-bg1.png')`)
 
     useEffect(()=>{
         console.log("CATEGORYDATA-->", JSON.stringify(categoryData))

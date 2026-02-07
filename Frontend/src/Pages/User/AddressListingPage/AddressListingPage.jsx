@@ -21,7 +21,7 @@ export default function AddressListingPage(){
     setBreadcrumbHeading('Manage Addresses')
     setPageWrapperClasses(`gap-[2rem] px-[4rem] pb-[10rem] justify-center xx-md:justify-normal`)
     setSidebarTileClasses('hidden xx-md:inline-block')
-    setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.96),rgba(255,255,255,0.96)), url('/patternBg2.png')`)
+    setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.96),rgba(255,255,255,0.96)), url('/Images/patternBg2.png')`)
       
     const location = useLocation()
     setPageLocation(location.pathname)
@@ -119,7 +119,7 @@ export default function AddressListingPage(){
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.6, ease: "easeOut" }}
                             >
-                               <img src='/address.png' className='w-[22rem] md:w-[45%] h-auto'/> 
+                               <img src='/Images/address.png' className='w-[22rem] md:w-[45%] h-auto'/> 
                                <p className='whitespace-normal xs-sm:whitespace-nowrap md:whitespace-normal'> 
                                     You don’t have any saved addresses yet. Add one to make checkout faster! 
                                </p>

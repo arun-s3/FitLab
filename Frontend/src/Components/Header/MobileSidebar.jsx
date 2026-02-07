@@ -190,7 +190,7 @@ export default function MobileSidebar({currentPageChatBoxStatus = false, current
                           <p className="mt-1 text-xs text-white/70"> Creatine Monohydrate 100g • 30 servings </p>
                           <p className="mt-1 text-xs text-white/50"> 4.8 • Free delivery for members </p>
                         </div>
-                        <img src="/creatine.jpg"
+                        <img src="/Images/creatine.jpg"
                           alt="Creatine Monohydrate thumbnail"
                           className="h-24 w-24 shrink-0 rounded-lg object-cover ring-1 ring-white/10"
                         />

@@ -78,7 +78,7 @@ export default function HomePage(){
     }, [])
 
     const bgImg = {
-        backgroundImage:"url('/Hero-section-bg2.png')",
+        backgroundImage:"url('/Images/Hero-section-bg2.png')",
         backgroundSize:"cover"
     }
 

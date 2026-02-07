@@ -291,7 +291,7 @@ export default function AdminSidebar({ isOpen, onClose }){
                   whileHover={{ scale: 1.05, rotate: 1 }}
                   transition={{ type: "spring", stiffness: 400, damping: 10 }}
                 >
-                  <img src="/Logo_main.png" alt="Fitlab" className="h-full w-full"/> 
+                  <img src="/Images/Logo_main.png" alt="Fitlab" className="h-full w-full"/> 
                 </motion.div>
               </div>
               <motion.button

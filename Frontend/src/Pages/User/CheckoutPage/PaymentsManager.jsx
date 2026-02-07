@@ -22,23 +22,23 @@ export default function PaymentManager({paymentMethod, setPaymentMethod, optionC
     const paymentOptions = [
       {
         name: 'razorpay',
-        icon: './razorpay.png'
+        icon: '/Images/razorpay.png'
       },
       {
         name: 'wallet',
-        icon: '/wallet.png'
+        icon: '/Images/wallet.png'
       },
       {
         name: 'paypal',
-        icon: '/paypal.png'
+        icon: '/Images/paypal.png'
       },
       {
         name: 'cashOnDelivery',
-        icon: '/cod.png'
+        icon: '/Images/cod.png'
       },
       {
         name: 'cards',
-        icon: '/card3.png',
+        icon: '/Images/card3.png',
       }
     ]
 

@@ -113,7 +113,7 @@ export default function BlockedPage(){
             <motion.div className="text-center" variants={itemVariants}>
               <motion.div animate="float" className="inline-block">
                 <img
-                  src="/blocked.png"
+                  src="/Images/blocked.png"
                   alt="Access Denied Illustration"
                   className="w-full max-w-md mx-auto h-80 object-contain"
                 />

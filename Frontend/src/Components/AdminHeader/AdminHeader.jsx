@@ -43,7 +43,7 @@ export default function AdminHeader({headerZIndex}){
                 onClose={()=> setSidebarOpen(false)} 
             />
 
-            <img src="/Logo_main.png"
+            <img src="/Images/Logo_main.png"
                 alt="Fitlab" 
                 className="hidden sm:inline-block sm:absolute sm:left-[17rem] sm:top-[-3px] x-md:static h-[5rem] mt-[5px]
                     xx-md:mt-[15px] ml-[-27rem] l-md:w-[-13rem] xx-md:ml-0"

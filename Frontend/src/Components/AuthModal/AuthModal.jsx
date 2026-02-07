@@ -80,7 +80,7 @@ export default function AuthModal({isOpen, onClose, accessFor = "this feature"})
                     <div className="p-3  rounded-2xl">
                       <Lock className="w-8 h-8 text-primary" />
                     </div>
-                    <img src="/Logo_main.png" alt="Fitlab" className="mt-[7px] h-[5rem] "/>
+                    <img src="/Images/Logo_main.png" alt="Fitlab" className="mt-[7px] h-[5rem] "/>
                   </div>
                   <div className="space-y-2">
                     <h2 className="text-2xl text-white font-bold text-foreground tracking-[0.7px]"> Welcome to Fitlab </h2>

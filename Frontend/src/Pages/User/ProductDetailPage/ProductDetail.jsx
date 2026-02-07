@@ -262,7 +262,7 @@ export default function ProductDetail({product = null, quantity, setQuantity, on
                       {
                         bestOffer && bestOffer.isBogo &&
                         <figure className='h-[80px] xs-sm:h-[100px] w-auto'>
-                          <img src='/bogo.png' className='h-[80px] xs-sm:h-[100px] w-auto object-cover'/>
+                          <img src='/Images/bogo.png' className='h-[80px] xs-sm:h-[100px] w-auto object-cover'/>
                         </figure>
                       }
                   </motion.p>

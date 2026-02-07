@@ -77,7 +77,7 @@ export default function ProductList({admin}){
     }, [products, productCounts])
 
     const headerBg = {
-        backgroundImage: "url('/header-bg.png')",
+        backgroundImage: "url('/Images/header-bg.png')",
         backgrounSize: 'cover'
     }
 

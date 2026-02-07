@@ -48,7 +48,7 @@ export default function FitnessQuoteSection() {
             variants={imageVariants} 
             className="relative h-64 md:h-96 rounded-lg overflow-hidden"
         >
-          <img src="./Quote-section-pic.png" alt="Fitness workout" className="w-full h-full object-cover" />
+          <img src="/Images/Quote-section-pic.png" alt="Fitness workout" className="w-full h-full object-cover" />
         </motion.div>
 
         <motion.div 

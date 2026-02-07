@@ -168,7 +168,7 @@ export default function AutoRechargeModal({ isOpen, onClose, onSave, currentSett
   }, [warnUserForConsent])
 
   const paymentOptions = [
-    {name: 'razorpay', iconSrc: './razorpay.png'}, {name: 'stripe', iconSrc: './stripe.png'}
+    {name: 'razorpay', iconSrc: '/Images/razorpay.png'}, {name: 'stripe', iconSrc: '/Images/stripe.png'}
   ]
 
   const cardStyle = {

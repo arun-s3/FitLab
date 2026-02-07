@@ -42,7 +42,7 @@ export default function AdminAddAndEditProductPage({ editProduct }){
     const [productData, setProductData] = useState({targetMuscles: []})
 
     const {setPageBgUrl} = useOutletContext() 
-    setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.9),rgba(255,255,255,0.9)), url('/admin-bg.jpg')`)
+    setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.9),rgba(255,255,255,0.9)), url('/Images/admin-bg.jpg')`)
 
     const [variantsDisabledMsg, setVariantsDisabledMsg] = useState(false)
 
@@ -50,7 +50,7 @@ export default function AdminAddAndEditProductPage({ editProduct }){
 
     const [categoryImgPreview, setCategoryImgPreview] = useState('')
     const categoryBgImage = {
-        backgroundImage: `linear-gradient(to right, rgba(243, 230, 251, 0.85), rgba(243, 230, 251, 0.85)), url('${categoryImgPreview}')`,
+        backgroundImage: `linear-gradient(to right, rgba(243, 230, 251, 0.85), rgba(243, 230, 251, 0.85)), url('/Images${categoryImgPreview}')`,
         backgroundPosition:'center',
         backgroundSize:'cover'
     }

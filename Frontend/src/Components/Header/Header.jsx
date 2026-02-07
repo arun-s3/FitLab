@@ -94,7 +94,7 @@ export default function Header({lighterLogo, customStyle, goToShopByCategorySec,
                 transition={{ delay: 0.4, duration: 0.8, ease: "easeOut" }}>
                 <Link to='/' className='absolute top-[5px] max-xs-sm:left-0 lg:static'>
                     <img
-                        src={!lighterLogo ? "/Logo_main.png" : "/logoDesign1.png"}
+                        src={!lighterLogo ? "/Images/Logo_main.png" : "/Images/logoDesign1.png"}
                         alt='Fitlab'
                         className='h-[5rem] '
                     />{" "}

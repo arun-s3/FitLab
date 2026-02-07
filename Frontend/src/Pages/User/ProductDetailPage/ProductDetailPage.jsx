@@ -45,25 +45,6 @@ export default function ProductDetailPage(){
 
   const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
-  const dummyProduct = {
-    id: 1,
-    name: "Premium Wireless Headphones",
-    price: 299.99,
-    originalPrice: 399.99,
-    rating: 4.5,
-    reviewCount: 128,
-    description:
-      "Experience crystal-clear sound with our premium wireless headphones. Featuring active noise cancellation, 30-hour battery life, and premium comfort padding.",
-    image: "/premium-wireless-headphones.jpg",
-    features: [
-      "Active Noise Cancellation",
-      "30-Hour Battery Life",
-      "Premium Sound Quality",
-      "Bluetooth 5.0",
-      "Lightweight Design",
-    ],
-  }
-
   useEffect(()=> {
     const fetchProduct = async()=> {
       const response = await axios.get(`${baseApiUrl}/products/${currentProductId}`, {withCredentials:true})
@@ -98,7 +79,7 @@ export default function ProductDetailPage(){
   },[error, productAdded, cart])
 
   const headerBg = {
-      backgroundImage: "url('/header-bg.png')",
+      backgroundImage: "url('/Images/header-bg.png')",
       backgrounSize: 'cover'
   }
   

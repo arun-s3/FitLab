@@ -246,7 +246,9 @@ export default function AdminPageLayout(){
                                                                     <motion.li variants={child}>
                                                                        <div>
                                                                             <Link to={subItem.path} className='flex items-start'> 
-                                                                                <CiSquareChevRight/> 
+                                                                                <CiSquareChevRight className={`
+                                                                                    ${subItem.id === 'operations-overview' ? '!w-[28px] !h-[28px]' : ''}
+                                                                                    `}/> 
                                                                                 <div className='flex flex-col gap-[5px]'>
                                                                                     <span> {subItem.label} </span> 
                                                                                     {

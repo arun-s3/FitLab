@@ -1,21 +1,57 @@
-import React,{useState} from 'react'
+import React, {useState, useEffect} from 'react'
 
 import {FaSortUp,FaSortDown} from "react-icons/fa6";
 import {MdBlock, MdDeleteOutline} from 'react-icons/md';
 import {RiFileEditLine} from "react-icons/ri";
 
-export default function ProductsTableView({products}){
+export default function ProductsTableView({products, setProducts}){
 
     const [activeSorter, setActiveSorter] = useState({field:'',order:''})
+
+    useEffect(() => {
+        console.log("Inside useEffect for activeSort");
+        let tempProducts = [...products]
+
+        if (activeSorter.field && activeSorter.order) {
+            console.log("Sorting products based on activeSorter...");
+            console.log(`Field: ${activeSorter.field}, Order: ${activeSorter.order}`);
+            tempProducts = sortProducts(activeSorter.field, activeSorter.order, true)
+        }
+        setProducts(tempProducts)
+
+    }, [activeSorter.field, activeSorter.order]);
 
     const sortHandler = (e,type,order)=>{
         if(e.target.style.height=='15px'){
           e.target.style.height='10px'
           e.target.style.color='rgba(159, 42, 240, 0.5)'
-          console.log("Going to default icon settings and localUsers--")
+          console.log("Going to default icon settings--")
       }else {
           setActiveSorter({field:type, order})
       }
+     }
+
+     const sortProducts = (type, order, returnData) => {
+         console.log("Sorting.....")
+
+         const sortedProducts = [...products].sort((a, b) => {
+             const valA = a[type]
+             const valB = b[type]
+
+             if (typeof valA === "string") {
+                 return order === 1 ? valA.localeCompare(valB) : valB.localeCompare(valA)
+             }
+
+             return order === 1 ? valA - valB : valB - valA
+         })
+
+         console.log("sortedProducts -->", sortedProducts)
+
+         if (returnData) {
+             return sortedProducts
+         } else {
+             setProducts(sortedProducts)
+         }
      }
 
 
@@ -28,13 +64,13 @@ export default function ProductsTableView({products}){
                     <div className='flex items-center'>
                         <span>Product Name</span>
                         <i className='flex flex-col gap-[2px] h-[5px]'>
-                            <FaSortUp  onClick = {(e)=>{ sortHandler(e,"productName",1)}} 
-                                    style={{height: activeSorter.field === "productName" && activeSorter.order === 1 ?'15px':'10px',
-                                                color: activeSorter.field === "productName" && activeSorter.order === 1 ? 
+                            <FaSortUp  onClick = {(e)=>{ sortHandler(e,"title",1)}} 
+                                    style={{height: activeSorter.field === "title" && activeSorter.order === 1 ?'15px':'10px',
+                                                color: activeSorter.field === "title" && activeSorter.order === 1 ? 
                                                             'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
-                            <FaSortDown onClick = {(e)=>sortHandler(e,"productName",-1)} 
-                                style={{height: activeSorter.field === "productName" && activeSorter.order === -1 ?'15px':'10px',
-                                            color: activeSorter.field === "productName" && activeSorter.order === -1 ? 
+                            <FaSortDown onClick = {(e)=>sortHandler(e,"title",-1)} 
+                                style={{height: activeSorter.field === "title" && activeSorter.order === -1 ?'15px':'10px',
+                                            color: activeSorter.field === "title" && activeSorter.order === -1 ? 
                                             'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)' }}/>
                         </i>
                     </div> 
@@ -87,31 +123,11 @@ export default function ProductsTableView({products}){
                 <td>
                     <div className='flex items-center'>
                         <span>Category</span>
-                        <i className='flex flex-col h-[5px]'>
-                            <FaSortUp onClick = {(e)=>sortHandler(e,"category",1)}
-                                style={{height: activeSorter.field === "category" && activeSorter.order === 1 ?'15px':'10px',
-                                            color: activeSorter.field === "category" && activeSorter.order === 1 ? 
-                                                'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
-                            <FaSortDown onClick = {(e)=>sortHandler(e,"category",-1)}
-                                style={{height: activeSorter.field === "category" && activeSorter.order === -1 ?'15px':'10px',
-                                             color: activeSorter.field === "category" && activeSorter.order === -1 ? 
-                                                'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
-                        </i>
                     </div>
                 </td>
                 <td>
                     <div className='flex items-center'>
                         <span>Weights</span>
-                        <i className='flex flex-col h-[5px]'>
-                            <FaSortUp onClick = {(e)=>sortHandler(e,"weights",1)}
-                                style={{height: activeSorter.field === "weights" && activeSorter.order === 1 ?'15px':'10px',
-                                            color: activeSorter.field === "weights" && activeSorter.order === 1 ? 
-                                                'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
-                            <FaSortDown onClick = {(e)=>sortHandler(e,"weights",-1)}
-                                style={{height: activeSorter.field === "weights" && activeSorter.order === -1 ?'15px':'10px',
-                                             color: activeSorter.field === "weights" && activeSorter.order === -1 ? 
-                                                'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
-                        </i>
                     </div>
                 </td>
                 <td></td>

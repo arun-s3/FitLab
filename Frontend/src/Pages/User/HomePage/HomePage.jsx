@@ -122,9 +122,9 @@ export default function HomePage(){
           </Suspense>
         </div>
 
-        <div className="w-full py-8">
-          <Suspense fallback={<Fallback variant="products" height="h-56" />}>
-            <LatestProductsCarousel />
+        <div>
+          <Suspense fallback={<Fallback variant="products" height="h-64" />}>
+            <FeaturesSection />
           </Suspense>
         </div>
 
@@ -139,10 +139,10 @@ export default function HomePage(){
             <ShopByCategories />
           </Suspense>
         </div>
-        
-        <div>
-          <Suspense fallback={<Fallback variant="products" height="h-64" />}>
-            <FeaturesSection />
+
+        <div className="w-full py-8">
+          <Suspense fallback={<Fallback variant="products" height="h-56" />}>
+            <LatestProductsCarousel />
           </Suspense>
         </div>
 

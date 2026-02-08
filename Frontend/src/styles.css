@@ -3139,6 +3139,10 @@ select {
   height: 100vh;
 }
 
+.\!h-\[28px\] {
+  height: 28px !important;
+}
+
 .max-h-48 {
   max-height: 12rem;
 }
@@ -3802,6 +3806,10 @@ select {
 
 .w-full {
   width: 100%;
+}
+
+.\!w-\[28px\] {
+  width: 28px !important;
 }
 
 .\!min-w-\[11\.1rem\] {

@@ -1,5 +1,5 @@
 import React,{useState} from "react"
-import {useNavigate} from 'react-router-dom'
+import {useNavigate, useLocation} from 'react-router-dom'
 import {useDispatch} from 'react-redux'
 import {motion, AnimatePresence} from "framer-motion"
 
@@ -17,6 +17,8 @@ export default function AdminSidebar({ isOpen, onClose }){
 
   const dispatch = useDispatch()
   const navigate = useNavigate()
+
+  const location = useLocation()
 
   const menuItems = [
     {
@@ -330,7 +332,9 @@ export default function AdminSidebar({ isOpen, onClose }){
                       <div className="flex items-center space-x-4" onClick={()=> {
                         if(!item.hasSubmenu && item?.path){
                             onClose()
-                            navigate(item.path) 
+                            navigate(item.path, {
+                              state: { from: location.pathname }
+                            }) 
                         }
                       }}>
                         <motion.div
@@ -376,7 +380,9 @@ export default function AdminSidebar({ isOpen, onClose }){
                                   onClick={()=> {
                                      if(subItem?.path){
                                         onClose()
-                                        navigate(subItem.path) 
+                                        navigate(subItem.path, {
+                                          state: { from: location.pathname }
+                                        }) 
                                      }
                                   }}
                                 >

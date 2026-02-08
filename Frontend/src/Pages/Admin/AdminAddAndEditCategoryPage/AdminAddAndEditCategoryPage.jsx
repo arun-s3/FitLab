@@ -175,12 +175,18 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
         if(categoryCreated){
             categoryCreated && sonnerToast.success('Created category succesfully!')
             dispatch(resetStates())
-            setTimeout(()=> {navigate('/admin/category', {replace: true})}, 1000)
+            setTimeout(()=> {navigate('/admin/category', {
+                replace: true, 
+                state: { from: location.pathname }
+            })}, 1000)
         }
         if(editCategory && categoryUpdated){
             categoryUpdated && sonnerToast.success('Updated category succesfully!')
             dispatch(resetStates())
-            setTimeout(()=> {navigate('/admin/category', {replace: true})}, 1000)
+            setTimeout(()=> {navigate("/admin/category", {
+                replace: true,
+                state: { from: location.pathname },
+            })}, 1000)
         }
     },[categoryCreated, categoryUpdated])
 

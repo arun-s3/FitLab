@@ -307,7 +307,10 @@ const tableBodyGenerator = (categories, isSubcategory, parentLevelCount)=> {
                                 {/* // */}
                                 <div className='w-[35px] flex flex-col gap-[2rem] text-secondary'>
                                        <span data-label='Edit' className='w-[30px] p-[5px] border rounded-[20px] z-[2] flex items-center justify-center 
-                                             relative cursor-pointer admin-control' onClick={()=> navigate('./edit', {state: {category}})}>    
+                                             relative cursor-pointer admin-control' onClick={()=> navigate('./edit', {state: {
+                                                category, 
+                                                from: location.pathname
+                                             }})}>    
                                          <i> <RiFileEditLine/> </i>
                                        </span>
                                        <span data-label='Block' className='w-[30px] p-[5px] border rounded-[20px] z-[2] flex items-center justify-center

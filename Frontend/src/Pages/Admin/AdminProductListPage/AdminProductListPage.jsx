@@ -13,6 +13,7 @@ import {IoMdAdd} from "react-icons/io"
 import axios from 'axios'
 
 import {resetStates} from '../../../Slices/productSlice'
+import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
 import ProductListingTools from '../../../Components/ProductListingTools/ProductListingTools'
 import {SitePrimaryButtonWithShadow} from '../../../Components/SiteButtons/SiteButtons'
 import {getAllProducts} from '../../../Slices/productSlice'
@@ -166,13 +167,14 @@ export default function AdminProductListPage(){
     }
 
 
-
     return(
 
         <section id='AdminProductList' >
 
             <header className='flex flex-col md:flex-row gap-8 md:gap-0 justify-between items-center'>
-                <h1 className='w-full md:w-auto'> Products </h1>
+                <header>
+                    <AdminTitleSection heading='Products' subHeading='View, edit, filter, export and manage products across grid, list, and table views.'/>
+                </header>
                 <div className='w-full md:w-auto flex items-center justify-between md:justify-normal gap-[10px] xx-md:gap-[10px]
                  lg:gap-[1.5rem] x-md:gap-[1.5rem]'>
                     <SitePrimaryButtonWithShadow 
@@ -207,7 +209,9 @@ export default function AdminProductListPage(){
                     <SitePrimaryButtonWithShadow 
                         tailwindClasses="xxs-sm:text-[13px] x-md:text-[14px] xx-md:text-[13px] lg:text-[14px] xxs-sm:py-[3px]
                             xx-md:py-[3px] lg:py-[4px] x-md:py-[4px] xxs-sm:rounded-[6px] xx-md:rounded-[6px] lg:rounded-[8px] x-md:rounded-[8px]"
-                        clickHandler={()=> navigate('/admin/products/add')}
+                        clickHandler={()=> navigate('/admin/products/add', {
+                            state: { from: location.pathname }
+                        })}
                         animated={true}
                     >
                         <i>

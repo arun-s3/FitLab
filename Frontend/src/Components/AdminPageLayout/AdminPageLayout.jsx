@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react'
 import  './AdminPageLayout.css'
-import {Link, Outlet} from 'react-router-dom'
+import {Link, Outlet, useLocation} from 'react-router-dom'
 import {useDispatch} from 'react-redux'
 import {motion, AnimatePresence} from 'framer-motion'
 
@@ -32,6 +32,8 @@ export default function AdminPageLayout(){
     }
 
     const dispatch = useDispatch()
+    
+    const location = useLocation()
 
     const [headerZIndex, setHeaderZIndex] = useState(10)
 
@@ -245,7 +247,10 @@ export default function AdminPageLayout(){
                                                                 >
                                                                     <motion.li variants={child}>
                                                                        <div>
-                                                                            <Link to={subItem.path} className='flex items-start'> 
+                                                                            <Link to={subItem.path} 
+                                                                                state={{ from: location.pathname }}
+                                                                                className='flex items-start'
+                                                                            > 
                                                                                 <CiSquareChevRight className={`
                                                                                     ${subItem.id === 'operations-overview' ? '!w-[28px] !h-[28px]' : ''}
                                                                                     `}/> 
@@ -271,7 +276,7 @@ export default function AdminPageLayout(){
                                                 </>
                                             :
                                             <div className={`${ showSubmenu[item.id] && 'toggleSublist-custom-after'} option`}>
-                                                <Link to={item.path}> 
+                                                <Link to={item.path} state={{ from: location.pathname }}> 
                                                     <item.icon className='w-[13px] h-[13px]'/> 
                                                     <span className={`${ showSubmenu[item.id] && 'text-primaryDark'} ml-[5px]`}> 
                                                          {item.label} 

@@ -18,6 +18,8 @@ export default function FitnessAiInsights({receivedSourceDatas, periodType}) {
     const [fitnessInsights, setFitnessInsights] = useState(null)
 
     const [generateAiInsights, setGenerateAiInsights] = useState(false)
+
+    const [recreateAICards, setRecreateAICards] = useState(false)
     
     const [loading, setLoading] = useState(false)
 
@@ -98,17 +100,22 @@ export default function FitnessAiInsights({receivedSourceDatas, periodType}) {
 
             const { week, month } = latestInsightResponse.data
             
-            if (week && month) {
+            if ((week && periodType ==='week') || (month && periodType ==='month')) {
               console.log("Returning cached AI response")
-              const insightDatas = {
-                week: week.insights,
-                month: month.insights
+              let insightDatas = null
+              if(periodType ==='week'){
+                insightDatas = week.insights
+              }else{
+                insightDatas = month.insights
               }
               console.log("Cached insightDatas------->", insightDatas) 
-              setFitnessInsights(insightDatas[periodType])
+              setFitnessInsights(insightDatas)
+              setRecreateAICards(true)
               return
             }else{
+              console.log("Have to generate new insights...")
               setGenerateAiInsights(true) 
+              setRecreateAICards(true)
             }
           }
         }catch (error) {
@@ -120,6 +127,8 @@ export default function FitnessAiInsights({receivedSourceDatas, periodType}) {
     }
 
     useEffect(()=> {
+      setFitnessInsights(null)
+      setRecreateAICards(false) 
       getInsightDataSources()
     }, [periodType])
     
@@ -138,7 +147,8 @@ export default function FitnessAiInsights({receivedSourceDatas, periodType}) {
     return ( 
       
         <>
-            {
+            {   
+            recreateAICards &&
                 <AiInsightCards 
                     insightsTemplates={insightsTemplates}
                     requiredSourceDatas={periodFitnessDatas}

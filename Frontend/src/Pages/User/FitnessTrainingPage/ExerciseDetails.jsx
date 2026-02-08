@@ -1,5 +1,5 @@
 
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useRef} from 'react'
 import {motion} from 'framer-motion'
 
 import {ArrowLeft} from 'lucide-react'
@@ -19,6 +19,14 @@ export default function ExerciseDetails({exercise, onGoBack}) {
 
   const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
+  const exerciseDetailsRef = useRef(null)
+
+  useEffect(() => {
+      if (exerciseDetailsRef?.current) {
+          exerciseDetailsRef.current?.scrollIntoView({ behavior: "smooth" })
+      }
+  }, [exerciseDetailsRef.current])
+
   useEffect(()=> {
     if(!exercise.name) return 
     async function loadExerciseBasedProducts(){
@@ -33,6 +41,7 @@ export default function ExerciseDetails({exercise, onGoBack}) {
       }
       catch(error){
         console.log("error from  loadExerciseBasedProducts--->", error.message)
+        sonnerToast.error("Something went wrong. Please check your network!")
       }  
     }
 
@@ -59,7 +68,7 @@ export default function ExerciseDetails({exercise, onGoBack}) {
   }
 
   return (
-    <div className="min-h-screen text-white overflow-hidden">
+    <div className="min-h-screen text-white overflow-hidden" ref={exerciseDetailsRef}>
 
       <motion.div
         className={`transition-all duration-300`}
@@ -224,7 +233,7 @@ export default function ExerciseDetails({exercise, onGoBack}) {
 
         <ExerciseVideos exercise={exercise}/>
         
-        <div className='mt-24 mb-12'>
+        <div className='mt-32 mb-12'>
           {
             exerciseBasedProducts &&
               <Carousal 

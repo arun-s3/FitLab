@@ -10,7 +10,7 @@ import {toast as sonnerToast} from 'sonner'
 import {camelToCapitalizedWords} from '../../../Utils/helperFunctions'
 
 
-export default function MonthlyWeeklyCharts({ title, dataKey, timeRange, onFetchedDatas }) {
+export default function MonthlyWeeklyCharts({ title, dataKey, timeRange, onFetchedDatas = () => {} }) {
 
   const chartConfig = {
     workouts: { color: "#3b82f6", name: "Workouts" },

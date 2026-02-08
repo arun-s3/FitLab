@@ -6,32 +6,13 @@ const HealthProfile = require("../Models/healthProfileModel")
 
 
 const fs = require('fs')
+const fsPromise = require("fs/promises")
 const path = require('path')
 const axios = require("axios")
 
 const {errorHandler} = require('../Utils/errorHandler')
 
 const EXERCISE_API_URL = process.env.EXERCISEDB_URL
-
-
-// const fetchFromBrave = async (query) => {
-//   try {
-//     const res = await axios.get("https://api.search.brave.com/res/v1/images/search", {
-//       headers: {
-//         "X-Subscription-Token": process.env.BRAVE_API_KEY,
-//       },
-//       params: {
-//         q: `${query} JEFIT`,
-//         count: 1
-//       },
-//     })
-
-//     return res.data?.results?.[0]?.thumbnail || null
-//   } catch (err) {
-//     console.log("Brave fetch error:", err.response?.data || err.message)
-//     return null
-//   }
-// }
 
 
 const fetchFromSerpApi = async (query) => {
@@ -209,6 +190,82 @@ const getExercisesList = async (req, res, next) => {
     }
     next(error)
   }
+}
+
+
+const getExerciseBodyParts = async (req, res, next) => {
+    try {
+        console.log("Inside getExerciseBodyParts controller")
+
+        const BODY_PARTS_FILE = path.join(__dirname, "..", "Data", "exerciseBodyParts.json")
+
+        const normalize = (arr)=> arr.map((item) => item.name.toLowerCase().trim()).sort()
+
+        let localData = []
+        try {
+            const file = await fsPromise.readFile(BODY_PARTS_FILE, "utf-8")
+            localData = JSON.parse(file).data || []
+        } catch (err) {
+            console.warn("Local body parts file missing or unreadable")
+        }
+        
+        try{
+            const response = await axios.get(`${EXERCISE_API_URL}/bodyparts`, { timeout: 15000 })
+        }catch (error) {
+          console.error("API error:", error.message)
+          return res.status(200).json({
+              success: true,
+              data: localData,
+          })
+        }
+        
+        const fetchedData = response.data?.data || []
+
+        if (!Array.isArray(fetchedData) || fetchedData.length === 0) {
+            console.error("Invalid body parts data from API")
+            return res.status(200).json({
+              success: true,
+              data: localData
+            })
+        }
+
+        const fetchedNormalized = normalize(fetchedData)
+        const localNormalized = normalize(localData)
+
+        const isDifferent =
+            fetchedNormalized.length !== localNormalized.length || fetchedNormalized.some((v, i) => v !== localNormalized[i])
+
+        if (isDifferent) {
+            console.log("Body parts changed → updating local JSON")
+
+            await fsPromise.writeFile(BODY_PARTS_FILE, JSON.stringify({ data: fetchedData }, null, 2), "utf-8")
+
+            return res.status(200).json({
+                success: true,
+                data: fetchedData,
+            })
+        }
+
+        console.log("Body parts unchanged → using local JSON")
+
+        return res.status(200).json({
+            success: true,
+            data: localData,
+        })
+    }
+    catch (error) {
+        console.error("Error fetching body parts:", error.response?.status || error.message)
+
+        const BODY_PARTS_FILE = path.join(__dirname, "..", "Data", "exerciseBodyParts.json")
+
+        const file = await fsPromise.readFile(BODY_PARTS_FILE, "utf-8")
+        localData = JSON.parse(file).data || []
+        return res.status(200).json({
+            success: true,
+            data: localData,
+        })
+
+    }
 }
 
 
@@ -915,6 +972,6 @@ const checkWeeklyHealthProfile = async (req, res, next) => {
 
 
 
-module.exports = {getExerciseThumbnail, getExerciseVideos, getExercisesList, addExercise, updateExerciseTemplate, updateWorkoutInfo, 
+module.exports = {getExerciseThumbnail, getExerciseVideos, getExercisesList, getExerciseBodyParts, addExercise, updateExerciseTemplate, updateWorkoutInfo, 
   updateCaloriesForExercise, getUserExerciseLibrary, getWorkoutHistory, getLatestWorkout, deleteExerciseTemplate, addOrUpdateDailyHealthProfile,
   getLatestHealthProfile, checkWeeklyHealthProfile}

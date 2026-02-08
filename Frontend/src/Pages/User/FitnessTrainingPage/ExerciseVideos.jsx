@@ -2,7 +2,7 @@
 import React, {useState, useEffect} from 'react'
 import {motion} from 'framer-motion'
 
-import {Play} from 'lucide-react'
+import {Play, Video} from 'lucide-react'
 import axios from 'axios'
 
 
@@ -49,6 +49,10 @@ export default function ExerciseVideos({exercise}) {
   return (
     <>
 
+        <h2 className='px-8 flex items-center gap-4 w-full mt-20 mb-6'>
+            <Video className='w-[30px] h-[30px] text-secondary'/>
+            <span className='text-[25px] text-black font-bold'> Videos related to this exercise or its variations </span>
+        </h2>
         {
           videos && videos.length > 0 &&
             <motion.div
@@ -89,8 +93,8 @@ export default function ExerciseVideos({exercise}) {
                         className="rounded-lg w-full object-cover" 
                       />
                 }
-                <p className="text-sm mt-1 font-medium">{videos[selectedVideoIndex].title}</p>
               </div>
+              <p className="absolute -bottom-4 text-[18px] text-muted font-medium">{videos[selectedVideoIndex].title}</p>
 
               <motion.div variants={itemVariants} className="basis-[40%] h-[36rem] max-x-lg:self-start">
                 <div className="bg-gradient-to-br from-purple-50 to-purple-100 backdrop-blur-sm border border-dropdownBorder
@@ -116,7 +120,7 @@ export default function ExerciseVideos({exercise}) {
                                 <Play className="text-white fill-white" size={24} />
                               </div>
                               <img 
-                                src={videos[selectedVideoIndex].thumbnail} 
+                                src={video.thumbnail} 
                                 className="rounded-lg w-full h-full object-cover" 
                               />
                             </div>

@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react'
 import {useLocation} from 'react-router-dom'
 
 import axios from 'axios'
+import {toast as sonnerToast} from 'sonner'
 
 import Header from '../../../Components/Header/Header'
 import TextChatBox from '../TextChatBox/TextChatBox'
@@ -50,14 +51,19 @@ export default function FitnessTrainingPage(){
     async function loadBodyParts(){
       try {
         console.log("Inside loadBodyParts()...")
-        const response = await axios.get(`${exerciseAPiUrl}/bodyparts`)
-        console.log("loadBodyParts response----->", response.data)
+        const response = await axios.get(`${baseApiUrl}/fitness/exercises/bodyparts`, {withCredentials: true})
+        console.log("loadBodyParts response----->", response.data.data)
         if(response.data.success){ 
           setBodyParts(response.data.data.map(data=> data.name))
           console.log("Body Parts--->", bodyParts)
         }
       }catch (error) {
       	console.error("Error while loading body parts", error.message)
+        if (error.response?.status === 429) {
+            sonnerToast.error(error.response.data?.message || "Too many requests. Please try again later.")
+            console.log("Error---->", error.response.data.message)
+        }
+        else sonnerToast.error("Something went wrong. Please check your network!")
       }
     }
     loadBodyParts()
@@ -70,25 +76,6 @@ export default function FitnessTrainingPage(){
           setExercises([])
           return
         }     
-
-        // const response = await axios.get(
-        //   `${exerciseAPiUrl}/exercises/filter`,
-        //   {
-        //     params: {
-        //       offset: firstExerciseIndex,          
-        //       limit: exercisesPerPage,             
-            
-        //       muscles: selectedMuscles.length > 0 ? selectedMuscles.join(",") : undefined,        
-        //       bodyParts: selectedBodyParts.length > 0 ? selectedBodyParts.join(",") : undefined,    
-        //       equipment: selectedEquipments.length > 0 ? selectedEquipments.join(",") : undefined,   
-            
-        //       search: options?.searchQueryRemoved ? undefined : searchQuery || undefined,
-            
-        //       sortBy: sort.by ? sort.by : undefined,
-        //       sortOrder: sort.order ? sort.order : undefined,
-        //     }
-        //   }
-        // );
 
         const queryDetails = {
           offset: firstExerciseIndex, 
@@ -114,6 +101,11 @@ export default function FitnessTrainingPage(){
         }
       }catch (error) {
       	console.error("Error while loading exercises", error.message)
+        if (error.response?.status === 429) {
+            sonnerToast.error(error.response.data?.message || "Too many requests. Please try again later.")
+            console.log("Error---->", error.response.data.message)
+        }
+        else sonnerToast.error("Something went wrong. Please check your network!")
       }
   }
 
@@ -197,9 +189,7 @@ export default function FitnessTrainingPage(){
 
                   <div className="mt-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-0 md:py-0">
 
-                  {
-                    bodyParts && bodyParts.length > 0 &&
-                      <MuscleSelector 
+\                      <MuscleSelector 
                         bodyParts={bodyParts} 
                         searchedBodyPart={searchQuery} 
                         setSearchedBodyPart={setSearchQuery} 
@@ -208,7 +198,6 @@ export default function FitnessTrainingPage(){
                         listExercises={loadExercises}
                         isLoading={loading}
                       />
-                  }
 
                   </div>
                 

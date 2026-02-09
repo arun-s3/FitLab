@@ -119,6 +119,7 @@ app.use('/admin/locations', adminCustomerGeographyRoutes)
 
 require("./CronJobs/couponCrons.js")
 require("./CronJobs/offerCrons.js")
+require("./CronJobs/fitnessCrons.js")
 
 global.io = io
 

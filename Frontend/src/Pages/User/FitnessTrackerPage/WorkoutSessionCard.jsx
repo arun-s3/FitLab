@@ -48,6 +48,7 @@ export default function WorkoutSessionCard() {
   const limit = 3
 
   const [loading, setLoading] = useState(false)
+  const [fetchError, setFetchError] = useState(null)
 
   const {acceptTermsOnFirstAction} = useTermsConsent()
 
@@ -61,17 +62,25 @@ export default function WorkoutSessionCard() {
         console.log("response.data.exercises----------->", response.data.exercises)
         setExercises(response.data.exercises)
         setTotalPages(response.data.totalPages)
-        setLoading(false)
-      }
-      if(response.status === 404){
-        setExercises([])
-        setLoading(false)
-        sonnerToast.error(error.response.data.message)
-        console.log("Error---->", error.response.data.message)
       }
     }catch (error) {
-      console.error("Error during ading exercise", error.message)
-      sonnerToast.error('Something went wrong! Please retry later.')
+        console.error("Error during fetching exercise", error.message)
+        if (error.response?.status === 404) {
+          setExercises([])
+          sonnerToast.error(error.response.data?.message)
+        } 
+        else if (!error.response) {
+          sonnerToast.error("Network error. Please check your internet.")
+          console.log('Settig fetch error...')
+          setFetchError("Network error. Please check your internet.")
+        }
+        else {
+          sonnerToast.error("Something went wrong! Please retry later.")
+          console.log("Settig fetch error...")
+          setFetchError("Something went wrong! Please retry later.")
+        }
+    }finally {
+        setLoading(false)
     }
   }
 
@@ -107,8 +116,13 @@ export default function WorkoutSessionCard() {
         console.log("Error---->", error.response.data.message)
       }
     }catch (error) {
-      console.error("Error during adding exercise", error.message)
-      sonnerToast.error('Something went wrong! Please retry later.')
+      console.error("Error during deleting exercise", error.message)
+      if (!error.response) {
+        sonnerToast.error("Network error. Please check your internet.")
+      }
+      else {
+        sonnerToast.error("Something went wrong! Please retry later.")
+      }
     }
   }
 
@@ -156,15 +170,20 @@ export default function WorkoutSessionCard() {
         console.log("response.data.tracker------->", response.data.tracker)
         return {trackerId: response.data.tracker._id, exerciseId: response.data.exercise._id}
       }
-      if(response.status === 400 || response.status === 404){
-        sonnerToast.error("Some error occured while saving the wokout details")
-        console.log("Error---->", error.response.data.message)
-      }
-      setRefreshHistory(true)
     }catch (error) {
       console.error("Error during saving workoutInfo", error.message)
       sonnerToast.error('Something went wrong! Please retry later.')
-      setRefreshHistory(true)
+      if (error.response?.status === 400 || error.response?.status === 404) {
+        sonnerToast.error("Some error occured while saving the wokout details")
+      } 
+      else if (!error.response) {
+        sonnerToast.error("Network error. Please check your internet.")
+      }
+      else {
+        sonnerToast.error("Something went wrong! Please retry later.")
+      }
+    }finally {
+        setRefreshHistory(true)
     }
   }
 
@@ -261,10 +280,12 @@ export default function WorkoutSessionCard() {
                     )
                   }
                   
-                  {!loading && exercises?.length === 0 ? (
+                  {!loading && !fetchError && exercises?.length === 0 ? (
                     <p className="text-gray-400 text-center py-6">No exercises added yet</p>
+                  ) : !loading && fetchError ? (
+                    <p className="my-12 text-center text-red-500 text-[13px] traxking-[0.3px]"> {fetchError} </p>
                   ) : (
-                    !loading && exercises && exercises.map((exercise) => (
+                    !loading && !fetchError && exercises && exercises.map((exercise) => (
                       <motion.div
                         key={exercise._id}
                         initial={{ x: -20, opacity: 0 }}

@@ -1,10 +1,11 @@
 import React, {useState, useEffect} from 'react'
 import { motion } from "framer-motion"
 
-import {Clock, Flame, Dumbbell, Play} from 'lucide-react'
+import { Clock, Flame, Dumbbell, TriangleAlert, RotateCcw, Play } from "lucide-react"
 import {IoIosFitness} from "react-icons/io"
 import {format} from "date-fns"
 import axios from 'axios'
+import {toast as sonnerToast} from 'sonner'
 
 import {estimateCalories} from "../../../Utils/exerciseFunctions"
 import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
@@ -22,11 +23,30 @@ export default function RecentWorkouts({refreshHistory, stopRefreshHistory, resu
   const limit = 2
 
   const [loading, setLoading] = useState(false)
+  const [refetch, setRefetch] = useState(true)
+  const [error, setError] = useState(false)
 
   const [selectedWorkoutId, setSelectedWorkoutId] = useState(null) 
   const [loadingResume, setLoadingResume] = useState(false)
 
   const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+
+  const ShowError = ()=> (
+      <div className='flex justify-center items-center gap-[5px] w-full h-full'>
+          <TriangleAlert className='mb-[18px] text-primary w-[28px] h-[28px]' />
+          <p className='flex flex-col'>
+              <span className='flex items-center gap-[7px] text-[14px] text-[#686262] font-medium'>
+                  Unable to load
+                  <RotateCcw
+                      className="w-[20px] h-[20px] text-muted p-1 rounded-full border border-dropdownBorder cursor-pointer 
+                          hover:text-black transition-all duration-150 ease-in"
+                      onClick={() => setRefetch(true)}
+                  />
+              </span>
+              <span className='text-[12px] text-muted'>Check connection</span>
+          </p>
+      </div>
+  )
 
   async function listWorkoutHistory(){
     try {   
@@ -39,19 +59,29 @@ export default function RecentWorkouts({refreshHistory, stopRefreshHistory, resu
         setOlderWorkouts(response.data.olderWorkouts)
         setTotalPages(response.data.pagination.totalPages)
         stopRefreshHistory()
-        setLoading(false)
       }
     }catch (error) {
       console.error("Error listing workoutInfo", error.message)
+      if (!error.response) {
+        sonnerToast.error("Network error. Please check your internet.")
+      }
+      else {
+        sonnerToast.error("Something went wrong! Please retry later.")
+      }
       stopRefreshHistory()
-      setLoading(false)
+      setError(true)
+    }finally {
+        setLoading(false)
+        setRefetch(false)
     }
   }
 
-  useEffect(()=> {
-    setLoading(true)
-    listWorkoutHistory()
-  }, [])
+  useEffect(() => {
+      if (refetch) {
+          setLoading(true)
+          listWorkoutHistory()
+      }
+  }, [refetch])
 
   useEffect(()=> {
     if(refreshHistory){
@@ -64,6 +94,10 @@ export default function RecentWorkouts({refreshHistory, stopRefreshHistory, resu
   useEffect(()=> {
       listWorkoutHistory()
   }, [currentPage])
+
+  useEffect(()=> {
+      console.log("error---->", error)
+  }, [error])
 
   const handleResumeWorkout = (workout)=> {
     console.log("Inside handleResumeWorkout----->")
@@ -198,40 +232,46 @@ export default function RecentWorkouts({refreshHistory, stopRefreshHistory, resu
 
 
   return (
+      <>
+          <HistoryWrapper heading="Today's Workouts" iconNeeded={false}>
+              {!loading && todayWorkouts && todayWorkouts.length > 0 ? (
+                  todayWorkouts.map((workouts) =>
+                      workouts.exercises.map((exercise) => (
+                          <HistoryCard
+                              workout={exercise}
+                              allowResumeExercise={true}
+                              workoutCompleted={workouts.exerciseCompleted}
+                          />
+                      )),
+                  )
+              ) : !loading && !error && (!todayWorkouts || todayWorkouts.length === 0) ? (
+                  <p className='my-8 text-[13px] text-muted text-center'> Looks like you havn't worked out today! </p>
+              ) : (
+                  !loading && error && <ShowError />
+              )}
+          </HistoryWrapper>
 
-    <>
+          <HistoryWrapper heading='Workout History' headerStyle='mt-8'>
+              {!loading && olderWorkouts && olderWorkouts.length > 0 ? (
+                  olderWorkouts.map((workouts) =>
+                      workouts.exercises.map((exercise) => <HistoryCard workout={exercise} date={workouts.date} />),
+                  )
+              ) : !loading && !error && (!olderWorkouts || todayWorkouts.length === 0) ? (
+                  <p className='my-8 text-[13px] text-muted text-center'> No workout history to show! </p>
+              ) : (
+                  !loading && error && <ShowError />
+              )}
 
-      <HistoryWrapper heading="Today's Workouts" iconNeeded={false}>
-        
-        {!loading && todayWorkouts && todayWorkouts.length > 0 && todayWorkouts.map((workouts) => (
-            workouts.exercises.map(exercise=> (
-              <HistoryCard workout={exercise} allowResumeExercise={true} workoutCompleted={workouts.exerciseCompleted}/>
-            ))
-        ))}
-
-      </HistoryWrapper>
-
-      <HistoryWrapper heading="Workout History" headerStyle="mt-8">
-        
-        {!loading && olderWorkouts && olderWorkouts.length > 0 && olderWorkouts.map((workouts) => (
-            workouts.exercises.map(exercise=> (
-              <HistoryCard workout={exercise} date={workouts.date}/>
-            ))
-        ))}
-
-        {
-          olderWorkouts.length > 0 && totalPages &&
-            <PaginationV2 
-              miniVersion={true}
-              headerStyle='!mt-4'
-              currentPage={currentPage} 
-              totalPages={totalPages} 
-              onPageChange={(page)=> setCurrentPage(page)} 
-            />
-        }
-
-      </HistoryWrapper>
-
-    </>
+              {olderWorkouts.length > 0 && totalPages && (
+                  <PaginationV2
+                      miniVersion={true}
+                      headerStyle='!mt-4'
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={(page) => setCurrentPage(page)}
+                  />
+              )}
+          </HistoryWrapper>
+      </>
   )
 }

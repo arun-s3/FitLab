@@ -18,8 +18,8 @@ export default function FitnessNav({ currentPage, setCurrentPage }) {
     try { 
       const response = await axios.get(`${baseApiUrl}/fitness/tracker/health/check`, { withCredentials: true })
       if(response.status === 200){
-        console.log(`response.data.hasEntryThisWeek-----${response.data.hasEntryThisWeek} and response.data.isNewUser-----${response.data.isNewUser}`)
-        if(!response.data.hasEntryThisWeek) setOpenReminderModal({status: true, isNewUser: response.data.isNewUser})
+        console.log(`response.data.shouldShowReminder-----${response.data.shouldShowReminder} and response.data.isNewUser-----${response.data.isNewUser}`)
+        if(response.data.shouldShowReminder) setOpenReminderModal({status: true, isNewUser: response.data.isNewUser})
       }
     }catch (error) {
       console.error("Error updating health profile:", error.message)

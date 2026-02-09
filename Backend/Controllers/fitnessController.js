@@ -195,76 +195,59 @@ const getExercisesList = async (req, res, next) => {
 
 const getExerciseBodyParts = async (req, res, next) => {
     try {
-        console.log("Inside getExerciseBodyParts controller")
+        const FILE = path.join(__dirname, "..", "Data", "exerciseBodyParts.json")
 
-        const BODY_PARTS_FILE = path.join(__dirname, "..", "Data", "exerciseBodyParts.json")
+        const file = await fsPromise.readFile(FILE, "utf-8")
+        const parsed = JSON.parse(file)
 
-        const normalize = (arr)=> arr.map((item) => item.name.toLowerCase().trim()).sort()
-
-        let localData = []
-        try {
-            const file = await fsPromise.readFile(BODY_PARTS_FILE, "utf-8")
-            localData = JSON.parse(file).data || []
-        } catch (err) {
-            console.warn("Local body parts file missing or unreadable")
-        }
-        
-        try{
-            const response = await axios.get(`${EXERCISE_API_URL}/bodyparts`, { timeout: 15000 })
-        }catch (error) {
-          console.error("API error:", error.message)
-          return res.status(200).json({
-              success: true,
-              data: localData,
-          })
-        }
-        
-        const fetchedData = response.data?.data || []
-
-        if (!Array.isArray(fetchedData) || fetchedData.length === 0) {
-            console.error("Invalid body parts data from API")
-            return res.status(200).json({
-              success: true,
-              data: localData
-            })
-        }
-
-        const fetchedNormalized = normalize(fetchedData)
-        const localNormalized = normalize(localData)
-
-        const isDifferent =
-            fetchedNormalized.length !== localNormalized.length || fetchedNormalized.some((v, i) => v !== localNormalized[i])
-
-        if (isDifferent) {
-            console.log("Body parts changed → updating local JSON")
-
-            await fsPromise.writeFile(BODY_PARTS_FILE, JSON.stringify({ data: fetchedData }, null, 2), "utf-8")
-
-            return res.status(200).json({
-                success: true,
-                data: fetchedData,
-            })
-        }
-
-        console.log("Body parts unchanged → using local JSON")
+        const data = Array.isArray(parsed.data) ? parsed.data : []
 
         return res.status(200).json({
             success: true,
-            data: localData,
+            data,
         })
+    } catch (error) {
+        console.error("Error reading body parts:", error.message)
+        next(error)
     }
-    catch (error) {
-        console.error("Error fetching body parts:", error.response?.status || error.message)
+}
 
-        const BODY_PARTS_FILE = path.join(__dirname, "..", "Data", "exerciseBodyParts.json")
+const getExerciseEquipments = async (req, res, next) => {
+    try {
+        const FILE = path.join(__dirname, "..", "Data", "exerciseEquipments.json")
 
-        const file = await fsPromise.readFile(BODY_PARTS_FILE, "utf-8")
-        localData = JSON.parse(file).data || []
+        const file = await fsPromise.readFile(FILE, "utf-8")
+        const parsed = JSON.parse(file)
+
+        const data = Array.isArray(parsed.data) ? parsed.data : []
+
         return res.status(200).json({
             success: true,
-            data: localData,
+            data,
         })
+    } catch (error) {
+        console.error("Error reading equipments:", error.message)
+        next(error)
+    }
+}
 
+
+const getExerciseMuscles = async (req, res, next) => {
+    try {
+        const FILE = path.join(__dirname, "..", "Data", "exerciseMuscles.json")
+
+        const file = await fsPromise.readFile(FILE, "utf-8")
+        const parsed = JSON.parse(file)
+
+        const data = Array.isArray(parsed.data) ? parsed.data : []
+
+        return res.status(200).json({
+            success: true,
+            data,
+        })
+    } catch (error) {
+        console.error("Error reading muscles:", error.message)
+        next(error)
     }
 }
 
@@ -656,73 +639,6 @@ const getWorkoutHistory = async (req, res, next) => {
 }
 
 
-// const getLatestWorkout = async (req, res, next)=> {
-//   try {
-//     console.log("Inside getLatestWorkout...")
-
-//     const userId = req.user._id
-    
-//     const startOfDay = new Date()
-//     startOfDay.setHours(0, 0, 0, 0)
-
-//     const endOfDay = new Date()
-//     endOfDay.setHours(23, 59, 59, 999)
-
-//     const result = await FitnessTracker.aggregate([
-//       {
-//         $match: {
-//           userId,
-//           date: { $gte: startOfDay, $lte: endOfDay }
-//         }
-//       },
-//       { $unwind: "$exercises" },
-//       {
-//         $addFields: {
-//           activityTime: {
-//             $ifNull: [
-//               "$exercises.exerciseCompletedAt",
-//               "$updatedAt"
-//             ]
-//           }
-//         }
-//       },
-//       {
-//         $sort: {
-//           activityTime: -1
-//         }
-//       },
-//       { $limit: 1 },
-//       {
-//         $project: {
-//           fitnessTrackerId: "$_id",
-//           exercise: "$exercises",
-//           workoutDate: "$date",
-//           activityTime: 1
-//         }
-//       }
-//     ]);
-
-//     if (!result.length) {
-//       return res.status(200).json({success: true, message: "No exercise found for today", data: null});
-//     }
-  
-//     console.log("result[0]---->", JSON.stringify(result[0]))
-
-//     const lastWorkout = result[0].exercise
-//     console.log("lastWorkout---->", JSON.stringify(lastWorkout))
-
-//     const { fitnessTrackerId, exercise } = result[0]
-
-//     console.log("fitnessTrackerId---->", fitnessTrackerId)
-
-//     return res.status(200).json({success: true, latestWorkout: exercise, trackerId: fitnessTrackerId});
-//   }
-//   catch (error) {
-//     console.error("Error fetching workout history:", error.message)
-//     next(error)
-//   }
-// }
-
 const getLatestWorkout = async (req, res, next) => {
   try {
     console.log("Inside getLatestWorkout...")
@@ -931,47 +847,63 @@ const checkWeeklyHealthProfile = async (req, res, next) => {
     const userId = req.user._id
 
     const user = await User.findById(userId)
-
-    let daysSinceRegistered = 0
-
-    if(user){
-      console.log("User logged in...")
-      const createdAt = new Date(user.createdAt)
-      const today = new Date()
-
-      daysSinceRegistered = Math.floor( (today - createdAt) / (1000 * 60 * 60 * 24) )
+    if (!user) {
+      return res.status(404).json({ success: false, notAnUser: true })
     }
-    console.log("daysSinceRegistered---->", daysSinceRegistered)
+
+    const createdAt = new Date(user.createdAt)
+    const today = new Date()
+
+    const daysSinceRegistered = Math.floor( (today - createdAt) / (1000 * 60 * 60 * 24) )
 
     const isNewUser = daysSinceRegistered < 7
 
     const now = new Date()
     const startOfWeek = new Date(now)
+
     startOfWeek.setDate(now.getDate() - now.getDay())
     startOfWeek.setHours(0, 0, 0, 0)
 
     const latestEntry = await HealthProfile.findOne({
       userId,
-      createdAt: { $gte: startOfWeek }, 
+      createdAt: { $gte: startOfWeek },
     }).sort({ createdAt: -1 })
 
-    console.log(`hasEntryThisWeek-----${latestEntry ? true : false} and isNewUser-----${isNewUser}`)
+    const hasEntryThisWeek = !!latestEntry
+
+    let shouldShowReminder = false
+
+    const ONE_DAY = 24 * 60 * 60 * 1000
+    const lastShown = user.lastHealthReminderShownAt
+
+    if (!hasEntryThisWeek) {
+      if (!lastShown || (now - lastShown) > ONE_DAY) {
+        shouldShowReminder = true
+
+        user.lastHealthReminderShownAt = now
+        await user.save()
+      }
+    }
+
+    console.log(`hasEntryThisWeek: ${hasEntryThisWeek}, isNewUser: ${isNewUser}, shouldShowReminder: ${shouldShowReminder}`)
 
     return res.status(200).json({
       success: true,
       isNewUser,
-      hasEntryThisWeek: latestEntry ? true : false,
-      latestEntry: latestEntry || null, 
-    });
+      hasEntryThisWeek,
+      shouldShowReminder,
+      latestEntry: latestEntry || null,
+    })
   }
   catch (error) {
-    console.error("checkWeeklyHealthProfile Error:", error.message);
+    console.error("checkWeeklyHealthProfile Error:", error.message)
     next(error)
   }
 }
 
 
 
-module.exports = {getExerciseThumbnail, getExerciseVideos, getExercisesList, getExerciseBodyParts, addExercise, updateExerciseTemplate, updateWorkoutInfo, 
-  updateCaloriesForExercise, getUserExerciseLibrary, getWorkoutHistory, getLatestWorkout, deleteExerciseTemplate, addOrUpdateDailyHealthProfile,
-  getLatestHealthProfile, checkWeeklyHealthProfile}
+
+module.exports = {getExerciseThumbnail, getExerciseVideos, getExercisesList, getExerciseBodyParts, getExerciseEquipments, getExerciseMuscles,
+    addExercise, updateExerciseTemplate, updateWorkoutInfo, updateCaloriesForExercise, getUserExerciseLibrary, getWorkoutHistory, 
+    getLatestWorkout, deleteExerciseTemplate, addOrUpdateDailyHealthProfile, getLatestHealthProfile, checkWeeklyHealthProfile}

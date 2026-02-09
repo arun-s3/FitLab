@@ -78,6 +78,10 @@ const userSchema = mongoose.Schema({
         type: Date,
         default: Date.now
     },
+    lastHealthReminderShownAt: {
+      type: Date,
+      default: null
+    },
     hasAcceptedTerms: {
       type: Boolean,
       default: false

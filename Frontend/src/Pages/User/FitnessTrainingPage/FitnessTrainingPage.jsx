@@ -20,9 +20,11 @@ import Footer from '../../../Components/Footer/Footer'
 export default function FitnessTrainingPage(){
 
   const [bodyParts, setBodyParts] = useState(null)
+  const [bodyPartsLoading, setBodyPartsLoading] = useState(false)
   const [selectedBodyParts, setSelectedBodyParts] = useState([])
   const [selectedMuscles, setSelectedMuscles] = useState([])
   const [selectedEquipments, setSelectedEquipments] = useState([])
+  
   const [searchQuery, setSearchQuery] = useState('')
 
   const [availableEquipments, setAvailableEquipments] = useState([])
@@ -33,7 +35,7 @@ export default function FitnessTrainingPage(){
   const [exercises, setExercises] = useState([])
   const [firstExerciseIndex, setFirstExerciseIndex] = useState(0)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState(false)
 
   const [selectedExercise, setSelectedExercise] = useState(null)
 
@@ -43,29 +45,35 @@ export default function FitnessTrainingPage(){
 
   const [openCoach, setopenCoach] = useState(true)
 
-  const exerciseAPiUrl = import.meta.env.VITE_EXERCISEDB_URL
-
   const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
-  useEffect(()=> {
-    async function loadBodyParts(){
+  async function loadBodyParts() {
       try {
-        console.log("Inside loadBodyParts()...")
-        const response = await axios.get(`${baseApiUrl}/fitness/exercises/bodyparts`, {withCredentials: true})
-        console.log("loadBodyParts response----->", response.data.data)
-        if(response.data.success){ 
-          setBodyParts(response.data.data.map(data=> data.name))
-          console.log("Body Parts--->", bodyParts)
-        }
-      }catch (error) {
-      	console.error("Error while loading body parts", error.message)
-        if (error.response?.status === 429) {
-            sonnerToast.error(error.response.data?.message || "Too many requests. Please try again later.")
-            console.log("Error---->", error.response.data.message)
-        }
-        else sonnerToast.error("Something went wrong. Please check your network!")
+          setBodyPartsLoading(true)
+          console.log("Inside loadBodyParts()...")
+          const response = await axios.get(`${baseApiUrl}/fitness/exercises/bodyparts`, { withCredentials: true })
+          console.log("loadBodyParts response----->", response.data.data)
+          if (response.data.success) {
+              setBodyParts(response.data.data.map((data) => data.name))
+              console.log("Body Parts--->", bodyParts)
+          }
+      } catch (error) {
+          console.error("Error while loading body parts", error.message)
+          setError(true)
+          if (!error.response) {
+              sonnerToast.error("Network error. Please check your internet.")
+          } else if (error.response?.status === 429) {
+              sonnerToast.error(error.response.data?.message || "Too many requests. Please try again later.")
+              console.log("Error---->", error.response.data.message)
+          } else {
+              sonnerToast.error("Something went wrong! Please retry later.")
+          }
+      } finally {
+          setBodyPartsLoading(false)
       }
-    }
+  }
+
+  useEffect(()=> {
     loadBodyParts()
   }, [])
 
@@ -90,6 +98,8 @@ export default function FitnessTrainingPage(){
           sortOrder: sort.order ? sort.order : undefined,
         }
 
+        console.log("fetching exercises...")
+
         const response = await axios.post(`${baseApiUrl}/fitness/exercises/list`, {queryDetails}, {withCredentials: true})
 
         console.log("fetchExercises response----->", response.data.data)
@@ -101,31 +111,31 @@ export default function FitnessTrainingPage(){
         }
       }catch (error) {
       	console.error("Error while loading exercises", error.message)
-        if (error.response?.status === 429) {
-            sonnerToast.error(error.response.data?.message || "Too many requests. Please try again later.")
-            console.log("Error---->", error.response.data.message)
-        }
-        else sonnerToast.error("Something went wrong. Please check your network!")
+        setError(true)
+         if (!error.response) {
+             sonnerToast.error("Network error. Please check your internet.")
+         } else if (error.response?.status === 429) {
+             sonnerToast.error(error.response.data?.message || "Too many requests. Please try again later.")
+             console.log("Error---->", error.response.data.message)
+         } else {
+             sonnerToast.error("Something went wrong! Please retry later.")
+         }
+      } finally {
+        setLoading(false)
       }
   }
-
   
   const loadExercises = async (options) => {
     setLoading(true)
-    setError(null)
+    setError(false)
 
     const result = await fetchExercises(options)
     setExercises(result || [])
-
-    if (result.error) {
-      setError(result.error)
-    }
-    setLoading(false)
   }
 
   useEffect(() => {
     if (searchQuery) {
-      console.log("searchQuery--->", searchQuery)
+      console.log("Loading exercise for searchQuery--->", searchQuery)
       loadExercises()
     }
   }, [searchQuery])
@@ -140,7 +150,7 @@ export default function FitnessTrainingPage(){
     console.log("selectedBodyParts----->", selectedBodyParts)
     if ((!selectedBodyParts || selectedBodyParts.length === 0) && !searchQuery) {
       setExercises([])
-      setError(null)
+      setError(false)
       return
     }
     console.log("firstExerciseIndex----->", firstExerciseIndex)
@@ -165,99 +175,81 @@ export default function FitnessTrainingPage(){
 
 
   return (
-    
-    <section id='FitnessTrainingPage'>
-      <header style={headerBg} className='h-[5rem]'>
-    
-        <Header currentPageCoachStatus={true}/>
-    
-      </header>
-    
-      <BreadcrumbBar heading='Fitness Training'/>
+      <section id='FitnessTrainingPage'>
+          <header style={headerBg} className='h-[5rem]'>
+              <Header currentPageCoachStatus={true} />
+          </header>
 
-      <main className='bg-gradient-to-br from-white via-blue-50 to-gray-100'>
-        
-        <div className="px-[1rem] py-[3rem] bg-white">
+          <BreadcrumbBar heading='Fitness Training' />
 
-          
-          <div className="min-h-screen text-slate-900">
+          <main className='bg-gradient-to-br from-white via-blue-50 to-gray-100'>
+              <div className='px-[1rem] py-[3rem] bg-white'>
+                  <div className='min-h-screen text-slate-900'>
+                      {!selectedExercise ? (
+                          <>
+                              <FitnessCarousal />
 
-            {
-              !selectedExercise ?
-                <>
-                  <FitnessCarousal />
+                              <div className='mt-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-0 md:py-0'>
+                                  \{" "}
+                                  <MuscleSelector
+                                      bodyParts={bodyParts}
+                                      searchedBodyPart={searchQuery}
+                                      setSearchedBodyPart={setSearchQuery}
+                                      onSearchBodyPart={setSelectedBodyParts}
+                                      selectedBodyParts={selectedBodyParts}
+                                      listExercises={loadExercises}
+                                      isLoading={loading}
+                                      bodyPartsLoading={bodyPartsLoading}
+                                  />
+                              </div>
 
-                  <div className="mt-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-0 md:py-0">
-
-\                      <MuscleSelector 
-                        bodyParts={bodyParts} 
-                        searchedBodyPart={searchQuery} 
-                        setSearchedBodyPart={setSearchQuery} 
-                        onSearchBodyPart={setSelectedBodyParts}
-                        selectedBodyParts={selectedBodyParts}
-                        listExercises={loadExercises}
-                        isLoading={loading}
-                      />
-
+                              <TrainingExercisesList
+                                  selectedBodyParts={selectedBodyParts}
+                                  searchQuery={searchQuery}
+                                  exercises={exercises}
+                                  onfetchMusclesAndEquipments={saveMusclesAndEquipments}
+                                  currentPage={currentPage}
+                                  totalPages={totalPages}
+                                  onSelectExercise={setSelectedExercise}
+                                  onPageChange={setCurrentPage}
+                                  isLoading={loading}
+                                  fetchError={error} 
+                                  refetchExercises={() => {
+                                    loadExercises()
+                                    loadBodyParts()
+                                  }}
+                                >
+                                  <FilterPanel
+                                      selectedMuscles={selectedMuscles}
+                                      onMusclesChange={setSelectedMuscles}
+                                      selectedEquipments={selectedEquipments}
+                                      onEquipmentsChange={setSelectedEquipments}
+                                      sortBy={sort.by}
+                                      onSortByChange={(value) => setSort((sorts) => ({ ...sorts, by: value }))}
+                                      sortOrder={sort.order}
+                                      onSortOrderChange={(value) => setSort((sorts) => ({ ...sorts, order: value }))}
+                                      availableMuscles={availableMuscles}
+                                      availableEquipments={availableEquipments}
+                                  />
+                              </TrainingExercisesList>
+                          </>
+                      ) : (
+                          <ExerciseDetails exercise={selectedExercise} onGoBack={() => setSelectedExercise(null)} />
+                      )}
                   </div>
-                
-                  <TrainingExercisesList 
-                    selectedBodyParts={selectedBodyParts} 
-                    exercises={exercises}
-                    onfetchMusclesAndEquipments={saveMusclesAndEquipments}
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onSelectExercise={setSelectedExercise}
-                    onPageChange={setCurrentPage}
-                    isLoading={loading}
-                    error={error}
-                  >
-                
-                      <FilterPanel
-                        selectedMuscles={selectedMuscles}
-                        onMusclesChange={setSelectedMuscles}
-                        selectedEquipments={selectedEquipments}
-                        onEquipmentsChange={setSelectedEquipments}
-                        sortBy={sort.by}
-                        onSortByChange={(value)=> setSort(sorts=> ({...sorts, by: value}))}
-                        sortOrder={sort.order}
-                        onSortOrderChange={(value)=> setSort(sorts=> ({...sorts, order: value}))}
-                        availableMuscles={availableMuscles}
-                        availableEquipments={availableEquipments}
-                      />
-                
-                  </TrainingExercisesList>
-                </>
-              
-              : <ExerciseDetails 
-                  exercise={selectedExercise} 
-                  onGoBack={()=> setSelectedExercise(null)}
-                />
+              </div>
 
-            }
+              {openCoach && (
+                  <div className='fixed bottom-[2rem] left-[2rem] z-50'>
+                      <CoachPlus closeable={true} autoOpen={false} onCloseChat={() => setopenCoach(false)} />
+                  </div>
+              )}
+          </main>
 
-          </div>
+          <FeaturesDisplay />
 
-        </div>
-
-        {
-            openCoach &&
-                <div className="fixed bottom-[2rem] left-[2rem] z-50">
-                
-                    <CoachPlus closeable={true} 
-                        autoOpen={false}
-                        onCloseChat={()=> setopenCoach(false)}/>
-                </div>
-        }
-
-      </main>
-
-      <FeaturesDisplay/>
-
-      <Footer/>
-
-    </section>
-    
+          <Footer />
+      </section>
   )
 }
 

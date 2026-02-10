@@ -128,6 +128,7 @@ export default function SocketProvider() {
 
     useEffect(() => {
         console.log("isAdminOnline--->", isAdminOnline)
+        if (!isAdminOnline) setIsTyping(false)
     }, [isAdminOnline])
 
     useEffect(() => {
@@ -136,7 +137,7 @@ export default function SocketProvider() {
         })
     
         socket.on("connect", () => {
-          console.log("✅ Socket connected:", socket.id)
+          console.log("Socket connected:", socket.id)
           setIsConnected(true)
           if(userWasGuest.wasGuest){
             console.log("Guest details before emiting delete-guest--->", userWasGuest)
@@ -153,6 +154,7 @@ export default function SocketProvider() {
 
         socket.on("admin-status", status=> {
           setIsAdminOnline(status)
+        //   if(!status || !isConnected) setIsTyping(false)
         })
 
         socket.on("connect_error", (error) => {
@@ -162,13 +164,13 @@ export default function SocketProvider() {
         })
     
         socket.on("disconnect", (reason) => {
-            console.warn("⚠️ Socket disconnected:", reason)
+            console.warn("Socket disconnected:", reason)
             setIsConnected(false)
             setIsAdminOnline(false)
         })
 
         socket.on("error", (err) => {
-            console.error("🔥 Socket error:", err)
+            console.error("Socket error:", err)
         })
 
         socket.on("chat-history", (messages) => {
@@ -219,6 +221,7 @@ export default function SocketProvider() {
         socket.on('coach-error', (message)=> {
           console.log("coach-error-->", message)
           setCoachError(message)
+          setIsCoachLoading(false)
         })
 
         socket.on("walletRechargeSuccess", (data) => {
@@ -395,6 +398,7 @@ export default function SocketProvider() {
         coachMessages,
         newCoachMessage,
         isCoachLoading,
+        setIsCoachLoading,
         coachError,
         handleSendMessageToCoach,
         handleUserTypingForCoach,

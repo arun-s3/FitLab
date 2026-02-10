@@ -13,10 +13,12 @@ export default function CoachPlus({autoOpen, onCloseChat}) {
 
   const [isOpen, setIsOpen] = useState(false)
 
+  const [connectionError, setConnectionError] = useState(false)
+
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
 
-  const {isConnected, coachMessages, newCoachMessage, isCoachLoading, coachError, 
+  const {isConnected, coachMessages, newCoachMessage, isCoachLoading, setIsCoachLoading, coachError, 
         handleSendMessageToCoach, handleUserTypingForCoach} = useContext(SocketContext)
 
 
@@ -31,6 +33,13 @@ export default function CoachPlus({autoOpen, onCloseChat}) {
   useEffect(() => {
     scrollToBottom()
   }, [coachMessages])
+
+  useEffect(() => {
+     if (isCoachLoading && !isConnected) {
+        setConnectionError(true)
+        setIsCoachLoading(false)
+     }
+  }, [isCoachLoading, isConnected])
 
   useEffect(() => {
     if (isOpen && inputRef.current) {
@@ -211,6 +220,21 @@ export default function CoachPlus({autoOpen, onCloseChat}) {
                 )}
               </AnimatePresence>
 
+              <AnimatePresence>
+                {(coachError || connectionError) && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="flex justify-start"
+                  >
+                    <p className="p-4 text-[13px] text-red-500 tracking-[0.3px] text-wrap bg-red-100 border border-red-300 rounded-lg">
+                        {coachError ? coachError : connectionError && "Please check your internet and try again later! "}
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+                
               <div ref={messagesEndRef} />
             </div>
 
@@ -248,31 +272,6 @@ export default function CoachPlus({autoOpen, onCloseChat}) {
                   <Send className="h-5 w-5" />
                 </motion.button>
               </div>
-
-              {/* <motion.p 
-                className="mt-[8px] ml-[3px] text-muted text-[10px]"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.4, delay: 0.6 }}
-              >  
-              By using Coach+, you agree to FitLab’s 
-                <a 
-                  href="/terms" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="mx-[3px] text-secondary hover:underline decoration-secondary transition duration-300 underline-offset-2"
-                >
-                  Terms & Conditions 
-                </a> and 
-                <a 
-                  href="/privacy" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="ml-[3px] text-secondary hover:underline decoration-secondary transition duration-300 underline-offset-2"
-                >
-                  Privacy Policy 
-                </a>
-              </motion.p> */}
 
               <TermsDisclaimer 
                 fontSize='10px' 

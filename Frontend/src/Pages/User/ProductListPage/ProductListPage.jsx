@@ -54,7 +54,7 @@ export default function ProductList({admin}){
     const [openCouponApplicableModal, setOpenCouponApplicableModal] = useState({status: false, code: '', products: [], categories: []})
 
     const {products, productCounts} = useSelector(state=> state.productStore)
-    const {cart, productAdded, productRemoved, loading, error, message} = useSelector(state=> state.cart)    
+    const {cart, productAdded, error, message} = useSelector(state=> state.cart)    
     
     const location = useLocation()
 

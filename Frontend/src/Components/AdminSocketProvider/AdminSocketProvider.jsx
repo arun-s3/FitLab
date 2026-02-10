@@ -62,8 +62,20 @@ export default function AdminSocketProvider() {
     })
 
     socket.on("active-users-update", (users) => {
-      setActiveUsers(users)
+        setActiveUsers(users)
+        const now = Date.now()
+
+        const offlineUsers = users.filter((user) => user.lastSeen && now > user.lastSeen)
+
+        setTypingUsers((prev) => {
+            const updated = { ...prev }
+            offlineUsers.forEach((user) => {
+                updated[user.username] = false
+            })
+            return updated
+        })
     })
+
 
     // socket.on("user-selected", (user) => {
     //   if(!selectedUser){

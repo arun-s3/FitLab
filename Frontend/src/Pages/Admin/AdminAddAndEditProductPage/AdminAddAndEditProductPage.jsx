@@ -146,7 +146,8 @@ export default function AdminAddAndEditProductPage({ editProduct }){
             productCreated && sonnerToast.success('Created product succesfully!')
             productUpdated && sonnerToast.success('Updated product succesfully!')
             dispatch(resetStates())
-            setTimeout(()=> {navigate('/admin/products', {replace: true})}, 1000)
+            navigate("/admin/products", { replace: true })
+            // setTimeout(()=> {navigate('/admin/products', {replace: true})}, 1000)
         }
     },[productCreated, productUpdated])
 
@@ -154,17 +155,17 @@ export default function AdminAddAndEditProductPage({ editProduct }){
         "Core", "Abs", "Full Body", "Cardio"]
 
     const muscleGroupPics = {
-      chest: "/MuscleGroups/chest.jpg",
-      back: "/MuscleGroups/back.jpg",
-      shoulders: "/MuscleGroups/shoulders.jpg",
-      biceps: "/MuscleGroups/biceps.jpg",
-      triceps: "/MuscleGroups/triceps.jpg",
-      forearms: "/MuscleGroups/forearms.jpg",
-      quadriceps: "/MuscleGroups/quads.jpg",
-      hamstrings: "/MuscleGroups/hams.jpg",
-      glutes: "/MuscleGroups/glutes.jpg",
-      calves: "/MuscleGroups/calves.jpg",
-      abs: "/MuscleGroups/abs.jpg",
+        chest: "/Images/MuscleGroups/chest.jpg",
+        back: "/Images/MuscleGroups/back.jpg",
+        shoulders: "/Images/MuscleGroups/shoulders.jpg",
+        biceps: "/Images/MuscleGroups/biceps.jpg",
+        triceps: "/Images/MuscleGroups/triceps.jpg",
+        forearms: "/Images/MuscleGroups/forearms.jpg",
+        quadriceps: "/Images/MuscleGroups/quads.jpg",
+        hamstrings: "/Images/MuscleGroups/hams.jpg",
+        glutes: "/Images/MuscleGroups/glutes.jpg",
+        calves: "/Images/MuscleGroups/calves.jpg",
+        abs: "/Images/MuscleGroups/abs.jpg",
     }
 
     const changeHandler = (e, fieldName)=> {

@@ -330,6 +330,9 @@ const getAllProducts = async (req, res, next)=> {
         }
         console.log("sortCriteria---->", JSON.stringify(sortCriteria))
       }
+      if (Object.keys(sortCriteria).length === 0) {
+          sortCriteria = { createdAt: -1 }
+      }
   
       if (queryOptions?.limit) {
         limit = parseInt(queryOptions.limit)
@@ -337,20 +340,6 @@ const getAllProducts = async (req, res, next)=> {
       if (queryOptions?.page) {
         skipables = (parseInt(queryOptions.page) - 1) * limit
       }
-  
-      // const productListQuery = Product.find(filters).sort(sortCriteria).skip(skipables).limit(limit);
-  
-      // const productBundle = await productListQuery.exec()
-      // const productCounts = await Product.countDocuments(filters)
-
-      // const maxPriceAggregation = await Product.aggregate([
-      //   { $match: filters }, 
-      //   { $group: { _id: null, maxPrice: { $max: "$price" } } },
-      // ])
-
-      // const maxPriceAvailable = maxPriceAggregation[0]?.maxPrice || 100000;
-  
-      // res.status(200).json({ productBundle, productCounts, maxPriceAvailable })
 
       const mainFilter = { ...filters, variantOf: { $in: [null, undefined] } }
 

@@ -118,7 +118,7 @@ export default function TextChatBox({closeable, onCloseChat, boxHeight, boxWidth
                     }
                   </h3>
                   <p className="text-xs opacity-90">
-                    {!isConnected && !isAdminOnline ? "Support agent unavailable" : "Online"}
+                    {!isAdminOnline ? "Support agent unavailable" : "Online"}
                   </p>
                 </div>
               </div>

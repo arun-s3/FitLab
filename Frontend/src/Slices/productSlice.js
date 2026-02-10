@@ -105,7 +105,7 @@ const productSlice = createSlice({
             state.error = false
             state.loading = false
             state.productCreated = true
-            state.products.push(action.payload.product)
+            // state.products.push(action.payload.mainProduct)
         })
         .addCase(createProduct.pending, (state,action)=>{
             state.loading = true

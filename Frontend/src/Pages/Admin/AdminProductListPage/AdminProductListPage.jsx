@@ -43,6 +43,8 @@ export default function AdminProductListPage(){
 
     const [limit, setLimit] = useState(9)  
     const [currentPage, setCurrentPage] = useState(1)
+    const [totalPages, setTotalPages] = useState(20)  
+
     const [sorts, setSorts] = useState({})
     const [queryOptions, setQueryOptions] = useState({page: 1, limit: 9})
 
@@ -53,7 +55,7 @@ export default function AdminProductListPage(){
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
-    const {products, message} = useSelector(state=> state.productStore)
+    const {products, productCounts, message} = useSelector(state=> state.productStore)
 
     const {setHeaderZIndex, setPageBgUrl} = useOutletContext() 
     setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.94),rgba(255,255,255,0.94)), url('/Images/admin-ProductsListBg.jpg')`)
@@ -68,6 +70,16 @@ export default function AdminProductListPage(){
 
     const muscleGroups = ["Chest", "Back", "Shoulders", "Biceps", "Triceps", "Forearms", "Quadriceps", "Hamstrings", "Glutes", "Calves",
         "Core", "Abs", "Full Body", "Cardio"]
+
+    const sortMenu = [
+        { name: "Price: High to Low", value: "price", order: "-1", invisibleOnTable: true },
+        { name: "Price: Low to High", value: "price", order: "1", invisibleOnTable: true },
+        { name: "Ratings: High to Low", value: "averageRating", order: "1" },
+        { name: "Ratings: Low to High", value: "averageRating", order: "-1" },
+        { name: "Featured", value: "featured" },
+        { name: "Best Sellers", value: "bestSellers" },
+        { name: "Newest Arrivals", value: "newestArrivals" },
+    ]
     
     useEffect(()=> {
         dispatch( getAllProducts({queryOptions: {page: 1, limit: 9}}))
@@ -101,6 +113,13 @@ export default function AdminProductListPage(){
             dispatch( getAllProducts({queryOptions}))
         }
     },[queryOptions])
+
+    useEffect(()=> {
+      if(products && productCounts && totalPages && limit){
+        console.log(`totalPages------>${totalPages}, limit------>${limit}`)
+        setTotalPages(Math.ceil(productCounts/limit))
+      }
+    }, [products, productCounts])
 
     useEffect(()=> {
         if(setHeaderZIndex && isFilterSidebarOpen){
@@ -167,55 +186,59 @@ export default function AdminProductListPage(){
     }
 
 
-    return(
-
-        <section id='AdminProductList' >
-
+    return (
+        <section id='AdminProductList'>
             <header className='flex flex-col md:flex-row gap-8 md:gap-0 justify-between items-center'>
                 <header>
-                    <AdminTitleSection heading='Products' subHeading='View, edit, filter, export and manage products across grid, list, and table views.'/>
+                    <AdminTitleSection
+                        heading='Products'
+                        subHeading='View, edit, filter, export and manage products across grid, list, and table views.'
+                    />
                 </header>
-                <div className='w-full md:w-auto flex items-center justify-between md:justify-normal gap-[10px] xx-md:gap-[10px]
+                <div
+                    className='w-full md:w-auto flex items-center justify-between md:justify-normal gap-[10px] xx-md:gap-[10px]
                  lg:gap-[1.5rem] x-md:gap-[1.5rem]'>
-                    <SitePrimaryButtonWithShadow 
-                        tailwindClasses="xxs-sm:text-[13px] x-md:text-[14px] xx-md:text-[13px] lg:text-[14px] xxs-sm:py-[3px]
-                            xx-md:py-[3px] lg:py-[4px] x-md:py-[4px] xxs-sm:rounded-[6px] xx-md:rounded-[6px] lg:rounded-[8px] x-md:rounded-[8px]"
-                        className='chip relative'  
+                    <SitePrimaryButtonWithShadow
+                        tailwindClasses='xxs-sm:text-[13px] x-md:text-[14px] xx-md:text-[13px] lg:text-[14px] xxs-sm:py-[3px]
+                            xx-md:py-[3px] lg:py-[4px] x-md:py-[4px] xxs-sm:rounded-[6px] xx-md:rounded-[6px] lg:rounded-[8px] x-md:rounded-[8px]'
+                        className='chip relative'
                         animated={true}
-                        clickHandler={(e)=> {
+                        clickHandler={(e) => {
                             setIsFilterSidebarOpen(true)
-                        }} 
-                    >
+                        }}>
                         <i>
-                            <LiaSlidersHSolid/>
+                            <LiaSlidersHSolid />
                         </i>
                         <span> Filter </span>
                     </SitePrimaryButtonWithShadow>
-                    <SitePrimaryButtonWithShadow 
-                        tailwindClasses="xxs-sm:text-[13px] x-md:text-[14px] xx-md:text-[13px] lg:text-[14px] xxs-sm:py-[3px]
-                            xx-md:py-[3px] lg:py-[4px] x-md:py-[4px] xxs-sm:rounded-[6px] xx-md:rounded-[6px] lg:rounded-[8px] x-md:rounded-[8px]"
-                        className='chip' 
+                    <SitePrimaryButtonWithShadow
+                        tailwindClasses='xxs-sm:text-[13px] x-md:text-[14px] xx-md:text-[13px] lg:text-[14px] xxs-sm:py-[3px]
+                            xx-md:py-[3px] lg:py-[4px] x-md:py-[4px] xxs-sm:rounded-[6px] xx-md:rounded-[6px] lg:rounded-[8px] x-md:rounded-[8px]'
+                        className='chip'
                         animated={true}
-                        clickHandler={()=> {setHeaderZIndex(0); setIsExportModalOpen(true)}}
-                    >
+                        clickHandler={() => {
+                            setHeaderZIndex(0)
+                            setIsExportModalOpen(true)
+                        }}>
                         <i>
-                            <FiDownload/>
+                            <FiDownload />
                         </i>
                         <span> Export </span>
                         <i>
-                            <RiArrowDropDownLine/>
+                            <RiArrowDropDownLine />
                         </i>
                     </SitePrimaryButtonWithShadow>
-                    <SitePrimaryButtonWithShadow 
-                        tailwindClasses="xxs-sm:text-[13px] x-md:text-[14px] xx-md:text-[13px] lg:text-[14px] xxs-sm:py-[3px]
-                            xx-md:py-[3px] lg:py-[4px] x-md:py-[4px] xxs-sm:rounded-[6px] xx-md:rounded-[6px] lg:rounded-[8px] x-md:rounded-[8px]"
-                        clickHandler={()=> navigate('/admin/products/add', {
-                            state: { from: location.pathname }
-                        })}
-                        animated={true}
-                    >
+                    <SitePrimaryButtonWithShadow
+                        tailwindClasses='xxs-sm:text-[13px] x-md:text-[14px] xx-md:text-[13px] lg:text-[14px] xxs-sm:py-[3px]
+                            xx-md:py-[3px] lg:py-[4px] x-md:py-[4px] xxs-sm:rounded-[6px] xx-md:rounded-[6px] lg:rounded-[8px] x-md:rounded-[8px]'
+                        clickHandler={() =>
+                            navigate("/admin/products/add", {
+                                state: { from: location.pathname },
+                            })
+                        }
+                        animated={true}>
                         <i>
-                            <IoMdAdd/>
+                            <IoMdAdd />
                         </i>
                         <span className='hidden md:inline-block'> Add new Product </span>
                         <span className='inline-block md:hidden'> Add Product </span>
@@ -223,65 +246,64 @@ export default function AdminProductListPage(){
                 </div>
             </header>
             <main className='relative mt-[4.3rem]'>
-
-                <ListingTabs showProducts={showProducts}
+                <ListingTabs
+                    showProducts={showProducts}
                     toggleTab={toggleTab}
                     setShowByGrid={setShowByGrid}
                     setShowByTable={setShowByTable}
                 />
 
                 <div className='border py-[1rem] px-[2rem] bg-white'>
-
-                    <ProductListingTools admin={true} 
-                        showSortBy={showSortBy} 
-                        setShowSortBy={setShowSortBy} 
+                    <ProductListingTools
+                        admin={true}
+                        showSortBy={showSortBy}
+                        setShowSortBy={setShowSortBy}
                         showByTable={showByTable}
-                        sortHandlers={{sorts, setSorts}} 
-                        limiter={{limit, setLimit}}
+                        sortHandlers={{ sorts, setSorts }}
+                        sortMenu={sortMenu}
+                        limiter={{ limit, setLimit }}
                         queryOptions={queryOptions}
                         setQueryOptions={setQueryOptions}
                     />
 
                     <div className='mt-[2rem] px-[2rem]'>
-
-                       {
-                        products &&
-                             <ProductsDisplay gridView={showByGrid} 
-                                showByTable={showByTable} 
-                                pageReader={{currentPage, setCurrentPage}} 
-                                limiter={{limit, setLimit}} 
-                                showTheseProducts={showTheseProducts} 
+                        {products && (
+                            <ProductsDisplay
+                                gridView={showByGrid}
+                                showByTable={showByTable}
+                                pageReader={{ currentPage, setCurrentPage }}
+                                limiter={{ limit, setLimit }}
+                                totalPages={totalPages}
+                                currentPage={currentPage}
+                                setCurrentPage={setCurrentPage}
+                                showTheseProducts={showTheseProducts}
                                 admin={true}
                             />
-                       }
-
+                        )}
                     </div>
-
                 </div>
             </main>
 
-                {   
-                    isFilterSidebarOpen &&
-                        <ProductFilterSidebar isOpen={isFilterSidebarOpen}
-                            onClose={() => setIsFilterSidebarOpen(false)} 
-                            isAdmin={true}
-                            popularProducts={popularProducts}
-                            muscleGroups={muscleGroups}
-                            brands={brands}
-                            applySidebarFilters={applySidebarFilters}
-                        />
-                }
+            {isFilterSidebarOpen && (
+                <ProductFilterSidebar
+                    isOpen={isFilterSidebarOpen}
+                    onClose={() => setIsFilterSidebarOpen(false)}
+                    isAdmin={true}
+                    popularProducts={popularProducts}
+                    muscleGroups={muscleGroups}
+                    brands={brands}
+                    applySidebarFilters={applySidebarFilters}
+                />
+            )}
 
-                {
-                    isExportModalOpen &&
-                        <ExportFileModal
-                            isOpen={isExportModalOpen}
-                            onClose={()=> setIsExportModalOpen(false)}
-                            onExport={exportFile}
-                            productCount={products.length}
-                        />
-                }
-
+            {isExportModalOpen && (
+                <ExportFileModal
+                    isOpen={isExportModalOpen}
+                    onClose={() => setIsExportModalOpen(false)}
+                    onExport={exportFile}
+                    productCount={products.length}
+                />
+            )}
         </section>
     )
 }

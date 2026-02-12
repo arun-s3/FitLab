@@ -119,7 +119,7 @@ const productSchema = mongoose.Schema({
        type: Boolean,
        default: false
     },
-    weight: {
+    weight: { 
       type: Number, 
       default: null
     },

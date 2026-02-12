@@ -10,10 +10,10 @@ import {MdFavorite, MdFavoriteBorder} from "react-icons/md"
 import {RiFileEditLine} from "react-icons/ri"
 import {MdBlock} from "react-icons/md"
 import {LuBadgeAlert} from "react-icons/lu"
-import {Calendar, Tag, NotebookPen, ShieldAlert} from 'lucide-react'
+import {Calendar, Tag, NotebookPen, ShieldAlert, PackagePlus} from 'lucide-react'
 import {format} from "date-fns"
 
-import {getAllProducts, toggleProductStatus} from '../../Slices/productSlice'
+import {getAllProducts, toggleProductStatus, restockProduct, resetStates} from "../../Slices/productSlice"
 import {addProductToList, removeProductFromList, getUserWishlist, getAllWishlistProducts, resetWishlistStates} from '../../Slices/wishlistSlice'
 import WishlistModal from '../../Pages/User/WishlistPage/Modals/WishlistModal'
 import WishlistOptionsModal from '../WishlistModals/WishlistOptionsModal'
@@ -26,14 +26,15 @@ import {SiteButtonSquare} from '../SiteButtons/SiteButtons'
 import {capitalizeFirstLetter, camelToCapitalizedWords} from '../../Utils/helperFunctions'
 import {addToCart} from '../../Slices/cartSlice'
 import ProductsTableView from './ProductsTableView'
+import RestockModal from '../RestockModal/RestockModal'
 
 
 export default function ProductsDisplay({gridView, showByTable, customGridViewStyles, currentPage, limiter, queryOptions, showTheseProducts, admin, 
-  wishlistDisplay, currentList, setCurrentPage, totalPages, couponApplicableItems = null, checkAuthOrOpenModal = null}) {
+  restockingProduct, wishlistDisplay, currentList, setCurrentPage, totalPages, couponApplicableItems = null, checkAuthOrOpenModal = null}) {
 
 
   const dispatch = useDispatch()
-  const {products:items, productCounts} = useSelector(state=> state.productStore)
+  const {products:items, productRestocked} = useSelector(state=> state.productStore)
   const [products, setProducts] = useState([])
 
   const [productIsHovered, setProductIsHovered] = useState()
@@ -41,6 +42,9 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
   const navigate = useNavigate()
 
   const {wishlist, wishlistProducts, listCreated, listProductRemoved, listProductAdded, loading, wishlistError, wishlistSuccess} = useSelector(state=> state.wishlist)
+
+  const [isRestockModalOpen, setIsRestockModalOpen] = useState(false)
+  const [selectedRestockProduct, setSelectedRestockProduct] = useState(null)
 
   const [isWishlistModalOpen, setIsWishlistModalOpen] = useState(false)
   const [isWishlistOptionsModalOpen, setIsWishlistOptionsModalOpen] = useState(false)
@@ -56,7 +60,8 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
   },[])
 
   useEffect(()=>{
-    if(!admin && !wishlistDisplay){
+    if((!admin && !wishlistDisplay) || restockingProduct){
+      console.log("Setting products....")
       setProducts(items)
     }
     if(wishlistDisplay && wishlistProducts){
@@ -98,6 +103,12 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
     }
   },[listProductAdded, listProductRemoved, wishlist, wishlistError])
 
+  useEffect(() => {
+      if (productRestocked) {
+          restockingProduct(false)
+      }
+  }, [productRestocked])
+
   const wishlistPriorityDetails = [
     {name: 'high', value: 1, color: 'text-red-500', bg: 'bg-red-200'},
     {name: 'medium', value: 2, color: 'text-yellow-500', bg: 'bg-yellow-100'},
@@ -132,6 +143,17 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
      console.log("Inside handleAddToCart()--")
      dispatch( addToCart({productId: id, quantity: 1}) )
      console.log("Dispatched successfully")
+  }
+
+  const openRestockModal = (product) => {
+      restockingProduct(true)
+      setSelectedRestockProduct(product)
+      setIsRestockModalOpen(true)
+  }
+  
+  const handleRestockProduct = (productId, quantity) => {
+      console.log("Restockig product....")
+      dispatch(restockProduct({ productId, quantity }))
   }
 
   const openWishlistOptionsModal = (product)=> {
@@ -321,6 +343,16 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
                                                 </i>
                                             </span>
                                             <span
+                                                data-label='Stock'
+                                                className='w-[30px] md:bg-white l-md:bg-transparent xx-lg:bg-white x-xl:bg-transparent p-[5px] border rounded-[20px] 
+                        z-[2] flex items-center justify-center relative cursor-pointer admin-control md:border-mutedDashedSeperation
+                        l-md:border-inputBorderLow xx-lg:border-mutedDashedSeperation x-xl:border-inputBorderLow admin-control'
+                                                onClick={() => openRestockModal(product)}>
+                                                <i>
+                                                    <PackagePlus size={16} />
+                                                </i>
+                                            </span>
+                                            <span
                                                 data-label='Block'
                                                 className='w-[30px] md:bg-white l-md:bg-transparent xx-lg:bg-white x-xl:bg-transparent p-[5px] border rounded-[20px] 
                         z-[2] flex items-center justify-center relative cursor-pointer admin-control md:border-mutedDashedSeperation
@@ -392,7 +424,7 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
                             <div
                                 className={` ${
                                     gridView
-                                        ? "mt-[10px] w-full flex flex-col gap-[5px] pl-[10px] py-[15px] rounded-[10px] product-infos"
+                                        ? "mt-[10px] w-full flex flex-col gap-[10px] pl-[10px] py-[15px] rounded-[10px] product-infos"
                                         : "inline-flex flex-col gap-[10px] justify-between px-[1rem] py-[2rem] rounded-[10px] ml-[1rem] product-infos w-full"
                                 } 
                                     ${wishlistDisplay && "mr-[1rem]"} ${productIsHovered === product._id && "shadow-lg"} cursor-pointer`}
@@ -441,33 +473,51 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
                                         {capitalizeFirstLetter(product.subtitle)}
                                     </p>
                                 )}
+                                <p
+                                    className={`${
+                                        admin && !gridView
+                                            ? "text-[16px]"
+                                            : gridView
+                                              ? "text-[16px] xx-md:text-[15px] lg:text-[16px]"
+                                              : wishlistDisplay
+                                                ? "text-[17px]"
+                                                : "text-[18px]"
+                                    } font-[500] tracking-[0.5px]`}>
+                                    &#8377;{" "}
+                                    {product.prices.length > 1
+                                        ? `${Math.min(...product.prices)} - ${Math.max(...product.prices)}`
+                                        : product.prices[0]}
+                                </p>
                                 <div>
-                                    {product.totalStock <= 5 && (
-                                        <p className='text-[13px] text-red-500 mb-[5px]'>
-                                            {product.totalStock <= 0
-                                                ? "Out of Stock"
-                                                : `Only ${product.totalStock} items in Stock!`}
+                                    {product.totalStock <= 5 ? (
+                                        <p className='mb-[5px] flex items-center gap-[5px]'>
+                                            <div className='w-[10px] h-[10px] bg-red-500 shadow-md rounded-full' />
+                                            <span className='text-[13px] text-red-500'>
+                                                {product.totalStock <= 0
+                                                    ? "Out of Stock"
+                                                    : `Only ${product.totalStock} ${admin ? "units in stock" : "left— order soon"}`}
+                                            </span>
+                                        </p>
+                                    ) : product.totalStock > 5 && product.totalStock < 10 ? (
+                                        <p className='mb-[5px] flex items-center gap-[5px]'>
+                                            <div className='w-[10px] h-[10px] bg-yellow-400 shadow-md rounded-full' />
+                                            <span className='text-[13px] text-[#3c3434]'>
+                                                {" "}
+                                                {`In stock (${product.totalStock} left)`}{" "}
+                                            </span>
+                                        </p>
+                                    ) : (
+                                        <p className='mb-[5px] flex items-center gap-[5px]'>
+                                            <div className='w-[10px] h-[10px] bg-green-500 shadow-md rounded-full' />
+                                            <span className='text-[13px] text-[#3c3434]'>
+                                                {" "}
+                                                {`In stock (${product.totalStock} available)`}{" "}
+                                            </span>
                                         </p>
                                     )}
 
-                                    <p
-                                        className={`${
-                                            admin && !gridView
-                                                ? "text-[16px]"
-                                                : gridView
-                                                  ? "text-[16px] xx-md:text-[15px] lg:text-[16px]"
-                                                  : wishlistDisplay
-                                                    ? "text-[17px]"
-                                                    : "text-[18px]"
-                                        } font-[500] tracking-[0.5px]`}>
-                                        &#8377;{" "}
-                                        {product.prices.length > 1
-                                            ? `${Math.min(...product.prices)} - ${Math.max(...product.prices)}`
-                                            : product.prices[0]}
-                                    </p>
-
                                     {product.variantType && (
-                                        <p className='mt-[3px] text-[13px] text-muted font-[450]'>
+                                        <p className='mt-[6px] text-[13px] text-muted font-[450]'>
                                             {`${camelToCapitalizedWords(product.variantType)}s:`}
                                             <span className='ml-[3px] text-[13px] capitalize'>
                                                 {product[`${product.variantType}s`]
@@ -599,6 +649,12 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
                   />
               )}
           </div>
+          <RestockModal
+              isOpen={isRestockModalOpen}
+              product={selectedRestockProduct}
+              onClose={() => setIsRestockModalOpen(false)}
+              onSave={handleRestockProduct}
+          />
           <div className='h-[7rem] w-full'></div>
       </>
   )

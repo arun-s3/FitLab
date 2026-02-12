@@ -48,6 +48,8 @@ export default function AdminProductListPage(){
     const [sorts, setSorts] = useState({})
     const [queryOptions, setQueryOptions] = useState({page: 1, limit: 9})
 
+    const [isProductRestocking, setIsProductRestocking] = useState(false)
+
     const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(false)
 
     const [isExportModalOpen, setIsExportModalOpen] = useState(false)
@@ -55,7 +57,7 @@ export default function AdminProductListPage(){
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
-    const {products, productCounts, message} = useSelector(state=> state.productStore)
+    const {products, productCounts, productRestocked, message} = useSelector(state=> state.productStore)
 
     const {setHeaderZIndex, setPageBgUrl} = useOutletContext() 
     setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.94),rgba(255,255,255,0.94)), url('/Images/admin-ProductsListBg.jpg')`)
@@ -121,13 +123,21 @@ export default function AdminProductListPage(){
       }
     }, [products, productCounts])
 
-    useEffect(()=> {
-        if(setHeaderZIndex && isFilterSidebarOpen){
+    useEffect(() => {
+        if (setHeaderZIndex && (isFilterSidebarOpen || isProductRestocking)) {
             setHeaderZIndex(0)
-        }else{
+        } else {
             setHeaderZIndex(10)
         }
-    }, [isFilterSidebarOpen])
+    }, [isFilterSidebarOpen, isProductRestocking])
+
+    useEffect(() => {
+        if (productRestocked) {
+          sonnerToast.success("Product restocked succesfully!")
+          dispatch(resetStates())
+        }
+        dispatch(getAllProducts({ queryOptions }))
+    }, [productRestocked])
 
     const showProducts = (type)=>{
         console.log("Inside showProducts(), type--", type)
@@ -277,6 +287,7 @@ export default function AdminProductListPage(){
                                 currentPage={currentPage}
                                 setCurrentPage={setCurrentPage}
                                 showTheseProducts={showTheseProducts}
+                                restockingProduct={setIsProductRestocking}
                                 admin={true}
                             />
                         )}

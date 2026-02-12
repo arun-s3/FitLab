@@ -59,6 +59,21 @@ export const getAllProducts = createAsyncThunk('getAllProducts', async({queryOpt
     }
 })
 
+export const restockProduct = createAsyncThunk('restockProduct', async({ productId, quantity }, thunkAPI)=>{
+    try{
+        console.log("Inside restockProduct createAsyncThunk")
+        console.log("queryOptions from productSlice-restockProduct--->", JSON.stringify({ productId, quantity }))
+        const response = await axios.put("/admin/products/restock", { productId, quantity }, { withCredentials: true })
+        console.log("returning success response from restockProduct createAsyncThunk..."+JSON.stringify(response.data))
+        return { productId, quantity }
+    }
+    catch(error){
+        console.log("inside catch of restockProduct from productSlice")
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
+        return thunkAPI.rejectWithValue(errorMessage)
+    }
+})
+
 export const searchProduct = createAsyncThunk('searchProduct', async({find}, thunkAPI)=>{
     try{
         console.log("Inside searchProduct createAsyncThunk")
@@ -83,7 +98,8 @@ const initialState = {
     success:false,
     message: null,
     productCreated: false,
-    productUpdated: false 
+    productUpdated: false ,
+    productRestocked: false
 }
 
 const productSlice = createSlice({
@@ -95,102 +111,136 @@ const productSlice = createSlice({
             state.error = false
             state.productCreated = false
             state.productUpdated = false
+            state.productRestocked = false
             console.log(`Reseting states in ProductSlice--> state.productCreated-${state.productCreated}, state.productUpdated-${state.productUpdated}`)
         }
     },
     extraReducers: (builder)=>{
-        builder.addCase(createProduct.fulfilled, (state, action)=>{
-            console.log("action.payload.mainProduct-->",action.payload.mainProduct)
-            console.log("action.payload.mainProduct-->",action.payload.variants)
-            state.error = false
-            state.loading = false
-            state.productCreated = true
-            // state.products.push(action.payload.mainProduct)
-        })
-        .addCase(createProduct.pending, (state,action)=>{
-            state.loading = true
-            state.error = false
-            state.productCreated = false
-        })
-        .addCase(createProduct.rejected, (state,action)=>{
-            state.loading = false
-            state.error = true
-            state.productCreated = false
-        })
-        .addCase(updateProduct.fulfilled, (state, action)=>{
-            console.log("action.payload.product- after Updating->",action.payload.product)
-            state.error = false
-            state.loading = false
-            state.productUpdated = true
-            const updatingProductIndex = state.products.findIndex(product=> product._id === action.payload.product._id)
-            state.products[updatingProductIndex] = action.payload.product
-            console.log("state.products[updatingProductIndex]-->", JSON.stringify(state.products[updatingProductIndex]))
-        })
-        .addCase(updateProduct.pending, (state,action)=>{
-            state.loading = true
-            state.error = false
-            state.productUpdated = false
-        })
-        .addCase(updateProduct.rejected, (state,action)=>{
-            state.loading = false
-            state.error = true
-            state.productUpdated = false
-        })
-        .addCase(getAllProducts.fulfilled, (state,action)=>{
-            console.log("Inside getAllProducts.fulfilled")
-            state.loading = false
-            state.error = false
-            // state.productSuccess = true
-            state.products = action.payload.productBundle
-            state.productCounts = action.payload.productCounts
-            state.maxPriceAvailable = action.payload.maxPriceAvailable
-        })
-        .addCase(getAllProducts.pending, (state,action)=>{
-            state.loading = true
-            state.error = false
-            // state.productSuccess = false
-        })
-        .addCase(getAllProducts.rejected, (state,action)=>{
-            state.loading = false
-            state.error = true
-            // state.productSuccess = false
-        })
-        .addCase(searchProduct.fulfilled, (state,action)=>{
-            console.log("Inside getAllProducts.fulfilled")
-            state.loading = false
-            state.error = false
-            // state.productSuccess = true
-            state.products = action.payload.products
-            state.productCounts = action.payload.productCounts
-            state.maxPriceAvailable = action.payload.maxPriceAvailable
-        })
-        .addCase(searchProduct.pending, (state,action)=>{
-            state.loading = true
-            state.error = false
-            // state.productSuccess = false
-        })
-        .addCase(searchProduct.rejected, (state,action)=>{
-            state.loading = false
-            state.error = true
-            // state.productSuccess = false
-        })
-        .addCase(toggleProductStatus.fulfilled, (state,action)=>{
-            state.success = true
-            state.message = action.payload.productBlocked
-            state.loading = false
-            state.error = false
-            const updatingProductIndex = state.products.findIndex(product=> product._id === action.payload.productId)
-            state.products[updatingProductIndex].isBlocked = state.message === 'Blocked'? true : false
-            console.log("state.products[updatingProductIndex].isBlocked-->", state.products[updatingProductIndex].isBlocked)
-        })
-        .addCase(toggleProductStatus.pending, (state,action)=>{
-            state.loading = true
-            state.error = false
-        })
-        .addCase(toggleProductStatus.rejected, (state,action)=>{
-            state.loading = false
-            state.error = true
-        })
+        builder
+            .addCase(createProduct.fulfilled, (state, action) => {
+                console.log("action.payload.mainProduct-->", action.payload.mainProduct)
+                console.log("action.payload.mainProduct-->", action.payload.variants)
+                state.error = false
+                state.loading = false
+                state.productCreated = true
+                // state.products.push(action.payload.mainProduct)
+            })
+            .addCase(createProduct.pending, (state, action) => {
+                state.loading = true
+                state.error = false
+                state.productCreated = false
+            })
+            .addCase(createProduct.rejected, (state, action) => {
+                state.loading = false
+                state.error = true
+                state.productCreated = false
+            })
+            .addCase(updateProduct.fulfilled, (state, action) => {
+                console.log("action.payload.product- after Updating->", action.payload.product)
+                state.error = false
+                state.loading = false
+                state.productUpdated = true
+                const updatingProductIndex = state.products.findIndex(
+                    (product) => product._id === action.payload.product._id,
+                )
+                state.products[updatingProductIndex] = action.payload.product
+                console.log(
+                    "state.products[updatingProductIndex]-->",
+                    JSON.stringify(state.products[updatingProductIndex]),
+                )
+            })
+            .addCase(updateProduct.pending, (state, action) => {
+                state.loading = true
+                state.error = false
+                state.productUpdated = false
+            })
+            .addCase(updateProduct.rejected, (state, action) => {
+                state.loading = false
+                state.error = true
+                state.productUpdated = false
+            })
+            .addCase(getAllProducts.fulfilled, (state, action) => {
+                console.log("Inside getAllProducts.fulfilled")
+                state.loading = false
+                state.error = false
+                // state.productSuccess = true
+                state.products = action.payload.productBundle
+                state.productCounts = action.payload.productCounts
+                state.maxPriceAvailable = action.payload.maxPriceAvailable
+            })
+            .addCase(getAllProducts.pending, (state, action) => {
+                state.loading = true
+                state.error = false
+                // state.productSuccess = false
+            })
+            .addCase(getAllProducts.rejected, (state, action) => {
+                state.loading = false
+                state.error = true
+                // state.productSuccess = false
+            })
+            .addCase(restockProduct.pending, (state, action) => {
+                state.loading = true
+                state.error = false
+                state.productRestocked = false
+            })
+
+            .addCase(restockProduct.fulfilled, (state, action) => {
+                state.loading = false
+                state.error = false
+                state.productRestocked = true
+
+                state.products = state.products.map((product) =>
+                    product._id === action.payload.productId ? { ...product, stock: action.payload.quantity } : product,
+                )
+            })
+
+            .addCase(restockProduct.rejected, (state, action) => {
+                state.loading = false
+                state.error = true
+                state.productRestocked = false
+            })
+
+            .addCase(searchProduct.fulfilled, (state, action) => {
+                console.log("Inside getAllProducts.fulfilled")
+                state.loading = false
+                state.error = false
+                // state.productSuccess = true
+                state.products = action.payload.products
+                state.productCounts = action.payload.productCounts
+                state.maxPriceAvailable = action.payload.maxPriceAvailable
+            })
+            .addCase(searchProduct.pending, (state, action) => {
+                state.loading = true
+                state.error = false
+                // state.productSuccess = false
+            })
+            .addCase(searchProduct.rejected, (state, action) => {
+                state.loading = false
+                state.error = true
+                // state.productSuccess = false
+            })
+            .addCase(toggleProductStatus.fulfilled, (state, action) => {
+                state.success = true
+                state.message = action.payload.productBlocked
+                state.loading = false
+                state.error = false
+                const updatingProductIndex = state.products.findIndex(
+                    (product) => product._id === action.payload.productId,
+                )
+                state.products[updatingProductIndex].isBlocked = state.message === "Blocked" ? true : false
+                console.log(
+                    "state.products[updatingProductIndex].isBlocked-->",
+                    state.products[updatingProductIndex].isBlocked,
+                )
+            })
+            .addCase(toggleProductStatus.pending, (state, action) => {
+                state.loading = true
+                state.error = false
+            })
+            .addCase(toggleProductStatus.rejected, (state, action) => {
+                state.loading = false
+                state.error = true
+            })
     }
 })
 

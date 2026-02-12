@@ -849,6 +849,36 @@ const updateProduct = async (req, res, next) => {
 }
 
 
+const restockProduct = async (req, res, next) => {
+    try {
+        const { productId, quantity } = req.body
+
+        if (!quantity || isNaN(quantity) || Number(quantity) <= 0) {
+            return res.status(400).json({ message: "Quantity must be a positive number" })
+        }
+
+        const updatedProduct = await Product.findByIdAndUpdate(
+            productId,
+            { $inc: { stock: Number(quantity) } }, 
+            { new: true },
+        )
+
+        if (!updatedProduct) {
+            return next(errorHandler(404, "Product not found"))
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Product restocked successfully",
+            updatedStock: updatedProduct.stock,
+        })
+    } catch (error) {
+        console.error("Error restocking product:", error.message)
+        next(error)
+    }
+}
+
+
   const toggleProductStatus = async (req, res, next)=> {
     try {
       console.log("Inside toggleProductStatus controller--")
@@ -1067,4 +1097,4 @@ const exportProductsAsCsv = async (req, res, next)=> {
 
 
 module.exports = {createProduct, getSingleProduct, getAllProducts, getLatestProducts, getPopularProducts, getSimilarProducts, 
-  getEquipmentByMuscleOrExercise, searchProduct, updateProduct, toggleProductStatus, exportProductsAsCsv, exportProductsAsPdf}
+  getEquipmentByMuscleOrExercise, searchProduct, updateProduct, restockProduct, toggleProductStatus, exportProductsAsCsv, exportProductsAsPdf}

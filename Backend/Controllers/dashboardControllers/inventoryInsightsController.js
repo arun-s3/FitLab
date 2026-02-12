@@ -6,7 +6,6 @@ const {errorHandler} = require('../../Utils/errorHandler')
 const LOW_STOCK_THRESHOLD = 5;
 
 
-
 const getProductStockInsights = async (req, res, next)=> {
   try {
     console.log("Inside getProductStockSummary")
@@ -31,25 +30,62 @@ const getProductStockInsights = async (req, res, next)=> {
 }
 
 
-const getLowStockProducts = async (req, res, next)=> {
-  try {
-    console.log("Inside getLowStockProducts")
+const getLowStockProducts = async (req, res, next) => {
+    try {
+        console.log("Inside getLowStockProducts")
 
-    const lowStockProducts = await Product.find({stock: { $gt: 0, $lte: LOW_STOCK_THRESHOLD }}).select('title stock -_id')
+        const mainProducts = await Product.find({
+            isBlocked: false,
+            variantOf: { $in: [null, undefined] },
+        })
+            .populate({
+                path: "variants",
+                select: "weight size motorPower color stock price",
+            })
+            .lean()
 
-    const result = lowStockProducts.map(product => ({
-      name: product.title,
-      stock: product.stock
-    }))
-    console.log("lowStockDatas----->", result)
+        const formattedLowStock = mainProducts
+            .map((main) => {
+                const variants = main.variants || []
+                const variantKey = main.variantType
 
-    res.status(200).json({lowStockDatas: result});
-  }
-  catch(error){
-    console.error("Error fetching low stock products:", error.message)
-    next(error)
-  }
+                const prices = [main.price, ...variants.map((v) => v.price)]
+                const stocks = [main.stock, ...variants.map((v) => v.stock)]
+
+                const totalStock = stocks.reduce((sum, s) => sum + (s || 0), 0)
+
+                if (totalStock === 0 || totalStock > LOW_STOCK_THRESHOLD) {
+                    return null
+                }
+
+                const variantValues = variantKey
+                    ? [main[variantKey], ...variants.map((v) => v[variantKey])].filter(Boolean)
+                    : []
+
+                const minPrice = Math.min(...prices)
+                const maxPrice = Math.max(...prices)
+
+                return {
+                    _id: main._id,
+                    thumbnail: main.thumbnail?.url || "",
+                    name: main.title,
+                    subtitle: main.subtitle,
+                    totalStock,
+                    price: minPrice === maxPrice ? minPrice : `${minPrice} - ${maxPrice}`,
+                    ...(variantKey ? { [`${variantKey}s`]: variantValues } : {}),
+                }
+            })
+            .filter(Boolean) 
+
+        console.log("Low stock products ---->", formattedLowStock)
+
+        res.status(200).json({ lowStockDatas: formattedLowStock })
+    } catch (error) {
+        console.error("Error fetching low stock products:", error.message)
+        next(error)
+    }
 }
+
 
 
 const getCategoryStockDatas = async (req, res, next)=> {

@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import {useSelector, useDispatch} from 'react-redux'
 
 import {FaRegBell} from "react-icons/fa"
@@ -14,6 +14,8 @@ export default function AdminHeader({headerZIndex}){
 
 
     const [sidebarOpen, setSidebarOpen] = useState(false)
+
+    const [profileImage, setProfileImage] = useState(null)
     
     const {admin} = useSelector(state=> state.admin)
     const dispatch = useDispatch()
@@ -22,32 +24,35 @@ export default function AdminHeader({headerZIndex}){
        backgroundImage: "linear-gradient(to right, black, var(--SECONDARY) 400%)"
     }
 
+    useEffect(() => {
+        if (admin) {
+            const defaultDp = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
+            setProfileImage(!admin?.profilePic || admin?.profilePic === defaultDp ? "/Images/adminDp.jpg" : admin.profilePic)
+        }
+    }, [admin])
+
 
     return (
-        <header className='bg-black h-[5rem] w-full flex justify-between items-center px-[33px] fixed top-0'
-            id='admin-wrapper-header' 
-            style={{...headerBgImg, zIndex: headerZIndex}} 
-        >
-
-            <div className="xx-md:hidden mt-[15p] p-[5px] bg-transparent border border-[#7f7d8085] rounded-[7px] shadow-sm">
+        <header
+            className='bg-black h-[5rem] w-full flex justify-between items-center px-[33px] fixed top-0'
+            id='admin-wrapper-header'
+            style={{ ...headerBgImg, zIndex: headerZIndex }}>
+            <div className='xx-md:hidden mt-[15p] p-[5px] bg-transparent border border-[#7f7d8085] rounded-[7px] shadow-sm'>
                 <button
-                  onClick={()=> setSidebarOpen(true)}
-                  className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors"
-                >
-                  <Menu size={22} className='text-primary'/>
+                    onClick={() => setSidebarOpen(true)}
+                    className='flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors'>
+                    <Menu size={22} className='text-primary' />
                 </button>
             </div>
 
-            <AdminSidebar 
-                isOpen={sidebarOpen} 
-                onClose={()=> setSidebarOpen(false)} 
-            />
+            <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-            <img src="/Images/Logo_main.png"
-                alt="Fitlab" 
-                className="hidden sm:inline-block sm:absolute sm:left-[17rem] sm:top-[-3px] x-md:static h-[5rem] mt-[5px]
-                    xx-md:mt-[15px] ml-[-27rem] l-md:w-[-13rem] xx-md:ml-0"
-            /> 
+            <img
+                src='/Images/Logo_main.png'
+                alt='Fitlab'
+                className='hidden sm:inline-block sm:absolute sm:left-[17rem] sm:top-[-3px] x-md:static h-[5rem] mt-[5px]
+                    xx-md:mt-[15px] ml-[-27rem] l-md:w-[-13rem] xx-md:ml-0'
+            />
 
             <div className='flex gap-[15px] justify-between items-center'>
                 {/* <i className='relative'>
@@ -56,10 +61,12 @@ export default function AdminHeader({headerZIndex}){
                 </i> */}
                 <div className='flex gap-[5px] justify-center items-center'>
                     <span className='w-[30px] h-auto rounded-[20px] relative'>
-                        <img alt='admin-dp' 
-                            src={admin.profilePic} 
-                            className='w-[30px] h-auto rounded-[20px]'
-                        /> 
+                        <img
+                            alt='admin-dp'
+                            src={profileImage}
+                            className={`w-[30px] h-auto rounded-[20px]
+                                ${!profileImage || profileImage === "/Images/adminDp.jpg" ? "contrast-[78%]" : ""}`}
+                        />
                         <span className='h-[8px] w-[8px] rounded-[10px] bg-green-400 absolute bottom-0 right-0'></span>
                     </span>
                     <div className='flex flex-col'>
@@ -68,7 +75,6 @@ export default function AdminHeader({headerZIndex}){
                     </div>
                 </div>
             </div>
-
         </header>
     )
 }

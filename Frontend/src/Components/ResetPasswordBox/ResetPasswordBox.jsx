@@ -5,11 +5,11 @@ import {Check, AlertCircle, Eye, EyeOff} from "lucide-react"
 import {toast as sonnerToast} from 'sonner'
 import axios from 'axios'
 
-import {SiteSecondaryFillImpButton} from '../../../Components/SiteButtons/SiteButtons'
-import {CustomHashLoader} from '../../../Components/Loader/Loader'
+import {SiteSecondaryFillImpButton} from '../SiteButtons/SiteButtons'
+import {CustomHashLoader} from '../Loader/Loader'
 
 
-export default function ChangePasswordBox({setOpenSecurityMenu}){
+export default function ResetPasswordBox({setOpenSecurityMenu, admin}){
 
   const [passwords, setPasswords] = useState({ current: "", new: "", confirm: "" })
   const [showPasswords, setShowPasswords] = useState({current:false, new: false, confirm: false})
@@ -81,9 +81,16 @@ export default function ChangePasswordBox({setOpenSecurityMenu}){
       setError({new: false, confirm: false, value:''})
 
       try{
-        const response = await axios.post(`${baseApiUrl}/password/update`, {
-          currentPassword: passwords.current, newPassword: passwords.new, confirmPassword: passwords.confirm
-        }, {withCredentials:true})
+        let response = null
+        if(admin) {
+            response = await axios.post(`${baseApiUrl}/admin/password/update`, {
+                currentPassword: passwords.current, newPassword: passwords.new, confirmPassword: passwords.confirm
+            }, {withCredentials:true})
+        }else{
+            response = await axios.post(`${baseApiUrl}/password/update`, {
+                currentPassword: passwords.current, newPassword: passwords.new, confirmPassword: passwords.confirm
+            }, {withCredentials:true})
+        }
         if(response.data.message.includes('success')){
           setLoading(false)
           setOpenSecurityMenu(false)
@@ -189,12 +196,18 @@ export default function ChangePasswordBox({setOpenSecurityMenu}){
           </div>
 
           <div>
-          <Link to='/forgot-password' className='ml-[3xp] text-[12px] text-secondary tracking-[0.2x] hover:underline cursor-pointer'>
-            Forgot Password? 
-          </Link>
-          <SiteSecondaryFillImpButton isDisabled={!passwordsMatch || !Object.values(requirements).every(Boolean)} 
-                className='mt-[5xp] disabled:opacity-80 disabled:cursor-not-allowed' customStyle={{marginTop: '5px'}}>
-            { loading? <CustomHashLoader loading={loading}/> : 'Change my Password' }  
+          {
+            !admin &&
+                <Link to='/forgot-password' className='ml-[3xp] text-[12px] text-secondary tracking-[0.2x] hover:underline cursor-pointer'>
+                  Forgot Password? 
+                </Link>
+          }
+          <SiteSecondaryFillImpButton 
+            className='mt-[5xp] disabled:opacity-80 disabled:cursor-not-allowed' customStyle={{marginTop: '5px'}}
+            isDisabled={!passwordsMatch || !Object.values(requirements).every(Boolean)} 
+            shouldSubmit={true}
+          >
+            { loading? <CustomHashLoader loading={loading}/> : admin ? 'Change Password' : 'Change my Password' }  
           </SiteSecondaryFillImpButton>
 
           <SiteSecondaryFillImpButton variant='outline' clickHandler={()=> setOpenSecurityMenu(false)}>

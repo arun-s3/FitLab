@@ -151,7 +151,8 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
       setIsRestockModalOpen(true)
   }
   
-  const handleRestockProduct = (productId, quantity) => {
+  const handleRestockProduct = (data) => {
+      const { productId, quantity } = data
       console.log("Restockig product....")
       dispatch(restockProduct({ productId, quantity }))
   }

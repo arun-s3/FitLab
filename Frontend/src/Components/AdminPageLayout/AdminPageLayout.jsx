@@ -292,7 +292,7 @@ export default function AdminPageLayout(){
                                      ${showSubmenu.dashboard ? 'mt-[-15px]' : 'mt-[-10px]'}`}
                                     onClick={()=>toggleSublist('settings')}>
                                     <div className={`${ showSubmenu.settings && 'toggleSublist-custom-after'} option`}> 
-                                        <Link> 
+                                        <Link to={'/admin/settings'}> 
                                             <IoSettingsOutline className='h-[15px] w-[15px]'/>  
                                             <span className={`${ showSubmenu.settings && 'text-primaryDark'}`}> Settings </span> 
                                         </Link> 

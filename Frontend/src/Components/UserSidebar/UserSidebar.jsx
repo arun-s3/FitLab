@@ -9,7 +9,7 @@ import {Camera, ChevronsDown, Clock, CreditCard, Heart, BadgePercent, Home, Key,
 import {IoBagCheckOutline} from "react-icons/io5"
 import {toast as sonnerToast} from 'sonner'
 
-import SelfieModal from './SelfieModal'
+import SelfieModal from '../SelfieModal/SelfieModal'
 import {updateUserProfilePic, resetStates} from '../../Slices/userSlice'
 import {CustomPuffLoader} from '../Loader/Loader'
 

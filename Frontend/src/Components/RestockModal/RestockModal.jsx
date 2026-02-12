@@ -79,11 +79,21 @@ export default function RestockModal({ isOpen, product, onClose, onSave }) {
         setIsLoading(true)
 
         const currentStock = getCurrentStock()
-        const totalStock = quantity + currentStock
+        const totalStock = quantity + product.totalStock
 
-        const productId = selectedVariantIndex === 0 ? product._id : product.variants[selectedVariantIndex - 1]._id
 
-        onSave?.(productId, quantity)
+        const saveData = {
+            productId: selectedVariantIndex === 0 ? product._id : product.variants[selectedVariantIndex - 1]._id,
+            quantity,
+            totalStock,
+            isMainProduct: selectedVariantIndex === 0,
+            isVariant: selectedVariantIndex > 0,
+            variantType: hasVariants ? product?.variantType : null,
+            variantIndex: selectedVariantIndex,
+            parentProductId: hasVariants && selectedVariantIndex > 0 ? product?._id : null,
+        }
+
+        onSave?.(saveData)
 
         setTimeout(() => {
             setIsLoading(false)
@@ -147,13 +157,13 @@ export default function RestockModal({ isOpen, product, onClose, onSave }) {
                                     <div className='w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center'>
                                         <img
                                             src={product.thumbnail.url}
-                                            alt={product?.name || product.title}
+                                            alt={product.title}
                                             className='w-full h-full object-cover'
                                         />
                                     </div>
                                     <div className='flex-1 min-w-0'>
                                         <h3 className='font-semibold text-gray-900 capitalize truncate'>
-                                            {product?.name || product.title}
+                                            {product.title}
                                         </h3>
                                         <p className='text-sm text-gray-500 capitalize truncate'>{product?.subtitle}</p>
                                     </div>
@@ -370,8 +380,8 @@ export default function RestockModal({ isOpen, product, onClose, onSave }) {
                                 {isLoading ? (
                                     <>
                                         <motion.div
-                                            animate={{ rotate: 360 }}
-                                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
+                                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                                        >
                                             <Check size={18} />
                                         </motion.div>
                                         Saving...

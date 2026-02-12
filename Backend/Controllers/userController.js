@@ -251,6 +251,8 @@ const updateUserDetails = async (req, res, next) => {
     const userId = req.user._id
     const {userDetails} = req.body
 
+    console.log("userDetails------>", JSON.stringify(userDetails))
+
     if (!userDetails.username || !userDetails.email){
       next(errorHandler(404, "Username and email are required!"))
     }

@@ -9,7 +9,7 @@ import {toast} from 'react-toastify'
 import {toast as sonnerToast} from 'sonner'
 
 import {UserPageLayoutContext} from '../UserPageLayout/UserPageLayout'
-import ChangePasswordBox from './ChangePasswordBox'
+import ResetPasswordBox from "../../../Components/ResetPasswordBox/ResetPasswordBox"
 import {SingleDateSelector} from '../../../Components/Calender/Calender' 
 import {updateUserDetails, resetStates as resetUserStates} from '../../../Slices/userSlice'
 import {getDefaultAddress, editAddress, resetStates as resetAddressStates} from '../../../Slices/addressSlice'
@@ -415,7 +415,7 @@ export default function UserAccountPage(){
                     <div ref={securityMenuRef}>
                         { 
                         openSecurityMenu &&
-                          <ChangePasswordBox setOpenSecurityMenu={setOpenSecurityMenu} />
+                          <ResetPasswordBox setOpenSecurityMenu={setOpenSecurityMenu} admin={false}/>
                         }
                     </div>
                       

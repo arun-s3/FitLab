@@ -49,6 +49,7 @@ import AdminOrderHistory from './Pages/Admin/AdminOrderHistroyPage/AdminOrderHis
 import AdminCouponManagementPage from './Pages/Admin/AdminCouponManagementPage/AdminCouponManagementPage'
 import AdminOfferManagementPage from './Pages/Admin/AdminOfferManagementPage/AdminOfferManagementPage'
 import AdminCreateOfferPage from './Pages/Admin/AdminCreateOfferPage/AdminCreateOfferPage'
+import AdminSettingsPage from "./Pages/Admin/AdminSettingsPage/AdminSettingsPage"
 import AdminTextChatSupportPage from './Pages/Admin/AdminTextChatSupportPage/AdminTextChatSupportPage'
 import AdminVideoChatSupportPage from './Pages/Admin/AdminVideoChatSupportPage/AdminVideoChatSupportPage'
 import AdminAiInsightsPage from './Pages/Admin/AdminAiInsightsPage/AdminAiInsightsPage'
@@ -182,6 +183,7 @@ export default function App(){
                                         <Route path='text' element={<AdminTextChatSupportPage />} />
                                         <Route path='video' element={<AdminVideoChatSupportPage />} />
                                     </Route>
+                                    <Route path='settings' element={<AdminSettingsPage />} />
                                 </Route>
                             </Route>
                         </Route>
@@ -198,7 +200,6 @@ export default function App(){
 
                 <Route path='*' element={<ErrorPage404 />} />
             </Routes>
-            
         </BrowserRouter>
     )
     

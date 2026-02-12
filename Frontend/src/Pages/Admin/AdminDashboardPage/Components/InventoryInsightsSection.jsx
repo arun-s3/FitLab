@@ -48,6 +48,7 @@ export default function InventoryInsightsSection() {
         setLowStockDatas(products=> 
             products.map(product=> {
                 if(product._id === selectedProduct._id){
+                    product.stocks = selectedProduct.stocks
                     product.totalStock = selectedProduct.totalStock
                 }
                 return product
@@ -163,10 +164,18 @@ export default function InventoryInsightsSection() {
       setIsRestockModalOpen(true)
   }
 
-  const handleRestockProduct = (productId, quantity) => {
+  const handleRestockProduct = (data) => {
       console.log("Restockig product....")
-      setSelectedProduct((product) => ({ ...product, totalStock: product.totalStock + quantity }))
-      dispatch(restockProduct({ productId: selectedProduct._id, quantity }))
+      const { productId, quantity, totalStock, variantIndex } = data
+      console.log(`quantity---->${quantity}, variantIndex----> ${variantIndex} and totalStock----> ${totalStock}`)
+      const newStocks = selectedProduct.stocks.map((stock, index)=> {
+        if (index === variantIndex) {
+            return quantity + stock
+        } else return stock
+      })
+      console.log("newStocks---->", newStocks)
+      setSelectedProduct((product) => ({ ...product, stocks: newStocks, totalStock }))
+      dispatch(restockProduct({ productId, quantity }))
   }
 
 
@@ -293,7 +302,7 @@ export default function InventoryInsightsSection() {
                                                           <div className='w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-medium mr-3'>
                                                               <Package size={16} />
                                                           </div>
-                                                          <span className='text-[15px]'>{product.name}</span>
+                                                          <span className='text-[15px]'>{product.title}</span>
                                                       </div>
                                                   </td>
                                                   <td className='py-3 px-4 text-[15px]'>{product.totalStock}</td>
@@ -453,7 +462,7 @@ export default function InventoryInsightsSection() {
               isOpen={isRestockModalOpen}
               product={selectedProduct}
               onClose={() => setIsRestockModalOpen(false)}
-              onSave={(quantity) => handleRestockProduct(quantity)}
+              onSave={handleRestockProduct}
           />
       </motion.section>
   )

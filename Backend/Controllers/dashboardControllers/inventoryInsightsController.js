@@ -62,17 +62,12 @@ const getLowStockProducts = async (req, res, next) => {
                     ? [main[variantKey], ...variants.map((v) => v[variantKey])].filter(Boolean)
                     : []
 
-                const minPrice = Math.min(...prices)
-                const maxPrice = Math.max(...prices)
-
                 return {
-                    _id: main._id,
-                    thumbnail: main.thumbnail?.url || "",
-                    name: main.title,
-                    subtitle: main.subtitle,
-                    totalStock,
-                    price: minPrice === maxPrice ? minPrice : `${minPrice} - ${maxPrice}`,
+                    ...main,
                     ...(variantKey ? { [`${variantKey}s`]: variantValues } : {}),
+                    prices,
+                    stocks,
+                    totalStock,
                 }
             })
             .filter(Boolean) 

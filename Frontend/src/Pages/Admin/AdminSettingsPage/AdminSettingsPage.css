@@ -1,0 +1,41 @@
+#AdminSettingsPage #admin-info input[id='email'] {
+    text-transform: none;
+}
+
+#AdminSettingsPage #admin-info .dob input {
+    width: 100%;
+    padding-left: 30px;
+    padding-block: 0.5rem;
+    font-size: 13px;
+    color: var(--SECONDARY);
+    border-radius: 0.5rem;
+    border: 1px solid rgb(203, 213, 219);
+}
+
+#AdminSettingsPage #admin-info .dob input::placeholder {
+    color: #4f5359;
+    letter-spacing: 0.2px;
+    word-spacing: 1px;
+    font-size: 11px;
+}
+
+#AdminSettingsPage #admin-info .dob input:focus {
+    border: 2px solid var(--SECONDARY);
+}
+
+#AdminSettingsPage #admin-info .dob input:disabled {
+    background: rgb(249, 250, 251);
+}
+
+#AdminSettingsPage #admin-info .dob svg {
+    position: absolute;
+    top: 12px;
+    left: 10px;
+    width: 15px;
+    height: 15px;
+    color: rgb(156 163 175);
+}
+
+#AdminSettingsPage #admin-info .dob .react-datepicker-wrapper {
+    width: 100%;
+}

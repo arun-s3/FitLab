@@ -23,7 +23,7 @@ export default function SocketProvider() {
 
     // const socket = useMemo(()=> io(baseApiUrl), [])
 
-    const {userToken, user} = useSelector((state)=> state.user)
+    const {user} = useSelector((state)=> state.user)
 
     const [socket, setSocket] = useState(null)
 
@@ -105,12 +105,12 @@ export default function SocketProvider() {
         setRoomId(response.data.userId)
         setUsername(response.data.username)
       } 
-      if(userToken){
+      if(user){
         fetchUserId()
       }else{
         fetchGuestId()
       }
-    }, [userToken])
+    }, [user])
     
     useEffect(()=> {
         console.log("username--->", username)

@@ -36,7 +36,7 @@ export default function Header({lighterLogo, customStyle, goToShopByCategorySec,
 
     const [openCoach, setopenCoach] = useState(false)
     
-    const {userToken,user} = useSelector((state)=>state.user)
+    const {user} = useSelector((state)=>state.user)
     const {cart} = useSelector(state=> state.cart)    
 
     const navigate = useNavigate()
@@ -224,7 +224,7 @@ export default function Header({lighterLogo, customStyle, goToShopByCategorySec,
                     initial={{ opacity: 0, x: 10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 1.4, duration: 0.6, ease: "easeOut" }}>
-                    {userToken && user ? (
+                    {user ? (
                         <UserHead />
                     ) : (
                         <div className='flex items-center gap-[10px]'>

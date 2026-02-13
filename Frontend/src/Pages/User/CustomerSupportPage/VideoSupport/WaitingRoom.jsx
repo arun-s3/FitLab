@@ -12,8 +12,6 @@ export default function WaitingRoom({ socketContextItems, isAdminBusy, onCallSta
 
   const [isConnected, setIsConnected] = useState(false)
 
-  const {userToken} = useSelector((state)=> state.user)
-
   const {socket, userId, username, messages, newMessage, isTyping, messagesEndRef, handleSendMessage, handleTyping} = socketContextItems
   console.log("socket--->", socket)
 

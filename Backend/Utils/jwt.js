@@ -1,37 +1,58 @@
-const jwt = require("jsonwebtoken");
+const jwt = require("jsonwebtoken")
 const isProd = process.env.NODE_ENV === "production"
 
-const generateToken = (res, userId) => {
-    try {
-        console.log("Inside generateToken");
-        const token = jwt.sign({ userId }, process.env.JWTSECRET, {
-            expiresIn: "10d",
-        });
-        console.log("Token made inside jwt-->" + token);
-        res.cookie("jwt", token, {
-            httpOnly: true,
-            secure: isProd,
-            sameSite: isProd ? "none" : "lax",
-            domain: isProd ? ".fitlab.co.in" : undefined,
-            path: "/",
-            maxAge: 10 * 24 * 60 * 60 * 1000,
-        })
-        return token;
-    } catch (error) {
-        error.statusCode = error.statusCode || 500;
-        error.message = error.message + "---Internal Server Error";
-        console.log(error);
-    }
-};
 
-const verifyToken = (token) => {
-    try {
-        return jwt.verify(token, process.env.JWTSECRET)
-    } catch (error) {
-        console.log("JWT verification failed:", error.message)
-        return null
-    }
+const generateAccessToken = (userId) => {
+    console.log("Inside generateAccessToken()..")
+    return jwt.sign(
+        { userId },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: "15m" }
+    )
+}
+
+const generateRefreshToken = (userId) => {
+    console.log("Inside generateRefreshToken()..")
+    return jwt.sign(
+        { userId },
+        process.env.REFRESH_TOKEN_SECRET,
+        { expiresIn: "10d" }
+    )
+}
+
+const sendTokens = (res, userId) => {
+    console.log("Inside sendTokens()..")
+    const accessToken = generateAccessToken(userId);
+    const refreshToken = generateRefreshToken(userId);
+
+    res.cookie("accessToken", accessToken, {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: isProd ? "none" : "lax",
+        domain: isProd ? ".fitlab.co.in" : undefined,
+        path: "/",
+        maxAge: 15 * 60 * 1000, 
+    });
+
+    res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: isProd ? "none" : "lax",
+        domain: isProd ? ".fitlab.co.in" : undefined,
+        path: "/",
+        maxAge: 10 * 24 * 60 * 60 * 1000, 
+    });
+}
+
+const verifyAccessToken = (token) => {
+    console.log("Inside verifyAccessToken()..")
+    return jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
+}
+
+const verifyRefreshToken = (token) => {
+    console.log("Inside verifyRefreshToken()..")
+    return jwt.verify(token, process.env.REFRESH_TOKEN_SECRET)
 }
 
 
-module.exports = { generateToken, verifyToken };
+module.exports = { sendTokens, verifyAccessToken, verifyRefreshToken }

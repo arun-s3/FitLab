@@ -1,5 +1,5 @@
 import {createSlice, createAsyncThunk} from '@reduxjs/toolkit'
-import axios from '../Utils/axiosConfig'
+import axios from '../Api/axiosConfig'
 
 export const signup = createAsyncThunk('userSignup', async(formData, thunkAPI)=>{
     try{
@@ -45,7 +45,6 @@ export const googleSignin = createAsyncThunk('googleSignin', async(userData,thun
 } )
 
 export const signout = createAsyncThunk('signout', async(googleId,thunkAPI)=>{
-    // console.log("inside userSlice signout-userToken"+userToken)
     try{ 
         // console.log("inside userSlice googlesignout, googleId"+googleId)
         const response = googleId? await axios.get('/googlesignout',{withCredentials:true}) 
@@ -135,7 +134,7 @@ export const updateTermsAcceptance = createAsyncThunk('updateTermsAcceptance', a
 // } )
 
 const initialState = {
-    userToken: null,
+    // userToken: null,
     user: null,
     userUpdated: false,
     userDpUpdated: false,
@@ -183,7 +182,6 @@ const userSlice = createSlice({
                 state.error = null
                 state.loading = false
                 state.success = true
-                state.userToken = action.payload.token
                 state.user = action.payload.user
                 console.log("userData from userSlice-signup.fulfilled-user-->"+JSON.stringify(action.payload.user))
                 console.log("message from userSlice-signup.fulfilled->"+JSON.stringify(action.payload.message))
@@ -204,10 +202,8 @@ const userSlice = createSlice({
                 state.loading = false
                 state.error = null
                 state.success = true
-                state.userToken = action.payload.token
                 state.user = action.payload.user
                 console.log("userData from userSlice-signin.fulfilled-user-->"+JSON.stringify(state.user))
-                console.log("token from userSlice-signin.fulfilled-token-->"+JSON.stringify(state.userToken))
                 console.log("message from userSlice-signin.fulfilled->"+JSON.stringify(action.payload.message))
         })
         .addCase(signin.rejected, (state,action)=>{
@@ -299,12 +295,11 @@ const userSlice = createSlice({
         })
         .addCase(signout.fulfilled, (state,action)=>{
                 console.log("inside signout.fulfilled, action.payload"+JSON.stringify(action.payload))
-                state.userToken = null
                 state.user = null
                 state.error = null,
                 state.loading = false
                 state.success = false
-                console.log("state.userToken now-->"+state.userToken )
+                console.log("state.user now-->"+state.user)
         })
         .addCase(googleSignin.pending, (state,action)=>{
                 state.loading = true
@@ -317,10 +312,10 @@ const userSlice = createSlice({
                 state.error = null
                 state.success = true
                 state.googleSuccess = true
-                state.userToken = action.payload.token
+                // state.userToken = action.payload.token
                 state.user = action.payload.user
                 // console.log("userData from userSlice--user-->"+JSON.stringify(state.user))
-                console.log("token from userSlice googleSignin--token-->"+JSON.stringify(state.userToken))
+                // console.log("token from userSlice googleSignin--token-->"+JSON.stringify(state.userToken))
                 console.log("message from userSlice googleSignin-->"+JSON.stringify(action.payload.message))
         })
         .addCase(googleSignin.rejected, (state,action)=>{

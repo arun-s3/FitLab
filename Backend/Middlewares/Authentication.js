@@ -1,19 +1,20 @@
-const {verifyToken} = require('../Utils/jwt')
+const {verifyAccessToken} = require('../Utils/jwt')
 const User = require('../Models/userModel')
 
 
 const isLogin = async (req, res, next) => {
     try {
-        const token = req.cookies?.jwt
+        console.log("Inside isLogin middeware...")
+        const token = req.cookies?.accessToken
         if (!token) {
             return res.status(401).json({ message: "Unauthorized" })
         }
 
         let decoded
         try {
-            decoded = verifyToken(token)
+            decoded = verifyAccessToken(token)
         } catch (err) {
-            return res.status(401).json({ message: "Invalid or expired token" })
+            return res.status(401).json({ message: "Access token expired" })
         }
 
         const currentUser = await User.findById(decoded.userId).select("-password")

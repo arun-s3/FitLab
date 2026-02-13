@@ -6,7 +6,7 @@ const HealthProfile = require("../Models/healthProfileModel")
 
 // const crypto = require("crypto");
 const {errorHandler} = require('../Utils/errorHandler')
-const {generateToken, verifyToken} = require('../Utils/jwt')
+const {sendTokens, verifyRefreshToken} = require('../Utils/jwt')
 const {encryptData} = require('../Controllers/controllerUtils/encryption')
 
 
@@ -100,6 +100,35 @@ const transporter = nodemailer.createTransport({
      }
   }
 
+
+  const createRefreshToken = async (req, res, next) => {
+    try {
+        console.log("Inside createRefreshToken")
+        const refreshToken = req.cookies.refreshToken;
+
+        if (!refreshToken) {
+            next(errorHandler(401, "No refresh token"))
+        }
+
+        let decoded;
+        try {
+            decoded = verifyRefreshToken(refreshToken);
+        } catch (err) {
+            next(errorHandler(403, "Invalid refresh token"))
+        }
+
+        sendTokens(res, decoded.userId);
+
+        res.status(200).json({ message: "Token refreshed" });
+
+    }
+    catch (error) {
+        console.log("error-createRefreshToken--", error.message)
+        next(error)
+    }
+}
+
+
 const createUser = async(req,res,next)=>{
     try{
         console.log("Inside backend createuser controller")
@@ -146,10 +175,10 @@ const createUser = async(req,res,next)=>{
                 return next(errorHandler(409, "User already exists"))
             }
         if(userData){
-            const token = generateToken(res, userData._id)
+            const token = sendTokens(res, userData._id)
             console.log("Just befores response sent-->"+JSON.stringify(userData))
 
-            res.status(201).json({message:"success", user: userData, token})
+            res.status(201).json({message:"success", user: userData})
             console.log("Response sent from backend-->"+JSON.stringify(userData))
             }
             else{
@@ -223,14 +252,14 @@ const loginUser = async(req,res,next)=>{
                 const passwordMatched = await bcryptjs.compare(password, userData.password)
                 console.log("passwordMatchd-->"+passwordMatched)
                 if(passwordMatched){
-                    const token = generateToken(res,userData._id)
+                    const token = sendTokens(res,userData._id)
                     console.log("token inside signinControllr-->"+token)
                     console.log("userData from backend-->"+userData)
                     if(userData.isBlocked){
                         next(errorHandler(401, `${userData.username} is Blocked!`))
                     }
                     // console.log("from signin controller--JWT Cookie inserted-->"+res.cookies)
-                    res.status(200).json({message:"Logged in successfully!",token:token, user:userData})
+                    res.status(200).json({message:"Logged in successfully!", user:userData})
                   }
                 else{
                     next(errorHandler(401, "You have entered a wrong password!"))
@@ -643,13 +672,23 @@ const signout = (req,res,next)=>{
     console.log("JWT Cookie from signout controller-->"+req.cookies.jwt)
     try{
         const isProd = process.env.NODE_ENV === "production"
-        res.clearCookie("jwt", {
+
+        res.clearCookie("accessToken", {
             httpOnly: true,
             secure: isProd,
             sameSite: isProd ? "none" : "lax",
             domain: isProd ? ".fitlab.co.in" : undefined,
             path: "/",
         })
+
+        res.clearCookie("refreshToken", {
+            httpOnly: true,
+            secure: isProd,
+            sameSite: isProd ? "none" : "lax",
+            domain: isProd ? ".fitlab.co.in" : undefined,
+            path: "/",
+        })
+        
         res.status(200).json({ message: "signed out" })
     }
     catch(error){
@@ -660,6 +699,6 @@ const signout = (req,res,next)=>{
 }
 
 
-module.exports = {tester, createUser, sendOtp, verifyOtp, loginUser, clearAllCookies, updateUserDetails, updateForgotPassword, resetPassword,
-     updateProfilePic, googleSignin, getUserId, searchUsernames, totalUsersCount, getUserByUsername, generateUniqueGuestUser, updateUserWeight,
-     verifyAndDeleteGuestUser, updateTermsAcceptance, signout}
+module.exports = {tester, createRefreshToken, createUser, sendOtp, verifyOtp, loginUser, clearAllCookies, updateUserDetails, updateForgotPassword,
+    createRefreshToken, resetPassword, updateProfilePic, googleSignin, getUserId, searchUsernames, totalUsersCount, getUserByUsername, 
+    generateUniqueGuestUser, updateUserWeight, verifyAndDeleteGuestUser, updateTermsAcceptance, signout}

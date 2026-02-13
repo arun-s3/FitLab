@@ -51,6 +51,8 @@ build_backend:
     - echo "MONGOURI=$MONGOURI" >> .env
     - echo "PORT=$PORT" >> .env
     - echo "JWTSECRET=$JWTSECRET" >> .env
+    - echo "ACCESS_TOKEN_SECRET=$ACCESS_TOKEN_SECRET" >> .env
+    - echo "REFRESH_TOKEN_SECRET=$REFRESH_TOKEN_SECRET" >> .env
     - echo "FITLABPASS=$FITLABPASS" >> .env
     - echo "CLOUDINARY_CLOUD_NAME=$CLOUDINARY_CLOUD_NAME" >> .env
     - echo "CLOUDINARY_API_KEY=$CLOUDINARY_API_KEY" >> .env

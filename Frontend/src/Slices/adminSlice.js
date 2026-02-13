@@ -1,5 +1,5 @@
 import {createSlice, createAsyncThunk} from '@reduxjs/toolkit'
-import axios from '../Utils/axiosConfig'
+import axios from '../Api/axiosConfig'
 
 export const adminSignin = createAsyncThunk('adminsignin', async(formData, thunkAPI)=>{
     try{

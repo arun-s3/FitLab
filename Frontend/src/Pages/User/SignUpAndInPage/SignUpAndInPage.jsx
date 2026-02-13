@@ -39,7 +39,7 @@ export default function SignUpAndInPage({type}){
     const [otpPageLoading, setOtpPageLoading] = useState(false)
  
     const dispatch = useDispatch()
-    const {error, loading, success, userToken, googleSuccess, user} = useSelector((state)=>state.user)
+    const {error, loading, success, googleSuccess, user} = useSelector((state)=>state.user)
     const {admin} = useSelector((state)=> state.admin)
 
     const baseApiUrl = import.meta.env.VITE_API_BASE_URL
@@ -90,7 +90,7 @@ export default function SignUpAndInPage({type}){
         if(error){
             console.log("error---->", error)
             if(error === 'Bad request- User already logged in!'){
-                if(userToken){
+                if(user){
                     navigate('/',{replace:true})
                 }else clearCookiesAndSignIn()
             }

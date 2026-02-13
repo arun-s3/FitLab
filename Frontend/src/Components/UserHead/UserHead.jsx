@@ -16,10 +16,9 @@ import {persistor} from "../../Store/reduxStore"
 
 export default function UserHead(){
 
-    const {user, userToken} = useSelector((state)=> state.user)
+    const {user} = useSelector((state)=> state.user)
     const dispatch = useDispatch()
     console.log("Userdata from UserHead-->"+JSON.stringify(user))
-    console.log("UserToken from UserHead-->"+JSON.stringify(userToken))
 
     const listRef = useRef(null)
     const [beVisible, setBeVisible] = useState(false)

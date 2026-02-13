@@ -2,12 +2,13 @@ const express = require('express')
 const userRouter = express.Router()
 const {isLogin, isLogout} = require('../Middlewares/Authentication')
 const upload = require('../Utils/multer')
-const {tester, createUser, sendOtp, verifyOtp, loginUser, clearAllCookies, updateForgotPassword, resetPassword, updateUserDetails, googleSignin,
-     updateProfilePic, signout, getUserId,searchUsernames, totalUsersCount, generateUniqueGuestUser, verifyAndDeleteGuestUser, updateUserWeight,
-     getUserByUsername, updateTermsAcceptance, googleSignout} = require('../Controllers/userController')
+const {createUser, createRefreshToken, sendOtp, verifyOtp, loginUser, clearAllCookies, updateForgotPassword, resetPassword,
+    updateUserDetails, googleSignin, updateProfilePic, signout, getUserId,searchUsernames, totalUsersCount, generateUniqueGuestUser, 
+    verifyAndDeleteGuestUser, updateUserWeight, getUserByUsername, updateTermsAcceptance, googleSignout} 
+    = require('../Controllers/userController')
 
-userRouter.get('/test', tester)
 
+userRouter.post('/refresh-token', createRefreshToken)
 userRouter.post('/signup', isLogout, createUser)    
 userRouter.post('/sendOtp', sendOtp)                                                                                                         //isLogout, 
 userRouter.post('/verifyOtp', verifyOtp)                                                                                                     //isLogout,

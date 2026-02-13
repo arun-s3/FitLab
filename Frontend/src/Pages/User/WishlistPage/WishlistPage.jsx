@@ -16,7 +16,7 @@ import {getAllWishlistProducts, getUserWishlist, searchList} from '../../../Slic
 import {getTheCart} from '../../../Slices/cartSlice'
 import CartSidebar from '../../../Components/CartSidebar/CartSidebar'
 import AuthPrompt from '../../../Components/AuthPrompt/AuthPrompt'
-import {UserPageLayoutContext} from '../UserPageLayout/UserPageLayout'
+import {UserPageLayoutContext} from '../../../Layouts/UserPageLayout/UserPageLayout'
 import {ProtectedUserContext} from '../../../Components/ProtectedUserRoutes/ProtectedUserRoutes'
 
 

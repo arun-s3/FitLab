@@ -8,7 +8,7 @@ import {RiArrowDropDownLine} from "react-icons/ri"
 import {toast} from 'react-toastify'
 import {toast as sonnerToast} from 'sonner'
 
-import {UserPageLayoutContext} from '../UserPageLayout/UserPageLayout'
+import {UserPageLayoutContext} from '../../../Layouts/UserPageLayout/UserPageLayout'
 import ResetPasswordBox from "../../../Components/ResetPasswordBox/ResetPasswordBox"
 import {SingleDateSelector} from '../../../Components/Calender/Calender' 
 import {updateUserDetails, resetStates as resetUserStates} from '../../../Slices/userSlice'

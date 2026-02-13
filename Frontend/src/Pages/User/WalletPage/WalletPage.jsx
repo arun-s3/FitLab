@@ -20,7 +20,7 @@ import AutoRechargeModal from "./Modals/AutoRechargeModal"
 import CardExistsWarningModal from "./Modals/CardExistsWarningModal"
 import WalletUtilitySection from "./WalletUtilitySection"
 import {ProtectedUserContext} from '../../../Components/ProtectedUserRoutes/ProtectedUserRoutes'
-import {UserPageLayoutContext} from '../UserPageLayout/UserPageLayout'
+import {UserPageLayoutContext} from '../../../Layouts/UserPageLayout/UserPageLayout'
 import {decryptData} from '../../../Utils/decryption'
 import {getOrCreateWallet, updateAutoRechargeSettings, resetWalletStates} from '../../../Slices/walletSlice'
 

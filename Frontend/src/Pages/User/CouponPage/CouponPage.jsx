@@ -9,7 +9,7 @@ import CouponTools from "./CouponTools"
 import CouponList from "./CouponList"
 import RemoveCouponModal from "./RemoveCouponModal"
 import AuthPrompt from '../../../Components/AuthPrompt/AuthPrompt'
-import {UserPageLayoutContext} from '../UserPageLayout/UserPageLayout'
+import {UserPageLayoutContext} from '../../../Layouts/UserPageLayout/UserPageLayout'
 import {ProtectedUserContext} from '../../../Components/ProtectedUserRoutes/ProtectedUserRoutes'
 import {getEligibleCoupons} from '../../../Slices/couponSlice'
 import {applyCoupon, removeCoupon, getTheCart, resetCartStates} from '../../../Slices/cartSlice'

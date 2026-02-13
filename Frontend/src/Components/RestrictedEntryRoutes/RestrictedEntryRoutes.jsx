@@ -8,7 +8,7 @@ export default function RestrictedEntryRoutes({redirectTo = null}){
 
     const location = useLocation()
 
-    const redirectToPage = redirectTo ? `/${redirectTo}` : '/403'
+    const redirectToPage = redirectTo ? `/${redirectTo}` : '/error/403'
 
     useEffect(()=> {
         if(!location.state?.NoDirectAccess){

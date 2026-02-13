@@ -14,7 +14,6 @@ import Logo from '../../../Components/Logo/Logo'
 import {resetStates, adminSignin} from '../../../Slices/adminSlice'
 
 
-
 export default function AdminSignInPage(){
 
     const bgImg = {
@@ -52,7 +51,7 @@ export default function AdminSignInPage(){
 
     useEffect(()=> {
         if(user){
-            navigate('/401', {
+            navigate('/error/401', {
                 replace: true,
                 state: { NoDirectAccess: true },
             })

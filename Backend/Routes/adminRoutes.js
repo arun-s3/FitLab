@@ -7,7 +7,7 @@ const {signinAdmin, signoutAdmin, showUsers, updateRiskyUserStatus, toggleBlockU
 const {updateUserDetails, updateProfilePic, resetPassword} = require('../Controllers/userController')
 
 
-adminRouter.post('/signin', signinAdmin) 
+adminRouter.post("/signin", isLogout, signinAdmin) 
 adminRouter.get('/signout', isLogin, signoutAdmin)
 adminRouter.post("/update", isLogin, authorizeAdmin, updateUserDetails)
 adminRouter.post("/password/update", isLogin, authorizeAdmin, resetPassword)

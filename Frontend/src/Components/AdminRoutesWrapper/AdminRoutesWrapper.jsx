@@ -8,9 +8,6 @@ import {resetStore} from "../../Store/resetActions"
 export default function AdminRoutesWrapper(){
 
     const dispatch = useDispatch()
-    const {user} = useSelector(state=> state.user)
-
-    const navigate = useNavigate()
 
     useEffect(()=> {
         const syncLogout = (e)=> {

@@ -344,10 +344,10 @@ function InputField({ label, Icon, name, value, requiredMsg, onChange, onBlur, d
                     onBlur={onBlur}
                     disabled={disabled}
                     className={`w-full py-2 pr-4 rounded-lg border
-            ${Icon ? "pl-10" : "pl-4"}
-            ${error ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-purple-600"}
-            focus:ring-2 focus:border-transparent
-            disabled:bg-gray-50`}
+                        ${Icon ? "pl-10" : "pl-4"}
+                        ${error ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-purple-600"}
+                        focus:ring-2 focus:border-transparent
+                        disabled:bg-gray-50`}
                 />
             </div>
 

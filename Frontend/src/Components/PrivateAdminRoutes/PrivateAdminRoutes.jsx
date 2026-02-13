@@ -14,7 +14,7 @@ export default function PrivateAdminRoutes(){
     return  (
 
        user && !user?.isAdmin ? 
-            <Navigate to="/401" replace state={{NoDirectAccess: true}}/>
+            <Navigate to="/error/401" replace state={{NoDirectAccess: true}}/>
             : (user && user.isAdmin && user.isVerified && !user.isBlocked) || (admin && admin.isAdmin && admin.isVerified && !admin.isBlocked)
             ? <Outlet/> 
             : <Navigate to="/admin/signin"/> 

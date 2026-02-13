@@ -10,6 +10,7 @@ export const adminSignin = createAsyncThunk('adminsignin', async(formData, thunk
     }
     catch(error){
         console.log("inside catch of adminSigin from adminSlice")
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })

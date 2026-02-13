@@ -17,7 +17,7 @@ import {CiSquareChevRight} from "react-icons/ci"
 import {RiRobot2Line} from "react-icons/ri"
 import {MapPinned, Headset} from "lucide-react"
 
-import AdminHeader from '../AdminHeader/AdminHeader'
+import AdminHeader from '../../Components/AdminHeader/AdminHeader'
 import {adminSignout} from '../../Slices/adminSlice'
 
 

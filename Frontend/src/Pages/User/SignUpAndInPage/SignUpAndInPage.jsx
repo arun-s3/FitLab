@@ -131,7 +131,7 @@ export default function SignUpAndInPage({type}){
             navigate("/", { replace: true })
         }
         if (admin) {
-            navigate("/403", {
+            navigate("/error/403", {
                 replace: true,
                 state: { NoDirectAccess: true },
             })
@@ -215,7 +215,7 @@ export default function SignUpAndInPage({type}){
         e.preventDefault()
         console.log("Inside submitData()--")
         if((type=="signup"? Object.keys(formData).length<5: Object.keys(formData).length<2) || Object.values(formData).find(inputValues=>inputValues==='undefined')){
-            if(!formData.size){
+            if(!Object.keys(formData).length){
                 console.log("No Fields entered!")
                 sonnerToast.error("Please enter all the fields!")
             }

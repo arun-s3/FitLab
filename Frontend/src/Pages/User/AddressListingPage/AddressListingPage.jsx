@@ -9,7 +9,7 @@ import {toast as sonnerToast} from 'sonner'
 
 import AddressLists from './AddressLists'
 import DeleteAddressModal from './DeleteAddressModal'
-import {UserPageLayoutContext} from '../UserPageLayout/UserPageLayout'
+import {UserPageLayoutContext} from '../../../Layouts/UserPageLayout/UserPageLayout'
 import {getAllAddress, deleteAddress, resetStates} from '../../../Slices/addressSlice'
 import AuthPrompt from '../../../Components/AuthPrompt/AuthPrompt'
 

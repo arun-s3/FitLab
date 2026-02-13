@@ -14,7 +14,7 @@ export default function RoutesAccessWrapper(){
     return  (
 
        admin  
-            ? <Navigate to="/403" replace state={{NoDirectAccess: true}}/>
+            ? <Navigate to="/error/403" replace state={{NoDirectAccess: true}}/>
             : <Outlet/> 
     )
 }

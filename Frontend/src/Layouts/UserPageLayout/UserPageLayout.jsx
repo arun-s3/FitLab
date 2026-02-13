@@ -2,10 +2,10 @@ import React, {createContext, useState} from 'react'
 import {Outlet} from 'react-router-dom'
 import {useSelector, useDispatch} from 'react-redux'
 
-import Header from '../../../Components/Header/Header'
-import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
-import UserSidebar from '../../../Components/UserSidebar/UserSidebar'
-import Footer from '../../../Components/Footer/Footer'
+import Header from '../../Components/Header/Header'
+import BreadcrumbBar from '../../Components/BreadcrumbBar/BreadcrumbBar'
+import UserSidebar from '../../Components/UserSidebar/UserSidebar'
+import Footer from '../../Components/Footer/Footer'
 
 export const UserPageLayoutContext = createContext()
 

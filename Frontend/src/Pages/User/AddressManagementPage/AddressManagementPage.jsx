@@ -7,7 +7,7 @@ import {toast as sonnerToast} from 'sonner'
 import {toast} from 'react-toastify'
 
 import AddressFields from './AddressFields'
-import {UserPageLayoutContext} from '../UserPageLayout/UserPageLayout'
+import {UserPageLayoutContext} from '../../../Layouts/UserPageLayout/UserPageLayout'
 import {createNewAddress, editAddress, resetStates} from '../../../Slices/addressSlice'
 import AuthPrompt from '../../../Components/AuthPrompt/AuthPrompt'
 

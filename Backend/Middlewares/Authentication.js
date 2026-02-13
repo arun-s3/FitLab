@@ -54,7 +54,7 @@ const authorizeAdmin = async(req,res,next)=>{
 
 const isLogout = (req,res,next)=>{
    try{
-        if(!req.cookies.jwt){
+        if(!req.cookies.accessToken){
             next()
         }
         else{

@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken")
+const RefreshToken = require("../Models/refreshTokenModel");
 const isProd = process.env.NODE_ENV === "production"
 
 
@@ -20,10 +21,16 @@ const generateRefreshToken = (userId) => {
     )
 }
 
-const sendTokens = (res, userId) => {
+const sendTokens = async(res, userId) => {
     console.log("Inside sendTokens()..")
     const accessToken = generateAccessToken(userId);
     const refreshToken = generateRefreshToken(userId);
+
+    await RefreshToken.create({
+        user: userId,
+        token: refreshToken,
+        expiresAt: new Date(Date.now() + 10 * 24 * 60 * 60 * 1000),
+    });
 
     res.cookie("accessToken", accessToken, {
         httpOnly: true,

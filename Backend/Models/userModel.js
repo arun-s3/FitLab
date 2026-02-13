@@ -12,10 +12,12 @@ const userSchema = mongoose.Schema({
         required:true,
         unique:true
     },
-    password:{
-        type:String,
-        required:true,
-        maxlength:100
+    password: {
+        type: String,
+        required: function () {
+            return !this.googleId; 
+        },
+        maxlength: 100
     },
     firstName:{
         type:String,
@@ -25,10 +27,18 @@ const userSchema = mongoose.Schema({
         type:String,
         default: null
     },
-    mobile:{
-        type:Number,
-        required:true,
-        unique:true
+    mobile: {
+        type: Number,
+        required: function () {
+            return !this.googleId; 
+        },
+        unique: true,
+        sparse: true
+    },
+    googleId: {
+        type: String,
+        unique: true,
+        sparse: true
     },
     profilePic:{
         type:String,
@@ -59,6 +69,11 @@ const userSchema = mongoose.Schema({
     isBlocked:{
         type:Boolean,
         default:false
+    },
+    authProvider: {
+        type: String,
+        enum: ["local", "google"],
+        default: "local"
     },
     riskyUserStatus: {
       type: Boolean,

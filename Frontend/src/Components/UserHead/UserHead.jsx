@@ -87,11 +87,9 @@ export default function UserHead(){
       try {
         console.log("Inside handleSignout")
         let result = null
-        if(user.googleId){
-            result = await dispatch(signout(user.googleId)).unwrap()
-        }else{
-            result = await dispatch(signout()).unwrap()
-        }
+
+        result = await dispatch(signout()).unwrap()
+
         console.log("Signout success:", result)
         if(result){
             await persistor.purge()
@@ -111,7 +109,7 @@ export default function UserHead(){
     return(
             <div className='ml-[70px] relative' onMouseEnter={toggleList.showList} onMouseLeave={mouseLeaveHandler} onClick={clickHandler}> 
                 <div className='flex' onMouseEnter={toggleList.showList}>  
-                    <div className='w-[33px] h-[33px] rounded-[15px]' id="image">
+                    <div className='w-[33px] h-[33px] rounded-[15px] border-2 border-dropdownBorder' id="image">
                         <img src={profilePic} alt="" className='rounded-[15px]' id="image"/>
                     </div>
                     <div className='self-end' id="dropdown">

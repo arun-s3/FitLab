@@ -2,8 +2,11 @@ const User = require('../Models/userModel')
 const Order = require('../Models/orderModel')
 const Address = require('../Models/addressModel')
 const bcryptjs = require('bcryptjs')
+
 const {errorHandler} = require('../Utils/errorHandler')
-const {generateToken, verifyToken} = require('../Utils/jwt')
+const {sendTokens, verifyRefreshToken} = require('../Utils/jwt')
+const RefreshToken = require("../Models/refreshTokenModel");
+
 const user = require('../Models/userModel') // CHECK IF THIS IS NEEDED(MAYBE THE REASON OF OTHER RANDOM ERRORS
 
 const tester = async(req,res)=>{ res.send("AdminTest-- Success")}
@@ -47,7 +50,7 @@ const signinAdmin = async(req,res,next)=>{
                     const passwordMatched = await bcryptjs.compare(password, userData.password)
                     console.log("passwordMatchd-->"+passwordMatched)
                     if(passwordMatched){
-                        const token = generateToken(res,userData._id)
+                        const token = await sendTokens(res,userData._id)
                         console.log("token inside signinControllr-->"+token)
                         console.log("userData from backend-->"+userData)
                         // console.log("from signin controller--JWT Cookie inserted-->"+res.cookies)
@@ -72,17 +75,34 @@ const signinAdmin = async(req,res,next)=>{
  } 
 }
 
-const signoutAdmin = (req,res,next)=>{
+const signoutAdmin = async(req,res,next)=>{
     console.log("Inside signoutAdmin controller")
     console.log("JWT Cookie from signout controller-->"+req.cookies.jwt)
     try{
         const isProd = process.env.NODE_ENV === "production"
-        res.clearCookie("jwt", {
+
+        const refreshToken = req.cookies.refreshToken;
+        
+        if (refreshToken) {
+            await RefreshToken.deleteOne({ token: refreshToken });
+        }
+
+        res.clearCookie("accessToken", {
             httpOnly: true,
             secure: isProd,
             sameSite: isProd ? "none" : "lax",
             domain: isProd ? ".fitlab.co.in" : undefined,
+            path: "/",
         })
+
+        res.clearCookie("refreshToken", {
+            httpOnly: true,
+            secure: isProd,
+            sameSite: isProd ? "none" : "lax",
+            domain: isProd ? ".fitlab.co.in" : undefined,
+            path: "/",
+        })
+
         res.status(200).json({ message: "signed out" })
     }
     catch(error){
@@ -388,6 +408,4 @@ const getUserStats = async (req, res, next) => {
 }
 
 
-
-module.exports = {tester, signinAdmin, signoutAdmin, showUsers, showUsersofStatus, toggleBlockUser, updateRiskyUserStatus, 
-    getUserStats}
+module.exports = {signinAdmin, signoutAdmin, showUsers, showUsersofStatus, toggleBlockUser, updateRiskyUserStatus, getUserStats}

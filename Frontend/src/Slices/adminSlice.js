@@ -102,7 +102,6 @@ export const updateRiskyUserStatus = createAsyncThunk('updateRiskyUserStatus', a
 })
 
 const initialState = {
-    adminToken: null,
     admin: null,
     adminError:null,
     adminLoading:false,
@@ -139,10 +138,8 @@ const adminSlice = createSlice({
             state.adminLoading = false
             state.adminError = null
             state.adminSuccess = true
-            state.adminToken = action.payload.adminToken
             state.admin = action.payload.admin
             console.log("adminData from adminSlice--admin-->"+JSON.stringify(state.admin))
-            console.log("adminToken from adminSlice--adminToken-->"+JSON.stringify(state.adminToken))
             console.log("message from adminSlice-->"+JSON.stringify(action.payload.message))
         })
         .addCase(adminSignin.rejected, (state,action)=>{
@@ -155,13 +152,10 @@ const adminSlice = createSlice({
         })
         .addCase(adminSignout.fulfilled, (state,action)=>{
            console.log("inside adminSignout.fulfilled, action.payload"+JSON.stringify(action.payload))
-           state.adminToken = null
            state.admin = null
-           console.log("state.userToken now-->"+state.adminToken)
         })
         .addCase(adminSignout.rejected, (state,action)=>{
             console.log("inside adminSignout.rejected"+JSON.stringify(action.payload))
-            console.log("state.userToken now-->"+state.adminToken)
         })
         .addCase(updateAdminDetails.pending, (state,action)=>{
             state.loading = true

@@ -226,7 +226,7 @@ export default function MobileSidebar({currentPageChatBoxStatus = false, current
                               }
                               <span> {user.email.length>15? user.email.slice(0,15)+"...": user.email} </span>
                             </div>
-                            <Link onClick={()=>{ user.googleId ? dispatch(signout(user.googleId)) : dispatch(signout()) }} > 
+                            <Link onClick={()=> dispatch(signout())} > 
                               <LogOut className='h-[18px] w-[18px] text-red-500' />  
                             </Link>
                         </button>

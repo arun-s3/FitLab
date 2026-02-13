@@ -13,6 +13,7 @@ userRouter.post('/signup', isLogout, createUser)
 userRouter.post('/sendOtp', sendOtp)                                                                                                         //isLogout, 
 userRouter.post('/verifyOtp', verifyOtp)                                                                                                     //isLogout,
 userRouter.post('/signin', isLogout, loginUser)
+userRouter.post('/googleSignin', googleSignin)
 userRouter.get('/clear-cookies', clearAllCookies)
 userRouter.post('/update', isLogin, updateUserDetails)
 userRouter.post('/password/reset', isLogin, updateForgotPassword)
@@ -27,7 +28,5 @@ userRouter.get('/user/:username', isLogin, getUserByUsername)
 userRouter.post('/terms', isLogin, updateTermsAcceptance)
 userRouter.get('/guest', generateUniqueGuestUser)
 userRouter.get('/guest-check', verifyAndDeleteGuestUser)
-userRouter.post('/googleSignin', googleSignin)
-userRouter.get('/googlesignout', signout) 
 
 module.exports = userRouter 

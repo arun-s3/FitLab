@@ -44,11 +44,9 @@ export const googleSignin = createAsyncThunk('googleSignin', async(userData,thun
     }
 } )
 
-export const signout = createAsyncThunk('signout', async(googleId,thunkAPI)=>{
+export const signout = createAsyncThunk('signout', async(thunkAPI)=>{
     try{ 
-        // console.log("inside userSlice googlesignout, googleId"+googleId)
-        const response = googleId? await axios.get('/googlesignout',{withCredentials:true}) 
-                                 : await axios.get('/signout',{withCredentials:true})
+        const response = await axios.get('/signout',{withCredentials:true})
         console.log("response from signout createAsyncThunk-->"+JSON.stringify(response.data))
         return response.data
     }
@@ -118,20 +116,6 @@ export const updateTermsAcceptance = createAsyncThunk('updateTermsAcceptance', a
     }
 } ) 
 
-// export const resetPassword = resetPasswords('updateUserDetails', async({currentPassword, newPassword, confirmPassword}, thunkAPI)=>{
-//     try{
-//         console.log("inside updateUserDetails of createAsyncThunk")
-//         const response = await axios.post('/update', {currentPassword, newPassword, confirmPassword}, {withCredentials:true})
-//         console.log("returning success response from updateUserDetails createAsyncThunk..."+JSON.stringify(response)) 
-//         console.log("userDetails from updateUserDetails createAsyncThunk--"+JSON.stringify(userDetails))
-//         return response.data
-//     }
-//     catch(error){
-//         console.log("inside catch of updateUserDetails from userSlice")
-//         const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
-//         return thunkAPI.rejectWithValue(errorMessage)
-//     }
-// } )
 
 const initialState = {
     // userToken: null,

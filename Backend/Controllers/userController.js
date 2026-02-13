@@ -2,16 +2,13 @@ const User = require('../Models/userModel')
 const bcryptjs = require('bcryptjs')
 const nodemailer = require("nodemailer")
 const cloudinary = require('../Utils/cloudinary')
+const RefreshToken = require("../Models/refreshTokenModel");
 const HealthProfile = require("../Models/healthProfileModel")
 
-// const crypto = require("crypto");
 const {errorHandler} = require('../Utils/errorHandler')
 const {sendTokens, verifyRefreshToken} = require('../Utils/jwt')
 const {encryptData} = require('../Controllers/controllerUtils/encryption')
 
-
-
-const tester = async(req,res)=>{res.send("UserTest-- Success")}
 
 const securePassword = async(password)=>{
     try{
@@ -110,6 +107,11 @@ const transporter = nodemailer.createTransport({
             next(errorHandler(401, "No refresh token"))
         }
 
+        const storedToken = await RefreshToken.findOne({ token: refreshToken });
+        if (!storedToken) {
+            return next(errorHandler(403, "Refresh token not recognized"));
+        }
+
         let decoded;
         try {
             decoded = verifyRefreshToken(refreshToken);
@@ -117,10 +119,9 @@ const transporter = nodemailer.createTransport({
             next(errorHandler(403, "Invalid refresh token"))
         }
 
-        sendTokens(res, decoded.userId);
+        await sendTokens(res, decoded.userId);
 
         res.status(200).json({ message: "Token refreshed" });
-
     }
     catch (error) {
         console.log("error-createRefreshToken--", error.message)
@@ -175,7 +176,7 @@ const createUser = async(req,res,next)=>{
                 return next(errorHandler(409, "User already exists"))
             }
         if(userData){
-            const token = sendTokens(res, userData._id)
+            const token = await sendTokens(res, userData._id)
             console.log("Just befores response sent-->"+JSON.stringify(userData))
 
             res.status(201).json({message:"success", user: userData})
@@ -252,7 +253,7 @@ const loginUser = async(req,res,next)=>{
                 const passwordMatched = await bcryptjs.compare(password, userData.password)
                 console.log("passwordMatchd-->"+passwordMatched)
                 if(passwordMatched){
-                    const token = sendTokens(res,userData._id)
+                    const token = await sendTokens(res,userData._id)
                     console.log("token inside signinControllr-->"+token)
                     console.log("userData from backend-->"+userData)
                     if(userData.isBlocked){
@@ -274,6 +275,43 @@ const loginUser = async(req,res,next)=>{
  } 
 
 }
+
+
+const googleSignin = async(req,res,next)=>{
+    try{
+        const {username, email, sub:googleId, picture:profilePic} = req.body
+
+        console.log("username-->"+ username+ "email--> "+ email+ "googleId(sub) -->"+ googleId+ "profilePic(picture)"+ profilePic)
+        
+        if (!googleId || !email) {
+            return next(errorHandler(401, "Unauthorized"));
+        }
+
+        let user = await User.findOne({ email })
+
+        if(!user){
+            user = await User.create({
+                username,
+                email,
+                googleId,          
+                profilePic,
+                password: null,    
+                authProvider: "google"
+            });
+            console.log("user----->", user)
+        }
+
+        await sendTokens(res, user._id)
+
+        console.log("Success from backend, res sent")
+        res.json({message:"success", user})
+    }
+    catch(error){
+        console.log("Inside catch of googleSignin controller")
+        next(error)
+    }
+}
+
 
 const updateUserDetails = async (req, res, next) => {
   try {
@@ -448,35 +486,6 @@ const updateUserWeight = async (req, res, next) => {
     console.error("Error updating weight:", error.message)
     next(error)
   }
-}
-
-
-const googleSignin = async(req,res,next)=>{
-    try{
-        const {username, email, sub:googleId, picture:profilePic} = req.body
-        console.log("username-->"+ username+ "email--> "+ email+ "googleId(sub) -->"+ googleId+ "profilePic(picture)"+ profilePic)
-        if(googleId){
-            const token = generateToken(res, googleId)
-            console.log("Token made from googleToken from backend-->"+token)
-            console.log("COOKIE made from googleSignin backend-->"+req.cookies.jwt)
-            if(token){
-                console.log("Success from backend, res sent")
-                res.json({message:"success", token, user:{username,email,googleId,profilePic}})
-            }
-            else{
-                console.log("500 error")
-                next(errorHandler(500,"Internal Server Error"))
-            }
-        }
-        else{
-                console.log("401 error")
-                next(errorHandler(401,"Unauthorized!"))
-        }
-    }
-    catch(error){
-        console.log("Inside catch of googleSignin controller")
-        next(error)
-    }
 }
 
 
@@ -668,10 +677,16 @@ const updateTermsAcceptance = async (req, res, next) => {
 }
 
 
-const signout = (req,res,next)=>{
+const signout = async (req,res,next)=>{
     console.log("JWT Cookie from signout controller-->"+req.cookies.jwt)
     try{
         const isProd = process.env.NODE_ENV === "production"
+
+        const refreshToken = req.cookies.refreshToken;
+
+        if (refreshToken) {
+            await RefreshToken.deleteOne({ token: refreshToken });
+        }
 
         res.clearCookie("accessToken", {
             httpOnly: true,
@@ -699,6 +714,6 @@ const signout = (req,res,next)=>{
 }
 
 
-module.exports = {tester, createRefreshToken, createUser, sendOtp, verifyOtp, loginUser, clearAllCookies, updateUserDetails, updateForgotPassword,
+module.exports = {createRefreshToken, createUser, sendOtp, verifyOtp, loginUser, clearAllCookies, updateUserDetails, updateForgotPassword,
     createRefreshToken, resetPassword, updateProfilePic, googleSignin, getUserId, searchUsernames, totalUsersCount, getUserByUsername, 
     generateUniqueGuestUser, updateUserWeight, verifyAndDeleteGuestUser, updateTermsAcceptance, signout}

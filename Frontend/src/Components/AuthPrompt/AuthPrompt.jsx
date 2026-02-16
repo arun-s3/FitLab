@@ -5,7 +5,6 @@ import {motion} from "framer-motion"
 import {ShoppingCart, Heart, User, MapPin, MapPinPlus, CreditCard, TicketPercent, ShoppingBag, ArrowRight} from "lucide-react"
 
 
-
 export default function AuthPrompt(){
 
   const location = useLocation()
@@ -67,16 +66,10 @@ export default function AuthPrompt(){
           currentPage = currentPage.replace(/\//g, "_")
         }
 
-        console.log("currentPage ---->", currentPage)
         const configuration = getPageConfig(currentPage)
         setConfig(configuration)
       }
     }, [location])
-
-    useEffect(()=> {
-      console.log('config------>', config)
-    }, [config])
-
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },

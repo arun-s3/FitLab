@@ -1,7 +1,5 @@
 
 
-let optionalField = ''
-
 const regexPatterns = {
 
     usernamePattern: /^[\w-]{5,15}(?!@)$/,
@@ -16,7 +14,6 @@ const regexPatterns = {
     brandPattern: /^(?!^\d+$)[a-zA-Z0-9\s,'-]{1,50}$/, 
     subtitlePattern: /^[\w\s.,!'"-]{20,300}$/,   
     descriptionPattern: /^[\w\s.,!'"-]{30,2000}$/,
-    // additionalInformation: /^([A-Za-z\s]+)\s*[\s:\-=]?\s*([A-Za-z0-9.,%\-()\s]+)(?:\n([A-Za-z\s]+)\s*[\s:\-=]?\s*([A-Za-z0-9.,%\-()\s]+))*$/,
 
     categoryNamePattern: /^[a-zA-Z\s,'-]{2,50}$/,
     categoryDescriptionPattern: /^[a-zA-Z0-9\s.,'!?&()\n-]{2,160}$/, 
@@ -38,43 +35,30 @@ const regexPatterns = {
     
 
     validator: function(fieldName, value, errorMessage){
-        console.log("Inside main validator function, with fieldname-->", fieldName)
-        // const currentPattern = Object.keys(this).find( (pattern,index)=> {
-        //     if(pattern.toLowerCase().toString().match(fieldName.toLowerCase().toString())) return pattern[index]
-        // } )
+
         const currentPattern = Object.keys(this).find((pattern) => {
             if( pattern.toLowerCase().includes(fieldName.toLowerCase()) ) return pattern 
         }
         )
         if(currentPattern){
             if(!Array.isArray(value) && this[currentPattern].test(value)){
-                 console.log("Passed the test")
                  return {error: false, message:"success"}
             }
             if(Array.isArray(value) && value.every(item=> this[currentPattern].test(item))){
                 return {error: false, message:"success"}
             }
             else{
-                console.log("Didn't pass the test")
-                console.log("validation failed errorMessage before return from regexPatterns.validator", JSON.stringify({error: true, message:errorMessage.toString() }))
                 return {
                     error: true,
                     message: errorMessage 
                 }
             }
         }
-        else{
-            console.log("No such Field found!")
-        }
     }
 }
 
 export const handleInputValidation = (fieldName, value, options, limits)=>{
-    console.log("fieldName-->",fieldName)
-    console.log("value-->",value)
-    console.log("isArray?-->", Array.isArray(value))
-    console.log("Options-->", options)
-    console.log("Limits--->", JSON.stringify(limits))
+
     if (Array.isArray(value) && (!value.length || value.some(val => !val.trim()))){
         if( value.some(val=> val.trim()) ){
             const arrayFields = ['weights', 'stock', 'price', 'sizes', 'motorPowers', 'colors']
@@ -87,7 +71,6 @@ export const handleInputValidation = (fieldName, value, options, limits)=>{
         }
         if( value.every(val=> !val.trim()) ){
             if(options?.optionalField){ 
-                console.log("Optional field with no value, hence returning!") 
                 return{
                     error: false,
                     message: 'Optional field with no value'
@@ -102,14 +85,12 @@ export const handleInputValidation = (fieldName, value, options, limits)=>{
     }
     if(Array.isArray(value) && limits){
         if(value.join('').length < limits.minChar){
-            console.log("Inside array limits validation")
             return{
                 error: true,
                 message: `There must be atleast ${limits.minChar} characters!`
             }
         }
         if(value.join('').length > limits.maxChar){
-            console.log("Inside array limits validation")
             return{
                 error: true,
                 message: `Only ${limits.maxChar} characters are allowed!`
@@ -118,7 +99,6 @@ export const handleInputValidation = (fieldName, value, options, limits)=>{
     }
     if(!Array.isArray(value) && !value.trim().length){
         if(options?.optionalField){ 
-            console.log("Optional field with no value, hence returning!") 
             return{
                 error: false,
                 message: 'Optional field with no value'
@@ -131,7 +111,6 @@ export const handleInputValidation = (fieldName, value, options, limits)=>{
         }
     }
     else{
-        console.log("Going to switch---")
         switch(fieldName){
             case "username":
                 return regexPatterns.validator(fieldName, value,"Username can be alphanumeric. Avoid special characters and must have atleast 5 letters!")
@@ -156,8 +135,6 @@ export const handleInputValidation = (fieldName, value, options, limits)=>{
                 return regexPatterns.validator(fieldName, value, "Please enter a valid product Subtitle! Must have atleast 20 characters and shouldn't cross 300 characters.")
             case "description":
                 return regexPatterns.validator(fieldName, value, "Please enter a valid product Description! Must have atleast 30 characters.(Max 2000 characters only allowed)")
-            // case "additionalInformation":
-                // return regexPatterns.validator(fieldName, value, "Please enter a valid product information! Must have atleast 30 characters.(Max 2000 characters only allowed)")
             
             case "categoryName":
                 return regexPatterns.validator(fieldName, value, "Please enter a valid Category name! Must be under 50 characters.")
@@ -191,34 +168,18 @@ export const handleInputValidation = (fieldName, value, options, limits)=>{
                 return regexPatterns.validator(fieldName, value, "Please enter a valid email address!")
             case "deliveryInstructions":
                 return regexPatterns.validator(fieldName, value, "Please enter a valid instructions! Must have atleast 30 characters and under 200 words. Also ;^*+=~`{}|<> are not allowed")
-            
-            default: {console.log(`Validation failed: Unrecognized field '${fieldName}'`)}
         }
     }
 }
 
-// export const displaySuccess = (e, options)=>{
-//     console.log("Success!")
-//     e.target.style.borderColor = 'green'
-//     if(!options?.optionalMsg){
-//         if(e.target.nextElementSibling.classList.contains('error')){
-//              e.target.nextElementSibling.style.visibility = 'hidden'
-//         }else{
-//             e.target.closest('.error').style.visibility = 'hidden'
-//         }
-//     }
-// }
 export const displaySuccess = (e, options = {}) => {
-    console.log("Success!")
     e.target.style.borderColor = 'green'
     if(options.optionalMsg){
-      console.log(options.optionalMsg)
     }else{
       let errorElement = e.target.nextElementSibling
         while(!errorElement.classList.contains('error')){
             errorElement = errorElement.nextElementSibling
         }
-      console.log("errorElement-->", errorElement)
       if(errorElement){
         errorElement.style.visibility = 'hidden'
       }
@@ -228,36 +189,27 @@ export const displaySuccess = (e, options = {}) => {
 export const displayErrorAndReturnNewFormData = (e, message, formData, fieldName)=>{
     e.target.style.borderColor = 'red'
     let errorDisplayer;
+
     if (e.target.nextElementSibling.classList.contains('error')){
         errorDisplayer = e.target.nextElementSibling
     }else errorDisplayer = e.target.nextElementSibling.nextElementSibling
-    console.log('errorDisplayer--->', errorDisplayer)
+
     errorDisplayer.style.visibility = 'visible'
     errorDisplayer.style.color = 'rgb(239,68,68)'
-    console.log("msg from displayError-->"+message)
     delete formData[fieldName]
     errorDisplayer.innerText = message.toString()
     errorDisplayer.click()
+
     return formData
 }
 
 export const cancelErrorState = (e, borderColor = 'transparent', options)=>{
-    console.log("Inside errorHandler cancelErrorState")
-    // console.log("e.target.previousElementSibling.value()"+ e.target.previousElementSibling.value)
     let inputElement = e.target.previousElementSibling;
     while (inputElement.tagName !== 'INPUT' && inputElement.tagName !== 'TEXTAREA'){
         inputElement = inputElement.previousElementSibling
     } 
-    if (inputElement) {
-        console.log("Found input element:", inputElement);
-    } else {
-        console.log("No input element found.");
-    }
-    console.log("e.target-->", e.target)
-    console.log("e.target.innerText-->",e.target.innerText)
+
     if(e.target.innerText.endsWith('empty')){
-        console.log("Inside cancelErrorState if e.target.innerText.endsWith('empty')")
-        console.log("Optional Message-->", options?.optionalMsg)
         setTimeout(()=>{
             e.target.innerText = options.optionalMsg ? options.optionalMsg : ''
             conosle.log('ErrorMsg cleared..')

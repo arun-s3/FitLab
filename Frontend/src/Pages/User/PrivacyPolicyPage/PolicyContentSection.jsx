@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "framer-motion"
 
 export default function PolicyContentSection({activeSectionIndex, activeSectionData}) {
 
-
   const fadeInOut = {
     initial: { opacity: 0, y: 10 },
     animate: { opacity: 1, y: 0 },

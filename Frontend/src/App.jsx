@@ -9,8 +9,6 @@ import UserRoutes from './Routes/UserRoutes'
 import AdminRoutes from './Routes/AdminRoutes'
 import ErrorRoutes from './Routes/ErrorRoutes'
 
-import ErrorPage404 from "./Pages/Errors/404ErrorPage"
-
 
 export default function App(){
     
@@ -24,7 +22,6 @@ export default function App(){
                 <Route path='/*' element={<UserRoutes />} />
                 <Route path='/admin/*' element={<AdminRoutes />} />
                 <Route path='/error/*' element={<ErrorRoutes />} />
-                {/* <Route path='*' element={<ErrorPage404 />} /> */}
             </Routes>
         </BrowserRouter>
     )

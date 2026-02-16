@@ -50,7 +50,7 @@ export default function WishlistModal({ isOpen, onClose, listDetails, setLoading
               const response = await fetch(url, {mode: 'cors'})
               return await response.blob()
           } catch (error) {
-              console.log("Error in convertToBlob-->", error.message)
+              sonnerToast.error("Error loading thumbnail")
           }
         }
         const blob = await convertToBlob(thumbnail.url)
@@ -135,7 +135,6 @@ export default function WishlistModal({ isOpen, onClose, listDetails, setLoading
     formData.append('image', newBlob, 'listThumbnail')
 
     if(!wishlistDetails.name){
-      console.log("No name entered!")
       sonnerToast.error("Please enter the name!")
       return
     }

@@ -1,11 +1,14 @@
 import React from "react"
 import { motion } from "framer-motion"
+
 import { Phone, Mail, MapPin, Target, Eye } from "lucide-react"
 import { CiFacebook } from "react-icons/ci";
 import { FaGoogle, FaInstagram, FaFacebookF } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 
+
 export default function ContactUsModule() {
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -78,7 +81,6 @@ export default function ContactUsModule() {
         </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-12 items-start">
-          {/* Contact Information */}
           <motion.div
             variants={containerVariants}
             initial="hidden"
@@ -86,7 +88,6 @@ export default function ContactUsModule() {
             viewport={{ once: true, amount: 0.3 }}
             className="space-y-8 relative"
           >
-            {/* Contact Details */}
             <div className="space-y-6">
               <motion.div
                 variants={itemVariants}
@@ -137,7 +138,6 @@ export default function ContactUsModule() {
               </motion.div>
             </div>
 
-            {/* Social Media */}
             <motion.div variants={itemVariants} className="pt-6 border-t border-gray-200">
               <p className="text-sm text-gray-300 font-medium mb-4">Follow us on social media</p>
               <div className="flex space-x-4">
@@ -185,7 +185,6 @@ export default function ContactUsModule() {
             </motion.div>
           </motion.div>
 
-          {/* Mission & Vision */}
           <motion.div
             variants={containerVariants}
             initial="hidden"
@@ -193,7 +192,6 @@ export default function ContactUsModule() {
             viewport={{ once: true, amount: 0.3 }}
             className="space-y-8"
           >
-            {/* Mission */}
             <motion.div
               variants={itemVariants}
               className="bg-gradient-to-br from-blue-600 to-blue-700 p-8 rounded-2xl text-white shadow-lg hover:shadow-xl transition-shadow duration-300"
@@ -210,7 +208,6 @@ export default function ContactUsModule() {
               </p>
             </motion.div>
 
-            {/* Vision */}
             <motion.div
               variants={itemVariants}
               className="bg-gradient-to-br from-purple-600 to-purple-700 p-8 rounded-2xl text-white shadow-lg hover:shadow-xl transition-shadow duration-300"

@@ -30,33 +30,23 @@ export default function OfferShowcase({sectionStyle, containerStyle, headlineSty
   const dispatch = useDispatch()
 
   useEffect(()=> {
-    console.log("currentPage------->", currentPage)
     if(user && Object.keys(queryOptions).length > 0){
-        console.log("Dispatching getAllOffers()...")
         dispatch( getAllOffers({queryOptions: {...queryOptions, userId: user._id, page: currentPage}}) )
     }
     else if(!user && Object.keys(queryOptions).length > 0){
-        console.log("Dispatching getAllOffers()...")
         dispatch( getAllOffers({queryOptions: {...queryOptions, page: currentPage}}) )
     }
   }, [currentPage, queryOptions, user])
 
   useEffect(()=> {
-      console.log("offers------->", offers)
-      console.log("totalOffers------->", totalOffers)
       if(offers && offers.length > 0){
           setCurrentOffer(offers[0])
           const thumbnail = offers[0].applicableType === 'products' 
                   ? offers[0].applicableProducts?.[0]?.thumbnail.url 
                   : offers[0].applicableCategories?.[0]?.image.url
-          console.log("thumbnail------->", thumbnail)
           setAltOfferBanner(thumbnail)
       }
   }, [offers])
-
-  useEffect(()=> {
-    console.log("openModal------->", openModal)
-  }, [openModal])
 
   const handlePrevious = () => {
     if(currentPage - 1 === 0){

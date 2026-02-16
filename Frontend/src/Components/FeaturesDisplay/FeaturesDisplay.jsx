@@ -3,7 +3,6 @@ import React from 'react'
 
 export default function FeaturesDisplay({darkVariant = false, topRoom = true}){
 
-
   const features = [
     {
       title: 'Product Support',

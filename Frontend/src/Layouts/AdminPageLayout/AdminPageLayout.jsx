@@ -163,7 +163,6 @@ export default function AdminPageLayout(){
     
     const logoutAdmin = ()=> {
         dispatch(adminSignout())
-        console.log("Dispatching adminSignout()....")
     }
 
     const container = {

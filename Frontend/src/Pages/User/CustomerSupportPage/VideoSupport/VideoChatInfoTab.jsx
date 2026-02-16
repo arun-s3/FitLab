@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 
-import { PhoneOff, Video, VideoOff, Mic, MicOff, Minimize2, Maximize2, User, Clock } from "lucide-react"
+import { PhoneOff, Video, User, Clock } from "lucide-react"
 
 
 export default function VideoChatInfoTab({ startVideoCall, declineVideoCall }) {

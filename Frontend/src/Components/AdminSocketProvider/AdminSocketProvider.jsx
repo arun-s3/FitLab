@@ -39,7 +39,6 @@ export default function AdminSocketProvider() {
     socket.on("connect", () => {
       setIsConnected(true)
       socket.emit("admin-login", { adminId: "admin_1", adminName })
-      console.log("Admin going to join all rooms...")
       socket.emit("admin-joins-every-rooms")
 
       socket.emit('count-all-guests')
@@ -50,12 +49,10 @@ export default function AdminSocketProvider() {
     })
 
     socket.on("let-user-connect-admin", (roomId)=> {
-      console.log("Inside let-user-connect-admin and Emiting admin-permits-user-connection...")
       socket.emit("admin-permits-user-connection", roomId)
     })
 
     socket.on("chat-history-with-user", (messages) => {
-      console.log("chat-history with user receieved----->", messages)
       if(messages.length > 0){
         setMessages(msgs=> ({...msgs, [messages[0].sender]: messages}))
       }
@@ -96,19 +93,17 @@ export default function AdminSocketProvider() {
     // }) ---> Test this later for admin multiple tab synchronous
 
     socket.on("receive-message", (message) => {
-      // if(message.sender !== adminName){
-        console.log("Message received from user--->", message)
         setMessages((prev) => ({
           ...prev,
           [message.sender]: [...(prev[message.sender] || []), message],
         }))
     })
 
-    socket.on("new-message-notification", (message) => {
-      if (!message.isAdmin) {
-        console.log("New message from user:", message.sender)
-      }
-    })
+    // socket.on("new-message-notification", (message) => {
+    //   if (!message.isAdmin) {
+    //     console.log("New message from user:", message.sender)
+    //   }
+    // })
 
     socket.on("user-typing-admin", (data) => {
       setTypingUsers((prev) => ({
@@ -125,7 +120,6 @@ export default function AdminSocketProvider() {
     })
 
     socket.on('guest-counts', (count)=> {
-      console.log("Guest count-->", count)
       setGuestCount(count)
     }) 
 
@@ -134,7 +128,6 @@ export default function AdminSocketProvider() {
     }) 
 
     socket.on('notification-error', (message)=> {
-      console.log("Notification error-->", message)
       sonnerToast.error(message)
     }) 
 
@@ -145,15 +138,9 @@ export default function AdminSocketProvider() {
     }
   }, [])
 
-  useEffect(()=> {
-    console.log("activeUsers--->", activeUsers)
-  }, [activeUsers])
-
   const handleSendMessage = (e, selectedUser) => {
     e.preventDefault()
     if (!newMessage.trim() || !socket || !selectedUser) return
-
-    console.log()
 
     const messageData = {
       roomId: selectedUser.userId,
@@ -224,7 +211,6 @@ export default function AdminSocketProvider() {
   }
 
   const sendUserNotification = (data)=> {
-    console.log("Emiting admin-send-notification...")
     socket.emit("admin-send-notification", data)
   }
 

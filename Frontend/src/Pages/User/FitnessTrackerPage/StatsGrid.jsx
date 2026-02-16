@@ -2,7 +2,9 @@ import React, {useState, useEffect} from "react"
 import './FitnessTrackerStyles.css'
 import {motion, AnimatePresence} from "framer-motion"
 
-import axios from 'axios'
+import apiClient from '../../../Api/apiClient'
+import {toast as sonnerToast} from 'sonner' 
+
 
 const TrendingIcon = () => (
   <svg className="w-5 h-5 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -72,14 +74,11 @@ export default function StatsGrid({ timeRange, onFetchedDatas }) {
     const baseApiUrl = import.meta.env.VITE_API_BASE_URL
   
     useEffect(() => {
-      const fetchAllStats = async ()=> {
-        console.log("Inside fetchAllStats()..")
-    
+      const fetchAllStats = async ()=> {    
         setLoading(true) 
         try{
-          const response = await axios.get(`${baseApiUrl}/fitness/tracker/stats/${timeRange}`, { withCredentials: true })
+          const response = await apiClient.get(`${baseApiUrl}/fitness/tracker/stats/${timeRange}`)
           if(response.status === 200){
-            console.log("response.data.weekStats------->", response.data.weekStats)
             const {totalWorkouts, totalVolumes, totalCaloriesBurned, currentStreak} = response.data.stats
             onFetchedDatas("stats", {totalWorkouts, totalVolumes, totalCaloriesBurned, currentStreak})
             setStatCards((prev) =>
@@ -99,15 +98,15 @@ export default function StatsGrid({ timeRange, onFetchedDatas }) {
                 return card;
               })
             )
-            setLoading(false)
           }
-          if(response.status === 400 || response.status === 404){
-            console.log("Error---->", error.response.data.message)
+        }catch(error) {
+          if (!error.response) {
+                sonnerToast.error("Network error. Please check your internet.")
+            } else {
+                sonnerToast.error("Some error occured while loading the charts")
+            }
+        }finally {
             setLoading(false)
-          }
-        }catch(error){
-          console.error("Error during saving workoutInfo", error.message)
-          setLoading(false)
         }
       }
     

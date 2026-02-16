@@ -3,14 +3,13 @@ import './CartSidebar.css'
 import {useNavigate} from 'react-router-dom'
 import {useSelector, useDispatch} from 'react-redux'
 
-import {X, Minus, Plus, ChevronRight, ShoppingCart, SquareArrowOutUpLeft, Trash, Trash2, Check, Circle, BadgePlus} from 'lucide-react'
+import {X, Minus, Plus, ChevronRight, ShoppingCart, SquareArrowOutUpLeft, Trash, Trash2, Check, BadgePlus} from 'lucide-react'
 import {toast} from 'react-toastify'
 import {toast as sonnerToast} from 'sonner'
 
 import {SiteSecondaryFillImpButton} from '../SiteButtons/SiteButtons'
 import ProductRemovalModal from '../ProductRemovalModal/ProductRemovalModal'
 import {addToCart, reduceFromCart, removeFromCart, getTheCart, resetCartStates} from '../../Slices/cartSlice'
-
 
 
 export default function CartSidebar({ isOpen, onClose, retractedView }) {
@@ -27,26 +26,20 @@ export default function CartSidebar({ isOpen, onClose, retractedView }) {
 
   const dispatch = useDispatch()
 
-
   useEffect(()=> {
     if(cart?.products){
-      console.log("Inside useEffect of ProductList before setting packedupCart..", packedupCart)
       setPackedupCart(cart)
-      // setIsCartOpen(true)
     }
     if(error){
-        sonnerToast.error(error, {description: "Please try again!"})
-        dispatch(resetCartStates())
+      sonnerToast.error(error, {description: "Please try again!"})
+      dispatch(resetCartStates())
     }
     if(error && error.toLowerCase().includes('product')){
-      console.log("Error from ProductDetailPage-->", error)
       toast.error(error)
       dispatch(resetCartStates())
     }
     if(productAdded){
-      console.log("Product added to cart successfully!")
       setPackedupCart(cart)
-      // setIsCartOpen(true)
       dispatch(resetCartStates())
     }
     if(productRemoved){
@@ -57,21 +50,10 @@ export default function CartSidebar({ isOpen, onClose, retractedView }) {
   },[error, productAdded, productRemoved, cart])
 
   useEffect(()=> {
-    if(packedupCart){
-      console.log("packedupCart--->", packedupCart) 
-    }
-    console.log("packedupCart?.products?.length !== 0", packedupCart?.products?.length !== 0)
-    console.log("scaleDownSidebar---->", scaleDownSidebar)
     if(packedupCart?.products && packedupCart.products.length <= 0){
-      console.log("Closing sidebar...")
       onClose()
     }
   },[packedupCart])
-
-  useEffect(()=> {
-    console.log('productToRemove---->', productToRemove)
-    console.log('isProductRemovalModalOpen---->', isProductRemovalModalOpen)
-  },[productToRemove, isProductRemovalModalOpen,])
 
   const removeProductFromCart = (id, name)=> {
     setProductToRemove({id, name})
@@ -100,7 +82,6 @@ export default function CartSidebar({ isOpen, onClose, retractedView }) {
   }
        
   const removeFromTheCart = (id) => {
-    console.log("id--->", id)
     dispatch( removeFromCart({productId: id}) )
   }
 

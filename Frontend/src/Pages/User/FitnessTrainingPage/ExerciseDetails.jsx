@@ -3,7 +3,7 @@ import React, {useState, useEffect, useRef} from 'react'
 import {motion} from 'framer-motion'
 
 import {ArrowLeft} from 'lucide-react'
-import axios from 'axios'
+import apiClient from '../../../Api/apiClient'
 
 import ExerciseVideos from './ExerciseVideos'
 import ExerciseDifficultyStars from './ExerciseDifficultyStars'
@@ -31,17 +31,16 @@ export default function ExerciseDetails({exercise, onGoBack}) {
     if(!exercise.name) return 
     async function loadExerciseBasedProducts(){
       try{
-        console.log("Inside loadExerciseBasedProducts()....")
-        const response = await axios.get(
-          `${baseApiUrl}/products/exercise?exercise=${encodeURIComponent(exercise.name)}&muscle=${encodeURIComponent(exercise.targetMuscles[0])}`,
-           {withCredentials: true}
+        const response = await apiClient.get(
+          `${baseApiUrl}/products/exercise?exercise=${encodeURIComponent(exercise.name)}&muscle=${encodeURIComponent(exercise.targetMuscles[0])}`
         )
-        console.log("RESPONSE from loadExerciseBasedProducts---->", response)
         setExerciseBasedProducts(response.data.exerciseBasedProducts)
       }
       catch(error){
-        console.log("error from  loadExerciseBasedProducts--->", error.message)
-        sonnerToast.error("Something went wrong. Please check your network!")
+        if (!error.response) {
+            sonnerToast.error("Network error. Please check your internet.")
+        }
+        setExerciseBasedProducts([])
       }  
     }
 

@@ -1,6 +1,5 @@
 import React from 'react'
 import './SiteButtons.css'
-import {useSelector} from 'react-redux'
 import {motion} from 'framer-motion'
 
 

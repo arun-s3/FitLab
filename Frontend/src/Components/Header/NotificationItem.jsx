@@ -77,7 +77,6 @@ export default function NotificationItem({ notification, index, onMarkAsRead, on
   }
 
 
-
   return (
     <motion.div
       initial={{ opacity: 0, x: -20 }}

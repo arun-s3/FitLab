@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Calendar, Check, Clock, Star, MessageSquare, Tag, X } from "lucide-react"
 import {toast as sonnerToast} from 'sonner'
 import {toast} from "react-toastify"
-import axios from 'axios'
+import apiClient from '../../../../Api/apiClient'
 
 import useModalHelpers from '../../../../Hooks/ModalHelpers'
 
@@ -208,14 +208,20 @@ export default function ScheduleModal({ userId, isOpen, onClose }) {
 
   const bookSession = async(sessionDetails)=> {
     try{
-      const response = await axios.post(`${baseApiUrl}/video-chat/book`, sessionDetails, { withCredentials: true } )
+      const response = await apiClient.post(`${baseApiUrl}/video-chat/book`, sessionDetails)
       if(response.status === 201){
         setIsSubmitted(true)
         return true
       }else return false
     }
     catch(error){
-      console.log("Error in bookSession-->", error.message)
+      if (!error.response) {
+          sonnerToast.error("Network error. Please check your internet.")
+      } else if (error.response?.status === 400 || error.response?.status === 401 || error.response?.status === 409) {
+          sonnerToast.error(error.response.data?.message || "Something went wrong. Please try again later.")
+      } else {
+          sonnerToast.error("Something went wrong! Please retry later.")
+      }
       return false
     }
   }

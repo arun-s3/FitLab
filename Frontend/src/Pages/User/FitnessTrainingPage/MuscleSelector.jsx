@@ -19,7 +19,6 @@ export default function MuscleSelector({bodyParts, setSearchedBodyPart, onSearch
     const location = useLocation()
   
     const searchKeyword = ()=> {
-      console.log('searchData--->', searchedKeyword)
       setSearchedBodyPart(searchedKeyword)
     }
 
@@ -29,7 +28,6 @@ export default function MuscleSelector({bodyParts, setSearchedBodyPart, onSearch
         const name = queryParams.get("name")
         const parsedName = name ? JSON.parse(decodeURIComponent(name)) : null
       
-        console.log("exerciseName----->", parsedName.exerciseName)
         if(parsedName.exerciseName){
           setSearchedKeyword(parsedName.exerciseName)
           setTimeout(()=> applyRef.current?.click(), 500)

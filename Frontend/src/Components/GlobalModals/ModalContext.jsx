@@ -12,17 +12,17 @@ export default function ModalProvider({ children }){
   const openModal = (content) => {
     setModalContent(content)
     setIsOpen(true)
-  };
+  }
 
   const closeModal = () => {
     setIsOpen(false)
     setModalContent(null)
-  };
+  }
 
   return (
     <ModalContext.Provider value={{ isOpen, openModal, closeModal }}>
       {children}
       {isOpen && modalContent}
     </ModalContext.Provider>
-  );
+  )
 }

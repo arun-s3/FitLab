@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react"
-import {useSelector} from 'react-redux'
 import { motion } from "framer-motion"
 
 import { Clock, Users, ChevronsLeftRightEllipsis, CheckCircle } from "lucide-react"
@@ -12,31 +11,22 @@ export default function WaitingRoom({ socketContextItems, isAdminBusy, onCallSta
 
   const [isConnected, setIsConnected] = useState(false)
 
-  const {socket, userId, username, messages, newMessage, isTyping, messagesEndRef, handleSendMessage, handleTyping} = socketContextItems
-  console.log("socket--->", socket)
-
-
+  const {socket, userId, username} = socketContextItems
 
   useEffect(() => {
-    console.log("socket from WaitingRoom-->", socket)
     if(socket){
 
       if(userId){
-        console.log("Emiting checkAdminStatus,  userId-->", userId)
-
-        console.log("Emiting joinQueue,  userId-->", userId)
         socket.emit("joinQueue", {userId, username})
 
         socket.on("JoinedQueue", ()=> setIsConnected(true))
 
         socket.on("queueUpdate", (data) => {
-          console.log("Inside on queueUpdate...")
           setQueuePosition(data.position)
           setWaitTime(data.estimatedWaitTime)
         })
 
         socket.on("callReady", (data) => {
-          console.log("Inside on callReady...")
           onCallStart(data.sessionId)
         })
 

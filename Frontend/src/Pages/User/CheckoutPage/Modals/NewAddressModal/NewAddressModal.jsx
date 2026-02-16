@@ -125,7 +125,6 @@ export default function NewAddressModal({ isOpen, onClose, onSubmit }){
   }
 
   const handleSubmit = (e) => {
-    console.log("Inside handleSubmit")
     e.preventDefault()
 
     const newErrors = {}
@@ -142,11 +141,7 @@ export default function NewAddressModal({ isOpen, onClose, onSubmit }){
     setTouched(newTouched)
     setErrors(newErrors)
 
-    // if (Object.keys(newErrors).length === 0) {
-      console.log("Submitting formData---->", formData)
-      onSubmit(formData)
-      // onClose()
-    // }
+    onSubmit(formData)
   }
 
   const personalInfo = ["firstName", "lastName", "nickName"]

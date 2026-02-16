@@ -7,13 +7,12 @@ import CartSidebar from '../CartSidebar/CartSidebar'
 import {addToCart, removeFromCart, resetCartStates} from '../../Slices/cartSlice'
 
 
-
 export default function RetractedCartSidebar(){
 
     const [isCartOpen, setIsCartOpen] = useState(false)
     const [packedupCart, setPackedupCart] = useState({})
     
-    const {cart, productAdded, productRemoved, loading, error, message} = useSelector(state=> state.cart) 
+    const {cart, productAdded, productRemoved, error} = useSelector(state=> state.cart) 
 
     useEffect(()=> {
         if(cart?.products && cart.products.length > 0){
@@ -21,12 +20,10 @@ export default function RetractedCartSidebar(){
             setIsCartOpen(true)
         }
         if(error && error.toLowerCase().includes('product')){
-          console.log("Error from ProductDetailPage-->", error)
           sonnerToast.error(error)
           dispatch(resetCartStates())
         }
         if(productAdded){
-          console.log("Product added to cart successfully!")
           setPackedupCart(cart)
           setIsCartOpen(true)
           dispatch(resetCartStates())
@@ -37,16 +34,15 @@ export default function RetractedCartSidebar(){
         }
     },[cart, error, productAdded, productRemoved])
 
-
     const updateQuantity = (id, newQuantity) => {
         dispatch( addToCart({productId: id, quantity: newQuantity}) )
     }
-         
        
     const removeFromTheCart = (id) => {
         dispatch(removeFromCart({productId: id}))
     }
 
+    
     return (
 
       <CartSidebar isOpen={isCartOpen} onClose={()=> setIsCartOpen(false)} packedupCart={packedupCart} 

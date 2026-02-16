@@ -1,24 +1,24 @@
 import React,{useEffect, useState, useRef} from 'react'
 import './SelectCategoryForAdmin.css'
 import {useSelector, useDispatch} from 'react-redux'
-import {getAllCategories, getSingleCategory, getCategoriesOfType, getFirstLevelCategories, resetSubcategories} from '../../Slices/categorySlice'
-import {convertToCamelCase, camelToCapitalizedWords} from '../../Utils/helperFunctions'
+
+import {toast as sonnerToast} from 'sonner'
+
+import {getAllCategories, getSingleCategory, getFirstLevelCategories, resetSubcategories, resetStates} from '../../Slices/categorySlice'
+import {camelToCapitalizedWords} from '../../Utils/helperFunctions'
+
 
 export default function SelectCategoryForAdmin({category, setCategory, editCategory}){
 
     const [categoryStatus, setCategoryStatus] = useState({strength:false, cardio:false, supplements:false, accessories:false})
 
-    const {categories} = useSelector(state=> state.categoryStore)
+    const {categories, error} = useSelector(state=> state.categoryStore)
     const dispatch = useDispatch()
 
     useEffect(()=>{
         dispatch(getAllCategories())
         dispatch(resetSubcategories())
     },[])
-
-    useEffect(()=>{
-        console.log("Categories-->", JSON.stringify(categories))
-    },[categories])
 
     useEffect(() => {
         if (editCategory) {
@@ -30,29 +30,19 @@ export default function SelectCategoryForAdmin({category, setCategory, editCateg
             });
             setCategoryStatus(updatedStatus);
         }
-        console.log("editCategory-->",JSON.stringify(editCategory))
     }, [editCategory])
 
-    // useEffect(() => {
-    //     editCategory.forEach(category => {
-    //         if (Object.keys(categoryStatus.current).includes(category)) {
-    //             categoryStatus.current[category] = true;
-    //         }
-    //     });
-    //     Object.keys(categoryStatus.current).forEach(categoryKey => {
-    //         if (categoryStatus.current[categoryKey]) {
-    //             categoryStatus.current[categoryKey].checked = true;
-    //         }
-    //     });
-    // }, [editCategory]);
+    useEffect(()=> {
+        if(error){
+            sonnerToast.error(error)
+            dispatch(resetStates())
+        }
+    }, [error])
     
-
     const categorySelectHandler = (e) => {
         if (e.target.checked) {
-            console.log("Checkbox checked!");     
             if (e.target.value === 'supplements') {
                 if (category.length > 0) {
-                    console.log("Cannot select supplements along with other categories")
                     e.target.checked = false
                     return;
                 } 
@@ -60,12 +50,10 @@ export default function SelectCategoryForAdmin({category, setCategory, editCateg
             } 
             else {
                 if (category.includes('supplements')) {
-                    console.log("Cannot select other categories when supplements is selected")
                     e.target.checked = false
                     return
                 }
                 if (category.length >= 2) {
-                    console.log("Cannot select more than 2 categories")
                     e.target.checked = false
                     return
                 }
@@ -73,7 +61,6 @@ export default function SelectCategoryForAdmin({category, setCategory, editCateg
             }
         } 
         else {
-            console.log("Checkbox unchecked!");
             setCategory(category.filter(item => item !== e.target.value));
         }
     }
@@ -102,7 +89,7 @@ export default function SelectCategoryForAdmin({category, setCategory, editCateg
 
 export function SelectSubCategoryForAdmin({category, setCategory, setSubCategory, categoryImgPreview, setCategoryImgPreview}){
 
-    const [error, setError] = useState('')
+    const [errorMsg, setErrorMsg] = useState('')
     const [levelOneCategories, setLevelOneCategories] = useState([])
 
     const [nestedSubcategories, setNestedSubcategories] = useState([])
@@ -114,7 +101,7 @@ export function SelectSubCategoryForAdmin({category, setCategory, setSubCategory
 
     const [defaultDisabled, setDefaultDisabled] = useState(true)
 
-    const {categories, populatedSubCategories, firstLevelCategories} = useSelector(state=> state.categoryStore)
+    const {categories, error, populatedSubCategories, firstLevelCategories} = useSelector(state=> state.categoryStore)
     const dispatch = useDispatch()
 
     const categoryRefs = useRef({})
@@ -126,7 +113,6 @@ export function SelectSubCategoryForAdmin({category, setCategory, setSubCategory
     },[])
 
     useEffect(()=>{
-        console.log("category.length------>", category.length)
         if(category.length == 0){
             setDefaultDisabled(true)
             setCheckedCategories({})
@@ -137,12 +123,7 @@ export function SelectSubCategoryForAdmin({category, setCategory, setSubCategory
         }
     },[category])
 
-    useEffect(()=>{
-        console.log("defaultDisabled---->", defaultDisabled)
-    },[defaultDisabled])
-
     useEffect(() => {
-        console.log("firstLevelCategories from SelectSubCategoryForAdmin --->", JSON.stringify(firstLevelCategories))
         if (firstLevelCategories && firstLevelCategories.length) {
             firstLevelCategories.forEach(category => {
                 if (!categoryRefs.current[category.name]) {
@@ -151,9 +132,7 @@ export function SelectSubCategoryForAdmin({category, setCategory, setSubCategory
             })
             Object.values(categoryRefs.current).forEach(refs => {
                 if (refs?.current) {
-                    console.log("category-->",category)
                     const isActive = category.some(cat => refs.current.id.includes(cat));
-                    console.log(`isActive is ${isActive} for ${refs.current.id}`)
                     if (!isActive) {
                         refs.current.style.color = '#919191';
                         refs.current.previousElementSibling.style.color = '#919191';
@@ -175,14 +154,12 @@ export function SelectSubCategoryForAdmin({category, setCategory, setSubCategory
                     ref.current.style.color = '#757575';
                     ref.current.previousElementSibling.style.color = '#757575';
                     ref.current.inactivate = true;
-                    console.log("Activated: ", ref.current.id)
                 }
             });
         }
     }, [category]);
 
     useEffect(() => {
-        console.log("checkedCategories-->", JSON.stringify(checkedCategories))
         const subcategory = Object.values(checkedCategories)
             .map(categoryValue => {
                 if (typeof categoryValue === 'object') {
@@ -199,18 +176,14 @@ export function SelectSubCategoryForAdmin({category, setCategory, setSubCategory
 
     useEffect(()=> {
         if(populatedSubCategories && populatedSubCategories.parentName && category.length > 0 && Object.keys(checkedCategories).length > 0){
-            console.log("populatedSubCategories from useEffect of SelectCategoryForAdmin-->", JSON.stringify(populatedSubCategories))
-            console.log("populatedSubCategories from useEffect of SelectCategoryForAdmin-->", JSON.stringify(populatedSubCategories.subcategories))
             setNestedSubcategories([{parentName: [populatedSubCategories['parentName']], subcategories: populatedSubCategories.subCategories}])
         }
     },[populatedSubCategories])
 
     useEffect(()=>{
         if(checkNestedSubcategories){
-            console.log("---checkNestedSubcategories------>", JSON.stringify(checkNestedSubcategories))
             const nestedSubCat = Object.values(checkNestedSubcategories).find(cat=> typeof cat == 'object')
             if(nestedSubCat){
-                console.log("Object.values(nestedSubCat)[0]-->",Object.values(nestedSubCat)[0])
                 if( !Object.keys(nestedSubCat).find(key=> key==='subCategory') && Object.values(nestedSubCat)[0] === true ){
                     makeSubCategoryLabel(checkNestedSubcategories)
                 }
@@ -219,18 +192,23 @@ export function SelectSubCategoryForAdmin({category, setCategory, setSubCategory
     },[checkNestedSubcategories])
 
     useEffect(()=>{
-        if(error){
+        if(errorMsg){
             setTimeout(()=>{
-                setError('')
+                setErrorMsg('')
             },2500)
         }
-    },[error])
+    },[errorMsg])
+
+    useEffect(()=> {
+        if(error){
+            sonnerToast.error(error)
+            dispatch(resetStates())
+        }
+    }, [error])
 
     const radioClickHandler = (e)=>{
         const checkStatus = checkedCategories?.[e.target.parentElement.parentElement.id]?.[e.target.id]
-        console.log("checkStatus-->", checkStatus)
         if(checkStatus){
-            console.log("Inisde if checkStatus")
             setCheckedCategories({ ...checkedCategories, [e.target.parentElement.parentElement.id]: false})
             setNestedSubcategories([])
             setCheckNestedSubcategories({})
@@ -243,11 +221,9 @@ export function SelectSubCategoryForAdmin({category, setCategory, setSubCategory
     }
 
     const radioChangeHandler = (e, subcat)=>{
-        console.log("Object.values(checkedCategories)-->",Object.values(checkedCategories))
         if(!Object.values(checkedCategories).every(status=> status === false)){
             e.target.checked = false
-            setError('Cannot select more than 1 subcategory!')
-            console.log("Cannot select more than 1 subcategory!")
+            setErrorMsg('Cannot select more than 1 subcategory!')
             return
         }else{
             if(subcat.subCategory){
@@ -259,11 +235,8 @@ export function SelectSubCategoryForAdmin({category, setCategory, setSubCategory
     }
 
     const nestedRadioClickHandler = (e, cat, subcat)=>{
-        console.log("cat---->", subcat.parentCategory)
         const checkStatus = checkNestedSubcategories?.[subcat.parentCategory]?.[subcat.name]
-        console.log("checkStatus-->", checkStatus)
         if(checkStatus){
-            console.log("Inisde if checkStatus")
             setCheckNestedSubcategories({...checkNestedSubcategories, [subcat.parentCategory]: {[subcat.name]: false, } })
             return
         }else{
@@ -275,31 +248,26 @@ export function SelectSubCategoryForAdmin({category, setCategory, setSubCategory
     const nestedRadioChangeHandler = (e, cat, subcat)=> {
         if( Object.keys(checkNestedSubcategories).find(nestedParentCat=> nestedParentCat === cat.name) ){
             e.target.checked = false
-            setError('Cannot select more than 1 subcategory!')
-            console.log("Cannot select more than 1 subcategory!")
+            setErrorMsg('Cannot select more than 1 subcategory!')
             return
         }else{
             if(subcat?.subCategory.length > 0){
-                console.log("subcat has subCategory")
                 dispatch(getSingleCategory({id: subcat._id}))
                 setCheckNestedSubcategories({...checkNestedSubcategories, [subcat.parentCategory]: {[subcat.name]: true} })
             }else{
                 setCheckNestedSubcategories({...checkNestedSubcategories, [subcat.parentCategory]: {[subcat.name]: true, subCategory: false} })
             }            
             setCategoryImgPreview(subcat.image.url)
-            console.log("subcat.subCategory.length--->", subcat.subCategory.length)
         }
         if(subcat.subCategory.length == 0){
-            console.log("Setting subcategory...")
             setSubCategory(subcat.name)
         }
     }
 
     const subCategoryBlockClickHandler = ()=>{
         if(!category.length){
-            setError('Please choose a category first!')
+            setErrorMsg('Please choose a category first!')
         }
-        console.log("defaultDisabled-->", defaultDisabled)
     }
 
     const makeSubCategoryLabel = (subcategoryObj)=> {
@@ -308,9 +276,9 @@ export function SelectSubCategoryForAdmin({category, setCategory, setSubCategory
         if(labeObj){
             label = camelToCapitalizedWords( Object.keys(labeObj)[0] )
         }
-        console.log("SubCategoryLabel---->", label)
         setsubcategoryLabel(label)
     }
+
 
     return(
         <main id='SelectSubCategoryForAdmin' className={` ${categoryImgPreview && 'before:content-[""]' } relative z-[10] `} 
@@ -374,7 +342,7 @@ export function SelectSubCategoryForAdmin({category, setCategory, setSubCategory
                 }
             </div>
             <p className={`h-[15px] w-full text-[11px] text-red-500 tracking-[0.1px] mt-[5px] ${categoryImgPreview && 'mb-[1rem] ml-[5px]'} `}> 
-                {error} 
+                {errorMsg} 
             </p>
         </main>
     )

@@ -17,10 +17,8 @@ export default function BreadcrumbBar({heading}){
     const location = useLocation()
 
     let breadCrumb = ''
-    console.log("Pathname->"+ location.pathname)
     const pathArray = location.pathname.split('/')
     pathArray[0] = 'Home'
-    console.log("PathArray-->"+ pathArray)
     const breadcrumbPath = pathArray.map(currentCrumb=>{
         currentCrumb=='Home'? breadCrumb+='/' : breadCrumb+=currentCrumb
         return(

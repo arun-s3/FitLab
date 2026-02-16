@@ -3,10 +3,9 @@ import {useDispatch, useSelector} from 'react-redux'
 import { motion } from "framer-motion"
 
 import {X} from "lucide-react"
-import axios from 'axios'
+import apiClient from '../../../Api/apiClient'
 
 import {updateUserWeight} from '../../../Slices/userSlice'
-
 
 const ClockIcon = () => (
   <svg className="w-6 h-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -77,32 +76,24 @@ export default function WorkoutSummaryModal({ stats, onClose, recalculateCalorie
 
   useEffect(() => {
     if (user?.weight) {
-      console.log("User has weight set")
       const estimatedCalories = recalculateCalories(user.weight)
       setUserWeight(user.weight)
       setEstimatedCalories(estimatedCalories)
       return; 
     }
     if (stats?.estimatedCalories) {
-      console.log("Using stats estimatedCalories")
       setEstimatedCalories(stats.estimatedCalories)
     }
   }, [user, stats])
 
   const saveCaloriesInfo = async(fitnessTrackerId, exerciseId, calories)=> {
     try {   
-      console.log("Inside saveCaloriesInfo()..")
       const calorieDetails = {fitnessTrackerId, exerciseId, calories}
-      const response = await axios.post(`${baseApiUrl}/fitness/tracker/workout/save-calories`, {calorieDetails}, { withCredentials: true })
-      if(response.status === 200){
-        console.log("Saved calorie details")
-      }
-      if(response.status === 400){
-        sonnerToast.error(error.response.data.message)
-        console.log("Error---->", error.response.data.message)
-      }
+      const response = await apiClient.post(`${baseApiUrl}/fitness/tracker/workout/save-calories`, {calorieDetails})
     }catch (error) {
-      console.error("Error during saving caloriesInfo", error.message)
+      if (!error.response) {
+          sonnerToast.error("Network error. Please check your internet.")
+      } 
     }
   }
 

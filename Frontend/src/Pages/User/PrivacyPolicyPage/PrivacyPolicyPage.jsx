@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import { motion } from "framer-motion"
 
-import PrivacyPolicies, {lastUpdated} from "../../../../data/PrivacyPolicies"
+import PrivacyPolicies, {lastUpdated} from "../../../Data/PrivacyPolicies"
 import PrivacyTopicsSection from "./PrivacyTopicsSection"
 import PolicyContentSection from "./PolicyContentSection"
 import Header from "../../../Components/Header/Header"

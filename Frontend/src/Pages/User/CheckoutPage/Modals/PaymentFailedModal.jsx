@@ -6,7 +6,6 @@ import {XCircle, X, RefreshCw, HelpCircle, ArrowLeft, AlertTriangle} from "lucid
 import useModalHelpers from '../../../../Hooks/ModalHelpers'
 
 
-
 export default function PaymentFailedModal({ isOpen, message, onClose, onRetry, paymentMethod, onContactSupport }){
 
   const [isRetrying, setIsRetrying] = useState(false)

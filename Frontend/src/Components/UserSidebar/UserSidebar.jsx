@@ -28,8 +28,6 @@ export default function UserSidebar({currentPath, openMenuByDefault = true, flex
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
-    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
     const menuItems = [
         { icon: Home, label: 'Account', path: '/account'},
         { icon: Clock, label: 'Order History', path: '/orders' },
@@ -52,11 +50,6 @@ export default function UserSidebar({currentPath, openMenuByDefault = true, flex
     const listMouseLeaveHandler = (e)=> {
          e.currentTarget.firstElementChild.style.color = 'rgba(215, 241, 72, 1)' // muted-kind
     }
-
-    useEffect(()=> {
-        console.log("Path now--->", location.path)
-        console.log("currentPath--->", currentPath)
-    },[])
 
     useEffect(()=> {
         if(photoDispatched && userDpUpdated){
@@ -107,7 +100,6 @@ export default function UserSidebar({currentPath, openMenuByDefault = true, flex
   }
 
   const uploadPhoto = async (dataUrl) => {
-      console.log("Inside uploadPhoto function")
       const blob = await (await fetch(dataUrl)).blob()
       const formData = new FormData()
       formData.append("image", blob, "photo.jpg")

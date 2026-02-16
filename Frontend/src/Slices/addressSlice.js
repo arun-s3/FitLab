@@ -1,88 +1,69 @@
 import {createSlice, createAsyncThunk} from '@reduxjs/toolkit'
-import axios from '../Api/axiosConfig'
+import apiClient from '../Api/apiClient'
+
 
 export const createNewAddress = createAsyncThunk('createNewAddress', async({id, addressData}, thunkAPI)=>{
     try{
-        console.log("Inside createNewAddress createAsyncThunk")
-        const response = await axios.post(`addresses/new/${id}`, {addressData}, {withCredentials:true})
-        console.log("returning success response from createNewAddress createAsyncThunk..."+JSON.stringify(response.data))
+        const response = await apiClient.post(`addresses/new/${id}`, {addressData})
         return response.data
     }
     catch(error){
-        console.log("inside catch of createNewAddress from addressSlice")
-        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong while adding new address. Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
 
 export const editAddress = createAsyncThunk('editAddress', async({id, addressId, addressData}, thunkAPI)=>{
     try{
-        console.log("Inside editAddress createAsyncThunk")
-        const response = await axios.post(`addresses/edit/${id}`, {addressData, addressId}, {withCredentials:true})
-        console.log("returning success response from editAddress createAsyncThunk..."+JSON.stringify(response.data))
+        const response = await apiClient.post(`addresses/edit/${id}`, {addressData, addressId})
         return {id, addressId, address: response.data.address}
     }
     catch(error){
-        console.log("inside catch of editAddress from addressSlice")
-        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong while updating address. Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
 
 export const deleteAddress = createAsyncThunk('deleteAddress', async({addressId}, thunkAPI)=>{
     try{
-        console.log("Inside deleteAddress createAsyncThunk")
-        console.log("addressId---->", addressId)
-        const response = await axios.delete(`addresses/delete/${addressId}`,{withCredentials:true})
-        console.log("returning success response from deleteAddress createAsyncThunk..."+JSON.stringify(response.data))
+        const response = await apiClient.delete(`addresses/delete/${addressId}`)
         return {addressId, message: response.data.message}
     }
     catch(error){
-        console.log("inside catch of deleteAddress from addressSlice")
-        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong while deleting address. Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
 
 export const getAllAddress = createAsyncThunk('getAllAddress', async(thunkAPI)=>{
     try{
-        console.log("Inside getAllAddress createAsyncThunk")
-        const response = await axios.get('addresses', {withCredentials:true})
-        console.log("returning success response from getAllAddress createAsyncThunk..."+JSON.stringify(response.data))
+        const response = await apiClient.get('addresses')
         return response.data
     }
     catch(error){
-        console.log("inside catch of getAllAddress from addressSlice")
-        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong while loading address. Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
 
 export const getDefaultAddress = createAsyncThunk('getDefaultAddress', async({id}, thunkAPI)=>{
     try{
-        console.log("Inside getDefaultAddress createAsyncThunk")
-        const response = await axios.get(`addresses/${id}/default`, {withCredentials:true})
-        console.log("returning success response from getDefaultAddress createAsyncThunk..."+JSON.stringify(response.data))
+        const response = await apiClient.get(`addresses/${id}/default`)
         return response.data
     }
     catch(error){
-        console.log("inside catch of getDefaultAddress from addressSlice")
-        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong. Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
 
 export const setAsDefaultAddress = createAsyncThunk('setAsDefaultAddress', async({addressId}, thunkAPI)=>{
     try{
-        console.log("Inside setAsDefaultAddress createAsyncThunk")
-        console.log("addressId---->", addressId)
-        const response = await axios.put(`addresses/setAsDefault/${addressId}`,{withCredentials:true})
-        console.log("returning success response from setAsDefaultAddress createAsyncThunk..."+JSON.stringify(response.data))
+        const response = await apiClient.put(`addresses/setAsDefault/${addressId}`)
         return {addressId, message: response.data.message}
     }
     catch(error){
-        console.log("inside catch of setAsDefaultAddress from addressSlice")
-        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong while setting default address. Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
@@ -115,7 +96,6 @@ const addressSlice = createSlice({
     },
     extraReducers: (builder)=>{
         builder.addCase(createNewAddress.fulfilled, (state, action)=>{
-            console.log("action.payload.address-->",action.payload.address)
             state.error = null
             state.addressCreated = true
             state.loading = false
@@ -130,7 +110,6 @@ const addressSlice = createSlice({
             state.error = action.payload
         })
         .addCase(editAddress.fulfilled, (state, action)=>{
-            console.log("action.payload.address-->",action.payload.address)
             state.error = null
             state.addressUpdated = true
             state.loading = false
@@ -146,7 +125,6 @@ const addressSlice = createSlice({
             state.error = action.payload
         })
         .addCase(deleteAddress.fulfilled, (state, action)=>{
-            console.log("action.payload.address-->",action.payload.addresses)
             state.error = null
             state.loading = false
             state.addressDeleted = true
@@ -162,7 +140,6 @@ const addressSlice = createSlice({
             state.error = action.payload
         })
         .addCase(getAllAddress.fulfilled, (state, action)=>{
-            console.log("action.payload.address-->",action.payload.addresses)
             state.error = null
             state.success = true
             state.loading = false
@@ -177,7 +154,6 @@ const addressSlice = createSlice({
             state.error = action.payload
         })
         .addCase(getDefaultAddress.fulfilled, (state, action)=>{
-            console.log("action.payload.address-->",action.payload.address)
             state.error = null
             state.success = true
             state.loading = false
@@ -192,7 +168,6 @@ const addressSlice = createSlice({
             state.error = action.payload
         })
         .addCase(setAsDefaultAddress.fulfilled, (state, action)=>{
-            console.log("action.payload.address-->",action.payload.addresses)
             state.error = null
             state.success = true
             state.loading = false

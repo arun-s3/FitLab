@@ -12,10 +12,10 @@ import {handleImageCompression} from '../../Utils/compressImages'
 import {IoCloseSharp} from "react-icons/io5";
 import {RiImageEditLine} from "react-icons/ri";
 import {FaArrowUp, FaArrowDown} from "react-icons/fa";
+
 import {toast} from 'react-toastify'
 import {toast as sonnerToast} from 'sonner'
 
-// import { uploadImages } from 'Frontend/src/Slices/productSlice'
 
 export default function FileUpload({images, setImages, imageLimit, needThumbnail, thumbnail, setThumbnail, thumbnailIndexOnEditProduct,
          imagePreview, imageType, imageCropperPositionFromTop, imageCropperBgBlur, imageCropperContainerHt, editable = true,
@@ -28,7 +28,6 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
 
     const [imageCropperState, setImageCropperState] = useState(false)
     const [imageCropperDefaultIndex, setImageCropperDefaultIndex] = useState(0)
-    // const [readyToCropImages, setReadyToCropImages] = useState([])
     const [croppedImages, setCroppedImages] = useState([]);
     const [imageCropperError, setImageCropperError] = useState('')
     const [cropWarnOnce, setCropWarnOnce] = useState(false)
@@ -36,11 +35,9 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
 
     useEffect(()=>{
         if(error){
-            console.log("ERROR!")
             setTimeout(()=> setError(""), 3000)
         }
         if(error && error == 'Please add files each of size below 3Mb!'){
-            console.log("Inside useEffect for error of image size between 3 and 5mb")
             imageMessageDisplay.current.parentElement.style.visibility = 'visible'
             imageMessageDisplay.current.style.display = 'none'
             setImageMessage('Please upload images smaller than 3MB. Images between 3MB and 5MB can be compressed or deleted.')
@@ -73,12 +70,7 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
     },[error, images, !cropWarnOnce])
 
     useEffect(()=>{
-        console.log("Images array-->" + JSON.stringify(images))
-        images.length && console.log("images[0].url"+ images.length && JSON.stringify(images[0].name))
-        thumbnail && console.log("thumbnail.url"+ JSON.stringify(thumbnail))
-        console.log("Images array with isThumbnail -->", images.map(img => img.isThumbnail));
         if(images.length){
-            console.log("thumbnailIndexOnEditProduct received from parent-->",thumbnailIndexOnEditProduct)
             setCurrentImageIndex(thumbnailIndexOnEditProduct);
         }
     },[thumbnailIndexOnEditProduct])
@@ -91,40 +83,23 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
             if (event.data.type === 'edited-image') {
                 const updatedImage = event.data.payload;
                 windowRef.current.close()
-                // IMP----> IF wanted base64Url set as editedImage's url use the commented
-                // const reader = new FileReader()
-                // reader.onload = ()=>{
-                //     const base64URL = reader.result
-                //     setEditedImage({...updatedImage, url:base64URL})
-                // }
-                // reader.onprogress = (event)=>{
-                //     const progress = (event.loaded/event.total)*100
-                //     console.log("LOADING..."+ progress)
-                //     windowRef.current.postMessage({type:'loading-img', progress}, '*')
-                // }
-                // reader.readAsDataURL(updatedImage.blob)
                 updatedImage.url = URL.createObjectURL(updatedImage.blob)
                 setEditedImage({...updatedImage})
-                console.log("RECEIVED EDITED IMAGE FROM IMAGE EDITOR-->", JSON.stringify(updatedImage))
-                // setEditedImage(updatedImage)
             }
         });        
     })
+
     useEffect(() => {
-        console.log("editedImage in editedimage useEffect-->", JSON.stringify(editedImage))
         if(editedImage.size > (5*1024*1024)){
             imageMessageDisplay.current.parentElement.style.visibility = 'visible'
             imageMessageDisplay.current.style.display = 'inline-block'
             setImageMessage('Compressing ')
         }   
         if( editedImage && editedImage.blob && imageMessageDisplay.current){
-            console.log("Inside if imageMessageDisplay.current")
             const compressAndPutToImages = async()=>{
                 try{
-                    console.log("Inside async compressAndPutToImages")
                     const compressedBlob = await handleImageCompression(editedImage.blob)
                     const compressedImgObj = {...editedImage, blob: compressedBlob, size: compressedBlob.size}
-                    console.log("Size now-->", compressedImgObj.size)
                     setImages((prevImages) => 
                         prevImages.map((image) => 
                             image.name === editedImage.name ? { ...image, ...compressedImgObj } : image
@@ -135,7 +110,7 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
                     imageMessageDisplay.current.style.display = 'none'
                 }
                 catch(error){
-                    console.log("Error inside compressAndPutToImages during compression of edited image--", error.message)
+                    sonnerToast.error("Error during auto-image compression")
                 }
             }
             compressAndPutToImages()
@@ -161,15 +136,12 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
     const imageDropHeaderRef = useRef(null)
     const fileDropContainerRef = useRef(null)
 
-    // const windowRef = useRef(null)
     const editorPath = useRef(null)
 
     const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
     const validateAndSetImage = (files)=>{
-        console.log("Got files! -->", JSON.stringify(files));
         const newImages = [];
-        console.log("IMAGES>LENGTH INSIDE validateAndSetImage-->", images.length)
         if(images.length+1 > imageLimit){
             const imageLabel = (imageLimit > 1)? 'images are' : 'image is'
             setError(`Only ${imageLimit} ${imageLabel} allowed to upload!`)
@@ -177,40 +149,32 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
         }
         for (let i = 0; i < files.length; i++) {
             if (files[i].type.split('/')[0] === 'image') {
-                console.log("Image file -->", JSON.stringify(files[i]))
                 
                 if (images.find(img => img.name === files[i].name)) {
-                    console.log("Duplicate image -->", JSON.stringify(files[i]))
                     setError("Duplicate Images won't be added!")
                     continue;
                 }
 
                 if (files[i].size > (3 * 1024 * 1024) && files[i].size < (5 * 1024 * 1024)) {
-                    console.log("Big image -->", JSON.stringify(files[i]))
                     setError("Please add files each of size below 3Mb!")
                 }
                 if (files[i].size > (5 * 1024 * 1024)) {
-                    console.log("Really big image -->", JSON.stringify(files[i]))
                     setError("Please upload an image smaller than 5MB. Images between 3MB and 5MB can be compressed or deleted. Files larger than 5MB are not allowed.")
                     continue;
                 }
 
                 newImages.push({ name: files[i].name, size: files[i].size, url: URL.createObjectURL(files[i]), blob: files[i], isCropped: false});
             } else {
-                console.log("Not an image -->", JSON.stringify(files[i]));
                 setError("Only images will be added!");
                 continue;
             }
         }
-        // setReadyToCropImages(newImages)
         setImages([...newImages, ...images])
         setImageCropperState(true)
     }
 
     const imageBrowseHandler = (e)=>{
-        console.log("Inside imageBrowseHandler")
         if(!e.target.files.length){
-            console.log("No images found-->"+JSON.stringify(e.target.files))
             return;
         }
         else{
@@ -222,26 +186,24 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
     const dragEnterHandler = (e)=>{
         e.dataTransfer.dropEffect = 'copy'
     }
+
     const dragOverHandler = (e) => {
         e.preventDefault() 
-        console.log("Inside dragOverHandler")
         e.dataTransfer.dropEffect = 'copy'
         setCheckDragging(true)
     }
+
     const dropHandler = (e)=>{
         e.preventDefault()
         setCheckDragging(false)
 
-        console.log("Inside dropHandler")
-        if(!e.dataTransfer.files.length){
-            console.log("No images found-->"+JSON.stringify(e.dataTransfer.files))
-            return;
-        }
+        if(!e.dataTransfer.files.length) return
         else{
             setError("")
             validateAndSetImage(e.dataTransfer.files)
         }
     }
+
     const dragLeaveHandler = (e)=>{
         setCheckDragging(false)
     }
@@ -252,27 +214,19 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
 
     const arrowHandler = (prevOrNext)=>{
         if(prevOrNext == 'prev'){
-            console.log("Inside prevImg")
             if(currentImageIndex < 1){
-                console.log("currentImage.current before assignment(inside if)-->"+ currentImageIndex)
                 setCurrentImageIndex(images.length-1)
-                console.log("currentImage.current now-->"+ currentImageIndex)
             }
             else{
                 setCurrentImageIndex(index=> index-1)
-                console.log("currentImage.current after assignment(inside else)-->"+ currentImageIndex)
             }
         }
         if(prevOrNext == 'next'){
-            console.log("Inside nextImg")
             if(currentImageIndex >= images.length-1){
-                console.log("currentImage.current before assignment(inside if)-->"+ currentImageIndex)
                 setCurrentImageIndex(0)
-                console.log("currentImage.current now-->"+ currentImageIndex)
             }
             else{
                 setCurrentImageIndex(index=> index+1)
-                console.log("currentImage.current after assignment(inside else)-->"+ currentImageIndex)
             }
         }
     }
@@ -297,7 +251,6 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
     }
 
     const compressBigImages = async()=>{
-        console.log("Inside compressBigImages()")
         setDisplayCompressButton(false)
         setImageMessage('Compressing')
         imageMessageDisplay.current.style.display = 'inline-block'
@@ -310,7 +263,6 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
                 return image
             })
         )
-        console.log("Compressed images-->", JSON.stringify(compressedImages))
         setImages([...compressedImages])
         setImageMessage(null)
         imageMessageDisplay.current.parentElement.style.visibility = 'hidden'
@@ -319,17 +271,12 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
 
     const openImageEditor = (imageUrl, name, blob)=>{
         editorPath.current = encodeURIComponent(imageUrl)
-        console.log(`imageUrl----> ${imageUrl}, name----> ${name}, blob----> ${blob}`)
-        console.log("editorPath.current-->"+editorPath.current)
 
         windowRef.current = window.open(`${window.location.origin}/image-editor?name=${name}`, "", "width=1300,height=700,left=300,top=300,resizable=no")
-        // windowRef.current.postMessage({type:'target-img', blob, name}, '*')
 
         const messageHandler = (event)=> {
             if (event.source === windowRef.current && event.data === 'child-ready') {
-                console.log('Child window is ready. Sending image blob...');
                 windowRef.current.postMessage({ type: 'target-img', blob, name }, '*');
-                console.log("SENT IMAGE TO IMAGE EDITOR AFTER CHILD-READY", JSON.stringify({ type: 'target-img', blob, name }))
             }
         };
     

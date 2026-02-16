@@ -4,7 +4,7 @@ import {useSelector} from 'react-redux'
 
 import { io } from "socket.io-client"
 
-import axios from "axios"
+import apiClient from "../../Api/apiClient"
 import {toast as sonnerToast} from 'sonner'
 import {Wallet} from 'lucide-react'
 
@@ -20,8 +20,6 @@ export const SocketContext = createContext();
 export default function SocketProvider() {
 
     const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
-    // const socket = useMemo(()=> io(baseApiUrl), [])
 
     const {user} = useSelector((state)=> state.user)
 
@@ -87,23 +85,28 @@ export default function SocketProvider() {
     
     useEffect(()=> { 
       async function fetchUserId(){
-        const guestVerificationRes = await axios.get(`${baseApiUrl}/guest-check`, {withCredentials: true})
-        console.log("guestVerificationRes--->", guestVerificationRes.data)
-        if(guestVerificationRes.data.wasGuest){
-          const {userId, username} = guestVerificationRes.data.credentials
-          setUserWasGuest({wasGuest: true, credentials: {userId, username}})
+        try{
+            const guestVerificationRes = await apiClient.get(`${baseApiUrl}/guest-check`)
+            if(guestVerificationRes.data.wasGuest){
+              const {userId, username} = guestVerificationRes.data.credentials
+              setUserWasGuest({wasGuest: true, credentials: {userId, username}})
+            }
+            const response = await apiClient.get(`${baseApiUrl}/getUserid`)
+            const decryptedUserId = decryptData(response.data.encryptedUserId)
+            setRoomId(decryptedUserId)
+            setUsername(response.data.username)
+        }catch(error) {
+            console.error(error)
         }
-        const response = await axios.get(`${baseApiUrl}/getUserid`, {withCredentials: true})
-        console.log("response from fetchUserId--->", response)
-        const decryptedUserId = decryptData(response.data.encryptedUserId)
-        setRoomId(decryptedUserId)
-        setUsername(response.data.username)
       } 
       async function fetchGuestId(){
-        const response = await axios.get(`${baseApiUrl}/guest`, {withCredentials: true})
-        console.log("response from fetchGuestId--->", response)
-        setRoomId(response.data.userId)
-        setUsername(response.data.username)
+        try{
+            const response = await apiClient.get(`${baseApiUrl}/guest`)
+            setRoomId(response.data.userId)
+            setUsername(response.data.username)
+        }catch(error){
+            console.error(error)
+        }
       } 
       if(user){
         fetchUserId()
@@ -111,23 +114,8 @@ export default function SocketProvider() {
         fetchGuestId()
       }
     }, [user])
-    
-    useEffect(()=> {
-        console.log("username--->", username)
-        console.log("roomId--->", roomId)
-        console.log("userWasGuest--->", userWasGuest)
-    },[username, roomId, userWasGuest])
-
-    useEffect(()=> {
-      console.log("openSemiAutoRechargeModal--->", openSemiAutoRechargeModal)
-    }, [openSemiAutoRechargeModal]) 
-
-    useEffect(()=> {
-      console.log("notifications from SocketProvider--->", notifications)
-    }, [notifications])
 
     useEffect(() => {
-        console.log("isAdminOnline--->", isAdminOnline)
         if (!isAdminOnline) setIsTyping(false)
     }, [isAdminOnline])
 
@@ -137,16 +125,13 @@ export default function SocketProvider() {
         })
     
         socket.on("connect", () => {
-          console.log("Socket connected:", socket.id)
           setIsConnected(true)
           if(userWasGuest.wasGuest){
-            console.log("Guest details before emiting delete-guest--->", userWasGuest)
             socket.emit("delete-guest", {userId: userWasGuest.credentials.userId, username: userWasGuest.credentials.username})
             setUserWasGuest({wasGuest: false, credentials: {}})
           }
           if(roomId && username){
             socket.emit("user-login", { userId: roomId, username })
-            console.log("User going to join room....")
             socket.emit("user-join-room", roomId)
             socket.emit("joinFitlab", {userId: roomId, username})
           }
@@ -154,35 +139,28 @@ export default function SocketProvider() {
 
         socket.on("admin-status", status=> {
           setIsAdminOnline(status)
-        //   if(!status || !isConnected) setIsTyping(false)
         })
 
         socket.on("connect_error", (error) => {
-          console.error("Server unreachable:", error.message)
           setIsConnected(false)
           setIsAdminOnline(false)
         })
     
         socket.on("disconnect", (reason) => {
-            console.warn("Socket disconnected:", reason)
             setIsConnected(false)
             setIsAdminOnline(false)
         })
 
-        socket.on("error", (err) => {
-            console.error("Socket error:", err)
-        })
+        // socket.on("error", (err) => {
+        //     console.error("Socket error:", err)
+        // })
 
         socket.on("chat-history", (messages) => {
-          console.log("chat-history receieved----->", messages)
           setMessages(messages)
         })
         
         socket.on("receive-message", (message) => {
-        //   if (message.sender !== username) {
-            console.log('Message received from admin--->', message)
             setMessages((prev) => [...prev, message])
-        //   }
         })
 
         socket.on("user-typing", (data) => {
@@ -192,40 +170,32 @@ export default function SocketProvider() {
         })
 
         socket.on("notifySupportCalling", (sessionId, sessionDetails)=> {
-          console.log("Inside on notifySupportCalling....")
           setScheduledVideoCallSessionId(sessionId)
-          console.log("sessionDetails----->", sessionDetails)
           setVideoSessionInfo(sessionDetails)
           setOpenVideoCallModal(true)
         })
 
         socket.on("unNotifySupportCalling", ()=> {
-          console.log("Inside on unNotifySupportCalling...")
           setScheduledVideoCallSessionId(null)
           setVideoSessionInfo({})
           setOpenVideoCallModal(false)
-          console.log("Emiting unNotifiedSupportCaling...")
           socket.emit("unNotifiedSupportCalling")
         }) 
 
         socket.on('coach-response', (message)=> {
-          console.log("coach-response-->", message)
           setCoachMessages((prev) => [...prev, message]) 
         })
       
         socket.on('coach-loading', (status)=> {
-          console.log("coach-loading....")
           setIsCoachLoading(status)
         })
       
         socket.on('coach-error', (message)=> {
-          console.log("coach-error-->", message)
           setCoachError(message)
           setIsCoachLoading(false)
         })
 
         socket.on("walletRechargeSuccess", (data) => {
-          console.log("AUTO-RECHARGE SUCCESS!", data)
           sonnerToast.success('Recharged wallet!', {duration: 2500})
           setOpenNotificationModal({
             header: "Wallet Auto-Recharged", content: `Wallet recharged with ₹${data.amount} through ${data.method}`, icon: Wallet,
@@ -234,27 +204,22 @@ export default function SocketProvider() {
         }) 
 
         socket.on("warnRazorpayRecharge", (data) => {
-          console.log("Warning on Razorpay recharge", data)
-          console.log("data.autoRechargeAmount------>", data.amount)
           if(!openSemiAutoRechargeModal.status){
             setOpenSemiAutoRechargeModal({status: true, walletAmount: data.balance, autoRechargeAmount: data.amount})
           }
         }) 
 
         socket.on("receive-notification", (data) => {
-          console.log("Received notification", data)
           setNotifications(prev=> [...prev, data])
         }) 
 
         socket.on("notification-marked-read", (id) => {
-          console.log("Notification id marked read----->", id)
           setNotifications(prev =>
             prev.map(notification=> notification._id === id ? { ...notification, isRead: true } : notification)
           )
         })
 
         socket.on("all-notifications-marked-read", () => {
-          console.log("All Notification marked read")
           setNotifications(prev =>
             prev.map(notification => ({
               ...notification,
@@ -266,12 +231,10 @@ export default function SocketProvider() {
         }) 
 
         socket.on("notification-deleted", (id) => {
-          console.log("All Notification marked read")
           setNotifications(notifications=> notifications.filter(notification=> notification._id !== id))
         }) 
 
         socket.on('notification-error', (message)=> {
-          console.log("Notification error-->", message)
           sonnerToast.error(message) 
         }) 
 
@@ -289,17 +252,8 @@ export default function SocketProvider() {
     useEffect(() => {
         scrollToBottom()
     }, [messages])
-
-    useEffect(() => {
-      console.log("newCoachMessage-->", newCoachMessage)
-      console.log("coachMessages-->", coachMessages)
-      console.log("isCoachLoading-->", isCoachLoading)
-      console.log("coachError-->", coachError)
-    }, [coachMessages, newCoachMessage, isCoachLoading, coachError])
-    
     
       const handleSendMessage = (e) => {
-        console.log("Inside handleSendMessage...")
         e.preventDefault()
         if (!newMessage.trim() || !socket) return
     
@@ -312,38 +266,29 @@ export default function SocketProvider() {
         }
     
         socket.emit("send-message", messageData)
-        // setMessages((prev) => [...prev, messageData])
     
         setNewMessage("")
     
-    
-        // Stop typing indicator
         socket.emit("typing", { roomId, isTyping: false, sender: username })
       }
     
       const handleTyping = (e) => {
-        console.log("Inside handleTyping...")
         setNewMessage(e.target.value)
     
         if (!socket) return
     
-        // Send typing indicator
         socket.emit("typing", { roomId, isTyping: true, sender: username })
     
-        // Clear previous timeout
         if (typingTimeoutRef.current) {
           clearTimeout(typingTimeoutRef.current)
         }
     
-        // Stop typing after 2 seconds of inactivity
         typingTimeoutRef.current = setTimeout(() => {
           socket.emit("typing", { roomId, isTyping: false, sender: username })
         }, 2000)
       }
 
       const handleSendMessageToCoach = () => {
-        console.log("Inside handleSendMessage...") 
-        // e.preventDefault()
         if (!newCoachMessage.trim() || !socket) return 
     
         const messageData = {

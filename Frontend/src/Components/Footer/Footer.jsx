@@ -16,7 +16,6 @@ export default function Footer({goToShopByCategorySec}) {
 
   const jumpToShopByCategorySec = ()=> {
     if(location.pathname !== '/' ){
-        console.log("Navigating now...")
         setTimeout(() => navigate('/', { state: { scrollTo: "shopByCategories" }}), 0)
     }else{
         goToShopByCategorySec()
@@ -31,10 +30,9 @@ export default function Footer({goToShopByCategorySec}) {
                   <figure>
                       <img src='/Images/Logo_main.png' alt='Fitlab' className='h-[5rem]' />
                   </figure>
-                  <p
-                      className='ml-[28px] mt-[-2px] capitalize text-small font-sairaCondensed text-muted font-medium 
-           max-xxs-sm:w-[75%] max-xs-sm2:w-[85%]'
-                      style={{ wordSpacing: "0.5px" }}>
+                  <p className='ml-[28px] mt-[-2px] capitalize text-small font-sairaCondensed text-muted font-medium 
+                        max-xxs-sm:w-[75%] max-xs-sm2:w-[85%]'
+                    style={{ wordSpacing: "0.5px" }}>
                       Sparking up fitness passion with the best workout gear. We're really pros at making gyms and
                       CrossFit spaces for homes and businesses all across India. Pump up your fitness routine with our
                       expert touch!
@@ -50,7 +48,7 @@ export default function Footer({goToShopByCategorySec}) {
 
               <nav
                   className='mt-[24px] sm:ml-[28px] md:ml-[40px] x-md:ml-0 flex lg:ml-[4.5rem] xl:ml-0 gap-[4rem] lg:gap-[2rem]
-         xl:gap-[4rem] items-center text-primary'>
+                    xl:gap-[4rem] items-center text-primary'>
                   <ul className='list-none text-descReg1 lg:text-[13px] xl:text-descReg1'>
                       <li>
                           {" "}
@@ -106,7 +104,7 @@ export default function Footer({goToShopByCategorySec}) {
                           name='email'
                           autoComplete='email'
                           className='placeholder:text-[12px] py-[6px] pl-[14px] rounded-[7px] w-full md:w-auto lg:min-w-[12rem] xl:min-w-[17rem]
-               bg-white/90 text-black'
+                            bg-white/90 text-black'
                       />
                       <SiteButtonSquare tailwindClasses='lg:text-[14px] xl:text-[15px] lg:px-[14px] xl:px-[25px]'>
                           {" "}
@@ -119,9 +117,6 @@ export default function Footer({goToShopByCategorySec}) {
               </div>
           </div>
 
-          {/* <div className="mt-10 border-t border-white/10 pt-6 text-center text-xs text-muted">
-        © {new Date().getFullYear()} Fitlab. All rights reserved.
-      </div> */}
       </footer>
   )
 }

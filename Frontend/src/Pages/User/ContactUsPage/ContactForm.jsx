@@ -94,9 +94,7 @@ export default function ContactForm({isSupportConnected, isCoachConnected, onSub
       setLoading(true)
       e.preventDefault()
       acceptTermsOnFirstAction()
-      console.log("formData---->", formData)
       const fields = Object.keys(formData)
-      console.log("fields---->", fields)
       if(fields.some(field=> !formData[field])){
         sonnerToast.error("Please fill all the details!")
         setLoading(false)
@@ -122,7 +120,6 @@ export default function ContactForm({isSupportConnected, isCoachConnected, onSub
         const name = `${firstName} ${lastName}`
         const mobile = countryCode + phone
         const details = {...rest, name, phone: mobile}
-        console.log("Details to submit---->", details)
         const status = await onSubmit({details})
         if(status){
           setFormData({
@@ -134,10 +131,7 @@ export default function ContactForm({isSupportConnected, isCoachConnected, onSub
             message: "",
           })
         }
-      }catch (error) {
-        console.error("Submit error:", error)
-        sonnerToast.error("Something went wrong. Please check your network and try again later.")
-      } finally {
+      }finally {
         setLoading(false)
       }
     }

@@ -18,13 +18,9 @@ export default function UserHead(){
 
     const {user} = useSelector((state)=> state.user)
     const dispatch = useDispatch()
-    console.log("Userdata from UserHead-->"+JSON.stringify(user))
 
     const listRef = useRef(null)
     const [beVisible, setBeVisible] = useState(false)
-
-    const location = useLocation()
-    const navigate = useNavigate()
 
     const menuItems = [
         { icon: Home, label: 'Account', path: '/account'},
@@ -50,14 +46,11 @@ export default function UserHead(){
     }
    const mouseLeaveHandler = ()=>{
         if(!beVisible){
-            console.log("executing hideList by onMouseLeave");
             toggleList.hideList()
         }
-        console.log("beVisible onMouseLeave-->"+beVisible);
    }
    const clickHandler =()=>{
         setBeVisible(!beVisible)
-        console.log("beVisible now-->"+beVisible)
         if(beVisible) toggleList.showList()
    }
 
@@ -68,11 +61,10 @@ export default function UserHead(){
                 const response = await axios.get(
                     'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png',
                     {responseType:'blob'} )
-                console.log("response.data-->"+JSON.stringify(response.data))
                 setProfilePic(URL.createObjectURL(response.data))    
             }
             catch(error){
-                console.log("Can't load deafultPic")
+                console.error(error)
             }
         }
         if(!user.profilePic){
@@ -85,12 +77,10 @@ export default function UserHead(){
 
     const handleSignout = async()=> {
       try {
-        console.log("Inside handleSignout")
         let result = null
 
         result = await dispatch(signout()).unwrap()
 
-        console.log("Signout success:", result)
         if(result){
             await persistor.purge()
             localStorage.clear()
@@ -100,7 +90,6 @@ export default function UserHead(){
             localStorage.setItem("completeLogout", Date.now())
         }
       }catch(error){
-        console.error("Signout failed:", error)
         toast.error("Internal server error. Please try again later!")
       }
     }

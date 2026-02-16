@@ -1,6 +1,7 @@
 import React,{useState, useEffect} from 'react'
 import './Pagination.css'
-import {RiArrowDropLeftLine, RiArrowDropRightLine} from "react-icons/ri";
+
+import {RiArrowDropLeftLine, RiArrowDropRightLine} from "react-icons/ri"
 
 
 export default function Pagination({productCounts, currentPage, currentPageChanger, limiter}){
@@ -17,12 +18,7 @@ export default function Pagination({productCounts, currentPage, currentPageChang
         setTotalPages(Math.ceil(productCounts/limit))
       }
     },[productCounts])
-
-    useEffect(()=>{
-        console.log("Current Page-->"+currentPage)
-        console.log("Current Pagination page-->"+currentPaginationPage)
-        console.log("Total Page-->", totalPages)
-      },[currentPage, currentPaginationPage])
+    
 
     return(
         <div className='mt-[3rem] flex gap-[10px] items-center' id='pagination-bar'>

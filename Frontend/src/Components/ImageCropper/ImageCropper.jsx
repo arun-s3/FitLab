@@ -1,21 +1,19 @@
-import React, { useState, useEffect } from "react";
-import Cropper from "react-easy-crop";
-import "./ImageCropper.css";
-import { getCroppedImg } from "../ImageCropper/ImageCropperUtilities";
+import React, { useState, useEffect } from "react"
+import "./ImageCropper.css"
 
-import {SiteButtonSquare, SitePrimaryWhiteTextButton, SitePrimaryButtonWithShadow, SitePrimaryMinimalButtonWithShadow} from "../SiteButtons/SiteButtons";
-
-import {toast} from 'react-toastify'
 import {toast as sonnerToast} from 'sonner'
-import {GoArrowLeft, GoArrowRight} from "react-icons/go";
-import {FaArrowLeft, FaArrowRight} from "react-icons/fa6";
-import {FiArrowLeftCircle, FiArrowRightCircle } from "react-icons/fi";
-import {IoCloseSharp} from "react-icons/io5";
+import Cropper from "react-easy-crop"
+
+import {GoArrowLeft, GoArrowRight} from "react-icons/go"
+import {FaArrowLeft, FaArrowRight} from "react-icons/fa6"
+import {IoCloseSharp} from "react-icons/io5"
+
+import {SiteButtonSquare, SitePrimaryButtonWithShadow, SitePrimaryMinimalButtonWithShadow} from "../SiteButtons/SiteButtons"
+import { getCroppedImg } from "../ImageCropper/ImageCropperUtilities"
 
 
 const ImageCropper = ({ images, onCropComplete, imageCropperState, setImageCropperState, imageCropperDefaultIndex,
    imageCloseHandler, imageCropperError, setImageCropperError, positionFromTop, bgBlur, containerHeight, controllerStyle }) => {
-
 
   const [modalIsOpen, setModalIsOpen] = useState(true)
   const [crop, setCrop] = useState({ x: 0, y: 0 })
@@ -35,13 +33,6 @@ const ImageCropper = ({ images, onCropComplete, imageCropperState, setImageCropp
   },[])
 
   useEffect(()=> {
-    if(buildOutline){
-      console.log("buildOutline--->", buildOutline)
-    }
-  },[buildOutline])
-
-  useEffect(()=> {
-    console.log("Images from ImageCropper----->", images)
     // setModalIsOpen(true)
     if (images.length > 0) {
       setStartIndex(0)
@@ -50,10 +41,9 @@ const ImageCropper = ({ images, onCropComplete, imageCropperState, setImageCropp
 
     if (imageCropperState){
       if(images.every(img=> img.isCropped)){
-          console.log("Closing the Crop Modal because everything is cropped...")
           setImageCropperState(false);
       }else{
-            console.log("Won't close because there's some image that are not cropped")
+        sonnerToast.error("Some images have not yet being cropped!")
       }
   }
   },[images])
@@ -79,7 +69,6 @@ const ImageCropper = ({ images, onCropComplete, imageCropperState, setImageCropp
   if (!images || images.length === 0) return
 
   const selectImage = (e, index)=> {
-    console.log("Inside selectImage")
     setCurrentImageIndex(index)
     setBuildOutline(images[index].name)
   }
@@ -89,14 +78,9 @@ const ImageCropper = ({ images, onCropComplete, imageCropperState, setImageCropp
   }
 
   const handleCrop = async () => {
-    console.log("Cropping the image")
-    if (!croppedAreaPixels) {
-      console.error("Cropping area not defined yet!")
-      return
-    }
+    if (!croppedAreaPixels) return
 
     const croppedImage = await getCroppedImg(images[currentImageIndex].url, croppedAreaPixels)
-    console.log("croppedImage--->", croppedImage)
     onCropComplete(croppedImage, images[currentImageIndex], currentImageIndex, false)
 
     if (currentImageIndex < images.length - 1) {
@@ -105,7 +89,6 @@ const ImageCropper = ({ images, onCropComplete, imageCropperState, setImageCropp
   }
 
   const skipCrop = (index)=> {
-    console.log("Skipping the image")
     setImageCropperError("Make sure you crop the image later before submitting")
     const unCroppedImage = images[index].url
     onCropComplete(unCroppedImage, images[index], index, true)

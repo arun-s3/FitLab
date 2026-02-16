@@ -5,7 +5,7 @@ import {SquareActivity, HeartPulse, BicepsFlexed} from "lucide-react"
 import {RiSkull2Line} from "react-icons/ri"
 import {RiBodyScanLine} from "react-icons/ri"
 import {GiStrongMan} from "react-icons/gi"
-import axios from 'axios'
+import apiClient from '../../../../Api/apiClient'
 
 import AiInsightCards from "../../../../Components/AiInsightCards/AiInsightCards"
 
@@ -85,13 +85,11 @@ export default function HealthAiInsights() {
     ]
 
     const getInsightDataSources = async()=> {
-        console.log("Inside getInsightDataSources...") 
         setLoading(true)
         try { 
-          const latestHealthResponse = await axios.get(`${baseApiUrl}/fitness/tracker/health`, { withCredentials: true })
-          if(latestHealthResponse.status === 200){ 
-            console.log("latestHealthResponse.data------->", latestHealthResponse.data) 
+          const latestHealthResponse = await apiClient.get(`${baseApiUrl}/fitness/tracker/health`)
 
+          if(latestHealthResponse.status === 200){ 
             const { latestProfile, prevProfile } = latestHealthResponse.data
 
             const hasPrevProfile = Boolean(prevProfile)
@@ -102,7 +100,6 @@ export default function HealthAiInsights() {
             const canUseCachedAnalysis = hasAIAnalysis && ((!hasPrevProfile && !isRelativeAnalysis) || (hasPrevProfile && isRelativeAnalysis))
             
             if (canUseCachedAnalysis) {
-              console.log("Returning cached AI response")
               setLatestHealthInsights(latestProfile.aiAnalysis)
               return
             }
@@ -112,7 +109,6 @@ export default function HealthAiInsights() {
             setLatestHealthDatas(healthDatas)
           }
         }catch (error) {
-          console.error("Error while fetching latest health datas", error.message)
           setError("Something went wrong while finding your health profiles! Please check your network and retry later")
         }finally{
           setLoading(false)

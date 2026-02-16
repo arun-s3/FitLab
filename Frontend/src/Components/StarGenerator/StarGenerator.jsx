@@ -24,6 +24,7 @@ export default function StarGenerator ({product}){
         }
     }
 
+    
     return(
         <span className='inline-flex items-center'> {stars} </span>
     )          

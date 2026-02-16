@@ -1,7 +1,7 @@
 import React, {useEffect} from 'react'
 import {motion, AnimatePresence} from 'framer-motion'
 
-import axios from 'axios'
+import apiClient from '../../../Api/apiClient'
 import {TriangleAlert, RotateCcw} from 'lucide-react'
 
 import ExerciseCard from './ExerciseCard'
@@ -20,36 +20,29 @@ export default function TrainingExercisesList({selectedBodyParts, searchQuery, e
     async function loadMusclesAndEquipments(){
       try {
         let items = {muscles: [], equipments: []}
-        console.log("Inside loadMusclesAndEquipments()...")
         const [musclesResponse, equipmentsResponse] = await Promise.allSettled([
-            await axios.get(`${baseApiUrl}/fitness/exercises/muscles`),
-            await axios.get(`${baseApiUrl}/fitness/exercises/equipments`),
+            await apiClient.get(`${baseApiUrl}/fitness/exercises/muscles`),
+            await apiClient.get(`${baseApiUrl}/fitness/exercises/equipments`),
         ])
         
-        console.log("musclesResponse------->", musclesResponse)
         if (musclesResponse.status === 'fulfilled'){
           const muscles = musclesResponse.value.data.data.map(data=> data.name)
           items.muscles = muscles
-          console.log("muscles------->", muscles)
         }
-        console.log("equipmentsResponse------->", equipmentsResponse)
         if (equipmentsResponse.status === 'fulfilled'){
           const equipments = equipmentsResponse.value.data.data.map(data=> data.name)
           items.equipments = equipments
-          console.log("equipments------->", equipments)
         }
-        console.log("items---->", items)
         onfetchMusclesAndEquipments(items)
       }catch (error) {
-      	console.error("Error while loading muscles and equipments", error.message)
+        if (!error.response) {
+          sonnerToast.error("Network error. Please check your internet.")
+        }
+        console.error(error)
       }
     }
     loadMusclesAndEquipments()
   }, [exercises])
-
-  useEffect(()=> {
-    console.log(`totalPages------>${totalPages} and currentPage------>${currentPage}`)
-  }, [currentPage, totalPages])
 
 
   return (

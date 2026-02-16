@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 
-import axios from 'axios'
+import apiClient from '../../../Api/apiClient'
+
 import {toast as sonnerToast} from 'sonner'
 import {Trash} from "lucide-react"
 import {IoIosFitness} from "react-icons/io"
@@ -55,29 +56,19 @@ export default function WorkoutSessionCard() {
   const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
   const getExercises = async()=> {
-    console.log("Inside getExercises...") 
     try { 
-      const response = await axios.get(`${baseApiUrl}/fitness/tracker/exercise-library/list?page=${currentPage}&limit=${limit}`, { withCredentials: true })
+      const response = await apiClient.get(`${baseApiUrl}/fitness/tracker/exercise-library/list?page=${currentPage}&limit=${limit}`)
       if(response.status === 200){
-        console.log("response.data.exercises----------->", response.data.exercises)
         setExercises(response.data.exercises)
         setTotalPages(response.data.totalPages)
       }
     }catch (error) {
-        console.error("Error during fetching exercise", error.message)
-        if (error.response?.status === 404) {
-          setExercises([])
-          sonnerToast.error(error.response.data?.message)
-        } 
-        else if (!error.response) {
-          sonnerToast.error("Network error. Please check your internet.")
-          console.log('Settig fetch error...')
+        setExercises([])
+        if (!error.response) {
           setFetchError("Network error. Please check your internet.")
         }
         else {
-          sonnerToast.error("Something went wrong! Please retry later.")
-          console.log("Settig fetch error...")
-          setFetchError("Something went wrong! Please retry later.")
+          setFetchError("Something went wrong! Please retry.")
         }
     }finally {
         setLoading(false)
@@ -97,7 +88,6 @@ export default function WorkoutSessionCard() {
     window.open(url, "_blank", "noopener,noreferrer")
   }
 
-
   const handleExerciseListUpdate = async() => {
     setLoading(true)
     getExercises()
@@ -105,22 +95,17 @@ export default function WorkoutSessionCard() {
 
   const handleDeleteExercise = async(exerciseTemplateId)=> { 
     try { 
-      const response = await axios.delete(`${baseApiUrl}/fitness/tracker/exercise-library/delete/${exerciseTemplateId}`,{ withCredentials: true })
+      const response = await apiClient.delete(`${baseApiUrl}/fitness/tracker/exercise-library/delete/${exerciseTemplateId}`)
       if(response.status === 200){
-        console.log("response.data.exercises----------->", response.data.exercises)
         sonnerToast.success('Exercise deleted successfully!')
         getExercises()
       }
-      if(response.status === 400 || response.status === 404){
-        sonnerToast.error(error.response.data.message)
-        console.log("Error---->", error.response.data.message)
-      }
     }catch (error) {
-      console.error("Error during deleting exercise", error.message)
       if (!error.response) {
         sonnerToast.error("Network error. Please check your internet.")
-      }
-      else {
+      } else if (error.response?.status === 404) {
+        sonnerToast.error(error.response.data.message || "Error while deleting the exercise. Pleae try later")
+      } else {
         sonnerToast.error("Something went wrong! Please retry later.")
       }
     }
@@ -145,14 +130,12 @@ export default function WorkoutSessionCard() {
   }
 
   const handleRestartExercise = () => {
-    console.log("Inside handleRestartExercise()")
     setStartTime(Date.now())
     setCurrentSet(0)
     setRestartTimer(true)
   }
 
   const handleResumeTodayWorkout = (workout, resumeFromSet)=> {
-    console.log("Inside handleResumeTodayWorkout()..resumeFromSet--->", resumeFromSet)
     acceptTermsOnFirstAction()
     setSelectedExerciseId(workout._id)
     setSelectedExercise(workout)
@@ -163,24 +146,17 @@ export default function WorkoutSessionCard() {
 
   const saveWorkoutInfos = async(workoutInfo)=> {
     try {   
-      console.log("Inside saveWorkoutInfos()..")
-      const response = await axios.post(`${baseApiUrl}/fitness/tracker/workout/add`, {workoutInfo}, { withCredentials: true })
+      const response = await apiClient.post(`${baseApiUrl}/fitness/tracker/workout/add`, {workoutInfo})
       if(response.status === 200){
-        console.log("Saved workout details")
-        console.log("response.data.tracker------->", response.data.tracker)
         return {trackerId: response.data.tracker._id, exerciseId: response.data.exercise._id}
       }
     }catch (error) {
-      console.error("Error during saving workoutInfo", error.message)
-      sonnerToast.error('Something went wrong! Please retry later.')
       if (error.response?.status === 400 || error.response?.status === 404) {
         sonnerToast.error("Some error occured while saving the wokout details")
-      } 
-      else if (!error.response) {
+      } else if (!error.response) {
         sonnerToast.error("Network error. Please check your internet.")
-      }
-      else {
-        sonnerToast.error("Something went wrong! Please retry later.")
+      } else {
+        sonnerToast.error("Something went wrong while saving workout details! Please retry later.")
       }
     }finally {
         setRefreshHistory(true)
@@ -189,7 +165,6 @@ export default function WorkoutSessionCard() {
 
   const handleFinishWorkout = async() => {
     acceptTermsOnFirstAction()
-    console.log("Inside handleFinishWorkout")
     const missedSets = []
     for (let i = currentSet; i < selectedExercise.sets.length; i++) {
       missedSets.push({
@@ -198,12 +173,10 @@ export default function WorkoutSessionCard() {
         totalSets: selectedExercise.sets.length,
       })
     }
-    console.log("missedSets---->", missedSets)
     let duration = Math.floor((Date.now() - startTime) / 1000)
     if(startTimerFrom){
       duration = Math.floor(duration + Number(startTimerFrom))
     }  
-    console.log("duration---->", duration)
 
     const totalVolume = selectedExercise.sets.reduce((acc, set) => acc + set.weight * set.reps, 0)
 
@@ -211,14 +184,9 @@ export default function WorkoutSessionCard() {
     const estimatedCalories = estimateCalories(bodyPart, equipment, sets, duration)
 
     const completedTillIndex = currentSet < selectedExercise.sets.length ? currentSet : null
-    console.log("completedTillIndex---->", completedTillIndex)
     const workoutInfo = {exerciseId: selectedExercise._id, selectedExercise, sets, completedTillIndex, duration}
 
     const {trackerId, exerciseId} = await saveWorkoutInfos(workoutInfo)
-
-    console.log(`trackerId---->${trackerId} and exerciseId---->${exerciseId}`)
-
-    // const estimatedCalories = Math.round((duration / 60) * 8 + totalVolume * 0.1)
 
     setSessionStats({
       duration,

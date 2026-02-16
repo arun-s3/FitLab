@@ -2,7 +2,8 @@ import React, {useState, useEffect, useRef} from 'react'
 import {useSelector} from 'react-redux'
 import {motion, AnimatePresence} from 'framer-motion'
 
-import axios from 'axios'
+import apiClient from '../../../../Api/apiClient'
+import {toast as sonnerToast} from 'sonner'
 import { X } from "lucide-react"
 
 import useModalHelpers from '../../../../Hooks/ModalHelpers'
@@ -31,9 +32,7 @@ export default function ReplaceCouponModal({ isOpen, onClose, putOldCoupon, curr
   useEffect(()=> {
     async function compareCoupons(){
       try{
-        const response = await axios.post( `${baseApiUrl}/coupons/compare`, {newCoupon, currentCoupon}, { withCredentials: true } )
-        console.log("response.data---->", response.data)
-        console.log("response.data.winnerCoupon.code---->", response.data.winnerCoupon.code)
+        const response = await apiClient.post( `${baseApiUrl}/coupons/compare`, {newCoupon, currentCoupon})
         if(response.status === 200){
           setWinnerDiscountValue(response.data.winnerCoupon.discount)
           if(currentCoupon === response.data.winnerCoupon.code) setWinnerCouponDiscount({currentCoupon: true, newCoupon: false})
@@ -41,10 +40,13 @@ export default function ReplaceCouponModal({ isOpen, onClose, putOldCoupon, curr
         }
       }
       catch(error){
-        console.log("Error in compareCoupons:", error.message)
-        if (error.response && error.response.status === 404) {
-          toast.error(error.response.data.message || "Coupon not found!", {autoClose: 4000});
-          setCouponError(true)
+        if (!error.response) {
+            sonnerToast.error("Network error. Please check your internet.")
+        } if (error.response && error.response.status === 404) {
+            toast.error(error.response.data.message || "Coupon not found!", {autoClose: 4000});
+            setCouponError(true)
+        } else {
+            sonnerToast.error("Something went wrong! Please retry later.")
         }
       }
     }

@@ -4,9 +4,7 @@ import { motion } from "framer-motion"
 import { Calendar, Video, Clock, Star } from "lucide-react"
 
 
-
 export default function RequestForm({ onImmediateRequest, onScheduleRequest }) {
-
 
   const bgImg = {
     backgroundImage:"url('/Images/videoSupport-bg.jpg')",

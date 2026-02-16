@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 
 import {ArrowLeft, ArrowRight} from "lucide-react"
-import axios from 'axios'
+import apiClient from '../../../Api/apiClient'
 
 
 export default function TestimonialSection(){
@@ -55,40 +55,41 @@ export default function TestimonialSection(){
   useEffect(() => {
     async function loadTestimonials() {
       try {   
-        console.log("Inside loadTestimonials()")
-        const response = await axios.get(`${baseApiUrl}/testimony/top`, { withCredentials: true })
-        console.log("response.data.testimonies---->", response.data.testimonies)
+        const response = await apiClient.get(`${baseApiUrl}/testimony/top`)
+        if(response?.data?.testimonies) {
+          const fetchedTestimonials = response.data.testimonies.map((testimony) => {
+            const { userId, ...rest } = testimony
+            const fullName = userId?.firstName && userId?.lastName 
+              ? `${userId.firstName} ${userId.lastName}` 
+              : userId?.username 
 
-        const fetchedTestimonials = response.data.testimonies.map((testimony) => {
-          const { userId, ...rest } = testimony
-          const fullName = userId?.firstName && userId?.lastName 
-            ? `${userId.firstName} ${userId.lastName}` 
-            : userId?.username 
-
-          return {
-            name: fullName,
-            profilePic: userId?.profilePic || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'
-              || '/default-avatar.png',
-            rating: testimony.rating,
-            title: testimony.title,
-            comment: testimony.comment,
-            createdAt: testimony.createdAt,
-            location: testimony.district || 'Not specified',
+            return {
+              name: fullName,
+              profilePic: userId?.profilePic || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'
+                || '/default-avatar.png',
+              rating: testimony.rating,
+              title: testimony.title,
+              comment: testimony.comment,
+              createdAt: testimony.createdAt,
+              location: testimony.district || 'Not specified',
+            }
+          })
+          if(fetchedTestimonials.length > 0){
+            setTestimonials([...fetchedTestimonials, ...extraTestimonials])
+            const visibleTestimonials = getVisibleTestimonials([...fetchedTestimonials, ...extraTestimonials])
+            setVisibleTestimonials(visibleTestimonials)
+          }else{
+            setTestimonials(extraTestimonials)
+            const visibleTestimonials = getVisibleTestimonials(extraTestimonials)
+            setVisibleTestimonials(visibleTestimonials)
           }
-        })
-        console.log("fetchedTestimonials-------------->", fetchedTestimonials)
-        if(fetchedTestimonials.length > 0){
-          setTestimonials([...fetchedTestimonials, ...extraTestimonials])
-          const visibleTestimonials = getVisibleTestimonials([...fetchedTestimonials, ...extraTestimonials])
-          setVisibleTestimonials(visibleTestimonials)
-        }else{
-          setTestimonials(extraTestimonials)
-          const visibleTestimonials = getVisibleTestimonials(extraTestimonials)
-          setVisibleTestimonials(visibleTestimonials)
         }
       }
       catch (error) {
-        console.log("Error fetching top testimonies:", error)
+        console.error(error)
+        setTestimonials(extraTestimonials)
+        const visibleTestimonials = getVisibleTestimonials(extraTestimonials)
+        setVisibleTestimonials(visibleTestimonials)
       }
     }
 
@@ -96,17 +97,11 @@ export default function TestimonialSection(){
   }, [])
 
   useEffect(()=> {
-    console.log("testimonials-------------->", testimonials)
-    console.log("visibleTestimonials-------------->", visibleTestimonials)
-  }, [testimonials, visibleTestimonials])
-
-  useEffect(()=> {
     if(testimonials && testimonials.length > 0){
       const visibleTestimonials = getVisibleTestimonials(testimonials)
       setVisibleTestimonials(visibleTestimonials)
     }
   }, [currentIndex])
-
 
   const nextSlide = () => {
     setCurrentIndex((prev) => (prev + 1) % testimonials.length)

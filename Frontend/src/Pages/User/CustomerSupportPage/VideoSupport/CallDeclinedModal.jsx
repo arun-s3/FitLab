@@ -6,7 +6,6 @@ import { X, PhoneOff, Clock, Headphones } from "lucide-react"
 import useModalHelpers from '../../../../Hooks/ModalHelpers'
 
 
-
 export default function CallDeclinedModal({ isOpen, onClose }) {
 
   const modalRef = useRef(null)

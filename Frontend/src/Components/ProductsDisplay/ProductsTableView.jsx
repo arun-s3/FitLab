@@ -1,20 +1,17 @@
 import React, {useState, useEffect} from 'react'
 
-import {FaSortUp,FaSortDown} from "react-icons/fa6";
-import {MdBlock, MdDeleteOutline} from 'react-icons/md';
-import {RiFileEditLine} from "react-icons/ri";
+import {FaSortUp,FaSortDown} from "react-icons/fa6"
+import {MdBlock} from 'react-icons/md'
+
 
 export default function ProductsTableView({products, setProducts}){
 
     const [activeSorter, setActiveSorter] = useState({field:'',order:''})
 
     useEffect(() => {
-        console.log("Inside useEffect for activeSort");
         let tempProducts = [...products]
 
         if (activeSorter.field && activeSorter.order) {
-            console.log("Sorting products based on activeSorter...");
-            console.log(`Field: ${activeSorter.field}, Order: ${activeSorter.order}`);
             tempProducts = sortProducts(activeSorter.field, activeSorter.order, true)
         }
         setProducts(tempProducts)
@@ -25,14 +22,12 @@ export default function ProductsTableView({products, setProducts}){
         if(e.target.style.height=='15px'){
           e.target.style.height='10px'
           e.target.style.color='rgba(159, 42, 240, 0.5)'
-          console.log("Going to default icon settings--")
       }else {
           setActiveSorter({field:type, order})
       }
      }
 
      const sortProducts = (type, order, returnData) => {
-         console.log("Sorting.....")
 
          const sortedProducts = [...products].sort((a, b) => {
              const valA = a[type]
@@ -44,8 +39,6 @@ export default function ProductsTableView({products, setProducts}){
 
              return order === 1 ? valA - valB : valB - valA
          })
-
-         console.log("sortedProducts -->", sortedProducts)
 
          if (returnData) {
              return sortedProducts

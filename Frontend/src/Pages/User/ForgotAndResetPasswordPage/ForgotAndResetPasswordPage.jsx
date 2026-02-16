@@ -1,7 +1,8 @@
 import React, {useState, useEffect, useRef}  from 'react'
 import './ForgotAndResetPasswordPage.css'
 import {Link, useNavigate} from 'react-router-dom'
-import axios from 'axios'
+
+import apiClient from '../../../Api/apiClient'
 
 import {Eye, EyeOff} from 'lucide-react'
 import {toast as sonnerToast} from 'sonner'
@@ -39,11 +40,6 @@ export default function ForgotAndResetPasswordPage(){
 
     const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
-    useEffect(()=>{
-        console.log("email is --->", email)
-        console.log("Passwords--->",JSON.stringify(passwords))
-    }, [email, passwords])
-
     useEffect(()=> {
         if(timer === 0 && !phase.resetPhase && !resendState){
             setVerificationError(true)
@@ -51,10 +47,6 @@ export default function ForgotAndResetPasswordPage(){
         }
         setMinutes(convertToMinutes(timer))
     }, [timer])
-
-    useEffect(()=> {
-        console.log("Code is--->", code)
-    },[code])
 
     useEffect(()=> {
       if(error.toLowerCase().includes('timeout')){
@@ -90,24 +82,26 @@ export default function ForgotAndResetPasswordPage(){
             setVerificationError(false)
             setResendState(false)
             setLoading(true)
-            console.log('Password reset requested for:', email)
 
             try{
-              const response = await axios.post(`${baseApiUrl}/sendOt`, {email}, {withCredentials:true})
+              const response = await apiClient.post(`${baseApiUrl}/sendOtp`, {email})
               if(response){
-                  console.log("Timer Starting...")
                   setPhase({...phase, timerPhase: true})
                   inputRef.current.value = '';
                   startTimer()
                   // setResetPhase(true)
-                  setLoading(false)
                 }
               }
               catch(error){
-                sonnerToast.error('Error sending the code to your mail. Please try again later!')
-                console.log("Error during sending Code...", error.message)
+                if (!error.response) {
+                  sonnerToast.error("Network error. Please check your internet.")
+                } else {
+                  sonnerToast.error('Error sending the code to your mail. Please try again later!')
+                }
+              }
+              finally {
                 setLoading(false)
-              } 
+              }
         }    
     }
 
@@ -117,11 +111,9 @@ export default function ForgotAndResetPasswordPage(){
             setTimer(prevCount => {
                 if (prevCount <= 1000) {
                     clearInterval(timerId.current)
-                    console.log("Time Over!")
                     setError("Timeout; Code is expired!")
                     return 0
                 } else {
-                    console.log(`Countdown: ${prevCount - 1000} seconds remaining`)
                     return prevCount - 1000
                 }
             });
@@ -145,52 +137,49 @@ export default function ForgotAndResetPasswordPage(){
 
     const submitCode = async(e)=>{
         e.preventDefault()
-        console.log("Inside submitCode...")
-        console.log("Code-->", code)
         setLoading(true)
         if( !/^\d{5}$/.test(code.trim()) ){
-          console.log("Input Code is not a valid 5-digit number!")
           setVerificationError(true)
           setError("Please enter a valid 5-digit Code!")
           setLoading(false)
           return
       }else{
-            console.log("Submitting Code.....")
             try{
-                const response = await axios.post(`${baseApiUrl}/verifyOtp`, {otp: code, email, updateUser: false}, {withCredentials: true})
-                console.log("RESPONSE from verifyOtp---->", response)
-                console.log("RESPONSE from verifyOtp in JSON---->", JSON.stringify(response))
+                const response = await apiClient.post(`${baseApiUrl}/verifyOtp`, {otp: code, email, updateUser: false})
                 if(response.data.message.includes('success')){
                     stopTimer()
                     setError('')
                     setVerificationError(false)
                     setCodeBoxDisabled(false)
                     sonnerToast.success("You are successfully verified!")
-                    console.log("You are successfully verified!")
-                    setLoading(false)
                     setPhase({...phase, resetPhase: true})    
                 }
             }
             catch(error){
-                setLoading(false)
-                console.log("error from  frontend--->", error.message)
+                if (!error.response) {
+                  sonnerToast.error("Network error. Please check your internet.")
+                  setLoading(false)
+                  return
+                }
                 const errorMessage = error.response.data.message.toLowerCase()
-                if(errorMessage.includes('invalid')){
-                    console.log("INAVLID Code from frontend")
+                if(errorMessage.includes('invalid')) {
                     sonnerToast.error("Invalid Code!")
                     setError("Inavlid Code. Please click 'resend again' to try again!")
                     setCode(null)
                     setVerificationError(true)
-                }
-                if(errorMessage.includes('expired')){
-                    console.log("Code is expired!")
+                }else if(errorMessage.includes('expired')) {
                     toast.error("Code is expired!")
                     setError("The Code is no longer valid. Please click 'resend again' to try again!")
                     setCode(null)
                     setVerificationError(true)
                     setCodeBoxDisabled(true)
+                }else {
+                    sonnerToast.error("Internal server error. Please try later")
                 }
-            }   
+            }
+            finally {
+                setLoading(false)
+            }  
         }
     }
 
@@ -203,7 +192,6 @@ export default function ForgotAndResetPasswordPage(){
       }
 
     const resendCode = async()=> {
-        console.log("Inside resendCode()--")
         setCode(null)
         setLoading(true)
         stopTimer()
@@ -211,13 +199,21 @@ export default function ForgotAndResetPasswordPage(){
         setVerificationError(false)
         setCodeBoxDisabled(false)
         setResendState(true)
-        const response = await axios.post(`${baseApiUrl}/sendOtp`, {email}, {withCredentials:true});
-        if(response){
-            console.log("Timer Restarting...")
-            startTimer()
+        try{
+          const response = await apiClient.post(`${baseApiUrl}/sendOtp`, {email});
+          if(response){
+              startTimer()
+              setResendState(false)
+              setPhase({...phase, timerPhase: true})    
+          }
+        }catch(error) {
+            if (!error.response) {
+              sonnerToast.error("Network error. Please check your internet.")
+            } else {
+              sonnerToast.error('Error resending the code to your mail. Please try again later!')
+            }
+        }finally {
             setLoading(false)
-            setResendState(false)
-            setPhase({...phase, timerPhase: true})    
         }
     }
     
@@ -243,21 +239,25 @@ export default function ForgotAndResetPasswordPage(){
       }
       else{
         try{
-          console.log("{newPassword: passwords.newPass}--->", JSON.stringify({newPassword: passwords.newPass}))
-          const response = await axios.post(`${baseApiUrl}/password/reset`, {newPassword: passwords.newPass}, {withCredentials:true})
+          const response = await apiClient.post(`${baseApiUrl}/password/reset`, {newPassword: passwords.newPass})
           if(response.data.message.includes('success')){
             setError('')
             setVerificationError(false)
             sonnerToast.success("Your password is successfully updated!")
-            console.log("Your password is successfully updated!")
-            setLoading(false)
             navigate('/signin', {replace: true})
             } 
         }
         catch(error){
-          setLoading(false)
-          sonnerToast.error("Internal Server Error!")
-          console.log("error from  frontend--->", error.message)
+          if (!error.response) {
+            sonnerToast.error("Network error. Please check your internet.")
+          } else if (error.response?.status === 400 || error.response?.status === 401) {
+            sonnerToast.error(error.response.data.message)
+          } else {
+            sonnerToast.error("Internal server error! Please retry later.")
+          }
+        }
+        finally {
+            setLoading(false)
         }
       }
     }

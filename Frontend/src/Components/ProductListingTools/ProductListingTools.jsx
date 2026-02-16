@@ -1,6 +1,5 @@
-import React,{useState, useEffect, useRef} from 'react'
+import React, {useEffect, useRef} from 'react'
 import './ProductListingTools.css'
-import {useSelector, useDispatch} from 'react-redux'
 import {debounce} from 'lodash'
 
 import {RiArrowDropDownLine} from "react-icons/ri"
@@ -10,8 +9,6 @@ import {VscSettings} from "react-icons/vsc"
 
 import useFlexiDropdown from '../../Hooks/FlexiDropdown'
 import useStickyDropdown from '../../Hooks/StickyDropdown'
-import {searchProduct, getAllProducts} from '../../Slices/productSlice'
-import {SearchInput} from '../FromComponents/FormComponents'
 
 
 export default function ProductListingTools({admin, showByGrid, setShowByGrid, showByTable, sortHandlers, sortMenu, limiter, queryOptions, 
@@ -24,14 +21,10 @@ export default function ProductListingTools({admin, showByGrid, setShowByGrid, s
 
     const {openStickyDropdowns, stickyDropdownRefs, toggleStickyDropdown} = useStickyDropdown(['sortDropdown'])
 
-    const {products, productCounts} = useSelector(state=> state.productStore)
-    const dispatch = useDispatch()
-
     const limitValues = [9, 12, 15, 18]
 
     useEffect(()=> {
         const handleResizing = ()=> {
-            console.log("window.innerWidth---->", window.innerWidth)
             if(window.innerWidth <= 1150){
                 setShowByGrid(true)
             }
@@ -52,15 +45,10 @@ export default function ProductListingTools({admin, showByGrid, setShowByGrid, s
 
     const searchHandler = (e)=> {
         const searchData = e.target.value
-        console.log('searchData--->', searchData)
         if(searchData.trim() !== ''){
-            console.log("Getting searched products--")
             debouncedSearch(searchData)
         } 
         else{
-            console.log("Getting all products--")
-            console.log('QUERYOOPTIONS FROM productListingTool--->', JSON.stringify(queryOptions))
-            // debouncedProducts()
             debouncedSearch.cancel()
             if(queryOptions.searchData){
                 setQueryOptions(queryOptions=> {
@@ -74,28 +62,23 @@ export default function ProductListingTools({admin, showByGrid, setShowByGrid, s
     const sortCheckHandler = (e, order) => {
         const sortKey = e.target.value
         const sortValue = order
-        console.log(`sortKey --> ${sortKey}, sortValue --> ${sortValue}`);
       
         if (e.target.checked){
             if(Object.keys(sorts).some((key) => key === sortKey)){
-               console.log("sortKey already exists")
                e.target.checked = false
                setSorts({})
                return
              }
              else{
-               console.log("Setting sort...")
                setSorts({[sortKey]: sortValue})
                return
              }
         } else {
-          console.log("Unchecked....")
             setSorts({})
             return
         }
       }
       
-
 
     return(
 

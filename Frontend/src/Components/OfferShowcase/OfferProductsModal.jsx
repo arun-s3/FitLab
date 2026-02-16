@@ -51,10 +51,8 @@ export default function OfferProductsModal({ offer, applicableProducts, onClose 
         return { ...parent, minPrice, discountedPrice }
       });
 
-    console.log("productsWithoutVariants------->", productsWithoutVariants)
     setProducts(productsWithoutVariants)
   }, [applicableProducts])
-
 
   const handlePreviousProducts = () => {
     setCurrentIndex(prev =>

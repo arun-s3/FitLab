@@ -60,7 +60,6 @@ export default function OrderProuctsHub({order, product, onOpenOrderDetailsModal
     }
 
     const clearProduct = (orderId, productId)=> {
-      console.log("Clearing the product...")
       dispatch(deleteProductFromOrderHistory({orderId, productId})) 
     }
 

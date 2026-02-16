@@ -3,7 +3,7 @@ import {useNavigate} from 'react-router-dom'
 import {useSelector} from 'react-redux'
 import {motion} from 'framer-motion'
 
-import axios from 'axios'
+import apiClient from '../../../Api/apiClient'
 import {format} from "date-fns"
 
 import OrderStepper from '../../../Components/OrderStepper/OrderStepper'
@@ -23,15 +23,15 @@ export default function OrderCompletedSummary(){
     useEffect(()=> {
       const loadOrderCompletedDetails = async ()=> {
         try{
-          console.log('Getting success details...')
-          const response = await axios.get(`${baseApiUrl}/order/latest`,{ withCredentials: true })
-          setOrderSuccessDetails(response.data.order)
+          const response = await apiClient.get(`${baseApiUrl}/order/latest`)
+          if(response?.data?.order) {
+            setOrderSuccessDetails(response.data.order)
+          }
         }
         catch(error){
-          console.log("Error during loadOrderCompletedDetails:", error.message)
+          console.error(error)
         }
       }
-      console.log('calling loadOrderCompletedDetails()...')
       loadOrderCompletedDetails()
     }, [])
 
@@ -77,8 +77,9 @@ export default function OrderCompletedSummary(){
                     transition={{ duration: 0.6, delay: 0.5 }}
                   >
                      {
-                      orderSuccessDetails &&
+                      orderSuccessDetails ?
                         format(new Date(orderSuccessDetails.estimtatedDeliveryDate), "MMMM dd, yyyy" )
+                        : ''
                      }
                   </motion.p>
                 </div>
@@ -112,7 +113,7 @@ export default function OrderCompletedSummary(){
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ duration: 0.5, delay: 0.8, type: "spring" }} 
                 >
-                  { orderSuccessDetails && orderSuccessDetails.fitlabOrderId }
+                  { orderSuccessDetails ? orderSuccessDetails.fitlabOrderId : '' }
                 </motion.span>{" "}
                 has been placed!
               </p>

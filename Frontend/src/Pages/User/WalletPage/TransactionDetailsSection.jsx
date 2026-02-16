@@ -16,9 +16,7 @@ import AuthPrompt from '../../../Components/AuthPrompt/AuthPrompt'
 import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
 
 
-
 export default function TransactionDetailsSection({transactions, queryOptions, setQueryOptions}){
-
 
     const [tooltip, setTooltip] = useState({id: '', showConfirm: false, showCancel: false})
 
@@ -55,7 +53,6 @@ export default function TransactionDetailsSection({transactions, queryOptions, s
 
     useEffect(()=> {
       if(transactionsCount && totalPages && limit){
-        console.log(`transactionsCount-----> ${transactionsCount}, totalPages------>${totalPages}, limit------>${limit}`)
         setTotalPages(Math.ceil(transactionsCount/limit))
       }
     }, [transactions, transactionsCount])
@@ -158,14 +155,9 @@ export default function TransactionDetailsSection({transactions, queryOptions, s
 
     const radioClickHandler = (e, sortBy)=>{
       const value = Number.parseInt(e.target.value)
-      console.log("value---->", value)
       const checkStatus = queryOptions.sort === value
-      console.log("checkStatus-->", checkStatus)
-      if(checkStatus){
-          console.log("returning..")
-          return
-      }else{
-          console.log("Checking radio..")
+      if(checkStatus) return
+      else{
           setQueryOptions(query=> {
             return {...query, sort: value, sortBy}
           })

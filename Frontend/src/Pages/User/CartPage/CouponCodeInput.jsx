@@ -8,7 +8,6 @@ import {applyCoupon, resetCartStates} from '../../../Slices/cartSlice'
 import ReplaceCouponModal from './Modals/ReplaceCouponModal'
 
 
-
 export default function CouponCodeInput({couponCode, setCouponCode, bestCouponAppliedStatus, setBestCouponAppliedStatus}){
 
   const [isReplaceModalOpen, setIsReplaceModalOpen] = useState(false)
@@ -19,11 +18,8 @@ export default function CouponCodeInput({couponCode, setCouponCode, bestCouponAp
   const dispatch = useDispatch() 
 
   useEffect(()=> {
-    console.log("bestCoupon from CouponCodeInput--->", bestCoupon)
     if(bestCoupon && Object.keys(bestCoupon).length > 0 && !couponCode && cart && !cart.couponUsed){
-      console.log("Inside useEffect of CouponCodeInput for bestCoupon")
       setCouponCode(bestCoupon.code)
-      console.log("Dispatching applyCoupon the best coupon...")
       dispatch( applyCoupon({couponCode: bestCoupon.code}) )
       setBestCouponAppliedStatus({dispatched: true, applied: false})
     }
@@ -34,7 +30,6 @@ export default function CouponCodeInput({couponCode, setCouponCode, bestCouponAp
       if(bestCoupon && bestCouponAppliedStatus.dispatched){
         setBestCouponAppliedStatus({dispatched: true, applied: true})
       }
-      console.log("Inside useEffect when couponApplied is true")
       setCouponCode(cart?.couponUsed?.code.toUpperCase())
     }
   },[couponApplied])
@@ -45,16 +40,13 @@ export default function CouponCodeInput({couponCode, setCouponCode, bestCouponAp
 
   const applyTheCoupon = ()=> {
     if(couponCode.trim() !== '' && cart?.couponUsed && cart.couponUsed.code !== couponCode){
-      console.log("No coupon code applied, hence replacing...")
       setIsReplaceModalOpen(true)
     }else{
-      console.log("dispatching applyCoupon()....")
       dispatch( applyCoupon({couponCode}) )
     }
   }
 
   const applyNewCoupon = ()=> {
-    console.log("Applying new coupon...")
     dispatch( applyCoupon({couponCode}) )
   }
 

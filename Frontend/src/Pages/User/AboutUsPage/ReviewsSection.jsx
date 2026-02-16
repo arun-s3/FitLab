@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from "react"
 import { motion, useInView } from "framer-motion"
 
-import axios from 'axios'
+import apiClient from "../../../Api/apiClient"
+import {toast as sonnerToast} from 'sonner'
 
 
 const ReviewCard = ({ avatar, name, title, review, rating, delay }) => {
@@ -69,9 +70,7 @@ export default function ReviewsSection() {
   useEffect(() => {
     async function loadTestimonials() {
       try {   
-        console.log("Inside loadTestimonials()")
-        const response = await axios.get(`${baseApiUrl}/testimony/top`, { withCredentials: true })
-        console.log("response.data.testimonies---->", response.data.testimonies)
+        const response = await apiClient.get(`${baseApiUrl}/testimony/top`)
 
         if(response.status === 200){
           const fetchedTestimonials = response.data.testimonies.slice(0,4).map((testimony) => {
@@ -89,17 +88,22 @@ export default function ReviewsSection() {
               review: testimony.comment,
             }
           })
-          console.log("fetchedTestimonials-------------->", fetchedTestimonials)
           setTestimonials(fetchedTestimonials)
         }
       }
       catch (error) {
-        console.log("Error fetching top testimonies:", error)
+        console.error("Error fetching top testimonies:", error)
+        if (!error.response) {
+            sonnerToast.error("Network error. Please check your internet.")
+        }
+        setTestimonials([])
       }
     }
     
       loadTestimonials()
   }, [])
+
+  if(!testimonials.length) return
 
 
   return (

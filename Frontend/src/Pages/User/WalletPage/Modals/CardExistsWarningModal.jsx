@@ -6,7 +6,6 @@ import {CreditCard, ArrowRight, X} from 'lucide-react'
 import useModalHelpers from '../../../../Hooks/ModalHelpers'
 
 
-
 export default function CardExistsWarningModal({ isOpen = true, onClose = () => {}, onUpdateCard = () => {} }) {
 
   const [isClosing, setIsClosing] = useState(false)
@@ -104,6 +103,7 @@ export default function CardExistsWarningModal({ isOpen = true, onClose = () => 
     scale: 0.98,
   }
 
+  
   return (
     <AnimatePresence>
       {isOpen && (

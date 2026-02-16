@@ -2,8 +2,8 @@
 import React, {useState, useEffect} from 'react'
 import {motion} from 'framer-motion'
 
-import {Play, Video} from 'lucide-react'
-import axios from 'axios'
+import {Play, Video, TriangleAlert} from 'lucide-react'
+import apiClient from '../../../Api/apiClient'
 
 
 export default function ExerciseVideos({exercise}) {
@@ -12,30 +12,27 @@ export default function ExerciseVideos({exercise}) {
   const [selectedVideoIndex, setSelectedVideoIndex] = useState(0)
   const [playVideo, setPlayVideo] = useState(false)
 
+  const [fetchError, setFetchError] = useState(false)
+
   const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
-  useEffect(()=> {
-    if (!exercise?.name) return
     async function fetchVideos() {
       try {
-        console.log("Inside fetchVideos()...")
-        const response = await axios.get( `${baseApiUrl}/fitness/videos/${exercise.name}`, { withCredentials: true })
-        console.log("fetchVideos response----->", response.data)
+        const response = await apiClient.get( `${baseApiUrl}/fitness/videos/${exercise.name}`)
         if(response.status === 200){ 
           setVideos(response.data.videos)
-          console.log("Videos--->", response.data.videos)
         }
       }catch (error) {
-        console.error("Error while fetching exercise videos", error.message)
+        setFetchError(true)
       }
     }
 
+  useEffect(()=> {
+    if (!exercise?.name) return
     fetchVideos()
   }, [exercise])
 
-  useEffect(()=> {
-    console.log("playVideo----->", playVideo)
-  }, [playVideo])
+  const refetchVideos = ()=> fetchVideos()
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -48,7 +45,6 @@ export default function ExerciseVideos({exercise}) {
 
   return (
     <>
-
         <h2 className='px-8 flex items-center gap-4 w-full mt-20 mb-6'>
             <Video className='w-[30px] h-[30px] text-secondary'/>
             <span className='text-[25px] text-black font-bold'> Videos related to this exercise or its variations </span>
@@ -137,6 +133,26 @@ export default function ExerciseVideos({exercise}) {
               
             </motion.div>
         }
+        {fetchError && (
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className='mt-8 flex justify-center items-center gap-[5px] w-[35%] min-w-[15rem] bg-red-50 border border-red-200
+                  text-red-700 p-4 rounded-lg mb-8'>
+                <TriangleAlert className='mb-[18px] text-primary w-[32px] h-[32px]' />
+                <p className='flex flex-col'>
+                    <span className='flex items-center gap-[7px] text-[17px] text-[#686262] font-medium'>
+                        Unable to load
+                        <RotateCcw
+                            className='w-[20px] h-[20px] text-muted p-1 rounded-full border border-dropdownBorder cursor-pointer 
+                                        hover:text-black transition-all duration-150 ease-in'
+                            onClick={() => refetchVideos()}
+                        />
+                    </span>
+                    <span className='text-[13px] text-muted'>Check connection</span>
+                </p>
+            </motion.div>
+        )}
     </>
   )
 }

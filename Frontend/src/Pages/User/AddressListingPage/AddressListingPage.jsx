@@ -14,7 +14,6 @@ import {getAllAddress, deleteAddress, resetStates} from '../../../Slices/address
 import AuthPrompt from '../../../Components/AuthPrompt/AuthPrompt'
 
  
-
 export default function AddressListingPage(){
 
     const {setBreadcrumbHeading, setSidebarTileClasses, setPageWrapperClasses, setPageLocation, setPageBgUrl} = useContext(UserPageLayoutContext)
@@ -48,13 +47,9 @@ export default function AddressListingPage(){
             sonnerToast.error(error)
             dispatch(resetStates())
         }
-        if(addresses){
-            console.log("addresses--->", addresses)
-        }
     },[addressDeleted, error, addresses])
 
     const onDeleteConfirm = async ()=> {
-        console.log("Address deleting..")
         dispatch(deleteAddress({ addressId: deleteAddressId }))
         setOpenDeleteModal(false)
     }

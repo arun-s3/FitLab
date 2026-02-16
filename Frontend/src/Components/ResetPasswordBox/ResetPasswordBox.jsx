@@ -3,7 +3,7 @@ import {Link} from 'react-router-dom'
 
 import {Check, AlertCircle, Eye, EyeOff} from "lucide-react"
 import {toast as sonnerToast} from 'sonner'
-import axios from 'axios'
+import apiClient from "../../Api/apiClient"
 
 import {SiteSecondaryFillImpButton} from '../SiteButtons/SiteButtons'
 import {CustomHashLoader} from '../Loader/Loader'
@@ -76,36 +76,40 @@ export default function ResetPasswordBox({setOpenSecurityMenu, admin}){
   const submitPassword = async(e)=> {
     e.preventDefault()
     if (passwordsMatch && Object.values(requirements).every(Boolean)){
-      console.log("Password verifications passed!")
       setLoading(true)
       setError({new: false, confirm: false, value:''})
 
       try{
         let response = null
         if(admin) {
-            response = await axios.post(`${baseApiUrl}/admin/password/update`, {
+            response = await apiClient.post(`${baseApiUrl}/admin/password/update`, {
                 currentPassword: passwords.current, newPassword: passwords.new, confirmPassword: passwords.confirm
-            }, {withCredentials:true})
+            })
         }else{
-            response = await axios.post(`${baseApiUrl}/password/update`, {
+            response = await apiClient.post(`${baseApiUrl}/password/update`, {
                 currentPassword: passwords.current, newPassword: passwords.new, confirmPassword: passwords.confirm
-            }, {withCredentials:true})
+            })
         }
         if(response.data.message.includes('success')){
-          setLoading(false)
           setOpenSecurityMenu(false)
           sonnerToast.success("Your password is successfully updated!")
-          console.log("Your password is successfully updated!")
         }
       }
       catch(error){
-        console.log("Error inside submitPassword--->", error.message)
-        setLoading(false)
-        const errorMessage = error.response.data.message
-        sonnerToast.error(errorMessage)
-        if(errorMessage.toLowerCase().includes('current')){
-          setError( {current: true, value: "The Current Pasword is wrong!"} )
+        if (!error.response) {
+          sonnerToast.error("Network error. Please check your internet and try again.")
+        }else if (error.response?.status === 400 ||error.response?.status === 401) {
+          sonnerToast.error(error.response.data.message || "Error while resetting password. Please try again")
+          const errorMessage = error.response.data.message
+          if(errorMessage.toLowerCase().includes("current password is incorrect")){
+            setError( {current: true, value: "The Current Pasword is wrong!"} )
+            }
+        } else {
+          sonnerToast.error("Internal server error! Please retry later.")
         }
+      }
+      finally {
+        setLoading(false)
       }
     }
   }

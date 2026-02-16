@@ -8,6 +8,8 @@ import {toast} from 'react-toastify'
 import {toast as sonnerToast} from 'sonner'
 import {useGoogleLogin} from '@react-oauth/google'
 import {Eye, EyeOff} from 'lucide-react'
+
+import apiClient from '../../../Api/apiClient'
 import axios from 'axios'
 
 import {SiteButtonSquare, SiteSecondaryBorderButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
@@ -45,32 +47,41 @@ export default function SignUpAndInPage({type}){
     const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
     const clearCookiesAndSignIn = async()=> {
-        console.log("Inside clearCookiesAndSignIn()")
-        const response = await axios.get(`${baseApiUrl}/clear-cookies`, {withCredentials:true})
-        if(response.status === 200){
-            console.log("Cookies cleared!")
-            dispatch(signin(formData))
-        }else{
-            toast.error("Internal Server Error. Please try after sometime!")
+        try {
+            const response = await apiClient.get(`${baseApiUrl}/clear-cookies`)
+            if(response.status === 200){
+                dispatch(signin(formData))
+            }
+        } catch(error) {
+            if (!error.response) {
+              toast.error("Network error. Please check your internet.")
+            } else {
+              toast.error("Internal Server Error. Please try after sometime!")
+            }
         }
     }
      
     useEffect(()=>{
-        console.log("Inside useEffect()")
         const checkSuccessAndSendOtp = async()=> {
-                console.log("success state now-->"+success)
-                sonnerToast.success("Registered succesfully!")
-                console.log("Just after success toast!")
-                // const response = await axios.post('/sendOtp', formData.email)
-                const response = await axios.post(`${baseApiUrl}/sendOtp`, { email: formData.email }, {withCredentials:true});
-                if(response){
-                    console.log("Redirecting to OTP Verification page...")
+            sonnerToast.success("Registered succesfully!")
+            try{
+                const response = await apiClient.post(`${baseApiUrl}/sendOtp`, { email: formData.email });
+                if(response.status === 200){
                     navigate('/otp-verify', {
                         replace:true, 
                         state:{email: formData.email, from: 'signup', NoDirectAccess: true}
                     }) 
                     setOtpPageLoading(false)
                 }
+            } catch(error) {
+                if (!error.response) {
+                  sonnerToast.error(`
+                    OTP verification failed due to a network error. Please check your internet connection. You will be asked to verify again at checkout.
+                  `)
+                }else {
+                  sonnerToast.error("OTP verification failed due to internal server error. You will be asked to verify again at checkout.")
+                }
+            }
         }
         if(type=='signup' && success && (!googleSuccess||googleSuccess)){
             setOtpPageLoading(true)
@@ -79,7 +90,6 @@ export default function SignUpAndInPage({type}){
         if(type=='signin' && success){
             if(location && location.state?.currentPath){
                 const redirectingtPath = location.state.currentPath 
-                console.log("redirectingtPath---->", redirectingtPath)
                 navigate(`${redirectingtPath}`, {replace:true})
             }
             else{
@@ -88,7 +98,6 @@ export default function SignUpAndInPage({type}){
             dispatch(resetStates())
         }
         if(error){
-            console.log("error---->", error)
             if(error === 'Bad request- User already logged in!'){
                 if(user){
                     navigate('/',{replace:true})
@@ -102,9 +111,7 @@ export default function SignUpAndInPage({type}){
                 })
             }
             else{
-                console.log("Just after before toast!-->"+error)
                 sonnerToast.error(error || "Something went wrong.")
-                console.log("Just after error toast!")
                 dispatch(resetStates())
             }
         }
@@ -112,18 +119,10 @@ export default function SignUpAndInPage({type}){
     })
     
     useLayoutEffect(()=>{
-        console.log("inside typecheck useEffect--,formData-->"+JSON.stringify(formData))
         setFormData({})
-        console.log("inside same typecheck useEffect after clearing properties of formdata--,formData-->"+JSON.stringify(formData))
         if(identifierRef.current) identifierRef.current.value=""
         passwordRef.current.value=""
     },[type])
-
-    useEffect(()=> {
-        if(location){
-            console.log("location----->", location)
-        }
-    }, [location])
 
     useEffect(() => {
         const userNotFilledForm = Object.keys(formData).length === 0
@@ -143,14 +142,12 @@ export default function SignUpAndInPage({type}){
     }
 
     const displaySuccess = (e)=>{
-        console.log("Success!")
         e.target.nextElementSibling.style.visibility = 'hidden'
         e.target.style.borderColor = 'green'
     }
     const displayError = (e,message)=>{
         e.target.style.borderColor = 'red'
         e.target.nextElementSibling.style.visibility = 'visible'
-        console.log("msg-->"+message)
         delete formData[e.target.id.toString()]
         e.target.nextElementSibling.innerText = message
     } 
@@ -159,7 +156,7 @@ export default function SignUpAndInPage({type}){
         usernamePattern: /^[\w-]{5,15}(?!@)$/,
         mobilePattern: /^\d{10}$/,
         passwordPattern: /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[`~@#$%^&*()\-+={}\\/;:"'|,.?<>])[a-zA-Z\d`~@#$%^&*()\-+={}\\/;:"'|,.\?<>]{5,}/,
-        // identifierPattern: new RegExp(`^(${this.emailPattern.toString().slice(2,-2).trim()})|(${this.usernamePattern.toString().slice(2,-2).trim()})$`),
+
         validator: function(e,errorMessage){
             const currentPattern = Object.keys(this).find( (pattern,index)=> {
                 if(pattern.toString().match(e.target.id.toString())) return pattern[index]
@@ -213,62 +210,51 @@ export default function SignUpAndInPage({type}){
 
     const submitData = (e)=>{
         e.preventDefault()
-        console.log("Inside submitData()--")
         if((type=="signup"? Object.keys(formData).length<5: Object.keys(formData).length<2) || Object.values(formData).find(inputValues=>inputValues==='undefined')){
             if(!Object.keys(formData).length){
-                console.log("No Fields entered!")
                 sonnerToast.error("Please enter all the fields!")
             }
             else{
-                console.log("Check errors"+JSON.stringify(formData))
                 sonnerToast.error("Please check the fields and submit again!")
             }
         } 
         else{
-            console.log("Inside else(no errors) of submitData() ")
-            console.log("FormData now-->"+JSON.stringify(formData))
-            console.log("type of this page-->"+type)
-            type=="signup"? dispatch(signup(formData)):dispatch(signin(formData))
-            console.log("Dispatched successfully--")
+            type=="signup" ? dispatch(signup(formData)) : dispatch(signin(formData))
         }
         
     }
 
     const googleSuccessHandler = async (response)=>{
-        console.log("Inside googleSuccessHandler Success login from google-->"+JSON.stringify(response))
         const googleToken = response.access_token
-        console.log("Inside googleSuccessHandler Fetching userDetails..")
-        const userDetails = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {headers:{
-            Authorization:`Bearer ${googleToken}`
-        }})
-        if(userDetails){
-            console.log("Fetched userDetails-->"+JSON.stringify(userDetails))
-            const {email,name,sub,picture} = userDetails.data
-            console.log("Fetched name & email-->"+name+" "+email+ "sub-(id)->"+sub+"picture-->"+picture)
-            const username = name.split(" ").join("").trim() + Math.random().toString().substr(2,4) 
-            const userData = {username, email, sub, picture}
-            console.log("Inside googleSignin userData(Dispatching....)-->"+JSON.stringify(userData))
-            setGooglePromptLoading(false)
-            dispatch(googleSignin(userData))
-            console.log("Success from googleSuccessHandler, dispatched googleSignin() successfully")
-        } 
-        else{
-            console.log("Inside googleSuccessHandler else-userDetails, couldn't fetch userDetails")
-            sonnerToast.error("Couldn't find the user details!")
-        }  
+        try {
+            const userDetails = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {headers:{
+                Authorization:`Bearer ${googleToken}`
+            }})
+            if(userDetails){
+                const {email,name,sub,picture} = userDetails.data
+                const username = name.split(" ").join("").trim() + Math.random().toString().substr(2,4) 
+                const userData = {username, email, sub, picture}
+                setGooglePromptLoading(false)
+                dispatch(googleSignin(userData))
+            } 
+            else{
+                sonnerToast.error("Couldn't find the user details!")
+            }
+        }catch (error) {
+          if (!error.response) {
+            sonnerToast.error("Network error. Please check your internet.")
+          }else {
+            sonnerToast.error("Something went wrong! Please retry later.")
+          }
+        }
     }
     const googleFailureHandler = (error)=>{
-        console.log("Success login from google-->"+JSON.stringify(error))
         toast.error("Please check your gmail id")
     }
     const googleLogin = useGoogleLogin({
             onSuccess:googleSuccessHandler,
             onFailure:googleFailureHandler
     })
-    
-
-    console.log("Store states from signUpAndInPage- loading-->"+loading)
-    console.log("Success before JSX"+success)
 
     const sectionVariants = {
       hidden: { opacity: 0,},

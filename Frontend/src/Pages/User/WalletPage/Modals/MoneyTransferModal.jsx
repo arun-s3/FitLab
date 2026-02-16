@@ -85,7 +85,6 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
     }
 
     const validateAccountDetails = (type)=> {
-      console.log("Inside validateAccountDetails..")
       const errors = { name: "", accountNumber: "" }
 
       if(type === 'name'){
@@ -110,7 +109,6 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
     }
 
     const handleAddPeerAccount = ()=> {
-        console.log("Inside handleAddPeerAccount..")
         const errors = { name: "", accountNumber: "" }
         let hasError = false
     
@@ -137,7 +135,6 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
           accountNumber: 'FTL' + newPeerAccount.accountNumber.toString(),
           isBeneficiary: !isRequester ? true : false
         }
-        console.log('accountDetails---->', accountDetails)
 
         dispatch( addPeerAccount({accountDetails}) )
       }
@@ -169,7 +166,6 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
             amount: transferAmount,
             notes: ''
         }
-        console.log('paymentDetails--->', paymentDetails)
 
         isRequester ? dispatch( requestMoneyFromUser({paymentDetails}) ) : dispatch( sendMoneyToUser({paymentDetails}) )
     
@@ -211,7 +207,6 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
               whileHover={{ scale: 1.1, rotate: 90 }}
               whileTap={{ scale: 0.9, rotate: -90 }}
               onClick={() => {
-                console.log('Closing Modal.....')
                 setIsTransferModalOpen(false)
                 setTransferAmount("")
                 setTransferConfirmationChecked(false)

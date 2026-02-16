@@ -56,19 +56,15 @@ export default function ShoppingCartPage(){
 
   useEffect(()=> {
     dispatch(getTheCart())
-    console.log("bestCoupon--->", bestCoupon)
     if(!bestCoupon && Object.keys(bestCoupon).length === 0){
-      console.log("Getting the best coupon...")
       dispatch(getBestCoupon())
     }
   },[])
 
   useEffect(()=> {
     if(cart){
-      console.log("Cart---->", cart)
       if(cart.products && cart.products.length > 0){
         const productIds = cart.products.map(product=> product.productId)
-        console.log("productIds---->", productIds)
         setCartProductIds(productIds)
       }
     }
@@ -92,31 +88,26 @@ export default function ShoppingCartPage(){
 
   useEffect(()=> {
     if(error){
-      console.log("Error-->", error)
       sonnerToast.error(error)
       dispatch(resetCartStates())
     }
   },[error])
 
   const addQuantity = (id, quantity)=> {
-    console.log("Inside addQuantity")
     dispatch( addToCart({productId: id, quantity}) )
   }
   
   const lessenQuantity = (id, quantity)=> {
-    console.log("Inside lessenQuantity")
     dispatch( reduceFromCart({productId: id, quantity}) )
   }
     
   const removeFromTheCart = (id, name)=> {
-    console.log("Removal confirmation for id--->", id)
     setProductToRemove({id, name})
     setIsProductRemovalModalOpen(true)
   }
 
   const confirmProductRemoval = ()=> {
     if(productToRemove !== null){
-      console.log("On confirmation--->", productToRemove.id)
       dispatch(removeFromCart({productId: productToRemove.id}))
       setIsProductRemovalModalOpen(false)
       setProductToRemove({})

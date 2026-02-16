@@ -27,17 +27,11 @@ export const InputLabelGenerator = React.memo(({ name, label, optionalField, opt
     const errorRef = useRef(null)
 
     const inputBlurHandler = (e, fieldName, options)=>{
-        console.log("inside inputBlurHandler, fieldname", fieldName)
 
         if(fieldName){
-           console.log("fieldName from inputBlurHandler-->", fieldName)
            const value = e.target.value
-           console.log("Value from the field--->", value)
-           console.log("options?.optionalField form inputBlurHandler--->", (options || false))
            const statusObj = handleInputValidation(fieldName, value, options || { optionalField: false })
-           console.log("statusObj from inputBlurHandler--> ", JSON.stringify(statusObj))
            if(!statusObj.error && statusObj.message.startsWith("Optional")){
-               console.log("Inside here----")
                e.target.nextElementSibling.textContent = optionalMsg ? optionalMsg : ''
                if(optionalMsg) e.target.nextElementSibling.style.color = 'rgb(125, 124, 140)'
                e.target.style.borderColor = primaryColor.current

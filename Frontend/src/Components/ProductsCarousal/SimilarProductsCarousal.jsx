@@ -2,8 +2,8 @@ import React, {useState, useEffect} from 'react'
 import {useNavigate} from 'react-router-dom'
 import {motion, AnimatePresence} from 'framer-motion'
 
-import {Star, ChevronLeft, ChevronRight} from 'lucide-react'
-import axios from 'axios'
+import {ChevronLeft, ChevronRight} from 'lucide-react'
+import apiClient from "../../Api/apiClient"
 
 import StarGenerator from '../StarGenerator/StarGenerator'
 
@@ -14,6 +14,8 @@ export default function SimilarProductsCarousal({titleColor = null, referencePro
     const [currentProductIndex, setCurrentProductIndex] = useState(0)
     const [direction, setDirection] = useState(0)
 
+    const [fetchError, setFetchError] = useState(false)
+
     const navigate = useNavigate()
 
     const baseApiUrl = import.meta.env.VITE_API_BASE_URL
@@ -21,18 +23,22 @@ export default function SimilarProductsCarousal({titleColor = null, referencePro
     useEffect(()=> {
       async function loadProducts(){
         try{
-          console.log("referenceProductIds--->", referenceProductIds)
-          const response = await axios.post(`${baseApiUrl}/products/similar`, {productIds: referenceProductIds}, {withCredentials: true})
-          console.log("RESPONSE from loadSlides---->", response)
-          setSimilarProducts(response.data.similarProducts)
+          const response = await apiClient.post(`${baseApiUrl}/products/similar`, {productIds: referenceProductIds})
+          if(response?.data?.similarProducts) {
+            setSimilarProducts(response.data.similarProducts)
+          }
         }
         catch(error){
-          console.log("error from  loadSlides--->", error.message)
+          if (!error.response) {
+            setFetchError(true)
+          } 
+          if (error.response?.status !== 404 && error.response?.status !== 400) {
+            setFetchError(true)
+          }
         }  
       }
       loadProducts()
     }, [referenceProductIds])
-
 
       const containerVariants = {
         enter: (direction) => ({

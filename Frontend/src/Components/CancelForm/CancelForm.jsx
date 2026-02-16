@@ -10,7 +10,6 @@ import {SiteSecondaryFillImpButton} from '../SiteButtons/SiteButtons'
 export default function CancelForm({openSelectReasons, setOpenSelectReasons, cancelReasonHandler, setOpenCancelForm, submitReason, canceledByAdmin,
    formFor, returnAndRefund = false}){
 
-  
   const commonReasonTitles = [
     "Order created by mistake", "Need to change shipping address", "Product(s) price too high", "Poor product reviews discovered",
     "Need to change payment method", "Delivery charge too high", "Incorrect product ordered", "Found somewhere else cheaper",

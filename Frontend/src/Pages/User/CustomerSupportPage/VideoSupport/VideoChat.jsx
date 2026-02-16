@@ -2,6 +2,7 @@ import React,{ useState, useEffect, useRef } from "react"
 import { motion } from "framer-motion"
 
 import { Mic, MicOff, Video, VideoOff, Phone, MessageSquare, Users } from "lucide-react"
+import {toast as sonnerToast} from 'sonner'
 
 import VideoChatInfoTab from './VideoChatInfoTab' 
 
@@ -21,18 +22,11 @@ export default function VideoChat({ socketContextItems, ImmediateVideoCallsessio
   const remoteVideoRef = useRef(null)
   const peerConnectionRef = useRef(null)
 
-  // const [runWithSessionId, setRunWithSessionId] = useState(null)
-
   const {socket, newMessage, isTyping, messagesEndRef, handleSendMessage, handleTyping} = socketContextItems
-
 
   const configuration = {
     iceServers: [{ urls: "stun:stun.l.google.com:19302" }, { urls: "stun:stun1.l.google.com:19302" }],
   }
-
-  useEffect(()=> {
-    console.log("Mounted.........")
-  }, [])
 
   useEffect(()=> {
     if(ImmediateVideoCallsessionId){
@@ -49,7 +43,6 @@ export default function VideoChat({ socketContextItems, ImmediateVideoCallsessio
           video: true,
           audio: true,
         })
-        console.log("localStream-->", localStream)
 
         if (localVideoRef.current) {
           localVideoRef.current.srcObject = localStream
@@ -67,31 +60,25 @@ export default function VideoChat({ socketContextItems, ImmediateVideoCallsessio
             setIsConnected(true)
           }
         }
-        console.log("Emiting joinSession....")
         socket.emit("joinSession", { sessionId })
 
         socket.on("offer", async (offer) => {
-          console.log("Inside on offer....")
           await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(offer))
           const answer = await peerConnectionRef.current.createAnswer()
           await peerConnectionRef.current.setLocalDescription(answer)
-          console.log("Emiting answer....")
           socket.emit("answer", { sessionId, answer })
         })
 
         socket.on("answer", async (answer) => {
-          console.log("Inside on answer....")
           await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(answer))
         })
 
         socket.on("iceCandidate", async (candidate) => {
-          console.log("Inside on iceCandidate....")
           await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate))
         })
 
         peerConnectionRef.current.onicecandidate = (event) => {
           if (event.candidate) {
-            console.log("Emiting iceCandidate....")
             socket.emit("iceCandidate", { sessionId, candidate: event.candidate })
           }
         }
@@ -99,20 +86,18 @@ export default function VideoChat({ socketContextItems, ImmediateVideoCallsessio
         setTimeout(async () => {
           const offer = await peerConnectionRef.current.createOffer()
           await peerConnectionRef.current.setLocalDescription(offer)
-          console.log("Emiting offer....")
           socket.emit("offer", { sessionId, offer })
         }, 2000)
 
         socket.off("chatMessage")
         socket.on("chatMessage", (msg) => {
           if(msg.sender !== 'user'){
-            console.log("Inside on chatMessage, msg-->", msg)
             setMessages((prev) => [...prev, { sender: "admin", text: msg.text, timestamp: Date.now() }])
           }
         })
 
       } catch (error) {
-        console.error("Error accessing media devices:", error)
+        sonnerToast.error("Error accessing media devices. Please check your browser settings and give us required permissions")
       }
     }
 
@@ -135,19 +120,6 @@ export default function VideoChat({ socketContextItems, ImmediateVideoCallsessio
       }
     }
   }, [sessionId, socket])
-
-  useEffect(()=> {
-    console.log("isConnected--->", isConnected)
-    console.log("message--->", message)
-    console.log("messages--->", messages)
-    console.log("localVideoRef--->", localVideoRef)
-    console.log("peerConnectionRef--->", peerConnectionRef)
-    console.log("isChatOpen--->", isChatOpen)
-    console.log("scheduledCallReceived--->", scheduledCallReceived)
-    console.log("sessionId--->", sessionId)
-    console.log("ImmediateVideoCallsessionId--->", ImmediateVideoCallsessionId)
-    console.log("scheduledVideoCallSessionId--->", scheduledVideoCallSessionId)
-  }, [isConnected, message, messages, localVideoRef, peerConnectionRef, isChatOpen, scheduledCallReceived, ImmediateVideoCallsessionId, scheduledVideoCallSessionId, sessionId])
 
   const toggleMute = () => {
     const localStream = localVideoRef.current?.srcObject
@@ -196,7 +168,6 @@ export default function VideoChat({ socketContextItems, ImmediateVideoCallsessio
 
   const startScheduledVideoCall = ()=> {
     if(scheduledVideoCallSessionId){
-      console.log("Starting scheduled video call with a session id")
       socket.emit('startScheduledSession', scheduledVideoCallSessionId)
       setSessionId(scheduledVideoCallSessionId)
     }

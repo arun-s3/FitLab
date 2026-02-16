@@ -33,7 +33,6 @@ export default function OrderTools({limit, setLimit, queryDetails, setQueryDetai
     useEffect(()=> {
       const handleClickOutside = (e)=> {
         const isOutside = !Object.values(dropdownRefs).some( (ref)=> ref.current?.contains(e.target) )
-        console.log("isOutside--->", isOutside)
 
         if (isOutside){
           setOpenDropdowns((prevState)=>
@@ -82,14 +81,10 @@ export default function OrderTools({limit, setLimit, queryDetails, setQueryDetai
 
     const radioClickHandler = (e)=>{
       const value = Number.parseInt(e.target.value)
-      console.log("value---->", value)
       const checkStatus = queryDetails.sort === value
-      console.log("checkStatus-->", checkStatus)
       if(checkStatus){
-          console.log("returning..")
           return
       }else{
-          console.log("Checking radio..")
           setQueryDetails(query=> {
             return {...query, sort: value}
           })

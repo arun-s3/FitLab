@@ -2,36 +2,32 @@ import React, {useState, useEffect} from 'react'
 import './ProductsDisplay.css'
 import {useNavigate} from 'react-router-dom'
 import {useDispatch, useSelector} from 'react-redux'
-import {motion, AnimatePresence} from 'framer-motion'
+import {motion} from 'framer-motion'
 
-import axios from 'axios'
 import {toast as sonnerToast} from 'sonner'
 import {MdFavorite, MdFavoriteBorder} from "react-icons/md"
 import {RiFileEditLine} from "react-icons/ri"
 import {MdBlock} from "react-icons/md"
-import {LuBadgeAlert} from "react-icons/lu"
 import {Calendar, Tag, NotebookPen, ShieldAlert, PackagePlus} from 'lucide-react'
 import {format} from "date-fns"
 
-import {getAllProducts, toggleProductStatus, restockProduct, resetStates} from "../../Slices/productSlice"
-import {addProductToList, removeProductFromList, getUserWishlist, getAllWishlistProducts, resetWishlistStates} from '../../Slices/wishlistSlice'
 import WishlistModal from '../../Pages/User/WishlistPage/Modals/WishlistModal'
 import WishlistOptionsModal from '../WishlistModals/WishlistOptionsModal'
 import RemoveWishlistItemModal from '../WishlistModals/RemoveWishlistItemModal'
-import Pagination from '../Pagination/Pagination'
+import ProductsTableView from './ProductsTableView'
+import RestockModal from '../RestockModal/RestockModal'
 import PaginationV2 from '../PaginationV2/PaginationV2'
-import StarGenerator from '../StarGenerator/StarGenerator'
 import AnimatedStarGenerator from '../AnimatedStarGenerator/AnimatedStarGenerator'
+
+import {toggleProductStatus, restockProduct, resetStates} from "../../Slices/productSlice"
+import {addProductToList, removeProductFromList, getUserWishlist, getAllWishlistProducts, resetWishlistStates} from '../../Slices/wishlistSlice'
 import {SiteButtonSquare} from '../SiteButtons/SiteButtons'
 import {capitalizeFirstLetter, camelToCapitalizedWords} from '../../Utils/helperFunctions'
 import {addToCart} from '../../Slices/cartSlice'
-import ProductsTableView from './ProductsTableView'
-import RestockModal from '../RestockModal/RestockModal'
 
 
 export default function ProductsDisplay({gridView, showByTable, customGridViewStyles, currentPage, limiter, queryOptions, showTheseProducts, admin, 
   restockingProduct, wishlistDisplay, currentList, setCurrentPage, totalPages, couponApplicableItems = null, checkAuthOrOpenModal = null}) {
-
 
   const dispatch = useDispatch()
   const {products:items, productRestocked} = useSelector(state=> state.productStore)
@@ -41,7 +37,7 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
 
   const navigate = useNavigate()
 
-  const {wishlist, wishlistProducts, listCreated, listProductRemoved, listProductAdded, loading, wishlistError, wishlistSuccess} = useSelector(state=> state.wishlist)
+  const {wishlist, wishlistProducts, listProductRemoved, listProductAdded, wishlistError} = useSelector(state=> state.wishlist)
 
   const [isRestockModalOpen, setIsRestockModalOpen] = useState(false)
   const [selectedRestockProduct, setSelectedRestockProduct] = useState(null)
@@ -61,18 +57,15 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
 
   useEffect(()=>{
     if((!admin && !wishlistDisplay) || restockingProduct){
-      console.log("Setting products....")
       setProducts(items)
     }
     if(wishlistDisplay && wishlistProducts){
-      console.log("wishlistProducts---->", wishlistProducts)
       let allWishlistProducts = wishlistProducts
       allWishlistProducts = allWishlistProducts.map(list=> {
           const {product, ...rest} = list
           const id = {productId: product._id}
           return {...id, ...product, ...rest}
       })
-      console.log("allWishlistProducts---->", allWishlistProducts)
       setProducts(allWishlistProducts)
     }
   },[items, wishlistProducts])
@@ -94,12 +87,8 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
       }
     }
     if(wishlistError && !wishlistError.includes('Unauthorized')){
-      console.log("wishlistError--->", wishlistError)
       sonnerToast.error("The product have been removed from the Wishlist!")
       dispatch(resetWishlistStates())
-    }
-    if(wishlist){
-      console.log("Wishlist---->", wishlist)
     }
   },[listProductAdded, listProductRemoved, wishlist, wishlistError])
 
@@ -139,10 +128,7 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
 
   const handleAddToCart = (id)=> {
      if(checkAuthOrOpenModal && checkAuthOrOpenModal()) return
-     
-     console.log("Inside handleAddToCart()--")
      dispatch( addToCart({productId: id, quantity: 1}) )
-     console.log("Dispatched successfully")
   }
 
   const openRestockModal = (product) => {
@@ -153,7 +139,6 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
   
   const handleRestockProduct = (data) => {
       const { productId, quantity } = data
-      console.log("Restockig product....")
       dispatch(restockProduct({ productId, quantity }))
   }
 
@@ -165,10 +150,6 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
   const openWishlistItemRemoveModal = (product) => {
     setSelectedProductForWishlist(product)
     let targetList
-    console.log("product.--->", product)
-    console.log("product._id--->", product._id)
-    wishlistDisplay && console.log("productId--->", product.productId)
-    console.log('wishlist---->', wishlist)
     if(!wishlistDisplay){
       targetList = wishlist.lists.find((list)=> list.products.find(item=> item.product === product._id))
     }
@@ -185,7 +166,6 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
     const userCreatedListsExists = Object.keys(wishlist).length && wishlist?.lists.some(list=> list.name === 'Default Shopping List') 
                                     && wishlist?.lists.length > 1
     if(userCreatedListsExists){
-      console.log("Has lists other than default list")
       openWishlistOptionsModal(product)
     }else{
       dispatch(addProductToList({productId: product._id}))
@@ -199,14 +179,11 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
     }) 
                                     
     if(productOfDefaultList){
-      console.log("Inside productOfDefaultList ")
       dispatch(removeProductFromList({productId: product._id}))
     }else{
-      console.log("Has lists other than default list")
       openWishlistItemRemoveModal(product)
     }
   }
-
 
 
   return (

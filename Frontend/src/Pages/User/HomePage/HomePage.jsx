@@ -2,7 +2,7 @@ import React, {useState, useEffect, useRef, lazy, Suspense} from 'react'
 import {useLocation} from "react-router-dom"
 import {motion} from "framer-motion"
 
-import axios from 'axios'
+import apiClient from '../../../Api/apiClient'
 
 import Header from '../../../Components/Header/Header'
 import HeroSection from './HeroSection'
@@ -66,12 +66,17 @@ export default function HomePage(){
     useEffect(()=> {
       async function loadPopularProducts(){
         try{
-          const response = await axios.get(`${baseApiUrl}/products/popular`, {withCredentials: true})
-          console.log("RESPONSE from loadPopularProducts---->", response)
-          setPopularProducts(response.data.popularProducts)
+          const response = await apiClient.get(`${baseApiUrl}/products/popular`)
+          if(response?.data?.popularProducts) {
+            setPopularProducts(response.data.popularProducts)
+          }
         }
         catch(error){
-          console.log("error from  loadSlides--->", error.message)
+          if (!error.response) {
+            sonnerToast.error("Network error. Please check your internet.")
+          }
+          console.error(error)
+          setPopularProducts([])
         }  
       }
       loadPopularProducts()

@@ -1,14 +1,12 @@
 import {createSlice, createAsyncThunk} from '@reduxjs/toolkit'
-import axios from '../Api/axiosConfig'
+import apiClient from '../Api/apiClient'
+
 
 export const addToCart = createAsyncThunk('cart/addToCart', async ({productId, quantity}, thunkAPI) => {
   try {
-    console.log('Inside addToCart createAsyncThunk');
-    const response = await axios.post('/cart/add', {productId, quantity}, {withCredentials: true})
-    console.log('Returning success response from addToCart...', JSON.stringify(response.data))
+    const response = await apiClient.post('/cart/add', {productId, quantity})
     return response.data
   }catch(error){
-    console.log('Inside catch of addToCart')
     const errorMessage = error.response?.data?.message || error?.message ||  'Something went wrong. Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
@@ -16,13 +14,10 @@ export const addToCart = createAsyncThunk('cart/addToCart', async ({productId, q
 
 export const reduceFromCart = createAsyncThunk('cart/reduceFromCart', async ({productId, quantity}, thunkAPI) => {
   try {
-    console.log('Inside reduceFromCart createAsyncThunk');
-    const response = await axios.post('/cart/reduce', {productId, quantity}, {withCredentials: true})
-    console.log('Returning success response from reduceFromCart...', JSON.stringify(response.data))
+    const response = await apiClient.post('/cart/reduce', {productId, quantity})
     return {productId, quantity, couponDiscount: response.data.couponDiscount, deliveryCharge: response.data.deliveryCharge, total: response.data.total,
       absoluteTotal: response.data.absoluteTotal, absoluteTotalWithTaxes: response.data.absoluteTotalWithTaxes, gst: response.data.gst}
   }catch(error){
-    console.log('Inside catch of reduceFromCart')
     const errorMessage = error.response?.data?.message || error?.message ||  'Something went wrong. Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
@@ -30,13 +25,10 @@ export const reduceFromCart = createAsyncThunk('cart/reduceFromCart', async ({pr
 
 export const removeFromCart = createAsyncThunk('cart/removeFromCart', async ({productId}, thunkAPI) => {
   try {
-    console.log('Inside removeFromCart createAsyncThunk')
-    const response = await axios.post('/cart/delete', {productId}, {withCredentials: true})
-    console.log('Returning success response from removeFromCart...', JSON.stringify(response.data))
+    const response = await apiClient.post('/cart/delete', {productId})
     return {productId, couponDiscount: response.data.couponDiscount, deliveryCharge: response.data.deliveryCharge,
        absoluteTotalWithTaxes: response.data.absoluteTotalWithTaxes, gst: response.data.gst}
   }catch(error){
-    console.log('Inside catch of removeFromCart')
     const errorMessage = error.response?.data?.message || error?.message ||  'Something went wrong. Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
@@ -44,25 +36,19 @@ export const removeFromCart = createAsyncThunk('cart/removeFromCart', async ({pr
 
 export const getTheCart = createAsyncThunk('cart/getTheCart', async (thunkAPI) => {
   try {
-    console.log('Inside getTheCart createAsyncThunk');
-    const response = await axios.get('/cart', {withCredentials: true})
-    console.log('Returning success response from getTheCart...', JSON.stringify(response.data))
+    const response = await apiClient.get('/cart')
     return response.data
   }catch(error){
-    console.log('Inside catch of getTheCart')
-    const errorMessage = error.response?.data?.message || error?.message ||  'Something went wrong. Please try again later.'
+    const errorMessage = error.response?.data?.message || error?.message ||  'Internal Server Error.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
 })
 
 export const applyCoupon = createAsyncThunk('cart/applyCoupon', async ({couponCode}, thunkAPI) => {
   try {
-    console.log('Inside applyCoupon createAsyncThunk');
-    const response = await axios.post('/cart/apply-coupon', {couponCode}, {withCredentials: true})
-    console.log('Returning success response from applyCoupon...', JSON.stringify(response.data))
+    const response = await apiClient.post('/cart/apply-coupon', {couponCode})
     return response.data
   }catch(error){
-    console.log('Inside catch of applyCoupon')
     const errorMessage = error.response?.data?.message || error?.message ||  'Something went wrong. Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
@@ -70,12 +56,9 @@ export const applyCoupon = createAsyncThunk('cart/applyCoupon', async ({couponCo
 
 export const removeCoupon = createAsyncThunk('cart/removeCoupon', async (thunkAPI) => {
   try {
-    console.log('Inside removeCoupon createAsyncThunk')
-    const response = await axios.get('/cart/remove-coupon', {withCredentials: true})
-    console.log('Returning success response from removeCoupon...', JSON.stringify(response.data))
+    const response = await apiClient.get('/cart/remove-coupon')
     return response.data
   }catch(error){
-    console.log('Inside catch of removeCoupon')
     const errorMessage = error.response?.data?.message || error?.message ||  'Something went wrong. Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
@@ -110,7 +93,6 @@ const cartSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(addToCart.fulfilled, (state, action) => {
-        console.log('addToCart fulfilled:', action.payload)
         state.error = null
         state.loading = false
         state.success = true
@@ -123,29 +105,19 @@ const cartSlice = createSlice({
         state.error = null
       })
       .addCase(addToCart.rejected, (state, action) => {
-        console.log('addToCart rejected:', action.payload)
         state.loading = false
         state.error = action.payload
         state.message = action.payload?.message || action.payload
         state.success = false
       })
       .addCase(reduceFromCart.fulfilled, (state, action) => {
-        console.log("reduceFromCart fulfilled:", action.payload);
         state.error = null;
         state.loading = false;
         state.success = true;
         state.message = action.payload.message;
         
-        console.log(`action.payload.couponDiscount---${action.payload.couponDiscount}, 
-          action.payload.deliveryCharge-->${action.payload.deliveryCharge}, action.payload.absoluteTotalWithTaxes-->${action.payload.absoluteTotalWithTaxes},`)
-
-        console.log("action.payload.productId-->", action.payload.productId)
-
         const productIndex = state.cart.products.findIndex( (item)=> item.productId._id === action.payload.productId )
-        console.log("productIndex-->", productIndex)
-
         if (productIndex === -1){
-          console.log("Error: Product not found in cart, skipping update!")
           return
         }
 
@@ -157,13 +129,10 @@ const cartSlice = createSlice({
           )
         }
         else{
-          console.log("Inside else state.cart.products[productIndex].quantity - action.payload.quantity > 0 ")
-          console.log("Before filter:", JSON.stringify(state.cart.products));
           const newCartProducts = state.cart.products.filter(
             (item)=> item.productId._id.toString() !== action.payload.productId.toString()
           )
           state.cart.products = [...newCartProducts]
-          console.log("After filter:", JSON.stringify(state.cart.products));
         }    
         
         state.cart.absoluteTotal = action.payload.absoluteTotal;
@@ -181,49 +150,24 @@ const cartSlice = createSlice({
       
         state.productReduced = true
         state.productAdded = false
-        // console.log(`state.cart.products[productIndex].total--> ${state.cart.products[productIndex].total} ..state.cart.products[productIndex].quantity---> ${state.cart.products[productIndex].quantity}`)
       })
       .addCase(reduceFromCart.pending, (state) => {
         state.loading = true
         state.error = null
       })
       .addCase(reduceFromCart.rejected, (state, action) => {
-        console.log('addToCart rejected:', action.payload)
         state.loading = false
         state.error = action.payload
         state.message = action.payload.message
         state.success = false
         state.productReduced = false
       })
-      // .addCase(removeFromCart.fulfilled, (state, action) => {
-      //   console.log('removeFromCart fulfilled:', action.payload)
-      //   state.error = null
-      //   state.loading = false
-      //   state.success = true
-      //   state.message = action.payload.message
-
-      //   const productIndex = state.cart.products.findIndex((item) => item.productId.toString() === action.payload.productId)
-      //   const productToRemove = state.cart.products[productIndex]
-      //   const amountToDeduct = productToRemove.total
-      //   state.cart.products.splice(productIndex, 1)
-      //   state.cart.absoluteTotal -= amountToDeduct
-      //   console.log("state.cart--->", JSON.stringify(state.cart))
-      //   state.cart.couponDiscount = action.payload.couponDiscount
-      //   state.cart.deliveryCharge = action.payload.deliveryCharge
-      //   state.cart.absoluteTotalWithTaxes = action.payload.absoluteTotalWithTaxes
-      //   state.productRemoved = true
-      //   state.productAdded = false
-      // })
       .addCase(removeFromCart.fulfilled, (state, action) => {
-        console.log("removeFromCart fulfilled:", action.payload);
         state.error = null;
         state.loading = false;
         state.success = true;
         state.message = action.payload.message;
         
-        console.log(`action.payload.couponDiscount---${action.payload.couponDiscount}, 
-          action.payload.deliveryCharge-->${action.payload.deliveryCharge}, action.payload.absoluteTotalWithTaxes-->${action.payload.absoluteTotalWithTaxes},
-           `)
         const productIndex = state.cart.products.findIndex( (item) => item.productId._id.toString() === action.payload.productId.toString() )
 
         if (productIndex !== -1) {
@@ -252,14 +196,12 @@ const cartSlice = createSlice({
         state.error = null
       })
       .addCase(removeFromCart.rejected, (state, action) => {
-        console.log('removeFromCart rejected:', action.payload)
         state.loading = false
         state.error = action.payload
         state.message = action.payload.message
         state.success = false
       })
       .addCase(getTheCart.fulfilled, (state, action) => {
-        console.log('getTheCart fulfilled:', action.payload)
         state.error = null
         state.loading = false
         state.success = true
@@ -271,14 +213,12 @@ const cartSlice = createSlice({
         state.error = null
       })
       .addCase(getTheCart.rejected, (state, action) => {
-        console.log('getTheCart rejected:', action.payload)
         state.loading = false
         state.error = action.payload
         state.message = action.payload.message
         state.success = false
       })
       .addCase(applyCoupon.fulfilled, (state, action) => {
-        console.log('applyCoupon fulfilled:', action.payload)
         state.error = null
         state.loading = false
         state.success = true
@@ -290,21 +230,18 @@ const cartSlice = createSlice({
           state.cart.deliveryCharge = action.payload.deliveryCharge
           state.cart.couponDiscount = action.payload.couponDiscount
         }
-        console.log('state.couponApplied---->', state.couponApplied)
       })
       .addCase(applyCoupon.pending, (state) => {
         state.loading = true
         state.error = null
       })
       .addCase(applyCoupon.rejected, (state, action) => {
-        console.log('applyCoupon rejected:', action.payload)
         state.loading = false
         state.error = action.payload
         state.message = action.payload.message
         state.success = false
       })
       .addCase(removeCoupon.fulfilled, (state, action) => {
-        console.log('removeCoupon fulfilled:', action.payload)
         state.error = null
         state.loading = false
         state.success = true
@@ -320,7 +257,6 @@ const cartSlice = createSlice({
         state.error = null
       })
       .addCase(removeCoupon.rejected, (state, action) => {
-        console.log('removeCoupon rejected:', action.payload)
         state.loading = false
         state.error = action.payload
         state.message = action.payload.message

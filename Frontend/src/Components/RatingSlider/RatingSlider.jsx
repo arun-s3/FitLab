@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState} from 'react'
 import './RatingSlider.css'
 import {motion, AnimatePresence} from "framer-motion"
 
@@ -42,7 +42,6 @@ export default function RatingSlider({rating, setRating, indentSlider = null}){
     setEnableRadioRate(!status)
     setIsDragging(status)
   }
-
 
 
   return (

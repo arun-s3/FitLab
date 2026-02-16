@@ -33,14 +33,6 @@ export default function PriceSliderAndFilter({priceGetter, priceSetter, firstSli
     const [minInputPrice, setMinInputPrice] = useState(0)
     const [maxInputPrice, setMaxInputPrice] = useState(null)
 
-    // const {maxPriceAvailable} = useSelector(state=> state.productStore)
-
-    // useEffect(()=> {
-    //     if(maxPriceAvailable){
-    //         maxPriceRupee.current = maxPriceAvailable
-    //     }
-    // },[maxPriceAvailable])
-
     useEffect(()=>{
         setMinInputPrice(minPrice)
         setMaxInputPrice(maxPrice)
@@ -48,36 +40,25 @@ export default function PriceSliderAndFilter({priceGetter, priceSetter, firstSli
 
     const calculatePrice = (e, priceUnit)=>{
         const parentWidthPx = Number.parseInt(window.getComputedStyle(e.target.parentElement).width)
-        console.log("window.getComputedStyle(e.target.parentElement).width)"+ parentWidthPx)
-        console.log("PriceUnit-->"+priceUnit)
-        console.log("(priceUnit/window.getComputedStyle(e.target.parentElement).width)"+(priceUnit/parentWidthPx))
         const pricePercentage = (priceUnit/parentWidthPx)
-        console.log("maxPriceRupee-->"+maxPriceRupee.current)
-        console.log("Price-->"+(maxPriceRupee.current * pricePercentage))
         return Math.ceil(maxPriceRupee.current * pricePercentage)
      }
      const setPriceUnit = (e)=>{
          let minPriceUnit,maxPriceUnit;
          if(minPriceRef.current.getBoundingClientRect().right <= maxPriceRef.current.getBoundingClientRect().left
                  || minPriceRef.current.getBoundingClientRect().right <= maxPriceRef.current.getBoundingClientRect().right){
-             console.log("Inside IF-minPriceRef.current.getBoundingClientRect.right <= maxPriceRef.current.getBoundingRectClient.left")
              minPriceUnit = firstRange.current
              maxPriceUnit = secondRange.current
          }
          else{
-             console.log("Inside ELSE-minPriceRef.current.getBoundingClientRect.right <= maxPriceRef.current.getBoundingRectClient.left")
              minPriceUnit = secondRange.current
              maxPriceUnit = firstRange.current
          }
-         console.log("minPriceUnit-->"+ minPriceUnit)
-         console.log("maxPriceUnit-->"+ maxPriceUnit)
+
          setMinPrice(calculatePrice(e,minPriceUnit))
          setMaxPrice(calculatePrice(e,maxPriceUnit))
      }
      const displayRange = ()=>{
-         console.log("Inside displayRange()")
-         console.log("secondRange.current - firstRange.current"+(secondRange.current - firstRange.current))
-         console.log("e.target.parentElement.style.width"+priceRangeWrapperRef.current.style.width.toString())
          const wrapperWidth = parseInt(window.getComputedStyle(priceRangeWrapperRef.current).width)
          let rangeDiff = secondRange.current - firstRange.current
          if(rangeDiff > wrapperWidth){
@@ -100,11 +81,9 @@ export default function PriceSliderAndFilter({priceGetter, priceSetter, firstSli
          e.dataTransfer.setDragImage(img, 0, 0);
          e.target.style.cursor = 'grab'
          dragCursor.current  =true
-         console.log("rangeStart value--> " + rangeStart.current);
          }
      }
      const dragEndHandler = (e, rangeStart, rangeEnd, range)=>{
-         console.log("Dragging ended")
          const parentWidth = parseInt(window.getComputedStyle(e.target.parentElement).width);
          const draggedPoint =  e.clientX - rangeStart.current
          if(draggedPoint > parentWidth){
@@ -117,11 +96,8 @@ export default function PriceSliderAndFilter({priceGetter, priceSetter, firstSli
              rangeEnd.current = draggedPoint
          }
           
-         console.log("range end value" + rangeEnd.current)
          range.current = rangeEnd.current - e.target.style.width
-         console.log("rage calculated-->" + range.current)
          e.target.style.left = range.current.toString() + 'px'
-         console.log("range.toString()+'px'-->"+ range.current.toString() + 'px')
          secondRange && displayRange()
          setPriceUnit(e)
      }
@@ -134,8 +110,6 @@ export default function PriceSliderAndFilter({priceGetter, priceSetter, firstSli
              e.target.style.cursor = 'grabbing'
              const currentHandlerRect = e.target.getBoundingClientRect()
              const otherHandlerRect = e.target.nextElementSibling.getBoundingClientRect()
-             console.log("getBoundingClientRect() of firstHandler-->"+ JSON.stringify(currentHandlerRect))
-             console.log("getBoundingClientRect() of otherHandler-->"+ JSON.stringify(otherHandlerRect))
             //  if(currentHandlerRect.right >= otherHandlerRect.left ){
             //      console.log("Collision alert!")
             //      collisionCheck.current = true
@@ -148,30 +122,16 @@ export default function PriceSliderAndFilter({priceGetter, priceSetter, firstSli
          }
      }
      const dragOverHandler = (e)=>{
-         console.log("Dragged over!")
          e.preventDefault()
-         // if(collisionCheck.current){
-         //     e.preventDefault()
-         // }
      }
      const dropHandler = (e)=>{
-         console.log("Dropped!")
          checkDragging.current = false
          checkMouseDown.current = false
          dragCursor.current = false
          e.preventDefault()
-         // if(collisionCheck.current){
-         //     e.preventDefault()
-         // } 
      }
- 
-     
+   
      const mouseDownHandler = (e)=>{
-        // if(checkDragging.current){
-        //     console.log("Inside mouseDownHandler")
-        //     checkMouseDown.current = true
-        // }
-         console.log("Inside mouseDownHandler")
          leftValueNow.current = parseInt(window.getComputedStyle(e.target).left);  
          currentX.current = e.clientX
          checkDragging.current = true  
@@ -210,17 +170,11 @@ export default function PriceSliderAndFilter({priceGetter, priceSetter, firstSli
      }
  
      const calculateRangeFromPrice = (minPriceLimit, maxPriceLimit)=>{
-         console.log("Inside calculateRangeFromPrice")
-         console.log("maxPriceRupee.current"+ maxPriceRupee.current)
          const parentWidthPx = Number.parseInt(window.getComputedStyle(priceRangeWrapperRef.current).width)
-         console.log("window.getComputedStyle(priceRangeWrapperRef.current).width)"+ parentWidthPx)
-         console.log("minPriceLimit, maxPriceLimit-->"+minPriceLimit+" "+maxPriceLimit)
          const minPricePercentage = minPriceLimit/maxPriceRupee.current
          const maxPricePercentage = maxPriceLimit/maxPriceRupee.current
-         console.log("minPricePerrcentOfMaxPrice, maxPricePercentageOfMaxPrice->"+minPricePercentage+" "+maxPricePercentage)
          const minPriceUnit = minPricePercentage * parentWidthPx
          const maxPriceUnit = maxPricePercentage * parentWidthPx
-         console.log("minPriceUnit, maxPriceUnit-->"+minPriceUnit+" "+maxPriceUnit)
  
          firstRange.current=maxPriceUnit
          maxPriceRef.current.style.left = `${firstRange.current}px`
@@ -232,25 +186,23 @@ export default function PriceSliderAndFilter({priceGetter, priceSetter, firstSli
      }
  
      const validateAndCompute = ()=>{
-        console.log(`maxInputPrice--${maxInputPrice}, minInputPrice--${minInputPrice}`)
          const numRegex = /^\d+$/;
          if( !(numRegex.test(minInputPrice)) || !(numRegex.test(maxInputPrice)) ){
-             console.log("Error in price limits")
              priceErrorRef.current.style.visibility = 'visible'
              priceErrorRef.current.textContent = "Minimum and Maximum price limits must be numbers!"
              setTimeout(()=> priceErrorRef.current.style.visibility = 'hidden', 3000)
-          }else if(minInputPrice < 0 || maxInputPrice < 0){
-             console.log("Error in price limits")
+          }
+          else if(minInputPrice < 0 || maxInputPrice < 0){
              priceErrorRef.current.style.visibility = 'visible'
              priceErrorRef.current.textContent = "Please enter positive numbers!"
              setTimeout(()=> priceErrorRef.current.style.visibility = 'hidden', 3000)
-          }else if(minInputPrice > maxInputPrice){
-             console.log("Error in price limits")
+          }
+          else if(minInputPrice > maxInputPrice){
              priceErrorRef.current.style.visibility = 'visible'
              priceErrorRef.current.textContent = "Minimum price limit should be leseer than Maximum price limit!"
              setTimeout(()=> priceErrorRef.current.style.visibility = 'hidden', 3000)
-          }else{
-             console.log("No error in price limits")
+          }
+          else{
              priceErrorRef.current.style.visibility = 'hidden'
  
              calculateRangeFromPrice(minInputPrice, maxInputPrice)
@@ -265,14 +217,12 @@ export default function PriceSliderAndFilter({priceGetter, priceSetter, firstSli
             transition={{ duration: 0.2 }}
             onDrop={(e)=> { 
                 e.preventDefault()
-                console.log("CURSOR Changing...")
                 e.dataTransfer.dropEffect = 'move'
                 if(dragCursor.current){
                     e.target.style.cursor = 'grabbing' 
                 }
             }} 
             onDragEnter={(e)=>{
-                console.log("CURSOR Changing...")
                 e.dataTransfer.dropEffect = 'move'
                 if(dragCursor.current){
                     e.target.style.cursor = 'grabbing' 
@@ -280,7 +230,6 @@ export default function PriceSliderAndFilter({priceGetter, priceSetter, firstSli
             }} 
             onDragOver={(e)=>{
                 e.preventDefault()
-                console.log("CURSOR Changing...")
                 e.dataTransfer.dropEffect = 'move'
                 if(dragCursor.current){
                     e.target.style.cursor = 'grabbing' 
@@ -289,11 +238,11 @@ export default function PriceSliderAndFilter({priceGetter, priceSetter, firstSli
         >
             <p className={`${(mountingComponent=='AdminProductListPage'? 'text-[13px] ':'text-[15px] ') + 'text-secondary text-center'}`}>
                 {minPrice} - { maxPrice 
-    ? (maxPrice !== maxPriceRupee.current 
-        ? maxPrice 
-        : maxPrice + "+") 
-    : "-"
-}
+                ? (maxPrice !== maxPriceRupee.current 
+                    ? maxPrice 
+                    : maxPrice + "+") 
+                : "-"
+            }
             </p>
             <div id='pricerange-wrapper' className='relative mt-[1rem]' onDragOver={(e)=>dragOverHandler(e)} 
                                                 onDrop={(e)=>dropHandler(e)} ref={priceRangeWrapperRef}>

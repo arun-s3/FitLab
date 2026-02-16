@@ -4,7 +4,7 @@ import { motion } from "framer-motion"
 import { Clock, Flame, Dumbbell, TriangleAlert, RotateCcw, Play } from "lucide-react"
 import {IoIosFitness} from "react-icons/io"
 import {format} from "date-fns"
-import axios from 'axios'
+import apiClient from '../../../Api/apiClient'
 import {toast as sonnerToast} from 'sonner'
 
 import {estimateCalories} from "../../../Utils/exerciseFunctions"
@@ -50,23 +50,19 @@ export default function RecentWorkouts({refreshHistory, stopRefreshHistory, resu
 
   async function listWorkoutHistory(){
     try {   
-      console.log("Inside listWorkoutHistory()..")
-      const response = await axios.get(`${baseApiUrl}/fitness/tracker/workout/list?page=${currentPage}&limit=${limit}`, { withCredentials: true })
+      const response = await apiClient.get(`${baseApiUrl}/fitness/tracker/workout/list?page=${currentPage}&limit=${limit}`)
       if(response.status === 200){
-        console.log("response.data.todayWorkouts--->", response.data.todayWorkouts)
-        console.log("response.data.olderWorkouts--->", response.data.olderWorkouts) 
         setTodayWorkouts(response.data.todayWorkouts)
         setOlderWorkouts(response.data.olderWorkouts)
         setTotalPages(response.data.pagination.totalPages)
         stopRefreshHistory()
       }
     }catch (error) {
-      console.error("Error listing workoutInfo", error.message)
       if (!error.response) {
         sonnerToast.error("Network error. Please check your internet.")
       }
       else {
-        sonnerToast.error("Something went wrong! Please retry later.")
+        sonnerToast.error("Something went wrong!")
       }
       stopRefreshHistory()
       setError(true)
@@ -95,15 +91,9 @@ export default function RecentWorkouts({refreshHistory, stopRefreshHistory, resu
       listWorkoutHistory()
   }, [currentPage])
 
-  useEffect(()=> {
-      console.log("error---->", error)
-  }, [error])
-
   const handleResumeWorkout = (workout)=> {
-    console.log("Inside handleResumeWorkout----->")
     setSelectedWorkoutId(workout._id)
     const resumeFromSet = workout.sets.findIndex(set=> !set.completed)
-    console.log("resumeFromSet----->", resumeFromSet)
     resumeTodayWorkout(workout, resumeFromSet)
   }
 

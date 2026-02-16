@@ -2,12 +2,11 @@ import React, {useState, useEffect} from 'react'
 import {motion} from 'framer-motion'
 
 import {Package} from "lucide-react"
-import axios from 'axios'
+import apiClient from '../../../Api/apiClient'
 
 import ExerciseDifficultyStars from './ExerciseDifficultyStars'
 import ExerciseForceType from './ExerciseForceType'
 import {CustomHashLoader} from '../../../Components/Loader/Loader'
-
 
 
 export default function ExerciseCard({exercise, index, onChooseExercise}){
@@ -27,10 +26,9 @@ export default function ExerciseCard({exercise, index, onChooseExercise}){
       
         async function searchImages(query) {
           try {
-            const response = await axios.get(`${baseApiUrl}/fitness/thumbnail/${query}`, { withCredentials: true })
+            const response = await apiClient.get(`${baseApiUrl}/fitness/thumbnail/${query}`)
             return response.data.thumbnail;
           } catch (error) {
-            console.error("Google Image Search Error:", error.response?.data || error);
             return null
           }
         }

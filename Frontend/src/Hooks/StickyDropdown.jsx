@@ -11,7 +11,6 @@ export default function useStickyDropdown(dropdownKeys) {
     const handleClickOutsideStickyDropdowns = (e) => {
       const isOutside = !Object.values(stickyDropdownRefs).some((ref)=> ref.current?.contains(e.target))
 
-      console.log('Sticky dropdowns--isOutside--', isOutside);
       if (isOutside) {
         setOpenStickyDropdowns( prevState=> 
           Object.keys(prevState).reduce((newState, key) => {
@@ -31,7 +30,6 @@ export default function useStickyDropdown(dropdownKeys) {
   const toggleStickyDropdown = (e, dropdownKey)=> {
     e.stopPropagation()
 
-    console.log(`Toggling dropdown: ${dropdownKey}`)
     setOpenStickyDropdowns((prevState) =>
       Object.keys(prevState).reduce((newState, key) => {
         newState[key] = key === dropdownKey ? !prevState[key] : false

@@ -4,7 +4,6 @@ import {motion} from "framer-motion"
 import {Star, X, Heart, Truck, ShoppingBag, Sparkles} from "lucide-react"
 
 
-
 export default function FitLabExperienceRating({ onClose, onSubmit }) {
     
   const [rating, setRating] = useState({service: 0, shopping: 0, delivery: 0, overall: 0})

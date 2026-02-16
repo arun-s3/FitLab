@@ -11,9 +11,7 @@ import useFlexiDropdown from '../../../Hooks/FlexiDropdown'
 
 export default function CouponTools({searchTerm, setSearchTerm, limit, onLimitChange, onSortClick, onSortChange, options}){
 
-  
   const {openDropdowns, dropdownRefs, toggleDropdown} = useFlexiDropdown(['limitDropdown', 'sortDropdown'])
-  
 
   const sortTypes = [
     {name: 'Coupons: Recent to Oldest', value: '-1', sortBy: 'createdAt'}, {name: 'Coupons: Oldest to Recent', value: '1', sortBy: 'createdAt'},

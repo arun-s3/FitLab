@@ -2,7 +2,9 @@ import React, {useState, useEffect, useRef} from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {debounce} from 'lodash'
 
+import apiClient from '../../../Api/apiClient'
 import axios from 'axios'
+
 import {Search, ChevronDown, Plus, Zap, Trash} from "lucide-react"
 import {IoIosFitness} from "react-icons/io"
 import {IoBody} from "react-icons/io5"
@@ -40,34 +42,26 @@ export default function ExerciseForm({ onAddOrUpdateExercise, editExerciseData =
     const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
     useEffect(()=> {
-      console.log("searchResults----->", searchResults)
-    }, [searchResults])
-
-    useEffect(()=> {
       async function loadBodyPartsAndEquipments(){
         try {
-          console.log("Inside loadBodyPartsAndEquipments()...")
           const [bodyPartsResponse, equipmentsResponse] = await Promise.allSettled([
-            await axios.get(`${exerciseAPiUrl}/bodyparts`),
-            await axios.get(`${exerciseAPiUrl}/equipments`),
+            await apiClient.get(`${baseApiUrl}/fitness/exercises/bodyparts`),
+            await apiClient.get(`${baseApiUrl}/fitness/exercises/equipments`),
           ])
 
-          console.log("bodyPartsResponse------->", bodyPartsResponse)
           if (bodyPartsResponse.status === 'fulfilled'){
             const bodyParts = bodyPartsResponse.value.data.data.map(data=> data.name)
-            console.log("bodyParts--->", bodyParts)
-            // setBodyParts([Cardio, Full-body, ...bodyParts])
             setBodyParts(bodyParts)
           }
-          console.log("equipmentsResponse------->", equipmentsResponse)
           if (equipmentsResponse.status === 'fulfilled'){
             const equipments = equipmentsResponse.value.data.data.map(data=> data.name)
-            console.log("equipments--->", equipments)
-            // setEquipments([None, Bodyweight, ...equipments])
             setEquipments(equipments)
           }
         }catch (error) {
-        	console.error("Error while loading body parts and equipments", error.message)
+        	console.error(error)
+            if (!error.response) {
+              sonnerToast.error("Network error. Please check your internet.")
+            }
         }
       }
       loadBodyPartsAndEquipments()
@@ -75,7 +69,6 @@ export default function ExerciseForm({ onAddOrUpdateExercise, editExerciseData =
 
     useEffect(()=> {
       if(editExerciseData && Object.keys(editExerciseData).length > 0){
-        console.log("Start editing...")
         setFormData({
           name: editExerciseData.name,
           equipment: editExerciseData.equipment,
@@ -88,8 +81,6 @@ export default function ExerciseForm({ onAddOrUpdateExercise, editExerciseData =
 
     const fetchExercises = async(name)=> { 
       try {
-          console.log("Inside fetchExercises()...")    
-
           const response = await axios.get(
             `${exerciseAPiUrl}/exercises/filter`,
             {
@@ -104,14 +95,12 @@ export default function ExerciseForm({ onAddOrUpdateExercise, editExerciseData =
             }
           );
         
-          console.log("fetchExercises response----->", response.data)
           if(response.data.success){
-            console.log("Exercises--->", response.data)
             const exercises = response.data.data.map(exercise=> exercise.name)
             setSearchResults((prev) => ({ ...prev, exercises }))
           }
         }catch (error) {
-            console.error("Error while loading exercises", error.message)
+            console.error(error)
         }
     }
   
@@ -122,9 +111,7 @@ export default function ExerciseForm({ onAddOrUpdateExercise, editExerciseData =
     ).current;
 
     const exerciseSearchHandler = (name)=> {
-        console.log('name--->', name)
         if(name.trim() !== ''){
-            console.log("Getting searched lists--")
             debouncedSearch(name)
         } 
     }
@@ -199,42 +186,42 @@ export default function ExerciseForm({ onAddOrUpdateExercise, editExerciseData =
 
     const addNewExercise = async(exercise)=> { 
       try { 
-        console.log("Inside addNewExercise()...")
-        const response = await axios.post(`${baseApiUrl}/fitness/tracker/exercise-library/add`, {exercise}, { withCredentials: true })
+        const response = await apiClient.post(`${baseApiUrl}/fitness/tracker/exercise-library/add`, {exercise})
         if(response.status === 201){
           sonnerToast.success("New exercise succesfully added!")
           onAddOrUpdateExercise()
-          setLoading(false)
-        }
-        if(response.status === 400){
-          sonnerToast.error(error.response.data.message)
-          console.log("Error---->", error.response.data.message)
         }
       }catch (error) {
-        console.error("Error during ading exercise", error.message)
+        if (!error.response) {
+          sonnerToast.error("Network error. Please check your internet.")
+        } else if (error.response?.status === 400) {
+          sonnerToast.error(error.response.data.message || "Error while adding your exercise. Please try later!")
+        } else {
+          sonnerToast.error("Something went wrong! Please retry later.")
+        }
+      }finally {
         setLoading(false)
-        sonnerToast.error('Something wet wrong! Please retry later.')
       }
     }
 
     const updateExercise = async(exercise, id)=> { 
       try { 
-        console.log("Inside updateExercise()...")
-        const response = await axios.put(`${baseApiUrl}/fitness/tracker/exercise-library/update`, {exercise, id}, { withCredentials: true })
+        const response = await apiClient.put(`${baseApiUrl}/fitness/tracker/exercise-library/update`, {exercise, id})
         if(response.status === 200){
           sonnerToast.success("Exercise succesfully updated!")
           onAddOrUpdateExercise()
-          setLoading(false)
           onExerciseUpdation()
         }
-        if(response.status === 400 || response.status === 404){
-          sonnerToast.error(error.response.data.message)
-          console.log("Error---->", error.response.data.message)
-        }
       }catch (error) {
-        console.error("Error during ading exercise", error.message)
+        if (!error.response) {
+          sonnerToast.error("Network error. Please check your internet.")
+        } else if (error.response?.status === 400 || error.response?.status === 404) {
+          sonnerToast.error(error.response.data.message || "Error while updating your exercise. Please try later!")
+        } else {
+          sonnerToast.error("Something went wrong! Please retry later.")
+        }
+      }finally {
         setLoading(false)
-        sonnerToast.error('Something wet wrong! Please retry later.')
       }
     }
 
@@ -261,8 +248,6 @@ export default function ExerciseForm({ onAddOrUpdateExercise, editExerciseData =
         notes: formData.notes || "",
       }
       
-      console.log("editExerciseData---->", editExerciseData)
-
       if(!editExerciseData){
         await addNewExercise(exercise)
       }else{

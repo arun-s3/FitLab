@@ -3,10 +3,10 @@ import {useNavigate} from 'react-router-dom'
 import {motion} from 'framer-motion'
 
 import {Plus, Minus, AlertCircle} from 'lucide-react'
-import axios from 'axios'
+import apiClient from '../../../Api/apiClient'
+import {toast as sonnerToast} from 'sonner'
 
 import {camelToCapitalizedWords} from '../../../Utils/helperFunctions'
-
 
 
 export default function OrderManager({products, orderReviewError, onIncQuantity, onDecQuantity}){
@@ -44,14 +44,19 @@ export default function OrderManager({products, orderReviewError, onIncQuantity,
 
     const goToProductDetailPage = async(id)=> {
       try {
-        console.log("Inside goToProductDetailPage")
-        const response = await axios.get(`${baseApiUrl}/products/${id}`, { withCredentials: true })
-        console.log("Response from /products/:id", response.data[0])
-        const product = response.data[0]
-        console.log("Product received-->", product)
-        if(product) navigate('/shop/product', {state: {product}})
+        const response = await apiClient.get(`${baseApiUrl}/products/${id}`)
+        let product = null
+        if(response?.data){
+            product = response.data[0]
+            navigate('/shop/product', {state: {product}})
+        }
       }catch(error){
-        console.error("Error in goToProductDetailPage -->", error.message)
+        console.error(error)
+         if (!error.response) {
+              sonnerToast.error("Network error. Please check your internet.")
+          } else {
+              sonnerToast.error("Something went wrong! Please retry later.")
+          }
       }
     }
 

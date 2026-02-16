@@ -14,8 +14,6 @@ export default function ProtectedUserRoutes(){
 
     const [isAuthModalOpen, setIsAuthModalOpen] = useState({status: false, accessFor: 'this feature'})
 
-    console.log("ProtectedUserRoutes mounted");
-
     const checkAuthOrOpenModal = useCallback((accessFor = 'this feature')=> {
         if(user){
           return false

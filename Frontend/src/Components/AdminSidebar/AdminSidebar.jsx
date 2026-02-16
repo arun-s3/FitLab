@@ -11,7 +11,6 @@ import {adminSignout} from '../../Slices/adminSlice'
 
 export default function AdminSidebar({ isOpen, onClose }){
 
-
   const [searchTerm, setSearchTerm] = useState("")
   const [expandedItems, setExpandedItems] = useState({})
 

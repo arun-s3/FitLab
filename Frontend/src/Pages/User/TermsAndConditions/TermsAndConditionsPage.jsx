@@ -4,7 +4,7 @@ import { motion } from "framer-motion"
 
 import {toast as sonnerToast} from 'sonner'
 
-import TermsAndConditions, {lastUpdated, termsVersion} from  "../../../../data/TermsAndConditions"
+import TermsAndConditions, {lastUpdated, termsVersion} from  "../../../Data/TermsAndConditions"
 import TermsAndConditionTopics from "./TermsAndConditionTopics"
 import TermsAndConditionContent from "./TermsAndConditionContent"
 import UserActionBar from "./UserActionBar"
@@ -22,7 +22,6 @@ export default function TermsAndConditionsPage() {
 
   useEffect(()=> {
       if(updatedTermsAcceptance){
-        console.log("Updated user terms acceptance")
         dispatch(resetStates())
       }
   }, [updatedTermsAcceptance])
@@ -40,7 +39,6 @@ export default function TermsAndConditionsPage() {
   }
 
   const handleConsent = (status) => {
-    console.log("Inside handleAccept()..")
     if(!user){
       sonnerToast.error("Please login first!")
       return

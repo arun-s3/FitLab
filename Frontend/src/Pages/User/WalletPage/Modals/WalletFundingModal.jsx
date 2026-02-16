@@ -1,15 +1,15 @@
 import React, {useState, useEffect, useRef} from 'react'
-import {useDispatch, useSelector} from 'react-redux'
+import {useDispatch} from 'react-redux'
 import {motion, AnimatePresence} from 'framer-motion'
 
-import { CreditCard, PlusCircle, X, Globe, ChevronLeft } from "lucide-react" 
+import { X, ChevronLeft } from "lucide-react" 
 import {toast} from 'react-toastify'
 import {toast as sonnerToast} from 'sonner'
-import axios from 'axios'
+import apiClient from '../../../../Api/apiClient'
 
 import PaypalPayment from '../../PaymentPages/PayPalPayment'
 import StripePayment from '../../PaymentPages/StripePayment'
-import {addFundsToWallet} from '../../../../Slices/walletSlice'
+import {addFundsToWallet, resetWalletStates} from '../../../../Slices/walletSlice'
 import useModalHelpers from '../../../../Hooks/ModalHelpers'
 import useTermsConsent from "../../../../Hooks/useTermsConsent"
 import TermsDisclaimer from "../../../../Components/TermsDisclaimer/TermsDisclaimer"
@@ -32,6 +32,8 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
 
     const dispatch = useDispatch()
 
+    const {walletError} = useSelector(state=> state.wallet)
+
     const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
     const modalRef = useRef(null)
@@ -47,10 +49,11 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
     },[])
 
     useEffect(()=> {
-      console.log("amount--->", amount)
-      console.log("notes--->", notes)
-      console.log("paymentMethod--->", paymentMethod)
-    },[amount, notes, paymentMethod])
+        if(walletError){
+            sonnerToast.error(walletError)
+            dispatch(resetWalletStates())
+        }
+    }, [walletError])
 
     const amountHandler = (e)=> {
       const value = parseFloat(e.target.value)
@@ -62,7 +65,6 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
     }
 
     const validateAndContinue = (continuePayment, minAmount = 1)=> {
-      console.log('Inside validateAndContinue')
       if(amount && Number(amount) > Number(minAmount)){
         continuePayment()
       }else{
@@ -72,17 +74,33 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
 
     const handlRazorpayPayment = async()=> {
       if(paymentMethod === 'razorpay'){
-        const response = await axios.post(`${baseApiUrl}/payment/razorpay/order`,
-          {amount: parseInt(amount).toFixed(2)}, { withCredentials: true }
-        )
-        console.log("razorpay created order--->", response.data.data)
-        handleRazorpayVerification(response.data.data)
+        try{
+            const response = await apiClient.post(`${baseApiUrl}/payment/razorpay/order`, {amount: parseInt(amount).toFixed(2)})
+            if(response?.data?.data){
+                handleRazorpayVerification(response.data.data)
+            }
+        } catch(error) {
+            if (!error.response) {
+              toast.error("Payment failed due to network error. Please check your internet and try again.")
+            } else {
+              toast.error("Payment failed due internal server error! Please retry later.")
+            }
+        }
       }
     }
 
     const handleRazorpayVerification = async (data) => {
-        const res = await axios.get(`${baseApiUrl}/payment/razorpay/key`, { withCredentials: true })
-        console.log("Razorpay key --->", res.data.key)
+        let res = null
+        try {
+            res = await apiClient.get(`${baseApiUrl}/payment/razorpay/key`)
+        }catch(error) {
+            if (!error.response) {
+              toast.error("Payment failed due to network error. Please check your internet and try again.")
+            } else {
+              toast.error("Payment failed due internal server error! Please retry later.")
+            }
+            return
+        }
         const options = {
             key: res.data.key,
             amount: data.amount,
@@ -96,18 +114,14 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
               }
             },
             handler: async (response) => {
-                console.log("response from handler-->", response)
                 try {
-                    const verifiedData = await axios.post(`${baseApiUrl}/payment/razorpay/verify`, {
+                    const verifiedData = await apiClient.post(`${baseApiUrl}/payment/razorpay/verify`, {
                         razorpay_order_id: response.razorpay_order_id,
                         razorpay_payment_id: response.razorpay_payment_id,
                         razorpay_signature: response.razorpay_signature,
                         amount: data.amount
-                    }, 
-                    { withCredentials: true }
-                    )
-                    console.log("verifiedData--->", verifiedData)
-                    if (verifiedData.data.message.toLowerCase().includes('success')) {
+                    })
+                    if (verifiedData?.data.message.toLowerCase().includes('success')) {
                         sonnerToast.success(verifiedData.data.message)
                         const paymentDetails = {
                           amount,
@@ -115,7 +129,6 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
                           paymentMethod,
                           paymentId: response.razorpay_payment_id
                         }
-                        console.log('Dispatching addFundsToWallet()...')
 
                         dispatch( addFundsToWallet({paymentDetails}) )
 
@@ -124,7 +137,13 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
                         toast.error('Payment Failed! Try again later!')
                     }
                 } catch (error) {
-                    console.log(error)
+                    if (!error.response) {
+                      toast.error("Network error. Please check your internet and try again!")
+                    } else if (error.response?.status === 400) {
+                      toast.error(error.response.data.message || "Payment failed!")
+                    } else {
+                      toast.error("Something went wrong! Please retry later.")
+                    }
                 }
             },
             theme: {
@@ -144,7 +163,6 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
         paymentMethod,
         paymentId
       }
-      console.log('Dispatching addFundsToWallet()...')
       dispatch( addFundsToWallet({paymentDetails}) )
       closeFundingModal()
     }
@@ -258,8 +276,8 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
                                 <input type="number" id="amount" 
                                   className="w-full h-9 sm:h-10 pr-2 pl-[30px] sm:pr-3 py-2 border border-gray-300 rounded-md text-[12px] sm:text-[13px] 
                                    focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="0.00" min="1" step='0.1'
-                                    onChange={(e)=> amountHandler(e)} onBlur={()=> {
-                                      console.log('Inside amount onBlur, amount-->', amount)
+                                    onChange={(e)=> amountHandler(e)} 
+                                    onBlur={()=> {
                                       const numericAmount = parseFloat(amount)
                                       if(isNaN(numericAmount) || numericAmount <= 1){
                                         setError('Amount must be higher than ₹ 1')

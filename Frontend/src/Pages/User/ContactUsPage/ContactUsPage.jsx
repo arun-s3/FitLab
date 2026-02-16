@@ -1,6 +1,6 @@
 import React, { useContext } from "react"
 
-import axios from 'axios'
+import apiClient from '../../../Api/apiClient'
 import {toast as sonnerToast} from 'sonner'
 
 import ContactForm from "./ContactForm"
@@ -24,21 +24,20 @@ export default function ContactUsPage(){
   const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
   const handleSubmit = async({details}) => {
-    console.log("Form Details inside handleSubmit():", details)
     try { 
-      const response = await axios.post(`${baseApiUrl}/contact`, {details}, { withCredentials: true })
+      const response = await apiClient.post(`${baseApiUrl}/contact`, {details})
       if(response.status === 201){
         sonnerToast.success(response.data.message, {duration: 4500})
         return true
       }
-      if(response.status === 404){
-        sonnerToast.error(error.response.data.message)
-        console.log("Error---->", error.response.data.message)
-        return false
-      }
     }catch (error) {
-      console.error("Error while submitting the details:", error.message)
-      sonnerToast.error('Something went wrong! Please retry later.')
+      if (!error.response) {
+          sonnerToast.error("Network error. Please check your internet.")
+      } else if (error.response?.status === 404) {
+          sonnerToast.error(error.response.data.message || "Error while submitting your message. Please try later!")
+      } else {
+          sonnerToast.error("Something went wrong! Please retry later.")
+      }
       return false
     }
   }

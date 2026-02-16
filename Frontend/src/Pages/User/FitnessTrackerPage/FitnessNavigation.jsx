@@ -1,8 +1,8 @@
 import React, {useState, useEffect} from "react"
 import { motion } from "framer-motion"
 
-import {Zap, Heart, ChartLine, ChartNoAxesCombined} from 'lucide-react'
-import axios from 'axios'
+import {Zap, Heart, ChartNoAxesCombined} from 'lucide-react'
+import apiClient from '../../../Api/apiClient'
 
 import HealthReminderModal from "./HealthReminderModal"
 
@@ -14,15 +14,14 @@ export default function FitnessNav({ currentPage, setCurrentPage }) {
   const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
   const checkRecentHealthTrackers = async()=> {
-    console.log("Inside checkRecentHealthTrackers...") 
     try { 
-      const response = await axios.get(`${baseApiUrl}/fitness/tracker/health/check`, { withCredentials: true })
+      const response = await apiClient.get(`${baseApiUrl}/fitness/tracker/health/check`)
       if(response.status === 200){
-        console.log(`response.data.shouldShowReminder-----${response.data.shouldShowReminder} and response.data.isNewUser-----${response.data.isNewUser}`)
         if(response.data.shouldShowReminder) setOpenReminderModal({status: true, isNewUser: response.data.isNewUser})
       }
     }catch (error) {
-      console.error("Error updating health profile:", error.message)
+      console.error(error)
+      return
     }
   }
 

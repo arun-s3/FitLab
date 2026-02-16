@@ -4,7 +4,7 @@ import {useDispatch, useSelector} from 'react-redux'
 import {motion} from 'framer-motion'
 
 import {Minus, X} from 'lucide-react'
-import axios from 'axios'
+import apiClient from '../../../Api/apiClient'
 
 import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
 import {CustomScaleLoader} from '../../../Components/Loader/Loader'
@@ -35,16 +35,14 @@ const PaymentSummary = forwardRef((
 
   const handleCheckout = useCallback( async ()=> {
     if(user.isVerified){
-      console.log("Going to checkout page...")
       navigate('/checkout')
     }
     else{
       sonnerToast.info("You are not a verified user!")
       setOtpPageLoading(true)
       try{
-        const response = await axios.post(`${baseApiUrl}/sendOtp`, {email: user.email}, {withCredentials:true})
+        const response = await apiClient.post(`${baseApiUrl}/sendOtp`, {email: user.email})
         if(response && response.status === 200){
-          console.log("Redirecting to OTP Verification page...")
           setOtpPageLoading(false)
           navigate('/otp-verify', {
               replace:true, 
@@ -53,8 +51,12 @@ const PaymentSummary = forwardRef((
         }
       }
       catch(error){
-        console.log("Error in handleCheckout", error.message)
-        sonnerToast.error(error.message)
+        console.error("Error in handleCheckout", error)
+        if (!error.response) {
+            sonnerToast.error("Network error. Please check your internet.")
+        }else {
+            sonnerToast.error("Something went wrong! Please retry later.")
+        }
       }
     }
   }, [user, navigate, baseApiUrl])

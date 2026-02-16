@@ -1,7 +1,6 @@
 import React,{useState, useEffect, useRef} from 'react'
 import './ImageEditor.css'
-import {useLocation, useSearchParams} from 'react-router-dom'
-import {useDispatch, useSelector} from 'react-redux'
+import {useSelector} from 'react-redux'
 
 import {toast as sonnerToast} from 'sonner'
 import Cropper from "react-easy-crop"
@@ -89,18 +88,14 @@ useEffect(() => {
     const messageHandler = (event) => {
         if (event.data.type === 'target-img') {
             const { blob, name } = event.data
-            console.log("RECIEVED IMAGE FROM FILE-UPLOAD ON CHILD READY-->", JSON.stringify({ blob, name }))
             const reader = new FileReader()
             reader.onload = ()=>{
-                console.log("Inside fileReader")
                 const base64URL = reader.result
                 setImage({name, url: base64URL})  
-                console.log("MADE A BASE64URL from BLOB FOR EDITING-->", JSON.stringify({name, url: base64URL}))
             }
             reader.readAsDataURL(blob) 
         }
         if(event.data.type === 'loading-img'){
-            console.log("Inside event.data.type == 'loading-img'")
             clearInterval(loadStartInterval.current)
             setLoadStart(null)
             setLoading(event.data.progress)
@@ -116,7 +111,6 @@ useEffect(() => {
 
 useEffect(()=>{
     if(apply){
-        console.log("inside useEffect for loadStartInterval ")
         loadStartInterval.current = setInterval(()=>{setLoadStart(num=> num>=90? 90 : num+15)}, 250)
     }
 },[apply])
@@ -139,7 +133,6 @@ useEffect(()=>{
 },[showPanel, showPanel.colorChannels])
 
 useEffect(()=>{
-    console.log("ROtation in radians", rotate * Math.PI/180)
     const aspectRatio = previewRef.current.naturalWidth / previewRef.current.naturalHeight
     originalAspectRatio.current = previewRef.current.naturalWidth / previewRef.current.naturalHeight
     if(rotate === 90 || rotate === 270){
@@ -149,7 +142,6 @@ useEffect(()=>{
         // previewRef.current.style.width = previewRef.current.style.height
         // previewRef.current.style.height = tempWidth
     }else{
-        console.log("Inside else for check rotate 90 times")
         setScaleX(scalex=> (scalex>0) ? 1 : -1)
         setScaleY(scaley=> (scaley>0) ? 1 : -1)
     }
@@ -161,11 +153,6 @@ useEffect(() => {
 
 }, [channelR, channelG, channelB, brightness, contrast, saturate, grayscale, blur, sepia, opacity, rotate, scaleX, scaleY,
      tempR, tempG, tempB, tintR, tintG, hueRotate])
-
-useEffect(()=>{
-   console.log("previewURL-->", previewURL)
-   console.log("image.url-->", image.url)
-},[previewURL])
 
 useEffect(() => {
     const warm = Math.max(0, temperature)
@@ -183,17 +170,13 @@ useEffect(() => {
 }, [temperature, tint])
 
 useEffect(()=>{
-   console.log("resetCrop-->", resetCrop)
    if(resetCrop && !croppedAreaPixels){
-    console.log("croppedAreaPixels is null")
     applyEffects({previewMode: true})
     setResetCrop(false)
    }
 },[resetCrop, croppedAreaPixels])
 
 async function applyColorCorrections(canvas, ctx, options = {}) {
-
-  console.log("Inside applyColorCorrections...")
 
   const {channelR = 0, channelG = 0, channelB = 0, tempR = 0, tempG = 0, tempB = 0, tintR = 0, tintG = 0, hueRotate = 0} = options
 
@@ -255,7 +238,6 @@ async function applyColorCorrections(canvas, ctx, options = {}) {
 }
 
 const applyEffects = ({ previewMode = false })=> {
-  console.log("Inside applyEffects, previewMode---->", previewMode)
 
   const canvas = canvasRef.current
   const ctx = canvas.getContext("2d")
@@ -266,7 +248,6 @@ const applyEffects = ({ previewMode = false })=> {
   img.crossOrigin = "Anonymous"
 
   if(croppedAreaPixels){
-    console.log("croppedAreaPixels exists")
     img.src = previewURL
     setCroppedAreaPixels(null)
   }else{
@@ -274,7 +255,6 @@ const applyEffects = ({ previewMode = false })=> {
   }
 
   img.onload = async () => {
-    console.log("Inside img.onload...")
     let drawWidth = img.width
     let drawHeight = img.height
 
@@ -327,7 +307,6 @@ const applyEffects = ({ previewMode = false })=> {
       if (!previewMode) {
         const imageData = {name: image.name, size: blob.size, blob}
         window.opener.postMessage({ type: "edited-image", payload: imageData }, "*")
-        console.log("EDITED IMAGE SET BACK TO FILE-UPLOAD-->", JSON.stringify(imageData))
       } else {
         const url = URL.createObjectURL(blob);
         setPreviewURL(url)
@@ -338,14 +317,10 @@ const applyEffects = ({ previewMode = false })=> {
 
 const panelHandler = (e, panel)=>{
     setShowPanel(showPanel=> {
-        console.log("panel==>"+panel)
-        console.log("showPanel-->"+JSON.stringify(showPanel))
         const newShowPanel = Object.keys(showPanel).reduce((accObj, panel) => {
             accObj[panel] = false 
             return accObj
         }, {})
-        console.log("New showPanel-->"+JSON.stringify(newShowPanel))
-        console.log("showPanel NOW-->"+JSON.stringify({...newShowPanel, [panel]: !showPanel[panel]}))
         return {...newShowPanel, [panel]: !showPanel[panel]}
     })
 }
@@ -355,22 +330,15 @@ const onCropCompleteHandler = (_, croppedAreaPixels) => {
 }
 
 const handleCrop = async () => {
-  console.log("Cropping the image")
 
-  if (!croppedAreaPixels) {
-    console.error("Cropping area not defined yet!")
-    return
-  }
+  if (!croppedAreaPixels) return
 
   const croppedImageURL  = await getCroppedImg(previewURL || image.url, croppedAreaPixels)
-  console.log("croppedImageURL :", croppedImageURL )
 
   setPreviewURL(croppedImageURL )
 
   const response = await fetch(croppedImageURL )
   const blob = await response.blob()
-
-  console.log("Actual Blob:", blob)
 
   if(!uncroppedImage){
     setUncroppedImage(image) 
@@ -380,12 +348,10 @@ const handleCrop = async () => {
   reader.onload = () => {
     const base64URL = reader.result
     setImage({name: image.name, url: base64URL});
-    console.log("Base64 from cropped blob:", base64URL)
   };
 
 reader.readAsDataURL(blob)
 }
-
 
 
  return(

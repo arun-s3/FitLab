@@ -7,7 +7,8 @@ import {GiMuscleUp} from "react-icons/gi"
 import {FaPersonRays} from "react-icons/fa6"
 import {MdOutlineThumbsUpDown} from "react-icons/md"
 import {MdTipsAndUpdates} from "react-icons/md"
-import axios from 'axios'
+
+import apiClient from '../../../../Api/apiClient'
 
 import AiInsightCards from "../../../../Components/AiInsightCards/AiInsightCards"
 
@@ -91,35 +92,29 @@ export default function FitnessAiInsights({receivedSourceDatas, periodType}) {
     ]
 
     const getInsightDataSources = async()=> {
-        console.log("Inside getInsightDataSources...") 
         setLoading(true)
         try {  
-          const latestInsightResponse = await axios.get(`${baseApiUrl}/ai/insights/tracker`, { withCredentials: true })
+          const latestInsightResponse = await apiClient.get(`${baseApiUrl}/ai/insights/tracker`)
+          
           if(latestInsightResponse.status === 200){ 
-            console.log("latestInsightResponse.data------->", latestInsightResponse.data) 
-
             const { week, month } = latestInsightResponse.data
             
             if ((week && periodType ==='week') || (month && periodType ==='month')) {
-              console.log("Returning cached AI response")
               let insightDatas = null
               if(periodType ==='week'){
                 insightDatas = week.insights
               }else{
                 insightDatas = month.insights
               }
-              console.log("Cached insightDatas------->", insightDatas) 
               setFitnessInsights(insightDatas)
               setRecreateAICards(true)
               return
             }else{
-              console.log("Have to generate new insights...")
               setGenerateAiInsights(true) 
               setRecreateAICards(true)
             }
           }
         }catch (error) {
-          console.error("Error while fetching latest insight datas", error.message)
           setError("Something went wrong while finding your tracking history! Please check your network and retry later")
         }finally{
           setLoading(false)

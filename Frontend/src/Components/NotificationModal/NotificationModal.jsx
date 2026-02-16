@@ -18,7 +18,6 @@ export default function NotificationModal({
 }) {
 
   useEffect(() => {
-    console.log("autoCloseDuration---->", autoCloseDuration)
     if (isOpen && autoClose) {
       const timer = setTimeout(() => {
         onClose()

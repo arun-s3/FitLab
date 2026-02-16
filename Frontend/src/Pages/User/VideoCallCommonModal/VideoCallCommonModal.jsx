@@ -7,7 +7,6 @@ import { PhoneOff, Video, Headset, Clock, Calendar, X, Dumbbell, Weight } from "
 import {SocketContext} from '../../../Components/SocketProvider/SocketProvider'
 
 
-
 export default function VideoCallModal({videoSessionInfo, onClose}) {
 
   const [isVisible, setIsVisible] = useState(true)
@@ -23,7 +22,6 @@ export default function VideoCallModal({videoSessionInfo, onClose}) {
   
 
   useEffect(()=> {
-    console.log("videoSessionInfo---->", videoSessionInfo)
     if(videoSessionInfo && Object.keys(videoSessionInfo).length > 0){
       setCallerInfo({
         name: "Fitness Expert",
@@ -34,7 +32,6 @@ export default function VideoCallModal({videoSessionInfo, onClose}) {
   }, [videoSessionInfo])
 
   useEffect(()=> {
-    console.log("callerInfo--->", callerInfo)
     if(location.pathname === '/support'){
       onClose()
     }
@@ -52,7 +49,6 @@ export default function VideoCallModal({videoSessionInfo, onClose}) {
   }
 
   const handleDeclineCall = () => {
-    console.log("Emiting leaveScheduledSession...")
     socket.emit("leaveScheduledSession", { sessionId: scheduledVideoCallSessionId })
     setForceEndScheduledSession(true)
     setCallState("declined")

@@ -57,7 +57,6 @@ export default function ReviewsPanel({onReviewSubmit}){
 
     const handleReviewSubmit = (e)=> {
       e.preventDefault()
-      console.log('Review submitted')
     }
     
 

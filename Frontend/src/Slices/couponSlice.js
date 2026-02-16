@@ -1,15 +1,12 @@
 import {createSlice, createAsyncThunk} from '@reduxjs/toolkit'
-import axios from '../Api/axiosConfig'
+import apiClient from '../Api/apiClient'
+
 
 export const createCoupon = createAsyncThunk('coupon/add', async ({couponDetails}, thunkAPI)=> {
   try {
-    console.log('Inside createCoupon createAsyncThunk')
-    console.log("couponDetails from couponSlice---->", couponDetails)
-    const response = await axios.post('/coupons/add', {couponDetails}, {withCredentials: true})
-    console.log('Returning success response from createCoupon...', JSON.stringify(response.data))
+    const response = await apiClient.post('/coupons/add', {couponDetails})
     return response.data
   }catch(error){
-    console.log('Inside catch of createCoupon')
     const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
@@ -17,13 +14,9 @@ export const createCoupon = createAsyncThunk('coupon/add', async ({couponDetails
 
 export const getAllCoupons = createAsyncThunk('coupon/list', async ({queryOptions}, thunkAPI)=> {
   try {
-    console.log('Inside getAllCoupons createAsyncThunk')
-    console.log("couponDetails from couponSlice---->", queryOptions)
-    const response = await axios.post('/coupons/list', {queryOptions}, {withCredentials: true})
-    console.log('Returning success response from getAllCoupons...', JSON.stringify(response.data))
+    const response = await apiClient.post('/coupons/list', {queryOptions})
     return response.data
   }catch(error){
-    console.log('Inside catch of getAllCoupons')
     const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
@@ -31,13 +24,9 @@ export const getAllCoupons = createAsyncThunk('coupon/list', async ({queryOption
 
 export const getEligibleCoupons = createAsyncThunk('coupon/list-eligible', async ({userId, queryOptions}, thunkAPI)=> {
   try {
-    console.log('Inside getEligibleCoupons createAsyncThunk')
-    console.log("couponDetails from couponSlice---->", queryOptions)
-    const response = await axios.post('/coupons/list-eligible', {userId, queryOptions}, {withCredentials: true})
-    console.log('Returning success response from getEligibleCoupons...', JSON.stringify(response.data))
+    const response = await apiClient.post('/coupons/list-eligible', {userId, queryOptions})
     return response.data
   }catch(error){
-    console.log('Inside catch of getEligibleCoupons')
     const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
@@ -45,13 +34,9 @@ export const getEligibleCoupons = createAsyncThunk('coupon/list-eligible', async
 
 export const updateCoupon = createAsyncThunk('coupon/update', async ({couponDetails, couponId}, thunkAPI)=> {
   try {
-    console.log('Inside updateCoupon createAsyncThunk')
-    console.log("couponDetails from couponSlice---->", couponDetails)
-    const response = await axios.post(`/coupons/update/${couponId}`, {couponDetails}, {withCredentials: true})
-    console.log('Returning success response from updateCoupon...', JSON.stringify(response.data))
+    const response = await apiClient.post(`/coupons/update/${couponId}`, {couponDetails})
     return response.data
   }catch(error){
-    console.log('Inside catch of updateCoupon')
     const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
@@ -59,13 +44,9 @@ export const updateCoupon = createAsyncThunk('coupon/update', async ({couponDeta
 
 export const deleteCoupon = createAsyncThunk('coupon/delete', async ({couponId}, thunkAPI)=> {
   try {
-    console.log('Inside deleteCoupon createAsyncThunk')
-    console.log("couponId from couponSlice---->", couponId)
-    const response = await axios.delete(`/coupons/delete/${couponId}`, {withCredentials: true})
-    console.log('Returning success response from deleteCoupon...', JSON.stringify(response.data))
+    const response = await apiClient.delete(`/coupons/delete/${couponId}`)
     return response.data
   }catch(error){
-    console.log('Inside catch of deleteCoupon')
     const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
@@ -73,13 +54,9 @@ export const deleteCoupon = createAsyncThunk('coupon/delete', async ({couponId},
 
 export const searchCoupons = createAsyncThunk('coupon/search', async ({query}, thunkAPI)=> {
   try {
-    console.log('Inside searchCoupons createAsyncThunk')
-    console.log("query from couponSlice---->", query)
-    const response = await axios.get(`/coupons/?query=${query}`, {withCredentials: true})
-    console.log('Returning success response from searchCoupons...', JSON.stringify(response.data))
+    const response = await apiClient.get(`/coupons/?query=${query}`)
     return response.data
   }catch(error){
-    console.log('Inside catch of searchCoupons')
     const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
@@ -87,12 +64,9 @@ export const searchCoupons = createAsyncThunk('coupon/search', async ({query}, t
 
 export const getBestCoupon = createAsyncThunk('coupon/getBestCoupon', async (thunkAPI)=> {
   try {
-    console.log('Inside getBestCoupon createAsyncThunk')
-    const response = await axios.get('/coupons/bestCoupons', {withCredentials: true})
-    console.log('Returning success response from getBestCoupon...', JSON.stringify(response.data))
+    const response = await apiClient.get('/coupons/bestCoupons')
     return response.data
   }catch(error){
-    console.log('Inside catch of getBestCoupon')
     const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
@@ -100,12 +74,9 @@ export const getBestCoupon = createAsyncThunk('coupon/getBestCoupon', async (thu
 
 export const toggleCouponStatus = createAsyncThunk('coupon/toggleCouponStatus', async ({couponId}, thunkAPI)=> {
   try {
-    console.log('Inside toggleCouponStatus createAsyncThunk')
-    const response = await axios.patch(`/coupons/toggle-status/${couponId}`, {withCredentials: true})
-    console.log('Returning success response from toggleCouponStatus...', JSON.stringify(response.data))
+    const response = await apiClient.patch(`/coupons/toggle-status/${couponId}`)
     return {couponId, message: response.data.message}
   }catch(error){
-    console.log('Inside catch of toggleCouponStatus')
     const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
@@ -141,7 +112,6 @@ const couponSlice = createSlice({
   extraReducers: (builder)=> {
     builder
       .addCase(createCoupon.fulfilled, (state, action)=> {
-        console.log('createCoupon fulfilled:', action.payload)
         state.couponError = null
         state.loading = false
         state.couponCreated = true
@@ -152,12 +122,10 @@ const couponSlice = createSlice({
         state.couponError = null
       })
       .addCase(createCoupon.rejected, (state, action) => {
-        console.log('createCoupon rejected:', action.payload)
         state.loading = false
         state.couponError = action.payload
       })
       .addCase(getAllCoupons.fulfilled, (state, action)=> {
-        console.log('getAllCoupons fulfilled:', action.payload)
         state.couponError = null
         state.loading = false
         state.coupons = action.payload.coupons
@@ -168,12 +136,10 @@ const couponSlice = createSlice({
         state.couponError = null
       })
       .addCase(getAllCoupons.rejected, (state, action) => {
-        console.log('getAllCoupons rejected:', action.payload)
         state.loading = false
         state.couponError = action.payload
       })
       .addCase(getEligibleCoupons.fulfilled, (state, action)=> {
-        console.log('getEligibleCoupons fulfilled:', action.payload)
         state.couponError = null
         state.loading = false
         state.coupons = action.payload.coupons
@@ -184,12 +150,10 @@ const couponSlice = createSlice({
         state.couponError = null
       })
       .addCase(getEligibleCoupons.rejected, (state, action) => {
-        console.log('getEligibleCoupons rejected:', action.payload)
         state.loading = false
         state.couponError = action.payload
       })
       .addCase(updateCoupon.fulfilled, (state, action)=> {
-        console.log('updateCoupon fulfilled:', action.payload)
         state.couponError = null
         state.loading = false
         state.couponUpdated = true
@@ -206,12 +170,10 @@ const couponSlice = createSlice({
         state.couponError = null
       })
       .addCase(updateCoupon.rejected, (state, action) => {
-        console.log('updateCoupon rejected:', action.payload)
         state.loading = false
         state.couponError = action.payload
       })
       .addCase(deleteCoupon.fulfilled, (state, action)=> {
-        console.log('deleteCoupon fulfilled:', action.payload)
         state.couponError = null
         state.loading = false
         state.couponRemoved = true
@@ -222,12 +184,10 @@ const couponSlice = createSlice({
         state.couponError = null
       })
       .addCase(deleteCoupon.rejected, (state, action) => {
-        console.log('deleteCoupon rejected:', action.payload)
         state.loading = false
         state.couponError = action.payload
       })
       .addCase(searchCoupons.fulfilled, (state, action)=> {
-        console.log('searchCoupons fulfilled:', action.payload)
         state.couponError = null
         state.loading = false
         state.coupons = action.payload.coupons
@@ -237,12 +197,10 @@ const couponSlice = createSlice({
         state.couponError = null
       })
       .addCase(searchCoupons.rejected, (state, action) => {
-        console.log('searchCoupons rejected:', action.payload)
         state.loading = false
         state.couponError = action.payload
       })
       .addCase(getBestCoupon.fulfilled, (state, action)=> {
-        console.log('getBestCoupon fulfilled:', action.payload)
         state.couponError = null
         state.bestCoupon = action.payload.bestCoupon
         state.couponMessage = action.payload.message
@@ -251,11 +209,9 @@ const couponSlice = createSlice({
         state.couponError = null
       })
       .addCase(getBestCoupon.rejected, (state, action) => {
-        console.log('getBestCoupon rejected:', action.payload)
         state.couponError = action.payload
       })
       .addCase(toggleCouponStatus.fulfilled, (state, action)=> {
-        console.log('toggleCouponStatus fulfilled:', action.payload)
         state.couponError = null
         state.couponToggled = true
         state.coupons =  state.coupons.map(coupon=> {
@@ -269,7 +225,6 @@ const couponSlice = createSlice({
         state.couponError = null
       })
       .addCase(toggleCouponStatus.rejected, (state, action) => {
-        console.log('toggleCouponStatus rejected:', action.payload)
         state.couponError = action.payload
         state.couponToggled = false
       })

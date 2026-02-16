@@ -81,7 +81,6 @@ export default function RestockModal({ isOpen, product, onClose, onSave }) {
         const currentStock = getCurrentStock()
         const totalStock = quantity + product.totalStock
 
-
         const saveData = {
             productId: selectedVariantIndex === 0 ? product._id : product.variants[selectedVariantIndex - 1]._id,
             quantity,

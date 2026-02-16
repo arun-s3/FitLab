@@ -22,9 +22,7 @@ export default function AddressManager({addresses, shippingAddress, setShippingA
       
     useEffect(()=> {
         if(error){
-            console.log("Just after before toast!-->"+error)
             sonnerToast.error(error)
-            console.log("Just after error toast, resetting..")
             dispatch(resetStates())
         }
         if(addressSubmitted && addressCreated){
@@ -37,8 +35,6 @@ export default function AddressManager({addresses, shippingAddress, setShippingA
     },[addressCreated, addressSubmitted, error])
 
     const submitAddress = (addressData)=> {
-        console.log("Inside submitAddress()--");
-        console.log("addressData----->", addressData)
         const {alternateMobileNumber, mobileNumber, ...rest} = addressData
         const newAddressData = {...rest, mobile: mobileNumber, alternateMobile: alternateMobileNumber}
 
@@ -49,24 +45,18 @@ export default function AddressManager({addresses, shippingAddress, setShippingA
         const missingRequiredFields = requiredFields.filter(
             (field) => !newAddressData[field] || newAddressData[field] === ""
         )
-        console.log(`Required Fields Length----> ${requiredFields.length} Required Fields--->, ${requiredFields}`)
         if (requiredFields.length < 9) {
-            console.log("Missing required fields:", missingRequiredFields)
             toast.error("Please enter all required fields!")
             return;
         }
 
         if (missingRequiredFields.length > 0 || Object.values(newAddressData).some((value) => value === undefined)) {
-            console.log("Undefined values found in addressData:", newAddressData)
             sonnerToast.error("Some of non-optional fields are not filled. Please check and submit again!")
             return;
         }
 
-        console.log("Inside else (no errors) of submitAddress()")
-        console.log("addressData now -->", JSON.stringify(newAddressData))
         dispatch(createNewAddress({id: user._id, addressData: newAddressData}))
         setAddressSubmitted(true)
-        console.log("Dispatched successfully!")
     }
     
 

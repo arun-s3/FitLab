@@ -5,7 +5,7 @@ import {motion, AnimatePresence} from 'framer-motion'
 
 import {toast} from 'react-toastify'
 import {toast as sonnerToast} from 'sonner'
-import axios from 'axios'
+import apiClient from '../../../Api/apiClient'
 
 import Header from '../../../Components/Header/Header'
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
@@ -47,15 +47,29 @@ export default function ProductDetailPage(){
 
   useEffect(()=> {
     const fetchProduct = async()=> {
-      const response = await axios.get(`${baseApiUrl}/products/${currentProductId}`, {withCredentials:true})
-      console.log('response.data.product---->', response.data.product)
-      return response.data.product 
+        try{
+            const response = await apiClient.get(`${baseApiUrl}/products/${currentProductId}`)
+            if(response?.data?.product ) {
+                return response.data.product 
+            }
+        }catch (error) {
+          if (!error.response) {
+            sonnerToast.error("Network error. Please check your internet.")
+          } else if (error.response?.status === 404) {
+            sonnerToast.error("The product is not available as of now! We are sorry.")
+          } else {
+            sonnerToast.error("Something went wrong! Please retry later.")
+          }
+          return null
+        }
     }
     const loadProduct = async()=> {
       if(currentProductId){
         const product = await fetchProduct()
-        setProductDetails(product)
-        dispatch( getBestOffer({productId: product._id, quantity}) )
+        if(product){
+            setProductDetails(product)
+            dispatch( getBestOffer({productId: product._id, quantity}) )
+        }
       }
     }
     dispatch(resetCartStates())
@@ -67,12 +81,10 @@ export default function ProductDetailPage(){
         setIsCartOpen(true)
       }
     if(error && error.toLowerCase().includes('product')){
-      console.log("Error from ProductDetailPage-->", error)
       sonnerToast.error(error)
       dispatch(resetCartStates())
     }
     if(productAdded){
-      console.log("Product added to cart successfully!")
       setIsCartOpen(true)
       dispatch(resetCartStates())
     }
@@ -97,15 +109,12 @@ export default function ProductDetailPage(){
 
   const handleAddToCart = (product, variantValueIndex) => {
     if(checkAuthOrOpenModal()) return
-    console.log(`Inside handleAddToCart()--Product---->${JSON.stringify(product)}, variantValueIndex---->, ${variantValueIndex}`)
     const requiredProductVariantId = variantValueIndex === 0 ? product._id : product.variants[variantValueIndex - 1]._id
     dispatch( addToCart({productId: requiredProductVariantId, quantity}) )
-    console.log("Dispatched successfully")
   }
 
   const submitReviewHandler = ()=> {
     if(checkAuthOrOpenModal()) return
-    console.log('Submitting reveiw...')
   }
 
 

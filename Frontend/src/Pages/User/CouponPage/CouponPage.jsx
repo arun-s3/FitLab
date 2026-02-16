@@ -44,7 +44,7 @@ export default function CouponPage(){
 
   const [queryOptions, setQueryOptions] = useState({page: 1, limit: 6})
   
-  const {coupons: allCoupons, totalCoupons} = useSelector(state=> state.coupons)
+  const {coupons: allCoupons, totalCoupons, couponError} = useSelector(state=> state.coupons)
   const {cart, couponApplied, couponRemoved} = useSelector(state=> state.cart)
   const {user} = useSelector(state=> state.user)
   
@@ -58,10 +58,8 @@ export default function CouponPage(){
       dispatch(getTheCart())
     }
     if(totalCoupons && totalPages && limit){
-      console.log(`totalPages------>${totalPages}, limit------>${limit}`)
       setTotalPages(Math.ceil(totalPages/limit))
     }
-    console.log("coupons------>", allCoupons)
   }, [allCoupons, totalCoupons])
 
   useEffect(()=> {
@@ -69,17 +67,18 @@ export default function CouponPage(){
       return {...query, page: currentPage}
     })
   },[currentPage])
-
-  useEffect(()=> {
-    console.log("cart------>", cart)
-  },[cart])
   
   useEffect(() => {
-    console.log("queryOptions----->", queryOptions)
     if(Object.keys(queryOptions).length > 0){
       dispatch( getEligibleCoupons({userId: user ? user._id : '', queryOptions}) )
     }
   }, [queryOptions])
+
+  useEffect(() => {
+    if(couponError){
+      sonnerToast.error(couponError)
+    }
+  }, [couponError])
 
   useEffect(()=> {
     if(couponApplied){
@@ -114,14 +113,10 @@ export default function CouponPage(){
 
   const radioClickHandler = (e, sortBy)=>{
     const value = Number.parseInt(e.target.value)
-    console.log("value---->", value)
     const checkStatus = queryOptions.sort === value
-    console.log("checkStatus-->", checkStatus)
     if(checkStatus){
-        console.log("returning..")
         return
     }else{
-        console.log("Checking radio..")
         setQueryOptions(query=> {
           return {...query, sort: value, sortBy}
         })
@@ -138,15 +133,11 @@ export default function CouponPage(){
     if(checkAuthOrOpenModal("coupon features")) return
     if(cart?.couponUsed?._id === coupon._id){
       setIsRemoveModalOpen({status: true, coupon: coupon.code})
-    }else{
-      console.log('Coupon---->', coupon)
-      console.log('Coupon.applicableCategories---->', coupon.applicableCategories)    
+    }else{  
       if(coupon?.applicableCategories && coupon?.applicableCategories.length > 0){
-        console.log('Coupon has applicableCategories---->', coupon.applicableCategories)
         setCouponApplicableModal({code: coupon.code, categories: coupon.applicableCategories})
       }
       if(coupon?.applicableProducts && coupon.applicableProducts.length > 0){
-        console.log('Coupon has applicableProducts---->', coupon.applicableProducts)
         setCouponApplicableModal({code: coupon.code, products: coupon.applicableProducts})
       } 
       dispatch( applyCoupon({couponCode: coupon.code}) )
@@ -154,7 +145,6 @@ export default function CouponPage(){
   }
 
   const removeTheCoupon = ()=> {
-    console.log('Removing coupon....')
     dispatch(removeCoupon())
   }
 

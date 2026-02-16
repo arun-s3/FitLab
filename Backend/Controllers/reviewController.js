@@ -38,7 +38,7 @@ const createReview = async (req, res, next)=> {
 
     const product = await Product.findById(productId)
     if (!product) {
-      return next(errorHandler(404, "Product not found"))
+      return next(errorHandler(404, "Product not available to be reviewed"))
     }
 
     const mainProductId = product.variantOf ? product.variantOf : product._id

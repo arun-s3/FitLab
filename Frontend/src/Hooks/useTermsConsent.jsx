@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react"
 import { useDispatch, useSelector } from "react-redux"
 
 import { updateTermsAcceptance, resetStates } from "../Slices/userSlice"
-import { termsVersion } from "../../data/TermsAndConditions"
+import { termsVersion } from "../Data/TermsAndConditions"
 
 
 const useTermsConsent = () => {
@@ -13,7 +13,6 @@ const useTermsConsent = () => {
   const hasTriggeredRef = useRef(false)
 
   const acceptTermsOnFirstAction = () => {
-    console.log("Inside acceptTermsOnFirstAction()...")
     if (user?.hasAcceptedTerms && user?.termsVersion === termsVersion) return
 
     if (hasTriggeredRef.current) return

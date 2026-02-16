@@ -11,7 +11,6 @@ import {capitalizeFirstLetter} from '../../Utils/helperFunctions'
 import {DateSelector} from '../Calender/Calender'
 
 
-
 export default function ProductFilterSidebar({isOpen, onClose, popularProducts, muscleGroups, brands, isAdmin = false, applySidebarFilters}){
 
   const [expandedSections, setExpandedSections] = useState({
@@ -48,25 +47,14 @@ export default function ProductFilterSidebar({isOpen, onClose, popularProducts, 
 
   const [categoryFilter, setCategoryFilter] = useState({categories: []})
 
-  // const {startDate, endDate} = dateGetter
-  // const {setStartDate, setEndDate} = dateSetter
-
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false)
   const productStatusOptions = [
     { value: "all", label: "All Products", icon: Clock, color: "text-neutral-400" },
     { value: "active", label: "Active Products", icon: CheckCircle, color: "text-green-400" },
     { value: "blocked", label: "Blocked Products", icon: XCircle, color: "text-red-400" },
   ]
-  
-  // const [showStatus, setShowStatus] = useState(false)
 
   useEffect(()=> {
-    console.log('Opened ProductFilterSidebar....')
-    console.log("isOpen--->", isOpen)
-  }, [isOpen])
-
-  useEffect(()=> {
-    console.log("startDate---->", startDate)
     if(startDate){
       setSelectedFilters((filters) => ({
         ...filters, startDate: startDate.toDateString()

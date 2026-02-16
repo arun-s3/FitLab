@@ -36,10 +36,6 @@ export default function SelfieModal({ isOpen, onClose, onCapture, userSystemPic,
     }, [userSystemPic])
 
     useEffect(()=> {
-      console.log(`capturedPic-----------> ${capturedPic} and userSystemPic-----------> ${JSON.stringify(userSystemPic)}`)
-    }, [userSystemPic, capturedPic])
-
-    useEffect(()=> {
       if(error){
         setTimeout(()=> setError(null), 3500)
       }
@@ -47,7 +43,6 @@ export default function SelfieModal({ isOpen, onClose, onCapture, userSystemPic,
 
   const startCamera = async () => {
     try {
-      console.log("[v0] Starting camera...")
       setError(null)
       const constraints = {
         video: {
@@ -58,27 +53,21 @@ export default function SelfieModal({ isOpen, onClose, onCapture, userSystemPic,
         audio: false,
       }
 
-      console.log("[v0] Requesting media devices with constraints:", constraints)
       const stream = await navigator.mediaDevices.getUserMedia(constraints)
-      console.log("[v0] Stream obtained:", stream)
       videoContainerRef.current.style.display = 'flex'
 
-      console.log("Inside if (videoRef.current)...")
       videoRef.current.srcObject = stream
       videoRef.current.play().catch((err) => console.error("[v0] Play error:", err))
       setCameraActive(true)
       setStreamActive(true)
-      console.log("[v0] Camera active and stream set")
     }
     catch (error){
-      console.error("[v0] Error accessing camera:", error)
       setError("Unable to access camera. Please check permissions.")
       alert("Unable to access camera. Please check permissions: " + error.message)
     }
   }
 
   const capturePhoto = () => {
-    console.log("[v0] Capturing photo...")
     if (videoRef.current && canvasRef.current) {
 
       if(userSystemPic) setUserSystemPic([])
@@ -88,34 +77,28 @@ export default function SelfieModal({ isOpen, onClose, onCapture, userSystemPic,
       canvasRef.current.height = videoRef.current.videoHeight
       context.drawImage(videoRef.current, 0, 0)
       const photoData = canvasRef.current.toDataURL("image/jpeg")
-      console.log("[v0] Photo captured successfully")
       setCapturedPic(photoData)
       stopCamera()
     }
   }
 
   const stopCamera = () => {
-    console.log("[v0] Stopping camera...")
     if (videoRef.current && videoRef.current.srcObject) {
       videoRef.current.srcObject.getTracks().forEach((track) => {
-        console.log("[v0] Stopping track:", track.kind)
         track.stop()
       })
       setCameraActive(false)
       setStreamActive(false)
       videoContainerRef.current.style.display = 'none'
-      console.log("[v0] Camera stopped")
     }
   }
 
   const handleClose = () => {
-    console.log("[v0] Closing modal...")
     stopCamera()
     onClose()
   }
 
   const handleRetake = () => {
-    console.log("[v0] Restarting camera for retake...")
     setCameraActive(false)
     setStreamActive(false)
     videoContainerRef.current.style.display = 'none'
@@ -123,13 +106,11 @@ export default function SelfieModal({ isOpen, onClose, onCapture, userSystemPic,
 
   const submitPhoto = ()=> {
     if(capturedPic){
-      console.log("Inside if(capturePhoto)")
       onCapture(capturedPic)
       sonnerToast.info('Uploading profile pic...')
       onClose()
     }
     else if(userSystemPic && userSystemPic.length > 0){
-      console.log("Inside else if(userSystemPic && userSystemPic.length > 0)")
       onCapture(userSystemPic[0].url)
       sonnerToast.info('Uploading profile pic...')
       onClose()
@@ -257,13 +238,6 @@ export default function SelfieModal({ isOpen, onClose, onCapture, userSystemPic,
                         autoPlay
                         playsInline
                         muted
-                        onLoadedMetadata={() => {
-                          console.log("[v0] Video metadata loaded:", {
-                            width: videoRef.current?.videoWidth,
-                            height: videoRef.current?.videoHeight,
-                            readyState: videoRef.current?.readyState,
-                          })
-                        }}
                         className="w-full h-full object-cover"
                       />
                     </div>

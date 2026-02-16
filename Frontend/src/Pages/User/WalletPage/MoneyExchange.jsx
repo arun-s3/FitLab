@@ -2,9 +2,10 @@ import React, {useState, useEffect} from "react"
 import './WalletPage.css'
 import {motion} from 'framer-motion'
 
-import MoneyTransferModal from "./Modals/MoneyTransferModal"
-
 import {ArrowUp, ChevronRight, Clipboard, UserPlus} from "lucide-react"
+import {toast as sonnerToast} from 'sonner'
+
+import MoneyTransferModal from "./Modals/MoneyTransferModal"
 
 
 export default function MoneyExchange({walletBalance, onAuthCheckModal}){
@@ -29,12 +30,9 @@ export default function MoneyExchange({walletBalance, onAuthCheckModal}){
       if(Object.values(selectedCreditor).some(val=> val)){
         setSelectedPeerAccount(selectedCreditor)
       }
-      console.log('isRequester--->', isRequester)
-      console.log('complexModal--->', complexModal)
     }, [selectedRecipient, selectedCreditor, isRequester, complexModal])
 
     useEffect(() => {
-      console.log("Error--->", error)
       if (Object.values(error).some(val=> val)){
         const timeout = setTimeout(()=> { setError({ sendMoney: '', receiveMoney: '' }) }, 2000)
         return () => clearTimeout(timeout)
@@ -49,7 +47,6 @@ export default function MoneyExchange({walletBalance, onAuthCheckModal}){
       if(onAuthCheckModal()){
         return
       }
-      console.log("Inside validateAccountNumber..")
       const errorMessage = "Please enter a valid account number"
     
       const validityTest = (accountNumber)=> {
@@ -57,13 +54,11 @@ export default function MoneyExchange({walletBalance, onAuthCheckModal}){
       }
     
       const returnError = (type)=> {
-          console.log("Not valid-->", errorMessage)
           setError(error=> ({...error, [type]: errorMessage}))
           return 1
       }
     
       const returnNoError = (type)=> {
-        console.log("Valid...")
         setError(error=> ({...error, [type]: ''}))
       }
     
@@ -102,10 +97,10 @@ export default function MoneyExchange({walletBalance, onAuthCheckModal}){
       }
       try {
         const text = await navigator.clipboard.readText()
-        console.log("Clipboard text--->", text)
     
-        const setAccNo = (no) => type === 'sendMoney' ? setSelectedRecipient({ name: '', accountNumber: no })
-                                            : setSelectedCreditor({ name: '', accountNumber: no })
+        const setAccNo = (no) => 
+            type === 'sendMoney' ? setSelectedRecipient({ name: '', accountNumber: no })
+                                 : setSelectedCreditor({ name: '', accountNumber: no })
         setAccNo(text)
 
         const hasNonDigit = /\D/.test(text)
@@ -116,14 +111,12 @@ export default function MoneyExchange({walletBalance, onAuthCheckModal}){
             const digitsOnly = text.replace(/\D/g, "")
             setAccNo(digitsOnly)
             const errorExists = validateAccountNumber(type, digitsOnly)
-            console.log("errorExists after extracting digits-->", errorExists)
             if (!errorExists) {
               setInputMsg(msg => ({ ...msg, [type]: '' }))
             }
           }, 700)
         }else{
           const errorExists = validateAccountNumber(type, text)
-          console.log("errorExists for pure digits-->", errorExists)
           if (errorExists) {
             setInputMsg(msg => ({ ...msg, [type]: 'Invalid account number format' }))
           } else {
@@ -131,7 +124,7 @@ export default function MoneyExchange({walletBalance, onAuthCheckModal}){
           }
         }
       } catch (error) {
-        console.error("Failed to read clipboard contents:", error.message)
+        sonnerToast.error("Error while pasting. Please try again!")
       }
     }
     
@@ -139,12 +132,8 @@ export default function MoneyExchange({walletBalance, onAuthCheckModal}){
         if(onAuthCheckModal()){
           return
         }
-        console.log('Inside openSimpleMoneyTransferModal(), type-->', type)
         const errorExists = validateAccountNumber(type)
-        if(errorExists){
-          console.log("Error exists...")
-          return
-        }
+        if(errorExists) return
 
         const makeError = (type)=> {
           setError(error=> ({...error, [type]: "Please enter a FitLab account number"}))
@@ -152,10 +141,7 @@ export default function MoneyExchange({walletBalance, onAuthCheckModal}){
 
         const openModal = (type)=> {
           setComplexModal(false)
-          console.log('inside, openModal(), type--->', type)
-          console.log('isRequester before setting--->', isRequester)
           type === 'sendMoney' ? setIsRequester(false) : setIsRequester(true)
-          console.log("Opening Modal....")
           setIsTransferModalOpen(true)
         }
 

@@ -1,15 +1,13 @@
 import {createSlice, createAsyncThunk} from '@reduxjs/toolkit'
-import axios from '../Api/axiosConfig'
+import apiClient from '../Api/apiClient'
+
 
 export const signup = createAsyncThunk('userSignup', async(formData, thunkAPI)=>{
     try{
-        console.log("Inside signup createAsyncThunk")
-        const response = await axios.post('/signup',formData,{withCredentials:true})
-        console.log("returning success response from signup createAsyncThunk..."+JSON.stringify(response))
+        const response = await apiClient.post('/signup',formData)
         return response.data
     }
     catch(error){
-        console.log("inside catch of signup from Userslice")
         const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
@@ -17,13 +15,10 @@ export const signup = createAsyncThunk('userSignup', async(formData, thunkAPI)=>
 
 export const signin = createAsyncThunk('signin', async(formData, thunkAPI)=>{
     try{
-        console.log("Inside signin createAsyncThunk")
-        const response = await axios.post('/signin',formData,{withCredentials:true})
-        console.log("returning success response from sigin createAsyncThunk..."+JSON.stringify(response.data))
+        const response = await apiClient.post('/signin',formData)
         return response.data
     }
     catch(error){
-        console.log("inside catch of signup from Userslice")
         const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
@@ -31,14 +26,10 @@ export const signin = createAsyncThunk('signin', async(formData, thunkAPI)=>{
 
 export const googleSignin = createAsyncThunk('googleSignin', async(userData,thunkAPI)=>{
     try{
-        console.log("inside googlesigin of createAsyncThunk")
-        const response = await axios.post('/googleSignin',userData,{withCredentials:true})
-        console.log("returning success response from googleSignin createAsyncThunk..."+JSON.stringify(response)) 
-        console.log("userInfo from googleSignin createAsyncThunk--"+JSON.stringify(userData))
+        const response = await apiClient.post('/googleSignin',userData)
         return response.data
     }
     catch(error){
-        console.log("inside catch of googleSignin from userSlice")
         const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
@@ -46,12 +37,10 @@ export const googleSignin = createAsyncThunk('googleSignin', async(userData,thun
 
 export const signout = createAsyncThunk('signout', async(thunkAPI)=>{
     try{ 
-        const response = await axios.get('/signout',{withCredentials:true})
-        console.log("response from signout createAsyncThunk-->"+JSON.stringify(response.data))
+        const response = await apiClient.get('/signout')
         return response.data
     }
     catch(error){
-        console.log("inside catch of signout from Userslice")
         const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
@@ -59,14 +48,10 @@ export const signout = createAsyncThunk('signout', async(thunkAPI)=>{
 
 export const updateUserDetails = createAsyncThunk('updateUserDetails', async({userDetails},thunkAPI)=>{
     try{
-        console.log("inside updateUserDetails of createAsyncThunk")
-        const response = await axios.post('/update', {userDetails}, {withCredentials:true})
-        console.log("returning success response from updateUserDetails createAsyncThunk..."+JSON.stringify(response)) 
-        console.log("userDetails from updateUserDetails createAsyncThunk--"+JSON.stringify(userDetails))
+        const response = await apiClient.post('/update', {userDetails})
         return response.data
     }
     catch(error){
-        console.log("inside catch of updateUserDetails from userSlice")
         const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
@@ -74,13 +59,10 @@ export const updateUserDetails = createAsyncThunk('updateUserDetails', async({us
 
 export const updateUserProfilePic = createAsyncThunk('updateUserProfilePic', async({formData},thunkAPI)=>{
     try{
-        console.log("inside updateUserProfilePic of createAsyncThunk")
-        const response = await axios.put('/profilePic', formData, {headers: { "Content-Type": "multipart/form-data" }, withCredentials: true})
-        console.log("returning success response from updateUserProfilePic createAsyncThunk..."+JSON.stringify(response)) 
+        const response = await apiClient.put('/profilePic', formData, {headers: { "Content-Type": "multipart/form-data" }})
         return response.data
     }
     catch(error){
-        console.log("inside catch of updateUserProfilePic from userSlice")
         const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
@@ -88,14 +70,10 @@ export const updateUserProfilePic = createAsyncThunk('updateUserProfilePic', asy
 
 export const updateUserWeight = createAsyncThunk('updateUserWeight', async({userWeight},thunkAPI)=>{
     try{
-        console.log("inside updateUserWeight of createAsyncThunk")
-        const response = await axios.put('/update/weight', {userWeight}, {withCredentials:true})
-        console.log("returning success response from updateUserWeight createAsyncThunk..."+JSON.stringify(response)) 
-        console.log("userDetails from updateUserWeight createAsyncThunk--"+JSON.stringify(userWeight))
+        const response = await apiClient.put('/update/weight', {userWeight})
         return {userWeight}
     }
     catch(error){
-        console.log("inside catch of updateUserWeight from userSlice")
         const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
@@ -103,14 +81,10 @@ export const updateUserWeight = createAsyncThunk('updateUserWeight', async({user
 
 export const updateTermsAcceptance = createAsyncThunk('updateTermsAcceptance', async({consent},thunkAPI)=>{
     try{
-        console.log("inside updateTermsAcceptance of createAsyncThunk")
-        const response = await axios.post('/terms', {consent}, {withCredentials:true})
-        console.log("returning success response from updateTermsAcceptance createAsyncThunk..."+JSON.stringify(response)) 
-        console.log("userDetails from updateTermsAcceptance createAsyncThunk--", consent)
+        const response = await apiClient.post('/terms', {consent})
         return response.data
     }
     catch(error){
-        console.log("inside catch of updateTermsAcceptance from userSlice")
         const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
         return thunkAPI.rejectWithValue(errorMessage)
     }
@@ -118,7 +92,6 @@ export const updateTermsAcceptance = createAsyncThunk('updateTermsAcceptance', a
 
 
 const initialState = {
-    // userToken: null,
     user: null,
     userUpdated: false,
     userDpUpdated: false,
@@ -135,8 +108,6 @@ const userSlice = createSlice({
     initialState,
     reducers:{
         resetStates: (state,action)=>{
-            console.log("state(success) before reset-->"+state.success)
-            console.log("Reseting states..inside resetStates() of userSlice ")
             state.error = null
             state.loading = false
             state.success = false
@@ -144,14 +115,11 @@ const userSlice = createSlice({
             state.userDpUpdated = false
             state.userWeightUpdated = false
             state.updatedTermsAcceptance = false
-            console.log("state(success) after reset-->"+state.success)
         },
         changePath: (state, action)=> {
-            console.log("changePage reducer")
             state.currentPath = action.payload.path
         },
         makeUserVerified: (state, action)=> {
-            console.log("Making user verified....")
             state.user.isVerified = true
         }
     },
@@ -159,7 +127,6 @@ const userSlice = createSlice({
         builder.addCase(signup.pending, (state,action)=>{
                 state.loading = true
                 state.success = false
-                console.log("loading from userSlice signup.pending--"+state.loading)
             }
         )
         .addCase(signup.fulfilled, (state,action)=>{
@@ -167,12 +134,8 @@ const userSlice = createSlice({
                 state.loading = false
                 state.success = true
                 state.user = action.payload.user
-                console.log("userData from userSlice-signup.fulfilled-user-->"+JSON.stringify(action.payload.user))
-                console.log("message from userSlice-signup.fulfilled->"+JSON.stringify(action.payload.message))
         })
         .addCase(signup.rejected, (state,action)=>{
-                console.log("error from userSlice- signup.rejected-->"+ state.error)
-                console.log("error payload from userSlice-signup.rejected-->"+JSON.stringify(action.payload))
                 state.error = action.payload
                 state.loading = false
                 state.success = false
@@ -180,28 +143,21 @@ const userSlice = createSlice({
         .addCase(signin.pending, (state,action)=>{
                 state.loading = true
                 state.success = false
-                console.log("loading from userSlice signin.pending--"+state.loading)
         })
         .addCase(signin.fulfilled, (state,action)=>{
                 state.loading = false
                 state.error = null
                 state.success = true
                 state.user = action.payload.user
-                console.log("userData from userSlice-signin.fulfilled-user-->"+JSON.stringify(state.user))
-                console.log("message from userSlice-signin.fulfilled->"+JSON.stringify(action.payload.message))
         })
         .addCase(signin.rejected, (state,action)=>{
-                console.log("error from userSlice- signin.rejected before assignment-->"+ state.error)
-                console.log("error payload from userSlice- signin.rejected-->"+JSON.stringify(action.payload))
                 state.error = action.payload
                 state.loading = false
                 state.success = false
-                console.log("error from userSlice- signin.rejected after assignment-->"+ state.error)
          })
          .addCase(updateUserDetails.pending, (state,action)=>{
                 state.loading = true
                 state.success = false
-                console.log("loading from userSlice updateUserDetails.pending--"+state.loading)
         })
         .addCase(updateUserDetails.fulfilled, (state,action)=>{
                 state.loading = false
@@ -209,18 +165,15 @@ const userSlice = createSlice({
                 state.success = true
                 state.user = action.payload.user
                 state.userUpdated =  true
-                console.log("userData from userSlice-updateUserDetails.fulfilled-user-->"+JSON.stringify(state.user))
         })
         .addCase(updateUserDetails.rejected, (state,action)=>{
                 state.error = action.payload
                 state.loading = false
                 state.success = false
-                console.log("error from userSlice- updateUserDetails.rejected after assignment-->"+ state.error)
         })
         .addCase(updateUserProfilePic.pending, (state,action)=>{
                 state.loading = true
                 state.success = false
-                console.log("loading from userSlice updateUserDetails.pending--"+state.loading)
         })
         .addCase(updateUserProfilePic.fulfilled, (state,action)=>{
                 state.loading = false
@@ -228,38 +181,31 @@ const userSlice = createSlice({
                 state.success = true 
                 state.user.profilePic = action.payload.profilePic
                 state.userDpUpdated =  true
-                console.log("userData from userSlice-updateUserDetails.fulfilled-user-->"+JSON.stringify(state.user))
         })
         .addCase(updateUserProfilePic.rejected, (state,action)=>{
                 state.error = action.payload
                 state.loading = false
                 state.success = false
-                console.log("error from userSlice- updateUserDetails.rejected after assignment-->"+ state.error)
         })
         .addCase(updateUserWeight.pending, (state,action)=>{
                 state.loading = true
                 state.success = false
-                console.log("loading from userSlice updateUserWeight.pending--"+state.loading)
         })
         .addCase(updateUserWeight.fulfilled, (state,action)=>{
                 state.loading = false
                 state.error = null
                 state.success = true 
-                console.log("userData from userSlice-updateUserWeight.fulfilled-action.payload.userWeight-->", action.payload.userWeight)
                 state.user.weight = action.payload.userWeight.weight
                 state.userWeightUpdated = true
-                console.log("userData from userSlice-updateUserWeight.fulfilled-user-->"+JSON.stringify(state.user))
         })
         .addCase(updateUserWeight.rejected, (state,action)=>{
                 state.error = action.payload
                 state.loading = false
                 state.success = false
-                console.log("error from userSlice- updateUserWeight.rejected after assignment-->"+ state.error)
         })
         .addCase(updateTermsAcceptance.pending, (state,action)=>{
                 state.loading = true
                 state.success = false
-                console.log("loading from userSlice updateTermsAcceptance.pending--"+state.loading)
         })
         .addCase(updateTermsAcceptance.fulfilled, (state,action)=>{
                 state.loading = false
@@ -269,47 +215,35 @@ const userSlice = createSlice({
                 state.user.termsAcceptedAt = action.payload.termsAcceptedAt
                 state.user.termsVersion = action.payload.termsVersion
                 state.updatedTermsAcceptance = true
-                console.log("hasAcceptedTerms from userSlice-updateTermsAcceptance.fulfilled-user-->"+action.payload.hasAcceptedTerms)
         })
         .addCase(updateTermsAcceptance.rejected, (state,action)=>{
                 state.error = action.payload
                 state.loading = false
                 state.success = false
-                console.log("error from userSlice- updateUserWeight.rejected after assignment-->"+ state.error)
         })
         .addCase(signout.fulfilled, (state,action)=>{
-                console.log("inside signout.fulfilled, action.payload"+JSON.stringify(action.payload))
                 state.user = null
                 state.error = null,
                 state.loading = false
                 state.success = false
-                console.log("state.user now-->"+state.user)
         })
         .addCase(googleSignin.pending, (state,action)=>{
                 state.loading = true
                 state.success = false
                 state.googleSuccess = false
-                console.log("loading from userSlice googleSignin.pending--"+state.loading)
         })
         .addCase(googleSignin.fulfilled, (state,action)=>{
                 state.loading = false
                 state.error = null
                 state.success = true
                 state.googleSuccess = true
-                // state.userToken = action.payload.token
                 state.user = action.payload.user
-                // console.log("userData from userSlice--user-->"+JSON.stringify(state.user))
-                // console.log("token from userSlice googleSignin--token-->"+JSON.stringify(state.userToken))
-                console.log("message from userSlice googleSignin-->"+JSON.stringify(action.payload.message))
         })
         .addCase(googleSignin.rejected, (state,action)=>{
-                console.log("error from userSlice- signin.rejected before assignment-->"+ state.error)
-                console.log("error payload from userSlice- signin.rejected-->"+JSON.stringify(action.payload))
                 state.error = action.payload
                 state.loading = false
                 state.success = false
                 state.googleSuccess = false
-                console.log("error from userSlice- signin.rejected after assignment-->"+ state.error)
         })
     
     }

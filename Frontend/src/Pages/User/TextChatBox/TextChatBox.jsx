@@ -6,7 +6,6 @@ import {SocketContext} from '../../../Components/SocketProvider/SocketProvider'
 import {MessageSquare, X, Send, User, Headphones, Minimize2, Maximize2} from "lucide-react"
 
 
-
 export default function TextChatBox({closeable, onCloseChat, boxHeight, boxWidth, focusByDefault = false, isStatic = false, openChats = false}){
 
   const [isOpen, setIsOpen] = useState(false)
@@ -15,10 +14,6 @@ export default function TextChatBox({closeable, onCloseChat, boxHeight, boxWidth
   const inputRef = useRef(null)
 
   const {isConnected, isAdminOnline, messages, newMessage, isTyping, messagesEndRef, handleSendMessage, handleTyping} = useContext(SocketContext)
-
-  useEffect(()=> {
-    console.log("new message--->", newMessage)
-  },[newMessage])
 
   useEffect(()=> {
     if(isStatic || openChats){
@@ -30,7 +25,6 @@ export default function TextChatBox({closeable, onCloseChat, boxHeight, boxWidth
   }, [isStatic, focusByDefault, openChats])
 
   const toggleChat = () => {
-    console.log("toggling...")
     setIsOpen(!isOpen)
     setIsMinimized(false)
   }

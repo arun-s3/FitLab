@@ -17,17 +17,11 @@ export default function CouponApplicableModal({open, onClose, couponLabel = "Sel
   useModalHelpers({open, onClose, modalRef})
 
   useEffect(()=> {
-    console.log("CouponApplicableModal opens...")
-  }, [])
-
-  useEffect(()=> {
     if(products.length === 0 && categories.length === 0){
-      console.log('Closing modal coz no produts/categories listed...')
       onClose()
     }
   }, [products, categories])
 
-  
   function useLockBodyScroll(lock) {
     useEffect(() => {
       if (!lock) return

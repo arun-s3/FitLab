@@ -3,8 +3,10 @@ import './OrderHistoryPage.css'
 import {Link} from 'react-router-dom'
 
 import {ShoppingBag, FileText}  from 'lucide-react'
+
 import {format} from "date-fns"
-import axios from 'axios'
+import apiClient from '../../../Api/apiClient'
+import {toast as sonnerToast} from 'sonner'
 
 
 export default function OrderHeader({order, onViewOrderDetails}){
@@ -13,18 +15,24 @@ export default function OrderHeader({order, onViewOrderDetails}){
 
     const exportInvoice = async(orderId)=> {
       try{
-        const response = await axios.get(`${baseApiUrl}/order/invoice/${orderId}`,{responseType: 'blob', withCredentials: true})
-        console.log("RESPONSE from order/invoice---->", response)
-        
-        const url = window.URL.createObjectURL(new Blob([response.data]))
-        const link = document.createElement('a')
-        link.href = url
-        link.setAttribute('download', `invoice_${orderId}.pdf`)
-        document.body.appendChild(link)
-        link.click()
+        const response = await apiClient.get(`${baseApiUrl}/order/invoice/${orderId}`,{responseType: 'blob'})
+        if(response?.data) {
+            const url = window.URL.createObjectURL(new Blob([response.data]))
+            const link = document.createElement('a')
+            link.href = url
+            link.setAttribute('download', `invoice_${orderId}.pdf`)
+            document.body.appendChild(link)
+            link.click()
+        }
       }
       catch(error){
-        console.log("error from  createInvoice--->", error.message)
+        if (!error.response) {
+          sonnerToast.error("Network error. Please check your internet.")
+        } else if (error.response?.status === 404) {
+          sonnerToast.error(error.response.data.message || "Error while exporting your invoice. Please try later!")
+        } else {
+          sonnerToast.error("Something went wrong! Please retry later.")
+        }
       }  
     }
 

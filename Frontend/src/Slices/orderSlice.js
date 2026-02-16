@@ -1,16 +1,12 @@
 import {createSlice, createAsyncThunk} from '@reduxjs/toolkit'
-import axios from '../Api/axiosConfig'
+import apiClient from '../Api/apiClient'
 
 
 export const createOrder = createAsyncThunk('order/createOrder', async ({orderDetails}, thunkAPI)=> {
   try {
-    console.log('Inside createOrder createAsyncThunk');
-    console.log("orderDetails from ordrSlice---->", orderDetails)
-    const response = await axios.post('/order/add', {orderDetails}, {withCredentials: true})
-    console.log('Returning success response from createOrder...', JSON.stringify(response.data))
+    const response = await apiClient.post('/order/add', {orderDetails})
     return response.data
   }catch(error){
-    console.log('Inside catch of createOrder')
     const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
@@ -18,13 +14,9 @@ export const createOrder = createAsyncThunk('order/createOrder', async ({orderDe
 
 export const getOrders = createAsyncThunk('order/getOrders', async ({queryDetails}, thunkAPI)=> {
   try {
-    console.log('Inside getOrders createAsyncThunk');
-    console.log("orderDetails from ordrSlice---->", queryDetails)
-    const response = await axios.post('/order', {queryDetails}, {withCredentials: true})
-    console.log('Returning success response from getOrders...', JSON.stringify(response.data))
+    const response = await apiClient.post('/order', {queryDetails})
     return response.data
   }catch(error){
-    console.log('Inside catch of getOrders')
     const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
@@ -32,13 +24,9 @@ export const getOrders = createAsyncThunk('order/getOrders', async ({queryDetail
 
 export const getAllUsersOrders = createAsyncThunk('order/getAllUsersOrders', async ({queryDetails}, thunkAPI)=> {
   try {
-    console.log('Inside getAllUsersOrders createAsyncThunk');
-    console.log("orderDetails from ordrSlice---->", queryDetails)
-    const response = await axios.post('/order/all', {queryDetails}, {withCredentials: true})
-    console.log('Returning success response from getOrders...', JSON.stringify(response.data))
+    const response = await apiClient.post('/order/all', {queryDetails})
     return response.data
   }catch(error){
-    console.log('Inside catch of getOrders')
     const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
@@ -46,13 +34,9 @@ export const getAllUsersOrders = createAsyncThunk('order/getAllUsersOrders', asy
 
 export const cancelOrder = createAsyncThunk('order/cancelOrder', async ({orderId, orderCancelReason}, thunkAPI)=> {
   try {
-    console.log('Inside cancelOrder createAsyncThunk');
-    console.log("orderId from orderSlice---->", orderId)
-    const response = await axios.patch(`/order/cancel/${orderId}`,{orderCancelReason}, {withCredentials: true})
-    console.log('Returning success response from cancelOrder...', JSON.stringify(response.data))
+    const response = await apiClient.patch(`/order/cancel/${orderId}`,{orderCancelReason})
     return {orderId, cart: response.data.order}
   }catch(error){
-    console.log('Inside catch of cancelOrder')
     const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
@@ -60,13 +44,9 @@ export const cancelOrder = createAsyncThunk('order/cancelOrder', async ({orderId
 
 export const cancelOrderProduct = createAsyncThunk('order/cancelOrderProduct', async ({orderId, productId, productCancelReason}, thunkAPI)=> {
     try {
-      console.log('Inside cancelOrderProduct createAsyncThunk');
-      console.log(`orderId and productId from orderSlice----> ${orderId} and ${productId}}`)
-      const response = await axios.patch(`/order/cancel`, {orderId, productId, productCancelReason}, {withCredentials: true})
-      console.log('Returning success response from cancelOrderProduct...', JSON.stringify(response.data))
+      const response = await apiClient.patch(`/order/cancel`, {orderId, productId, productCancelReason})
       return {orderId, productId, updatedOrder: response.data.order, message: response.data.message}
     }catch(error) {
-      console.log('Inside catch of cancelOrder')
       const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
       return thunkAPI.rejectWithValue(errorMessage)
     }
@@ -75,13 +55,9 @@ export const cancelOrderProduct = createAsyncThunk('order/cancelOrderProduct', a
 
 export const deleteProductFromOrderHistory = createAsyncThunk('order/deleteProductFromOrderHistory', async ({orderId, productId}, thunkAPI)=> {
   try {
-    console.log('Inside deleteProductFromOrderHistory createAsyncThunk');
-    console.log(`orderId and productId from orderSlice----> ${orderId} and ${productId}}`)
-    const response = await axios.post(`/order/delete/${orderId}`, {productId}, {withCredentials: true})
-    console.log('Returning success response from deleteProductFromOrderHistory...', JSON.stringify(response.data))
+    const response = await apiClient.post(`/order/delete/${orderId}`, {productId})
     return {orderId, productId, updatedOrder: response.data.order, message: response.data.message}
   }catch(error) {
-    console.log('Inside catch of deleteProductFromOrderHistory')
     const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
@@ -90,13 +66,9 @@ export const deleteProductFromOrderHistory = createAsyncThunk('order/deleteProdu
 
 export const changeOrderStatus = createAsyncThunk('order/changeOrderStatus', async ({orderId, newStatus}, thunkAPI)=> {
   try {
-    console.log('Inside changeOrderStatus createAsyncThunk');
-    console.log("orderId from orderSlice---->", orderId)
-    const response = await axios.patch(`/order/status/${orderId}`,{newStatus}, {withCredentials: true})
-    console.log('Returning success response from changeOrderStatus...', JSON.stringify(response.data))
+    const response = await apiClient.patch(`/order/status/${orderId}`,{newStatus})
     return {orderId, updatedOrder: response.data.updatedOrder}
   }catch(error){
-    console.log('Inside catch of cancelOrder')
     const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
@@ -104,13 +76,9 @@ export const changeOrderStatus = createAsyncThunk('order/changeOrderStatus', asy
 
 export const changeProductStatus = createAsyncThunk('order/changeProductStatus', async ({orderId, productId, newProductStatus}, thunkAPI)=> {
   try {
-    console.log('Inside changeProductStatus createAsyncThunk');
-    console.log("orderId from orderSlice---->", orderId)
-    const response = await axios.patch(`/order/status/${orderId}/products/${productId}`,{newProductStatus}, {withCredentials: true})
-    console.log('Returning success response from changeProductStatus...', JSON.stringify(response.data))
+    const response = await apiClient.patch(`/order/status/${orderId}/products/${productId}`,{newProductStatus})
     return {orderId, productId, updatedProduct: response.data.updatedProduct, order: response.data.order}
   }catch(error){
-    console.log('Inside catch of changeProductStatus')
     const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
@@ -120,14 +88,9 @@ export const initiateReturn = createAsyncThunk(
   'order/initiateReturn',
   async ({ orderId, productId, returnType, returnReason, formData }, thunkAPI) => {
     try {
-      console.log('Inside initiateReturn createAsyncThunk')
-      console.log('orderId from orderSlice ---->', orderId)
-
-      const response = await axios.post('/order/return', formData, {headers: {'Content-Type': 'multipart/form-data'}})
-      console.log('Returning success response from initiateReturn...', JSON.stringify(response.data))
+      const response = await apiClient.post('/order/return', formData, {headers: {'Content-Type': 'multipart/form-data'}})
       return { orderId, productId, returnType, returnReason }
     }catch (error) {
-      console.log('Inside catch of initiateReturn:', error)
       const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
       return thunkAPI.rejectWithValue(errorMessage)
     }
@@ -136,13 +99,9 @@ export const initiateReturn = createAsyncThunk(
 
 export const handleReturnDecision = createAsyncThunk('order/handleReturnDecision', async ({returnDetails}, thunkAPI)=> {
   try {
-    console.log('Inside handleReturnDecision createAsyncThunk')
-    console.log("orderId from orderSlice---->", returnDetails.orderId)
-    const response = await axios.post(`order/return/decision`, {returnDetails}, {withCredentials: true})
-    console.log('Returning success response from handleReturnDecision...', JSON.stringify(response.data))
+    const response = await apiClient.post(`order/return/decision`, {returnDetails})
     return {...returnDetails}
   }catch(error){
-    console.log('Inside catch of handleReturnDecision')
     const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
@@ -150,13 +109,9 @@ export const handleReturnDecision = createAsyncThunk('order/handleReturnDecision
 
 export const cancelReturnRequest = createAsyncThunk('order/cancelReturnRequest', async ({returnDetails}, thunkAPI)=> {
   try {
-    console.log('Inside handleReturnDecision createAsyncThunk')
-    console.log("orderId from orderSlice---->", returnDetails.orderId)
-    const response = await axios.post(`order/return/cancel`, {returnDetails}, {withCredentials: true})
-    console.log('Returning success response from cancelReturnRequest...', JSON.stringify(response.data))
+    const response = await apiClient.post(`order/return/cancel`, {returnDetails})
     return {...returnDetails}
   }catch(error){
-    console.log('Inside catch of cancelReturnRequest')
     const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
@@ -164,13 +119,9 @@ export const cancelReturnRequest = createAsyncThunk('order/cancelReturnRequest',
 
 export const processRefund = createAsyncThunk('order/processRefund', async ({refundInfos}, thunkAPI)=> {
   try {
-    console.log('Inside processRefund createAsyncThunk')
-    console.log("orderId from orderSlice---->", refundInfos.orderId)
-    const response = await axios.post(`order/refund`, {refundInfos}, {withCredentials: true})
-    console.log('Returning success response from processRefund...', JSON.stringify(response.data))
+    const response = await apiClient.post(`order/refund`, {refundInfos})
     return {...refundInfos}
   }catch(error){
-    console.log('Inside catch of processRefund')
     const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
@@ -216,7 +167,6 @@ const orderSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(createOrder.fulfilled, (state, action) => {
-        console.log('createOrder fulfilled:', action.payload)
         state.orderError = null
         state.loading = false
         state.orderSuccess = true
@@ -229,14 +179,12 @@ const orderSlice = createSlice({
         state.orderError = null
       })
       .addCase(createOrder.rejected, (state, action) => {
-        console.log('createOrder rejected:', action.payload)
         state.loading = false
         state.orderError = action.payload
         state.orderMessage = action.payload.message
         state.orderSuccess = false
       })
       .addCase(getOrders.fulfilled, (state, action) => {
-        console.log('getOrders fulfilled:', action.payload)
         state.orderError = null
         state.loading = false
         state.orderSuccess = true
@@ -249,14 +197,12 @@ const orderSlice = createSlice({
         state.orderError = null
       })
       .addCase(getOrders.rejected, (state, action) => {
-        console.log('getOrders rejected:', action.payload)
         state.loading = false
         state.orderError = action.payload
         state.orderMessage = action.payload.message
         state.orderSuccess = false 
       })
       .addCase(getAllUsersOrders.fulfilled, (state, action) => {
-        console.log('getAllUsersOrders fulfilled:', action.payload)
         state.orderError = null
         state.loading = false
         state.orderSuccess = true
@@ -269,14 +215,12 @@ const orderSlice = createSlice({
         state.orderError = null
       })
       .addCase(getAllUsersOrders.rejected, (state, action) => {
-        console.log('getAllUsersOrders rejected:', action.payload)
         state.loading = false
         state.orderError = action.payload
         state.orderMessage = action.payload.message
         state.orderSuccess = false 
       })
       .addCase(cancelOrder.fulfilled, (state, action) => { 
-        console.log('cancelOrder fulfilled:', action.payload)
         state.orderError = null
         state.loading = false
         state.orderCancelled = true
@@ -298,14 +242,12 @@ const orderSlice = createSlice({
         state.orderError = null
       })
       .addCase(cancelOrder.rejected, (state, action) => {
-        console.log('cancelOrder rejected:', action.payload)
         state.loading = false
         state.orderError = true
         state.orderMessage = action.payload.message
         state.orderCancelled = false
       })
       .addCase(cancelOrderProduct.fulfilled, (state, action) => {
-        console.log('cancelOrderProduct fulfilled:', action.payload);
         state.orderError = null;
         state.loading = false;
         state.productCancelled = true;
@@ -334,13 +276,11 @@ const orderSlice = createSlice({
         state.orderError = null
       })
       .addCase(cancelOrderProduct.rejected, (state, action)=> {
-        console.log('cancelOrderProduct rejected:', action.payload)
         state.loading = false
         state.orderError = action.payload
         state.productCancelled = false
       })
       .addCase(deleteProductFromOrderHistory.fulfilled, (state, action) => {
-        console.log('deleteProductFromOrderHistory fulfilled:', action.payload)
         state.orderError = null
         state.loading = false
         state.productDeleted = true
@@ -352,7 +292,6 @@ const orderSlice = createSlice({
         ...order,
         products: order.products.map((product) => {
           if (product.productId._id.toString() === action.payload.productId.toString()) {
-            console.log("if (product.productId._id.toString() === action.payload.productId.toString())...product.productId._id--->", product.productId._id)
             return { ...product, isDeleted: true };
           }
           return product;
@@ -367,14 +306,12 @@ const orderSlice = createSlice({
         state.orderError = null
       })
       .addCase(deleteProductFromOrderHistory.rejected, (state, action) => {
-        console.log('deleteProductFromOrderHistory rejected:', action.payload)
         state.loading = false
         state.orderError = true
         state.orderMessage = action.payload.message
         state.productDeleted  = false
       })
       .addCase(changeOrderStatus.fulfilled, (state, action)=> { 
-        console.log('changeOrderStatus fulfilled:', action.payload)
         state.orderError = null
         state.loading = false
         state.orderUpdated = true
@@ -405,14 +342,12 @@ const orderSlice = createSlice({
         state.orderError = null
       })
       .addCase(changeOrderStatus.rejected, (state, action)=> {
-        console.log('changeProductStatus rejected:', action.payload)
         state.loading = false
         state.orderError = true
         state.orderMessage = action.payload.message
         state.orderUpdated = false
       })
       .addCase(changeProductStatus.fulfilled, (state, action)=> { 
-        console.log('changeProductStatus fulfilled:', action.payload)
         state.orderError = null
         state.loading = false
         state.orderUpdated = true
@@ -425,7 +360,6 @@ const orderSlice = createSlice({
             order.products = order.products.map(product=> {
 
               if(product.productId._id === action.payload.productId){
-                console.log(`product.productStatus-------> ${product.productStatus} and requiredStatus-------> ${requiredStatus} `)
                 product.productStatus = requiredStatus
 
                 if(requiredStatus === 'delivered'){
@@ -454,14 +388,12 @@ const orderSlice = createSlice({
         state.orderError = null
       })
       .addCase(changeProductStatus.rejected, (state, action)=> {
-        console.log('changeProductStatus rejected:', action.payload)
         state.loading = false
         state.orderError = true
         state.orderMessage = action.payload.message
         state.orderUpdated = false
       })
       .addCase(initiateReturn.fulfilled, (state, action) => {
-        console.log('initiateReturn fulfilled:', action.payload)
         state.orderError = null
         state.loading = false
         state.orderSuccess = true
@@ -489,13 +421,11 @@ const orderSlice = createSlice({
         state.orderError = null
       })
       .addCase(initiateReturn.rejected, (state, action) => {
-        console.log('initiateReturn rejected:', action.payload)
         state.loading = false
         state.orderError = action.payload
         state.orderSuccess = false
       })
       .addCase(handleReturnDecision.fulfilled, (state, action) => {
-        console.log('handleReturnDecision fulfilled:', action.payload)
         state.loading = false
         state.orderError = null
         state.orderSuccess = true
@@ -552,14 +482,12 @@ const orderSlice = createSlice({
         state.orderError = null
       })
       .addCase(handleReturnDecision.rejected, (state, action) => {
-        console.log('handleReturnDecision rejected:', action.payload)
         state.loading = false
         state.orderError = action.payload
         state.orderSuccess = false
         state.handledOrderDecision = false
       })
       .addCase(cancelReturnRequest.fulfilled, (state, action) => {
-        console.log('cancelReturnRequest fulfilled:', action.payload)
         state.orderError = null
         state.loading = false
         state.orderSuccess = true
@@ -610,14 +538,12 @@ const orderSlice = createSlice({
         state.orderError = null
       })
       .addCase(cancelReturnRequest.rejected, (state, action) => {
-        console.log('handleReturnDecision rejected:', action.payload)
         state.loading = false
         state.orderError = action.payload
         state.orderSuccess = false
         state.canceledReturnRequest = false
       })
       .addCase(processRefund.fulfilled, (state, action) => {
-        console.log('processRefund fulfilled:', action.payload)
         state.orderError = null
         state.loading = false
         state.refundSuccess = true
@@ -650,13 +576,11 @@ const orderSlice = createSlice({
         state.orderError = null
       })
       .addCase(processRefund.rejected, (state, action) => {
-        console.log('handleReturnDecision rejected:', action.payload)
         state.loading = false
         state.orderError = action.payload
         state.orderSuccess = false
         state.refundSuccess = false
       })
-
 
     }
 })

@@ -3,7 +3,7 @@ import {useNavigate} from 'react-router-dom'
 import {AnimatePresence, motion} from "framer-motion"
 
 import {ChevronLeft, ChevronRight} from "lucide-react"
-import axios from 'axios'
+import apiClient from '../../../Api/apiClient'
 
 
 export default function LatestProductsCarousel() {
@@ -20,12 +20,17 @@ export default function LatestProductsCarousel() {
   useEffect(()=> {
     async function loadSlides(){
       try{
-        const response = await axios.get(`${baseApiUrl}/products/latest`, {withCredentials: true})
-        console.log("RESPONSE from loadSlides---->", response)
-        setSlides(response.data.latestProducts)
+        const response = await apiClient.get(`${baseApiUrl}/products/latest`)
+        if(response?.data?.latestProducts){
+            setSlides(response.data.latestProducts)
+        }
       }
       catch(error){
-        console.log("error from  loadSlides--->", error.message)
+        if (!error.response) {
+          sonnerToast.error("Network error. Please check your internet.")
+        }
+        console.error(error)
+        setSlides([])
       }  
     }
     loadSlides()

@@ -1,17 +1,12 @@
 import React, {useState, useEffect} from 'react'
 import {useSelector, useDispatch} from 'react-redux'
 
-import {FaRegBell} from "react-icons/fa"
 import {Menu} from "lucide-react"
 
-import {adminSignout} from '../../Slices/adminSlice'
 import AdminSidebar from '../../Components/AdminSidebar/AdminSidebar'
 
 
-
-
 export default function AdminHeader({headerZIndex}){
-
 
     const [sidebarOpen, setSidebarOpen] = useState(false)
 

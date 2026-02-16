@@ -4,6 +4,8 @@ import {useSelector, useDispatch} from 'react-redux'
 import {unwrapResult} from '@reduxjs/toolkit'
 import {motion, AnimatePresence} from "framer-motion"
 
+import {toast as sonnerToast} from 'sonner'
+
 import {MdOutlineArrowDropDownCircle} from 'react-icons/md'
 import {GoPlus} from "react-icons/go"
 
@@ -46,42 +48,25 @@ export default function CategoryDisplay({type, filter, setFilter, categoryType, 
       checkNestedSubcategories(populatedSubCategories.parentId, true); 
     }
   }, [populatedSubCategories, loadingSubCategories]);
-  
 
   useEffect(()=>{
     const categoryArray = checkedCategories.map(category=> category.name)
     if(!storeCheckedCategories){
       const topLevelCategories = categories.map(cat=> cat.name)
-      console.log('topLevelcategories---->', topLevelCategories)
       const mainCategories = categoryArray.filter(cat => topLevelCategories.includes(cat));
       const subCategories = categoryArray.filter(cat => !topLevelCategories.includes(cat));
-      console.log(`Detected SubCategories----> ${subCategories}, Detected Categories----> ${mainCategories}`)
       filter && setFilter({...filter, categories: [...mainCategories], subCategories: subCategories.toString()})
-      console.log("checkedCategories", JSON.stringify(checkedCategories))
-    }else{
     }
   },[checkedCategories])
-  // useEffect(()=>{
-  //   filter && setFilter({...filter, categories: [...checkedCategories]})
-  //   console.log("checkedCategories", JSON.stringify(checkedCategories))
-  // },[checkedCategories])
-
-  useEffect(()=>{
-    console.log("openSubcategories--->", JSON.stringify(openSubcategories))
-  },[filter,openSubcategories])
- 
-  useEffect(()=>{
-    console.log("SUBCATEGORIES--->", JSON.stringify(subCategories))
-  },[subCategories])
 
   const closeNestedSubcategories = (id) => {
     if (subCategories[id]) {
       subCategories[id].forEach((subCategory) => {
         setOpenSubcategories((prevOpenSubcategories) => ( {...prevOpenSubcategories, [subCategory._id]: { ...openSubcategories[subCategory._id], status: false } }));
         closeNestedSubcategories(subCategory._id);
-      });
+      })
     }
-  };
+  }
 
   const showSubcategories = (id, name) => {
     dispatch(getSingleCategory({ id }));
@@ -93,13 +78,12 @@ export default function CategoryDisplay({type, filter, setFilter, categoryType, 
         checked: openSubcategories?.[id]?.checked ? openSubcategories?.[id]?.checked : false,
         parentLevelCount: prevOpenSubcategories[id]?.parentLevelCount || 1,
       },
-    }));
-  };
+    }))
+  }
 
 const checkNestedSubcategories = async (id, isChecked) => {
   if (subCategories[id]) {
     for (const subCategory of subCategories[id]) {
-      console.log("Setting openSubCAtegories for-->",subCategory.name)
       setOpenSubcategories((prevOpenSubcategories) => ({
         ...prevOpenSubcategories,
         [subCategory._id]: {
@@ -107,23 +91,19 @@ const checkNestedSubcategories = async (id, isChecked) => {
           checked: isChecked,
           status: prevOpenSubcategories[subCategory._id]?.status || false,
         },
-      }));
+      }))
 
       try {
-        console.log("Dispatching category inside checkNestedSubcategories-->",subCategory.name)
         const result = await dispatch(getSingleCategory({ id: subCategory._id }));
         unwrapResult(result);  
-        console.log("Dispatched category inside checkNestedSubcategories-->",subCategory.name)
-        console.log("Going to checkNestedSubcategories from checkNestedSubcategories--")
         await checkNestedSubcategories(subCategory._id, isChecked);  
-      } catch (error) {
-        console.error("Error fetching subcategory inside checkNestedSubcategories--", error);
+      }
+      catch (error) {
+        sonnerToast.error("Internal server error")
       }
     }
-  }else{
-    console.log(`NO such subCategories[id] of ${id} available`)
   }
-};
+}
 
   const checkboxHandler = async (e, catId, subCategory) => {
     const categoryId = e ? e.target.id : catId;
@@ -139,21 +119,15 @@ const checkNestedSubcategories = async (id, isChecked) => {
   
     if (subCategory.length > 0) {
       if (subCategories[catId]) {
-        console.log("Inside if subCategories[catId]",)
         await checkNestedSubcategories(catId, isChecked);
       } else {
-        console.log("Inside else subCategories[catId]")
         setLoadingSubCategories(true)
         try{
-          console.log("Dispatching category inside checkboxHandler-->",categoryId)
           const result = await dispatch(getSingleCategory({ id: catId }))
-          console.log(`Dispatched category inside checkboxHandler-->name-${categoryId}, id-${catId}`)
           unwrapResult(result)
-          console.log("Going to checkNestedSubcategories from checkboxHandler--")
           setLoadingSubCategories(false)
         }
         catch (error) {
-          console.error("Error fetching subcategory inside checkboxHandler--", error);
           setLoadingSubCategories(false)
         }
       }
@@ -168,7 +142,6 @@ const checkNestedSubcategories = async (id, isChecked) => {
   useEffect(()=> {
     async function checkRequestedCategory(){
       if(categoryType){
-        console.log("categoryType wanted---->", categoryType)
         await checkboxHandler(null, categoryType.id, categoryType.subCategory)
       }
     }
@@ -177,7 +150,6 @@ const checkNestedSubcategories = async (id, isChecked) => {
 
   const radioClickHandler = (name)=>{
     const checkStatus = radioCheckedCategory === name
-    console.log("checkStatus-->", checkStatus)
     if(checkStatus){
         setRadioCheckedCategory('')
         return
@@ -191,50 +163,16 @@ const checkNestedSubcategories = async (id, isChecked) => {
   const radioChangeHandler = (e, name)=>{
     e.target.checked = (radioCheckedCategory === name)
 }
-  
-  // const manualCheckboxHandler = (e, name)=> {
-  //   console.log('e.target.checked---->',e.target.checked)
-  //   const status = e.target.checked
-  //    setManualCheckCategory(manualCheckCategory=> {
-  //     const key = manualCheckCategory?.find(catObj=> Object.keys(catObj)[0] === name)
-  //     return [...manualCheckCategory, {...key, [name]: status}]
-  //    })
-  // }
-//   const manualCheckboxHandler = (e, name) => {
-//     console.log('e.target.checked ---->', e.target.checked);
-//     const status = e.target.checked;
-
-//     setManualCheckCategory((prevState) => {
-//         // Check if the category already exists in the array
-//         const existingIndex = prevState.findIndex((item) => item.name === name);
-
-//         if (existingIndex !== -1) {
-//             // Update the existing category's status
-//             const updatedCategory = { ...prevState[existingIndex], checked: status };
-//             return [
-//                 ...prevState.slice(0, existingIndex),
-//                 updatedCategory,
-//                 ...prevState.slice(existingIndex + 1),
-//             ];
-//         } else {
-//             // Add a new category to the array
-//             return [...prevState, { name, checked: status }];
-//         }
-//     });
-// };
 
   const manualCheckboxHandler = (e, name)=> {
-    console.log('e.target.checked ---->', e.target.checked);
     const status = e.target.checked;
     const manualCheckCategoryCurrentLength = Object.keys(manualCheckCategory).filter(cat=> manualCheckCategory[cat] === true).length
-    console.log("manualCheckCategoryCurrentLength--->", manualCheckCategoryCurrentLength)
     if (manualCheckCategoryCurrentLength > 2) setRelatedCategoryError("Can set only 3 categories as related category at the maximum!")
     if(status && manualCheckCategoryCurrentLength < 3){
       setManualCheckCategory(prevObj=> {
         return {...prevObj, [name]:true}
       })
     }else{
-      console.log("manualCheckCategory---->", JSON.stringify(manualCheckCategory))
       setManualCheckCategory(prevObj=> {
         return {...prevObj, [name]:false}
       })

@@ -3,7 +3,7 @@ import {motion, AnimatePresence} from 'framer-motion'
 
 import {VscSettings} from "react-icons/vsc"
 import {RiArrowDropUpLine} from "react-icons/ri"
-import axios from 'axios'
+import apiClient from '../../../Api/apiClient'
 
 import CategoryDisplay from '../../../Components/CategoryDisplay/CategoryDisplay'
 import PriceSliderAndFilter from '../../../Components/PriceSliderAndFilter/PriceSliderAndFilter'
@@ -28,6 +28,9 @@ export default function FilterModule({filter, setFilter, rating, setRating, popu
 
     const [showSubcategoriesOf, setShowSubcategoriesOf] = useState(null)
 
+    const [popularProductsShowLabel, setPopularProductsShowLabel] = useState('See more')
+    const [morePopularProducts, setMorePopularProducts] = useState(0)
+
     const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
     useEffect(()=>{
@@ -39,22 +42,23 @@ export default function FilterModule({filter, setFilter, rating, setRating, popu
     useEffect(()=> {
         async function getCategoryName(){
             try{
-                const response = await axios.get(`${baseApiUrl}/admin/products/category/id/${categoryType}`, {withCredentials: true})
-                console.log("Category id asked--->", response.data.id) 
+                const response = await apiClient.get(`${baseApiUrl}/admin/products/category/id/${categoryType}`)
                 setShowSubcategoriesOf({id: response.data.id, subCategory: response.data.subCategory})
               }
               catch(error){
-                console.log("error from  getCategoryName--->", error.message)
+                if (!error.response) {
+                  sonnerToast.error("Network error. Please check your internet.")
+                } else if (error.response?.status === 404) {
+                  sonnerToast.error(error.response.data.message || "Error while loading the category specific products. Pleae try later")
+                } else {
+                  sonnerToast.error("Something went wrong! Please retry later.")
+                }
               }  
         }
         if(categoryType){
-          console.log("categoryType---->", categoryType)
           getCategoryName()
         }
     }, [categoryType])
-
-    const [popularProductsShowLabel, setPopularProductsShowLabel] = useState('See more')
-    const [morePopularProducts, setMorePopularProducts] = useState(0)
         
     const container = {
       hidden: { opacity: 0, height: 0 },
@@ -83,13 +87,10 @@ export default function FilterModule({filter, setFilter, rating, setRating, popu
     }
 
    const popularProductsHandler = (e, product)=>{
-        console.log(`Product ${e.target.checked ? 'checked' : 'unchecked'}--->`, product)
         if(e.target.checked){
-            console.log("Inside e.target.checked")
             setFilter({...filter, products: [...filter.products, product]})
         }
         if(!e.target.checked){
-            console.log("Inside e.target.unchecked")
             const updatedProducts = filter.products.filter(item=> item !== product)
             setFilter(filter=> (
                 {...filter, products: updatedProducts}
@@ -127,8 +128,6 @@ export default function FilterModule({filter, setFilter, rating, setRating, popu
           : [...filters.targetMuscles, muscle]
       }))
     }
-
-
 
 
     return (

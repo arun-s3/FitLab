@@ -35,7 +35,6 @@ export default function AddressManagementPage({editAddresses = false}){
     const [addressId, setAddressId] = useState(null)
 
     useEffect(()=> {
-        console.log("editAddresses----->", editAddresses)
         setPageLocation(location.pathname)
         if(location?.state?.address){
             const {type, _id, userId, __v, ...rest} = location.state.address
@@ -51,29 +50,19 @@ export default function AddressManagementPage({editAddresses = false}){
                 return {...addressData, type: radioCheckedAddressType}
             })
     },[radioCheckedAddressType])
-
-    useEffect(()=> {
-        if(addressData){
-            console.log("addressData--->", JSON.stringify(addressData))
-        }
-    },[addressData])
     
     useEffect(()=> {
         if(error){
-            console.log("Just after before toast!-->"+error)
             sonnerToast.error(error)
-            console.log("Just after error toast, resetting..")
             dispatch(resetStates())
         }
         if(addressCreated){
             sonnerToast.success("New Address registered successfully!") 
-            console.log("Just after error toast, resetting..")
             dispatch(resetStates())
             navigate('/account/addresses', {replace: true})
         }
         if(addressUpdated){
             sonnerToast.success("Address Updated successfully!")
-            console.log("Just after error toast, resetting..")
             dispatch(resetStates())
             navigate('/account/addresses', {replace: true})
         }
@@ -92,7 +81,6 @@ export default function AddressManagementPage({editAddresses = false}){
     const radioClickHandler = (e)=>{
         const type = e.target.id
         const checkStatus = radioCheckedAddressType === type
-        console.log("checkStatus-->", checkStatus)
         if(checkStatus){
             setradioCheckedAddressType('')
             return
@@ -109,8 +97,6 @@ export default function AddressManagementPage({editAddresses = false}){
     }
 
     const submitAddress = () => {
-        console.log("Inside submitAddress()--");
-        console.log("addressData----->", addressData)
     
         const optionalFieldNames = ["nickName", "landmark", "alternateMobile", "deliveryInstructions", "defaultAddress"];
         const requiredFields = Object.keys(addressData).filter(
@@ -119,26 +105,19 @@ export default function AddressManagementPage({editAddresses = false}){
         const missingRequiredFields = requiredFields.filter(
             (field) => !addressData[field] || addressData[field] === ""
         )
-        console.log(`Required Fields Length----> ${requiredFields.length} Required Fields--->, ${requiredFields}`)
         if (requiredFields.length < 9) {
-            console.log("Missing required fields:", missingRequiredFields)
             toast.error("Please enter all required fields!")
             return;
         }
     
         if (missingRequiredFields.length > 0 || Object.values(addressData).some((value) => value === undefined)) {
-            console.log("Undefined values found in addressData:", addressData)
             sonnerToast.error("Please check the fields and submit again!")
             return;
         }
-    
-        console.log("Inside else (no errors) of submitAddress()")
-        console.log("addressData now -->", JSON.stringify(addressData))
-        if(addressId) console.log("addressId------>", addressId)
+
         !editAddresses 
             ? dispatch(createNewAddress({ id: user._id, addressData }))
             : dispatch(editAddress({ id: user._id, addressId, addressData }))
-        console.log("Dispatched successfully!")
     }
     
 

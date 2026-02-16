@@ -6,7 +6,7 @@ import {motion, AnimatePresence} from 'framer-motion'
 import {Star, X}  from 'lucide-react'
 import {toast as sonnerToast} from 'sonner'
 import {format} from "date-fns"
-import axios from 'axios'
+import apiClient from '../../../Api/apiClient'
 
 import Header from '../../../Components/Header/Header'
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
@@ -73,9 +73,9 @@ export default function OrderHistoryPage(){
 
     const [openRefundModal, setOpenRefundModal] = useState({status: false, orderOrProduct: null})
 
-    const {orders, totalOrders, orderReturnRequested, canceledReturnRequest, loading, orderError} = useSelector(state=> state.order)
+    const {orders, totalOrders, canceledReturnRequest, loading, orderError} = useSelector(state=> state.order)
 
-    const {cart, productAdded, productRemoved, error, message} = useSelector(state=> state.cart)
+    const {productAdded, error} = useSelector(state=> state.cart)
 
     const dispatch = useDispatch()
 
@@ -84,12 +84,9 @@ export default function OrderHistoryPage(){
 
   useEffect(()=> {
     if(orders && totalOrders && totalPages && limit){
-      console.log(`totalPages------>${totalPages}, limit------>${limit}`)
       setTotalPages(Math.ceil(totalOrders/limit))
     }
-    console.log("showOrderDetailsModal--------------------->", showOrderDetailsModal)
   }, [orders, totalOrders, showOrderDetailsModal])
-  
 
   useEffect(()=> {
     setQueryDetails(query=> {
@@ -99,19 +96,12 @@ export default function OrderHistoryPage(){
 
   useEffect(()=> {
     if(Object.keys(queryDetails).length > 0){
-      console.log("queryDetails---->", JSON.stringify(queryDetails))
       dispatch( getOrders({queryDetails}) )
     }
   },[queryDetails])
 
   useEffect(()=> {
-    console.log("Fetched all the orders------>", orders)
-  },[orders])
-
-  useEffect(()=> {
       if(productAdded){
-        console.log("Product added to cart successfully!")
-        // setPackedupCart(cart)
         setIsCartOpen(true)
         dispatch(resetCartStates())
       }
@@ -132,11 +122,6 @@ export default function OrderHistoryPage(){
         dispatch(resetOrderStates())
       }
     }, [canceledReturnRequest])
-
-    useEffect(()=> {
-      console.log("showReviewForm--------------->", showReviewForm)
-      console.log("noShowRating--------------->", noShowRating)
-    }, [showReviewForm, noShowRating])
 
     const orderStatusStyles = [
       {status:'processing', textColor:'text-orange-500', bg:'bg-orange-500', lightBg:'bg-orange-50', border:'border-orange-300', shadow: '#fdba74'},
@@ -165,20 +150,15 @@ export default function OrderHistoryPage(){
     }
 
     const handleAddToCart = (productId)=> {
-        console.log("Inside handleAddToCart()--")
         dispatch( addToCart({productId, quantity}) )
-        console.log("Dispatched successfully")
     }
 
     const cancelOrReturnProduct = (e, productId, orderId, orderDate)=> {
-      console.log(`orderId---> ${orderId}, productId---> ${JSON.stringify(productId)}`)
       if(e.target.textContent.toLowerCase().includes('cancel')){
-        console.log("Opening the CancelForm..")
         setOpenCancelForm({type:'product', status:true, options: {productId: productId, orderId}, return: false},)
         // window.scrollTo( {top: productCancelFormRef.current.getBoundingClientRect().top, scrollBehavior: 'smooth'} )
         sonnerToast.warning("You are about to cancel the product!")
       }else{
-        console.log("Opening the ReturnForm..")
         const isReturnEligible = Date.now() <= new Date(orderDate).getTime() + returnWindowTime
         if(!isReturnEligible){
           sonnerToast.error("Sorry! Return requests are accepted within 30 days of purchase!", {duration: 4500})
@@ -190,7 +170,6 @@ export default function OrderHistoryPage(){
     }
 
     const preCancelTheOrder = (e, orderId)=> {
-      console.log("Opening the modal for cancelOrder...")
       setOpenCancelForm({type:'order', status:true, options: {orderId}})
       // window.scrollTo( {top: orderCancelFormRef.current.getBoundingClientRect().top, scrollBehavior: 'smooth'} )
     }
@@ -204,7 +183,6 @@ export default function OrderHistoryPage(){
         if(openSelectReasons.reason.trim()){
           orderCancelReason = orderCancelReason + openSelectReasons.reason.trim()
         }
-        console.log("orderCancelReason----->", orderCancelReason)
         setOpenSelectReasons(({status:false, reasonTitle:'', reason:''}))
         dispatch( cancelOrder({orderId: cancelThisOrderId, orderCancelReason}) )
         setCancelThisOrderId(null)
@@ -227,7 +205,6 @@ export default function OrderHistoryPage(){
     const submitReason = (formFor)=> {
 
       if(formFor === 'product'){
-        console.log("Cancelling the Product..")
         let productCancelReason = '';
         if(openSelectReasons.reasonTitle.trim()){
           productCancelReason = openSelectReasons.reasonTitle.trim() + '.'
@@ -240,12 +217,10 @@ export default function OrderHistoryPage(){
           dispatch(cancelOrderProduct({orderId: openCancelForm.options.orderId, productId: openCancelForm.options.productId._id, productCancelReason}))
           setOpenCancelForm({type:'', status:false, options:{}})
         }else{
-          console.log('openSelectReasons inside submitReason()--->', openSelectReasons)
           setOpenRefundModal({status: true, orderOrProduct: 'product'})
         }
       }
       if(formFor === 'order'){
-        console.log("Cancelling the Order..")
         setOpenCancelConfirmModal(true)
         setCancelThisOrderId(openCancelForm.options.orderId)
         setOpenCancelForm({type:'', status:false, options:{}})
@@ -265,12 +240,6 @@ export default function OrderHistoryPage(){
     }
 
     const initiateReturnProduct = async (images = [])=> {
-      console.log('openSelectReasons--->', openSelectReasons)
-      console.log('images--->', images)
-      console.log(`orderId---> ${openCancelForm.options.orderId}, productId---> ${openCancelForm.options.productId}, 
-          returnType---> ${openRefundModal.orderOrProduct}`)
-      console.log("Inside initiateReturnProduct()..")
-
       const formData = new FormData()
       formData.append('orderId', openCancelForm.options.orderId)
       formData.append('returnType', openRefundModal.orderOrProduct)
@@ -305,7 +274,6 @@ export default function OrderHistoryPage(){
     const confirmCancelReturn = ()=> {
       if(cancelReturnReq.cancelType){
         const returnDetails = {orderId: cancelReturnReq.orderId, productId: cancelReturnReq.productId._id, returnType: cancelReturnReq.cancelType}
-        console.log('returnDetails------------>', returnDetails)
         dispatch(cancelReturnRequest({returnDetails}))
         // setCancelReturnReq({orderId: null, productId: null, cancelType: null})
       }
@@ -315,14 +283,11 @@ export default function OrderHistoryPage(){
         try{
           let response;
           if(isTestimony){
-            response = await axios.post(`${baseApiUrl}/testimony/add`, {...newReview}, { withCredentials: true })
+            response = await apiClient.post(`${baseApiUrl}/testimony/add`, {...newReview})
           }else{
-            response = await axios.post(`${baseApiUrl}/review/add`, {productId: id, ...newReview},
-                { withCredentials: true }
-              )
+            response = await apiClient.post(`${baseApiUrl}/review/add`, {productId: id, ...newReview})
           }
-          console.log("handleAddReview response----->", response)
-          if(response.data.success){
+          if(response?.data?.success){
             sonnerToast.success(`Your ${showReviewForm.testimony ? 'testimony' : 'review'} has been submitted successfully!`)
             setShowReviewForm({ status: false, orderId: null, productId: null, testimony: false })
             setNoShowRating(ids=> ([...ids, id]))
@@ -330,9 +295,10 @@ export default function OrderHistoryPage(){
           }
         }
         catch(error){
-          console.log(error)
-          if (error.response && (error.response.status === 400 || error.response.status === 404)) {
-            sonnerToast.error(error.response.data.message || "Error while submitting!")
+          if (!error.response) {
+            sonnerToast.error("Network error. Please check your internet.")
+          } else if (error.response.status === 400 || error.response.status === 404) {
+            sonnerToast.error(error.response.data.message || "Error while submitting. Please try later!")
           }else{
             sonnerToast.error("Internal Server Error")
           }

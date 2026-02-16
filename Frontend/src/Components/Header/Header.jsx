@@ -1,19 +1,13 @@
 import React, {useState, useEffect, useContext} from 'react'
 import './Header.css'
 import {Link, useNavigate, useLocation} from 'react-router-dom'
-import {useSelector, useDispatch} from 'react-redux'
+import {useSelector} from 'react-redux'
 import {motion} from "framer-motion"
 
-
-import {IoIosSearch} from "react-icons/io"
-import {CiUser} from "react-icons/ci"
 import {IoCartOutline} from "react-icons/io5"
-import {MdFavoriteBorder} from "react-icons/md"
-import {HiOutlineMenu, HiOutlineX} from "react-icons/hi"
 import { MdSportsGymnastics } from "react-icons/md"
-import {User, Heart, Headset, Store, Activity, ShoppingBag, CreditCard, Bot, LogIn} from "lucide-react"
+import {User, Heart, Headset, Store, Activity, Bot, LogIn} from "lucide-react"
 
-import Logo from '../Logo/Logo'
 import UserHead from '../UserHead/UserHead'
 import NotificationBell from './NotificationBell'
 import VideoCallCommonModal from '../../Pages/User/VideoCallCommonModal/VideoCallCommonModal'
@@ -23,7 +17,6 @@ import CartSidebar from '../../Components/CartSidebar/CartSidebar'
 import TextChatBox from '../../Pages/User/TextChatBox/TextChatBox'
 import CoachPlus from '../../Pages/User/Coach+/Coach+'
 import {SocketContext} from '../../Components/SocketProvider/SocketProvider'
-
 
 
 export default function Header({lighterLogo, customStyle, goToShopByCategorySec, currentPageChatBoxStatus = false,
@@ -40,7 +33,6 @@ export default function Header({lighterLogo, customStyle, goToShopByCategorySec,
     const {cart} = useSelector(state=> state.cart)    
 
     const navigate = useNavigate()
-    const dispatch = useDispatch()
     const location = useLocation()
 
     const {isAdminOnline, isConnected, notifications, setNotifications, markNotificationRead, markAllNotificationRead,
@@ -57,7 +49,6 @@ export default function Header({lighterLogo, customStyle, goToShopByCategorySec,
 
     const jumpToShopByCategorySec = ()=> {
         if(location.pathname !== '/' ){
-            console.log("Navigating now...")
             setTimeout(() => navigate('/', { state: { scrollTo: "shopByCategories" }}), 0)
         }else{
             goToShopByCategorySec()
@@ -86,8 +77,8 @@ export default function Header({lighterLogo, customStyle, goToShopByCategorySec,
             style={customStyle}
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}>
-            {/* <Logo/> */}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+        >
             <motion.div
                 initial={{ opacity: 0, x: -30 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -98,7 +89,6 @@ export default function Header({lighterLogo, customStyle, goToShopByCategorySec,
                         alt='Fitlab'
                         className='h-[5rem] '
                     />{" "}
-                    {/*mt-[10px]*/}
                 </Link>
             </motion.div>
 
@@ -173,9 +163,6 @@ export default function Header({lighterLogo, customStyle, goToShopByCategorySec,
                         transition: { staggerChildren: 0.1, delayChildren: 1 },
                     },
                 }}>
-                {/* <i> 
-                    <IoIosSearch className='h-[23px] w-[23px] lg:h-[20px] lg:w-[20px] xl:h-[22px] xl:w-[22px] s-xl:h-[23px] s-xl:w-[23px]'/>
-                </i> */}
                 <i onClick={() => navigate("/account")}>
                     <User className='h-[22px] w-[22px] lg:h-[20px] lg:w-[20px] xl:w-[22px] xl:h-[21px] x-xl:w-[21px] x-xl:h-[22px]' />
                 </i>
@@ -184,7 +171,6 @@ export default function Header({lighterLogo, customStyle, goToShopByCategorySec,
                 </i>
                 <i className='relative' onClick={() => setOpenChatBox()} onMouseEnter={() => openCartSidebar()}>
                     <IoCartOutline className='h-[23px] w-[23px] lg:h-[20px] lg:w-[20px] xl:h-[22px] xl:w-[22px] x-xl:h-[23px] x-xl:w-[23px]' />
-                    {/* <ShoppingCart className='w-[20px] h-[20px]'/> */}
                     {cart?.products && cart.products.length > 0 && (
                         <span
                             className={`absolute top-[-32%] left-[45%] ${cart.products.length > 100 && "px-[12px] py-[10px]"}
@@ -195,7 +181,6 @@ export default function Header({lighterLogo, customStyle, goToShopByCategorySec,
                     )}
                 </i>
                 <i onClick={() => navigate("/wishlist")}>
-                    {/* <MdFavoriteBorder style={{fontSize:'25px'}}/> */}
                     <Heart className='w-[20px] h-[20px] lg:w-[19px] lg:h-[19px] x-xl:h-[20px] x-xl:w-[20px]' />
                 </i>
                 <i onClick={() => setopenCoach((status) => !status)} className='inline-block lg:hidden'>

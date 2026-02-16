@@ -25,15 +25,12 @@ export default function WalletCard({children}) {
 
     useEffect(()=> {
       if(safeWallet && Object.keys(safeWallet).length > 0){
-        console.log("Got safeWallet--->", safeWallet)
         setWallet(safeWallet)
         const decryptedWallet = decryptData(safeWallet)
-        console.log("decryptedWallet--->", decryptedWallet)
         const hiddenAcNo = "FTL **** ****" + " " + decryptedWallet?.accountNumber?.slice(11)
         setHiddenAccountNo(hiddenAcNo)
         }
       if(walletMessage && walletMessage?.includes('created')){
-        console.log('Its a First time user!')
         setFirstTimeUser(true)
         setMessage("Welcome to FitLab Wallet! Your unique account number:")
         sonnerToast.success("A new FitLab Account has been created for you!")
@@ -41,8 +38,6 @@ export default function WalletCard({children}) {
     },[safeWallet, walletMessage])
 
     useEffect(()=> {
-      console.log('message--->', message)
-      console.log('firstTimeUser--->', firstTimeUser)
       if(message){
         if(firstTimeUser && message && message.toLowerCase().includes('welcome to fitlab wallet')){
           setTimeout(()=> setMessage(''), 4000)
@@ -52,7 +47,6 @@ export default function WalletCard({children}) {
 
     const formatAccountNumber = (number)=> {
       const numbersOnly = number.slice(3)
-      console.log("Acc no now--->",numbersOnly)
       let num = ''
       for(let i=0; i<numbersOnly.length; i++){
         if( (i+1) % 4 === 0 && i+1 !== numbersOnly.length ){

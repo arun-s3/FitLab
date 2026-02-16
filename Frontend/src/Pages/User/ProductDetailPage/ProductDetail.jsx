@@ -26,13 +26,11 @@ export default function ProductDetail({product = null, quantity, setQuantity, on
 
     useEffect(()=> {
       if(product && Object.keys(product).length > 0){
-        console.log("product[`${product.variantType}s`][0]---->", product[`${product.variantType}s`][0])
         
         if(!product?.mainProduct){
           setSelectedVariantValue(product[`${product.variantType}s`][0])
         }else{
           const requiredVariantIndex = product.mainProduct.variants.findIndex(variant=> variant._id.toString() === product._id.toString()) + 1
-          console.log("requiredVariantIndex--->", requiredVariantIndex )
           setSelectedVariantValue(product[`${product.variantType}s`][requiredVariantIndex])
           setVariantValueIndex(requiredVariantIndex)
         }

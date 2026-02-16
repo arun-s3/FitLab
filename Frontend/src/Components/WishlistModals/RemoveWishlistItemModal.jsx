@@ -4,8 +4,7 @@ import {useDispatch} from 'react-redux'
 import { X, AlertTriangle } from "lucide-react"
 
 import useModalHelpers from '../../Hooks/ModalHelpers'
-import {removeProductFromList, resetWishlistStates} from '../../Slices/wishlistSlice'
-
+import {removeProductFromList} from '../../Slices/wishlistSlice'
 
 
 export default function RemoveWishlistItemModal({ isOpen, onClose, product, listName, forWishlistDisplay, removeProductFromWishlist}){
@@ -18,12 +17,9 @@ export default function RemoveWishlistItemModal({ isOpen, onClose, product, list
   useModalHelpers({open: isOpen, onClose, modalRef})
 
   const handleRemoveListProductConfirm = ()=> {
-    console.log(`Removing ${product.title} from ${listName}`)
     if(removeProductFromWishlist){
-      console.log("removeProductFromList--->", removeProductFromWishlist)
       dispatch(removeProductFromList( {listName, productId: removeProductFromWishlist } ))
     }else{
-      console.log("Inside else removeProductFromList")
       dispatch(removeProductFromList( {listName, productId: product._id } ))
     }
   }

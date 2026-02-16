@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 
 import { ChevronLeft, ChevronRight, X } from "lucide-react"
-import axios from 'axios'
+import apiClient from "../../Api/apiClient"
 
 import {capitalizeFirstLetter} from '../../Utils/helperFunctions'
 
@@ -17,16 +17,12 @@ export default function OfferCategoryModal({ categories, onClose }) {
 
     const getProductsCountUnderCategory = async()=> { 
         try { 
-          const response = await axios.get(`${baseApiUrl}/admin/products/category/count/${categories[currentIndex]._id}`,{ withCredentials: true })
+          const response = await apiClient.get(`${baseApiUrl}/admin/products/category/count/${categories[currentIndex]._id}`)
           if(response.status === 200){
-            console.log("response.data.productCount----------->", response.data.productCount)
             setProductCount(response.data.productCount)
           }
-          if(response.status === 400 || response.status === 404){
-            console.log("Error---->", error.response.data.message)
-          }
         }catch (error) {
-          console.error("Error while getting product count", error.message)
+            console.error(error)
         }
     }
 

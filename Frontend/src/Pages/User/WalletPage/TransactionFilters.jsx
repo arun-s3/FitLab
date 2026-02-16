@@ -85,15 +85,9 @@ export default function TransactionFilters({queryOptions, setQueryOptions, close
 
     const radioClickHandler = (e, type)=>{
       const value = e.target.value
-      console.log("type-->", type)
-      console.log("value---->", value)
       const checkStatus = queryOptions.type === value
-      console.log("checkStatus-->", checkStatus)
-      if(checkStatus){
-          console.log("returning..")
-          return
-      }else{
-          console.log("Checking radio..")
+      if(checkStatus) return
+      else{
           setQueryOptions(query=> {
             return {...query, type: value}
           })

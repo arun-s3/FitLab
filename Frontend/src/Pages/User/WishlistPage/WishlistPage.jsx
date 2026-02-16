@@ -12,7 +12,7 @@ import ProductsDisplay from '../../../Components/ProductsDisplay/ProductsDisplay
 import ProductListingTools from '../../../Components/ProductListingTools/ProductListingTools'
 import WishlistModal from './Modals/WishlistModal'
 import ListDeletionModal from './Modals/ListDeletionModal'
-import {getAllWishlistProducts, getUserWishlist, searchList} from '../../../Slices/wishlistSlice'
+import {getAllWishlistProducts, getUserWishlist, searchList, resetWishlistStates} from '../../../Slices/wishlistSlice'
 import {getTheCart} from '../../../Slices/cartSlice'
 import CartSidebar from '../../../Components/CartSidebar/CartSidebar'
 import AuthPrompt from '../../../Components/AuthPrompt/AuthPrompt'
@@ -56,7 +56,7 @@ export default function WishlistPage(){
     const [isCartOpen, setIsCartOpen] = useState(false)
 
     const {cart, productAdded, productRemoved, error, message} = useSelector(state=> state.cart) 
-    const {wishlist, wishlistProducts} = useSelector(state=> state.wishlist) 
+    const {wishlist, wishlistProducts, wishlistError} = useSelector(state=> state.wishlist) 
     const {user} = useSelector((state)=> state.user)
 
     const dispatch = useDispatch()
@@ -77,23 +77,24 @@ export default function WishlistPage(){
     },[])
 
     useEffect(()=> {
-        console.log("wishlist--------->", wishlist)
         dispatch( getAllWishlistProducts({queryOptions}))
     }, [wishlist])
 
+    useEffect(()=> {
+        sonnerToast.error(wishlistError)
+        dispatch(resetWishlistStates())
+    }, [wishlistError])
+
     useEffect(()=>{
-        console.log("SORTS-->", JSON.stringify(sorts))
         setQueryOptions(queryOptions=> (
             {...queryOptions, listName: currentList, sort: sorts, page: currentPage, limit}
         ))
     },[sorts, currentPage, limit])
 
     useEffect(()=>{
-        console.log('WISHLIST OUERYOPTIONS--------->', JSON.stringify(queryOptions))
         if(Object.keys(queryOptions).length){
             dispatch( getAllWishlistProducts({queryOptions}))
         }
-        console.log('updateListDetails--->', updateListDetails)
     },[queryOptions, updateListDetails])
 
     useEffect(()=> {
@@ -127,13 +128,10 @@ export default function WishlistPage(){
 
     const searchHandler = (e)=> {
         const searchData = e.target.value
-        console.log('searchData--->', searchData)
         if(searchData.trim() !== ''){
-            console.log("Getting searched lists--")
             debouncedSearch(searchData)
         } 
         else{
-            console.log("Getting all lists--")
             debouncedSearch.cancel()
             dispatch(getUserWishlist())
         } 

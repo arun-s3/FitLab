@@ -6,7 +6,6 @@ export default function FitnessLayout({children}) {
 
   return (
     <div className="min-h-screen">
-      {/* Background accent elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <motion.div
           className="absolute top-0 right-0 w-96 h-96 bg-blue-300 rounded-full blur-3xl opacity-15"
@@ -22,14 +21,6 @@ export default function FitnessLayout({children}) {
 
       <div className="relative z-10">
         <div className="max-w-7xl mx-auto px-4 py-8 pt-4">
-          {/* <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mb-8"
-          >
-            <p className="text-gray-600 text-lg">Track your progress, crush your goals</p>
-          </motion.div> */}
 
           <div className="pb-8">{children}</div>
         </div>

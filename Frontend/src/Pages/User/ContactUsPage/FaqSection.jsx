@@ -3,7 +3,7 @@ import { motion } from "framer-motion"
 
 import {ChevronDown} from "lucide-react"
 
-import FaqDatas from "../../../../data/FaqDatas"
+import FaqDatas from "../../../Data/FaqDatas"
 
 
 export default function FaqSection(){
@@ -23,7 +23,6 @@ export default function FaqSection(){
 
   useEffect(()=> {
     if(faqData && activeCategory){
-        console.log("faqData[activeCategory]----->", faqData[activeCategory])
         setCurrentFaqCategory(faqData[activeCategory])
     }
   }, [faqData, activeCategory])

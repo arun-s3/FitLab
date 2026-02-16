@@ -4,7 +4,7 @@ import {motion, AnimatePresence} from 'framer-motion'
 
 import { CloudLightningIcon, X, IndianRupee, AlertCircle, CheckCircle, HelpCircle, Info } from 'lucide-react'
 import {toast as sonnerToast} from 'sonner'
-import axios from 'axios'
+import apiClient from '../../../../Api/apiClient'
 
 import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js"
 
@@ -67,14 +67,7 @@ export default function AutoRechargeModal({ isOpen, onClose, onSave, currentSett
 
   const confirmStripeCardSetup = async(clientSecret)=> {
     if (!stripe || !elements) return
-    console.log("Inside confirmStripeCardSetup....")
-    console.log("stripe:", stripe);
-    console.log("elements:", elements);
     const cardElement = elements?.getElement(CardElement);
-
-    console.log("stripe loaded:", !!stripe);
-    console.log("elements loaded:", !!elements);
-    console.log("card element:", cardElement);
 
     let paymentMethodId
     const result = await stripe.confirmCardSetup(clientSecret, {
@@ -87,18 +80,19 @@ export default function AutoRechargeModal({ isOpen, onClose, onSave, currentSett
       return false
     }
     paymentMethodId = result.setupIntent.payment_method
-    console.log("paymentMethodId.......", paymentMethodId)
     try{
-      const response = await axios.post(`${baseApiUrl}/wallet/save-stripe-settings`, {paymentMethodId}, { withCredentials: true })
-      console.log("confirmCardSetup response----->", response)
+      const response = await apiClient.post(`${baseApiUrl}/wallet/save-stripe-settings`, {paymentMethodId})
       if(response.data.success){
         sonnerToast.success("Auto-recharge settings updated!")
         return true
       }
     }
     catch(error){
-      console.log("Error inside confirmCardSetup--->", error.message)
-      sonnerToast.error("Error while saving card. Try after sometime!")
+        if (!error.response) {
+          sonnerToast.error("Network error while saving the saving the card. Please check your internet and try again!")
+        } else {
+          sonnerToast.error("Internal server error. Please try again later!")
+        }
       return false
     }
   }
@@ -113,7 +107,6 @@ export default function AutoRechargeModal({ isOpen, onClose, onSave, currentSett
       }, 2000)
     }
     if(walletSettingsUpdated && submitted && stripeClientSecret){
-       console.log("Intent submitted....")
         const setup = async () => {
           const didCardSetup = await confirmStripeCardSetup(stripeClientSecret)
 

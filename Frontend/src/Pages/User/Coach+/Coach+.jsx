@@ -20,11 +20,6 @@ export default function CoachPlus({autoOpen, onCloseChat}) {
 
   const {isConnected, coachMessages, newCoachMessage, isCoachLoading, setIsCoachLoading, coachError, 
         handleSendMessageToCoach, handleUserTypingForCoach} = useContext(SocketContext)
-
-
-  useEffect(()=> {
-    console.log("newCoachMessage--->", newCoachMessage)
-  },[newCoachMessage])
   
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -50,7 +45,6 @@ export default function CoachPlus({autoOpen, onCloseChat}) {
   useEffect(()=> {
     if(autoOpen){
       setIsOpen(true)
-      console.log("autoOpen--->", autoOpen)
     }
   }, [autoOpen])
 

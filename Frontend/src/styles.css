@@ -2552,10 +2552,6 @@ select {
   display: grid;
 }
 
-.contents {
-  display: contents;
-}
-
 .\!hidden {
   display: none !important;
 }
@@ -5439,11 +5435,6 @@ select {
   border-color: rgb(156 163 175 / var(--tw-border-opacity));
 }
 
-.border-gray-500 {
-  --tw-border-opacity: 1;
-  border-color: rgb(107 114 128 / var(--tw-border-opacity));
-}
-
 .border-gray-700 {
   --tw-border-opacity: 1;
   border-color: rgb(55 65 81 / var(--tw-border-opacity));
@@ -7522,11 +7513,6 @@ select {
 .px-\[5px\] {
   padding-left: 5px;
   padding-right: 5px;
-}
-
-.px-\[60px\] {
-  padding-left: 60px;
-  padding-right: 60px;
 }
 
 .px-\[6px\] {

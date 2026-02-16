@@ -12,7 +12,6 @@ export default function AdminRoutesWrapper(){
     useEffect(()=> {
         const syncLogout = (e)=> {
             if (e.key === "completeLogout"){
-                console.log("Clearing every redux states and local, session storages across all tabs...")
                 dispatch(resetStore())
                 localStorage.clear()
                 sessionStorage.clear()

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react"
 import { motion } from "framer-motion"
 
 import {Bot} from "lucide-react"
-import axios from 'axios'
+import apiClient from "../../Api/apiClient"
 
 import {CustomHashLoader} from '../Loader/Loader'
 
@@ -82,64 +82,50 @@ export default function AiInsightCards({insightsTemplates, requiredSourceDatas, 
     let aiResponseTopics = Object.keys(aiResponse)
 
     if(excludeAndReturnItemTitles && !hasReturnedExclusive.current){
-        // onReturnExclusiveDatas(aiResponse[excludeAndReturnItemTitles])
         const excludedDatas = aiResponseTopics.reduce((accObj, topic)=> {
           if(excludeAndReturnItemTitles.some(title=> title === topic)){
             accObj[topic] = aiResponse[topic]
           }
           return accObj
         }, {})
-        console.log("excludedDatas from insights----->", excludedDatas) 
         onReturnExclusiveDatas(excludedDatas)
         hasReturnedExclusive.current = true
         aiResponseTopics = aiResponseTopics.filter(topic=> !excludeAndReturnItemTitles.includes(topic))
     }
 
-    console.log(`aiResponseTopics of ${sectionTitle}----------->`, aiResponseTopics)
-    console.log(`insightsTemplates inside createInsightCards() of ${sectionTitle}----------->`, insightsTemplates)
-
     const insightsDatas = aiResponseTopics.map(topic=> {
       const insightTemplate = insightsTemplates.find(template=> template.title === topic)
-      console.log("insightTemplate found---->", insightTemplate)
-      if (!insightTemplate) {
-        console.warn(`No template found for topic: ${topic}`)
-        return 
-      }
       return {...insightTemplate, description: aiResponse[topic]}
     })
 
-    console.log(`insightsDatas of ${sectionTitle}----------->`, insightsDatas)
-
     const filteredInsightData = insightsDatas.filter(data=> data?.title)
-    console.log(`filteredInsightData of ${sectionTitle}----------->`, filteredInsightData)
     setInsights(filteredInsightData)
   }
 
   const getAiInsights = async()=> {
-      console.log("Inside getAiInsights...") 
       setLoading(true)
       try { 
-        const AiInsightResponse = await axios.post(`${baseApiUrl}/ai/analyze`, {analysisRequirement: requiredSourceDatas}, { withCredentials: true})
+        const AiInsightResponse = await apiClient.post(`${baseApiUrl}/ai/analyze`, {analysisRequirement: requiredSourceDatas})
         if(AiInsightResponse.status === 200){
-          console.log("AiInsightResponse.data.aiResponse----------->", AiInsightResponse.data.aiResponse)
           createInsightCards(AiInsightResponse.data.aiResponse)
         }
-        if(AiInsightResponse.status === 404 || AiInsightResponse.status === 502){
-            sonnerToast.error(error.response.data.message)
-            setError(error.response.data.message)
-        } 
       }catch (error) {
-        console.error("Error while fetching insights", error.message)
-        setError("Something went wrong while finding your health profiles! Please check your network and retry later")
+        if (!error.response) {
+          sonnerToast.error("Network error. Please check your internet.")
+          setError("Network error. Please check your internet.")
+        } else if (error.response?.status === 404 || error.response?.status === 502) {
+          sonnerToast.error(error.response.data.message || "Error while loading the insights")
+          setError(error.response.data.message || "Error while loading the insights")
+        } else {
+          sonnerToast.error("Something went wrong! Please retry later!")
+          setError("Something went wrong! Please retry later!")
+        }
       }finally{
         setLoading(false)
       }
   }
 
   useEffect(()=> {
-    console.log(`insightsTemplates of ${sectionTitle}---------->`,insightsTemplates)
-    console.log(`existingAiInsights of ${sectionTitle}---------->`,existingAiInsights)
-    console.log(`requiredSourceDatas of ${sectionTitle}---------->`,requiredSourceDatas)
     if(insightsTemplates && insightsTemplates.length > 0 && existingAiInsights && !hasCreatedCards.current){
         hasCreatedCards.current = true  
         createInsightCards(existingAiInsights)
@@ -148,14 +134,6 @@ export default function AiInsightCards({insightsTemplates, requiredSourceDatas, 
       getAiInsights()
     }
   }, [insightsTemplates, existingAiInsights, requiredSourceDatas])
-
-  useEffect(()=> {
-    console.log(`requiredSourceDatas of ${sectionTitle}---------->`,requiredSourceDatas)
-  }, [requiredSourceDatas])
-
-  useEffect(()=> {
-    console.log(`insights of ${sectionTitle}----------->`, insights)
-  }, [insights])
 
   if (sourceDatasLoading || loading) {
     return (

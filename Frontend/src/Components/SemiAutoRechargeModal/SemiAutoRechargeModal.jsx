@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 import { Zap, X, CheckCircle2, AlertCircle } from 'lucide-react'
 import {toast as sonnerToast} from 'sonner'
-import axios from 'axios'
+import apiClient from "../../Api/apiClient"
 
 import {getOrCreateWallet} from '../../Slices/walletSlice'
 
@@ -38,33 +38,35 @@ export default function SemiAutoRechargeModal({ isOpen,  onClose, walletAmount, 
   
   const handleWalletRecharge = async (amount) => {
     try {
-      const response = await axios.post(`${baseApiUrl}/payment/razorpay/order`, { amount }, { withCredentials: true })
+      const response = await apiClient.post(`${baseApiUrl}/payment/razorpay/order`, { amount })
       if(response.status === 200){
-        console.log("verifiedData --->", response.data.data)
         await handleRazorpayRechargeVerification(response.data.data)
       }
     } catch (error) {
-      console.log(error)
-      sonnerToast.error("Could not initiate recharge")
+        if (!error.response) {
+          sonnerToast.error("Could not initiate recharge due to network error. Please check your internet.")
+        } else {
+          sonnerToast.error("Internal server error! Please retry later.")
+        }
     }
   }
   
   const getRazorpayKey = async()=> {
       let response
       try{
-            response = await axios.get(`${baseApiUrl}/payment/razorpay/key`, { withCredentials: true })
-          }
+            response = await apiClient.get(`${baseApiUrl}/payment/razorpay/key`)
+            return response.data.key
+        }
       catch(error){
-            console.log(error)
             sonnerToast.error("Something went wrong. Please try again after sometime!")
-          }
-      console.log("Razorpay key --->", response.data.key)
-      return response.data.key
+            return null
+        }
+
   }
   
   const handleRazorpayRechargeVerification = async (data) => {
     const razorpayKey = await getRazorpayKey()
-    console.log("order_id --->", data.id)
+    if(!razorpayKey) return
     
     const options = {
       key: razorpayKey,
@@ -79,36 +81,31 @@ export default function SemiAutoRechargeModal({ isOpen,  onClose, walletAmount, 
         }
       },
       handler: async (response) => {
-        console.log("RAZORPAY HANDLER RESPONSE --->", response)
         try {
-          const verifiedData = await axios.post(
+          const verifiedData = await apiClient.post(
             `${baseApiUrl}/payment/razorpay/verify`,
             {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
               amount: data.amount
-            },
-            { withCredentials: true }
+            }
           )
-          console.log("verifiedData --->", verifiedData)
           if (verifiedData.status === 200) {
               const razorpayPaymentId = response.razorpay_order_id
-              const rechargeResponse  = await axios.post(`${baseApiUrl}/wallet/recharge/razorpay`, {amount: data.amount, razorpayPaymentId}, { withCredentials: true })
+              const rechargeResponse  = await apiClient.post(`${baseApiUrl}/wallet/recharge/razorpay`, {amount: data.amount, razorpayPaymentId})
               if(rechargeResponse.status === 200){
                 sonnerToast.success("Auto-recharge successful!")
-                console.log("Dispatching getOrCreateWallet---->")
                 dispatch(getOrCreateWallet())
                 onRecharged()
               }
-          } else {
-            sonnerToast.error("Recharge verification failed")
-             onClose()
-          }
-        } catch (err) {
-          console.log(err);
-          sonnerToast.error("Unexpected error. Try again!")
-          onClose()
+          } 
+        } catch (error) {
+            if (!error.response) {
+              sonnerToast.error("Recharge verification failed due to network error. Please check your internet.")
+            } 
+            else sonnerToast.error("Recharge verification failed due to server issues. Please try later!")
+            onClose()
         }
       },
       theme: {
@@ -116,7 +113,6 @@ export default function SemiAutoRechargeModal({ isOpen,  onClose, walletAmount, 
       }
     }
     
-    console.log("Razorpay Checkout Options -->", options)
     const razorpayWindow = new window.Razorpay(options)
     razorpayWindow.open()
   }
@@ -152,7 +148,7 @@ export default function SemiAutoRechargeModal({ isOpen,  onClose, walletAmount, 
 
   const skipRecharge = async()=> {
       try{
-            const response = await axios.post(`${baseApiUrl}/wallet/recharge/skip`, {}, { withCredentials: true })
+            const response = await apiClient.post(`${baseApiUrl}/wallet/recharge/skip`, {})
             if(response.status === 200){
                 sonnerToast.success(
                   "Auto-recharge skipped!", 
@@ -164,9 +160,8 @@ export default function SemiAutoRechargeModal({ isOpen,  onClose, walletAmount, 
               }
           }
       catch(error){
-            console.log(error)
             sonnerToast.error("Something went wrong. Please try again after sometime!")
-          }
+        }
       onClose()
   }
 

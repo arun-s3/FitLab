@@ -7,6 +7,7 @@ const isLogin = async (req, res, next) => {
         console.log("Inside isLogin middeware...")
         const token = req.cookies?.accessToken
         if (!token) {
+            console.log("No accessToken found inside cookie")
             return res.status(401).json({ message: "Unauthorized" })
         }
 
@@ -14,11 +15,13 @@ const isLogin = async (req, res, next) => {
         try {
             decoded = verifyAccessToken(token)
         } catch (err) {
+            console.log("Cannot decode...Access token expired")
             return res.status(401).json({ message: "Access token expired" })
         }
 
         const currentUser = await User.findById(decoded.userId).select("-password")
         if (!currentUser) {
+            console.log("currentUser--->", currentUser)
             return res.status(401).json({ message: "User not found" })
         }
 

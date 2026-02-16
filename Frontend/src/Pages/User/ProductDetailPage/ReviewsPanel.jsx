@@ -1,7 +1,7 @@
 import React,{useState, useEffect, useRef} from "react"
 import { motion } from "framer-motion"
 
-import axios from 'axios'
+import apiClient from '../../../Api/apiClient'
 import {toast as sonnerToast} from 'sonner'
 
 import ReviewsStats from "./ReviewStats"
@@ -33,7 +33,7 @@ export default function ReviewsPanel({ productId, productRating, totalReviews })
 
   async function loadReviews(){  
     try{ 
-      const response = await axios.get(`${baseApiUrl}/review/${productId}?sort=${sortBy}&page=${currentPage}`, { withCredentials: true })
+      const response = await apiClient.get(`${baseApiUrl}/review/${productId}?sort=${sortBy}&page=${currentPage}`)
       if(response.data.success){
         setReviews(response.data.reviews)
         setRating(response.data.productAvgReview)
@@ -42,7 +42,7 @@ export default function ReviewsPanel({ productId, productRating, totalReviews })
       }
     }
     catch(error){
-      console.log('Error inside loadReviews()--->', error.message)
+        sonnerToast.error("Error while loading the reviews.")
     }
   }
 
@@ -52,7 +52,6 @@ export default function ReviewsPanel({ productId, productRating, totalReviews })
 
   useEffect(()=> {
     if(reviews && totalReviews && totalPages && limit){
-      console.log(`totalPages------>${totalPages}, limit------>${limit}`)
       loadReviews()
       setTotalPages(Math.ceil(totalReviews/limit))
     }
@@ -78,19 +77,19 @@ export default function ReviewsPanel({ productId, productRating, totalReviews })
   const handleAddReview = async(newReview) => {
     setShowForm(false)
       try{
-        const response = await axios.post(`${baseApiUrl}/review/add`, {productId, ...newReview}, { withCredentials: true })
-        console.log("handleAddReview response----->", response)
-        if(response.data.success){
+        const response = await apiClient.post(`${baseApiUrl}/review/add`, {productId, ...newReview})
+        if(response?.data?.success){
           sonnerToast.success("Your review has been submitted successfully!")
           loadReviews()
         }
       }
       catch(error){
-        console.log(error)
-        if (error.response && (error.response.status === 400 || error.response.status === 404)) {
-          sonnerToast.error(error.response.data.message || "Error while submitting!")
-        }else{
-          sonnerToast.error("Internal Server Error")
+        if (!error.response) {
+          sonnerToast.error("Network error. Please check your internet.")
+        } else if (error.response.status === 400 || error.response.status === 404) {
+          sonnerToast.error(error.response.data.message || "Error while submitting your review. Please try again later!")
+        } else{
+          sonnerToast.error("Internal server error")
         }
       }
   }
@@ -108,20 +107,19 @@ export default function ReviewsPanel({ productId, productRating, totalReviews })
    const handleEditReview = async(review) => {
     setShowForm(false)
       try{
-        console.log("Inside handleEditReview() and review----->", review)
-        const response = await axios.post(`${baseApiUrl}/review/update/${review._id}`, {productId, ...review}, { withCredentials: true })
-        console.log("handleEditReview response----->", response)
+        const response = await apiClient.post(`${baseApiUrl}/review/update/${review._id}`, {productId, ...review})
         if(response.data.success){
           sonnerToast.success("Your review has been updated successfully!")
           loadReviews()
         }
       }
       catch(error){
-        console.log(error)
-        if (error.response && (error.response.status === 400 || error.response.status === 404)) {
-          sonnerToast.error(error.response.data.message || "Error while submitting!")
-        }else{
-          sonnerToast.error("Internal Server Error")
+        if (!error.response) {
+          sonnerToast.error("Network error. Please check your internet.")
+        } else if (error.response.status === 400 || error.response.status === 404) {
+          sonnerToast.error(error.response.data.message || "Error while updating your review. Please try again later!")
+        } else{
+          sonnerToast.error("Internal server error")
         }
       }
    }

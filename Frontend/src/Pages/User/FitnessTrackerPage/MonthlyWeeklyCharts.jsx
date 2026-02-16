@@ -4,8 +4,8 @@ import { motion } from "framer-motion"
 import {LineChart, Line, BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell, XAxis, YAxis, 
   CartesianGrid, Tooltip, ResponsiveContainer} from "recharts"
 
-import axios from 'axios'
 import {toast as sonnerToast} from 'sonner' 
+import apiClient from '../../../Api/apiClient'
 
 import {camelToCapitalizedWords} from '../../../Utils/helperFunctions'
 
@@ -45,27 +45,21 @@ export default function MonthlyWeeklyCharts({ title, dataKey, timeRange, onFetch
     useEffect(() => {
         const fetchAllStats = async () => {
             try {
-                console.log("Inside fetchAllStats()..")
-                const response = await axios.get(`${baseApiUrl}/fitness/tracker/stats/${dataKey}`, {
-                    withCredentials: true,
-                })
+                const response = await apiClient.get(`${baseApiUrl}/fitness/tracker/stats/${dataKey}`)
                 if (response.status === 200) {
                     const { weeklyDatas, monthlyDatas } = response.data
-                    console.log(`${dataKey} weeklyDatas------>`, weeklyDatas)
-                    console.log(`${dataKey} monthlyDatas------>`, monthlyDatas)
                     setchartDatas({ week: weeklyDatas, month: monthlyDatas })
                     onFetchedDatas(dataKey, { week: weeklyDatas, month: monthlyDatas })
                 }
-                if (response.status === 400 || response.status === 404) {
-                    sonnerToast.error("Some error occured while loading the charts")
-                    console.log("Error---->", error.response.data.message)
-                    setLoading(false)
-                }
             } catch (error) {
-                console.error("Error during saving fetchAllStats", error.message)
-                sonnerToast.error("Some error occured while loading the charts")
+                if (!error.response) {
+                    sonnerToast.error("Network error. Please check your internet.")
+                }else {
+                    sonnerToast.error("Some error occured while loading the stats")
+                }
+            } finally {
                 setLoading(false)
-            }
+            }   
         }
 
         setLoading(true)

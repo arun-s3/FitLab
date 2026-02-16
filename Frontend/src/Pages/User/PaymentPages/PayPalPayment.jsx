@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from "react"
 
-import axios from 'axios'
+import apiClient from '../../../Api/apiClient'
 import {toast as sonnerToast} from 'sonner'
 import {toast} from 'react-toastify'
 
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js'
 
 import {CustomHashLoader} from '../../../Components/Loader/Loader'
-
-
 
 
 export default function PaypalPayment({amount, onPayment, onError}) {
@@ -20,7 +18,7 @@ export default function PaypalPayment({amount, onPayment, onError}) {
     const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
     useEffect(() => {
-        axios.get(`${baseApiUrl}/payment/paypal/clientid`, {withCredentials: true})
+        apiClient.get(`${baseApiUrl}/payment/paypal/clientid`)
             .then(res=> setClientId(res.data.id))
             .catch(err=> {
                 setMessage("Could not load PayPal client ID") 
@@ -28,17 +26,10 @@ export default function PaypalPayment({amount, onPayment, onError}) {
             })
     }, [])
 
-    useEffect(()=> {
-        if(clientId){
-            console.log('clientId from useEffect-->', clientId)
-        }
-    },[clientId])
-
     const findUsdAmount = async(amount)=> {
         const currencyRateResponse = await fetch(`https://v6.exchangerate-api.com/v6/${currencyApiKey}/latest/INR`)
         const data = await currencyRateResponse.json()
         const usdRate = data.conversion_rates.USD
-        console.log("usdRate--->", usdRate)
         return (amount * usdRate)
     }
 
@@ -46,7 +37,6 @@ export default function PaypalPayment({amount, onPayment, onError}) {
         const currencyRateResponse = await fetch(`https://v6.exchangerate-api.com/v6/${currencyApiKey}/latest/USD`)
         const data = await currencyRateResponse.json()
         const inrRate = data.conversion_rates.INR
-        console.log("inrRate--->", inrRate)
         return (amount * inrRate)
     }
 
@@ -63,9 +53,7 @@ export default function PaypalPayment({amount, onPayment, onError}) {
     }
 
     const makePaypalOrder = async()=> {
-        try {
-            console.log('clientId--->', clientId)
-            
+        try {            
             const usdAmount = await findUsdAmount(amount)
             
             const response = await fetch(`${baseApiUrl}/payment/paypal/order`, {
@@ -76,7 +64,6 @@ export default function PaypalPayment({amount, onPayment, onError}) {
                 body: JSON.stringify({amount: usdAmount.toFixed(2)})
             })
             
-            console.log("clientId-->", clientId)
             const orderData = await response.json()
 
             if (orderData.id) {
@@ -93,7 +80,6 @@ export default function PaypalPayment({amount, onPayment, onError}) {
             }
         }
         catch(error){
-            console.error(error)
             setMessage(`Could not initiate PayPal Checkout...${error}`)
             sonnerToast.error(`Could not initiate PayPal Checkout...${error}`)
             onError(`Could not initiate PayPal Checkout...${error}`)
@@ -102,19 +88,9 @@ export default function PaypalPayment({amount, onPayment, onError}) {
 
     const onPaypalApproval = async(data, actions)=> {
         try {
-            console.log('Inside onApprove')
-            console.log("PayPal Approval Data:", data)
-            const response = await fetch(`${baseApiUrl}/payment/paypal/capture`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({orderId: data.orderID})
-                }
-            )
+            const response = await apiClient.post(`${baseApiUrl}/payment/paypal/capture`, {orderId: data.orderID})
 
-            const orderData = await response.json()
+            const orderData = response.data
             const errorDetail = orderData?.details?.[0]
 
             if (errorDetail?.issue === "INSTRUMENT_DECLINED") {
@@ -126,26 +102,14 @@ export default function PaypalPayment({amount, onPayment, onError}) {
             } else {
                 const transaction = orderData.captureResult.purchase_units[0].payments.captures[0]
                 setMessage(`Transaction ${transaction.status}: ${transaction.id}. See console for all available details`)
-                console.log('Payment Completed!')
-                console.log(
-                    "Capture result",
-                    orderData,
-                    JSON.stringify(orderData, null, 2)
-                )
-
                 const inrAmount = await findInrAmount(transaction.amount.value)
-                console.log("inrRate--->", inrAmount)
 
-                await axios.post(`${baseApiUrl}/payment/paypal/save`, 
-                    {captureResult: orderData.captureResult, inrAmount}, 
-                    {withCredentials: true}
-                )
+                await apiClient.post(`${baseApiUrl}/payment/paypal/save`, {captureResult: orderData.captureResult, inrAmount})
 
                 onPayment(transaction.id)
             }
         }
         catch (error){
-            console.error(error)
             setMessage(`Sorry, your transaction could not be processed...${error}`)
             onError(`Sorry, your transaction could not be processed...${error}`)
             toast.error(`Sorry, your transaction could not be processed...${error}`)
@@ -167,7 +131,6 @@ export default function PaypalPayment({amount, onPayment, onError}) {
                         }}
                        createOrder={async()=> {
                             const orderId = await makePaypalOrder()
-                            console.log("Returned PayPal order ID:", orderId)
                             return orderId
                         }}
                        onApprove={(data, actions)=> onPaypalApproval(data, actions)}

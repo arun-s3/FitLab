@@ -1,15 +1,12 @@
 import {createSlice, createAsyncThunk} from '@reduxjs/toolkit'
-import axios from '../Api/axiosConfig'
+import apiClient from '../Api/apiClient'
+
 
 export const getOrCreateWallet = createAsyncThunk('wallet/getOrCreateWallet', async ({queryOptions}, thunkAPI)=> {
   try {
-    console.log('Inside getOrCreateWallet createAsyncThunk');
-    console.log("getOrCreateWallet from walletSlice---->", queryOptions)
-    const response = await axios.post('/wallet', {queryOptions},  {withCredentials: true})
-    console.log('Returning success response from getOrCreateWallet...', JSON.stringify(response.data))
+    const response = await apiClient.post('/wallet', {queryOptions})
     return response.data
   }catch(error){
-    console.log('Inside catch of getOrCreateWallet')
     const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
@@ -17,13 +14,9 @@ export const getOrCreateWallet = createAsyncThunk('wallet/getOrCreateWallet', as
 
 export const addFundsToWallet = createAsyncThunk('wallet/addFundsToWallet', async ({paymentDetails}, thunkAPI)=> {
   try {
-    console.log('Inside addFundsToWallet createAsyncThunk');
-    console.log("addFundsToWallet from walletSlice---->", paymentDetails)
-    const response = await axios.post('/wallet/add', {paymentDetails}, {withCredentials: true})
-    console.log('Returning success response from addFundsToWallet...', JSON.stringify(response.data))
+    const response = await apiClient.post('/wallet/add', {paymentDetails})
     return response.data
   }catch(error){
-    console.log('Inside catch of addFundsToWallet')
     const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
@@ -31,13 +24,9 @@ export const addFundsToWallet = createAsyncThunk('wallet/addFundsToWallet', asyn
 
 export const addPeerAccount = createAsyncThunk('wallet/peer-account', async ({accountDetails}, thunkAPI)=> {
   try {
-    console.log('Inside addPeerAccount createAsyncThunk')
-    console.log("addPeerAccount from walletSlice---->", accountDetails)
-    const response = await axios.post('/wallet/peer-account', {accountDetails}, {withCredentials: true})
-    console.log('Returning success response from addPeerAccount...', JSON.stringify(response.data))
+    const response = await apiClient.post('/wallet/peer-account', {accountDetails})
     return response.data
   }catch(error){
-    console.log('Inside catch of addPeerAccount')
     const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
@@ -45,13 +34,9 @@ export const addPeerAccount = createAsyncThunk('wallet/peer-account', async ({ac
 
 export const sendMoneyToUser = createAsyncThunk('wallet/sendMoneyToUser', async ({paymentDetails}, thunkAPI)=> {
   try {
-    console.log('Inside sendMoneyToUser createAsyncThunk');
-    console.log("sendMoneyToUser from walletSlice---->", paymentDetails)
-    const response = await axios.post('/wallet/send', {paymentDetails}, {withCredentials: true})
-    console.log('Returning success response from sendMoneyToUser...', JSON.stringify(response.data))
+    const response = await apiClient.post('/wallet/send', {paymentDetails})
     return response.data
   }catch(error){
-    console.log('Inside catch of sendMoneyToUser')
     const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
@@ -59,13 +44,9 @@ export const sendMoneyToUser = createAsyncThunk('wallet/sendMoneyToUser', async 
 
 export const requestMoneyFromUser = createAsyncThunk('wallet/requestMoneyFromUser', async ({paymentDetails}, thunkAPI)=> {
   try {
-    console.log('Inside requestMoneyFromUser createAsyncThunk');
-    console.log("requestMoneyFromUser from walletSlice---->", paymentDetails)
-    const response = await axios.post('/wallet/request', {paymentDetails}, {withCredentials: true})
-    console.log('Returning success response from requestMoneyFromUser...', JSON.stringify(response.data))
+    const response = await apiClient.post('/wallet/request', {paymentDetails})
     return response.data
   }catch(error){
-    console.log('Inside catch of requestMoneyFromUser')
     const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
@@ -73,13 +54,9 @@ export const requestMoneyFromUser = createAsyncThunk('wallet/requestMoneyFromUse
 
 export const confirmMoneyRequest = createAsyncThunk('wallet/confirmMoneyRequest', async ({transaction_id}, thunkAPI)=> {
   try {
-    console.log('Inside confirmMoneyRequest createAsyncThunk');
-    console.log("confirmMoneyRequest from walletSlice---->", transaction_id)
-    const response = await axios.post('/wallet/request-confirm', {transaction_id}, {withCredentials: true})
-    console.log('Returning success response from confirmMoneyRequest...', JSON.stringify(response.data))
+    const response = await apiClient.post('/wallet/request-confirm', {transaction_id})
     return response.data
   }catch(error){
-    console.log('Inside catch of confirmMoneyRequest')
     const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
@@ -87,13 +64,9 @@ export const confirmMoneyRequest = createAsyncThunk('wallet/confirmMoneyRequest'
 
 export const declineMoneyRequest = createAsyncThunk('wallet/declineMoneyRequest', async ({transaction_id}, thunkAPI)=> {
   try {
-    console.log('Inside declineMoneyRequest createAsyncThunk');
-    console.log("declineMoneyRequest from walletSlice---->", transaction_id)
-    const response = await axios.post('/wallet/request-decline', {transaction_id}, {withCredentials: true})
-    console.log('Returning success response from declineMoneyRequest...', JSON.stringify(response.data))
+    const response = await apiClient.post('/wallet/request-decline', {transaction_id})
     return response.data
   }catch(error){
-    console.log('Inside catch of declineMoneyRequest')
     const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
@@ -101,13 +74,9 @@ export const declineMoneyRequest = createAsyncThunk('wallet/declineMoneyRequest'
 
 export const updateAutoRechargeSettings = createAsyncThunk('wallet/updateAutoRechargeSettings', async ({settings}, thunkAPI)=> {
   try {
-    console.log('Inside updateAutoRechargeSettings createAsyncThunk');
-    console.log("updateAutoRechargeSettings from walletSlice---->", settings)
-    const response = await axios.post('/wallet/recharge-settings', {settings}, {withCredentials: true})
-    console.log('Returning success response from updateAutoRechargeSettings...', JSON.stringify(response.data))
+    const response = await apiClient.post('/wallet/recharge-settings', {settings})
     return response.data
   }catch(error){
-    console.log('Inside catch of updateAutoRechargeSettings')
     const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
     return thunkAPI.rejectWithValue(errorMessage)
   }
@@ -135,7 +104,6 @@ const initialState = {
 const handleAsyncThunkCases = (builder, asyncThunk) => {
   builder
     .addCase(asyncThunk.fulfilled, (state, action) => {
-      console.log(`${asyncThunk.typePrefix} fulfilled:`, action.payload)
       state.walletError = null
       state.walletLoading = false
       state.walletMessage = action.payload.message
@@ -169,10 +137,8 @@ const handleAsyncThunkCases = (builder, asyncThunk) => {
       state.walletError = null
     })
     .addCase(asyncThunk.rejected, (state, action) => {
-      console.log(`${asyncThunk.typePrefix} rejected:`, action.payload)
       state.walletLoading = false
       state.walletError = action.payload
-      // state.walletMessage = action.payload.message
     })
 }
 

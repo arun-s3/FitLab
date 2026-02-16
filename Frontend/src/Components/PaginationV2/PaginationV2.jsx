@@ -1,25 +1,26 @@
-import React from 'react';
-import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
+import React from 'react'
+import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react'
 
 const PaginationV2 = ({ currentPage, totalPages, onPageChange, bgColorStyle, headerStyle, miniVersion = false }) => {
-  const pageNumbers = [];
-  const maxVisiblePages = 5;
+
+  const pageNumbers = []
+  const maxVisiblePages = 5
 
   // Generate page numbers
   for (let i = 1; i <= totalPages; i++) {
-    pageNumbers.push(i);
+    pageNumbers.push(i)
   }
 
   // Determine which page numbers to show
-  let pagesToShow = [];
+  let pagesToShow = []
   if (totalPages <= maxVisiblePages) {
-    pagesToShow = pageNumbers;
+    pagesToShow = pageNumbers
   } else {
-    const halfVisible = Math.floor(maxVisiblePages / 2);
+    const halfVisible = Math.floor(maxVisiblePages / 2)
     if (currentPage <= halfVisible + 1) {
-      pagesToShow = [...pageNumbers.slice(0, maxVisiblePages - 1), '...', totalPages];
+      pagesToShow = [...pageNumbers.slice(0, maxVisiblePages - 1), '...', totalPages]
     } else if (currentPage >= totalPages - halfVisible) {
-      pagesToShow = [1, '...', ...pageNumbers.slice(-maxVisiblePages + 1)];
+      pagesToShow = [1, '...', ...pageNumbers.slice(-maxVisiblePages + 1)]
     } else {
       pagesToShow = [
         1,
@@ -27,7 +28,7 @@ const PaginationV2 = ({ currentPage, totalPages, onPageChange, bgColorStyle, hea
         ...pageNumbers.slice(currentPage - 2, currentPage + 1),
         '...',
         totalPages,
-      ];
+      ]
     }
   }
 
@@ -73,7 +74,7 @@ const PaginationV2 = ({ currentPage, totalPages, onPageChange, bgColorStyle, hea
         <ChevronRight className="w-8 mob:w-5 h-8 mob:h-5" />
       </button>
     </nav>
-  );
+  )
 }
 
 export default PaginationV2

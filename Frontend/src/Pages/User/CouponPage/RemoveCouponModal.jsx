@@ -6,9 +6,7 @@ import { X, AlertTriangle } from "lucide-react"
 import useModalHelpers from '../../../Hooks/ModalHelpers'
 
 
-
 export default function RemoveCouponModal({isOpen, onClose, couponCode, onConfirm}){
-
 
   if (!isOpen) return null
 

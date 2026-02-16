@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from "react"
+import React, { useState } from "react"
 import {useSelector} from 'react-redux'
 import { motion } from "framer-motion"
 
 import {Check, UserPen} from "lucide-react"
 import { FaRegThumbsUp } from "react-icons/fa6";
 import { FaThumbsUp } from "react-icons/fa6";
-import axios from 'axios'
+
+import {toast as sonnerToast} from 'sonner'
+import apiClient from '../../../Api/apiClient'
 
 
 export default function ReviewCard({ review, index, onEdit }){
@@ -18,23 +20,22 @@ export default function ReviewCard({ review, index, onEdit }){
   const [editTooltip, setEditTooltip] = useState(false)
   const [editingReview, setEditingReview] = useState(false)
 
-  useEffect(()=> {
-    console.log("Review insisde the ReviewCard----->", review)
-    console.log("isHelpful----->", isHelpful)
-  }, [review, isHelpful])
-
   const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
   const handleHelpful = async() => {
     try{
-      const response = await axios.get(`${baseApiUrl}/review/toggleHelpful/${review._id}`, { withCredentials: true })
-      if(response.data.success){ helpfulCount
+      const response = await apiClient.get(`${baseApiUrl}/review/toggleHelpful/${review._id}`)
+      if(response?.data?.success){ 
         setIsHelpful(response.data.helpfulStatus)
         setHelpfulCount(response.data.helpfulCount)
       }
     }
     catch(error){
-      console.log('Error inside loadReviews()--->', error.message)
+      if (!error.response) {
+        sonnerToast.error("Network error. Please check your internet.")
+      }else {
+        sonnerToast.error("Something went wrong! Please retry later.")
+      }
     }
   }
   

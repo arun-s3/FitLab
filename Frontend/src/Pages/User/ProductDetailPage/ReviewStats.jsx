@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from "react"
 import { motion } from "framer-motion"
 
-import axios from 'axios'
+import apiClient from '../../../Api/apiClient'
 
 
 export default function ReviewsStats({ productId, rating, totalReviews }) {
@@ -12,16 +12,14 @@ export default function ReviewsStats({ productId, rating, totalReviews }) {
 
   useEffect(()=> {
     async function loadReviewStats(){  
-        console.log("Inside loadReviewStats()")
         try{ 
-          const response = await axios.get(`${baseApiUrl}/review/stats/${productId}`, { withCredentials: true })
-          console.log("Response for loadReviewStats----->", response)
-          if(response.data.success){
+          const response = await apiClient.get(`${baseApiUrl}/review/stats/${productId}`)
+          if(response?.data?.success){
             setRatingDistribution(response.data.ratingCounts)
           }
         }
         catch(error){
-          console.log('Error inside loadReviewStats()--->', error.message)
+          console.error(error)
         }
       }
     loadReviewStats()

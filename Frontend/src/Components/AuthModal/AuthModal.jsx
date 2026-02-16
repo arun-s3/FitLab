@@ -7,7 +7,6 @@ import {X, Lock, ArrowRight, UserPlus} from "lucide-react"
 import useModalHelpers from '../../Hooks/ModalHelpers'
 
 
-
 export default function AuthModal({isOpen, onClose, accessFor = "this feature"}){
 
     const navigate = useNavigate()

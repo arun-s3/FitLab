@@ -1,6 +1,6 @@
 import React from 'react'
 
-import {Check, Plus, Minus, X, CreditCard, Lock, MapPin} from 'lucide-react'
+import {Check} from 'lucide-react'
 
 
 export default function OrderStepper({stepNumber}){

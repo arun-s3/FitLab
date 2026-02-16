@@ -4,9 +4,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { MessageCircle, ArrowDown } from "lucide-react"
 
 
-
 export default function ChatTooltip({ isVisible, onHide }) {
-
 
   return (
 

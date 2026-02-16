@@ -3,27 +3,24 @@ import {useLocation} from 'react-router-dom'
 import './ProductListPage.css'
 import {useDispatch, useSelector} from 'react-redux'
 import {debounce} from 'lodash'
-import {motion, AnimatePresence} from "framer-motion"
+import {motion} from "framer-motion"
 
 import {toast} from 'react-toastify'
 
 import Header from '../../../Components/Header/Header'
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
-import TestPriceFilter from '../../../Components/PriceSliderAndFilter/TestPriceSliderAndFilter' // For Enhancing Original PriceFilter feature..will do it later
 import ProductsDisplay from '../../../Components/ProductsDisplay/ProductsDisplay'
 import ProductListingTools from '../../../Components/ProductListingTools/ProductListingTools'
 import CartSidebar from '../../../Components/CartSidebar/CartSidebar'
 import CouponApplicableModal from './CouponApplicableModal'
-import {getAllProducts, toggleProductStatus} from '../../../Slices/productSlice'
+import {getAllProducts} from '../../../Slices/productSlice'
 import {getTheCart, resetCartStates} from '../../../Slices/cartSlice'
 import {ProtectedUserContext} from '../../../Components/ProtectedUserRoutes/ProtectedUserRoutes'
 import ProductFilterSidebar from '../../../Components/ProductFilterSidebar/ProductFilterSidebar'
 import FilterModule from './FilterModule'
 
 
-
-export default function ProductList({admin}){
-
+export default function ProductList(){
 
     const {setIsAuthModalOpen, checkAuthOrOpenModal} = useContext(ProtectedUserContext)
     setIsAuthModalOpen({status: false, accessFor: 'shopping'})
@@ -71,7 +68,6 @@ export default function ProductList({admin}){
 
     useEffect(()=> {
       if(products && productCounts && totalPages && limit){
-        console.log(`totalPages------>${totalPages}, limit------>${limit}`)
         setTotalPages(Math.ceil(productCounts/limit))
       }
     }, [products, productCounts])
@@ -113,8 +109,6 @@ export default function ProductList({admin}){
     },[])
 
     useEffect(()=>{
-        console.log("FILTER-->", JSON.stringify(filter))
-        console.log("SORTS-->", JSON.stringify(sorts))
         setQueryOptions(queryOptions=> (
             {...queryOptions, filter: {...queryOptions.filter, ...filter}, sort: sorts, page: currentPage, limit,
                  averageRating: rating}
@@ -122,7 +116,6 @@ export default function ProductList({admin}){
     },[filter, sorts, currentPage, limit, rating])
 
     useEffect(()=>{
-        console.log('OUERYOPTIONS--------->', JSON.stringify(queryOptions))
         if(Object.keys(queryOptions).length){
             dispatch( getAllProducts({queryOptions}))
         }
@@ -139,12 +132,10 @@ export default function ProductList({admin}){
           setIsCartOpen(true)
         }
         if(error && error.toLowerCase().includes('product')){
-          console.log("Error from ProductDetailPage-->", error)
           toast.error(error)
           dispatch(resetCartStates())
         }
         if(productAdded){
-          console.log("Product added to cart successfully!")
           setIsCartOpen(true)
           dispatch(resetCartStates())
         }
@@ -155,8 +146,6 @@ export default function ProductList({admin}){
 
 
     const applySidebarFilters = (appliedFilters)=> {
-        console.log("Inside applySidebarFilters...")
-        console.log("appliedFilters from ProductFilterSidebar------->", appliedFilters)
         if(appliedFilters.minPrice){
             setMinPrice(appliedFilters.minPrice)
         }
@@ -169,7 +158,6 @@ export default function ProductList({admin}){
         const {categories, brands, targetMuscles} = appliedFilters
         setFilter({...filter, categories, brands, targetMuscles, products: appliedFilters.popularProducts})
     }
-
 
 
     return(
@@ -216,7 +204,7 @@ export default function ProductList({admin}){
                             sortMenu={sortMenu}
                             limiter={{limit, setLimit}}
                             showFilter={true}
-                            filterHandler={()=> { console.log('Opening FilterSidebar...') ; setIsFilterSidebarOpen(true)}}
+                            filterHandler={()=> setIsFilterSidebarOpen(true)}
                             queryOptions={queryOptions}
                             setQueryOptions={setQueryOptions}
                         />

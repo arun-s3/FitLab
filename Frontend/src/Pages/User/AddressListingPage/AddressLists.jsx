@@ -8,7 +8,6 @@ import {RiFileEditLine} from "react-icons/ri"
 
 import {SitePrimaryButtonWithShadow} from '../../../Components/SiteButtons/SiteButtons'
 import {setAsDefaultAddress} from '../../../Slices/addressSlice'
-
  
 
 export default function AddressLists({addresses, setOpenDeleteModal, setDeleteAddressId}){

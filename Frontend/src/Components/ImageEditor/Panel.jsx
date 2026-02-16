@@ -1,7 +1,6 @@
-import React, {useEffect} from 'react'
+import React from 'react'
 
 import {TbColorFilter} from "react-icons/tb";
-import {GiSettingsKnobs} from "react-icons/gi";
 import {LuSettings2} from "react-icons/lu";
 import {MdFilterHdr} from "react-icons/md";
 import {MdCrop} from "react-icons/md";
@@ -9,11 +8,6 @@ import {RxRotateCounterClockwise} from "react-icons/rx";
 import {PiTextTBold} from "react-icons/pi";
 
 export default function Panel({panelHandler, subPanelStatus}){
-
-    useEffect(()=> {
-        console.log("subPanelStatus---------->", subPanelStatus)
-        console.log("subPanelStatus['colorChannels']---------->", subPanelStatus['colorChannels'])
-    }, [subPanelStatus])
 
     return(
         <div className='flex flex-col gap-[2rem] justify-center items-center mt-[3rem] w-full'>

@@ -130,7 +130,6 @@ walletCron(io)
 app.use( (error ,req ,res, next)=> {
     const message = error.message||'Internal Server Error'
     const statusCode = error.statusCode||500
-    console.log(`From index.js errorHandling middleware message is---> ${message} and statusCode is- ${statusCode}`)
     res.status(statusCode).json({message})
 })
 

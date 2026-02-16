@@ -4,7 +4,7 @@ import {useDispatch} from 'react-redux'
 import {X, Heart, Flag, Plus} from "lucide-react"
 
 import useModalHelpers from '../../Hooks/ModalHelpers'
-import {addProductToList, resetWishlistStates} from '../../Slices/wishlistSlice'
+import {addProductToList} from '../../Slices/wishlistSlice'
 import {SiteSecondaryFillButton} from '../SiteButtons/SiteButtons'
 
 
@@ -24,7 +24,6 @@ export default function WishlistOptionsModal({ isOpen, onClose, product, setIsWi
 
   const handleSubmit = (e)=> {
     e.preventDefault()
-    console.log(`Adding ${product.title} to wishlist: ${selectedList}`)
     dispatch(addProductToList({listName: selectedList, productId: product._id, productNote, productPriority}))
     onClose()
   }
@@ -103,7 +102,7 @@ export default function WishlistOptionsModal({ isOpen, onClose, product, setIsWi
               <button type="button" className="flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm
                  font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2
                      focus:ring-indigo-500" 
-                            onClick={()=> { console.log("Adding to default wishlist");  onClose() }}>
+                            onClick={()=> onClose()}>
                     Add to default list
               </button>
             </div>
@@ -111,7 +110,7 @@ export default function WishlistOptionsModal({ isOpen, onClose, product, setIsWi
           </form>
 
           <div className="mt-6 pt-4 border-t">
-            <button onClick={()=> {console.log("Create new wishlist")}} className="flex items-center">
+            <button className="flex items-center">
               <Plus className={`h-5 w-5 mr-2 ${isHovered ? 'text-orange-400' : 'text-primaryDark'}
                    transition duration-150 ease-in-out`}
                 onMouseEnter={()=> setIsHovered(true)} onMouseLeave={()=> setIsHovered(false)}/>

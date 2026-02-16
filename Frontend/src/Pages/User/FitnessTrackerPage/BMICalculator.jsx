@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react"
 import {useDispatch, useSelector} from 'react-redux'
 import { motion } from "framer-motion"
 
-import axios from 'axios'
+import apiClient from '../../../Api/apiClient'
 import {toast as sonnerToast} from 'sonner'
 
 import HealthAiInsights from "./AiModules/HealthAiInsights"
@@ -43,18 +43,12 @@ export default function BMICalculator() {
 
   useEffect(()=> {
     if(user && user.gender){
-      console.log("User has already set gender")
       setFormData((prev) => ({...prev, gender: user.gender}))
     }
     if(user && user.weight){
-      console.log("User has already set gender")
       setFormData((prev) => ({...prev, weight: user.weight}))
     }
   }, [user])
-
-  useEffect(()=> {
-      console.log("formData-------->", formData)
-  }, [formData])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -68,9 +62,8 @@ export default function BMICalculator() {
 
   const updateHealthProfile = async(healthProfile)=> {
     acceptTermsOnFirstAction()
-    console.log("Inside updateHealthProfile...") 
     try { 
-      const response = await axios.post(`${baseApiUrl}/fitness/tracker/health/update`, {healthProfile}, { withCredentials: true })
+      const response = await apiClient.post(`${baseApiUrl}/fitness/tracker/health/update`, {healthProfile})
       if(response.status === 200 || response.status === 201){
         sonnerToast.success("Your health profile updated!")
         sonnerToast.info("Keep your health profile updated every week/month for accurate insights and trackig. We'll remind you weekly.", {duration: 5500})
@@ -78,33 +71,35 @@ export default function BMICalculator() {
         dispatch(updateUserWeight({userWeight: userWeightObj}))
         setLoading(false)
       }
-      if(response.status === 400 || response.status === 404){
-        sonnerToast.error(error.response.data.message)
-        console.log("Error---->", error.response.data.message)
-      }
     }catch (error) {
-      console.error("Error updating health profile:", error.message)
+      if (!error.response) {
+          sonnerToast.error("Network error. Please check your internet.")
+      } else if (error.response?.status === 400 || error.response?.status === 404) {
+          sonnerToast.error(error.response.data?.message || "Something went wrong. Please try again later.")
+      } else {
+          sonnerToast.error("Internal server error")
+      }
     }
   }
 
   const getLatestHealthProfile = async()=> {
-    console.log("Inside getLatestHealthProfile...") 
     try { 
-      const response = await axios.get(`${baseApiUrl}/fitness/tracker/health`, { withCredentials: true })
+      const response = await apiClient.get(`${baseApiUrl}/fitness/tracker/health`)
       if(response.status === 200){
-        console.log("response.data.latestProfile------>", response.data.latestProfile)
         const {bodyFatPercentage, bloodPressure, ...rest} = response.data.latestProfile
         const {systolic, diastolic} = bloodPressure
         const latestProfileDatas = {bodyFat: bodyFatPercentage, systolic, diastolic, ...rest}
-        console.log("latestProfileDatas------>", latestProfileDatas)
         setFormData((prev) => ({...prev, ...latestProfileDatas}))
         sonnerToast.info("Your latest health indicators are shown. Update fields as needed!", {duration: 7000})
       }
-      if(response.status === 404){
-        console.log("Error---->", error.response.data.message)
-      }
     }catch (error) {
-      console.error("Error updating health profile:", error.message)
+      if (!error.response) {
+          sonnerToast.error("Network error. Please check your internet.")
+      } else if (error.response?.status === 404) {
+          sonnerToast.error(error.response.data?.message || "Something went wrong. Please try again later.")
+      } else {
+          sonnerToast.error("Something went wrong!")
+      }
     }
   }
 

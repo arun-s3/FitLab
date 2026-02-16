@@ -8,8 +8,6 @@ import useModalHelpers from '../../../Hooks/ModalHelpers'
 
 export default function HealthReminderModal({isOpen, isNewUser = true, onUpdateHealthMetrics, onClose}) {
 
-  // const [isOpen, setIsOpen] = useState(true)
-
   const modalRef = useRef(null)
   useModalHelpers({open: isOpen, onClose, modalRef})
 

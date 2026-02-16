@@ -3,7 +3,7 @@ import { motion } from "framer-motion"
 
 import {Flame, Award, Timer, Battery} from "lucide-react"
 import {MdTipsAndUpdates} from "react-icons/md"
-import axios from 'axios'
+import apiClient from '../../../../Api/apiClient'
 
 import AiInsightCards from "../../../../Components/AiInsightCards/AiInsightCards"
 
@@ -73,14 +73,11 @@ export default function WorkoutAiInsights() {
     ]
 
     const getInsightDataSources = async()=> {
-        console.log("Inside getInsightDataSources...") 
         setLoading(true)
         try { 
-          const latestWorkoutResponse = await axios.get(`${baseApiUrl}/fitness/tracker/workout/latest`, { withCredentials: true })
-          if(latestWorkoutResponse.status === 200){ 
-            console.log("latestWorkoutResponse.data------->", latestWorkoutResponse.data) 
-            console.log("latestWorkoutResponse.data.prevExercise------->", latestWorkoutResponse.data.prevExercise) 
+          const latestWorkoutResponse = await apiClient.get(`${baseApiUrl}/fitness/tracker/workout/latest`)
 
+          if(latestWorkoutResponse.status === 200){ 
             const { latestWorkout, prevExercise, trackerId } = latestWorkoutResponse.data
 
             const hasPrevWorkout = Boolean(prevExercise)
@@ -91,7 +88,6 @@ export default function WorkoutAiInsights() {
             const canUseCachedAnalysis = hasAIAnalysis && ((!hasPrevWorkout && !isRelativeAnalysis) || (hasPrevWorkout && isRelativeAnalysis))
             
             if (canUseCachedAnalysis) {
-              console.log("Returning cached AI response")
               setLatestWokoutInsights(latestWorkout.aiAnalysis)
               return
             }
@@ -101,7 +97,6 @@ export default function WorkoutAiInsights() {
             setLatestWorkoutDatas(workoutDatas)
           }
         }catch (error) {
-          console.error("Error while fetching latest workout", error.message)
           setError("Something went wrong while finding your workout history! Please check your network and retry later")
         }finally{
           setLoading(false)

@@ -9,9 +9,7 @@ import CallDeclinedModal from "./VideoSupport/CallDeclinedModal"
 import {SocketContext} from '../../../Components/SocketProvider/SocketProvider'
 
 
-
 export default function VideoSupportModule() {
-
 
   const [requestType, setRequestType] = useState(null)
   const [isWaiting, setIsWaiting] = useState(false)
@@ -28,21 +26,18 @@ export default function VideoSupportModule() {
   const socketContextItems = useContext(SocketContext)
   const {socket, userId, openVideoCallModal, scheduledVideoCallSessionId, forceEndScheduledSession, setForceEndScheduledSession} = socketContextItems
 
-
   const handleImmediateRequest = () => {
     setRequestType("immediate")
     setIsWaiting(true)
   }
 
   const handleCallStart = (sessionId) => {
-    console.log("Inside handleCallStart of VideoSupportModule")
     setIsWaiting(false)
     setInCall(true)
     setCallData({ sessionId })
   }
 
   const handleEndCall = () => {
-    console.log("Inside handleEndCall()...")
     setInCall(false)
     setRequestType(null)
     setCallData(null)
@@ -60,21 +55,16 @@ export default function VideoSupportModule() {
   useEffect(()=> {
     if(socket){
       socket.on("sessionEnded", () => {
-        console.log("Inside on sessionEnded, calling handleEndCall()......")
         handleEndCall()
       })
 
       socket.on("callDeclined", (message) => {
-        console.log("Inside on callDeclined....")
         handleCallDeclined()
         handleEndCall()
       })
 
       socket.on("currentAdminStatus", ({adminId, status})=> {
-        console.log("Inside on currentAdminStatus...")
-        console.log("status--->", status)
         if(status === 'busy'){
-          console.log("Admin is busy!")
           setIsAdminBusy(true)
         }else setIsAdminBusy(false)
       }) 
@@ -87,19 +77,13 @@ export default function VideoSupportModule() {
   }, [socket])
 
   useEffect(()=> {
-    console.log("isAdminBusy--->", isAdminBusy)
-    console.log("openVideoCallModal--->", openVideoCallModal)
     if(scheduledVideoCallSessionId){
-      console.log("Inside VideoSupportModule page...openVideoCallModal is true")
       setScheduledCallReceived(true)
     }else setScheduledCallReceived(false)
-    // handleCallStart(videoCallSessionId)
   }, [isAdminBusy, scheduledVideoCallSessionId])
 
   useEffect(()=> {
-    console.log("forceEndScheduledSession--->", forceEndScheduledSession)
     if(forceEndScheduledSession){
-      console.log("Calling handleEndCall()...")
       handleEndCall()
       setForceEndScheduledSession(false)
     }

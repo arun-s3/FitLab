@@ -1,9 +1,10 @@
 import React,{useState, useEffect, useRef} from 'react'
 import './OtpVerificationPage.css'
 import {Link, useNavigate, useLocation} from 'react-router-dom'
-import axios from 'axios'
 import {useDispatch, useSelector} from 'react-redux'
 import {motion, AnimatePresence} from 'framer-motion'
+
+import apiClient from '../../../Api/apiClient'
 
 import {toast as sonnerToast} from 'sonner'
 import {toast} from 'react-toastify'
@@ -59,7 +60,6 @@ export default function OtpVerificationPage(){
 
     useEffect(()=> {
         if(location){
-            console.log("location.state.email---->", location?.state?.email)
             setUserEmail(location?.state?.email)
             setCancelAllowed(location.state?.from === 'signup' ? true : false)
             startTimer()
@@ -77,15 +77,10 @@ export default function OtpVerificationPage(){
 
     useEffect(()=> {
         if(Object.keys(values).length){
-            console.log("Values are--->", JSON.stringify(values))
             const otpValues = Object.values(values).join('')
             setOtp(otpValues)
         }
     },[values])
-
-    useEffect(()=> {
-        console.log("OTP is--->", JSON.stringify(otp))
-    },[otp])
 
     const startTimer = ()=> {
         setTimer(5 * 60 * 1000)
@@ -93,10 +88,8 @@ export default function OtpVerificationPage(){
             setTimer(prevCount => {
                 if (prevCount <= 1000) {
                     clearInterval(timerId.current)
-                    console.log("Time Over!")
                     return 0
                 } else {
-                    console.log(`Countdown: ${prevCount - 1000} seconds remaining`)
                     return prevCount - 1000
                 }
             });
@@ -160,21 +153,15 @@ export default function OtpVerificationPage(){
 
     const submitOtp = async(e)=>{
         setLoading(true)
-        console.log("Object.keys(values).length--->", Object.keys(values).length)
-        console.log("Values object---->", JSON.stringify(values))
         const nonEmptyValues = Object.values(values).filter(val=> val!== '')
-        console.log("nonEmptyValues object---->", JSON.stringify(nonEmptyValues))
         if(Object.keys(nonEmptyValues).length < 5){
             setError("Please enter a valid otp!")
             setLoading(false)
             return
         }else{
-            console.log("Submitting Otp.....")
             try{
-                const response = await axios.post(`${baseApiUrl}/verifyOtp`, {otp, email: userEmail, updateUser: true}, {withCredentials: true})
-                console.log("RESPONSE from verifyOtp---->", response)
-                console.log("RESPONSE from verifyOtp in JSON---->", JSON.stringify(response))
-                if(response.data.message.includes('success')){
+                const response = await apiClient.post(`${baseApiUrl}/verifyOtp`, {otp, email: userEmail, updateUser: true})
+                if(response?.data.message.includes('success')){
                     stopTimer()
                     setError('')
                     setVerificationError(false)
@@ -186,22 +173,22 @@ export default function OtpVerificationPage(){
                         : navigate('/cart',{
                             replace:true, state: {OtpVerified: true}
                         }) 
-                    setLoading(false)
                 }
             }
             catch(error){
-                setLoading(false)
-                console.log("error from  frontend--->", error.message)
-                const errorMessage = error.response.data.message.toLowerCase()
+                if (!error.response) {
+                  sonnerToast.error("Network error. Please check your internet.")
+                  setLoading(false)
+                  return
+                }
+                const errorMessage = error.response?.data.message.toLowerCase()
                 if(errorMessage.includes('invalid')){
-                    console.log("INAVLID OTP from frontend")
                     sonnerToast.error("Invalid OTP!")
                     setError("Inavlid OTP. Please click 'resend again' to try again!")
                     setvalues({})
                     setVerificationError(true)
                 }
                 if(errorMessage.includes('expired')){
-                    console.log("OTP is expired!")
                     toast.error("OTP is expired!")
                     setError("The OTP is no longer valid. Please click 'resend again' to try again!")
                     setvalues({})
@@ -211,6 +198,8 @@ export default function OtpVerificationPage(){
                 else{
                     toast.error("Internal Server Error!")
                 }
+            }finally {
+                setLoading(false)
             }   
         }
     }
@@ -224,7 +213,6 @@ export default function OtpVerificationPage(){
     }
 
     const resendOtp = async()=> {
-        console.log("Inside resendOtp()--")
         setvalues({})
         setLoading(true)
         stopTimer()
@@ -232,9 +220,18 @@ export default function OtpVerificationPage(){
         setVerificationError(false)
         setOtpBoxDisabled(false)
         setResendState(true)
-        const response = await axios.post(`${baseApiUrl}/sendOtp`, { email: userEmail }, {withCredentials:true});
-        if(response){
-            startTimer()
+        try {
+            const response = await apiClient.post(`${baseApiUrl}/sendOtp`, { email: userEmail });
+            if(response){
+                startTimer()
+            }
+        }catch(error) {
+            if (!error.response) {
+              sonnerToast.error("Network error. Please check your internet.")
+            } else {
+              sonnerToast.error('Error resending the otp to your mail. Please try again later!')
+            }
+        }finally {
             setLoading(false)
         }
     }

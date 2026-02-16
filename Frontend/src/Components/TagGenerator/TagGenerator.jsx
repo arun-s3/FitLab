@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from 'react'
-import {BsTags} from "react-icons/bs";
-import {IoIosClose} from "react-icons/io";
+
+import {BsTags} from "react-icons/bs"
+import {IoIosClose} from "react-icons/io"
 
 
 export default function TagGenerator({tag, setTags, editTags, SetPlaceholderIcon}){
@@ -9,9 +10,7 @@ export default function TagGenerator({tag, setTags, editTags, SetPlaceholderIcon
 
     useEffect(()=>{
         if(editTags){
-            console.log(`editTags length-->${editTags.length} editTags tags--> ${editTags}`)
             const uniqueTags = [...new Set([...editTags])]
-            console.log("UNIQUE TAGS-->", uniqueTags)
             setTags(prevTags => [
                 ...prevTags,
                 ...uniqueTags.filter(tag => !prevTags.includes(tagConstructor(tag))).map(tag => tagConstructor(tag))
@@ -33,26 +32,18 @@ export default function TagGenerator({tag, setTags, editTags, SetPlaceholderIcon
     }
     const tagsInputHandler = (e)=>{
         if(e.target.value.trim()){
-            console.log("Value inside tag")
             if(e.target.parentElement.scrollHeight > e.target.parentElement.clientHeight ){
                 e.target.value = ''
                 e.target.style.display = 'none'
-                console.log("Overflowing..")
                 return
             }
             else{
                 if(e.target.scrollWidth > e.target.clientWidth){
-                    console.log("Overflowing width")
                     e.target.style.width = `${e.target.scrollWidth}px`
-                }
-                if(e.target.value.length == e.target.maxLength){
-                    console.log("Maxlength exceeded!")
-                }              
+                }           
                 if(( (/\w+\s+/).test(e.target.value) )){
-                    console.log("Space found!")     
                     const currentTag = e.target.value.trim()   
                     if( tag.find(tag=> tag.key == currentTag ) ){
-                        console.log("Tag must be unique")
                         setError('Tag must be unique')
                         return
                     } 
@@ -67,7 +58,6 @@ export default function TagGenerator({tag, setTags, editTags, SetPlaceholderIcon
     }
     const tagsKeyDownHandler = (e)=>{
         if(e.key=='Backspace' && !e.target.value){
-            console.log("Inside tagsKeyDownHandler conditn success")
             tag && setTags(tag=> tag.slice(0,-1) )
         } 
     }

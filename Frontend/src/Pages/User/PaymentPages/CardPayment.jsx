@@ -2,12 +2,11 @@
 import React, {useState, forwardRef, useImperativeHandle} from "react"
 import './CardPayment.css'
 
-import axios from 'axios'
+import apiClient from '../../../Api/apiClient'
 import {toast as sonnerToast} from 'sonner'
 import {toast} from 'react-toastify'
 
 import { useStripe, useElements, PaymentElement } from "@stripe/react-stripe-js"
-
 
 
 const CardPayment = forwardRef( ({onPayment, payButtonText, displayError}, ref)=> {
@@ -22,7 +21,6 @@ const CardPayment = forwardRef( ({onPayment, payButtonText, displayError}, ref)=
   const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
   const handleElementChange = (e)=> {
-    console.log("PaymentElement out of focus")
     if(!e.complete){
       setIsDisabled(true)
     }else{
@@ -43,7 +41,6 @@ const CardPayment = forwardRef( ({onPayment, payButtonText, displayError}, ref)=
       })
     
       if (error){
-        console.log(error)
         setMessage(error.message)
         sonnerToast.error(error.message, {duration: 4000})
         setIsLoading(false)
@@ -58,7 +55,7 @@ const CardPayment = forwardRef( ({onPayment, payButtonText, displayError}, ref)=
           paymentId: paymentIntent.id,
           paymentMethod: "stripe",
         }
-        await axios.post(`${baseApiUrl}/payment/stripe/save`, {paymentDatas}, {withCredentials: true})
+        await apiClient.post(`${baseApiUrl}/payment/stripe/save`, {paymentDatas})
         onPayment(paymentIntent.id)
       }
     

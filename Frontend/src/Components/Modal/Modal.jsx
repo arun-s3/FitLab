@@ -20,11 +20,6 @@ export default function Modal({children, openModal, setOpenModal, title, content
     }
   },[open])
 
-  useEffect(()=>{
-    console.log("Message written---->", message)
-  },[message])
-//   const openModal = () => { setModelIsOpen(true) }
-
   const inputHandler = (e)=> {
     setMessage(e.target.value)
   }

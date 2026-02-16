@@ -2,7 +2,6 @@ import {configureStore, combineReducers} from '@reduxjs/toolkit'
 import {persistReducer,persistStore} from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
 import sessionStorage from 'redux-persist/lib/storage/session' 
-// import sessionStorage from './sesssionStorage' 
 import { PAUSE,PERSIST,REGISTER,REHYDRATE,PURGE,FLUSH } from 'redux-persist'
 
 import userReducer from '../Slices/userSlice'

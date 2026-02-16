@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react'
 import {useLocation} from 'react-router-dom'
 
-import axios from 'axios'
+import apiClient from '../../../Api/apiClient'
 import {toast as sonnerToast} from 'sonner'
 
 import Header from '../../../Components/Header/Header'
@@ -50,23 +50,16 @@ export default function FitnessTrainingPage(){
   async function loadBodyParts() {
       try {
           setBodyPartsLoading(true)
-          console.log("Inside loadBodyParts()...")
-          const response = await axios.get(`${baseApiUrl}/fitness/exercises/bodyparts`, { withCredentials: true })
-          console.log("loadBodyParts response----->", response.data.data)
+          const response = await apiClient.get(`${baseApiUrl}/fitness/exercises/bodyparts`)
           if (response.data.success) {
               setBodyParts(response.data.data.map((data) => data.name))
-              console.log("Body Parts--->", bodyParts)
           }
       } catch (error) {
-          console.error("Error while loading body parts", error.message)
           setError(true)
           if (!error.response) {
               sonnerToast.error("Network error. Please check your internet.")
-          } else if (error.response?.status === 429) {
-              sonnerToast.error(error.response.data?.message || "Too many requests. Please try again later.")
-              console.log("Error---->", error.response.data.message)
-          } else {
-              sonnerToast.error("Something went wrong! Please retry later.")
+          }else {
+              sonnerToast.error("Something went wrong! Internal server error.")
           }
       } finally {
           setBodyPartsLoading(false)
@@ -79,7 +72,6 @@ export default function FitnessTrainingPage(){
 
   const fetchExercises = async(options)=> { 
     try {
-        console.log("Inside fetchExercises()...")
         if(options?.searchQueryRemoved && selectedBodyParts?.length === 0){
           setExercises([])
           return
@@ -98,27 +90,21 @@ export default function FitnessTrainingPage(){
           sortOrder: sort.order ? sort.order : undefined,
         }
 
-        console.log("fetching exercises...")
+        const response = await apiClient.post(`${baseApiUrl}/fitness/exercises/list`, {queryDetails})
 
-        const response = await axios.post(`${baseApiUrl}/fitness/exercises/list`, {queryDetails}, {withCredentials: true})
-
-        console.log("fetchExercises response----->", response.data.data)
         if(response.data.data.success){
-          console.log("Exercises--->", response.data.data)
           const totalPagesRequired = Math.ceil(response.data.data.metadata.totalExercises / exercisesPerPage)
           setTotalPages(totalPagesRequired)
           return response.data.data.data
         }
       }catch (error) {
-      	console.error("Error while loading exercises", error.message)
         setError(true)
          if (!error.response) {
              sonnerToast.error("Network error. Please check your internet.")
          } else if (error.response?.status === 429) {
              sonnerToast.error(error.response.data?.message || "Too many requests. Please try again later.")
-             console.log("Error---->", error.response.data.message)
          } else {
-             sonnerToast.error("Something went wrong! Please retry later.")
+             sonnerToast.error("Something went wrong while loading exercises! Please retry later.")
          }
       } finally {
         setLoading(false)
@@ -135,7 +121,6 @@ export default function FitnessTrainingPage(){
 
   useEffect(() => {
     if (searchQuery) {
-      console.log("Loading exercise for searchQuery--->", searchQuery)
       loadExercises()
     }
   }, [searchQuery])
@@ -147,13 +132,11 @@ export default function FitnessTrainingPage(){
   }, [selectedEquipments, selectedMuscles, sort.by, sort.order])
 
   useEffect(() => {
-    console.log("selectedBodyParts----->", selectedBodyParts)
     if ((!selectedBodyParts || selectedBodyParts.length === 0) && !searchQuery) {
       setExercises([])
       setError(false)
       return
     }
-    console.log("firstExerciseIndex----->", firstExerciseIndex)
     loadExercises()
   }, [selectedBodyParts, firstExerciseIndex])
 

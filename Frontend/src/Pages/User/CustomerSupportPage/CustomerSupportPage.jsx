@@ -55,7 +55,6 @@ export default function CustomerSupportPage(){
     }, [])
 
 
-
     return (
 
          <>
@@ -95,10 +94,7 @@ export default function CustomerSupportPage(){
                     </svg>
                 </div>
                         
-                <main 
-                  className='-mt-[4rem] bg-gradient-to-b from-gray-50 to-gray-100'
-                  // style={{backgroundImage: `linear-gradient(to right,rgba(255,255,255,0.95),rgba(255,255,255,0.95)), url('/Images/patternBg5.png')`}}
-                >
+                <main className='-mt-[4rem] bg-gradient-to-b from-gray-50 to-gray-100'>
 
                     <div className='w-full flex gap-4 pl-[4rem] pr-[2rem]'>
 
@@ -106,7 +102,6 @@ export default function CustomerSupportPage(){
                                                                 
                         <UserSidebar currentPath='/support' />
                         
-                                     
                       </div>
 
                       <div className='mt-[4rem] flex justify-between'>

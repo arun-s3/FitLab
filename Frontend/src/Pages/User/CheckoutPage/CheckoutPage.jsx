@@ -6,7 +6,7 @@ import {motion} from 'framer-motion'
 
 import {toast} from 'react-toastify'
 import {toast as sonnerToast} from 'sonner'
-import axios from 'axios'
+import apiClient from '../../../Api/apiClient'
 
 import Header from '../../../Components/Header/Header'
 import OrderManager from './OrderManager'
@@ -69,7 +69,6 @@ export default function CheckoutPage(){
 
     useEffect(()=> {
       if(orderFreshSources){
-        console.log("cart--->", cart)
         placeOrder()
         setOrderFreshSources(false)
       }
@@ -97,16 +96,11 @@ export default function CheckoutPage(){
         })
       }
       if(shippingAddress){
-        console.log("shippingAddress----->", shippingAddress)
         setOrderDetails(orderDetails=> {
           return {...orderDetails, shippingAddressId: shippingAddress._id}
         })
       }
     },[shippingAddress, paymentMethod])
-
-    useEffect(()=> {
-      console.log("orderDetails------->", JSON.stringify(orderDetails))
-    },[orderDetails])
 
     useEffect(()=> {
       if(orderCreated){
@@ -125,14 +119,12 @@ export default function CheckoutPage(){
       }
       if(orderError){
         setIsLoading(false)
-        console.log("orderError--->", orderError)
         toast.error(orderError, {autoClose: 3500})
         dispatch(resetOrderStates())
       }
     },[orderCreated, orderMessage, orderError, orderReviewError])
 
     useEffect(()=> {
-      console.log("productRemoved--->", productRemoved)
       if(productRemoved){
         const unavailableProducts = cart.products.filter(product=> 
           !product.productId || product.productId.isBlocked || product.productId.stock < product.quantity
@@ -167,12 +159,10 @@ export default function CheckoutPage(){
     }
 
     const addQuantity = (id, quantity)=> {
-      console.log("Inside addQuantity")
       dispatch( addToCart({productId: id, quantity}) )
     }
     
     const lessenQuantity = (id, quantity, currentQuantity)=> {
-      console.log("Inside lessenQuantity")
       if(currentQuantity > 1){
         dispatch( reduceFromCart({productId: id, quantity}) )
       }else{
@@ -181,13 +171,11 @@ export default function CheckoutPage(){
     }
 
     const removeProduct = (id)=> {
-        console.log("Inside removeProduct()")
         dispatch(removeFromCart({productId: id}))
     }
 
     const radioClickHandler = (e, type, value)=>{
       const checkStatus = type==='address' ? (shippingAddress === value) : (paymentMethod === value)
-      console.log("checkStatus-->", checkStatus)
       if(checkStatus){
           if(type === 'address') setShippingAddress('')
           else setPaymentMethod('')
@@ -212,19 +200,14 @@ export default function CheckoutPage(){
     }
 
     const setNewAddressAsShippingAddress = ()=> {
-      console.log('addresses now------>', addresses)
-      console.log("Inside setNewAddressAsShippingAddress")
       const today = new Date().toISOString().split("T")[0]
-      console.log("today-->", today)
 
       const latestTodayAddress = addresses
         .filter(addr=> addr?.createdAt && new Date(addr.createdAt).toISOString().split("T")[0] === today)
         .sort((a, b)=> new Date(b.createdAt) - new Date(a.createdAt)) 
-      console.log("latestTodayAddress-->", latestTodayAddress)
 
       if(latestTodayAddress && latestTodayAddress.length > 0){
         const newlyCreatedAddress = latestTodayAddress[0]
-        console.log("newlyCreatedAddress-->", newlyCreatedAddress)
         setShippingAddress(newlyCreatedAddress)
       }
     }
@@ -256,7 +239,6 @@ export default function CheckoutPage(){
       return
     } 
     try{
-      console.log("Inside placeOrder")
       if(paymentMethod === ''){
         sonnerToast.error('Please select a payment Method!')
         setIsLoading(false)
@@ -269,27 +251,22 @@ export default function CheckoutPage(){
       }
       if(paymentMethod === 'razorpay'){
         try{
-            const response = await axios.post(`${baseApiUrl}/payment/razorpay/order`,
-              {amount: cart.absoluteTotalWithTaxes.toFixed(2)}, { withCredentials: true }
-            )
-            console.log("razorpay created order--->", response.data.data)
-            handleRazorpayVerification(response.data.data)
-            setIsLoading(false)
+            const response = await apiClient.post(`${baseApiUrl}/payment/razorpay/order`, {amount: cart.absoluteTotalWithTaxes.toFixed(2)})
+            if(response?.data){
+                handleRazorpayVerification(response.data.data)
+            }
         }
         catch(error){
-          console.log(error)
           setIsPaymentFailedModalOpen({status: true, msg: 'Network Error'})
-          setIsLoading(false)
+        }
+        finally{
+            setIsLoading(false)
         }
       }
       else if(paymentMethod === 'wallet'){
-        console.log('Paying with wallet...')
         try{  
-           const response = await axios.post(`${baseApiUrl}/wallet/order`,
-              {amount: cart.absoluteTotalWithTaxes.toFixed(2)}, { withCredentials: true }
-            )
-          console.log('response.data--->', response.data)
-          if(response.data.transactionId){ 
+           const response = await apiClient.post(`${baseApiUrl}/wallet/order`, {amount: cart.absoluteTotalWithTaxes.toFixed(2)})
+          if(response?.data.transactionId){ 
             sonnerToast.success("Payment via Wallet successfull!", {autoClose: 4000})
             const paymentDetails = {paymentMethod: 'wallet', paymentStatus: 'completed', transactionId: response.data.transactionId}
             dispatch( createOrder({orderDetails: {...orderDetails, paymentDetails}}) ) 
@@ -298,7 +275,9 @@ export default function CheckoutPage(){
         catch(error){
           sonnerToast.error(error.message, {duration: 4000})
           setIsPaymentFailedModalOpen({status: true, msg: 'Network Error'})
-          setIsLoading(false)
+        }
+        finally{
+            setIsLoading(false)
         }
       }
       else{
@@ -307,11 +286,13 @@ export default function CheckoutPage(){
     }
     catch(error){
       setIsLoading(false)
-      console.log('Error in placeOrder:', error.response.data?.message || error.message)
-      if (error.response && error.response.status !== 500){
+      console.error('Error in placeOrder:', error)
+      if (!error.response) {
+        sonnerToast.error("Network error. Please check your internet.")
+      }else if (error.response && error.response.status !== 500){
         sonnerToast.error(error.response.data?.message || error.message, {duration: 4000})
       }else{
-        toast.error('Something went wrong.', {autoClose: 4000})
+        toast.error('Internal server error!', {autoClose: 4000})
       }
     }
   }
@@ -319,12 +300,10 @@ export default function CheckoutPage(){
   const handleRazorpayVerification = async (data) => {
     let res = null
     try{
-      res = await axios.get(`${baseApiUrl}/payment/razorpay/key`, { withCredentials: true })
+      res = await apiClient.get(`${baseApiUrl}/payment/razorpay/key`)
     }catch(error){
-      console.log(error)
       setIsPaymentFailedModalOpen({status: true, msg: "Internal Server Error. Please try again later!"})
     }
-    console.log("Razorpay key --->", res.data.key)
     const options = {
         key: res.data.key,
         amount: data.amount,
@@ -338,18 +317,14 @@ export default function CheckoutPage(){
           }
         },
         handler: async (response) => {
-            console.log("response from handler-->", response)
             try {
-                const verifiedData = await axios.post(`${baseApiUrl}/payment/razorpay/verify`, {
+                const verifiedData = await apiClient.post(`${baseApiUrl}/payment/razorpay/verify`, {
                     razorpay_order_id: response.razorpay_order_id,
                     razorpay_payment_id: response.razorpay_payment_id,
                     razorpay_signature: response.razorpay_signature,
                     amount: data.amount
-                }, 
-                { withCredentials: true }
-                )
-                console.log("verifiedData--->", verifiedData)
-                if (verifiedData.data.message.toLowerCase().includes('success')) {
+                })
+                if (verifiedData?.data?.message.toLowerCase().includes('success')) {
                     setIsLoading(true)
                     sonnerToast.success(verifiedData.data.message, {duration: 4000})
                     dispatch( createOrder({
@@ -363,7 +338,10 @@ export default function CheckoutPage(){
                     setIsPaymentFailedModalOpen({status: true, msg: "Payment Failed! Try again later!"})
                 }
             } catch (error) {
-                console.log(error)
+                console.error(error)
+                if (!error.response) {
+                    sonnerToast.error("Network error. Please check your internet.")
+                }
                 setIsPaymentFailedModalOpen({status: true, msg: "Unexpected error, Please try again!"})
             }
         },
@@ -389,12 +367,10 @@ const handleStripeOrPaypalPayment = (paymentGateway, paymentId)=> {
 
 const handleRetryCheckout = ()=> {
   sonnerToast.info("Retrying to place the order..")
-  console.log("Inside handleRetryCheckout()...")
   sourceItAgainAndOrder()
 }
 
 const handleRetryPayment = ()=> {
-  console.log('Retrying Payment....')
   sonnerToast.info("Retrying Payment..")
   if(paymentMethod === 'cards'){
     setRetryStripePaymentStatus(true)

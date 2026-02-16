@@ -20,7 +20,6 @@ import {CustomHashLoader} from '../../../Components/Loader/Loader'
 import AuthPrompt from '../../../Components/AuthPrompt/AuthPrompt'
 
 
-
 export default function UserAccountPage(){
 
   const {setBreadcrumbHeading, setPageLocation} = useContext(UserPageLayoutContext)
@@ -57,7 +56,6 @@ export default function UserAccountPage(){
   useEffect(()=> {
     const handleClickOutside = (e)=> {
       const isOutside = !Object.values(dropdownRefs).some( (ref)=> ref.current?.contains(e.target) )
-      console.log("isOutside--->", isOutside)
        if (isOutside){
         setOpenDropdowns((prevState)=>
           Object.keys(prevState).reduce((newState, key)=> {
@@ -76,7 +74,6 @@ export default function UserAccountPage(){
   useEffect(()=> {
     const getUserDefaultAddress = async()=>{
       if(user){
-        console.log('user----->', JSON.stringify(user))
         setUserDetails({...user})
         setDob(new Date(user.dob))
         dispatch( getDefaultAddress({id: user._id}) )
@@ -98,23 +95,12 @@ export default function UserAccountPage(){
       setUserDetails(userDetails=> ( {...userDetails, gender} ))
     }
     if(dob){
-      console.log("DOB-->",dob)
-      console.log("new Date(dob)-->",new Date(dob))
       setUserDetails(userDetails=> ( {...userDetails, dob: new Date(dob)} ))
     }
     if(addressType){
       setAddressDetails(addressDetails=> ( {...addressDetails, type: addressType} ))
     }
   },[gender, dob, addressType])
-
-  useEffect(()=> {
-    if(Object.keys(userDetails).length){
-
-    } 
-    if(Object.keys(addressDetails).length){
-      
-    }
-  },[userDetails, addressDetails])
 
   useEffect(()=> {
     if(userUpdated && addressUpdated){
@@ -149,13 +135,10 @@ export default function UserAccountPage(){
   }
 
   const inputBlurHandler = (e, fieldName, options, detailType)=>{
-    console.log("inside inputBlurHandler, fieldname", fieldName)
     if(fieldName){
        const value = e.target.value
        const statusObj = (options?.optionalField) ? handleInputValidation(fieldName, value, {optionalField: true}) : handleInputValidation(fieldName, value)
-       console.log("statusObj from inputBlurHandler--> ", JSON.stringify(statusObj))
        if(!statusObj.error && statusObj.message.startsWith("Optional")){
-           console.log("Inside here----")
            e.target.nextElementSibling.textContent = ''
            e.target.style.borderColor = primaryColor.current
            return
@@ -172,7 +155,6 @@ export default function UserAccountPage(){
   }
 
   const handleSubmit = () =>{
-    console.log("Inside submitAddress()--");
     setEditing(false)
 
     const requiredAddressFieldNames = addressInfoTypes.filter(infoType=> !infoType.hasOwnProperty('optionalField'))
@@ -189,42 +171,28 @@ export default function UserAccountPage(){
           (field) => !detailsArray[field] || detailsArray[field] === "" || detailsArray[field] === undefined
         )
       
-      console.log(`Required Fields Length----> ${requiredFields.length} Required Fields--->, ${requiredFields}`)
       if (requiredFields.length < requiredfieldNamesArray.length) {
-          console.log("Missing required fields!")
           toast.error("Please enter all required fields!")
           return 'error';
       }
        if (missingRequiredFields.length > 0) {
-          console.log("Undefined values found in required fields!")
           sonnerToast.error("Please check the fields and submit again!")
           return 'error';
       }
     }
       
     if(user){
-      console.log("Checking errors in userDetails......")
-      console.log(`requiredUserFieldNames--->${requiredUserFieldNames}`)
       const status = checkErrors(userDetails, requiredUserFieldNames)
-      console.log("status-->", status)
       if( status === 'error') return
 
       dispatch( updateUserDetails({userDetails}) )
-      console.log("userDetails now -->", userDetails)
-      console.log("Dispatched userDetails successfully!")
     }
     if(currentDefaultAddress){
-      console.log("Checking errors in addressDetails......")
-      console.log(`requiredAddressFieldNames--->${requiredAddressFieldNames}`)
       const status = checkErrors(addressDetails, requiredAddressFieldNames)
-      console.log("status-->", status)
       if( status === 'error') return 
 
       dispatch( editAddress({id: user._id, addressId: addressDetails._id, addressData: addressDetails}) )
-      console.log("addressDetails now -->", addressDetails)
-      console.log("Dispatched addressDetails successfully!")
     }
-    console.log("Dispatched all successfully!")
   }
 
   const openSecurity = ()=> {
@@ -255,8 +223,12 @@ export default function UserAccountPage(){
                                      : inputBlurHandler(e, infoType.type, detailType)}/>
               {infoType?.Icon && <infoType.Icon className="absolute left-3 top-[14px] w-4 h-4 text-gray-400"/> }
               <p className='mt-[3px] h-[7px] text-[10px] text-red-500 visible tracking-[0.2px] error' ref={errorRef}
-                  onClick={(e)=> { console.log("Clicked error..."); infoType?.optionalField ? cancelErrorState(e, primaryColor.current, {optionalField: true})
-                      : cancelErrorState(e, primaryColor.current)}}></p>
+                  onClick={(e)=> {
+                    infoType?.optionalField 
+                        ? cancelErrorState(e, primaryColor.current, {optionalField: true})
+                        : cancelErrorState(e, primaryColor.current)
+                  }}>
+              </p>
           </div>
         </div>
       )

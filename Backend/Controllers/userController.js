@@ -492,12 +492,29 @@ const updateUserWeight = async (req, res, next) => {
 const clearAllCookies = async(req, res, next)=> {
     try {
         console.log("Inside clearAllCookies..")
-        res.cookie("jwt", "", {
+        const isProd = process.env.NODE_ENV === "production"
+
+        const refreshToken = req.cookies.refreshToken;
+
+        if (refreshToken) {
+            await RefreshToken.deleteOne({ token: refreshToken });
+        }
+
+        res.clearCookie("accessToken", {
             httpOnly: true,
-            sameSite: "strict",
-            expires: new Date(0) 
+            secure: isProd,
+            sameSite: isProd ? "none" : "lax",
+            domain: isProd ? ".fitlab.co.in" : undefined,
+            path: "/",
         })
 
+        res.clearCookie("refreshToken", {
+            httpOnly: true,
+            secure: isProd,
+            sameSite: isProd ? "none" : "lax",
+            domain: isProd ? ".fitlab.co.in" : undefined,
+            path: "/",
+        })
         return res.status(200).json({ message: "Logged out successfully" })
     }
     catch(error){

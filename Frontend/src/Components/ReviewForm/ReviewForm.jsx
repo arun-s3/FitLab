@@ -17,10 +17,6 @@ export default function ReviewForm({onSubmit, editReview = null, onEditSubmissio
   const [hoveredRating, setHoveredRating] = useState(0)
 
   useEffect(()=> {
-    console.log("ReviewForm Mounted....")
-  }, [])
-
-  useEffect(()=> {
     if(editReview){
       setRating(editReview.rating)
       setTitle(editReview.title)
@@ -29,13 +25,11 @@ export default function ReviewForm({onSubmit, editReview = null, onEditSubmissio
   }, [editReview])
 
   useEffect(()=> {
-    console.log("provideRating---->", provideRating)
     setRating(provideRating)
   }, [provideRating])
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    console.log("Inside handleSubmit()...")
 
     if (!title.trim() || !comment.trim()) {
       !title.trim() ? setSelectInput({title: true, comment: false}) : setSelectInput({title: false, comment: true})

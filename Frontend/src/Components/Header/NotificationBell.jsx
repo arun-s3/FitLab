@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 
 import { Bell } from "lucide-react"
-import axios from 'axios'
+import apiClient from "../../Api/apiClient"
 
 import NotificationItem from "./NotificationItem"
 
@@ -19,6 +19,8 @@ export default function NotificationBell({notifications, setNotifications, onNot
   const [currentNotificationBatch, setCurrentNotificationBatch] = useState(1)
   const [hasMoreUsersNotifications, setHasMoreUsersNotifications] = useState(true)
   const limit = 5
+
+  const [fetchError, setFetchError] = useState(false)
 
   const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
@@ -43,20 +45,21 @@ export default function NotificationBell({notifications, setNotifications, onNot
     }
   }, [isOpen])
 
-
   const getNotifications = async()=> {
-    console.log("Inside getNotifications()...") 
     if (!hasMoreUsersNotifications) return 
     try { 
-      const response = await axios.get(`${baseApiUrl}/notifications?page=${currentNotificationBatch}&limit=${limit}`, { withCredentials: true })
+      const response = await apiClient.get(`${baseApiUrl}/notifications?page=${currentNotificationBatch}&limit=${limit}`)
       if(response.status === 200){
-        console.log("response.data.notifications------>", response.data.notifications)
         setNotifications(response.data.notifications)
         setHasMoreUsersNotifications(response.data.hasMore)
         setCurrentNotificationBatch(batch=> batch + 1)
       }
     }catch (error) {
-      console.error("Error while fetching notifications:", error.message)
+      if (!error.response) {
+        setFetchError("Error while loading notifications, due to network error. Please check your internet.")
+      }else {
+        setFetchError("Error while loading notifications, due to server issues.")
+      }
     }
   }
 
@@ -65,7 +68,6 @@ export default function NotificationBell({notifications, setNotifications, onNot
   }, [])
 
   useEffect(()=> {
-    console.log("notifications----->", notifications)
     if(notifications && notifications?.length > 0){
       setUnreadCount(notifications.filter((n) => !n.isRead).length)
     }

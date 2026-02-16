@@ -1,11 +1,12 @@
 import React,{useEffect, useRef, useState} from 'react'
 import './ProductFilterForAdmin.css'
 
-import PriceSliderAndFilter from '../PriceSliderAndFilter/PriceSliderAndFilter';
+import PriceSliderAndFilter from '../PriceSliderAndFilter/PriceSliderAndFilter'
 import {DateSelector} from '../Calender/Calender'
-import {SiteButtonSquare} from '../SiteButtons/SiteButtons';
+import {SiteButtonSquare} from '../SiteButtons/SiteButtons'
 
-import {MdOutlineArrowDropDownCircle} from "react-icons/md";
+import {MdOutlineArrowDropDownCircle} from "react-icons/md"
+
 
 export default function ProductFilterForAdmin({filter, setFilter, priceGetter, priceSetter, dateGetter, dateSetter}){
 
@@ -47,19 +48,16 @@ export default function ProductFilterForAdmin({filter, setFilter, priceGetter, p
            uniqueBrands = Array.from( new Set([...uniqueBrands]) )
            for(let brand of uniqueBrands){
             if(!brandPattern.test(brand)){
-                console.log("Please put a valid brand name!")
                 e.target.nextElementSibling.style.visibility = 'visible'
                 setBrandErrorMsg('Please put a valid brand name!')
                 return;
             }
            }
            if(uniqueBrands.some(brand => !brand.trim())){
-            console.log("Please make sure that there are no consecutive commas without any number between them")
             e.target.nextElementSibling.style.visibility = 'visible'
             setBrandErrorMsg('Please make sure that there are no consecutive commas without any number between them!')
             return;
            }
-           console.log("Brands-->", uniqueBrands)
            setFilter({...filter, brands: uniqueBrands})
         }
     }
@@ -67,6 +65,8 @@ export default function ProductFilterForAdmin({filter, setFilter, priceGetter, p
     const categoryAddHandler = (e)=>{
         setFilter({...filter, categories:[...filter.categories, e.target.value]}) 
     }
+
+    
     return(
         <div className='w-[20rem] border border-primary bg-white pt-[20px] pb-[25px] px-[35px] rounded-[8px] ' id='admin-product-filter'>    {/* border-[#e5e7eb] */}
         <h4 className='text-[16px] font-[500] text-secondary tracking-[1.3px]'> Filter </h4>

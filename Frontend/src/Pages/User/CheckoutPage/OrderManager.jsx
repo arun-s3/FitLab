@@ -11,8 +11,6 @@ import {camelToCapitalizedWords} from '../../../Utils/helperFunctions'
 
 export default function OrderManager({products, orderReviewError, onIncQuantity, onDecQuantity}){
 
-    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
     const navigate = useNavigate()
  
     const containerVariants = {
@@ -44,7 +42,7 @@ export default function OrderManager({products, orderReviewError, onIncQuantity,
 
     const goToProductDetailPage = async(id)=> {
       try {
-        const response = await apiClient.get(`${baseApiUrl}/products/${id}`)
+        const response = await apiClient.get(`/products/${id}`)
         let product = null
         if(response?.data){
             product = response.data[0]

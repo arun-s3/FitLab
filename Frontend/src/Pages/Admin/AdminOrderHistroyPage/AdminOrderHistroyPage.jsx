@@ -3,10 +3,9 @@ import {useOutletContext} from 'react-router-dom'
 import './AdminOrderHistroyPage.css'
 import {useDispatch, useSelector} from 'react-redux'
 
-import {ShoppingBag, Package, RefreshCcw, CircleOff, Box, Download, Search, MoreHorizontal, MessageSquare, 
-   Filter, Plus, CalendarArrowDown, CircleCheckBig, SquareCheckBig, Truck, PackageCheck, ChevronDown, TextSearch, ShoppingCart } from 'lucide-react'
+import {ShoppingBag, Package, RefreshCcw, CircleOff, Download, Search, MoreHorizontal, TriangleAlert,
+   Filter, Plus, CalendarArrowDown, SquareCheckBig, Truck, PackageCheck, ChevronDown, TextSearch } from 'lucide-react'
 import {RiArrowDropDownLine} from "react-icons/ri"
-import {BiCartAdd} from "react-icons/bi"
 import {TbCreditCardRefund} from "react-icons/tb"
 import {MdSort} from "react-icons/md"
 import {format} from "date-fns"
@@ -20,7 +19,7 @@ import CancelForm from '../../../Components/CancelForm/CancelForm'
 import ReturnRequestModal from './ReturnRequestModal'
 import {SitePrimaryButtonWithShadow, SiteSecondaryFillImpButton} from '../../../Components/SiteButtons/SiteButtons' 
 import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
-import {getOrders, getAllUsersOrders, cancelOrder, cancelOrderProduct, changeOrderStatus,
+import {getAllUsersOrders, cancelOrder, cancelOrderProduct, changeOrderStatus,
           changeProductStatus, processRefund, resetOrderStates} from '../../../Slices/orderSlice'
 
 
@@ -37,6 +36,8 @@ export default function AdminOrderHistoryPage(){
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(20)  
   const [limit, setLimit] = useState(8) 
+
+  const [metricError, setMetricError] = useState(false)
 
   const [queryDetails, setQueryDetails] = useState({'page': 1, 'limit': 8, 'sort': -1, 'orderStatus': 'orders'})
 
@@ -62,8 +63,6 @@ export default function AdminOrderHistoryPage(){
   const {setHeaderZIndex, setPageBgUrl} = useOutletContext() 
   setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.93),rgba(255,255,255,0.93)), url('/Images/admin-ProductsListBg.jpg')`)
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
   const [openDropdowns, setOpenDropdowns] = useState({showTab: false, durationDropdown: false, sortDropdown: false, limitDropdown: false})
     const dropdownRefs = {
       showTab: useRef(null),
@@ -84,8 +83,6 @@ export default function AdminOrderHistoryPage(){
     useEffect(()=> {
       const handleClickOutside = (e)=> {
         const isOutside = !Object.values(dropdownRefs).some( (ref)=> ref.current?.contains(e.target) )
-        console.log("isOutside--->", isOutside)
-  
         if (isOutside){
           setOpenDropdowns((prevState)=>
             Object.keys(prevState).reduce((newState, key)=> {
@@ -101,18 +98,23 @@ export default function AdminOrderHistoryPage(){
       }
     }, [])
 
-    useEffect(()=> {
-      async function findStatus(){
-        const response = await axios.get(`${baseApiUrl}/order/statusCounts`, {withCredentials: true})
-        console.log("Response from statusCounts", response.data)
-        setStatusCounts(response.data.statusCounts) 
+    async function findStatus(){
+      try{
+          const response = await axios.get(`/order/statusCounts`, {withCredentials: true})
+          if(response?.data.statusCounts) {
+              setStatusCounts(response.data.statusCounts) 
+          }
+      }catch (error) {
+          setMetricError(true)
       }
+    }
+
+    useEffect(()=> {
       findStatus()
     },[])
 
     useEffect(()=> {
       if(orders && totalUsersOrders && totalPages && limit){
-        console.log(`totalUsersOrders-----> ${totalUsersOrders}, totalPages------>${totalPages}, limit------>${limit}`)
         setTotalPages(Math.ceil(totalUsersOrders/limit))
       }
     }, [orders, totalUsersOrders])
@@ -125,7 +127,6 @@ export default function AdminOrderHistoryPage(){
 
     useEffect(()=> {
         if(Object.keys(queryDetails).length > 0){
-          console.log("queryDetails---->", JSON.stringify(queryDetails))
           dispatch( getAllUsersOrders({queryDetails}) )
         }
     },[queryDetails])
@@ -222,14 +223,9 @@ export default function AdminOrderHistoryPage(){
 
   const radioClickHandler = (e)=>{
     const value = Number.parseInt(e.target.value)
-    console.log("value---->", value)
     const checkStatus = queryDetails.sort === value
-    console.log("checkStatus-->", checkStatus)
-    if(checkStatus){
-        console.log("returning..")
-        return
-    }else{
-        console.log("Checking radio..")
+    if(checkStatus) return
+    else{
         setQueryDetails(query=> {
           return {...query, sort: value}
         })
@@ -276,7 +272,6 @@ export default function AdminOrderHistoryPage(){
   }
 
   const preCancelTheOrder = (e, orderId)=> {
-    console.log("Opening the modal for cancelOrder...")
     setOpenCancelForm({type:'order', status:true, options: {orderId}})
     window.scrollTo( {top: orderCancelFormRef.current.getBoundingClientRect().top, scrollBehavior: 'smooth'} )
   }
@@ -290,7 +285,6 @@ export default function AdminOrderHistoryPage(){
       if(openSelectReasons.reason.trim()){
         orderCancelReason = orderCancelReason + openSelectReasons.reason.trim()
       }
-      console.log("orderCancelReason----->", orderCancelReason)
       setOpenSelectReasons(({status:false, reasonTitle:'', reason:''}))
       dispatch( cancelOrder({orderId: cancelThisOrderId, orderCancelReason}) )
       setCancelThisOrderId(null)
@@ -313,7 +307,6 @@ export default function AdminOrderHistoryPage(){
 
   const submitReason = (formFor)=> {
     if(formFor === 'product'){
-      console.log("Cancelling the Product..")
       let productCancelReason = '';
       if(openSelectReasons.reasonTitle.trim()){
         productCancelReason = openSelectReasons.reasonTitle.trim() + '.'
@@ -326,7 +319,6 @@ export default function AdminOrderHistoryPage(){
       setOpenCancelForm({type:'', status:false, options:{}})
     }
     if(formFor === 'order'){
-      console.log("Cancelling the Order..")
       setOpenGenericModal(true)
       setCancelThisOrderId(openCancelForm.options.orderId)
       setOpenCancelForm({type:'', status:false, options:{}})
@@ -334,8 +326,6 @@ export default function AdminOrderHistoryPage(){
   }
 
   const changeTheOrderStatus = (orderId, order = null, newStatus)=> {
-    console.log("Inside changeTheOrderStatus..")
-    console.log("newStatus---->", newStatus)
     if(newStatus === 'Review return request'){
       setshowReturnRequestModal({status: true, order, product: null, returnOrderOrProduct: 'order'})
     }
@@ -343,25 +333,19 @@ export default function AdminOrderHistoryPage(){
   }
 
   const changeTheProductStatus = (orderId, productId, newProductStatus)=> {
-    console.log("Inside changeTheProductStatus..")
-    console.log(`productId--->${productId} and orderId---> ${orderId} and newStatus---> ${newProductStatus}`)
     dispatch(changeProductStatus({orderId, productId, newProductStatus}))
   }
 
   const cancelTheOrderProduct = (productId, orderId)=> {
-    console.log("Inside cancelTheOrderProduct..")
-    console.log(`productId--->${productId} and orderId---> ${orderId}`)
     setOpenCancelForm({type:'product', status:true, options: {productId, orderId}})
     window.scrollTo( {top: productCancelFormRef.current.getBoundingClientRect().top, scrollBehavior: 'smooth'} )
   }
 
   const initiateRefundProcess = ()=> {
     const refundInfos = {orderId: refundDetails.orderId, productId: refundDetails.productId, refundType: refundDetails.refundType}
-    console.log("refundInfos-------->", refundInfos)
     dispatch(processRefund({refundInfos}))
     setRefundDetails({orderId: null, productId: null, refundType: null})
   }
-
 
 
   return (
@@ -390,7 +374,7 @@ export default function AdminOrderHistoryPage(){
         <div className="bg-gray-50 min-h-screen">
           {/* Metrics Grid */}
           <div className="mb-[3rem] grid grid-cols-4 gap-6">
-            { metrics &&
+            { metrics && !metricError &&
             metrics.map((metric, index) => (
               <div key={index} className="bg-white p-[10px] flex items-start gap-[10px] border border-primary rounded-xl">
                   <div className='p-3 bg-primaryDark rounded-lg'>
@@ -402,7 +386,25 @@ export default function AdminOrderHistoryPage(){
                   </div>
                   
               </div>
-            ))}
+            ))} 
+            { metricError &&
+                <div className='w-full h-full col-span-4'>
+                    <div className='flex justify-center items-center gap-[5px] w-full h-full'>
+                        <TriangleAlert className='mb-[18px] text-primary w-[32px] h-[32px]' />
+                        <p className='flex flex-col'>
+                            <span className='flex items-center gap-[7px] text-[17px] text-[#686262] font-medium'>
+                                Unable to load
+                                <RotateCcw
+                                    className="w-[20px] h-[20px] text-muted p-1 rounded-full border border-dropdownBorder cursor-pointer 
+                                        hover:text-black transition-all duration-150 ease-in"
+                                    onClick={() => findStatus()}
+                                />
+                            </span>
+                            <span className='text-[13px] text-muted'>Check connection</span>
+                        </p>
+                    </div>
+                </div>
+            }
           </div>
           <div id='order-menu' className='mb-[2rem] flex justify-between items-center'>
 
@@ -746,7 +748,6 @@ export default function AdminOrderHistoryPage(){
                                 {
                                   (()=> {
                                     const {status, icon:Icon} = changeStatus(product.productStatus, product.productReturnStatus)
-                                    console.log("status inside ()()------>", status)
                                     return(
                                       <span className='flex items-center gap-[10px]'>
                                           <span className='capitalize whitespace-nowrap'> 
@@ -823,7 +824,6 @@ export default function AdminOrderHistoryPage(){
           isOpen={()=> showReturnRequestModal.status}
           onClose={() => setshowReturnRequestModal({status: false, order: null, product: null, returnOrderOrProduct: null})} 
           onDecision={(orderId, didAccept) => {
-            console.log(`The request of ${orderId} is ${didAccept ? 'approved!' : 'rejected'}`)
             setshowReturnRequestModal({status: false, order: null, product: null, returnOrderOrProduct: null})
           }}
         />

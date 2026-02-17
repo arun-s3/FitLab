@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from "react"
+import React, { useState, useRef, useContext } from "react"
 import {useSelector} from 'react-redux'
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -22,7 +22,6 @@ export default function CustomerMessageModal({ isOpen, onClose, customer }) {
 
   const handleSendMessage = () => {
     if (title.trim() && message.trim()) {
-      console.log("Sending message to customer:", customer, message, title)
 
       const data = {userId: customer._id, title, message, type: 'admin', referenceModel: 'Admin', referenceId: admin._id}
       sendUserNotification(data)

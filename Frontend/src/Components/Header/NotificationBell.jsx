@@ -22,8 +22,6 @@ export default function NotificationBell({notifications, setNotifications, onNot
 
   const [fetchError, setFetchError] = useState(false)
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
   useEffect(() => {
     function handleClickOutside(event) {
       if (
@@ -48,7 +46,7 @@ export default function NotificationBell({notifications, setNotifications, onNot
   const getNotifications = async()=> {
     if (!hasMoreUsersNotifications) return 
     try { 
-      const response = await apiClient.get(`${baseApiUrl}/notifications?page=${currentNotificationBatch}&limit=${limit}`)
+      const response = await apiClient.get(`/notifications?page=${currentNotificationBatch}&limit=${limit}`)
       if(response.status === 200){
         setNotifications(response.data.notifications)
         setHasMoreUsersNotifications(response.data.hasMore)

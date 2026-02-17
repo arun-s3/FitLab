@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react"
 import {useOutletContext} from 'react-router-dom'
 
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 
 import {ComposableMap, Geographies, Geography, ZoomableGroup} from "react-simple-maps"
 import {scaleSequential} from "d3-scale"
@@ -9,6 +9,8 @@ import {interpolateYlGnBu} from "d3-scale-chromatic"
 
 import {Users, MapPinHouse, LocateFixed, Plus, Minus} from "lucide-react"
 import axios from "axios";
+
+import StatError from "./StatError"
 
 import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
 
@@ -25,15 +27,19 @@ export default function AdminDashboardHeatmapPage(){
   const [maxState, setMaxState] = useState(null)
   const [totalUsers, setTotalUsers] = useState(0)
   const [zoom, setZoom] = useState(6)
+  
+  const [fetchStats, setFetchStats] = useState(true)
+  const [statError, setStatError] = useState(false)
+  const [statLoading, setStatLoading] = useState(false)
 
   const {setPageBgUrl} = useOutletContext() 
   setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.94),rgba(255,255,255,0.94)), url('/Images/admin-bg12.png')`)
-  
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
   useEffect(()=> {
+    if(!fetchStats) return
+    setStatLoading(true)
     axios
-      .get(`${baseApiUrl}/admin/locations/map`, {withCredentials: true})
+      .get(`/admin/locations/map`, {withCredentials: true})
       .then((res) => {
         const data = res.data.usersLocationData
         setStateData(data)
@@ -46,9 +52,15 @@ export default function AdminDashboardHeatmapPage(){
         let total = data.reduce((acc, curr) => acc + curr.customerCount, 0)
         setTotalUsers(total)
       })
-      .catch((err) => console.error(err))
+      .catch((error) => {
+        if (!error.response) {
+          sonnerToast.error("Network error. Please check your internet.")
+        } else {
+          sonnerToast.error("Customer locations cannot be shown due to internal server error. Please try later")
+        }
+      })
 
-      axios.get(`${baseApiUrl}/admin/locations/stats`, {withCredentials: true}).then(res=> {
+      axios.get(`/admin/locations/stats`, {withCredentials: true}).then(res=> {
          const newStats = []  
          newStats.push({
             name: "totalCustomers",
@@ -71,12 +83,17 @@ export default function AdminDashboardHeatmapPage(){
             icon: LocateFixed,
             color: "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400"
           })
-          console.log('newStats----->', newStats)
 
           setUserLocationStats(newStats) 
         }
-      )
-  }, [])
+    )
+    .catch((error) => {
+      setStatError(true)
+    })
+    .finally(()=> setStatLoading(false))
+
+    setFetchStats(false)
+  }, [fetchStats])
 
   const colorScale = scaleSequential()
     .domain([0, Math.max(...stateData.map((s) => s.customerCount)) || 1])
@@ -110,7 +127,6 @@ export default function AdminDashboardHeatmapPage(){
   return ranges
 }
 
-
 const colorRanges = generateColorBuckets();
 
 
@@ -129,7 +145,7 @@ const colorRanges = generateColorBuckets();
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {
-              userLocationStats && userLocationStats.length > 0 ?
+              userLocationStats && userLocationStats.length > 0 && !statError && !statLoading &&
               userLocationStats.map((stat, index)=> (
                 <div key={stat.title}
                   className={`flex items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border
@@ -145,25 +161,32 @@ const colorRanges = generateColorBuckets();
                   </div>
                 </div>
             ))
-            :
+            }
+            { statLoading &&
               [...Array(3)].map((_, index)=> (
                 <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.1, duration: 0.5 }}
-                className={`skeleton-loader flex items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border 
+                className={`flex items-center bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border 
                   ${index === 0 && 'border-primary'}`}
                 >
                   <div className="flex items-center">
-                    <div className='w-[17px] h-[17px] p-3 rounded-full mr-4'></div>
-                    <div>
-                      <p className="invisible text-[13px] text-gray-500 dark:text-gray-400">Insight Title</p>
-                      <h3 className="invisible text-[20px] font-bold mt-1">Insight Value</h3>
+                    <div className='w-[17px] h-[17px] p-3 rounded-full mr-4 skeleton-loader'/>
+                    <div> 
+                      <div className="h-[13px] w-24 skeleton-loader rounded"/>
+                      <div className="h-[25px] w-24 skeleton-loader rounded"/>
                     </div>
                   </div>
               </motion.div>
             ))
+            }
+            {
+            statError && 
+                <div className='w-full h-full col-span-3'>
+                    <StatError refreshFetch={()=> setFetchStats(true)} />
+                </div>
             }
           </div>
 

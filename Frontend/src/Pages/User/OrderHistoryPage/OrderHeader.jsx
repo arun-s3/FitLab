@@ -11,11 +11,9 @@ import {toast as sonnerToast} from 'sonner'
 
 export default function OrderHeader({order, onViewOrderDetails}){
 
-    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
     const exportInvoice = async(orderId)=> {
       try{
-        const response = await apiClient.get(`${baseApiUrl}/order/invoice/${orderId}`,{responseType: 'blob'})
+        const response = await apiClient.get(`/order/invoice/${orderId}`,{responseType: 'blob'})
         if(response?.data) {
             const url = window.URL.createObjectURL(new Blob([response.data]))
             const link = document.createElement('a')

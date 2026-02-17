@@ -40,12 +40,10 @@ export default function MonthlyWeeklyCharts({ title, dataKey, timeRange, onFetch
 
     const [loading, setLoading] = useState(false)
 
-    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
     useEffect(() => {
         const fetchAllStats = async () => {
             try {
-                const response = await apiClient.get(`${baseApiUrl}/fitness/tracker/stats/${dataKey}`)
+                const response = await apiClient.get(`/fitness/tracker/stats/${dataKey}`)
                 if (response.status === 200) {
                     const { weeklyDatas, monthlyDatas } = response.data
                     setchartDatas({ week: weeklyDatas, month: monthlyDatas })

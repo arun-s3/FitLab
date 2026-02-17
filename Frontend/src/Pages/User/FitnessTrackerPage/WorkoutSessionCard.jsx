@@ -53,11 +53,9 @@ export default function WorkoutSessionCard() {
 
   const {acceptTermsOnFirstAction} = useTermsConsent()
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
   const getExercises = async()=> {
     try { 
-      const response = await apiClient.get(`${baseApiUrl}/fitness/tracker/exercise-library/list?page=${currentPage}&limit=${limit}`)
+      const response = await apiClient.get(`/fitness/tracker/exercise-library/list?page=${currentPage}&limit=${limit}`)
       if(response.status === 200){
         setExercises(response.data.exercises)
         setTotalPages(response.data.totalPages)
@@ -95,7 +93,7 @@ export default function WorkoutSessionCard() {
 
   const handleDeleteExercise = async(exerciseTemplateId)=> { 
     try { 
-      const response = await apiClient.delete(`${baseApiUrl}/fitness/tracker/exercise-library/delete/${exerciseTemplateId}`)
+      const response = await apiClient.delete(`/fitness/tracker/exercise-library/delete/${exerciseTemplateId}`)
       if(response.status === 200){
         sonnerToast.success('Exercise deleted successfully!')
         getExercises()
@@ -146,7 +144,7 @@ export default function WorkoutSessionCard() {
 
   const saveWorkoutInfos = async(workoutInfo)=> {
     try {   
-      const response = await apiClient.post(`${baseApiUrl}/fitness/tracker/workout/add`, {workoutInfo})
+      const response = await apiClient.post(`/fitness/tracker/workout/add`, {workoutInfo})
       if(response.status === 200){
         return {trackerId: response.data.tracker._id, exerciseId: response.data.exercise._id}
       }

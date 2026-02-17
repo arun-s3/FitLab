@@ -72,8 +72,6 @@ export default function WorkoutSummaryModal({ stats, onClose, recalculateCalorie
 
   const {user, userWeightUpdated} = useSelector(state=> state.user)
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
   useEffect(() => {
     if (user?.weight) {
       const estimatedCalories = recalculateCalories(user.weight)
@@ -89,7 +87,7 @@ export default function WorkoutSummaryModal({ stats, onClose, recalculateCalorie
   const saveCaloriesInfo = async(fitnessTrackerId, exerciseId, calories)=> {
     try {   
       const calorieDetails = {fitnessTrackerId, exerciseId, calories}
-      const response = await apiClient.post(`${baseApiUrl}/fitness/tracker/workout/save-calories`, {calorieDetails})
+      const response = await apiClient.post(`/fitness/tracker/workout/save-calories`, {calorieDetails})
     }catch (error) {
       if (!error.response) {
           sonnerToast.error("Network error. Please check your internet.")

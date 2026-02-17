@@ -1,8 +1,11 @@
 import React, { useState, useEffect, useRef } from "react"
 import { motion } from "framer-motion"
-import { Mic, MicOff, Video, VideoOff, Phone, MessageSquare, Users, Monitor, Settings } from "lucide-react"
+
+import { Mic, MicOff, Video, VideoOff, Phone, MessageSquare, Users, Monitor } from "lucide-react"
+
 
 export default function AdminVideoChat({ adminSocketContextItems, session, onEndSession }) {
+    
   const [isMuted, setIsMuted] = useState(false)
   const [isVideoOff, setIsVideoOff] = useState(false)
   const [isConnected, setIsConnected] = useState(false)
@@ -16,20 +19,7 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
   const remoteVideoRef = useRef(null)
   const peerConnectionRef = useRef(null)
 
-  const {
-        socket,
-        guestCount,
-        activeUsers,
-        newMessage, 
-        typingUsers, 
-        unreadCounts,
-        setUnreadCounts, 
-        notifications,
-        setNotifications,
-        messagesEndRef, 
-        handleTyping,
-        handleSendMessage
-    } = adminSocketContextItems
+  const { socket } = adminSocketContextItems
 
   const configuration = {
     iceServers: [{ urls: "stun:stun.l.google.com:19302" }, { urls: "stun:stun1.l.google.com:19302" }],
@@ -45,8 +35,6 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
           video: true,
           audio: true,
         })
-        console.log("localStream-->", localStream)
-
         if (localVideoRef.current) {
           localVideoRef.current.srcObject = localStream
         }
@@ -63,32 +51,25 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
             setIsConnected(true)
           }
         }
-
-        console.log("Emiting joinSession....")
         socket.emit("joinSession", { sessionId: session.sessionId })
 
         socket.on("offer", async (offer) => {
-          console.log("Inside on offer....")
           await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(offer))
           const answer = await peerConnectionRef.current.createAnswer()
           await peerConnectionRef.current.setLocalDescription(answer)
-          console.log("Emiting answer....")
           socket.emit("answer", { sessionId: session.sessionId, answer })
         })
 
         socket.on("answer", async (answer) => {
-          console.log("Inside on answer....")
           await peerConnectionRef.current.setRemoteDescription(new RTCSessionDescription(answer))
         })
 
         socket.on("iceCandidate", async (candidate) => {
-          console.log("Inside on iceCandidate....")
           await peerConnectionRef.current.addIceCandidate(new RTCIceCandidate(candidate))
         })
 
         peerConnectionRef.current.onicecandidate = (event) => {
           if (event.candidate) {
-             console.log("Emiting iceCandidate....")
              socket.emit("iceCandidate", { sessionId: session.sessionId, candidate: event.candidate })
           }
         }
@@ -96,7 +77,6 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
         socket.off("chatMessage")
         socket.on("chatMessage", (msg) => {
           if(msg.sender !== 'admin'){
-            console.log("Inside on chatMessage, msg-->", msg)
             setMessages((prev) => [...prev, { sender: "user", text: msg.text, timestamp: Date.now() }])
           }
         })
@@ -115,7 +95,6 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
         setTimeout(async () => {
           const offer = await peerConnectionRef.current.createOffer()
           await peerConnectionRef.current.setLocalDescription(offer)
-          console.log("Emiting offer....")
           socket.emit("offer", { sessionId: session.sessionId, offer })
         }, 1000)
       } catch (error) {
@@ -146,16 +125,6 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
       }
     }
   }, [session, socket])
-
-    useEffect(()=> {
-      console.log("isConnected--->", isConnected)
-      console.log("message--->", message)
-      console.log("messages--->", messages)
-      console.log("localVideoRef--->", localVideoRef)
-      console.log("peerConnectionRef--->", peerConnectionRef)
-      console.log("remoteVideoRef--->", remoteVideoRef)
-      console.log("isChatOpen--->", isChatOpen)
-    }, [isConnected, message, messages, localVideoRef, peerConnectionRef, isChatOpen])
 
   const toggleMute = () => {
     const localStream = localVideoRef.current?.srcObject
@@ -188,10 +157,7 @@ export default function AdminVideoChat({ adminSocketContextItems, session, onEnd
     if (localStream) {
       localStream.getTracks().forEach((track) => track.stop())
     }
-
-    console.log("Emiting endSession...")
     socket.emit("endSession", { sessionId: session.sessionId })
-    console.log("calling  =onEndSession()...")
     onEndSession()
   }
 

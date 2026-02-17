@@ -19,8 +19,6 @@ export const SocketContext = createContext();
 
 export default function SocketProvider() {
 
-    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
     const {user} = useSelector((state)=> state.user)
 
     const [socket, setSocket] = useState(null)
@@ -82,16 +80,17 @@ export default function SocketProvider() {
 
     const {acceptTermsOnFirstAction} = useTermsConsent()
 
+    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
     
     useEffect(()=> { 
       async function fetchUserId(){
         try{
-            const guestVerificationRes = await apiClient.get(`${baseApiUrl}/guest-check`)
+            const guestVerificationRes = await apiClient.get(`/guest-check`)
             if(guestVerificationRes.data.wasGuest){
               const {userId, username} = guestVerificationRes.data.credentials
               setUserWasGuest({wasGuest: true, credentials: {userId, username}})
             }
-            const response = await apiClient.get(`${baseApiUrl}/getUserid`)
+            const response = await apiClient.get(`/getUserid`)
             const decryptedUserId = decryptData(response.data.encryptedUserId)
             setRoomId(decryptedUserId)
             setUsername(response.data.username)
@@ -101,7 +100,7 @@ export default function SocketProvider() {
       } 
       async function fetchGuestId(){
         try{
-            const response = await apiClient.get(`${baseApiUrl}/guest`)
+            const response = await apiClient.get(`/guest`)
             setRoomId(response.data.userId)
             setUsername(response.data.username)
         }catch(error){

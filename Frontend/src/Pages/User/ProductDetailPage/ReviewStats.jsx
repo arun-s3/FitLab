@@ -8,12 +8,10 @@ export default function ReviewsStats({ productId, rating, totalReviews }) {
 
   const [ratingDistribution, setRatingDistribution] = useState({})
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
   useEffect(()=> {
     async function loadReviewStats(){  
         try{ 
-          const response = await apiClient.get(`${baseApiUrl}/review/stats/${productId}`)
+          const response = await apiClient.get(`/review/stats/${productId}`)
           if(response?.data?.success){
             setRatingDistribution(response.data.ratingCounts)
           }

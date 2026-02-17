@@ -15,10 +15,9 @@ export default function PaypalPayment({amount, onPayment, onError}) {
     const [clientId, setClientId] = useState(null)
 
     const currencyApiKey = import.meta.env.VITE_EXCHANGERATEAPI_KEY
-    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
     useEffect(() => {
-        apiClient.get(`${baseApiUrl}/payment/paypal/clientid`)
+        apiClient.get(`/payment/paypal/clientid`)
             .then(res=> setClientId(res.data.id))
             .catch(err=> {
                 setMessage("Could not load PayPal client ID") 
@@ -56,7 +55,7 @@ export default function PaypalPayment({amount, onPayment, onError}) {
         try {            
             const usdAmount = await findUsdAmount(amount)
             
-            const response = await fetch(`${baseApiUrl}/payment/paypal/order`, {
+            const response = await fetch(`/payment/paypal/order`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -88,7 +87,7 @@ export default function PaypalPayment({amount, onPayment, onError}) {
 
     const onPaypalApproval = async(data, actions)=> {
         try {
-            const response = await apiClient.post(`${baseApiUrl}/payment/paypal/capture`, {orderId: data.orderID})
+            const response = await apiClient.post(`/payment/paypal/capture`, {orderId: data.orderID})
 
             const orderData = response.data
             const errorDetail = orderData?.details?.[0]
@@ -104,7 +103,7 @@ export default function PaypalPayment({amount, onPayment, onError}) {
                 setMessage(`Transaction ${transaction.status}: ${transaction.id}. See console for all available details`)
                 const inrAmount = await findInrAmount(transaction.amount.value)
 
-                await apiClient.post(`${baseApiUrl}/payment/paypal/save`, {captureResult: orderData.captureResult, inrAmount})
+                await apiClient.post(`/payment/paypal/save`, {captureResult: orderData.captureResult, inrAmount})
 
                 onPayment(transaction.id)
             }

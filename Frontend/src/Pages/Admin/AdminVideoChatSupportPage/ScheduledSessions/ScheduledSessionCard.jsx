@@ -4,9 +4,7 @@ import { motion } from "framer-motion"
 import { User, Clock, Video, Circle, PhoneOff, MessageSquare, Calendar, AlertCircle } from "lucide-react"
 
 
-
 export default function ScheduledSessionCard({ session, onStartCall, onEndCall, socket, currentScheduledSession }) {
-
 
   const [canStartCall, setCanStartCall] = useState(false)
   const [isUrgent, setIsUrgent] = useState(false)
@@ -26,7 +24,6 @@ export default function ScheduledSessionCard({ session, onStartCall, onEndCall, 
   }
 
   const getTimeUntilSession = () => {
-    console.log("Inside getTimeUntilSession()")
     const diffMins = Math.floor(session.timeRemainingMs / (1000 * 60))
     if (diffMins < 0) {
       return { text: `${Math.abs(diffMins)}m ago`, color: "text-red-600", urgent: true }
@@ -43,11 +40,9 @@ export default function ScheduledSessionCard({ session, onStartCall, onEndCall, 
   useEffect(()=> {
     if(socket){
       socket.on("stoppedSupportCalling", ()=> {
-        console.log("Inside on stoppedSupportCalling....")
         setIsCalling(false)
       })
       socket.on("userDeclinedScheduledSession", (sessionId) => {
-        console.log("Inside on userDeclinedScheduledSession in ScheduledCard......")
         setIsCalling(false)
       })
     }
@@ -60,11 +55,9 @@ export default function ScheduledSessionCard({ session, onStartCall, onEndCall, 
   useEffect(()=> {
     if(Object.keys(session).length > 0){
       if(session?.timeRemaining){
-        console.log(`${session.userId.username} has session on ${session.scheduledDate} at ${session.scheduledTime}`)
         const timeInfoObj = getTimeUntilSession()
         setTimeInfo(timeInfoObj)
         if(session.isUserActive && session.timeRemainingMs){
-          console.log("Inside if(session.isUserActive && timeInfoObj?.text)")
           setCanStartCall(true)
         }
         if(timeInfoObj && timeInfoObj?.urgent && session.status === "upcoming"){
@@ -78,14 +71,12 @@ export default function ScheduledSessionCard({ session, onStartCall, onEndCall, 
   }, [session.scheduledDate])
 
   useEffect(()=> {
-    console.log("currentScheduledSession--->", currentScheduledSession)
     if(currentScheduledSession && currentScheduledSession._id !== session._id){
       setDisableCall(true)
     }else setDisableCall(false)
   }, [currentScheduledSession])
 
   useEffect(()=> {
-    console.log("disableCall------>", disableCall)
   }, [disableCall])
 
   const getStatusColor = () => {
@@ -104,7 +95,6 @@ export default function ScheduledSessionCard({ session, onStartCall, onEndCall, 
   }
 
   const startOrStopCall = ()=> {
-    console.log("Inside startOrStopCall")
     if(!isCalling){
       onStartCall()
       setIsCalling(true)
@@ -112,8 +102,6 @@ export default function ScheduledSessionCard({ session, onStartCall, onEndCall, 
       onEndCall()
     }
   }
-
-
 
   return (
     <motion.div

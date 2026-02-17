@@ -25,8 +25,6 @@ export default function OrdersFulfillmentSection() {
 
   const [fetchChartData, setFetchChartData] = useState(true)
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
   const [status, setStatus] = useState({
       stats: "loading",
       ordersOverTime: "loading",
@@ -45,16 +43,14 @@ export default function OrdersFulfillmentSection() {
 
       const [orderStatsResponse, ordersOverTimeResponse, topProductsResponse, orderStatusPercentRes] =
           await Promise.allSettled([
-              axios.get(`${baseApiUrl}/admin/dashboard/orders/stats`, { withCredentials: true }),
-              axios.get(`${baseApiUrl}/admin/dashboard/orders/stats/monthly`, { withCredentials: true }),
-              axios.get(`${baseApiUrl}/admin/dashboard/products/top`, { withCredentials: true }),
-              axios.get(`${baseApiUrl}/admin/dashboard/orders/status-percent`, { withCredentials: true }),
+              axios.get(`/admin/dashboard/orders/stats`, { withCredentials: true }),
+              axios.get(`/admin/dashboard/orders/stats/monthly`, { withCredentials: true }),
+              axios.get(`/admin/dashboard/products/top`, { withCredentials: true }),
+              axios.get(`/admin/dashboard/orders/status-percent`, { withCredentials: true }),
           ])
 
       if (orderStatsResponse.status === "fulfilled") {
           const response = orderStatsResponse.value
-          console.log("ORDER response.data.stats----->", response.data.stats)
-
           newStats.push(
               {
                   name: "totalOrders",
@@ -78,38 +74,30 @@ export default function OrdersFulfillmentSection() {
                   color: "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400",
               },
           )
-          console.log("newStats----->", newStats)
-
           setStats(newStats)
           setStatus((status) => ({ ...status, stats: "success" }))
       } else {
-          console.log("Error in total revenue:", orderStatsResponse.reason.message)
           setStatus((status) => ({ ...status, stats: "error" }))
       }
 
       if (ordersOverTimeResponse.status === "fulfilled") {
           const response = ordersOverTimeResponse.value
-          console.log("ordersOverTimeResponse response----->", response.data.ordersOverTime)
           setOrdersOverTimeStats(response.data.ordersOverTime)
           setStatus((status) => ({ ...status, ordersOverTime: "success" }))
       } else {
-          console.log("Error in orders over time:", ordersOverTimeResponse.reason.message)
           setStatus((status) => ({ ...status, ordersOverTime: "error" }))
       }
 
       if (topProductsResponse.status === "fulfilled") {
           const response = topProductsResponse.value
-          console.log("ordersOverTimeResponse response----->", response.data.topProductDatas)
           setTopProductDatas(response.data.topProductDatas)
           setStatus((status) => ({ ...status, mostPurchasedProducts: "success" }))
       } else {
-          console.log("Error in orders over time:", topProductsResponse.reason.message)
           setStatus((status) => ({ ...status, mostPurchasedProducts: "error" }))
       }
 
       if (orderStatusPercentRes.status === "fulfilled") {
           const response = orderStatusPercentRes.value
-          console.log("orderStatusPercentRes response----->", response.data.orderStatusDistribution)
           const statusColors = [
               { name: "Delivered", color: "#10b981" },
               { name: "Pending", color: "#f59e0b" },
@@ -121,11 +109,9 @@ export default function OrdersFulfillmentSection() {
               const color = statusColors.find((statusColor) => statusColor.name === status.name).color
               return { ...status, color }
           })
-          console.log("colorMappedStatus--->", colorMappedStatus)
           setOrderStatusDistribution(colorMappedStatus)
           setStatus((status) => ({ ...status, orderStatusDistribution: "success" }))
       } else {
-          console.log("Error in orders over time:", orderStatusPercentRes.reason.message)
           setStatus((status) => ({ ...status, orderStatusDistribution: "error" }))
       }
   }
@@ -146,7 +132,6 @@ export default function OrdersFulfillmentSection() {
       })
       setFetchChartData(true)
   }
-
 
 
   return (

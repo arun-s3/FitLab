@@ -44,8 +44,6 @@ export default function OtpVerificationPage(){
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
-    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
     const bgImg = {
         backgroundImage:"url('/Images/otp-bg.png')",
     }
@@ -160,7 +158,7 @@ export default function OtpVerificationPage(){
             return
         }else{
             try{
-                const response = await apiClient.post(`${baseApiUrl}/verifyOtp`, {otp, email: userEmail, updateUser: true})
+                const response = await apiClient.post(`/verifyOtp`, {otp, email: userEmail, updateUser: true})
                 if(response?.data.message.includes('success')){
                     stopTimer()
                     setError('')
@@ -221,7 +219,7 @@ export default function OtpVerificationPage(){
         setOtpBoxDisabled(false)
         setResendState(true)
         try {
-            const response = await apiClient.post(`${baseApiUrl}/sendOtp`, { email: userEmail });
+            const response = await apiClient.post(`/sendOtp`, { email: userEmail });
             if(response){
                 startTimer()
             }

@@ -15,12 +15,10 @@ export default function LatestProductsCarousel() {
 
   const navigate = useNavigate()
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
   useEffect(()=> {
     async function loadSlides(){
       try{
-        const response = await apiClient.get(`${baseApiUrl}/products/latest`)
+        const response = await apiClient.get(`/products/latest`)
         if(response?.data?.latestProducts){
             setSlides(response.data.latestProducts)
         }

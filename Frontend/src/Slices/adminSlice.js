@@ -13,7 +13,7 @@ export const adminSignin = createAsyncThunk('adminsignin', async(formData, thunk
     }
 })
 
-export const adminSignout = createAsyncThunk('adminSignout', async(thunkAPI)=>{
+export const adminSignout = createAsyncThunk('adminSignout', async(_, thunkAPI)=>{
     try{ 
         const response = await apiClient.get('/admin/signout')
         return response.data

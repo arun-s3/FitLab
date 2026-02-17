@@ -34,17 +34,13 @@ export default function AdminCategoryListPage(){
   const [toggleTab, setToggleTab] = useState({goTo: 'all'})
 
   const {setPageBgUrl} = useOutletContext() 
-//   setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.95),rgba(255,255,255,0.95)), url('/Images/admin-bg1.png')`)
      setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.94),rgba(255,255,255,0.94)), url('/Images/admin-ProductsListBg.jpg')`)
 
   useEffect(() => {
     const getFitlabCategories =  async ()=>{
-      console.log("Getting all categories...")
       dispatch( getAllCategories() )
     }                  
     getFitlabCategories()
-    console.log("CATGEORIES----",JSON.stringify(categories))
-    console.log("ALLSUBCATEGORIES---------------->", allSubCategories)
     // dispatch(resetSubcategories())
   }, []);
 
@@ -60,14 +56,9 @@ export default function AdminCategoryListPage(){
 //         dispatch(getAllCategories({}))
 //     }
 //   },[toggleTab])
-  
-  useEffect(()=>{
-        console.log("CATEGORIES from backend-->", JSON.stringify(categories))
-    },[categories])
 
   useEffect(()=> {
     if(message){
-      console.log("message arrived-->", message)
       sonnerToast.success(message)
     }
     dispatch(resetStates())
@@ -89,22 +80,8 @@ export default function AdminCategoryListPage(){
 //     }
 //   },[populatedSubCategories, allSubCategories])
 
-  useEffect(()=>{
-    if(categories.length){
-        console.log("categories from AdminCategoryList--->", JSON.stringify(categories))
-    }
-    console.log("subCategories from AdminCategoryList--->", subCategories)
-    // console.log("Subcategories now-->", JSON.stringify(subCategories))
-    // console.log("Subcategory of 1st Id-->", JSON.stringify(subCategories['67165c5c19a2809d4c87ae1b']))
-    if(openSubcategories){
-        console.log("openSubcategories-->", JSON.stringify(openSubcategories))
-    }
-  },[categories, subCategories, openSubcategories])
-
   useEffect(() => {
     if (populatedSubCategories && allSubCategories) {
-      console.log("allSubCategories from AdminCategoryListPage--->", JSON.stringify(allSubCategories));
-      
       // Filter subcategories for the current parentId
       const filteredSubCategories = allSubCategories.filter(
         (scat) => scat.parentCategory === populatedSubCategories.parentId
@@ -166,20 +143,16 @@ useEffect(() => {
     }
 }, [blockedCategoryList]);
 
-  
-
    const [activeSorter, setActiveSorter] = useState({field:'',order:''})
    const sortHandler = (e,type,order)=>{
        if(e.target.style.height=='15px'){
          e.target.style.height='10px'
          e.target.style.color='rgba(159, 42, 240, 0.5)'
-         console.log("Going to default icon settings and localUsers--")
      }else {
          setActiveSorter({field:type, order})
      }
     }
    const showCategories = (type)=>{
-       console.log("Inside showCategories(), type--", type)
        setToggleTab({goTo: type})
        if(type == 'all'){
             dispatch(getAllCategories({}))

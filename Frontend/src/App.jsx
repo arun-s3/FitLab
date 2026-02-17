@@ -16,7 +16,7 @@ export default function App(){
         <BrowserRouter>
             <ToastContainer theme='dark' autoClose={3000} style={{ fontSize: "12px" }} hideProgressBar />
 
-            <SonnerToaster position='bottom-right' duration={3500} richColors />
+            <SonnerToaster position='bottom-right' duration={3500} expand={true} richColors />
 
             <Routes>
                 <Route path='/*' element={<UserRoutes />} />

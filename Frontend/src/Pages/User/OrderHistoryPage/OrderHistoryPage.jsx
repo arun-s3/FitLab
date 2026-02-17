@@ -79,8 +79,6 @@ export default function OrderHistoryPage(){
 
     const dispatch = useDispatch()
 
-    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
 
   useEffect(()=> {
     if(orders && totalOrders && totalPages && limit){
@@ -283,9 +281,9 @@ export default function OrderHistoryPage(){
         try{
           let response;
           if(isTestimony){
-            response = await apiClient.post(`${baseApiUrl}/testimony/add`, {...newReview})
+            response = await apiClient.post(`/testimony/add`, {...newReview})
           }else{
-            response = await apiClient.post(`${baseApiUrl}/review/add`, {productId: id, ...newReview})
+            response = await apiClient.post(`/review/add`, {productId: id, ...newReview})
           }
           if(response?.data?.success){
             sonnerToast.success(`Your ${showReviewForm.testimony ? 'testimony' : 'review'} has been submitted successfully!`)

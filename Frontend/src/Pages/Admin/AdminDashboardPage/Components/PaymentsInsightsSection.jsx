@@ -42,8 +42,6 @@ export default function PaymentsInsightsSection() {
       paymentMethodsDatas: "loading",
       refundRequestDatas: "loading",
   })
-
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
   
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
@@ -55,24 +53,19 @@ export default function PaymentsInsightsSection() {
       const newStats = []
 
       const [paymentStatsResponse, paymentMethodResponse, refundRequestRes] = await Promise.allSettled([
-          axios.get(`${baseApiUrl}/admin/dashboard/payments/stats`, { withCredentials: true }),
-          axios.get(`${baseApiUrl}/admin/dashboard/payments/methods`, { withCredentials: true }),
-          axios.get(`${baseApiUrl}/admin/dashboard/payments/refunds`, { withCredentials: true }),
+          axios.get(`/admin/dashboard/payments/stats`, { withCredentials: true }),
+          axios.get(`/admin/dashboard/payments/methods`, { withCredentials: true }),
+          axios.get(`/admin/dashboard/payments/refunds`, { withCredentials: true }),
       ])
 
       if (paymentStatsResponse.status === "fulfilled") {
           const response = paymentStatsResponse.value
-          console.log("paymentStatsResponse totalWalletPayments----->", response.data.totalWalletPayments)
-          console.log("response.data.refundChangePercent----->", response.data.refundChangePercent)
-
           const changePercent = parseInt(response.data.refundChangePercent)
 
           const changeValue =
               changePercent !== 0 && changePercent !== "N/A"
                   ? (changePercent > 0 ? "+" : "-") + " " + changePercent + "%"
                   : "0 %"
-          console.log("changeValue----->", changeValue)
-
           newStats.push(
               {
                   name: "totalWalletPayments",
@@ -101,37 +94,30 @@ export default function PaymentsInsightsSection() {
                   color: "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
               },
           )
-          console.log("newStats----->", newStats)
-
           setPaymentStats(newStats)
           setStatus((status) => ({ ...status, stats: "success" }))
       } else {
-          console.log("Error in payment stats response:", paymentStatsResponse.reason.message)
           setStatus((status) => ({ ...status, stats: "error" }))
       }
 
       if (paymentMethodResponse.status === "fulfilled") {
           const response = paymentMethodResponse.value
-          console.log("paymentMethodResponse----->", response.data.paymentMethodDatas)
           setPaymentMethodsDatas(response.data.paymentMethodDatas)
           setStatus((status) => ({ ...status, paymentMethodsDatas: "success" }))
       } else {
-          console.log("Error in paymentMethodResponse:", paymentMethodResponse.reason.message)
           setStatus((status) => ({ ...status, paymentMethodsDatas: "error" }))
       }
 
       if (refundRequestRes.status === "fulfilled") {
           const response = refundRequestRes.value
-          console.log("refundRequestRes ----->", response.data.refundRequestDatas)
           setRefundRequestDatas(response.data.refundRequestDatas)
           setStatus((status) => ({ ...status, refundRequestDatas: "success" }))
       } else {
-          console.log("Error in refundRequestRes response:", refundRequestRes.reason.message)
           setStatus((status) => ({ ...status, refundRequestDatas: "error" }))
       }
 
       await axios
-          .get(`${baseApiUrl}/admin/dashboard/payments/customers-by-state`)
+          .get(`/admin/dashboard/payments/customers-by-state`)
           .then((res) => setLocationDatas(res.data))
           .catch((err) => console.error(err))
   }

@@ -76,8 +76,6 @@ export default function AiInsightCards({insightsTemplates, requiredSourceDatas, 
   const hasReturnedExclusive = useRef(false)
   const hasCreatedCards = useRef(false)
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
   const createInsightCards = (aiResponse)=> {
     let aiResponseTopics = Object.keys(aiResponse)
 
@@ -105,7 +103,7 @@ export default function AiInsightCards({insightsTemplates, requiredSourceDatas, 
   const getAiInsights = async()=> {
       setLoading(true)
       try { 
-        const AiInsightResponse = await apiClient.post(`${baseApiUrl}/ai/analyze`, {analysisRequirement: requiredSourceDatas})
+        const AiInsightResponse = await apiClient.post(`/ai/analyze`, {analysisRequirement: requiredSourceDatas})
         if(AiInsightResponse.status === 200){
           createInsightCards(AiInsightResponse.data.aiResponse)
         }

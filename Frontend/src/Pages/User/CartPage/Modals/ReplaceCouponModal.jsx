@@ -18,8 +18,6 @@ export default function ReplaceCouponModal({ isOpen, onClose, putOldCoupon, curr
   const [couponError, setCouponError] = useState(null)
   const {cart} = useSelector(state=> state.cart)
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
   const modalRef = useRef(null)
   useModalHelpers({open: isOpen, onClose, modalRef})
 
@@ -32,7 +30,7 @@ export default function ReplaceCouponModal({ isOpen, onClose, putOldCoupon, curr
   useEffect(()=> {
     async function compareCoupons(){
       try{
-        const response = await apiClient.post( `${baseApiUrl}/coupons/compare`, {newCoupon, currentCoupon})
+        const response = await apiClient.post( `/coupons/compare`, {newCoupon, currentCoupon})
         if(response.status === 200){
           setWinnerDiscountValue(response.data.winnerCoupon.discount)
           if(currentCoupon === response.data.winnerCoupon.code) setWinnerCouponDiscount({currentCoupon: true, newCoupon: false})

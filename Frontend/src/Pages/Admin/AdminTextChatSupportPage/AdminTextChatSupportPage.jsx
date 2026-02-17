@@ -36,8 +36,6 @@ export default function AdminTextChatSupportPage() {
 
   const adminName = "Support Agent"
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
   const {
       isConnected,
       socket,
@@ -47,8 +45,6 @@ export default function AdminTextChatSupportPage() {
       newMessage, 
       setMessages,
       typingUsers, 
-      unreadCounts,
-      setUnreadCounts, 
       notifications,
       setNotifications,
       messagesEndRef, 
@@ -62,8 +58,6 @@ export default function AdminTextChatSupportPage() {
   const handleUserSelect = (user) => {
     setSelectedUser(user)
     setLastSeen(user.lastSeen)
-
-    console.log("Clearing notifications....")
     const notificationForUserExists = notifications.length > 0 && notifications.some(statusObj=> statusObj.sender === user.username)
     if(notificationForUserExists){
       setNotifications(notifications=> {
@@ -80,8 +74,18 @@ export default function AdminTextChatSupportPage() {
 
   useEffect(()=> {
     async function fetchTotalUserCount(){
-      const response = await axios.get(`${baseApiUrl}/totalUsers`, {withCredentials: true})
-      setTotalUsers(response.data.totalUsers)
+      try{
+        const response = await axios.get(`/totalUsers`, {withCredentials: true})
+        if(response?.data.totalUsers) {
+            setTotalUsers(response.data.totalUsers)
+        }
+      }catch(error) {
+        if (!error.response) {
+          sonnerToast.error("Network error while finding total users. Please check your internet.")
+        }else {
+          sonnerToast.error("Something went wrong while finding total users!")
+        }
+      }
     }
     if(!totalUsers){
       fetchTotalUserCount()
@@ -92,9 +96,7 @@ export default function AdminTextChatSupportPage() {
     if(socket){
       socket.on("receive-message", (message) => {
         const selected = selectedUserRef.current
-        console.log(`Now message.sender is ${message.sender} and selectedUser.username is ${selected?.username}`)
         if(message.sender !== adminName && ( !selected || message.sender !== selected.username)){
-          console.log("Setting notification....")
           setNotifications(notifications=> {
             const userExists = notifications.some(statusObj=> statusObj.sender === message.sender)
             if(userExists){
@@ -116,8 +118,6 @@ export default function AdminTextChatSupportPage() {
         }
       })
       socket.on('update-last-seen', (user)=> {
-        console.log("Inside update-last-seen")
-        console.log("selectedUser--->", selectedUser)
         if(selectedUser && selectedUser.username === user.username){
           setLastSeen(user.lastSeen)
         }
@@ -131,10 +131,7 @@ export default function AdminTextChatSupportPage() {
 
   useEffect(()=> {
     scrollToBottom()
-
-    console.log("Messages--->", messages)
     if(selectedUser && messages?.[selectedUser.username]?.length > 0){
-      console.log("messages[messages.length - 1]---->", messages[selectedUser.username][messages.length - 1])
       const lastMsg = messages[selectedUser.username][messages[selectedUser.username].length - 1]
       const isLastMsgByAdmin = lastMsg.isAdmin
       if(!isLastMsgByAdmin){
@@ -144,27 +141,12 @@ export default function AdminTextChatSupportPage() {
   }, [messages, selectedUser])
 
   useEffect(()=> {
-    console.log("typingUsers--->", typingUsers)
     if(selectedUser){
-      console.log("selectedUser.username--->", selectedUser.username)
       setLastSeen(selectedUser.lastSeen)
     }
     if(notifications){
-      console.log("notifications--->", notifications)
     }
   },[typingUsers, selectedUser, activeUsers, notifications])
-
-  // useEffect(()=> {
-  //   if(activeUsers && activeUsers.length > 0){
-  //     if(offlineUsers && offlineUsers.length > 0){
-  //       activeUsers.forEach(user=> {
-  //         if(offlineUsers.some(offlineUser=> offlineUser.username === user.username)){
-  //           offlineUsers.filter(offlineUser=>Z)
-  //         }
-  //       })
-  //     }
-  //   }
-  // }, [activeUsers, offlineUsers])
 
   useEffect(() => {
     if (!activeUsers?.length) return
@@ -188,7 +170,6 @@ export default function AdminTextChatSupportPage() {
     )
 
     if (matchedUser && !selectedUser.socketId) {
-      console.log('Selectig the same user from activeUsers')
       setSelectedUser(matchedUser)
       setLastSeen(matchedUser.lastSeen)
     }
@@ -200,10 +181,9 @@ export default function AdminTextChatSupportPage() {
   }
 
   const getAdminChatHistory = async()=> {
-    console.log("Inside getAdminChatHistory()...") 
     if (!hasMoreUsersChats) return 
     try { 
-      const response = await axios.get(`${baseApiUrl}/chat/history?page=${currentHistoryPage}&limit=${limit}`, { withCredentials: true })
+      const response = await axios.get(`/chat/history?page=${currentHistoryPage}&limit=${limit}`, { withCredentials: true })
       if(response.status === 200){
         const usersDatas = response.data.users.map(user=> ({
           username: user.username, userId: user._id, lastSeen: user.lastSeen, isOnline: false, socketId: null, isOfflineMsg: true
@@ -214,41 +194,48 @@ export default function AdminTextChatSupportPage() {
         setCurrentHistoryPage(page=> page + 1)
       }
     }catch (error) {
-      console.error("Error while sending message to the user:", error.message)
-      sonnerToast.error('Something went wrong! Please retry later.')
+      sonnerToast.error('Something went wrong while loading the chat history! Try refreshing the page.')
     }
   }
 
   const getOfflineUser = async(username)=> {
-    console.log("Inside getOfflineUser()...") 
     try { 
-      const response = await axios.get(`${baseApiUrl}/user/${username}`, { withCredentials: true })
+      const response = await axios.get(`/user/${username}`, { withCredentials: true })
       if(response.status === 200){
-        console.log("response.data.user----------->", response.data.user)
         return response.data.user
       }
-      if(response.status === 404){
-        console.log("Error---->", error.response.data.message)
-        sonnerToast.error(error.response.data.message)
-      }
     }catch (error) {
-      console.log("Error while getting user-->", error.message)
-      sonnerToast.error('Something went wrong! Please retry later.')
+      if (!error.response) {
+        sonnerToast.error("Network error. Please check your internet.")
+      } else if (error.response?.status === 404) {
+        sonnerToast.error(error.response.data.message)
+      } else {
+        sonnerToast.error("Something went wrong while finding the total offline users!")
+      }
     }
   }
 
   const fetchUsernameList = (searchTerm)=> {
     async function fetchUsernames(){
-      const response = await axios.get(`${baseApiUrl}/search/${searchTerm}`, {withCredentials: true})
-      console.log("response from fetchUserId--->", response)
-      const usernames = response.data.usernames
-      if(usernames.length > 0){
-        toggleDropdown('searchResultDropdown')
-        setUsernameList({searched: true, list: usernames})
-      }else{
-        toggleDropdown('searchResultDropdown')
-        setUsernameList({searched: true, list: []})
-      }    
+      try {
+        const response = await axios.get(`/search/${searchTerm}`, {withCredentials: true})
+        if(response?.data.usernames) {
+            const usernames = response.data.usernames
+            if(usernames.length > 0){
+              toggleDropdown('searchResultDropdown')
+              setUsernameList({searched: true, list: usernames})
+            }else{
+              toggleDropdown('searchResultDropdown')
+              setUsernameList({searched: true, list: []})
+            }
+        }
+      }catch (error) {
+        if (!error.response) {
+        sonnerToast.error("Network error. Please check your internet.")
+        }else {
+          sonnerToast.error("Internal server error! Please try later")
+        }
+      }
     } 
     fetchUsernames({searched: false, list: []})
   }
@@ -260,11 +247,8 @@ export default function AdminTextChatSupportPage() {
   ).current; 
 
   const searchUsernames = (e)=> {
-    console.log("Inside searchUsernames")
     const searchTerm = e.target.value
-    console.log('searchTerm--->', searchTerm)
     if(searchTerm.trim() !== ''){
-        console.log("Getting searched usernames--")
         debouncedUsernameSearch(searchTerm)
     } 
     else{
@@ -273,7 +257,6 @@ export default function AdminTextChatSupportPage() {
   }
 
   const selectSearchedUser = async(username)=> {
-    console.log("Insdie selectSearchedUser...")
     const user = activeUsers.find(user=> user.username === username && user.isOnline)
     if(user){
       setInitialActiveUser(user)

@@ -42,17 +42,15 @@ export default function SalesRevenueSection() {
 
   const COLORS = ["#8b5cf6", "#cb8ef5", "#f1c40f", "#d7f148"]
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
   const fetchAllStats = async () => {
       const newStats = []
 
       const [revenueResponse, avgOrdersResponse, totalOrdersResponse, categoryDatasResponse] = await Promise.allSettled(
           [
-              axios.get(`${baseApiUrl}/admin/dashboard/revenue/total`, { withCredentials: true }),
-              axios.get(`${baseApiUrl}/admin/dashboard/orders/average`, { withCredentials: true }),
-              axios.get(`${baseApiUrl}/admin/dashboard/orders/total`, { withCredentials: true }),
-              axios.get(`${baseApiUrl}/admin/dashboard/revenue/category`, { withCredentials: true }),
+              axios.get(`/admin/dashboard/revenue/total`, { withCredentials: true }),
+              axios.get(`/admin/dashboard/orders/average`, { withCredentials: true }),
+              axios.get(`/admin/dashboard/orders/total`, { withCredentials: true }),
+              axios.get(`/admin/dashboard/revenue/category`, { withCredentials: true }),
           ],
       )
 
@@ -70,7 +68,6 @@ export default function SalesRevenueSection() {
               color: "bg-purple-50 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400",
           })
       } else {
-          console.log("Error in total revenue:", revenueResponse.reason.message)
           statsError = true
       }
 
@@ -86,7 +83,6 @@ export default function SalesRevenueSection() {
               color: "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
           })
       } else {
-          console.log("Error in avg orders:", avgOrdersResponse.reason.message)
           statsError = true
       }
 
@@ -102,7 +98,6 @@ export default function SalesRevenueSection() {
               color: "bg-orange-50 text-primaryDark dark:bg-orange-900/30 dark:text-orange-400",
           })
       } else {
-          console.log("Error in total orders:", totalOrdersResponse.reason.message)
           statsError = true
       }
 
@@ -119,13 +114,10 @@ export default function SalesRevenueSection() {
       })
 
       if (categoryDatasResponse.status === "fulfilled") {
-          console.log("Inside categoryDatasResponse..")
           const value = categoryDatasResponse.value.data.categoryDatas
-          console.log("setting categoryDatas--->", categoryDatasResponse.value.data.categoryDatas)
           setCategoryDatas(value)
           setStatus((status) => ({ ...status, revenueByCategory: "success" }))
       } else {
-          console.log("Error in total orders:", categoryDatasResponse.reason.message)
           setStatus((status) => ({ ...status, revenueByCategory: "error" }))
       }
   }
@@ -138,7 +130,6 @@ export default function SalesRevenueSection() {
   }, [fetchChartData])
   
   useEffect(()=> {
-    console.log("stats--->", stats)
     const priorityOrder = ['totalRevenue', 'avgOrders', 'totalOrders']
 
     const orderedStats = stats.sort(
@@ -149,26 +140,20 @@ export default function SalesRevenueSection() {
 
   useEffect(()=> { 
     const loadRevenueDatas = async()=> {
-      console.log("Inside loadRevenueDatas")
-      console.log("activeTab--->", activeTab)
       try{
         let response = null
         if(activeTab === 'monthly'){
-          console.log("Inide activeTab === 'monthly'")
-          response = await axios.get(`${baseApiUrl}/admin/dashboard/revenue/monthly`, { withCredentials: true })
+          response = await axios.get(`/admin/dashboard/revenue/monthly`, { withCredentials: true })
         }
         if(activeTab === 'weekly'){
-          console.log("Inide activeTab === 'weekly'")
-          response = await axios.get(`${baseApiUrl}/admin/dashboard/revenue/weekly`, { withCredentials: true })
+          response = await axios.get(`/admin/dashboard/revenue/weekly`, { withCredentials: true })
         }
-        console.log("response.data---->", response.data)
         if(response?.data){
           setStatus((status) => ({ ...status, revenueTrendsData: "success" }))
           setRevenueDatas(response.data.revenueDatas) 
         }
       }
       catch(error){
-        console.log("Error in loadRevenueDatas-->", error.message)
         setStatus((status) => ({ ...status, revenueTrendsData: "error" }))
       }
     }
@@ -176,9 +161,8 @@ export default function SalesRevenueSection() {
       loadRevenueDatas(activeTab)
     }
     const loadHourlyRevenue = async()=> {
-      console.log("loadHourlyRevenue")
       try{
-        const response = await axios.get(`${baseApiUrl}/admin/dashboard/revenue/hourly/:${salesDate}`, { withCredentials: true })
+        const response = await axios.get(`/admin/dashboard/revenue/hourly/:${salesDate}`, { withCredentials: true })
         if(response.data){
             setHourlySalesDatas(response.data.daySalesDatas)
             setStatus((status) => ({ ...status, hourlySalesDatas: "success" }))
@@ -192,11 +176,6 @@ export default function SalesRevenueSection() {
       loadHourlyRevenue()
     }
   },[activeTab, salesDate])
-
-  useEffect(()=> {
-    console.log("hourlySalesDatas---->", hourlySalesDatas)
-    console.log("categoryDatas---->", categoryDatas)
-  },[hourlySalesDatas, categoryDatas])
 
   const tabs = [
     { id: "weekly", label: "Weekly" },

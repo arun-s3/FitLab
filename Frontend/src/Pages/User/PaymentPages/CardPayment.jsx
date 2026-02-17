@@ -18,8 +18,6 @@ const CardPayment = forwardRef( ({onPayment, payButtonText, displayError}, ref)=
   const stripe = useStripe()
   const elements = useElements()
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
   const handleElementChange = (e)=> {
     if(!e.complete){
       setIsDisabled(true)
@@ -55,7 +53,7 @@ const CardPayment = forwardRef( ({onPayment, payButtonText, displayError}, ref)=
           paymentId: paymentIntent.id,
           paymentMethod: "stripe",
         }
-        await apiClient.post(`${baseApiUrl}/payment/stripe/save`, {paymentDatas})
+        await apiClient.post(`/payment/stripe/save`, {paymentDatas})
         onPayment(paymentIntent.id)
       }
     

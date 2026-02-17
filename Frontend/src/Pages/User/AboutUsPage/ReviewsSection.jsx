@@ -64,13 +64,11 @@ export default function ReviewsSection() {
   const isInView = useInView(ref, { once: true, amount: 0.3 })
 
   const [testimonials, setTestimonials] = useState([])
-
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
     
   useEffect(() => {
     async function loadTestimonials() {
       try {   
-        const response = await apiClient.get(`${baseApiUrl}/testimony/top`)
+        const response = await apiClient.get(`/testimony/top`)
 
         if(response.status === 200){
           const fetchedTestimonials = response.data.testimonies.slice(0,4).map((testimony) => {

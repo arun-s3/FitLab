@@ -13,8 +13,6 @@ export default function ErrorPage404() {
   const {admin} = useSelector(state=> state.admin)
   const {user} = useSelector(state=> state.user)
   
-  console.log("Inside PrivateAdminRoutes", user && !user.isAdmin)
-
   const goToHome = ()=> {
     user && !user.isAdmin && !admin
         ?  user.isBlocked

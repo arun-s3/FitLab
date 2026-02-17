@@ -21,11 +21,9 @@ export default function ContactUsPage(){
 
   const {isConnected, isAdminOnline} = useContext(SocketContext)
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
   const handleSubmit = async({details}) => {
     try { 
-      const response = await apiClient.post(`${baseApiUrl}/contact`, {details})
+      const response = await apiClient.post(`/contact`, {details})
       if(response.status === 201){
         sonnerToast.success(response.data.message, {duration: 4500})
         return true

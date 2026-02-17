@@ -17,8 +17,6 @@ export default function WorkoutAiInsights() {
 
     const [error, setError] = useState(null)
 
-    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
     const insightsTemplates = [
         {
           id: 1,
@@ -75,7 +73,7 @@ export default function WorkoutAiInsights() {
     const getInsightDataSources = async()=> {
         setLoading(true)
         try { 
-          const latestWorkoutResponse = await apiClient.get(`${baseApiUrl}/fitness/tracker/workout/latest`)
+          const latestWorkoutResponse = await apiClient.get(`/fitness/tracker/workout/latest`)
 
           if(latestWorkoutResponse.status === 200){ 
             const { latestWorkout, prevExercise, trackerId } = latestWorkoutResponse.data

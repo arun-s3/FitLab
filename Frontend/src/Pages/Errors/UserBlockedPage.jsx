@@ -1,7 +1,7 @@
 import React, {useState} from 'react'
 import {motion} from "framer-motion"
 
-import {Mail, Phone, MapPin, Shield, AlertTriangle, ArrowLeft} from "lucide-react"
+import {Mail, Phone, MapPin, AlertTriangle} from "lucide-react"
 
 import TextChatBox from '../../Pages/User/TextChatBox/TextChatBox'
 

@@ -19,8 +19,6 @@ export default function ResetPasswordBox({setOpenSecurityMenu, admin}){
   const [error, setError] = useState({current: false, new: false, confirm: false, value:''})
   const [loading, setLoading] = useState(false)
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
   const requirementSubtitles = [
     {value: 'At least 1 upper case letter (A-Z)', requirement: requirements.uppercase},
     {value: 'At least 1 special character(@#$%^&*,etc)', requirement: requirements.specialChars},
@@ -82,11 +80,11 @@ export default function ResetPasswordBox({setOpenSecurityMenu, admin}){
       try{
         let response = null
         if(admin) {
-            response = await apiClient.post(`${baseApiUrl}/admin/password/update`, {
+            response = await apiClient.post(`/admin/password/update`, {
                 currentPassword: passwords.current, newPassword: passwords.new, confirmPassword: passwords.confirm
             })
         }else{
-            response = await apiClient.post(`${baseApiUrl}/password/update`, {
+            response = await apiClient.post(`/password/update`, {
                 currentPassword: passwords.current, newPassword: passwords.new, confirmPassword: passwords.confirm
             })
         }

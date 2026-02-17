@@ -3,7 +3,6 @@ import './AdminAddAndEditCategoryPage.css'
 import {useDispatch, useSelector} from 'react-redux'
 import {useNavigate, useLocation, useOutletContext} from 'react-router-dom'
 
-import {IoArrowBackSharp} from "react-icons/io5"
 import {BiCategory} from "react-icons/bi"
 import {MdOutlineCategory, MdArrowDropDown} from "react-icons/md"
 import {CgDetailsMore} from "react-icons/cg"
@@ -21,7 +20,6 @@ import CategoryDisplay from '../../../Components/CategoryDisplay/CategoryDisplay
 import useFlexiDropdown from '../../../Hooks/FlexiDropdown'
 import { SiteButtonSquare } from '../../../Components/SiteButtons/SiteButtons'
 import {createCategory, getAllCategories, getCategoryNames, updateCategory, resetStates} from '../../../Slices/categorySlice'
-import {SearchInput} from '../../../Components/FromComponents/FormComponents'
 import {CustomHashLoader} from '../../../Components/Loader/Loader'
 import PlaceholderIcon from '../../../Components/PlaceholderIcon/PlaceholderIcon'
 import {DateSelector} from '../../../Components/Calender/Calender'
@@ -61,18 +59,10 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
 
     const hiddenInputRef = useRef(null)
 
-    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
     const {setPageBgUrl} = useOutletContext() 
     setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.95),rgba(255,255,255,0.95)), url('/Images/admin-bg1.png')`)
 
     useEffect(()=>{
-        console.log("CATEGORYDATA-->", JSON.stringify(categoryData))
-    },[categoryData])
-
-    useEffect(()=>{
-        console.log("Images-->", JSON.stringify(images))
-        console.log("Related category--->", JSON.stringify(relatedCategory))
         setCategoryData({...categoryData, images, parentCategory, relatedCategory, startDate, endDate})
     },[images, parentCategory, relatedCategory, startDate, endDate])
 
@@ -98,15 +88,12 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
     },[radioCheckedCategory])
 
     useEffect(()=> {
-        console.log("manualCheckCategory--->", JSON.stringify(manualCheckCategory))
         const relatedCategories = Object.keys(manualCheckCategory).filter(cat=> manualCheckCategory[cat] == true)
         setRelatedCategory(relatedCategories)
     },[manualCheckCategory])
 
     useEffect(() => {
         if(location?.state?.category){
-           console.log("location.state-->", JSON.stringify(location.state));
-           console.log("location.state.category._id-->", JSON.stringify(location.state.category._id));
            editCategoryItem.current = location.state.category;
            dispatch(getCategoryNames({id: location.state.category._id}))
         }
@@ -114,10 +101,8 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
 
    const loadCategoryInfo = async(id)=> {
         try{
-            console.log("Inside loadCategoryInfo...")
-            const response = await axios.get(`${baseApiUrl}/admin/products/category/${id}`, { withCredentials: true })
+            const response = await axios.get(`/admin/products/category/${id}`, { withCredentials: true })
             if(response && response.status === 200){
-                console.log('response.data.category----->', response.data.category)
                 return {
                     parentCategory: response.data.category.parentCategory.name,
                     relatedCategory: response.data.category.relatedCategory.map(cat=> cat.name)
@@ -125,26 +110,26 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
             }
         }
         catch(error){
-            console.log("Error inside loadCategoryInfo--->", error.message)
+            if (!error.response) {
+              sonnerToast.error("Network error. Please check your internet.")
+            }else {
+              sonnerToast.error("Something went wrong! Please retry later.")
+              navigate(-1)
+            }
         }
    }
 
     useEffect(()=>{
         if(editCategoryItem.current){
-            console.log("Inside useEffect() for tempDatas----")
         const convertToBlob = async (url) => {
             try {
                 const response = await fetch(url, {mode: 'cors'});
                 return await response.blob();
             } catch (error) {
-                console.log("Error in convertToBlob-->", error.message);
+                sonnerToast.error("Error while loading the thumbnail!")
             }
         }
         const loadCategoryData = async () => {   
-                console.log("tempDatas.relatedCategoryNames-->",tempDatas.relatedCategoryNames) 
-                console.log("tempDatas.parentCategoryName-->",tempDatas.parentCategoryName) 
-                console.log("editCategoryItem.current-->",editCategoryItem.current) 
-                console.log("editCategoryItem.current?.seasonalActivation?-->",editCategoryItem.current?.seasonalActivation) 
                 setCategoryData({
                     "categoryName": editCategoryItem.current.name,
                     "categoryDescription": editCategoryItem.current.description,
@@ -160,8 +145,6 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
                 const categoryParentAndRelated = await loadCategoryInfo(editCategoryItem.current._id)
                 setParentCategory(categoryParentAndRelated.parentCategory || null)
                 setRelatedCategory(categoryParentAndRelated.relatedCategory || [])
-
-                console.log('image from state of location on Edit-->', JSON.stringify(editCategoryItem.current.image))
                 const blob = await convertToBlob(editCategoryItem.current.image.url);
                 const newImage = {...editCategoryItem.current.image, blob};
                 setImages([newImage]);
@@ -171,7 +154,6 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
     },[tempDatas])
 
     useEffect(()=>{
-        console.log(`Inside useEffect for productCreated, productUpdated success, productUpdated-${categoryUpdated} productCreated-${categoryCreated}`)
         if(categoryCreated){
             categoryCreated && sonnerToast.success('Created category succesfully!')
             dispatch(resetStates())
@@ -191,7 +173,6 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
     },[categoryCreated, categoryUpdated])
 
     const changeHandler = (e, fieldName)=>{
-        console.log(" inside Changehandler")
         if(fieldName == 'categoryBadge'){
             const listNode = badgeListRef.current
             listNode.style.visibility = 'hidden'
@@ -205,7 +186,6 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
     const badgeFocusHandler = (e)=>{ e.target.parentElement.previousElementSibling.style.display = 'none' }
 
     const inputBlurHandler = (e, fieldName, options)=>{
-         console.log("inside inputBlurHandler, fieldname", fieldName)
          if(!fieldName=='categoryBadge'){
             e.target.value.trim()? null : e.target.previousElementSibling.style.display = 'inline-block'
          }else{
@@ -214,9 +194,7 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
          if(fieldName){
             const value = e.target.value
             const statusObj = (options?.optionalField) ? handleInputValidation(fieldName, value, {optionalField: true}) : handleInputValidation(fieldName, value)
-            console.log("statusObj from inputBlurHandler--> ", JSON.stringify(statusObj))
             if(!statusObj.error && statusObj.message.startsWith("Optional")){
-                console.log("Inside here----")
                 e.target.nextElementSibling.textContent = ''
                 e.target.style.borderColor = primaryColor.current
                 return
@@ -232,7 +210,6 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
     }
 
     const showList = (e)=>{
-        console.log("Inside showList")
         const listNode = e.target.id == 'category-badge' ? badgeListRef.current : e.currentTarget.nextElementSibling
         if(listNode.style.visibility === 'visible'){
             listNode.style.visibility = 'hidden'
@@ -257,18 +234,14 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
         }
         if(categoryType=='relatedCategory'){
             if(e.target.checked){
-                console.log("Inside if e.target.checked")
                 if(relatedCategory.length < 2){
-                    console.log("Only 2 related categories allowed")
                     e.target.checked = true
                     setRelatedCategory([...relatedCategory, name])
                 }else{
-                    console.log("closing--")
                     e.target.checked = false
                     closeList()
                 }
             }else{
-                console.log("Inside else e.target.checked")
                 e.target.checked = false
                 setRelatedCategory(relatedCat=> relatedCat.filter(cat=> cat!==name))
             }   
@@ -285,18 +258,10 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
     const submitHandler = async (e)=>{
 
         if(!images.length) delete categoryData['images']
-        console.log("Inside submitData()--", JSON.stringify(categoryData))
         const requiredFields = ["categoryName","categoryDescription","images"]
-        console.log("(Object.keys(categoryData).length >= 3)-->", Object.keys(categoryData).length >= 3)
-        console.log("requiredFields.every(field=> Object.keys(categoryData).includes(field) )-->", requiredFields.every(field=> Object.keys(categoryData).includes(field) ))
-        console.log("Object.values(categoryData).find(inputValues=> inputValues !== 'undefined')-->", Object.values(categoryData).find(inputValues=> inputValues !== 'undefined'))
         if( (Object.keys(categoryData).length >= 3 && requiredFields.every(field=> Object.keys(categoryData).includes(field) )) && Object.values(categoryData).find(inputValues=> inputValues !== 'undefined')){
-            console.log("Inside else(no errors) of submitData() ")
-            console.log("categoryData now-->"+JSON.stringify(categoryData))
             const formData = new FormData()
             const {images, ...rest} = categoryData
-            console.log("Image-->", JSON.stringify(images))
-            console.log("rest-->", JSON.stringify(rest))
             for (let field in rest){
                 if( Array.isArray(rest[field]) ){
                     rest[field].forEach((item) => {
@@ -321,19 +286,14 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
             for(let field in categoryData){
                 !categoryData[field] && delete categoryData[field]
             }
-            console.log("CATEGORYDATA BEFORE DISPATCHING-->", JSON.stringify(categoryData))
-            console.log("FORMDATA BEFORE DISPATCHING-->", formData)
             editCategory? dispatch( updateCategory( {formData, id: editCategoryItem.current._id}) ) : dispatch( createCategory( {formData}) )
-            console.log("DISPATCHED SUCCESSFULLY--")
             sonnerToast.info("Uploading the informations...")
         } 
         else{
             if(!Object.keys(categoryData).length){
-                console.log("No Fields entered!")
                 sonnerToast.error("Please enter all the fields!", {description: "Some required details are missing. Fill them in to continue."})
             }
             else{
-                console.log("Check errors"+JSON.stringify(categoryData))
                 sonnerToast.error("Please check the fields and submit!", {description: "Some required details are wrong. Check them and continue."})
             }
         }

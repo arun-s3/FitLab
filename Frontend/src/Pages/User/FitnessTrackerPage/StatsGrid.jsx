@@ -70,14 +70,12 @@ export default function StatsGrid({ timeRange, onFetchedDatas }) {
       color: "from-green-500 to-green-600",
     },
   ])
-
-    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
   
     useEffect(() => {
       const fetchAllStats = async ()=> {    
         setLoading(true) 
         try{
-          const response = await apiClient.get(`${baseApiUrl}/fitness/tracker/stats/${timeRange}`)
+          const response = await apiClient.get(`/fitness/tracker/stats/${timeRange}`)
           if(response.status === 200){
             const {totalWorkouts, totalVolumes, totalCaloriesBurned, currentStreak} = response.data.stats
             onFetchedDatas("stats", {totalWorkouts, totalVolumes, totalCaloriesBurned, currentStreak})

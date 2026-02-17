@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect } from "react"
 import './FutureRevenueChart.css'
 import {useOutletContext} from 'react-router-dom'
 
@@ -9,7 +9,6 @@ import {MdTipsAndUpdates} from "react-icons/md"
 import {IoPricetagsOutline} from "react-icons/io5"
 import {RiUserHeartLine} from "react-icons/ri"
 import {toast as sonnerToast} from 'sonner'
-import {toast} from 'react-toastify'
 import axios from 'axios'
 
 import AiInsightCards from "../../../Components/AiInsightCards/AiInsightCards"
@@ -36,8 +35,6 @@ export default function AdminAiInsightsPage(){
 
     const {setPageBgUrl} = useOutletContext()
     setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.94),rgba(255,255,255,0.94)), url('/Images/admin-aiInsights.png')`)
-
-    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
     const insightsTemplates = [
         {
@@ -120,16 +117,13 @@ export default function AdminAiInsightsPage(){
     }
     
     const getInsightDataSources = async()=> {
-        console.log("Inside getInsightDataSources...") 
         setLoading(true)
         try {  
-            const latestInsightResponse = await axios.get(`${baseApiUrl}/ai/insights/business`, { withCredentials: true })
+            const latestInsightResponse = await axios.get(`/ai/insights/business`, { withCredentials: true })
 
             if(latestInsightResponse.status === 200){ 
-                console.log("latestInsightResponse.data.businessInsightDoc------->", latestInsightResponse.data.businessInsightDoc)     
                 const businessInsightDoc = latestInsightResponse.data.businessInsightDoc    
                 if (businessInsightDoc) {
-                    console.log("Returning cached AI response")
                     setDashboardInsights(businessInsightDoc.insights)
                     return
                 }else{
@@ -143,7 +137,7 @@ export default function AdminAiInsightsPage(){
             } 
 
         }catch (error) {
-          console.error("Error while fetching latest insight datas", error.message)
+          sonnerToast.error("Error while fetching latest insight datas")
           showError()
         }finally{
           setLoading(false)
@@ -163,67 +157,55 @@ export default function AdminAiInsightsPage(){
             const [
                 orderOverTimeRes, avgOrdersRes, monthlyRevenueRes, userGrowthRes, discountImpactRes, refundRequestRes
             ] = await Promise.allSettled([
-                axios.get(`${baseApiUrl}/admin/dashboard/orders/stats/monthly`, { withCredentials: true }),
-                axios.get(`${baseApiUrl}/admin/dashboard/orders/average`, { withCredentials: true }),
-                axios.get(`${baseApiUrl}/admin/dashboard/revenue/monthly`, { withCredentials: true }),
-                axios.get(`${baseApiUrl}/admin/dashboard/customers/monthly`, { withCredentials: true }),
-                axios.get(`${baseApiUrl}/admin/dashboard/coupons/impact`, { withCredentials: true }),
-                axios.get(`${baseApiUrl}/admin/dashboard/payments/refunds`, { withCredentials: true })
+                axios.get(`/admin/dashboard/orders/stats/monthly`, { withCredentials: true }),
+                axios.get(`/admin/dashboard/orders/average`, { withCredentials: true }),
+                axios.get(`/admin/dashboard/revenue/monthly`, { withCredentials: true }),
+                axios.get(`/admin/dashboard/customers/monthly`, { withCredentials: true }),
+                axios.get(`/admin/dashboard/coupons/impact`, { withCredentials: true }),
+                axios.get(`/admin/dashboard/payments/refunds`, { withCredentials: true })
             ])
         
             if (orderOverTimeRes.status === 'fulfilled'){ 
                 const response = orderOverTimeRes.value
-                console.log("orderOverTimeRes response----->", response.data.ordersOverTime) 
                 newStats = {...newStats, ordersOverTime: response.data.ordersOverTime} 
             }else{
-                console.log("Error in total revenue:", orderOverTimeRes.reason.message)
                 showError()
             }
         
             if (avgOrdersRes.status === 'fulfilled'){
                 const response = avgOrdersRes.value
-                console.log("avgOrdersRes ----->", response.data.averageOrderTotal) 
                 newStats = {...newStats, averageOrders: response.data.averageOrderTotal} 
             }else{
-                console.log("Error in avg orders:", avgOrdersRes.reason.message)
                 showError()
             } 
 
             if (monthlyRevenueRes.status === 'fulfilled') { 
                 const response = monthlyRevenueRes.value
-                console.log("monthlyRevenueRes ----->", response.data.revenueDatas) 
                 newStats = {...newStats, monthlyRevenueDatas: response.data.revenueDatas}
             }else{
-              console.log("Error in total orders:", totalOrdersResponse.reason.message) 
               showError()
             }
 
             if (userGrowthRes.status === 'fulfilled') {
                 const response = userGrowthRes.value
-                console.log("userGrowthResponse response----->", response.data.monthlyUserGrowthData) 
                 newStats = {...newStats, monthlyUserGrowthDatas: response.data.monthlyUserGrowthData}
             }else{
-              console.log("Error in total orders:", userGrowthRes.reason.message) 
               showError()
             }
 
             if (discountImpactRes.status === 'fulfilled'){
                 const response = discountImpactRes.value
-                console.log("discountImpactRes response----->", response.data) 
                 newStats = {...newStats, couponDiscountImpacts: response.data}
             }
             else{
-                console.log("Error in user coupon redemption response:", discountImpactRes.reason.message)
                 showError()
             }
 
             if (refundRequestRes.status === 'fulfilled'){
                 const response = refundRequestRes.value
-                console.log("refundRequestRes ----->", response.data.refundRequestDatas) 
                 newStats = {...newStats, refundRequestDatas: response.data.refundRequestDatas}
             }
             else{
-                console.log("Error in refundRequestRes response:", refundRequestRes.reason.message)
                 showError()
             }
 
@@ -252,7 +234,6 @@ export default function AdminAiInsightsPage(){
     }, [dashboardDatas])
 
     useEffect(()=> {
-      console.log("propabilityAndSuggestionInsights----->", propabilityAndSuggestionInsights) 
       if(propabilityAndSuggestionInsights){
         setFutureMonthlyRevenueTrends(propabilityAndSuggestionInsights["Probable Monthly Revenue Trends"])
       }

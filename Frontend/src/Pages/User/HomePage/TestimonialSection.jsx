@@ -11,8 +11,6 @@ export default function TestimonialSection(){
   const [visibleTestimonials, setVisibleTestimonials] = useState([])
   const [currentIndex, setCurrentIndex] = useState(0)
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
   const extraTestimonials = [
     {
       _id: 1,
@@ -55,7 +53,7 @@ export default function TestimonialSection(){
   useEffect(() => {
     async function loadTestimonials() {
       try {   
-        const response = await apiClient.get(`${baseApiUrl}/testimony/top`)
+        const response = await apiClient.get(`/testimony/top`)
         if(response?.data?.testimonies) {
           const fetchedTestimonials = response.data.testimonies.map((testimony) => {
             const { userId, ...rest } = testimony

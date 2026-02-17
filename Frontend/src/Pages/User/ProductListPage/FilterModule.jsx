@@ -31,8 +31,6 @@ export default function FilterModule({filter, setFilter, rating, setRating, popu
     const [popularProductsShowLabel, setPopularProductsShowLabel] = useState('See more')
     const [morePopularProducts, setMorePopularProducts] = useState(0)
 
-    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
     useEffect(()=>{
         if(firstSlideRef.current){
             setFilter({...filter, minPrice, maxPrice})
@@ -42,7 +40,7 @@ export default function FilterModule({filter, setFilter, rating, setRating, popu
     useEffect(()=> {
         async function getCategoryName(){
             try{
-                const response = await apiClient.get(`${baseApiUrl}/admin/products/category/id/${categoryType}`)
+                const response = await apiClient.get(`/admin/products/category/id/${categoryType}`)
                 setShowSubcategoriesOf({id: response.data.id, subCategory: response.data.subCategory})
               }
               catch(error){

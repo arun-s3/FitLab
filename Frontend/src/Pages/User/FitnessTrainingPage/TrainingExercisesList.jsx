@@ -14,15 +14,13 @@ import TermsDisclaimer from "../../../Components/TermsDisclaimer/TermsDisclaimer
 export default function TrainingExercisesList({selectedBodyParts, searchQuery, exercises, isLoading, fetchError, currentPage, totalPages, 
     refetchExercises, onSelectExercise, onPageChange, onfetchMusclesAndEquipments, children}){
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
   useEffect(()=> {
     async function loadMusclesAndEquipments(){
       try {
         let items = {muscles: [], equipments: []}
         const [musclesResponse, equipmentsResponse] = await Promise.allSettled([
-            await apiClient.get(`${baseApiUrl}/fitness/exercises/muscles`),
-            await apiClient.get(`${baseApiUrl}/fitness/exercises/equipments`),
+            await apiClient.get(`/fitness/exercises/muscles`),
+            await apiClient.get(`/fitness/exercises/equipments`),
         ])
         
         if (musclesResponse.status === 'fulfilled'){

@@ -26,8 +26,6 @@ export default function FitnessAiInsights({receivedSourceDatas, periodType}) {
 
     const [error, setError] = useState(null)
 
-    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
     const insightsTemplates = [   
         {
           id: 1,
@@ -94,7 +92,7 @@ export default function FitnessAiInsights({receivedSourceDatas, periodType}) {
     const getInsightDataSources = async()=> {
         setLoading(true)
         try {  
-          const latestInsightResponse = await apiClient.get(`${baseApiUrl}/ai/insights/tracker`)
+          const latestInsightResponse = await apiClient.get(`/ai/insights/tracker`)
           
           if(latestInsightResponse.status === 200){ 
             const { week, month } = latestInsightResponse.data

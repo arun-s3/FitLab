@@ -40,8 +40,6 @@ export default function InventoryInsightsSection() {
   const dispatch = useDispatch()
   const { productRestocked } = useSelector((state) => state.productStore)
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
   useEffect(() => {
       if (productRestocked) {
         sonnerToast.success("Product restocked succesfully!")
@@ -63,15 +61,13 @@ export default function InventoryInsightsSection() {
       const newStats = []
 
       const [productStockResponse, productLowStockResponse, categoryStockDatasResponse] = await Promise.allSettled([
-          axios.get(`${baseApiUrl}/admin/dashboard/products/stock`, { withCredentials: true }),
-          axios.get(`${baseApiUrl}/admin/dashboard/products/stock/low`, { withCredentials: true }),
-          axios.get(`${baseApiUrl}/admin/dashboard/category/stock`, { withCredentials: true }),
+          axios.get(`/admin/dashboard/products/stock`, { withCredentials: true }),
+          axios.get(`/admin/dashboard/products/stock/low`, { withCredentials: true }),
+          axios.get(`/admin/dashboard/category/stock`, { withCredentials: true }),
       ])
 
       if (productStockResponse.status === "fulfilled") {
           const response = productStockResponse.value
-          console.log("productStockResponse totalProducts----->", response.data.totalProducts)
-
           newStats.push(
               {
                   name: "totalProducts",
@@ -95,32 +91,25 @@ export default function InventoryInsightsSection() {
                   color: "bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400",
               },
           )
-          console.log("newStats----->", newStats)
-
           setProductStats(newStats)
           setStatus((status) => ({ ...status, stats: "success" }))
       } else {
-          console.log("Error in product stock response:", productStockResponse.reason.message)
           setStatus((status) => ({ ...status, stats: "error" }))
       }
 
       if (productLowStockResponse.status === "fulfilled") {
           const response = productLowStockResponse.value
-          console.log("productLowStockResponse----->", response.data.lowStockDatas)
           setLowStockDatas(response.data.lowStockDatas)
           setStatus((status) => ({ ...status, lowStockDatas: "success" }))
       } else {
-          console.log("Error in productLowStockResponse:", productLowStockResponse.reason.message)
           setStatus((status) => ({ ...status, lowStockDatas: "error" }))
       }
 
       if (categoryStockDatasResponse.status === "fulfilled") {
           const response = categoryStockDatasResponse.value
-          console.log("categoryStockDatasResponse ----->", response.data.categoryStockDatas)
           setCategoryStockDatas(response.data.categoryStockDatas)
           setStatus((status) => ({ ...status, categoryStockDatas: "success" }))
       } else {
-          console.log("Error in categoryStockDatas response:", categoryStockDatasResponse.reason.message)
           setStatus((status) => ({ ...status, categoryStockDatas: "error" }))
       }
   }
@@ -165,15 +154,12 @@ export default function InventoryInsightsSection() {
   }
 
   const handleRestockProduct = (data) => {
-      console.log("Restockig product....")
       const { productId, quantity, totalStock, variantIndex } = data
-      console.log(`quantity---->${quantity}, variantIndex----> ${variantIndex} and totalStock----> ${totalStock}`)
       const newStocks = selectedProduct.stocks.map((stock, index)=> {
         if (index === variantIndex) {
             return quantity + stock
         } else return stock
       })
-      console.log("newStocks---->", newStocks)
       setSelectedProduct((product) => ({ ...product, stocks: newStocks, totalStock }))
       dispatch(restockProduct({ productId, quantity }))
   }

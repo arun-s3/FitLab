@@ -55,8 +55,6 @@ export default function CheckoutPage(){
     const dispatch = useDispatch()
     const navigate = useNavigate()
 
-    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
     useEffect(()=> {
       dispatch(getTheCart())
       dispatch(getAllAddress())
@@ -251,7 +249,7 @@ export default function CheckoutPage(){
       }
       if(paymentMethod === 'razorpay'){
         try{
-            const response = await apiClient.post(`${baseApiUrl}/payment/razorpay/order`, {amount: cart.absoluteTotalWithTaxes.toFixed(2)})
+            const response = await apiClient.post(`/payment/razorpay/order`, {amount: cart.absoluteTotalWithTaxes.toFixed(2)})
             if(response?.data){
                 handleRazorpayVerification(response.data.data)
             }
@@ -265,7 +263,7 @@ export default function CheckoutPage(){
       }
       else if(paymentMethod === 'wallet'){
         try{  
-           const response = await apiClient.post(`${baseApiUrl}/wallet/order`, {amount: cart.absoluteTotalWithTaxes.toFixed(2)})
+           const response = await apiClient.post(`/wallet/order`, {amount: cart.absoluteTotalWithTaxes.toFixed(2)})
           if(response?.data.transactionId){ 
             sonnerToast.success("Payment via Wallet successfull!", {autoClose: 4000})
             const paymentDetails = {paymentMethod: 'wallet', paymentStatus: 'completed', transactionId: response.data.transactionId}
@@ -300,7 +298,7 @@ export default function CheckoutPage(){
   const handleRazorpayVerification = async (data) => {
     let res = null
     try{
-      res = await apiClient.get(`${baseApiUrl}/payment/razorpay/key`)
+      res = await apiClient.get(`/payment/razorpay/key`)
     }catch(error){
       setIsPaymentFailedModalOpen({status: true, msg: "Internal Server Error. Please try again later!"})
     }
@@ -318,7 +316,7 @@ export default function CheckoutPage(){
         },
         handler: async (response) => {
             try {
-                const verifiedData = await apiClient.post(`${baseApiUrl}/payment/razorpay/verify`, {
+                const verifiedData = await apiClient.post(`/payment/razorpay/verify`, {
                     razorpay_order_id: response.razorpay_order_id,
                     razorpay_payment_id: response.razorpay_payment_id,
                     razorpay_signature: response.razorpay_signature,

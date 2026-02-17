@@ -118,13 +118,11 @@ export default function AdminSettingsPage() {
         }
 
         const userDetails = { ...formData, dob }
-        console.log("userDetails now -->", userDetails)
 
         dispatch( updateAdminDetails({userDetails}) )
     }
 
     const uploadPhoto = async (dataUrl) => {
-        console.log("Inside uploadPhoto function")
         const blob = await (await fetch(dataUrl)).blob()
 
         const formData = new FormData()

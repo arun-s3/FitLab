@@ -34,7 +34,7 @@ export const removeFromCart = createAsyncThunk('cart/removeFromCart', async ({pr
   }
 })
 
-export const getTheCart = createAsyncThunk('cart/getTheCart', async (thunkAPI) => {
+export const getTheCart = createAsyncThunk('cart/getTheCart', async (_, thunkAPI) => {
   try {
     const response = await apiClient.get('/cart')
     return response.data
@@ -54,7 +54,7 @@ export const applyCoupon = createAsyncThunk('cart/applyCoupon', async ({couponCo
   }
 })
 
-export const removeCoupon = createAsyncThunk('cart/removeCoupon', async (thunkAPI) => {
+export const removeCoupon = createAsyncThunk('cart/removeCoupon', async (_, thunkAPI) => {
   try {
     const response = await apiClient.get('/cart/remove-coupon')
     return response.data
@@ -215,7 +215,7 @@ const cartSlice = createSlice({
       .addCase(getTheCart.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload
-        state.message = action.payload.message
+        state.message = action.payload
         state.success = false
       })
       .addCase(applyCoupon.fulfilled, (state, action) => {

@@ -34,8 +34,6 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
 
     const {walletError} = useSelector(state=> state.wallet)
 
-    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
     const modalRef = useRef(null)
     useModalHelpers({open: showFundingModal, onClose: closeFundingModal, modalRef})
 
@@ -75,7 +73,7 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
     const handlRazorpayPayment = async()=> {
       if(paymentMethod === 'razorpay'){
         try{
-            const response = await apiClient.post(`${baseApiUrl}/payment/razorpay/order`, {amount: parseInt(amount).toFixed(2)})
+            const response = await apiClient.post(`/payment/razorpay/order`, {amount: parseInt(amount).toFixed(2)})
             if(response?.data?.data){
                 handleRazorpayVerification(response.data.data)
             }
@@ -92,7 +90,7 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
     const handleRazorpayVerification = async (data) => {
         let res = null
         try {
-            res = await apiClient.get(`${baseApiUrl}/payment/razorpay/key`)
+            res = await apiClient.get(`/payment/razorpay/key`)
         }catch(error) {
             if (!error.response) {
               toast.error("Payment failed due to network error. Please check your internet and try again.")
@@ -115,7 +113,7 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
             },
             handler: async (response) => {
                 try {
-                    const verifiedData = await apiClient.post(`${baseApiUrl}/payment/razorpay/verify`, {
+                    const verifiedData = await apiClient.post(`/payment/razorpay/verify`, {
                         razorpay_order_id: response.razorpay_order_id,
                         razorpay_payment_id: response.razorpay_payment_id,
                         razorpay_signature: response.razorpay_signature,

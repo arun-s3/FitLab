@@ -16,8 +16,6 @@ const StripePayment = forwardRef( ({ amount, onPayment, payButtonText = 'Pay and
 
   const [clientSecret, setClientSecret] = useState("")
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
   const clickStripePayment = useRef()
 
   const tryStripePaymentAgain = ()=> clickStripePayment.current.clickStripePaymentAgain()
@@ -29,7 +27,7 @@ const StripePayment = forwardRef( ({ amount, onPayment, payButtonText = 'Pay and
   }), [tryStripePaymentAgain])
 
   useEffect(() => {
-    fetch(`${baseApiUrl}/payment/stripe/order`, {
+    fetch(`/payment/stripe/order`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ amount })

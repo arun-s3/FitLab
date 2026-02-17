@@ -35,7 +35,7 @@ export const deleteAddress = createAsyncThunk('deleteAddress', async({addressId}
     }
 })
 
-export const getAllAddress = createAsyncThunk('getAllAddress', async(thunkAPI)=>{
+export const getAllAddress = createAsyncThunk('getAllAddress', async(_, thunkAPI)=>{
     try{
         const response = await apiClient.get('addresses')
         return response.data

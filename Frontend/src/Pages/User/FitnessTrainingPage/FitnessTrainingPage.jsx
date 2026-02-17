@@ -45,12 +45,10 @@ export default function FitnessTrainingPage(){
 
   const [openCoach, setopenCoach] = useState(true)
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
   async function loadBodyParts() {
       try {
           setBodyPartsLoading(true)
-          const response = await apiClient.get(`${baseApiUrl}/fitness/exercises/bodyparts`)
+          const response = await apiClient.get(`/fitness/exercises/bodyparts`)
           if (response.data.success) {
               setBodyParts(response.data.data.map((data) => data.name))
           }
@@ -90,7 +88,7 @@ export default function FitnessTrainingPage(){
           sortOrder: sort.order ? sort.order : undefined,
         }
 
-        const response = await apiClient.post(`${baseApiUrl}/fitness/exercises/list`, {queryDetails})
+        const response = await apiClient.post(`/fitness/exercises/list`, {queryDetails})
 
         if(response.data.data.success){
           const totalPagesRequired = Math.ceil(response.data.data.metadata.totalExercises / exercisesPerPage)

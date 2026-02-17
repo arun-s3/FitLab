@@ -19,8 +19,6 @@ export default function SemiAutoRechargeModal({ isOpen,  onClose, walletAmount, 
 
   const dispatch = useDispatch()
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
   useEffect(()=> {
     const script = document.createElement("script")
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
@@ -38,7 +36,7 @@ export default function SemiAutoRechargeModal({ isOpen,  onClose, walletAmount, 
   
   const handleWalletRecharge = async (amount) => {
     try {
-      const response = await apiClient.post(`${baseApiUrl}/payment/razorpay/order`, { amount })
+      const response = await apiClient.post(`/payment/razorpay/order`, { amount })
       if(response.status === 200){
         await handleRazorpayRechargeVerification(response.data.data)
       }
@@ -54,7 +52,7 @@ export default function SemiAutoRechargeModal({ isOpen,  onClose, walletAmount, 
   const getRazorpayKey = async()=> {
       let response
       try{
-            response = await apiClient.get(`${baseApiUrl}/payment/razorpay/key`)
+            response = await apiClient.get(`/payment/razorpay/key`)
             return response.data.key
         }
       catch(error){
@@ -83,7 +81,7 @@ export default function SemiAutoRechargeModal({ isOpen,  onClose, walletAmount, 
       handler: async (response) => {
         try {
           const verifiedData = await apiClient.post(
-            `${baseApiUrl}/payment/razorpay/verify`,
+            `/payment/razorpay/verify`,
             {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
@@ -93,7 +91,7 @@ export default function SemiAutoRechargeModal({ isOpen,  onClose, walletAmount, 
           )
           if (verifiedData.status === 200) {
               const razorpayPaymentId = response.razorpay_order_id
-              const rechargeResponse  = await apiClient.post(`${baseApiUrl}/wallet/recharge/razorpay`, {amount: data.amount, razorpayPaymentId})
+              const rechargeResponse  = await apiClient.post(`/wallet/recharge/razorpay`, {amount: data.amount, razorpayPaymentId})
               if(rechargeResponse.status === 200){
                 sonnerToast.success("Auto-recharge successful!")
                 dispatch(getOrCreateWallet())
@@ -148,7 +146,7 @@ export default function SemiAutoRechargeModal({ isOpen,  onClose, walletAmount, 
 
   const skipRecharge = async()=> {
       try{
-            const response = await apiClient.post(`${baseApiUrl}/wallet/recharge/skip`, {})
+            const response = await apiClient.post(`/wallet/recharge/skip`, {})
             if(response.status === 200){
                 sonnerToast.success(
                   "Auto-recharge skipped!", 

@@ -3,7 +3,7 @@ import {useOutletContext} from 'react-router-dom'
 
 import {motion} from "framer-motion"
 
-import {Search, ChevronDown} from 'lucide-react'
+import {Search} from 'lucide-react'
 
 import SalesRevenueSection from "./Components/SalesRevenueSection"
 import OrdersFulfillmentSection from "./Components/OrderFulfillmentSection."

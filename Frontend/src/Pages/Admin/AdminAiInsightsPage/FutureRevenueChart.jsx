@@ -1,4 +1,4 @@
-import React, {useEffect} from "react"
+import React from "react"
 import './FutureRevenueChart.css'
 import { motion } from "framer-motion"
 
@@ -13,10 +13,6 @@ export default function FutureRevenueChart({monthlyRevenueTrends, parentFetchErr
     transition: { duration: 0.5 },
   }
 
-  useEffect(()=> {
-    console.log("monthlyRevenueTrends ----->", monthlyRevenueTrends) 
-  }, [monthlyRevenueTrends])
-    
 
   return (
 

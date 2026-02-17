@@ -1,9 +1,7 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState} from 'react'
 import './OfferList.css'
-import {useDispatch, useSelector} from 'react-redux'
 
-import { ArrowUpDown, BadgePercent, DiamondPercent, Edit2, ImageUpscale, IndianRupee, Link2, MessageSquareQuote, Scaling,
-   ShoppingCart, Trash2 } from "lucide-react"
+import { ArrowUpDown, BadgePercent, Edit2, IndianRupee, Link2, MessageSquareQuote, Scaling, ShoppingCart, Trash2 } from "lucide-react"
 import { BsToggle2On, BsToggle2Off } from "react-icons/bs"
 import {format} from "date-fns"
 
@@ -11,14 +9,9 @@ import {format} from "date-fns"
 export default function OfferList({ offers, onEdit, onDelete, onSort, onDeactivate }){
 
   const [showItemsOf, setShowItemsOf] = useState('')
-  const [showCustomersOf, setShowCustomersOf] = useState('')
   const [order, setOrder] = useState(-1)
 
   const [scaledImg, setScaledImg] = useState([])
-
-  useEffect(()=> {
-    console.log('SCALEDIMG--->', scaledImg)
-  },[scaledImg])
 
   const tableHeaders = [
     {value: 'Offer', icon: true, sortBy:'name'}, {value: 'Target Users', icon: false}, 

@@ -1,11 +1,10 @@
-import React, {useEffect, useRef, useState} from 'react'
+import React, {useState} from 'react'
 import './AdvancedCouponFilters.css'
 
 import {BadgePercent, BadgeIndianRupee, Truck, ChevronDown, Tag, ListTodo, Check, ChevronUp, Plus, Minus} from "lucide-react"
 import {TbShoppingCartPlus} from "react-icons/tb"
 import {TbPackages} from "react-icons/tb"
 import {BiCategory} from "react-icons/bi"
-import {MdOutlineArrowDropDownCircle} from "react-icons/md"
 
 import {camelToCapitalizedWords} from "../../../Utils/helperFunctions"
 import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
@@ -58,9 +57,7 @@ export default function AdvancedCouponFilters({queryOptions, setQueryOptions, cl
     }
 
     const inputBlurHandler = (e, fieldName)=> { 
-      console.log("Inside inputBlurHandler, fieldname", fieldName)
       const value = e.target.value.trim()
-      console.log("value--->", value)
       const regexPattern = /^\d+$/
       if( value  && (!regexPattern.test(value) || value < 0) ){
         setError(error=> ( {...error, [fieldName]: `Please enter a valid ${camelToCapitalizedWords(fieldName)}!`} ) )
@@ -69,10 +66,8 @@ export default function AdvancedCouponFilters({queryOptions, setQueryOptions, cl
     }
 
     const incDecHandler = (type, operate)=> {
-      console.log("Inside incDecHandler")
       const value = type === 'usedCount' ? Number(usedCount) : Number(minimumOrderValue)
       const setter = type === 'usedCount' ? setUsedCount : setMinimumOrderValue
-      console.log("Number(formData[type])-->", value)
       if( ((value) || value == '0') && !isDisabled[type] ){
         if(value >= 0){
           if(operate === 1){
@@ -94,7 +89,6 @@ export default function AdvancedCouponFilters({queryOptions, setQueryOptions, cl
       }
       close()
     }
-
 
 
     return(
@@ -195,7 +189,6 @@ export default function AdvancedCouponFilters({queryOptions, setQueryOptions, cl
                                 {
                                   (()=> {
                                     const UserIcon = getApplicableIcon(type.value)
-                                    console.log("type.value--->", type.value)
                                     return <UserIcon className={`w-[15px] h-[15px] text-inherit`}/>
                                   })()
                                 }        

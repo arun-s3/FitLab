@@ -17,13 +17,11 @@ export default function SimilarProductsCarousal({titleColor = null, referencePro
     const [fetchError, setFetchError] = useState(false)
 
     const navigate = useNavigate()
-
-    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
   
     useEffect(()=> {
       async function loadProducts(){
         try{
-          const response = await apiClient.post(`${baseApiUrl}/products/similar`, {productIds: referenceProductIds})
+          const response = await apiClient.post(`/products/similar`, {productIds: referenceProductIds})
           if(response?.data?.similarProducts) {
             setSimilarProducts(response.data.similarProducts)
           }

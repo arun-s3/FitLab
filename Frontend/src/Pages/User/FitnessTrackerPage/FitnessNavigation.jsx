@@ -11,11 +11,9 @@ export default function FitnessNav({ currentPage, setCurrentPage }) {
 
   const [openReminderModal, setOpenReminderModal] = useState({status: false, isNewUser: true})
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
   const checkRecentHealthTrackers = async()=> {
     try { 
-      const response = await apiClient.get(`${baseApiUrl}/fitness/tracker/health/check`)
+      const response = await apiClient.get(`/fitness/tracker/health/check`)
       if(response.status === 200){
         if(response.data.shouldShowReminder) setOpenReminderModal({status: true, isNewUser: response.data.isNewUser})
       }

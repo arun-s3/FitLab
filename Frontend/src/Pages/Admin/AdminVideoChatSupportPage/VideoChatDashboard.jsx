@@ -1,17 +1,15 @@
 import React from 'react'
 import { motion } from "framer-motion"
 
-import { Users, Clock, Video, Power, PowerOff, Bell, Settings } from "lucide-react"
+import { Users, Clock, Video, Power, PowerOff, Bell } from "lucide-react"
 
 import UserQueueCard from "./UserQueueCard"
 import ScheduledSessions from './ScheduledSessions/ScheduledSessions'
 
 
-
 export default function AdminDashboard({
   waitingQueue,
   activeSessions,
-  activeUsers,
   adminStatus,
   onAcceptCall,
   onDeclineCall,

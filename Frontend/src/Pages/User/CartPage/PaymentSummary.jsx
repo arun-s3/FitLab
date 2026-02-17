@@ -25,8 +25,6 @@ const PaymentSummary = forwardRef((
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
   useEffect(()=> {
     if(cart && cart?.couponUsed?.code){
       setCouponCode(cart.couponUsed.code)
@@ -41,7 +39,7 @@ const PaymentSummary = forwardRef((
       sonnerToast.info("You are not a verified user!")
       setOtpPageLoading(true)
       try{
-        const response = await apiClient.post(`${baseApiUrl}/sendOtp`, {email: user.email})
+        const response = await apiClient.post(`/sendOtp`, {email: user.email})
         if(response && response.status === 200){
           setOtpPageLoading(false)
           navigate('/otp-verify', {

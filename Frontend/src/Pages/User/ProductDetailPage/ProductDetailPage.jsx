@@ -43,12 +43,10 @@ export default function ProductDetailPage(){
 
   const dispatch = useDispatch()
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
   useEffect(()=> {
     const fetchProduct = async()=> {
         try{
-            const response = await apiClient.get(`${baseApiUrl}/products/${currentProductId}`)
+            const response = await apiClient.get(`/products/${currentProductId}`)
             if(response?.data?.product ) {
                 return response.data.product 
             }

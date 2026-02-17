@@ -3,13 +3,12 @@ import './CouponModal.css'
 import { useSelector, useDispatch } from "react-redux"
 import {debounce} from 'lodash'
 
-import { X, DiamondPercent, BadgePercent, Plus, Minus, Search, ChevronDown, ChevronUp } from "lucide-react"
+import { X, BadgePercent, Plus, Minus, Search, ChevronDown, ChevronUp } from "lucide-react"
 import { RiCoupon4Line } from "react-icons/ri"
 import {toast as sonnerToast} from 'sonner'
 import {toast} from 'react-toastify'
 
 import CategoryDisplay from "../../../Components/CategoryDisplay/CategoryDisplay"
-import {handleInputValidation, displaySuccess, displayErrorAndReturnNewFormData, cancelErrorState} from '../../../Utils/fieldValidator'
 import {createCoupon, updateCoupon, resetCouponStates} from '../../../Slices/couponSlice'
 import {searchProduct, getAllProducts} from '../../../Slices/productSlice'
 import {showUsers} from '../../../Slices/adminSlice'
@@ -17,9 +16,7 @@ import useModalHelpers from '../../../Hooks/ModalHelpers'
 import {camelToCapitalizedWords} from "../../../Utils/helperFunctions"
 
 
-
 export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
-
 
   const [formData, setFormData] = useState({
     code: "",
@@ -70,9 +67,6 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
         setSelectedCustomers([...coupon.assignedCustomers])
       }
       setShowCategories(false)
-      // if(coupon.applicableCategories.length > 0){
-      //   setSelectedCategories({categories: [...coupon.applicableCategories]})
-      // }
       setFormData({...coupon, startDate: coupon.startDate.split("T")[0], endDate: coupon.endDate.split("T")[0] })
     } else {
       setFormData({
@@ -104,32 +98,24 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
 
   useEffect(()=> {
     if(selectedCategories?.categories && selectedCategories.categories.length > 0){
-      console.log("selectedCategories?.categories--->", selectedCategories.categories)
       setFormData(formData=> (
         { ...formData, applicableCategories: [ ...new Set([...formData.applicableCategories, ...selectedCategories.categories]) ] }
       ))
     }
     if(selectedProducts){
-      console.log("selectedProducts--->", selectedProducts)
       setFormData(formData=> (
         { ...formData, applicableProducts: [...selectedProducts.map(product=> product.title)] }
       ))
     }
     if(selectedCustomers){
-      console.log("selectedCustomers--->", selectedCustomers)
       setFormData(formData=> (
         { ...formData, assignedCustomers: [...selectedCustomers.map(customer=> customer.username)] }
       ))
     }
   },[selectedCategories, selectedProducts, selectedCustomers])
 
-  useEffect(()=> {
-    console.log("formData--->", formData)
-  },[formData])
-
   useEffect(()=>{
     if(Object.keys(productQueryOptions).length){
-        console.log('OUERYOPTIONS--------->', JSON.stringify(productQueryOptions))
         dispatch( getAllProducts({queryOptions: productQueryOptions}) )
     }
     if(Object.keys(customerQueryOptions).length){
@@ -149,9 +135,7 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
   }, [couponCreated, couponUpdated])
 
   const handleChange = (e)=> {
-    console.log("Inside handleChange...")
     const { name, value, type, checked } = e.target
-    console.log("Value--->", value)
     if (type === "checkbox") {
       setFormData((prev) => ({ ...prev, [name]: checked }))
     } else if (type === "select-multiple") {
@@ -163,13 +147,10 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
   }
 
   const inputBlurHandler = (e, fieldName)=> { 
-    console.log("inside inputBlurHandler, fieldname", fieldName)
     const value = e.target.value.trim()
-    console.log("value--->", value)
     const regexPattern = /^\d+$/
 
     if( (fieldName === 'code' || fieldName === 'startDate' || fieldName === 'endDate' || fieldName === 'discountValue') && !value){
-      console.log("Inside if(fieldName === 'code' || fieldName === 'startDate' || fieldName === 'endDate' && !value)")
       setError(error=> ( {...error, [fieldName]: `${camelToCapitalizedWords(fieldName)} cannot be empty!`} ) )
       e.target.style.borderColor = '#e74c3c'
       return
@@ -178,10 +159,6 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
       setError(error=> ( {...error, [fieldName]: `Please enter a valid ${camelToCapitalizedWords(fieldName)}!`} ) )
       e.target.style.borderColor = '#e74c3c'
     }
-    // else if( (fieldName === 'discountValue' || fieldName === 'fixed') && formData.discountType === 'percentage' && !value ){
-    //   setError(error=> ( {...error, discountValue: `Discount cannot be empty!`} ) )
-    //   e.target.style.borderColor = '#e74c3c'
-    // }
     else if(fieldName === 'discountValue' && formData[fieldName] > 100){
       setError(error=> ( {...error, discountValue: 'Discount value must be less than 100!'} ) )
       e.target.style.borderColor = '#e74c3c'
@@ -197,9 +174,7 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
   }
 
   const incDecHandler = (type, operate)=> {
-    console.log("Inside incDecHandler")
     const value = Number(formData[type])
-    console.log("Number(formData[type])-->", value)
     if( (formData[type] && value) || formData[type] == '0' ){
       if(formData[type] >= 0){
         if(operate === 1){
@@ -221,10 +196,8 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
 
   const searchProducts = (e)=> {
     const searchData = e.target.value
-    console.log('searchData--->', searchData)
     if(searchData.trim() !== ''){
         setShowSearchResults(results=> ({...results, products: true}))
-        console.log("Getting searched products--")
         debouncedProductSearch(searchData)
     } 
     else{
@@ -248,7 +221,6 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
 
   const productCheckHandler = (e, productName)=> {
     const checked = e.target.checked
-    console.log("checked-->", checked)
     if(checked){
       setSelectedProducts( products=> [...products, {title: productName}] )
     }else{
@@ -266,10 +238,8 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
 
   const searchCustomers = (e)=> {
     const searchData = e.target.value
-    console.log('searchData--->', searchData)
     if(searchData.trim() !== ''){
         setShowSearchResults(results=> ({...results, customers: true}))
-        console.log("Getting searched customers--")
         debouncedCustomersSearch(searchData)
     } 
     else{
@@ -293,7 +263,6 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
 
   const customerCheckHandler = (e, username)=> {
     const checked = e.target.checked
-    console.log("checked-->", checked)
     if(checked){
       setSelectedCustomers( users=> [...users, {username}] )
     }else{

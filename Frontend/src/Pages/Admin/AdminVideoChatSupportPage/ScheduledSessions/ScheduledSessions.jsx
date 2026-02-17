@@ -9,9 +9,7 @@ import ScheduledSessionCard from "./ScheduledSessionCard"
 import {AdminSocketContext} from '../../../../Components/AdminSocketProvider/AdminSocketProvider'
 
 
-
 export default function ScheduledSessions({ currentScheduledSession, onStartScheduledCall, onEndScheduledCall }) {
-
 
   const [selectedDate, setSelectedDate] = useState("today")
   const [filterStatus, setFilterStatus] = useState("all")
@@ -27,38 +25,29 @@ export default function ScheduledSessions({ currentScheduledSession, onStartSche
   const [scheduledSessions, setScheduledSessions] = useState([])
   const [filteredSessions, setFilteredSessions] = useState([])
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
   const checkUserActive = (username)=> {
-    console.log("Inside checkUserActive")
     return activeUsers.some(user=> user.username === username && user.isOnline)
   }
 
   useEffect(()=> {
     async function fetchSessions(){
       try{
-        const response = await axios.get(`${baseApiUrl}/video-chat/`, {withCredentials: true})
+        const response = await axios.get(`/video-chat/`, {withCredentials: true})
         if(response.status === 200){
-          console.log("Fetched Session---->", response.data.sessions)
           const sessions = response.data.sessions
           if(sessions && sessions.length > 0){
-            console.log("Users booked some sessions")
             const sessionsWithDetails = sessions.map(session=> {
               const today = new Date()
               const sessionDate = new Date(session.scheduledDate)  
-              console.log("sessionDate.toDateString() === today.toDateString()---->", sessionDate.toDateString() === today.toDateString())         
               if(sessionDate.toDateString() === today.toDateString()){
-                console.log("Today's sessions..")
                 const timeNow = today.getTime()
                 let sessionHourPart  = Number.parseInt(session.scheduledTime.split(':')[0])
                 if(session.scheduledTime.includes('PM')){
                   sessionHourPart += 12
-                  console.log("sessionHourPart--->", sessionHourPart)
                 }
                 const sessionHour = new Date(today)
                 sessionHour.setHours(sessionHourPart, 0, 0, 0)
                 let timeRemaining =  sessionHour.getTime() - timeNow
-                console.log(`timeRemaining from ${session.scheduledTime} on ${session.scheduledDate}----> ${timeRemaining}`)
                 if(timeRemaining < 0 && session.status !== 'completed'){
                   session.status = 'missed'
                 }else{
@@ -67,7 +56,6 @@ export default function ScheduledSessions({ currentScheduledSession, onStartSche
                     start: 0,
                     end: timeRemaining
                   }) 
-                  console.log("timeRemaining now---->", timeRemaining)
                   session.timeRemaining = formatDuration(timeRemaining)
                 }
               }
@@ -79,29 +67,26 @@ export default function ScheduledSessions({ currentScheduledSession, onStartSche
         }
       }
       catch(error){
-        console.log("Error in fetchSessions:", error.message)
+        if (!error.response) {
+          sonnerToast.error("Network error. Please check your internet.")
+        }else {
+          sonnerToast.error("Cannot load sessions due to server issues. Please refresh again or come again later!")
+        }
       }
     }
     fetchSessions()
   }, [])
 
   useEffect(()=> {
-    console.log("activeUsers---->", activeUsers)
-    console.log("updatedSessions.length---->", updatedSessions?.length)
     if(updatedSessions && updatedSessions?.length > 0 && activeUsers && activeUsers?.length > 0){
       const updateSessions = updatedSessions.map(session=> {
         const isActive = checkUserActive(session.userId.username) 
-        console.log("isActive---->", isActive)
         session.isUserActive = isActive
         return session
       })
       setScheduledSessions(updateSessions)
     }
   }, [activeUsers, updatedSessions])
-
-  useEffect(()=> {
-    console.log("currentScheduledSession--->", currentScheduledSession)
-  }, [currentScheduledSession])
 
   const container = {
     hidden: { opacity: 0 },
@@ -175,28 +160,16 @@ export default function ScheduledSessions({ currentScheduledSession, onStartSche
     setSelectedDate(date)
     setFilterStatus(status)
     const sessions = requiredSessions(scheduledSessions, date, status)
-    console.log("filteredSessions now------>", sessions)
     setFilteredSessions(sessions)
   }
 
   useEffect(()=> {
     if(scheduledSessions && scheduledSessions.length > 0){
-      console.log("scheduledSessions---->", scheduledSessions)
       const statsInfo = getSessionStats()
       setStats(statsInfo)
       filterHandler(selectedDate || 'today', filterStatus || 'all')
     }
   }, [scheduledSessions])
-
-  useEffect(()=> {
-    console.log("filteredSessions atlast----------->", filteredSessions)
-  }, [filteredSessions])
-
-    useEffect(()=> {
-    console.log(`selectedDate is ${selectedDate} and filterStatus is ${filterStatus}`)
-  }, [selectedDate, filterStatus])
-
-
 
 
   return (

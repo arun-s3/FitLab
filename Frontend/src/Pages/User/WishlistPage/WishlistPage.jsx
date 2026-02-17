@@ -5,6 +5,8 @@ import {useSelector, useDispatch} from 'react-redux'
 import {debounce} from 'lodash'
 import {motion} from 'framer-motion'
 
+import {toast as sonnerToast} from 'sonner'
+
 import {TbShoppingCartHeart} from "react-icons/tb"
 
 import ListBoard from './ListBoard'

@@ -33,15 +33,10 @@ export default function AdminSignInPage(){
     const {user} = useSelector(state=> state.user)
 
     useEffect(() => {
-        console.log("Inside useEffect()")
-        console.log("adminSuccess--->", adminSuccess)
         if (adminSuccess) {
-            console.log("ADMIN TOKEN-->"+adminToken)
-            console.log("ADMIN DATA-->"+JSON.stringify(admin))
             navigate('/admin/dashboard/business', { replace: true });
             dispatch(resetStates())
         } else if (adminError) {
-            console.log("adminError---->", adminError)
             sonnerToast.error(adminError)
             dispatch(resetStates())
         } else if (!adminSuccess && adminToken) {
@@ -63,14 +58,12 @@ export default function AdminSignInPage(){
     }
 
     const displaySuccess = (e)=>{
-        console.log("Success!")
         e.target.nextElementSibling.style.visibility = 'hidden'
         e.target.style.borderColor = 'green'
     }
     const displayError = (e,errorMessage)=>{
         e.target.style.borderColor = 'red'
         e.target.nextElementSibling.style.visibility = 'visible'
-        console.log("msg-->"+errorMessage)
         delete formData[e.target.id.toString()]
         e.target.nextElementSibling.innerText = errorMessage
     }
@@ -106,25 +99,20 @@ export default function AdminSignInPage(){
 
     const submitData = (e)=>{
         e.preventDefault()
-        console.log("Inside submitData()--")
         if((Object.keys(formData).length<2) || Object.values(formData).find(inputValues=>inputValues==='undefined')){
             if(!Object.keys(formData).length){
-                console.log("No Fields entered!")
                 toast.error("Please enter all the fields!")
             }
             else{
-                console.log("Check errors"+JSON.stringify(formData))
                 sonnerToast.error("Please check the fields and submit again!")
             }
         } 
         else{
-            console.log("Inside else(no errors) of submitData() ")
-            console.log("FormData now-->"+JSON.stringify(formData))
             dispatch(adminSignin(formData))
-            console.log("Dispatched successfully--")
         }
         
     }
+
     
     return (
         <section style={bgImg} className='h-[130vh]' id='admin-signin'>

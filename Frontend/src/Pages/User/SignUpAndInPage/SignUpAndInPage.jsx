@@ -44,11 +44,9 @@ export default function SignUpAndInPage({type}){
     const {error, loading, success, googleSuccess, user} = useSelector((state)=>state.user)
     const {admin} = useSelector((state)=> state.admin)
 
-    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
     const clearCookiesAndSignIn = async()=> {
         try {
-            const response = await apiClient.get(`${baseApiUrl}/clear-cookies`)
+            const response = await apiClient.get(`/clear-cookies`)
             if(response.status === 200){
                 dispatch(signin(formData))
             }
@@ -65,7 +63,7 @@ export default function SignUpAndInPage({type}){
         const checkSuccessAndSendOtp = async()=> {
             sonnerToast.success("Registered succesfully!")
             try{
-                const response = await apiClient.post(`${baseApiUrl}/sendOtp`, { email: formData.email });
+                const response = await apiClient.post(`/sendOtp`, { email: formData.email });
                 if(response.status === 200){
                     navigate('/otp-verify', {
                         replace:true, 

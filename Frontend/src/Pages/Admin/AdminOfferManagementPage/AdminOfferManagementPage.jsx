@@ -4,7 +4,7 @@ import {useOutletContext} from 'react-router-dom'
 import {useSelector, useDispatch} from "react-redux"
 import {debounce} from 'lodash'
 
-import {Plus, Search, CalendarX2, ChevronDown, SlidersHorizontal} from "lucide-react"
+import {Search, CalendarX2, ChevronDown, SlidersHorizontal} from "lucide-react"
 import {RiArrowDropDownLine} from "react-icons/ri"
 import {MdSort} from "react-icons/md"
 import {TbTags, TbTagOff, TbUserStar, TbUsers} from "react-icons/tb"
@@ -70,7 +70,6 @@ export default function AdminOfferManagementPage(){
     useEffect(()=> {
       setOffers(allOffers)
       if(allOffers && totalOffers && totalPages && limit){
-        console.log(`totalPages------>${totalPages}, limit------>${limit}`)
         setTotalPages(Math.ceil(totalOffers/limit))
       }
     }, [allOffers, totalOffers])    
@@ -82,7 +81,6 @@ export default function AdminOfferManagementPage(){
     },[startDate, endDate, currentPage])
 
     useEffect(() => {
-      console.log("queryOptions----->", queryOptions)
       if(Object.keys(queryOptions).length > 0){
         dispatch( getAllOffers({queryOptions}) )
       }
@@ -125,13 +123,10 @@ export default function AdminOfferManagementPage(){
   
     const searchOffers = (e)=> {
       const searchData = e.target.value
-      console.log('searchData--->', searchData)
       if(searchData.trim() !== ''){
-          console.log("Getting searched lists--")
           debouncedSearch(searchData)
       } 
       else{
-          console.log("Getting all lists--")
           debouncedSearch.cancel()
           setQueryOptions(query=> {
             const {searchData, ...rest} = query
@@ -149,14 +144,10 @@ export default function AdminOfferManagementPage(){
   
     const radioClickHandler = (e, sortBy)=>{
       const value = Number.parseInt(e.target.value)
-      console.log("value---->", value)
       const checkStatus = queryOptions.sort === value
-      console.log("checkStatus-->", checkStatus)
       if(checkStatus){
-          console.log("returning..")
           return
       }else{
-          console.log("Checking radio..")
           setQueryOptions(query=> {
             return {...query, sort: value, sortBy}
           })
@@ -174,7 +165,6 @@ export default function AdminOfferManagementPage(){
         return {...query, sortBy, sort}
       })
     }
-
 
 
     return(

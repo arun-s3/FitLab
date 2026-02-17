@@ -39,14 +39,12 @@ export default function ExerciseForm({ onAddOrUpdateExercise, editExerciseData =
 
     const exerciseAPiUrl = import.meta.env.VITE_EXERCISEDB_URL
 
-    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
     useEffect(()=> {
       async function loadBodyPartsAndEquipments(){
         try {
           const [bodyPartsResponse, equipmentsResponse] = await Promise.allSettled([
-            await apiClient.get(`${baseApiUrl}/fitness/exercises/bodyparts`),
-            await apiClient.get(`${baseApiUrl}/fitness/exercises/equipments`),
+            await apiClient.get(`/fitness/exercises/bodyparts`),
+            await apiClient.get(`/fitness/exercises/equipments`),
           ])
 
           if (bodyPartsResponse.status === 'fulfilled'){
@@ -186,7 +184,7 @@ export default function ExerciseForm({ onAddOrUpdateExercise, editExerciseData =
 
     const addNewExercise = async(exercise)=> { 
       try { 
-        const response = await apiClient.post(`${baseApiUrl}/fitness/tracker/exercise-library/add`, {exercise})
+        const response = await apiClient.post(`/fitness/tracker/exercise-library/add`, {exercise})
         if(response.status === 201){
           sonnerToast.success("New exercise succesfully added!")
           onAddOrUpdateExercise()
@@ -206,7 +204,7 @@ export default function ExerciseForm({ onAddOrUpdateExercise, editExerciseData =
 
     const updateExercise = async(exercise, id)=> { 
       try { 
-        const response = await apiClient.put(`${baseApiUrl}/fitness/tracker/exercise-library/update`, {exercise, id})
+        const response = await apiClient.put(`/fitness/tracker/exercise-library/update`, {exercise, id})
         if(response.status === 200){
           sonnerToast.success("Exercise succesfully updated!")
           onAddOrUpdateExercise()

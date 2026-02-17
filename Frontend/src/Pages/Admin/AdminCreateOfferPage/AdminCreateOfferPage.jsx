@@ -5,10 +5,7 @@ import { useSelector, useDispatch } from "react-redux"
 import {debounce} from 'lodash'
 
 import { X, DiamondPercent, BadgePercent, BadgeIndianRupee, IndianRupee, Plus, Minus, Search, ChevronDown,
-   ChevronUp, ListTodo, CalendarSync, RefreshCcw,
-   Dot} from "lucide-react"
-import { RiCoupon4Line } from "react-icons/ri"
-import {MdOutlineCategory, MdArrowDropDown} from "react-icons/md"
+   ChevronUp, ListTodo, CalendarSync, RefreshCcw} from "lucide-react"
 import {CgDetailsMore} from "react-icons/cg"
 import {TbShoppingCartDiscount} from "react-icons/tb"
 import {GoDotFill} from "react-icons/go"
@@ -23,16 +20,13 @@ import {handleImageCompression} from '../../../Utils/compressImages'
 import {CustomHashLoader} from '../../../Components/Loader/Loader'
 import {DateSelector} from '../../../Components/Calender/Calender'
 import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
-import {handleInputValidation, displaySuccess, displayErrorAndReturnNewFormData, cancelErrorState} from '../../../Utils/fieldValidator'
 import {createOffer, updateOffer, resetOfferStates} from '../../../Slices/offerSlice'
 import {searchProduct, getAllProducts} from '../../../Slices/productSlice'
 import {showUsers} from '../../../Slices/adminSlice'
 import {camelToCapitalizedWords} from "../../../Utils/helperFunctions"
 
 
-
 export default function AdminCreateOfferPage(){
-
 
   const [formData, setFormData] = useState({
     name: "",
@@ -119,7 +113,6 @@ export default function AdminCreateOfferPage(){
 
   useEffect(()=> {
     if (selectedCategories?.categories) {
-      console.log("selectedCategories?.categories--->", selectedCategories.categories)
       setFormData(formData=> ({
           ...formData,
           applicableCategories: Array.isArray(formData.applicableCategories) 
@@ -137,7 +130,6 @@ export default function AdminCreateOfferPage(){
     }
 
     if(selectedProducts){
-      console.log("selectedProducts--->", selectedProducts)
       setFormData(formData=> (
         { ...formData, applicableProducts: [...selectedProducts.map(product=> product.title)] }
       ))
@@ -155,14 +147,6 @@ export default function AdminCreateOfferPage(){
   },[selectedCategories, selectedProducts])
 
   useEffect(()=> {
-    console.log("formData--->", formData)
-  },[formData])
-
-  useEffect(()=> {
-    console.log("formData on first launch--->", formData)
-  }, [])
-
-  useEffect(()=> {
     if(startDate){
       setFormData(formData=> (
         {...formData, startDate}
@@ -177,7 +161,6 @@ export default function AdminCreateOfferPage(){
 
   useEffect(()=>{
     if(Object.keys(productQueryOptions).length){
-        console.log('OUERYOPTIONS--------->', JSON.stringify(productQueryOptions))
         dispatch( getAllProducts({queryOptions: productQueryOptions}) )
     }
     // if(Object.keys(customerQueryOptions).length){
@@ -211,9 +194,7 @@ export default function AdminCreateOfferPage(){
   }, [productSearchRef])
 
   const handleChange = (e)=> {
-    console.log("Inside handleChange...")
     const { name, value, type, checked } = e.target
-    console.log("Value--->", value)
     if (type === "checkbox") {
       setFormData((prev) => (
         { ...prev, discountType: prev.discountType || "percentage", recurringOffer: prev.recurringOffer ?? false,
@@ -269,13 +250,10 @@ export default function AdminCreateOfferPage(){
   }
 
   const inputBlurHandler = (e, fieldName)=> { 
-    console.log("inside inputBlurHandler, fieldname", fieldName)
     const value = e.target.value.trim()
-    console.log("value--->", value)
     const regexPattern = /^\d+$/
 
     if( (fieldName === 'name' || fieldName === 'startDate' || fieldName === 'endDate' || fieldName === 'discountValue') && !value){
-      console.log("Inside if(fieldName === 'code' || fieldName === 'startDate' || fieldName === 'endDate' && !value)")
       setError(error=> ( {...error, [fieldName]: `${camelToCapitalizedWords(fieldName)} cannot be empty!`} ) )
       e.target.style.borderColor = '#e74c3c'
       return
@@ -299,9 +277,7 @@ export default function AdminCreateOfferPage(){
   }
 
   const incDecHandler = (type, operate)=> {
-    console.log("Inside incDecHandler")
     const value = Number(formData[type])
-    console.log("Number(formData[type])-->", value)
     if( (formData[type] && value) || formData[type] == '0' ){
       if(formData[type] >= 0){
         if(operate === 1){
@@ -323,10 +299,8 @@ export default function AdminCreateOfferPage(){
 
   const searchProducts = (e)=> {
     const searchData = e.target.value
-    console.log('searchData--->', searchData)
     if(searchData.trim() !== ''){
         setShowSearchResults(true)
-        console.log("Getting searched products--")
         debouncedProductSearch(searchData)
     } 
     else{
@@ -353,7 +327,6 @@ export default function AdminCreateOfferPage(){
 
   const productCheckHandler = (e, productName)=> {
     const checked = e.target.checked
-    console.log("checked-->", checked)
     // setSwitchApplicableType(false)
     if(checked){
       setSelectedProducts( products=> [...products, {title: productName}] )
@@ -395,7 +368,6 @@ export default function AdminCreateOfferPage(){
 
   const radioClickHandler = (e, group)=>{
     const checkStatus = formData.targetCustomers === group
-    console.log("checkStatus-->", checkStatus)
     if(checkStatus){
         setFormData(formData => {
           const [targetCustomers, ...rest] = formData
@@ -414,7 +386,6 @@ export default function AdminCreateOfferPage(){
   }
 
   const handleSubmit = async()=> {
-    console.log("formData--->", formData)
     const {name, discountType, discountValue, applicableType, startDate, endDate} =  formData
     if(!name || !startDate || !endDate || !discountType || !discountValue || !applicableType){
       toast.error("Please fill the required fields!")
@@ -441,11 +412,6 @@ export default function AdminCreateOfferPage(){
       return
     }
 
-    // let offerId
-    // if(isEditing){
-    //   offerId = coupon._id
-    // } 
-    // offer ? dispatch( updateOffer({offerDetails: formData, offerId}) )  : dispatch( createOffer({offerDetails: formData}) ) 
     let newBlob
     if(images.length > 0){
       const compressedImageBlob = async(image)=>{
@@ -483,8 +449,7 @@ export default function AdminCreateOfferPage(){
      <section id='AdminCreateOfferPage'>
 
         <header>
-                {/* <input type='search' placeholder='Search Categories' className='w-[12rem] h-[35px] border-dotted bg-[#fefff8]
-                         rounded-[7px] placeholder:text-[11px]' /> */}
+                
             <AdminTitleSection heading='Create Offer' subHeading="Create and configure offers, user targeting, recurring options, banners 
               and other options for better sales."/>
 
@@ -659,25 +624,10 @@ export default function AdminCreateOfferPage(){
                           Select Categories
                         </label>
                         <div id="applicableCategories" className="mt-[5px] px-[15px] py-[7px] border border-dropdownBorder rounded-[5px]">
-                          {/* {categories.map((category)=> (
-                            <option key={category.id} value={category.id}>
-                              {category.name}
-                            </option>
-                          ))} */}
                           {
                             showCategories &&
                             <CategoryDisplay type='checkboxType' filter={selectedCategories} setFilter={setSelectedCategories} />
                           }        
-                          {/* {
-                          !showCategories &&
-                          <h5 className="mt-[10px] mb-[5px] text-[12px] text-muted font-[450] hover:underline transition duration-150 cursor-pointer" 
-                            onClick={()=> { setFormData(formData=> (
-                                  {...formData, applicableCategories: []}
-                                  ));
-                                 setShowCategories(true)}}>
-                          Choose different Categories
-                          </h5>
-                          } */}
                         </div>
                         {
                            formData?.applicableCategories?.length > 0 && showCategories &&
@@ -869,7 +819,6 @@ export default function AdminCreateOfferPage(){
               imagePreview={{status: true, size: 'landscape'}}/>
 
             </div>  
-            {/*  categoryImgPreview={{categoryName: `${categoryData?.categoryName ? categoryData?.categoryName : 'Category Name'}`}} in FileUpload */}
         </main>
 
     </section>

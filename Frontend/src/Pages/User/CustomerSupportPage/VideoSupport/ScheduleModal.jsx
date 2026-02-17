@@ -21,8 +21,6 @@ export default function ScheduleModal({ userId, isOpen, onClose }) {
 
   const timeSlots = ["09:00 AM", "10:00 AM", "11:00 AM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM", "06:00 PM", "07:00 PM", "08:00 PM"]
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
   const modalRef = useRef(null)
   useModalHelpers({open: isOpen, onClose, modalRef})
 
@@ -208,7 +206,7 @@ export default function ScheduleModal({ userId, isOpen, onClose }) {
 
   const bookSession = async(sessionDetails)=> {
     try{
-      const response = await apiClient.post(`${baseApiUrl}/video-chat/book`, sessionDetails)
+      const response = await apiClient.post(`/video-chat/book`, sessionDetails)
       if(response.status === 201){
         setIsSubmitted(true)
         return true

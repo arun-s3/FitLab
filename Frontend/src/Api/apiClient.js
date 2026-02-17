@@ -26,9 +26,8 @@ apiClient.interceptors.response.use( response => response, async error => {
                   window.location.replace(  isAdminRoute ? "/admin/signin" : "/signin" );
                 }
             }
-
-        return Promise.reject(error);
     }
+    return Promise.reject(error);
 })
 
 export default apiClient;

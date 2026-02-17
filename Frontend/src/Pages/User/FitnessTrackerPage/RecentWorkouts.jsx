@@ -29,8 +29,6 @@ export default function RecentWorkouts({refreshHistory, stopRefreshHistory, resu
   const [selectedWorkoutId, setSelectedWorkoutId] = useState(null) 
   const [loadingResume, setLoadingResume] = useState(false)
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
   const ShowError = ()=> (
       <div className='flex justify-center items-center gap-[5px] w-full h-full'>
           <TriangleAlert className='mb-[18px] text-primary w-[28px] h-[28px]' />
@@ -50,7 +48,7 @@ export default function RecentWorkouts({refreshHistory, stopRefreshHistory, resu
 
   async function listWorkoutHistory(){
     try {   
-      const response = await apiClient.get(`${baseApiUrl}/fitness/tracker/workout/list?page=${currentPage}&limit=${limit}`)
+      const response = await apiClient.get(`/fitness/tracker/workout/list?page=${currentPage}&limit=${limit}`)
       if(response.status === 200){
         setTodayWorkouts(response.data.todayWorkouts)
         setOlderWorkouts(response.data.olderWorkouts)

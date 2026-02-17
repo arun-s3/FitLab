@@ -35,7 +35,7 @@ export const googleSignin = createAsyncThunk('googleSignin', async(userData,thun
     }
 } )
 
-export const signout = createAsyncThunk('signout', async(thunkAPI)=>{
+export const signout = createAsyncThunk('signout', async(_, thunkAPI)=>{
     try{ 
         const response = await apiClient.get('/signout')
         return response.data

@@ -2,7 +2,6 @@ import React,{useState, useEffect, useRef} from 'react'
 import './AdminProductListPage.css'
 import {useNavigate, useOutletContext} from 'react-router-dom'
 import {useSelector, useDispatch} from 'react-redux'
-import {motion} from 'framer-motion'
 
 import {toast} from 'react-toastify'
 import {toast as sonnerToast} from 'sonner'
@@ -21,7 +20,6 @@ import ListingTabs from './ListingTabs'
 import ProductsDisplay from '../../../Components/ProductsDisplay/ProductsDisplay'
 import ProductFilterSidebar from '../../../Components/ProductFilterSidebar/ProductFilterSidebar'
 import ExportFileModal from './ExportFileModal'
-
 
 
 export default function AdminProductListPage(){
@@ -62,8 +60,6 @@ export default function AdminProductListPage(){
     const {setHeaderZIndex, setPageBgUrl} = useOutletContext() 
     setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.94),rgba(255,255,255,0.94)), url('/Images/admin-ProductsListBg.jpg')`)
 
-    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
     const popularProducts = [
         'benches', 'gymbell', 'treadmill', 'Ellipticals', 'bikes', 'proteinPowders', 'mutistationMachines', 'resistanceBands', 'yogaMats'
     ]
@@ -93,24 +89,19 @@ export default function AdminProductListPage(){
 
     useEffect(()=> {
         if(message && message?.includes('block')){
-          console.log("message arrived-->", message)
           sonnerToast.success(`${message} successfully`)
         }
       },[message])
 
     useEffect(()=>{
         setTotalFilter({...filter, minPrice, maxPrice})
-        console.log("TotalFilters-->", JSON.stringify(totalFilter))
     },[filter, minPrice, maxPrice])
 
     useEffect(()=>{
-        console.log("FILTER-->", JSON.stringify(totalFilter))
-        console.log("SORTS-->", JSON.stringify(sorts))
         setQueryOptions( {filter: {...queryOptions.filter, ...totalFilter}, sort: {...queryOptions.sort, ...sorts}, page: currentPage, limit} )
     },[totalFilter, sorts, currentPage, limit])
 
     useEffect(()=>{
-        console.log('OUERYOPTIONS--------->', JSON.stringify(queryOptions))
         if(Object.keys(queryOptions).length){
             dispatch( getAllProducts({queryOptions}))
         }
@@ -118,7 +109,6 @@ export default function AdminProductListPage(){
 
     useEffect(()=> {
       if(products && productCounts && totalPages && limit){
-        console.log(`totalPages------>${totalPages}, limit------>${limit}`)
         setTotalPages(Math.ceil(productCounts/limit))
       }
     }, [products, productCounts])
@@ -140,7 +130,6 @@ export default function AdminProductListPage(){
     }, [productRestocked])
 
     const showProducts = (type)=>{
-        console.log("Inside showProducts(), type--", type)
         setToggleTab({goTo: type})
         if(type == 'all'){
             setShowTheseProducts(products)
@@ -154,8 +143,6 @@ export default function AdminProductListPage(){
     }
 
     const applySidebarFilters = (appliedFilters)=> {
-        console.log("Inside applySidebarFilters...")
-        console.log("appliedFilters from ProductFilterSidebar------->", appliedFilters)
         if(appliedFilters.minPrice){
             setMinPrice(appliedFilters.minPrice)
         }
@@ -170,8 +157,7 @@ export default function AdminProductListPage(){
         setHeaderZIndex(10)
         if(products && products.length > 0){
             try {
-                console.log(`Exporting products in ${type}----> ${JSON.stringify(products)}`)
-                const response = await axios.post(`${baseApiUrl}/admin/products/export/${type}`,
+                const response = await axios.post(`/admin/products/export/${type}`,
                     {products}, {withCredentials: true, responseType: 'blob'})
 
                 const fileBlob = new Blob([response.data], { type: type === 'csv' ? 'text/csv' : 'application/pdf'})
@@ -188,7 +174,13 @@ export default function AdminProductListPage(){
 
                 }
             catch (error) {
-              console.error("Error exporting file:", error.message)
+              if (!error.response) {
+                sonnerToast.error("Network error. Please check your internet.")
+              } else if (error.response?.status === 404) {
+                sonnerToast.error(error.response.data.message || "No products found!")
+              } else {
+                sonnerToast.error("Something went wrong while exporting files! Please retry later.")
+              }
             }
         }else{
             toast.error("Sorry.There is no available product in the store to export details!")

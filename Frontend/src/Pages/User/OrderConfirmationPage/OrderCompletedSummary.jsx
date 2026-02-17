@@ -18,12 +18,10 @@ export default function OrderCompletedSummary(){
 
     const navigate = useNavigate()
 
-    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
     useEffect(()=> {
       const loadOrderCompletedDetails = async ()=> {
         try{
-          const response = await apiClient.get(`${baseApiUrl}/order/latest`)
+          const response = await apiClient.get(`/order/latest`)
           if(response?.data?.order) {
             setOrderSuccessDetails(response.data.order)
           }

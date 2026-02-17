@@ -27,9 +27,8 @@ export default function AdminSocketProvider() {
 
   const messagesEndRef = useRef(null)
   const adminName = "Support Agent"
-
+  
   const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
   
   useEffect(() => {
     const socket = io(baseApiUrl, {

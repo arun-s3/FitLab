@@ -1,6 +1,8 @@
 import React from 'react'
 import { motion } from "framer-motion"
+
 import { User, Clock, Phone, PhoneOff, MessageSquare } from "lucide-react"
+
 
 export default function UserQueueCard({ user, position, onAccept, onDecline, disabled }) {
   const waitTime = Math.floor((Date.now() - (user.joinTime || Date.now())) / 1000 / 60)

@@ -42,17 +42,15 @@ export default function CouponsOffersInsightsSection() {
       discountImpactDatas: "loading",
   })
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
   const fetchAllStats = async () => {
       const newStats = []
 
       const [couponRevenueResponse, couponStatsResponse, couponRedemptionRes, discountImpactRes] =
           await Promise.allSettled([
-              axios.get(`${baseApiUrl}/admin/dashboard/coupons/revenue`, { withCredentials: true }),
-              axios.get(`${baseApiUrl}/admin/dashboard/coupons/stats`, { withCredentials: true }),
-              axios.get(`${baseApiUrl}/admin/dashboard/coupons/redemptions`, { withCredentials: true }),
-              axios.get(`${baseApiUrl}/admin/dashboard/coupons/impact`, { withCredentials: true }),
+              axios.get(`/admin/dashboard/coupons/revenue`, { withCredentials: true }),
+              axios.get(`/admin/dashboard/coupons/stats`, { withCredentials: true }),
+              axios.get(`/admin/dashboard/coupons/redemptions`, { withCredentials: true }),
+              axios.get(`/admin/dashboard/coupons/impact`, { withCredentials: true }),
           ])
 
       let statsError = false
@@ -81,16 +79,12 @@ export default function CouponsOffersInsightsSection() {
                       ? "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400"
                       : "bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400",
           })
-          console.log("newStats----->", newStats)
       } else {
-          console.log("Error in Coupon Revenue:", couponRevenueResponse.reason.message)
           statsError = true
       }
 
       if (couponStatsResponse.status === "fulfilled") {
           const response = couponStatsResponse.value
-          console.log("couponStatsResponse----->", response.data)
-
           newStats.push(
               {
                   name: "activeCoupons",
@@ -107,9 +101,7 @@ export default function CouponsOffersInsightsSection() {
                   color: "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
               },
           )
-          console.log("newStats now----->", newStats)
       } else {
-          console.log("Error in Coupon Stats:", couponStatsResponse.reason.message)
           statsError = true
       }
 
@@ -127,23 +119,17 @@ export default function CouponsOffersInsightsSection() {
 
       if (couponRedemptionRes.status === "fulfilled") {
           const response = couponRedemptionRes.value
-          console.log("couponRedemptionRes----->", couponRedemptionRes)
-          console.log("couponRedemptionRes response----->", response.data)
           setCouponRedemptionsDatas(response.data)
           setStatus((status) => ({ ...status, couponRedemptionsDatas: "success" }))
       } else {
-          console.log("Error in user coupon redemption response:", couponRedemptionRes.reason.message)
           setStatus((status) => ({ ...status, couponRedemptionsDatas: "error" }))
       }
 
       if (discountImpactRes.status === "fulfilled") {
           const response = discountImpactRes.value
-          console.log("discountImpactRes----->", discountImpactRes)
-          console.log("discountImpactRes response----->", response.data)
           setDiscountImpactDatas(response.data)
           setStatus((status) => ({ ...status, discountImpactDatas: "success" }))
       } else {
-          console.log("Error in user coupon redemption response:", discountImpactRes.reason.message)
           setStatus((status) => ({ ...status, discountImpactDatas: "error" }))
       }
   }
@@ -165,7 +151,6 @@ export default function CouponsOffersInsightsSection() {
         setFetchChartData(true)
     }
     useEffect(()=> {
-      console.log("couponStats--->", couponStats)
       const priorityOrder = ['couponDiscountRevenue', 'activeCoupons', 'couponRedemptions']
   
       const orderedStats = couponStats.sort(

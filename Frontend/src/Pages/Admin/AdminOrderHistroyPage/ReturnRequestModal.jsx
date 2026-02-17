@@ -8,7 +8,7 @@ import {toast as sonnerToast} from 'sonner'
 
 import {handleReturnDecision, resetOrderStates} from '../../../Slices/orderSlice'
 import useModalHelpers from '../../../Hooks/ModalHelpers'
-import {capitalizeFirstLetter, camelToCapitalizedWords} from '../../../Utils/helperFunctions'
+import {camelToCapitalizedWords} from '../../../Utils/helperFunctions'
 
 
 export default function ReturnRequestModal({returnRequestOrder = null, returnRequestProduct = null, returnOrderOrProduct, isOpen, onClose, onDecision, user}){

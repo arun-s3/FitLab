@@ -2,10 +2,7 @@ import React, {useState} from 'react'
 import './CouponList.css'
 
 import { ArrowUpDown, Edit2, Trash2 } from "lucide-react"
-import {IoToggle} from "react-icons/io5"
 import { BsToggle2On, BsToggle2Off } from "react-icons/bs";
-import { BsToggleOn, BsToggleOff } from "react-icons/bs";
-
 
 
 export default function CouponList({ coupons, onEdit, onDelete, onDeactivate, onSort, sortConfig }){

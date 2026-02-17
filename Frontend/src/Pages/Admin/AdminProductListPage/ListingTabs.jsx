@@ -2,7 +2,6 @@ import React from "react"
 
 import {BsFillGrid3X3GapFill} from "react-icons/bs"
 import {FaList} from "react-icons/fa"
-import {CiViewTable} from "react-icons/ci"
 import {VscTable} from "react-icons/vsc"
 
 

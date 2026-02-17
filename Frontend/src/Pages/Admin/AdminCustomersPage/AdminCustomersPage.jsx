@@ -66,28 +66,22 @@ export default function AdminCustomersPageV1() {
 
     const {activeUsers} = useContext(AdminSocketContext)
 
-    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
     const mainBgImg = {
         colorImage : "linear-gradient(to right,rgba(255,255,255),rgba(255,255,255))"
     }
 
     useEffect(() => {
-        console.log("Dispatching showUsers()--- ")
         dispatch(showUsers({queryOptions: {page: 1, limit: 6, status: 'all'}}))
     }, [dispatch, adminMessage])
 
     useEffect(() => {
-        console.log("Setting localUsers to allUsers--- ")
         if (allUsers) {
-            console.log("allUsers---->", allUsers)
             setTempUsers(allUsers)
         }
     }, [allUsers])
 
     useEffect(()=> {
       if(totalUsers){
-        console.log(`totalUsers------>${totalUsers}, limit------>${limit}`)
         setTotalPages(Math.ceil(totalUsers/limit))
       }
     }, [totalUsers])
@@ -97,12 +91,9 @@ export default function AdminCustomersPageV1() {
     },[currentPage, status, limit])
 
     useEffect(() => {
-        console.log("Inside useEffect for tempUsers");
         let tempUserList = [...tempUsers];
 
         if (activeSorter.field && activeSorter.order) {
-            console.log("Sorting users based on activeSorter...");
-            console.log(`Field: ${activeSorter.field}, Order: ${activeSorter.order}`);
             tempUserList = sortUsers(activeSorter.field, activeSorter.order, true);
         }
         setLocalUsers(tempUserList)
@@ -126,7 +117,6 @@ export default function AdminCustomersPageV1() {
                 user._id === id ? { ...user, isBlocked: !user.isBlocked } : user
             )
         );
-        console.log("Dispatching toggleBlockUser()-- ")
         dispatch(toggleBlockUser(id));
     }
 
@@ -139,7 +129,6 @@ export default function AdminCustomersPageV1() {
         if(suspiciousId){
             setTimerDelay(15);
             const id = suspiciousId
-            console.log("Set timer delay to 10 seconds");
             sonnerToast.warning("You are about to mark a customer suspicious/fraudstar/criminal")
             
             timerId.current = setInterval(() => {
@@ -148,10 +137,8 @@ export default function AdminCustomersPageV1() {
                         clearInterval(timerId.current); 
                         const riskDetails = {userId: suspiciousId, riskyUserNotes, riskyUserStatus: true}
                         dispatch(updateRiskyUserStatus({riskDetails}))
-                        console.log("User suspicious marker dispatched");
                         return null;
                     } else {
-                        console.log(`Countdown: ${prevCount - 1} seconds remaining`);
                         return prevCount - 1;
                     }
                 });
@@ -169,48 +156,41 @@ export default function AdminCustomersPageV1() {
     }
 
     const searchHandler = (e)=>{
-        console.log("Inside searchHandler")
         if(e.target.value.trim()==""){
-            console.log("Empty search, hence dispatching...")
             setSearchData(null)
             dispatch(showUsers({queryOptions: {page: currentPage, limit}}))
         }
         else{
             setSearchData(e.target.value.trim())
             if(matchCase){
-                console.log("Inside searchHandler matchCase true case")
                 const searchRegex = new RegExp(`^(${e.target.value.trim()})`) 
-                setLocalUsers( localUsers.filter(user=>searchRegex.test(user.username)||searchRegex.test(user.email)||searchRegex.test(user.mobile)) )
+                setLocalUsers( localUsers.filter(user=>
+                    searchRegex.test(user.username) || searchRegex.test(user.email) || searchRegex.test(user.mobile)) 
+                )
             }
             else{
                 const searchValue = e.target.value.toString().toLowerCase()
-                console.log("Inside searchHandler matchCase false case")
-                console.log("localUsers.filter(user=> user.username.includes(e.target.value))-->"+JSON.stringify(localUsers.filter(user=> user.username.includes(e.target.value.toLowerCase||e.target.value.toUpperCase))) )
-                setLocalUsers( localUsers.filter(user=> user.username.toLowerCase().includes(searchValue)||user.email.toLowerCase().includes(searchValue)||user.mobile.toString().toLowerCase().includes(searchValue)) )
+                setLocalUsers( localUsers.filter(user=> 
+                    user.username.toLowerCase().includes(searchValue) 
+                    || user.email.toLowerCase().includes(searchValue)
+                    || user.mobile.toString().toLowerCase().includes(searchValue))
+                 )
             }
         }
     }
 
     const sortHandler = (e,type,order)=>{
-        console.log("typeof localUsers[0][type]-->"+typeof localUsers[0][type])
-
         if(e.target.style.height=='15px'){
                 e.target.style.height='10px'
                 e.target.style.color='rgba(159, 42, 240, 0.5)'
-                console.log("Going to default icon settings and localUsers--")
                 setLocalUsers(allUsers)
-                console.log("Localusers now-->"+JSON.stringify(localUsers))
             }
             else {
                 setActiveSorter({field:type, order})
-                // sortUsers(type, order, false)
             }
-            
     }
 
     const sortUsers = (type, order, returnData) => {
-        console.log("Sorting.....")
-
         const sortedUsers = [...tempUsers].sort((a, b) => {
           const valA = a[type]
           const valB = b[type]
@@ -223,9 +203,6 @@ export default function AdminCustomersPageV1() {
             ? valA - valB
             : valB - valA
         })
-
-        console.log("sortedUsers -->", sortedUsers)
-
         if (returnData){
           return sortedUsers
         }else{
@@ -234,27 +211,26 @@ export default function AdminCustomersPageV1() {
     }
 
     const statusSelector = (status)=> {
-        console.log("Inside statusSelector--")
         setStatus(status) 
     }
 
     const getUserStats = async(user)=> { 
       try { 
-        const response = await axios.get(`${baseApiUrl}/admin/stats/${user._id}`,{ withCredentials: true })
+        const response = await axios.get(`/admin/stats/${user._id}`,{ withCredentials: true })
         if(response.status === 200){
-          console.log("response.data.stats----------->", response.data.stats)
           setOpenUserDetailsModal({customerData: user, orderStats: response.data.stats, address: response.data.address})
-          console.log("Opening customer detail modal..")
           setHeaderZIndex(300)
         }
       }catch (error) {
-        console.error("Error while getting user stats", error.message)
-        sonnerToast.error('Something went wrong! Please retry later.')
+        if (!error.response) {
+          sonnerToast.error("Network error. Please check your internet.")
+        }else {
+          sonnerToast.error("Something went wrong! Please retry later.")
+        }
       }
     }
 
     const restoreUser = (id)=> {
-        console.log("Inside restoreUser()...")
         const riskDetails = {userId: id, riskyUserStatus: false}
         dispatch(updateRiskyUserStatus({riskDetails}))
     }

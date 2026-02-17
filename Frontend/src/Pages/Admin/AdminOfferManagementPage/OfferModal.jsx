@@ -5,7 +5,6 @@ import {debounce} from 'lodash'
 
 import {X, DiamondPercent, BadgePercent, Plus, Minus, Search, ChevronDown, ChevronUp, RefreshCcw, CalendarSync, Users,
    IndianRupee, ListTodo} from "lucide-react"
-import {RiCoupon4Line} from "react-icons/ri"
 import {GoDotFill} from "react-icons/go"
 import {CgDetailsMore} from "react-icons/cg"
 import {toast as sonnerToast} from 'sonner'
@@ -13,7 +12,6 @@ import {toast} from 'react-toastify'
 
 import CategoryDisplay from "../../../Components/CategoryDisplay/CategoryDisplay"
 import FileUpload from '../../../Components/FileUpload/FileUpload'
-import {handleInputValidation, displaySuccess, displayErrorAndReturnNewFormData, cancelErrorState} from '../../../Utils/fieldValidator'
 import {updateOffer, resetOfferStates} from '../../../Slices/offerSlice'
 import {searchProduct, getAllProducts} from '../../../Slices/productSlice'
 import {showUsers} from '../../../Slices/adminSlice'
@@ -21,10 +19,7 @@ import {camelToCapitalizedWords} from "../../../Utils/helperFunctions"
 import useModalHelpers from '../../../Hooks/ModalHelpers'
 
 
-
-
 export default function OfferModal({ isOpen, onClose, offer, isEditing }){
-
 
   const [formData, setFormData] = useState({
     name: "",
@@ -80,7 +75,6 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
             const response = await fetch(url, {mode: 'cors'})
             return await response.blob()
         } catch (error) {
-            console.log("Error in convertToBlob-->", error.message)
         }
       }
       const blob = await convertToBlob(offer.offerBanner.url)
@@ -91,8 +85,6 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
     }
 
     if (offer){
-      console.log("offer-->", offer)
-      console.log("offerBanner-->", offer.offerBanner)      
       loadOfferDatas()
     } 
   }, [offer])
@@ -105,7 +97,6 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
 
   useEffect(()=> {
     if (selectedCategories?.categories) {
-      console.log("selectedCategories?.categories--->", selectedCategories.categories)
       setFormData(formData=> ({
           ...formData,
           applicableCategories: Array.isArray(formData.applicableCategories) 
@@ -123,7 +114,6 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
     }
 
     if(selectedProducts){
-      console.log("selectedProducts--->", selectedProducts)
       setFormData(formData=> (
         { ...formData, applicableProducts: [...selectedProducts.map(product=> product.title)] }
       ))
@@ -140,13 +130,8 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
     }
   },[selectedCategories, selectedProducts])
 
-  useEffect(()=> {
-    console.log("formData--->", formData)
-  },[formData])
-
   useEffect(()=>{
     if(Object.keys(productQueryOptions).length){
-        console.log('OUERYOPTIONS--------->', JSON.stringify(productQueryOptions))
         dispatch( getAllProducts({queryOptions: productQueryOptions}) )
     }
   },[productQueryOptions])
@@ -173,9 +158,7 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
   }, [productSearchRef])
 
   const handleChange = (e)=> {
-    console.log("Inside handleChange...")
     const { name, value, type, checked } = e.target
-    console.log("Value--->", value)
     if (type === "checkbox") {
       setFormData((prev)=> ({ ...prev, [name]: checked }))
     } else if (type === "select-multiple") {
@@ -187,13 +170,10 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
   }
 
   const inputBlurHandler = (e, fieldName)=> { 
-    console.log("Inside inputBlurHandler, fieldname", fieldName)
     const value = e.target.value.trim()
-    console.log("value--->", value)
     const regexPattern = /^\d+$/
 
     if( (fieldName === 'name' || fieldName === 'startDate' || fieldName === 'endDate' || fieldName === 'discountValue') && !value){
-      console.log("Inside if(fieldName === 'code' || fieldName === 'startDate' || fieldName === 'endDate' && !value)")
       setError(error=> ( {...error, [fieldName]: `${camelToCapitalizedWords(fieldName)} cannot be empty!`} ) )
       e.target.style.borderColor = '#e74c3c'
       return
@@ -217,9 +197,7 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
   }
 
   const incDecHandler = (type, operate)=> {
-    console.log("Inside incDecHandler")
     const value = Number(formData[type])
-    console.log("Number(formData[type])-->", value)
     if( (formData[type] && value) || formData[type] == '0' ){
       if(formData[type] >= 0){
         if(operate === 1){
@@ -241,10 +219,8 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
 
   const searchProducts = (e)=> {
     const searchData = e.target.value
-    console.log('searchData--->', searchData)
     if(searchData.trim() !== ''){
         setShowSearchResults(true)
-        console.log("Getting searched products--")
         debouncedProductSearch(searchData)
     } 
     else{
@@ -271,7 +247,6 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
 
   const productCheckHandler = (e, productName)=> {
     const checked = e.target.checked
-    console.log("checked-->", checked)
     // setSwitchApplicableType(false)
     if(checked){
       setSelectedProducts( products=> [...products, {title: productName}] )

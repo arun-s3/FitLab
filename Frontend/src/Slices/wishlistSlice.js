@@ -35,7 +35,7 @@ export const removeProductFromList = createAsyncThunk('removeProductFromList', a
   }
 })
 
-export const getUserWishlist = createAsyncThunk('getUserWishlist', async (thunkAPI)=> {
+export const getUserWishlist = createAsyncThunk('getUserWishlist', async (_, thunkAPI)=> {
   try {
     const response = await apiClient.get('/wishlist')
     return response.data

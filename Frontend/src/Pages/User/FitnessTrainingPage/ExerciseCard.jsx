@@ -14,8 +14,6 @@ export default function ExerciseCard({exercise, index, onChooseExercise}){
     const [thumbnail, setThumbnail] = useState('')
     const [isLoading, setIsLoading] = useState(false)
 
-    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
     useEffect(() => {
       if (!exercise?.name) return
     
@@ -26,7 +24,7 @@ export default function ExerciseCard({exercise, index, onChooseExercise}){
       
         async function searchImages(query) {
           try {
-            const response = await apiClient.get(`${baseApiUrl}/fitness/thumbnail/${query}`)
+            const response = await apiClient.get(`/fitness/thumbnail/${query}`)
             return response.data.thumbnail;
           } catch (error) {
             return null

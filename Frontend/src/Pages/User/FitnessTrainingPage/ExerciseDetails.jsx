@@ -15,9 +15,10 @@ export default function ExerciseDetails({exercise, onGoBack}) {
 
   const [hideGif, setHideGif] = useState(false)
 
-  const [exerciseBasedProducts, setExerciseBasedProducts] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [fetchError, setFetchError] = useState(false)
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
+  const [exerciseBasedProducts, setExerciseBasedProducts] = useState([])
 
   const exerciseDetailsRef = useRef(null)
 
@@ -27,24 +28,34 @@ export default function ExerciseDetails({exercise, onGoBack}) {
       }
   }, [exerciseDetailsRef.current])
 
+  async function loadExerciseBasedProducts(){
+    try{
+      const response = await apiClient.get(
+        `/products/exercise?exercise=${encodeURIComponent(exercise.name)}&muscle=${encodeURIComponent(exercise.targetMuscles[0])}`
+      )
+      setExerciseBasedProducts(response.data.exerciseBasedProducts)
+    }
+    catch(error){
+      setFetchError(true)
+      if (!error.response) {
+          sonnerToast.error("Network error. Please check your internet.")
+      }
+      setExerciseBasedProducts([])
+    }  
+    finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchProducts = ()=> {
+    setFetchError(false)
+    setLoading(true)
+    loadExerciseBasedProducts()
+  }
+
   useEffect(()=> {
     if(!exercise.name) return 
-    async function loadExerciseBasedProducts(){
-      try{
-        const response = await apiClient.get(
-          `${baseApiUrl}/products/exercise?exercise=${encodeURIComponent(exercise.name)}&muscle=${encodeURIComponent(exercise.targetMuscles[0])}`
-        )
-        setExerciseBasedProducts(response.data.exerciseBasedProducts)
-      }
-      catch(error){
-        if (!error.response) {
-            sonnerToast.error("Network error. Please check your internet.")
-        }
-        setExerciseBasedProducts([])
-      }  
-    }
-
-    loadExerciseBasedProducts()
+    fetchProducts()
   }, [exercise])
 
   const containerVariants = {
@@ -141,7 +152,7 @@ export default function ExerciseDetails({exercise, onGoBack}) {
                     src={`/Images/Muscles/${exercise.targetMuscles[0]}.jpg`}
                     onError={(e) => {
                       e.target.onerror = null
-                      e.target.src = `/Muscles/${exercise.targetMuscles[0]}.png`
+                      e.target.src = `/Images/Muscles/${exercise.targetMuscles[0]}.png`
                     }}
                     className="h-full w-full object-cover rounded-[7px]"
                     // onLoad={()=> setIsLoading(false)}
@@ -153,7 +164,7 @@ export default function ExerciseDetails({exercise, onGoBack}) {
                     onError={(e) => {
                       e.target.onerror = null
                       const fallbackImg = exercise.targetMuscles?.[1] || exercise.secondaryMuscles?.[0]
-                      e.target.src = `/Muscles/${fallbackImg}.jpg`
+                      e.target.src = `/Images/Muscles/${fallbackImg}.jpg`
                     }}
                     className="h-full w-full object-cover rounded-[7px]"
                     // onLoad={()=> setIsLoading(false)}
@@ -237,6 +248,9 @@ export default function ExerciseDetails({exercise, onGoBack}) {
             exerciseBasedProducts &&
               <Carousal 
                 products={exerciseBasedProducts} 
+                isLoading={loading}
+                error={fetchError}
+                refetch={fetchProducts}
                 title='Recommended products for this muscle' 
                 titleStyle='text-secondary'
                 imageStyle='!rounded-[12px]'

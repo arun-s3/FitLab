@@ -4,12 +4,10 @@ import {useLocation, useNavigate, useOutletContext} from 'react-router-dom'
 import {useSelector, useDispatch} from 'react-redux'
 import {motion} from 'framer-motion'
 
-import {ProductIcon, ProductIcon2} from '../../../Components/Icons/Icons'
-import {IoArrowBackSharp} from "react-icons/io5";
-import {IoIosArrowRoundBack} from "react-icons/io";
+
 import {GoPackage} from "react-icons/go";
 import {MdCurrencyRupee} from "react-icons/md";
-import {LuPackage, LuPackageSearch} from "react-icons/lu";
+import {LuPackageSearch} from "react-icons/lu";
 import {LiaWeightSolid} from "react-icons/lia";
 import {BsLightningCharge} from "react-icons/bs";
 import {AiOutlineSafetyCertificate} from "react-icons/ai";
@@ -66,42 +64,28 @@ export default function AdminAddAndEditProductPage({ editProduct }){
     const navigate = useNavigate()
 
     useEffect(() => {
-        console.log("Images-->", JSON.stringify(images))
-        console.log("Thumbnail-->", JSON.stringify(thumbnail))
-        console.log("SubCategory---->", subCategory)
         if(category.length == 0) setCategoryImgPreview('')
 
         setProductData({ ...productData, category: category, subCategory, images: images, thumbnail: thumbnail });
     }, [category, subCategory, images, thumbnail]);
 
     useEffect(()=>{
-        // console.log("tag-->", JSON.stringify(tag))
         let tagStrings = tag.map(tag=> tag.key)
         tagStrings = [...new Set(tagStrings)]
-        console.log("tagStrings-->", tagStrings)
         setProductData({...productData, tags: tagStrings})
     },[tag])
-    
-    useEffect(()=>{
-        console.log("PRODUCTDATA-->", JSON.stringify(productData))
-        if(categoryImgPreview){
-            console.log("categoryImgPreview-->", categoryImgPreview)
-        }
-    },[productData, categoryImgPreview])
 
     useEffect(() => {
-        console.log("Inside useEffect() for editProduct----")
         const convertToBlob = async (url) => {
             try {
                 const response = await fetch(url, { mode: 'cors' });
                 return await response.blob();
             } catch (error) {
-                console.log("Error in convertToBlob-->", error.message);
+                sonnerToast.error("Error while loading the images!")
             }
         }
         const loadProductData = async () => {
             if (location?.state?.product) {
-                console.log("location.state-->", JSON.stringify(location.state));
                 editProductItem.current = location.state.product;    
                 setProductData({
                     "title": editProductItem.current.title,
@@ -118,22 +102,16 @@ export default function AdminAddAndEditProductPage({ editProduct }){
                 setCategory(editProductItem.current.category)
                 setSubCategory(editProductItem.current.subCategory)
                 images.forEach((img,index)=> console.log(`image[${index}]from state of location on Edit-->`, JSON.stringify(img)))
-                console.log("thumbnail from state of location on Edit-->", JSON.stringify(thumbnail))
                 const newImages = await Promise.all(
                     editProductItem.current.images.map(async (img) => {
                         const blob = await convertToBlob(img.url);
-                        // const url = await convertBlobToUrl(blob)
-                        // console.log("imageUrl after conversion from blob--->", url)
                         return {...img, blob};
                     })
                 );
                 setImages(newImages);
                 const thumbnailBlob = await convertToBlob(editProductItem.current.thumbnail.url);
                 setThumbnail({ ...editProductItem.current.thumbnail, blob: thumbnailBlob});
-                console.log("editProductItem.current.tags-->", editProductItem.current.tags);
-                console.log("isThumbnails from parent-->", newImages.map(img=> img.isThumbnail))
                 const foundThumbnailIndex = newImages.map(img=> img.isThumbnail).findIndex(el=> el=='true')
-                console.log("FOUND THUMBNAIL INDEX-->", foundThumbnailIndex)
                 setThumbnailIndexOnEditProduct(foundThumbnailIndex)
             }
         };
@@ -141,13 +119,11 @@ export default function AdminAddAndEditProductPage({ editProduct }){
     },[location]);
     
     useEffect(()=>{
-        console.log(`Inside useEffect for productCreated, productUpdated success, productUpdated-${productUpdated} productCreated-${productCreated}`)
         if(productCreated || (editProduct && productUpdated)){
             productCreated && sonnerToast.success('Created product succesfully!')
             productUpdated && sonnerToast.success('Updated product succesfully!')
             dispatch(resetStates())
             navigate("/admin/products", { replace: true })
-            // setTimeout(()=> {navigate('/admin/products', {replace: true})}, 1000)
         }
     },[productCreated, productUpdated])
 
@@ -169,7 +145,6 @@ export default function AdminAddAndEditProductPage({ editProduct }){
     }
 
     const changeHandler = (e, fieldName)=> {
-        console.log(" inside Changehandler")
         setProductData({...productData, [fieldName]: e.target.value})
     }
 
@@ -180,16 +155,13 @@ export default function AdminAddAndEditProductPage({ editProduct }){
     }
 
     const additionalInfoBlurHandler = (e)=> {
-            console.log("if(fieldName == 'additionalInformation')")
             const infoArr = productData?.additionalInformation.filter(info=> info !== null && info.trim() !== "")
-            console.log("infoArr---->", JSON.stringify(infoArr))
             setProductData({...productData, additionalInformation: [...infoArr] })
     }
     
     const inputFocusHandler = (e)=>{ e.target.previousElementSibling.style.display = 'none' }
 
     const inputBlurHandler = (e, fieldName, options, limits)=>{
-         console.log("inside inputBlurHandler, fieldname", fieldName)
          e.target.value.trim()? null : e.target.previousElementSibling.style.display = 'inline-block'
          if(fieldName){
             let uniqueArr
@@ -214,10 +186,7 @@ export default function AdminAddAndEditProductPage({ editProduct }){
             const statusObj = (options?.optionalField) 
                 ? handleInputValidation(fieldName, value, {optionalField: true}, limits) 
                 : handleInputValidation(fieldName, value, limits)
-            console.log("statusObj from inputBlurHandler--> ", JSON.stringify(statusObj))
             if(!statusObj.error && statusObj.message.startsWith("Optional")){
-                console.log("Inside here----")
-                // e.target.nextElementSibling.textContent = ''
                 e.target.style.borderColor = primaryColor.current
                 return
             }
@@ -231,21 +200,6 @@ export default function AdminAddAndEditProductPage({ editProduct }){
          }
     }
 
-    // const handleImageCompression = async (file) => {
-    //     console.log("Inside imageCompressor")
-    //     const options = {
-    //         maxSizeMB: 2,         
-    //         maxWidthOrHeight: 1024, 
-    //     }
-    //     try {
-    //         console.log("Compressing..")
-    //         const compressedFile = await imageCompression(file, options);
-    //         return compressedFile
-    //     } catch (error) {
-    //         console.error('Error during compression:', error)
-    //     }
-    // }
- 
     const handleMuscleChange = (muscle) => {
         setProductData((datas) => ({
           ...datas,
@@ -256,17 +210,14 @@ export default function AdminAddAndEditProductPage({ editProduct }){
     }
 
     const submitHandler = async (e)=>{
-        console.log("Inside submitData()--")
         setStartedSubmission(true)
 
         const checkVariantDataValidity = (variantAttribute)=> {
             if(productData[variantAttribute] && productData[variantAttribute].length !== productData['stock'].length ){
-                console.log(`Enter stock quantities for each ${variantAttribute} variant — exactly one per variant!`)
                 sonnerToast.error(`Enter stock quantities for each ${variantAttribute} variant — exactly one per variant!`)
                 return false
             }
             if(productData[variantAttribute] && productData[variantAttribute].length !== productData['price'].length ){
-                console.log(`Enter prices for each ${variantAttribute} variant — exactly one per variant!`)
                 sonnerToast.error(`Enter prices for each ${variantAttribute} variant — exactly one per variant!`)
                 return false
             }
@@ -274,48 +225,31 @@ export default function AdminAddAndEditProductPage({ editProduct }){
         }
         const variantAttributes = ['weights', 'sizes', 'motorPowers', 'colors']
         const doesMultipleVariantAttrExists = variantAttributes.filter(attribute=> productData[attribute]).length > 1
-        console.log("doesMultipleVariantAttrExists---->", doesMultipleVariantAttrExists)
         if(doesMultipleVariantAttrExists){
             sonnerToast.error("Only one variant attribute (weights, sizes, motor power, or colors) can be selected!")
             return
         }
 
         const userSelectedVariantAttr = variantAttributes.find(attribute=> productData[attribute])
-        console.log("userSelectedVariantAttr-->", userSelectedVariantAttr)
         if( !checkVariantDataValidity(userSelectedVariantAttr) ) return
 
         const optionalFields = ["description", "additionalInformation", "tags", ...variantAttributes]
         const requiredFields = Object.keys(productData).filter(field=> !optionalFields.includes(field))
         const isRequiredFieldsMissing = requiredFields.some(field=> productData[field] === undefined || productData[field].toString().trim() === '')
-        console.log("productData---->", productData)
-        console.log("Object.keys(productData).length----->", Object.keys(productData).length)
-        console.log("Object.keys(productData).find(field=> !optionalFields.includes(field)---->", Object.keys(productData).find(field=> !optionalFields.includes(field)))
-        console.log("Required fields---->", requiredFields)
-        // if( (Object.keys(productData).length <= 9 && optionalFields.some(field=> !Object.keys(productData).includes(field) )) || 
-        //         Object.keys(productData).find(field=> !optionalFields.includes(field) && (productData[field] === undefined || productData[field].toString().trim() === ''))){
+
         if(isRequiredFieldsMissing){
             if(!Object.keys(productData).length){
-                console.log("No Fields entered!")
                 toast.error("Please enter all the fields!")
             }
             else{
-                console.log("Check errors"+JSON.stringify(productData))
                 sonnerToast.error("Please check the fields and submit again!")
             }
         } 
         else{
-            console.log("Inside else(no errors) of submitData() ")
-            console.log("ProductData now-->"+JSON.stringify(productData))
-
             const formData = new FormData()
             const {images, thumbnail, ...rest} = productData
 
             rest.variantType = userSelectedVariantAttr
-
-            console.log("Images-->", JSON.stringify(images))
-            console.log("Thumbnail-->",JSON.stringify(thumbnail))
-            console.log("rest-->", JSON.stringify(rest))
-
             for (let field in rest){
                 if( Array.isArray(rest[field]) ){
                     rest[field].forEach((item) => {
@@ -344,20 +278,14 @@ export default function AdminAddAndEditProductPage({ editProduct }){
                 formData.append('images', blob, `productImg${index}`);
             })
             const thumbnailIndex = images.findIndex(img=> img.isThumbnail)
-            console.log("thumbnailIndex-->", thumbnailIndex)
             if(thumbnailIndex !== -1){
                 formData.append('thumbnail', newBlobs[thumbnailIndex], 'productThumbnail')
                 formData.append('thumbnailImageIndex', thumbnailIndex)
             }else{
-                console.log("thumbnail not found in the images")
                 sonnerToast.error('Please select a Thumbnail!')
             }
-
-            console.log("PRODUCTDATA BEFORE DISPATCHING-->", JSON.stringify(productData))
-
             editProduct?  dispatch( updateProduct({formData, id: editProductItem.current._id}) ) : dispatch( createProduct({formData}) )
             sonnerToast.info("Uploading your product...")
-            console.log("Dispatched successfully--")
             setStartedSubmission(false)
         }
     }
@@ -366,8 +294,6 @@ export default function AdminAddAndEditProductPage({ editProduct }){
     return(
         <section id='AdminAddProduct'> 
             <header>
-                {/* <i className='p-[7px] border border-[#c4c6ca] rounded-[4px]'> <IoArrowBackSharp/> </i>
-                <h1>{ editProduct ? 'Edit Product' : 'Add Product'}</h1> */}
                 <AdminTitleSection heading={ editProduct ? 'Edit Product' : 'Add Product'} 
                         subHeading={ editProduct ? "Update the product information" : "Fill in the details to add a new product"}/>
             </header>
@@ -552,10 +478,6 @@ export default function AdminAddAndEditProductPage({ editProduct }){
                             </span>
                           ))}
                         </div>
-                        {/* {   productData.targetMuscles &&
-                            <img src={muscleGroupPics.find(pic=> productData.targetMuscles.some(muscle=> pic.includes(muscle.toLowerCase())))} 
-                                className='absolute right-[-31px] w-[30%] h-auto rounded-[8px]'/>
-                        } */}
                         {productData.targetMuscles && (
                           (() => {
                             const match = Object.keys(muscleGroupPics).find((muscle, picIndex) =>

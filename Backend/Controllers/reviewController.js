@@ -14,7 +14,7 @@ const calculateAverageRating = async (productId)=> {
       averageRating: 0,
       totalReviews: 0,
     })
-    return
+    return {averageRating: 0, totalReviews: 0}
   }
   const avg = reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length
 
@@ -169,8 +169,8 @@ const getProductReviews = async (req, res, next) => {
         reviews: [],
         currentPage,
         totalPages: 0,
-        productAvgReview: reviewStats.averageRating,
-        productTotalReview: reviewStats.totalReviews,
+        productAvgReview: reviewStats?.averageRating || 0,
+        productTotalReview: reviewStats?.totalReviews || 0,
       })
     }
 

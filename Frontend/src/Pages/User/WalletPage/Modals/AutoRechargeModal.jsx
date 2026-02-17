@@ -46,8 +46,6 @@ export default function AutoRechargeModal({ isOpen, onClose, onSave, currentSett
 
   const {acceptTermsOnFirstAction} = useTermsConsent()
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
   useEffect(()=> {
     const script = document.createElement("script")
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
@@ -81,7 +79,7 @@ export default function AutoRechargeModal({ isOpen, onClose, onSave, currentSett
     }
     paymentMethodId = result.setupIntent.payment_method
     try{
-      const response = await apiClient.post(`${baseApiUrl}/wallet/save-stripe-settings`, {paymentMethodId})
+      const response = await apiClient.post(`/wallet/save-stripe-settings`, {paymentMethodId})
       if(response.data.success){
         sonnerToast.success("Auto-recharge settings updated!")
         return true

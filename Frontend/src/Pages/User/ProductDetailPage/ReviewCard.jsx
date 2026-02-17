@@ -20,11 +20,9 @@ export default function ReviewCard({ review, index, onEdit }){
   const [editTooltip, setEditTooltip] = useState(false)
   const [editingReview, setEditingReview] = useState(false)
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
   const handleHelpful = async() => {
     try{
-      const response = await apiClient.get(`${baseApiUrl}/review/toggleHelpful/${review._id}`)
+      const response = await apiClient.get(`/review/toggleHelpful/${review._id}`)
       if(response?.data?.success){ 
         setIsHelpful(response.data.helpfulStatus)
         setHelpfulCount(response.data.helpfulCount)

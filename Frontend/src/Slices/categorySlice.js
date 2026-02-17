@@ -13,7 +13,7 @@ export const createCategory = createAsyncThunk('createCategory', async({formData
     }
 })
 
-export const getAllCategories = createAsyncThunk('getAllCategories', async(thunkAPI)=>{
+export const getAllCategories = createAsyncThunk('getAllCategories', async(_, thunkAPI)=>{
     try{
         const response = await apiClient.get('/admin/products/category')
         return response.data
@@ -68,7 +68,7 @@ export const getNestedSubcategoryNames = createAsyncThunk('getNestedSubcategoryN
     }
 })
 
-export const getFirstLevelCategories = createAsyncThunk('getFirstLevelCategories', async(thunkAPI)=>{
+export const getFirstLevelCategories = createAsyncThunk('getFirstLevelCategories', async(_, thunkAPI)=>{
     try{
         const response = await apiClient.get(`/admin/products/category/getFirstLevelCategories`)
         return response.data

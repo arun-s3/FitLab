@@ -50,18 +50,16 @@ export default function OffersInsightsSection() {
 
   const radarColors = ["#8884d8", "#82ca9d", "#ffc658", "#ff7f50", "#00c49f", "#ff69b4"]
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
   const fetchAllStats = async () => {
       const newStats = []
 
       const [offerRevenueResponse, offerStatsResponse, topOffersResponse, monthlyOffersStatsRes, offersUserTypeRes] =
           await Promise.allSettled([
-              axios.get(`${baseApiUrl}/admin/dashboard/offers/revenue`, { withCredentials: true }),
-              axios.get(`${baseApiUrl}/admin/dashboard/offers/stats`, { withCredentials: true }),
-              axios.get(`${baseApiUrl}/admin/dashboard/offers/top`, { withCredentials: true }),
-              axios.get(`${baseApiUrl}/admin/dashboard/offers/monthly`, { withCredentials: true }),
-              axios.get(`${baseApiUrl}/admin/dashboard/offers/userGroup`, { withCredentials: true }),
+              axios.get(`/admin/dashboard/offers/revenue`, { withCredentials: true }),
+              axios.get(`/admin/dashboard/offers/stats`, { withCredentials: true }),
+              axios.get(`/admin/dashboard/offers/top`, { withCredentials: true }),
+              axios.get(`/admin/dashboard/offers/monthly`, { withCredentials: true }),
+              axios.get(`/admin/dashboard/offers/userGroup`, { withCredentials: true }),
           ])
 
       let statsError = false
@@ -90,16 +88,12 @@ export default function OffersInsightsSection() {
                       ? "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400"
                       : "bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400",
           })
-          console.log("newStats----->", newStats)
       } else {
-          console.log("Error in Offer Revenue:", offerRevenueResponse.reason.message)
           statsError = true
       }
 
       if (offerStatsResponse.status === "fulfilled") {
           const response = offerStatsResponse.value
-          console.log("offerStatsResponse----->", response.data)
-
           newStats.push(
               {
                   name: "activeOffers",
@@ -116,9 +110,7 @@ export default function OffersInsightsSection() {
                   color: "bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400",
               },
           )
-          console.log("newStats now----->", newStats)
       } else {
-          console.log("Error in Offer Stats:", offerStatsResponse.reason.message)
           statsError = true
       }
 
@@ -136,31 +128,25 @@ export default function OffersInsightsSection() {
 
       if (topOffersResponse.status === "fulfilled") {
           const response = topOffersResponse.value
-          console.log("mostUsedOffersDatas----->", response.data.mostUsedOffersData)
           setMostUsedOffersDatas(response.data.mostUsedOffersData)
           setStatus((status) => ({ ...status, mostUsedOffersDatas: "success" }))
       } else {
-          console.log("Error in user top Offers response:", topOffersResponse.reason.message)
           setStatus((status) => ({ ...status, mostUsedOffersDatas: "error" }))
       }
 
       if (monthlyOffersStatsRes.status === "fulfilled") {
           const response = monthlyOffersStatsRes.value
-          console.log("monthlyOffersStatsRes response----->", response.data.monthOffersStats)
           setMonthlyOffersStats(response.data.monthOffersStats)
           setStatus((status) => ({ ...status, monthlyOffersStats: "success" }))
       } else {
-          console.log("Error in user top Offers response:", monthlyOffersStatsRes.reason.message)
           setStatus((status) => ({ ...status, monthlyOffersStats: "error" }))
       }
 
       if (offersUserTypeRes.status === "fulfilled") {
           const response = offersUserTypeRes.value
-          console.log("offersUserTypeRes response----->", response.data.offersByUserGroups)
           setOffersByUserTypeStats(response.data.offersByUserGroups)
           setStatus((status) => ({ ...status, offersByUserTypeStats: "success" }))
       } else {
-          console.log("Error in user top Offers response:", offersUserTypeRes.reason.message)
           setStatus((status) => ({ ...status, offersByUserTypeStats: "error" }))
       }
   }
@@ -182,25 +168,15 @@ export default function OffersInsightsSection() {
         setFetchChartData(true)
     }
   
-      useEffect(()=> {
-        console.log("offerStats--->", offerStats)
-        const priorityOrder = ['offersRevenue', 'activeOffers', 'expiredOffers']
-    
-        const orderedStats = offerStats.sort(
-          (a, b)=> priorityOrder.indexOf(a.name) - priorityOrder.indexOf(b.name)
-        )
-        setOrderedStats(orderedStats)
-      },[offerStats])
+    useEffect(()=> {
+      const priorityOrder = ['offersRevenue', 'activeOffers', 'expiredOffers']
+
+      const orderedStats = offerStats.sort(
+        (a, b)=> priorityOrder.indexOf(a.name) - priorityOrder.indexOf(b.name)
+      )
+      setOrderedStats(orderedStats)
+    },[offerStats])
   
-      useEffect(()=> {
-        console.log("orderedStats--->", orderedStats)
-        console.log("mostUsedOffersDatas--->", mostUsedOffersDatas)
-      },[orderedStats, mostUsedOffersDatas])
-
-       useEffect(() => {
-           console.log("status--->", status)
-       }, [status])
-
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },

@@ -31,22 +31,18 @@ export default function CustomerInsightsSection() {
       vipCustomersDatas: "loading",
   })
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
   const fetchAllStats = async () => {
       const newMetrics = []
 
       const [usersMetricsResponse, userTypesResponse, userGrowthResponse, vipCustomersRes] = await Promise.allSettled([
-          axios.get(`${baseApiUrl}/admin/dashboard/customers/metrics`, { withCredentials: true }),
-          axios.get(`${baseApiUrl}/admin/dashboard/customers/types`, { withCredentials: true }),
-          axios.get(`${baseApiUrl}/admin/dashboard/customers/monthly`, { withCredentials: true }),
-          axios.get(`${baseApiUrl}/admin/dashboard/customers/vip`, { withCredentials: true }),
+          axios.get(`/admin/dashboard/customers/metrics`, { withCredentials: true }),
+          axios.get(`/admin/dashboard/customers/types`, { withCredentials: true }),
+          axios.get(`/admin/dashboard/customers/monthly`, { withCredentials: true }),
+          axios.get(`/admin/dashboard/customers/vip`, { withCredentials: true }),
       ])
 
       if (usersMetricsResponse.status === "fulfilled") {
           const response = usersMetricsResponse.value
-          console.log("Customer Metrics response.data----->", response.data)
-
           newMetrics.push(
               {
                   name: "totalCustomers",
@@ -70,18 +66,14 @@ export default function CustomerInsightsSection() {
                   color: "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400",
               },
           )
-          console.log("newMetrics, ie userMetrics----->", newMetrics)
-
           setUserMetrics(newMetrics)
           setStatus((status) => ({ ...status, stats: "success" }))
       } else {
-          console.log("Error in User Metrics:", usersMetricsResponse.reason.message)
           setStatus((status) => ({ ...status, stats: "error" }))
       }
 
       if (userTypesResponse.status === "fulfilled") {
           const response = userTypesResponse.value
-          console.log("userTypesResponse response----->", response.data.userTypesDatas)
           const userTypeColors = [
               { name: "New Customers", color: "#d7f148" },
               { name: "Returning Customers", color: "#8b5cf6" },
@@ -94,27 +86,22 @@ export default function CustomerInsightsSection() {
           setuserTypeDatas(colorMappedUserTypes)
           setStatus((status) => ({ ...status, userTypeDatas: "success" }))
       } else {
-          console.log("Error in user type percentage:", userTypesResponse.reason.message)
           setStatus((status) => ({ ...status, userTypeDatas: "error" }))
       }
 
       if (userGrowthResponse.status === "fulfilled") {
           const response = userGrowthResponse.value
-          console.log("userGrowthResponse response----->", response.data.monthlyUserGrowthData)
           setMonthlyUserGrowthDatas(response.data.monthlyUserGrowthData)
           setStatus((status) => ({ ...status, monthlyUserGrowthDatas: "success" }))
       } else {
-          console.log("Error in user growth response:", userGrowthResponse.reason.message)
           setStatus((status) => ({ ...status, monthlyUserGrowthDatas: "error" }))
       }
 
       if (vipCustomersRes.status === "fulfilled") {
           const response = vipCustomersRes.value
-          console.log("vipCustomersRes response----->", response.data.vipCustomerDatas)
           setVipCustomersDatas(response.data.vipCustomerDatas)
           setStatus((status) => ({ ...status, vipCustomersDatas: "success" }))
       } else {
-          console.log("Error in vipCustomersdata:", vipCustomersRes.reason.message)
           setStatus((status) => ({ ...status, vipCustomersDatas: "error" }))
       }
   }

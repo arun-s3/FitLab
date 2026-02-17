@@ -2,7 +2,9 @@
 import React, {useState, useEffect} from 'react'
 import {motion} from 'framer-motion'
 
-import {Play, Video, TriangleAlert} from 'lucide-react'
+import {Play, Video, TriangleAlert, RotateCcw} from 'lucide-react'
+import {toast as sonnerToast} from 'sonner'
+
 import apiClient from '../../../Api/apiClient'
 
 
@@ -12,27 +14,33 @@ export default function ExerciseVideos({exercise}) {
   const [selectedVideoIndex, setSelectedVideoIndex] = useState(0)
   const [playVideo, setPlayVideo] = useState(false)
 
+  const [loading, setLoading] = useState(false)
   const [fetchError, setFetchError] = useState(false)
-
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
     async function fetchVideos() {
       try {
-        const response = await apiClient.get( `${baseApiUrl}/fitness/videos/${exercise.name}`)
+        const response = await apiClient.get( `/fitness/videos/${exercise.name}`)
         if(response.status === 200){ 
           setVideos(response.data.videos)
         }
       }catch (error) {
         setFetchError(true)
+      }finally {
+        setLoading(false)
       }
     }
 
   useEffect(()=> {
     if (!exercise?.name) return
+    setLoading(true)
     fetchVideos()
   }, [exercise])
 
-  const refetchVideos = ()=> fetchVideos()
+  const refetchVideos = ()=> {
+    setFetchError(false)
+    setLoading(true)
+    fetchVideos()
+  }
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -50,7 +58,7 @@ export default function ExerciseVideos({exercise}) {
             <span className='text-[25px] text-black font-bold'> Videos related to this exercise or its variations </span>
         </h2>
         {
-          videos && videos.length > 0 &&
+          videos && videos.length > 0 && !fetchError &&
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -133,12 +141,25 @@ export default function ExerciseVideos({exercise}) {
               
             </motion.div>
         }
+        {loading && (
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className='flex justify-center py-12'>
+                <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+                    className='w-12 h-12 border-4 border-slate-200 border-t-secondary rounded-full'
+                />
+            </motion.div>
+        )}
+        
         {fetchError && (
             <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className='mt-8 flex justify-center items-center gap-[5px] w-[35%] min-w-[15rem] bg-red-50 border border-red-200
-                  text-red-700 p-4 rounded-lg mb-8'>
+                className='mt-16 mx-auto flex justify-center items-center gap-[5px] w-[35%] min-w-[15rem] bg-red-50 border border-red-200
+                  text-red-700 px-4 py-8 rounded-lg mb-8'>
                 <TriangleAlert className='mb-[18px] text-primary w-[32px] h-[32px]' />
                 <p className='flex flex-col'>
                     <span className='flex items-center gap-[7px] text-[17px] text-[#686262] font-medium'>

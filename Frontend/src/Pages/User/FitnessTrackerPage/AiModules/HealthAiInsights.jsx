@@ -19,8 +19,6 @@ export default function HealthAiInsights() {
 
     const [error, setError] = useState(null)
 
-    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
     const insightsTemplates = [
         {
           id: 1,
@@ -87,7 +85,7 @@ export default function HealthAiInsights() {
     const getInsightDataSources = async()=> {
         setLoading(true)
         try { 
-          const latestHealthResponse = await apiClient.get(`${baseApiUrl}/fitness/tracker/health`)
+          const latestHealthResponse = await apiClient.get(`/fitness/tracker/health`)
 
           if(latestHealthResponse.status === 200){ 
             const { latestProfile, prevProfile } = latestHealthResponse.data

@@ -5,7 +5,6 @@ import {useSelector, useDispatch} from "react-redux"
 import {debounce} from 'lodash'
 
 import {Plus, Search, SlidersHorizontal, CalendarX2} from "lucide-react"
-// import {IconFilePercent, IconRosetteDiscount, IconRosetteDiscountCheck, IconRosetteDiscountOff} from "@tabler/icons-react"
 import {TbFilePercent} from "react-icons/tb"
 import {RiDiscountPercentLine} from "react-icons/ri"
 import {TbRosetteDiscountCheck} from "react-icons/tb"
@@ -13,7 +12,6 @@ import {TbRosetteDiscountOff} from "react-icons/tb"
 import {RiArrowDropDownLine} from "react-icons/ri"
 import {MdSort} from "react-icons/md"
 import {toast as sonnerToast} from 'sonner'
-import {TbDiscountOff} from "react-icons/tb"
 
 import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
 import CouponList from "./CouponList"
@@ -61,14 +59,12 @@ export default function AdminCouponManagementPage(){
     const {coupons: allCoupons, totalCoupons, couponDeactivated} = useSelector(state=> state.coupons)
     const dispatch = useDispatch()
     
-
     useEffect(() => {
         setCoupons(allCoupons)
     }, [allCoupons])
 
     useEffect(()=> {
       if(coupons && totalCoupons && totalPages && limit){
-        console.log(`totalPages------>${totalPages}, limit------>${limit}`)
         setTotalPages(Math.ceil(totalCoupons/limit))
       }
     }, [coupons, totalCoupons])    
@@ -80,7 +76,6 @@ export default function AdminCouponManagementPage(){
     },[startDate, endDate, currentPage])
 
     useEffect(() => {
-      console.log("queryOptions----->", queryOptions)
       if(Object.keys(queryOptions).length > 0){
         dispatch( getAllCoupons({queryOptions}) )
       }
@@ -131,13 +126,10 @@ export default function AdminCouponManagementPage(){
   
     const searchCoupon = (e)=> {
       const searchData = e.target.value
-      console.log('searchData--->', searchData)
       if(searchData.trim() !== ''){
-          console.log("Getting searched lists--")
           debouncedSearch(searchData)
       } 
       else{
-          console.log("Getting all lists--")
           debouncedSearch.cancel()
           setQueryOptions(query=> {
             const {searchData, ...rest} = query
@@ -155,14 +147,10 @@ export default function AdminCouponManagementPage(){
   
     const radioClickHandler = (e, sortBy)=>{
       const value = Number.parseInt(e.target.value)
-      console.log("value---->", value)
       const checkStatus = queryOptions.sort === value
-      console.log("checkStatus-->", checkStatus)
       if(checkStatus){
-          console.log("returning..")
           return
       }else{
-          console.log("Checking radio..")
           setQueryOptions(query=> {
             return {...query, sort: value, sortBy}
           })
@@ -180,7 +168,6 @@ export default function AdminCouponManagementPage(){
         return {...query, sortBy, sort}
       })
     }
-
 
 
     return(
@@ -212,7 +199,7 @@ export default function AdminCouponManagementPage(){
                             toggleStickyDropdown(e, 'filterDropdown')
                             setAdvFilterEvent(e)
                           }}
-                             id='sort-options' ref={stickyDropdownRefs.filterDropdown}> {/* onClick={(e)=> toggleDropdown('filterDropdown')}*/}
+                             id='sort-options' ref={stickyDropdownRefs.filterDropdown}> 
                          <SlidersHorizontal className='h-[15px] w-[15px]'/>
                          <span className='text-[13px] font-[470]'> Adv Filters </span>
                          

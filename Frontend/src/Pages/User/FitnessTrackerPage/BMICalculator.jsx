@@ -35,8 +35,6 @@ export default function BMICalculator() {
 
   const {acceptTermsOnFirstAction} = useTermsConsent()
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL 
-
   useEffect(()=> {
     getLatestHealthProfile()
   }, [])
@@ -63,7 +61,7 @@ export default function BMICalculator() {
   const updateHealthProfile = async(healthProfile)=> {
     acceptTermsOnFirstAction()
     try { 
-      const response = await apiClient.post(`${baseApiUrl}/fitness/tracker/health/update`, {healthProfile})
+      const response = await apiClient.post(`/fitness/tracker/health/update`, {healthProfile})
       if(response.status === 200 || response.status === 201){
         sonnerToast.success("Your health profile updated!")
         sonnerToast.info("Keep your health profile updated every week/month for accurate insights and trackig. We'll remind you weekly.", {duration: 5500})
@@ -84,7 +82,7 @@ export default function BMICalculator() {
 
   const getLatestHealthProfile = async()=> {
     try { 
-      const response = await apiClient.get(`${baseApiUrl}/fitness/tracker/health`)
+      const response = await apiClient.get(`/fitness/tracker/health`)
       if(response.status === 200){
         const {bodyFatPercentage, bloodPressure, ...rest} = response.data.latestProfile
         const {systolic, diastolic} = bloodPressure

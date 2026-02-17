@@ -29,11 +29,9 @@ export default function ReviewsPanel({ productId, productRating, totalReviews })
 
   const reviewFormRef = useRef(null)
 
-  const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
   async function loadReviews(){  
     try{ 
-      const response = await apiClient.get(`${baseApiUrl}/review/${productId}?sort=${sortBy}&page=${currentPage}`)
+      const response = await apiClient.get(`/review/${productId}?sort=${sortBy}&page=${currentPage}`)
       if(response.data.success){
         setReviews(response.data.reviews)
         setRating(response.data.productAvgReview)
@@ -77,7 +75,7 @@ export default function ReviewsPanel({ productId, productRating, totalReviews })
   const handleAddReview = async(newReview) => {
     setShowForm(false)
       try{
-        const response = await apiClient.post(`${baseApiUrl}/review/add`, {productId, ...newReview})
+        const response = await apiClient.post(`/review/add`, {productId, ...newReview})
         if(response?.data?.success){
           sonnerToast.success("Your review has been submitted successfully!")
           loadReviews()
@@ -107,7 +105,7 @@ export default function ReviewsPanel({ productId, productRating, totalReviews })
    const handleEditReview = async(review) => {
     setShowForm(false)
       try{
-        const response = await apiClient.post(`${baseApiUrl}/review/update/${review._id}`, {productId, ...review})
+        const response = await apiClient.post(`/review/update/${review._id}`, {productId, ...review})
         if(response.data.success){
           sonnerToast.success("Your review has been updated successfully!")
           loadReviews()

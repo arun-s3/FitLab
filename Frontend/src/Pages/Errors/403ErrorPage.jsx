@@ -1,6 +1,6 @@
 import React from 'react'
-import {Outlet, useNavigate} from "react-router-dom"
-import {useSelector,useDispatch} from 'react-redux'
+import {useNavigate} from "react-router-dom"
+import {useSelector} from 'react-redux'
 import {motion} from "framer-motion"
 
 import {FaArrowRightLong, FaArrowLeftLong} from "react-icons/fa6"

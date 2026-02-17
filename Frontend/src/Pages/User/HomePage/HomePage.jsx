@@ -2,6 +2,8 @@ import React, {useState, useEffect, useRef, lazy, Suspense} from 'react'
 import {useLocation} from "react-router-dom"
 import {motion} from "framer-motion"
 
+import {toast as sonnerToast} from 'sonner'
+
 import apiClient from '../../../Api/apiClient'
 
 import Header from '../../../Components/Header/Header'
@@ -35,8 +37,6 @@ export default function HomePage(){
 
     const shopByCategoryRef = useRef(null)
 
-    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
     useEffect(() => {
       const observer = new IntersectionObserver(
         (entries) => {
@@ -66,7 +66,7 @@ export default function HomePage(){
     useEffect(()=> {
       async function loadPopularProducts(){
         try{
-          const response = await apiClient.get(`${baseApiUrl}/products/popular`)
+          const response = await apiClient.get(`/products/popular`)
           if(response?.data?.popularProducts) {
             setPopularProducts(response.data.popularProducts)
           }
@@ -110,7 +110,7 @@ export default function HomePage(){
           <Suspense fallback={<Fallback variant="products" height="h-56" />}>
             {/* <PopularProductsCarousal /> */}
             {
-              popularproducts &&
+              popularproducts && popularproducts.length > 0 &&
                 <Carousal 
                   products={popularproducts} 
                   title='Most Popular Products' 

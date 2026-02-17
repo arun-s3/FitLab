@@ -38,8 +38,6 @@ export default function ForgotAndResetPasswordPage(){
 
     const navigate = useNavigate()
 
-    const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-
     useEffect(()=> {
         if(timer === 0 && !phase.resetPhase && !resendState){
             setVerificationError(true)
@@ -84,7 +82,7 @@ export default function ForgotAndResetPasswordPage(){
             setLoading(true)
 
             try{
-              const response = await apiClient.post(`${baseApiUrl}/sendOtp`, {email})
+              const response = await apiClient.post(`/sendOtp`, {email})
               if(response){
                   setPhase({...phase, timerPhase: true})
                   inputRef.current.value = '';
@@ -145,7 +143,7 @@ export default function ForgotAndResetPasswordPage(){
           return
       }else{
             try{
-                const response = await apiClient.post(`${baseApiUrl}/verifyOtp`, {otp: code, email, updateUser: false})
+                const response = await apiClient.post(`/verifyOtp`, {otp: code, email, updateUser: false})
                 if(response.data.message.includes('success')){
                     stopTimer()
                     setError('')
@@ -200,7 +198,7 @@ export default function ForgotAndResetPasswordPage(){
         setCodeBoxDisabled(false)
         setResendState(true)
         try{
-          const response = await apiClient.post(`${baseApiUrl}/sendOtp`, {email});
+          const response = await apiClient.post(`/sendOtp`, {email});
           if(response){
               startTimer()
               setResendState(false)
@@ -239,7 +237,7 @@ export default function ForgotAndResetPasswordPage(){
       }
       else{
         try{
-          const response = await apiClient.post(`${baseApiUrl}/password/reset`, {newPassword: passwords.newPass})
+          const response = await apiClient.post(`/password/reset`, {newPassword: passwords.newPass})
           if(response.data.message.includes('success')){
             setError('')
             setVerificationError(false)

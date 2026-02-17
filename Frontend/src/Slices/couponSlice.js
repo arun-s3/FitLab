@@ -62,7 +62,7 @@ export const searchCoupons = createAsyncThunk('coupon/search', async ({query}, t
   }
 })
 
-export const getBestCoupon = createAsyncThunk('coupon/getBestCoupon', async (thunkAPI)=> {
+export const getBestCoupon = createAsyncThunk('coupon/getBestCoupon', async (_, thunkAPI)=> {
   try {
     const response = await apiClient.get('/coupons/bestCoupons')
     return response.data

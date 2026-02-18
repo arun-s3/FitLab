@@ -3,7 +3,6 @@ import React, {useState, useEffect} from 'react'
 import {motion} from 'framer-motion'
 
 import {Play, Video, TriangleAlert, RotateCcw} from 'lucide-react'
-import {toast as sonnerToast} from 'sonner'
 
 import apiClient from '../../../Api/apiClient'
 

@@ -4,7 +4,7 @@ import {useDispatch, useSelector} from 'react-redux'
 
 import {RiCoupon4Line} from "react-icons/ri"
 
-import {applyCoupon, resetCartStates} from '../../../Slices/cartSlice'
+import {applyCoupon} from '../../../Slices/cartSlice'
 import ReplaceCouponModal from './Modals/ReplaceCouponModal'
 
 

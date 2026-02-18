@@ -15,8 +15,10 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts"
+
 import { CreditCard, RefreshCcw, IndianRupee, ArrowDown, ChevronUp, ChevronDown, ArrowUp } from "lucide-react"
-import axios from 'axios'
+
+import apiClient from '../../../../Api/apiClient'
 
 import {OperationsAnalyticsContext} from '.././AdminDashboardPage'
 import { useTogglerEnabled } from "../../../../Hooks/ToggleEnabler"
@@ -53,9 +55,9 @@ export default function PaymentsInsightsSection() {
       const newStats = []
 
       const [paymentStatsResponse, paymentMethodResponse, refundRequestRes] = await Promise.allSettled([
-          axios.get(`/admin/dashboard/payments/stats`, { withCredentials: true }),
-          axios.get(`/admin/dashboard/payments/methods`, { withCredentials: true }),
-          axios.get(`/admin/dashboard/payments/refunds`, { withCredentials: true }),
+          apiClient.get(`/admin/dashboard/payments/stats`),
+          apiClient.get(`/admin/dashboard/payments/methods`),
+          apiClient.get(`/admin/dashboard/payments/refunds`),
       ])
 
       if (paymentStatsResponse.status === "fulfilled") {
@@ -116,7 +118,7 @@ export default function PaymentsInsightsSection() {
           setStatus((status) => ({ ...status, refundRequestDatas: "error" }))
       }
 
-      await axios
+      await apiClient
           .get(`/admin/dashboard/payments/customers-by-state`)
           .then((res) => setLocationDatas(res.data))
           .catch((err) => console.error(err))

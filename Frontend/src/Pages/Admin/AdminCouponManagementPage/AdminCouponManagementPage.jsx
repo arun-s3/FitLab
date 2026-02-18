@@ -56,7 +56,7 @@ export default function AdminCouponManagementPage(){
     setHeaderZIndex(0)
     setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.94),rgba(255,255,255,0.94)), url('/Images/admin-bg4.png')`)
 
-    const {coupons: allCoupons, totalCoupons, couponDeactivated} = useSelector(state=> state.coupons)
+    const {coupons: allCoupons, totalCoupons, couponDeactivated, couponError} = useSelector(state=> state.coupons)
     const dispatch = useDispatch()
     
     useEffect(() => {
@@ -87,6 +87,13 @@ export default function AdminCouponManagementPage(){
       }
       dispatch(resetCouponStates())
     },[couponDeactivated])
+
+    useEffect(()=> {
+        if(couponError) {
+            sonnerToast.error(couponError)
+            dispatch(resetCouponStates())
+        }
+    }, [couponError])
 
     const sortTypes = [
       {name: 'Coupons: Recent to Oldest', value: '-1', sortBy: 'createdAt'}, {name: 'Coupons: Oldest to Recent', value: '1', sortBy: 'createdAt'},

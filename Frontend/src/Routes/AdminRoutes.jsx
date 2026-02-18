@@ -9,7 +9,7 @@ import AdminAddAndEditProductPage from '../Pages/Admin/AdminAddAndEditProductPag
 import AdminProductListPage from '../Pages/Admin/AdminProductListPage/AdminProductListPage'
 import AdminAddAndEditCategoryPage from '../Pages/Admin/AdminAddAndEditCategoryPage/AdminAddAndEditCategoryPage'
 import AdminCategoryListPage from '../Pages/Admin/AdminCategoryListPage/AdminCategoryListPage'
-import AdminOrderHistory from "../Pages/Admin/AdminOrderHistroyPage/AdminOrderHistroyPage"
+import AdminOrderHistoryPage from "../Pages/Admin/AdminOrderHistoryPage/AdminOrderHistoryPage"
 
 import AdminDashboardPage from '../Pages/Admin/AdminDashboardPage/AdminDashboardPage'
 import AdminDashboardHeatmapPage from '../Pages/Admin/AdminCustomerHeatmapPage/AdminDashboardHeatmapPage.jsx'
@@ -75,7 +75,7 @@ export default function AdminRoutes() {
                                     element={<AdminAddAndEditCategoryPage editCategory={true} />}
                                 />
                             </Route>
-                            <Route path='orders' element={<AdminOrderHistory />} />
+                            <Route path='orders' element={<AdminOrderHistoryPage />} />
                             <Route path='coupons' element={<AdminCouponManagementPage />} />
                             <Route path='offers'>
                                 <Route index element={<AdminOfferManagementPage />} />

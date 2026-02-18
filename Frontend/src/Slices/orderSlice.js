@@ -243,7 +243,7 @@ const orderSlice = createSlice({
       })
       .addCase(cancelOrder.rejected, (state, action) => {
         state.loading = false
-        state.orderError = true
+        state.orderError = action.payload
         state.orderMessage = action.payload.message
         state.orderCancelled = false
       })
@@ -307,7 +307,7 @@ const orderSlice = createSlice({
       })
       .addCase(deleteProductFromOrderHistory.rejected, (state, action) => {
         state.loading = false
-        state.orderError = true
+        state.orderError = action.payload
         state.orderMessage = action.payload.message
         state.productDeleted  = false
       })
@@ -343,7 +343,7 @@ const orderSlice = createSlice({
       })
       .addCase(changeOrderStatus.rejected, (state, action)=> {
         state.loading = false
-        state.orderError = true
+        state.orderError = action.payload
         state.orderMessage = action.payload.message
         state.orderUpdated = false
       })
@@ -389,7 +389,7 @@ const orderSlice = createSlice({
       })
       .addCase(changeProductStatus.rejected, (state, action)=> {
         state.loading = false
-        state.orderError = true
+        state.orderError = action.payload
         state.orderMessage = action.payload.message
         state.orderUpdated = false
       })

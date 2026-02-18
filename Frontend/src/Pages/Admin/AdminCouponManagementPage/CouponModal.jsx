@@ -11,7 +11,7 @@ import {toast} from 'react-toastify'
 import CategoryDisplay from "../../../Components/CategoryDisplay/CategoryDisplay"
 import {createCoupon, updateCoupon, resetCouponStates} from '../../../Slices/couponSlice'
 import {searchProduct, getAllProducts} from '../../../Slices/productSlice'
-import {showUsers} from '../../../Slices/adminSlice'
+import {showUsers, resetStates} from '../../../Slices/adminSlice'
 import useModalHelpers from '../../../Hooks/ModalHelpers'
 import {camelToCapitalizedWords} from "../../../Utils/helperFunctions"
 
@@ -50,9 +50,9 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
   const [customerQueryOptions, setCustomerQueryOptions] = useState({page: 1, limit: 6})
 
   const { products, productCounts } = useSelector(state=> state.productStore)
-  const { adminLoading, adminError, adminSuccess, adminMessage, allUsers } = useSelector(state => state.admin)
+  const { adminLoading, allUsers } = useSelector(state => state.admin)
   
-  const {couponCreated, couponUpdated} = useSelector(state=> state.coupons)
+  const {couponCreated, couponUpdated, couponError} = useSelector(state=> state.coupons)
   const dispatch = useDispatch()
 
   const modalRef = useRef(null)
@@ -133,6 +133,13 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
       dispatch(resetCouponStates())
     }
   }, [couponCreated, couponUpdated])
+
+  useEffect(()=> {
+      if(couponError) {
+          sonnerToast.error(couponError)
+          dispatch(resetCouponStates())
+      }
+  }, [couponError])
 
   const handleChange = (e)=> {
     const { name, value, type, checked } = e.target

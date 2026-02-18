@@ -20,7 +20,7 @@ export default function RefundModal({isOpen, onClose, returnOrderOrProduct, orde
 
   const [errorMsg, setErrorMsg] = useState('')
 
-  const {orderReturnRequested, loading, orderError} = useSelector(state=> state.order)
+  const {orderReturnRequested, loading} = useSelector(state=> state.order)
 
   const modalRef = useRef(null)
   useModalHelpers({open: isOpen, onClose, modalRef})

@@ -51,7 +51,7 @@ export default function UserAccountPage(){
 
   const dispatch = useDispatch()
   const {user, userUpdated, loading: userLoading} = useSelector(state=> state.user)
-  const {currentDefaultAddress, addressUpdated, loading: addressLoading} = useSelector(state=> state.address)
+  const {currentDefaultAddress, addressUpdated, loading: addressLoading, error} = useSelector(state=> state.address)
 
   useEffect(()=> {
     const handleClickOutside = (e)=> {

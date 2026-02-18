@@ -19,8 +19,10 @@ import {
   PolarRadiusAxis,
   Radar  
 } from "recharts"
+
 import { Tag, Percent, TrendingUp, TrendingDown, ArrowUp, Award, Clock, Users, ChevronUp, ChevronDown } from "lucide-react"
-import axios from 'axios'
+
+import apiClient from '../../../../Api/apiClient'
 
 import {OperationsAnalyticsContext} from '../AdminDashboardPage'
 import { useTogglerEnabled } from "../../../../Hooks/ToggleEnabler"
@@ -55,11 +57,11 @@ export default function OffersInsightsSection() {
 
       const [offerRevenueResponse, offerStatsResponse, topOffersResponse, monthlyOffersStatsRes, offersUserTypeRes] =
           await Promise.allSettled([
-              axios.get(`/admin/dashboard/offers/revenue`, { withCredentials: true }),
-              axios.get(`/admin/dashboard/offers/stats`, { withCredentials: true }),
-              axios.get(`/admin/dashboard/offers/top`, { withCredentials: true }),
-              axios.get(`/admin/dashboard/offers/monthly`, { withCredentials: true }),
-              axios.get(`/admin/dashboard/offers/userGroup`, { withCredentials: true }),
+              apiClient.get(`/admin/dashboard/offers/revenue`),
+              apiClient.get(`/admin/dashboard/offers/stats`),
+              apiClient.get(`/admin/dashboard/offers/top`),
+              apiClient.get(`/admin/dashboard/offers/monthly`),
+              apiClient.get(`/admin/dashboard/offers/userGroup`),
           ])
 
       let statsError = false

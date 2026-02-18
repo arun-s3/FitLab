@@ -103,16 +103,21 @@ export default function OrderHistoryPage(){
         setIsCartOpen(true)
         dispatch(resetCartStates())
       }
+    },[loading, productAdded])
+
+    useEffect(()=> {
+      if(orderError){
+        sonnerToast.error(orderError)
+        dispatch(resetOrderStates())
+      }
+    }, [orderError])
+
+    useEffect(()=> {
       if(error){
         sonnerToast.error(error)
         dispatch(resetCartStates())
       }
-      if(orderError){
-        sonnerToast.error(orderError)
-        dispatch(resetCartStates())
-      }
-      dispatch(resetCartStates())
-    },[loading, error, orderError, productAdded])
+    },[error])
 
     useEffect(()=> {
       if(canceledReturnRequest){ 

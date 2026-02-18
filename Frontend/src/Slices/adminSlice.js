@@ -107,6 +107,7 @@ const adminSlice = createSlice({
         builder.addCase(adminSignin.pending, (state,action)=>{
             state.adminLoading = true
             state.adminSuccess = false
+            state.adminError = null
         })
         .addCase(adminSignin.fulfilled, (state,action)=>{
             state.adminLoading = false
@@ -121,22 +122,29 @@ const adminSlice = createSlice({
         })
         .addCase(adminSignout.fulfilled, (state,action)=>{
            state.admin = null
+           state.adminError = null
+           state.adminSuccess = true
+           state.adminLoading = false
         })
         .addCase(adminSignout.rejected, (state,action)=>{
+            state.adminError = action.payload
+            state.adminLoading = false
+            state.adminSuccess = false
         })
         .addCase(updateAdminDetails.pending, (state,action)=>{
             state.loading = true
             state.success = false
+            state.adminError = null
         })
         .addCase(updateAdminDetails.fulfilled, (state,action)=>{
             state.loading = false
-            state.error = null
+            state.adminError = null
             state.success = true
             state.admin = action.payload.user
             state.adminUpdated =  true
         })
         .addCase(updateAdminDetails.rejected, (state,action)=>{
-            state.error = action.payload
+            state.adminError = action.payload
             state.loading = false
             state.success = false
             state.adminUpdated = false
@@ -144,16 +152,17 @@ const adminSlice = createSlice({
         .addCase(updateAdminProfilePic.pending, (state,action)=>{
             state.loading = true
             state.success = false
+            state.adminError = null
         })
         .addCase(updateAdminProfilePic.fulfilled, (state,action)=>{
             state.loading = false
-            state.error = null
+            state.adminError = null
             state.success = true 
             state.admin.profilePic = action.payload.profilePic
             state.adminDpUpdated =  true
         })
         .addCase(updateAdminProfilePic.rejected, (state,action)=>{
-            state.error = action.payload
+            state.adminError = action.payload
             state.loading = false
             state.success = false
             state.adminDpUpdated = false
@@ -161,45 +170,45 @@ const adminSlice = createSlice({
         .addCase(showUsers.pending, (state,action)=>{
             state.adminLoading = true
             state.success = false
-            state.adminError = false
+            state.adminError = null
         })
         .addCase(showUsers.fulfilled, (state,action)=>{
             state.adminLoading = false
             state.success = true
-            state.adminError = false
+            state.adminError = null
             state.allUsers = action.payload.users
             state.totalUsers = action.payload.totalUsers
         })
         .addCase(showUsers.rejected, (state,action)=>{
             state.adminLoading = false
             state.success = false
-            state.adminError = true
+            state.adminError = action.payload
         })
         .addCase(toggleBlockUser.pending, (state,action)=>{
             state.adminLoading = true
             state.success = false
-            state.adminError = false
+            state.adminError = null
         })
         .addCase(toggleBlockUser.fulfilled, (state,action)=>{
             state.adminLoading = false
             state.success = true
-            state.adminError = false
+            state.adminError = null
             state.adminMessage = action.payload.message
         })
         .addCase(toggleBlockUser.rejected, (state,action)=>{
             state.adminLoading = false
             state.success = false
-            state.adminError = true
+            state.adminError = action.payload
         })
         .addCase(updateRiskyUserStatus.pending, (state, action) => {
           state.adminLoading = true
           state.success = false
-          state.adminError = false
+          state.adminError = null
         })
         .addCase(updateRiskyUserStatus.fulfilled, (state, action) => {
           state.adminLoading = false
           state.success = true
-          state.adminError = false
+          state.adminError = null
           state.adminMessage = action.payload.message
 
           if (action.payload.updatedUser) {
@@ -213,7 +222,7 @@ const adminSlice = createSlice({
         .addCase(updateRiskyUserStatus.rejected, (state, action) => {
           state.adminLoading = false
           state.success = false
-          state.adminError = true
+          state.adminError = action.payload
           state.adminMessage = action.payload
         })
 

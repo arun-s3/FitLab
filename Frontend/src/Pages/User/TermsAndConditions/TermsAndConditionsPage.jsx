@@ -26,12 +26,12 @@ export default function TermsAndConditionsPage() {
       }
   }, [updatedTermsAcceptance])
 
-  useEffect(()=> {
-      if(error){
-        sonnerToast.error(error || "Something went wrong. Plaese check your network and retry later!")
-        dispatch(resetStates())
-      }
-  }, [error])
+//   useEffect(()=> {
+//       if(error){
+//         sonnerToast.error(error || "Something went wrong. Plaese check your network and retry later!")
+//         dispatch(resetStates())
+//       }
+//   }, [error])
 
   const headerBg = {
      backgroundImage: "url('/Images/header-bg.png')",

@@ -3,8 +3,10 @@ import './componentsStyle.css'
 import { motion, AnimatePresence } from "framer-motion"
 
 import {PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from "recharts"
+
 import { Users, UserPlus, UserCheck, Award, ChevronDown, ChevronUp } from "lucide-react"
-import axios from 'axios'
+
+import apiClient from '../../../../Api/apiClient'
 
 import {BusinessAnalyticsContext} from '.././AdminDashboardPage'
 import { useTogglerEnabled } from "../../../../Hooks/ToggleEnabler"
@@ -35,10 +37,10 @@ export default function CustomerInsightsSection() {
       const newMetrics = []
 
       const [usersMetricsResponse, userTypesResponse, userGrowthResponse, vipCustomersRes] = await Promise.allSettled([
-          axios.get(`/admin/dashboard/customers/metrics`, { withCredentials: true }),
-          axios.get(`/admin/dashboard/customers/types`, { withCredentials: true }),
-          axios.get(`/admin/dashboard/customers/monthly`, { withCredentials: true }),
-          axios.get(`/admin/dashboard/customers/vip`, { withCredentials: true }),
+          apiClient.get(`/admin/dashboard/customers/metrics`),
+          apiClient.get(`/admin/dashboard/customers/types`),
+          apiClient.get(`/admin/dashboard/customers/monthly`),
+          apiClient.get(`/admin/dashboard/customers/vip`),
       ])
 
       if (usersMetricsResponse.status === "fulfilled") {

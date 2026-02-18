@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react'
 import './CartSidebar.css'
-import {useNavigate} from 'react-router-dom'
+import {useNavigate, useLocation} from 'react-router-dom'
 import {useSelector, useDispatch} from 'react-redux'
 
 import {X, Minus, Plus, ChevronRight, ShoppingCart, SquareArrowOutUpLeft, Trash, Trash2, Check, BadgePlus} from 'lucide-react'
@@ -24,19 +24,13 @@ export default function CartSidebar({ isOpen, onClose, retractedView }) {
   const {cart, productAdded, productRemoved, loading, error, message} = useSelector(state=> state.cart)
   const navigate = useNavigate()
 
+  const location = useLocation()
+
   const dispatch = useDispatch()
 
   useEffect(()=> {
     if(cart?.products){
       setPackedupCart(cart)
-    }
-    if(error){
-      sonnerToast.error(error, {description: "Please try again!"})
-      dispatch(resetCartStates())
-    }
-    if(error && error.toLowerCase().includes('product')){
-      toast.error(error)
-      dispatch(resetCartStates())
     }
     if(productAdded){
       setPackedupCart(cart)
@@ -47,7 +41,15 @@ export default function CartSidebar({ isOpen, onClose, retractedView }) {
       sonnerToast.info("Product removed from cart")
       dispatch(resetCartStates())
     }
-  },[error, productAdded, productRemoved, cart])
+  },[productAdded, productRemoved, cart])
+
+  useEffect(()=> {
+    if(location.pathname === '/cart' || location.pathname === '/checkout') return
+    if(error){
+      sonnerToast.error(error)
+      dispatch(resetCartStates())
+    }
+  },[error])
 
   useEffect(()=> {
     if(packedupCart?.products && packedupCart.products.length <= 0){

@@ -44,8 +44,8 @@ export default function CouponPage(){
 
   const [queryOptions, setQueryOptions] = useState({page: 1, limit: 6})
   
-  const {coupons: allCoupons, totalCoupons, couponError} = useSelector(state=> state.coupons)
-  const {cart, couponApplied, couponRemoved} = useSelector(state=> state.cart)
+  const {coupons: allCoupons, totalCoupons} = useSelector(state=> state.coupons)
+  const {cart, couponApplied, couponRemoved, error} = useSelector(state=> state.cart)
   const {user} = useSelector(state=> state.user)
   
   const dispatch = useDispatch()
@@ -74,11 +74,12 @@ export default function CouponPage(){
     }
   }, [queryOptions])
 
-  useEffect(() => {
-    if(couponError){
-      sonnerToast.error(couponError)
+  useEffect(()=> {
+    if(error){
+      sonnerToast.error(error)
+      dispatch(resetCartStates())
     }
-  }, [couponError])
+  },[error])
 
   useEffect(()=> {
     if(couponApplied){

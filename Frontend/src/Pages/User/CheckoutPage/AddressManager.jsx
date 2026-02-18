@@ -21,10 +21,6 @@ export default function AddressManager({addresses, shippingAddress, setShippingA
     const {user} = useSelector(state=> state.user)
       
     useEffect(()=> {
-        if(error){
-            sonnerToast.error(error)
-            dispatch(resetStates())
-        }
         if(addressSubmitted && addressCreated){
             dispatch(getAllAddress())
             sonnerToast.success("New Address registered successfully!") 
@@ -32,7 +28,14 @@ export default function AddressManager({addresses, shippingAddress, setShippingA
             setDeliverAddressMade(true)
             setAddressSubmitted(false)
         }
-    },[addressCreated, addressSubmitted, error])
+    },[addressSubmitted, addressCreated])
+
+    useEffect(()=> {
+        if(addressSubmitted && error){
+            sonnerToast.error(error)
+            dispatch(resetStates())
+        }
+    },[addressSubmitted, error])
 
     const submitAddress = (addressData)=> {
         const {alternateMobileNumber, mobileNumber, ...rest} = addressData

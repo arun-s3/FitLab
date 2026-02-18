@@ -4,11 +4,11 @@ import { motion, AnimatePresence } from "framer-motion"
 
 import { X, Send, MessageCircle, User } from "lucide-react"
 
-import useModalHelpers from '../../../Hooks/ModalHelpers'
-import {AdminSocketContext} from '../../../Components/AdminSocketProvider/AdminSocketProvider'
+import useModalHelpers from '../../Hooks/ModalHelpers'
+import {AdminSocketContext} from '../AdminSocketProvider/AdminSocketProvider'
 
 
-export default function CustomerMessageModal({ isOpen, onClose, customer }) {
+export default function CustomerMessageModal({ isOpen, onClose, customer, addSubtitle = null }) {
 
   const [message, setMessage] = useState("")
   const [title, setTitle] = useState("")
@@ -81,7 +81,7 @@ export default function CustomerMessageModal({ isOpen, onClose, customer }) {
                     <h2 className="text-white font-semibold text-lg">
                         {`${customer?.firstName && customer?.lastName ? `${customer.firstName} ${customer.lastName}` : `${customer.username}` }`}
                     </h2>
-                    <p className="text-purple-100 text-sm">{customer?.email || "customer@example.com"}</p>
+                    {customer?.email && <p className="text-purple-100 text-sm">{customer.email}</p>}
                   </div>
                 </div>
                 <motion.button
@@ -106,9 +106,14 @@ export default function CustomerMessageModal({ isOpen, onClose, customer }) {
                     <MessageCircle className="w-5 h-5 text-purple-600 mt-0.5 flex-shrink-0" />
                     <div>
                       <h3 className="text-purple-900 font-medium text-sm mb-1">Send Quick Message</h3>
-                      <p className="text-purple-700 text-sm leading-relaxed">
-                        Compose a one-way message to notify this customer. For real-time conversations, use the chat
-                        button below.
+                      <p className="text-purple-700 text-sm leading-relaxed"> 
+                        {
+                            `Compose a one-way message to notify this customer. ${addSubtitle 
+                                ? addSubtitle
+                                : `For real-time communication, please navigate to the support section in the sidebar
+                                     and use video or text chat.`
+                            }`
+                        }
                       </p>
                     </div>
                   </div>

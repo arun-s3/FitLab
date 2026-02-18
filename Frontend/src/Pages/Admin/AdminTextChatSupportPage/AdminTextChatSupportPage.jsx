@@ -4,7 +4,9 @@ import {motion, AnimatePresence} from "framer-motion"
 import {debounce} from 'lodash'
 
 import {Users, Send, Search, Clock, User, Headphones, Circle, MessageSquare, Settings, Bell, History} from "lucide-react"
-import axios from 'axios'
+
+import apiClient from '../../../Api/apiClient'
+
 import {toast as sonnerToast} from 'sonner'
 
 import {AdminSocketContext} from '../../../Components/AdminSocketProvider/AdminSocketProvider'
@@ -75,7 +77,7 @@ export default function AdminTextChatSupportPage() {
   useEffect(()=> {
     async function fetchTotalUserCount(){
       try{
-        const response = await axios.get(`/totalUsers`, {withCredentials: true})
+        const response = await apiClient.get(`/totalUsers`, {withCredentials: true})
         if(response?.data.totalUsers) {
             setTotalUsers(response.data.totalUsers)
         }
@@ -183,7 +185,7 @@ export default function AdminTextChatSupportPage() {
   const getAdminChatHistory = async()=> {
     if (!hasMoreUsersChats) return 
     try { 
-      const response = await axios.get(`/chat/history?page=${currentHistoryPage}&limit=${limit}`, { withCredentials: true })
+      const response = await apiClient.get(`/chat/history?page=${currentHistoryPage}&limit=${limit}`, { withCredentials: true })
       if(response.status === 200){
         const usersDatas = response.data.users.map(user=> ({
           username: user.username, userId: user._id, lastSeen: user.lastSeen, isOnline: false, socketId: null, isOfflineMsg: true
@@ -200,7 +202,7 @@ export default function AdminTextChatSupportPage() {
 
   const getOfflineUser = async(username)=> {
     try { 
-      const response = await axios.get(`/user/${username}`, { withCredentials: true })
+      const response = await apiClient.get(`/user/${username}`, { withCredentials: true })
       if(response.status === 200){
         return response.data.user
       }
@@ -218,7 +220,7 @@ export default function AdminTextChatSupportPage() {
   const fetchUsernameList = (searchTerm)=> {
     async function fetchUsernames(){
       try {
-        const response = await axios.get(`/search/${searchTerm}`, {withCredentials: true})
+        const response = await apiClient.get(`/search/${searchTerm}`, {withCredentials: true})
         if(response?.data.usernames) {
             const usernames = response.data.usernames
             if(usernames.length > 0){

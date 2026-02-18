@@ -78,15 +78,18 @@ export default function ProductDetailPage(){
     if(cart?.products && cart.products.length > 0){
         setIsCartOpen(true)
       }
-    if(error && error.toLowerCase().includes('product')){
-      sonnerToast.error(error)
-      dispatch(resetCartStates())
-    }
     if(productAdded){
       setIsCartOpen(true)
       dispatch(resetCartStates())
     }
-  },[error, productAdded, cart])
+  },[productAdded, cart])
+
+  useEffect(()=> {
+    if(error){
+      sonnerToast.error(error)
+      dispatch(resetCartStates())
+    }
+  },[error])
 
   const headerBg = {
       backgroundImage: "url('/Images/header-bg.png')",

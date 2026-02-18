@@ -363,7 +363,7 @@ const sendMoneyToUser = async (req, res, next)=> {
       return next(errorHandler(400, "Insufficient balance"))
     }
 
-    const recipientWallet = await Wallet.findOne({accountNumber: recipientAccountNumber})
+    const recipientWallet = await Wallet.findOne({accountNumber: 'FTL' + recipientAccountNumber})
     if (!recipientWallet) return next(errorHandler(404, "Recipient wallet not found"))
 
     const transactionId = uuidv4()

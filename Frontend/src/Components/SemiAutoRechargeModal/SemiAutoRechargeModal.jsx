@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react'
-import {useDispatch} from 'react-redux'
+import {useDispatch, useSelector} from 'react-redux'
 import { motion, AnimatePresence } from 'framer-motion'
 
 import { Zap, X, CheckCircle2, AlertCircle } from 'lucide-react'
-import {toast as sonnerToast} from 'sonner'
-import apiClient from "../../Api/apiClient"
 
-import {getOrCreateWallet} from '../../Slices/walletSlice'
+import apiClient from "../../Api/apiClient"
+import {toast as sonnerToast} from 'sonner'
+
+import {getOrCreateWallet, resetWalletStates} from '../../Slices/walletSlice'
 
 
 export default function SemiAutoRechargeModal({ isOpen,  onClose, walletAmount, autoRechargeAmount, onRecharged}) {
@@ -16,6 +17,8 @@ export default function SemiAutoRechargeModal({ isOpen,  onClose, walletAmount, 
   const [isAutoClosing, setIsAutoClosing] = useState(false)
 
   const [stopTimer, setStopTimer] = useState(false)
+
+  const {walletError} = useSelector(state=> state.wallet)
 
   const dispatch = useDispatch()
 
@@ -33,6 +36,13 @@ export default function SemiAutoRechargeModal({ isOpen,  onClose, walletAmount, 
       setIsAutoClosing(false)
     }
   }, [isOpen])
+
+  useEffect(()=> {
+      if(walletError){
+          sonnerToast.error(walletError)
+          dispatch(resetWalletStates())
+      }
+  }, [walletError])
   
   const handleWalletRecharge = async (amount) => {
     try {

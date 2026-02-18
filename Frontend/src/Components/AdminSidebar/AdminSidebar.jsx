@@ -1,23 +1,33 @@
-import React,{useState} from "react"
+import React, {useState, useEffect} from "react"
 import {useNavigate, useLocation} from 'react-router-dom'
-import {useDispatch} from 'react-redux'
+import {useDispatch, useSelector} from 'react-redux'
 import {motion, AnimatePresence} from "framer-motion"
 
 import {LayoutDashboard,Heater as HeatMap, Users, Package, FolderOpen, Ticket, ShoppingCart, Gift, ImageIcon, Headphones, Settings,
   LogOut, Search, ChevronDown, ChevronRight, X} from "lucide-react"
+import {toast as sonnerToast} from 'sonner'
 
-import {adminSignout} from '../../Slices/adminSlice'
+import {adminSignout, resetStates} from '../../Slices/adminSlice'
 
 
 export default function AdminSidebar({ isOpen, onClose }){
 
   const [searchTerm, setSearchTerm] = useState("")
   const [expandedItems, setExpandedItems] = useState({})
+  
+  const { adminLoading, adminError } = useSelector(state => state.admin)
 
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
   const location = useLocation()
+
+  useEffect(()=> {
+      if(adminError) {
+          sonnerToast.error(adminError, { id: "admin-error" })
+          dispatch(resetStates())
+      }
+  }, [adminError])
 
   const menuItems = [
     {

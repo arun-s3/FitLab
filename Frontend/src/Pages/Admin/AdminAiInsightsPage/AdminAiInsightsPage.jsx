@@ -8,8 +8,10 @@ import {HiUserGroup} from "react-icons/hi"
 import {MdTipsAndUpdates} from "react-icons/md"
 import {IoPricetagsOutline} from "react-icons/io5"
 import {RiUserHeartLine} from "react-icons/ri"
+
 import {toast as sonnerToast} from 'sonner'
-import axios from 'axios'
+
+import apiClient from '../../../Api/apiClient'
 
 import AiInsightCards from "../../../Components/AiInsightCards/AiInsightCards"
 import FutureRevenueChart from "./FutureRevenueChart"
@@ -119,7 +121,7 @@ export default function AdminAiInsightsPage(){
     const getInsightDataSources = async()=> {
         setLoading(true)
         try {  
-            const latestInsightResponse = await axios.get(`/ai/insights/business`, { withCredentials: true })
+            const latestInsightResponse = await apiClient.get(`/ai/insights/business`)
 
             if(latestInsightResponse.status === 200){ 
                 const businessInsightDoc = latestInsightResponse.data.businessInsightDoc    
@@ -157,12 +159,12 @@ export default function AdminAiInsightsPage(){
             const [
                 orderOverTimeRes, avgOrdersRes, monthlyRevenueRes, userGrowthRes, discountImpactRes, refundRequestRes
             ] = await Promise.allSettled([
-                axios.get(`/admin/dashboard/orders/stats/monthly`, { withCredentials: true }),
-                axios.get(`/admin/dashboard/orders/average`, { withCredentials: true }),
-                axios.get(`/admin/dashboard/revenue/monthly`, { withCredentials: true }),
-                axios.get(`/admin/dashboard/customers/monthly`, { withCredentials: true }),
-                axios.get(`/admin/dashboard/coupons/impact`, { withCredentials: true }),
-                axios.get(`/admin/dashboard/payments/refunds`, { withCredentials: true })
+                apiClient.get(`/admin/dashboard/orders/stats/monthly`),
+                apiClient.get(`/admin/dashboard/orders/average`),
+                apiClient.get(`/admin/dashboard/revenue/monthly`),
+                apiClient.get(`/admin/dashboard/customers/monthly`),
+                apiClient.get(`/admin/dashboard/coupons/impact`),
+                apiClient.get(`/admin/dashboard/payments/refunds`)
             ])
         
             if (orderOverTimeRes.status === 'fulfilled'){ 

@@ -4,7 +4,6 @@ import {useLocation, useNavigate, useOutletContext} from 'react-router-dom'
 import {useSelector, useDispatch} from 'react-redux'
 import {motion} from 'framer-motion'
 
-
 import {GoPackage} from "react-icons/go";
 import {MdCurrencyRupee} from "react-icons/md";
 import {LuPackageSearch} from "react-icons/lu";
@@ -14,6 +13,7 @@ import {AiOutlineSafetyCertificate} from "react-icons/ai";
 import {CgDetailsMore} from "react-icons/cg";
 import {TbWeight} from "react-icons/tb";
 import {IoColorPaletteOutline} from "react-icons/io5";
+
 import {toast as sonnerToast} from 'sonner'
 import {toast} from 'react-toastify'
 
@@ -126,6 +126,13 @@ export default function AdminAddAndEditProductPage({ editProduct }){
             navigate("/admin/products", { replace: true })
         }
     },[productCreated, productUpdated])
+
+    useEffect(()=> {
+        if(error) {
+            sonnerToast.error(error)
+            dispatch(resetStates())
+        }
+    }, [error])
 
     const muscleGroups = ["Chest", "Back", "Shoulders", "Biceps", "Triceps", "Forearms", "Quadriceps", "Hamstrings", "Glutes", "Calves",
         "Core", "Abs", "Full Body", "Cardio"]

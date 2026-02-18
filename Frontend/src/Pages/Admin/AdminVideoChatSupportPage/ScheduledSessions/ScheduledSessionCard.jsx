@@ -1,10 +1,13 @@
 import React, {useState, useEffect} from "react"
+import {useOutletContext} from 'react-router-dom'
 import { motion } from "framer-motion"
 
 import { User, Clock, Video, Circle, PhoneOff, MessageSquare, Calendar, AlertCircle } from "lucide-react"
 
+import CustomerMessageModal from '../../../../Components/CustomerMessageModal/CustomerMessageModal'
 
-export default function ScheduledSessionCard({ session, onStartCall, onEndCall, socket, currentScheduledSession }) {
+
+export default function ScheduledSessionCard({ session, onStartCall, onEndCall, socket, currentScheduledSession, messageUser }) {
 
   const [canStartCall, setCanStartCall] = useState(false)
   const [isUrgent, setIsUrgent] = useState(false)
@@ -14,6 +17,11 @@ export default function ScheduledSessionCard({ session, onStartCall, onEndCall, 
   const [isCalling, setIsCalling] = useState(false) 
 
   const [disableCall, setDisableCall] = useState(false)
+
+  const [openMessageModal, setOpenMessageModal] = useState({customer: null})
+
+  const {setHeaderZIndex} = useOutletContext()  
+  setHeaderZIndex(0)
 
   const formatDate = (date)=> {
     return new Date(date).toLocaleDateString([], {
@@ -203,9 +211,10 @@ export default function ScheduledSessionCard({ session, onStartCall, onEndCall, 
 
           <div className="flex gap-[5px] space-x-2">
             <motion.button
-              whileHover={{ scale: 1.05 }}
+              whileHover={{ scale: 1.05 }} 
               whileTap={{ scale: 0.95 }}
-              className="p-3 rounded-xl bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors duration-300"
+              className="p-3 rounded-[9px] bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors duration-300"
+              onClick={()=> messageUser()}
             >
               <MessageSquare className="h-4 w-4" />
             </motion.button>
@@ -216,7 +225,7 @@ export default function ScheduledSessionCard({ session, onStartCall, onEndCall, 
                 whileTap={{ scale: session.isUserActive ? 0.95 : 1 }}
                 onClick={session.isUserActive ? startOrStopCall : undefined}
                 disabled={!session.isUserActive ? true : disableCall ? true : false}
-                className={`flex items-center space-x-2 px-4 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                className={`flex items-center space-x-2 px-4 py-3 rounded-[7px] font-semibold transition-all duration-300 ${
                   !session.isUserActive
                     ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                     : disableCall 
@@ -233,6 +242,7 @@ export default function ScheduledSessionCard({ session, onStartCall, onEndCall, 
           </div>
         </div>
       </div>
+
     </motion.div>
   )
 }

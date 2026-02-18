@@ -43,11 +43,14 @@ export default function AddressListingPage(){
             sonnerToast.success('Deleted the address successfully!')
             dispatch(resetStates())
         }
+    },[addressDeleted, addresses])
+
+    useEffect(()=> {
         if(error){
-            sonnerToast.error(error)
+            sonnerToast.error(error, { id: "address-error" })
             dispatch(resetStates())
         }
-    },[addressDeleted, error, addresses])
+    },[error])
 
     const onDeleteConfirm = async ()=> {
         dispatch(deleteAddress({ addressId: deleteAddressId }))

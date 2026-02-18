@@ -13,6 +13,8 @@ import {RiUserReceived2Line} from "react-icons/ri"
 import {GrUserNew} from "react-icons/gr"
 import {FaUsersViewfinder} from "react-icons/fa6"
 
+import {toast as sonnerToast} from 'sonner'
+
 import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
 import OfferList from "./OfferList"
 import OfferModal from "./OfferModal"
@@ -57,7 +59,7 @@ export default function AdminOfferManagementPage(){
     setHeaderZIndex(0)
     setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.94),rgba(255,255,255,0.94)), url('/Images/admin-bg6.png')`)
 
-    const {offers: allOffers, totalOffers} = useSelector(state=> state.offers)
+    const {offers: allOffers, totalOffers, offerError} = useSelector(state=> state.offers)
     const dispatch = useDispatch()
 
     const statusTabs = [
@@ -85,6 +87,13 @@ export default function AdminOfferManagementPage(){
         dispatch( getAllOffers({queryOptions}) )
       }
     }, [queryOptions])
+
+    useEffect(()=> {
+        if(offerError) {
+            sonnerToast.error(offerError)
+            dispatch(resetOfferStates())
+        }
+    }, [offerError])
 
     const sortTypes = [
       {name: 'Offers: Recent to Oldest', value: '-1', sortBy: 'createdAt'}, {name: 'Offers: Oldest to Recent', value: '1', sortBy: 'createdAt'},

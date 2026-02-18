@@ -115,7 +115,7 @@ const initialState = {
     categoryCreated: false,
     categoryUpdated: false,
     loading: false,
-    error: false,
+    error: null,
     success:false,
     message: null,
 }
@@ -126,7 +126,7 @@ const categorySlice = createSlice({
     reducers: {
         resetStates: (state, action)=>{
             state.loading = false
-            state.error = false
+            state.error = null
             state.success = false
             state.message = ''
             state.categoryCreated = false
@@ -138,7 +138,7 @@ const categorySlice = createSlice({
     },
     extraReducers: (builder)=>{
         builder.addCase(createCategory.fulfilled, (state, action)=>{
-            state.error = false
+            state.error = null
             state.loading = false
             state.success = true
             state.categoryCreated = true
@@ -146,17 +146,17 @@ const categorySlice = createSlice({
         })
         .addCase(createCategory.pending, (state,action)=>{
             state.loading = true
-            state.error = false
+            state.error = null
             state.success = false
         })
         .addCase(createCategory.rejected, (state,action)=>{
             state.loading = false
-            state.error = true
+            state.error = action.payload
             state.success = true
             state.categoryCreated = false
         })
         .addCase(getAllCategories.fulfilled, (state,action)=>{
-            state.error = false
+            state.error = null
             state.loading = false
             state.success = true
             state.categories = action.payload.categoriesData
@@ -164,16 +164,16 @@ const categorySlice = createSlice({
         })
         .addCase(getAllCategories.pending, (state,action)=>{
             state.loading = true
-            state.error = false
+            state.error = null
             state.success = false
         })
         .addCase(getAllCategories.rejected, (state,action)=>{
             state.loading = false
-            state.error = true
+            state.error = action.payload
             state.success = true
         })
         .addCase(getCategoriesOfType.fulfilled, (state,action)=>{
-            state.error = false
+            state.error = null
             state.loading = false
             state.success = true
             state.categories = action.payload.categoriesData
@@ -181,16 +181,16 @@ const categorySlice = createSlice({
         })
         .addCase(getCategoriesOfType.pending, (state,action)=>{
             state.loading = true
-            state.error = false
+            state.error = null
             state.success = false
         })
         .addCase(getCategoriesOfType.rejected, (state,action)=>{
             state.loading = false
-            state.error = true
+            state.error = action.payload
             state.success = true
         })
         .addCase(getSingleCategory.fulfilled, (state, action) => {
-            state.error = false;
+            state.error = null;
             state.loading = false;
             state.populatedSubCategories = {
                 subCategories: action.payload.populatedSubCategories,
@@ -214,29 +214,29 @@ const categorySlice = createSlice({
         })      
         .addCase(getSingleCategory.pending, (state,action)=>{
             state.loading = true
-            state.error = false
+            state.error = null
         })
         .addCase(getSingleCategory.rejected, (state,action)=>{
             state.loading = false
-            state.error = true
+            state.error = action.payload
         })
         .addCase(getCategoryNames.fulfilled, (state,action)=>{
-            state.error = false
+            state.error = null
             state.loading = false
             state.nestedSubcategoryNames = {nestedSubcategoryNames: action.payload.nestedSubcategoryNames, parentId: action.payload.id}
         })
         .addCase(getCategoryNames.pending, (state,action)=>{
             state.loading = true
-            state.error = false
+            state.error = null
         })
         .addCase(getCategoryNames.rejected, (state,action)=>{
             state.loading = false
-            state.error = true
+            state.error = action.payload
         })
         .addCase(getNestedSubcategoryNames.fulfilled, (state,action)=>{
             const parentNameObj = action.payload.nestedSubcategoryNames[0]
             const nestedSubcategoryNames = action.payload.nestedSubcategoryNames.slice(1)
-            state.error = false
+            state.error = null
             state.loading = false
             state.nestedSubcategoryNames = {
                 parentNameObj,
@@ -247,44 +247,44 @@ const categorySlice = createSlice({
         })
         .addCase(getNestedSubcategoryNames.pending, (state,action)=>{
             state.loading = true
-            state.error = false
+            state.error = null
         })
         .addCase(getNestedSubcategoryNames.rejected, (state,action)=>{
             state.loading = false
-            state.error = true
+            state.error = action.payload
         })
         .addCase(getFirstLevelCategories.fulfilled, (state,action)=>{
-            state.error = false
+            state.error = null
             state.loading = false
             state.firstLevelCategories = action.payload.firstLevelCategories
         })
         .addCase(getFirstLevelCategories.pending, (state,action)=>{
             state.loading = true
-            state.error = false
+            state.error = null
         })
         .addCase(getFirstLevelCategories.rejected, (state,action)=>{
             state.loading = false
-            state.error = true
+            state.error = action.payload
         })
         .addCase(toggleCategoryStatus.fulfilled, (state, action) => {
             state.success = true;
             state.loading = false;
-            state.error = false;
+            state.error = null;
             state.message = action.payload.message
             state.blockedCategoryList = JSON.parse(JSON.stringify(action.payload.blockStatusIdList))
         })
         .addCase(toggleCategoryStatus.pending, (state,action)=>{
             state.loading = true
-            state.error = false
+            state.error = null
             state.categoryUpdated = false
         })
         .addCase(toggleCategoryStatus.rejected, (state,action)=>{
             state.loading = false
-            state.error = true
+            state.error = action.payload
             state.categoryUpdated = false
         })
         .addCase(updateCategory.fulfilled, (state, action)=>{
-            state.error = false
+            state.error = null
             state.loading = false
             state.categoryUpdated = true
             const updatingCategoryIndex = state.categories.findIndex(category=> category._id === action.payload.id)
@@ -292,12 +292,12 @@ const categorySlice = createSlice({
         })
         .addCase(updateCategory.pending, (state,action)=>{
             state.loading = true
-            state.error = false
+            state.error = null
             state.success = false
         })
         .addCase(updateCategory.rejected, (state,action)=>{
             state.loading = false
-            state.error = true
+            state.error = action.payload
             state.success = true
         })
     }

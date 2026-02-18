@@ -18,7 +18,7 @@ export default function ReturnRequestModal({returnRequestOrder = null, returnReq
 
   const [images, setImages] = useState(null)
 
-  const {handledOrderDecision, orderError} = useSelector(state=> state.order)
+  const {handledOrderDecision} = useSelector(state=> state.order)
   const dispatch = useDispatch()
 
   const modalRef = useRef(null)

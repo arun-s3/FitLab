@@ -20,7 +20,7 @@ import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
 import OrderStepper from '../../../Components/OrderStepper/OrderStepper'
 import FeaturesDisplay from '../../../Components/FeaturesDisplay/FeaturesDisplay'
 import Footer from '../../../Components/Footer/Footer'
-import {getTheCart, addToCart, reduceFromCart, removeFromCart} from '../../../Slices/cartSlice'
+import {getTheCart, addToCart, reduceFromCart, removeFromCart, resetCartStates} from '../../../Slices/cartSlice'
 import {createOrder, resetOrderStates} from '../../../Slices/orderSlice'
 import {getAllAddress, resetStates} from '../../../Slices/addressSlice'
 
@@ -48,7 +48,7 @@ export default function CheckoutPage(){
 
     const [retryStripePaymentStatus, setRetryStripePaymentStatus] = useState(false)
 
-    const {cart, productRemoved} = useSelector(state=> state.cart)
+    const {cart, productRemoved, error} = useSelector(state=> state.cart)
     const {addresses} = useSelector(state=> state.address)
     const {orderCreated, orderMessage, orderError} = useSelector(state=> state.order)
 
@@ -71,6 +71,13 @@ export default function CheckoutPage(){
         setOrderFreshSources(false)
       }
     }, [cart, orderFreshSources])
+
+    useEffect(()=> {
+      if(error){
+        sonnerToast.error(error)
+        dispatch(resetCartStates())
+      }
+    },[error])
 
     useEffect(()=> {
       if(addresses && !deliverAddressMade){
@@ -115,12 +122,15 @@ export default function CheckoutPage(){
       if(orderReviewError){
         setTimeout(()=> setOrderReviewError(''), 2500)
       }
+    },[orderCreated, orderMessage, orderReviewError])
+
+    useEffect(()=> {
       if(orderError){
-        setIsLoading(false)
-        toast.error(orderError, {autoClose: 3500})
-        dispatch(resetOrderStates())
+          setIsLoading(false)
+          toast.error(orderError, {autoClose: 3500})
+          dispatch(resetOrderStates())
       }
-    },[orderCreated, orderMessage, orderError, orderReviewError])
+    }, [orderError])
 
     useEffect(()=> {
       if(productRemoved){
@@ -129,6 +139,7 @@ export default function CheckoutPage(){
         )
         setCheckoutBlockedProducts(unavailableProducts)
         dispatch(resetOrderStates())
+        dispatch(resetCartStates())
       }
     }, [productRemoved])
 

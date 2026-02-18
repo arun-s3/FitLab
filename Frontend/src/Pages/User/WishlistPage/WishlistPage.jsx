@@ -83,8 +83,10 @@ export default function WishlistPage(){
     }, [wishlist])
 
     useEffect(()=> {
-        sonnerToast.error(wishlistError)
-        dispatch(resetWishlistStates())
+        if(wishlistError) {
+            sonnerToast.error(wishlistError, { id: "wishlist-error" })
+            dispatch(resetWishlistStates())
+        }
     }, [wishlistError])
 
     useEffect(()=>{

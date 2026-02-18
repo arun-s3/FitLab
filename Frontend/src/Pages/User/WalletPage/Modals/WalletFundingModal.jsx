@@ -32,8 +32,6 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
 
     const dispatch = useDispatch()
 
-    const {walletError} = useSelector(state=> state.wallet)
-
     const modalRef = useRef(null)
     useModalHelpers({open: showFundingModal, onClose: closeFundingModal, modalRef})
 
@@ -45,13 +43,6 @@ export default function WalletFundingModal({showFundingModal, closeFundingModal,
       script.async = true
       document.body.appendChild(script)
     },[])
-
-    useEffect(()=> {
-        if(walletError){
-            sonnerToast.error(walletError)
-            dispatch(resetWalletStates())
-        }
-    }, [walletError])
 
     const amountHandler = (e)=> {
       const value = parseFloat(e.target.value)

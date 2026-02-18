@@ -58,8 +58,6 @@ export default function UserSidebar({currentPath, openMenuByDefault = true, flex
             setPhotoDispatched(false)
         }
         if(error){
-            sonnerToast.error(error)
-            dispatch(resetStates())
             setPhotoDispatched(false)
         }
     }, [userDpUpdated, error])

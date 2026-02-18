@@ -3,19 +3,20 @@ import './AdminProductListPage.css'
 import {useNavigate, useOutletContext} from 'react-router-dom'
 import {useSelector, useDispatch} from 'react-redux'
 
-import {toast} from 'react-toastify'
-import {toast as sonnerToast} from 'sonner'
 import {LiaSlidersHSolid} from "react-icons/lia"
 import {FiDownload} from "react-icons/fi"
 import {RiArrowDropDownLine} from "react-icons/ri"
 import {IoMdAdd} from "react-icons/io"
-import axios from 'axios'
 
-import {resetStates} from '../../../Slices/productSlice'
+import {toast} from 'react-toastify'
+import {toast as sonnerToast} from 'sonner'
+
+import apiClient from '../../../Api/apiClient'
+
 import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
 import ProductListingTools from '../../../Components/ProductListingTools/ProductListingTools'
 import {SitePrimaryButtonWithShadow} from '../../../Components/SiteButtons/SiteButtons'
-import {getAllProducts} from '../../../Slices/productSlice'
+import {getAllProducts, resetStates} from '../../../Slices/productSlice'
 import ListingTabs from './ListingTabs'
 import ProductsDisplay from '../../../Components/ProductsDisplay/ProductsDisplay'
 import ProductFilterSidebar from '../../../Components/ProductFilterSidebar/ProductFilterSidebar'
@@ -55,7 +56,7 @@ export default function AdminProductListPage(){
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
-    const {products, productCounts, productRestocked, message} = useSelector(state=> state.productStore)
+    const {products, productCounts, productRestocked, message, error} = useSelector(state=> state.productStore)
 
     const {setHeaderZIndex, setPageBgUrl} = useOutletContext() 
     setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.94),rgba(255,255,255,0.94)), url('/Images/admin-ProductsListBg.jpg')`)
@@ -113,6 +114,13 @@ export default function AdminProductListPage(){
       }
     }, [products, productCounts])
 
+    useEffect(()=> {
+         if(error) {
+             sonnerToast.error(error)
+             dispatch(resetStates())
+         }
+    }, [error])
+
     useEffect(() => {
         if (setHeaderZIndex && (isFilterSidebarOpen || isProductRestocking)) {
             setHeaderZIndex(0)
@@ -157,8 +165,7 @@ export default function AdminProductListPage(){
         setHeaderZIndex(10)
         if(products && products.length > 0){
             try {
-                const response = await axios.post(`/admin/products/export/${type}`,
-                    {products}, {withCredentials: true, responseType: 'blob'})
+                const response = await apiClient.post(`/admin/products/export/${type}`, {products}, {responseType: 'blob'})
 
                 const fileBlob = new Blob([response.data], { type: type === 'csv' ? 'text/csv' : 'application/pdf'})
 

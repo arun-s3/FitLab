@@ -1,6 +1,6 @@
 import React, {useState, useEffect} from 'react'
 import './ProductsDisplay.css'
-import {useNavigate} from 'react-router-dom'
+import {useNavigate, useLocation} from 'react-router-dom'
 import {useDispatch, useSelector} from 'react-redux'
 import {motion} from 'framer-motion'
 
@@ -36,8 +36,9 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
   const [productIsHovered, setProductIsHovered] = useState()
 
   const navigate = useNavigate()
+  const location = useLocation()
 
-  const {wishlist, wishlistProducts, listProductRemoved, listProductAdded, wishlistError} = useSelector(state=> state.wishlist)
+  const {wishlist, wishlistProducts, listProductAdded, listProductRemoved, wishlistError} = useSelector(state=> state.wishlist)
 
   const [isRestockModalOpen, setIsRestockModalOpen] = useState(false)
   const [selectedRestockProduct, setSelectedRestockProduct] = useState(null)
@@ -75,7 +76,7 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
   },[showTheseProducts])
 
   useEffect(()=> {
-    if(listProductAdded){
+    if(listProductAdded){ 
       sonnerToast.success("The product have been added to the Wishlist!")
       dispatch(resetWishlistStates())
     }
@@ -86,11 +87,15 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
         dispatch( getAllWishlistProducts({queryOptions}) )
       }
     }
+  },[listProductAdded, listProductRemoved, wishlist])
+
+  useEffect(()=> {
+    if(location.pathname === '/wishlist') return
     if(wishlistError && !wishlistError.includes('Unauthorized')){
-      sonnerToast.error("The product have been removed from the Wishlist!")
+      sonnerToast.error(wishlistError)
       dispatch(resetWishlistStates())
     }
-  },[listProductAdded, listProductRemoved, wishlist, wishlistError])
+  },[wishlistError])
 
   useEffect(() => {
       if (productRestocked) {

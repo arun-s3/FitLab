@@ -29,20 +29,24 @@ export default function AdminSignInPage(){
 
     const dispatch = useDispatch()
 
-    const {adminError, adminLoading, adminSuccess, adminToken,admin} = useSelector((state)=> state.admin)
+    const {adminError, adminLoading, adminSuccess, adminToken, admin} = useSelector((state)=> state.admin)
     const {user} = useSelector(state=> state.user)
 
     useEffect(() => {
         if (adminSuccess) {
             navigate('/admin/dashboard/business', { replace: true });
             dispatch(resetStates())
-        } else if (adminError) {
-            sonnerToast.error(adminError)
-            dispatch(resetStates())
-        } else if (!adminSuccess && adminToken) {
+        } else if (!adminSuccess && admin) {
             navigate('/admin/dashboard/business', {replace: true })
         }
     }, [adminSuccess, adminError, adminToken, dispatch, navigate])
+
+    useEffect(() => {
+        if (adminError) {
+            sonnerToast.error(adminError)
+            dispatch(resetStates())
+        } 
+    }, [adminError])
 
     useEffect(()=> {
         if(user){

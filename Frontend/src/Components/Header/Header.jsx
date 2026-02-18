@@ -1,12 +1,14 @@
 import React, {useState, useEffect, useContext} from 'react'
 import './Header.css'
 import {Link, useNavigate, useLocation} from 'react-router-dom'
-import {useSelector} from 'react-redux'
+import {useSelector, useDispatch} from 'react-redux'
 import {motion} from "framer-motion"
 
 import {IoCartOutline} from "react-icons/io5"
 import { MdSportsGymnastics } from "react-icons/md"
 import {User, Heart, Headset, Store, Activity, Bot, LogIn} from "lucide-react"
+
+import {toast as sonnerToast} from 'sonner'
 
 import UserHead from '../UserHead/UserHead'
 import NotificationBell from './NotificationBell'
@@ -16,6 +18,7 @@ import MobileSidebar from './MobileSidebar'
 import CartSidebar from '../../Components/CartSidebar/CartSidebar'
 import TextChatBox from '../../Pages/User/TextChatBox/TextChatBox'
 import CoachPlus from '../../Pages/User/Coach+/Coach+'
+import {resetStates} from '../../Slices/userSlice'
 import {SocketContext} from '../../Components/SocketProvider/SocketProvider'
 
 
@@ -29,11 +32,13 @@ export default function Header({lighterLogo, customStyle, goToShopByCategorySec,
 
     const [openCoach, setopenCoach] = useState(false)
     
-    const {user} = useSelector((state)=>state.user)
+    const {user, error} = useSelector((state)=> state.user)
     const {cart} = useSelector(state=> state.cart)    
 
     const navigate = useNavigate()
     const location = useLocation()
+
+    const dispatch = useDispatch()
 
     const {isAdminOnline, isConnected, notifications, setNotifications, markNotificationRead, markAllNotificationRead,
          deleteNotification} = useContext(SocketContext)
@@ -43,8 +48,15 @@ export default function Header({lighterLogo, customStyle, goToShopByCategorySec,
 
     // const [openVideoCallModal, setOpenVideoCallModal] = useState(false)
 
+    useEffect(()=> {
+        if(error) {
+            sonnerToast.error(error)
+            dispatch(resetStates())
+        }
+    }, [error])
+
     const openCartSidebar = ()=> {
-            setIsCartOpen(true)
+        setIsCartOpen(true)
     }
 
     const jumpToShopByCategorySec = ()=> {
@@ -169,7 +181,7 @@ export default function Header({lighterLogo, customStyle, goToShopByCategorySec,
                 <i onClick={() => navigate("/shop")} className='inline-block lg:hidden'>
                     <Store className='h-[20px] w-[20px' />
                 </i>
-                <i className='relative' onClick={() => setOpenChatBox()} onMouseEnter={() => openCartSidebar()}>
+                <i className='relative' onClick={() => navigate("/cart")} onMouseEnter={() => openCartSidebar()}>
                     <IoCartOutline className='h-[23px] w-[23px] lg:h-[20px] lg:w-[20px] xl:h-[22px] xl:w-[22px] x-xl:h-[23px] x-xl:w-[23px]' />
                     {cart?.products && cart.products.length > 0 && (
                         <span

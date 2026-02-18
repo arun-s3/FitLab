@@ -8,7 +8,10 @@ import {scaleSequential} from "d3-scale"
 import {interpolateYlGnBu} from "d3-scale-chromatic"
 
 import {Users, MapPinHouse, LocateFixed, Plus, Minus} from "lucide-react"
-import axios from "axios";
+
+import {toast as sonnerToast} from 'sonner'
+
+import apiClient from '../../../Api/apiClient'
 
 import StatError from "./StatError"
 
@@ -38,8 +41,8 @@ export default function AdminDashboardHeatmapPage(){
   useEffect(()=> {
     if(!fetchStats) return
     setStatLoading(true)
-    axios
-      .get(`/admin/locations/map`, {withCredentials: true})
+    apiClient
+      .get(`/admin/locations/map`)
       .then((res) => {
         const data = res.data.usersLocationData
         setStateData(data)
@@ -54,13 +57,13 @@ export default function AdminDashboardHeatmapPage(){
       })
       .catch((error) => {
         if (!error.response) {
-          sonnerToast.error("Network error. Please check your internet.")
+          sonnerToast.error("Customer locations cannot be shown due network error. Please check your internet.")
         } else {
           sonnerToast.error("Customer locations cannot be shown due to internal server error. Please try later")
         }
       })
 
-      axios.get(`/admin/locations/stats`, {withCredentials: true}).then(res=> {
+      apiClient.get(`/admin/locations/stats`).then(res=> {
          const newStats = []  
          newStats.push({
             name: "totalCustomers",

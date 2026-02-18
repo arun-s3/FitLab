@@ -23,7 +23,7 @@ import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleS
 export default function AdminCategoryListPage(){
 
   const dispatch = useDispatch()
-  const {categories, message, populatedSubCategories, allSubCategories, blockedCategoryList} = useSelector(state=> state.categoryStore)
+  const {categories, message, error, populatedSubCategories, allSubCategories, blockedCategoryList} = useSelector(state=> state.categoryStore)
 
   const [subCategories, setSubCategories] = useState({})
   const [openSubcategories, setOpenSubcategories] = useState({})
@@ -63,6 +63,13 @@ export default function AdminCategoryListPage(){
     }
     dispatch(resetStates())
   },[message])
+
+  useEffect(()=> {
+     if(error){
+         sonnerToast.error(error)
+         dispatch(resetStates())
+     }
+  }, [error])
 
 //   useEffect(()=>{
 //     if(populatedSubCategories){

@@ -6,6 +6,7 @@ import {debounce} from 'lodash'
 import {motion} from "framer-motion"
 
 import {toast} from 'react-toastify'
+import {toast as sonnerToast} from 'sonner'
 
 import Header from '../../../Components/Header/Header'
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
@@ -13,8 +14,9 @@ import ProductsDisplay from '../../../Components/ProductsDisplay/ProductsDisplay
 import ProductListingTools from '../../../Components/ProductListingTools/ProductListingTools'
 import CartSidebar from '../../../Components/CartSidebar/CartSidebar'
 import CouponApplicableModal from './CouponApplicableModal'
-import {getAllProducts} from '../../../Slices/productSlice'
+import {getAllProducts, resetStates} from '../../../Slices/productSlice'
 import {getTheCart, resetCartStates} from '../../../Slices/cartSlice'
+import {resetWishlistStates} from '../../../Slices/wishlistSlice'
 import {ProtectedUserContext} from '../../../Components/ProtectedUserRoutes/ProtectedUserRoutes'
 import ProductFilterSidebar from '../../../Components/ProductFilterSidebar/ProductFilterSidebar'
 import FilterModule from './FilterModule'
@@ -50,8 +52,9 @@ export default function ProductList(){
 
     const [openCouponApplicableModal, setOpenCouponApplicableModal] = useState({status: false, code: '', products: [], categories: []})
 
-    const {products, productCounts} = useSelector(state=> state.productStore)
-    const {cart, productAdded, error, message} = useSelector(state=> state.cart)    
+    const {products, productCounts, error: productError} = useSelector(state=> state.productStore)
+    const {cart, productAdded, error, message} = useSelector(state=> state.cart)   
+    const {wishlistError} = useSelector(state=> state.wishlist) 
     
     const location = useLocation()
 
@@ -71,6 +74,13 @@ export default function ProductList(){
         setTotalPages(Math.ceil(productCounts/limit))
       }
     }, [products, productCounts])
+
+    useEffect(()=> {
+        if(wishlistError) {
+            sonnerToast.error(wishlistError, { id: "wishlist-error" })
+            dispatch(resetWishlistStates())
+        }
+    }, [wishlistError])
 
     const headerBg = {
         backgroundImage: "url('/Images/header-bg.png')",
@@ -144,6 +154,12 @@ export default function ProductList(){
         }
     },[error, productAdded, message, cart])
 
+    useEffect(()=> {
+         if(productError) {
+             sonnerToast.error(productError)
+             dispatch(resetStates())
+         }
+    }, [productError])
 
     const applySidebarFilters = (appliedFilters)=> {
         if(appliedFilters.minPrice){

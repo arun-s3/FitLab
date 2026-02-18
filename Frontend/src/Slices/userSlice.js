@@ -129,7 +129,7 @@ const userSlice = createSlice({
                 state.success = false
             }
         )
-        .addCase(signup.fulfilled, (state,action)=>{
+        .addCase(signup.fulfilled, (state,action)=>{ 
                 state.error = null
                 state.loading = false
                 state.success = true
@@ -143,6 +143,7 @@ const userSlice = createSlice({
         .addCase(signin.pending, (state,action)=>{
                 state.loading = true
                 state.success = false
+                state.error = null
         })
         .addCase(signin.fulfilled, (state,action)=>{
                 state.loading = false
@@ -153,11 +154,12 @@ const userSlice = createSlice({
         .addCase(signin.rejected, (state,action)=>{
                 state.error = action.payload
                 state.loading = false
-                state.success = false
+                state.success = false 
          })
          .addCase(updateUserDetails.pending, (state,action)=>{
                 state.loading = true
                 state.success = false
+                state.error = null
         })
         .addCase(updateUserDetails.fulfilled, (state,action)=>{
                 state.loading = false
@@ -174,6 +176,7 @@ const userSlice = createSlice({
         .addCase(updateUserProfilePic.pending, (state,action)=>{
                 state.loading = true
                 state.success = false
+                state.error = null
         })
         .addCase(updateUserProfilePic.fulfilled, (state,action)=>{
                 state.loading = false
@@ -190,6 +193,7 @@ const userSlice = createSlice({
         .addCase(updateUserWeight.pending, (state,action)=>{
                 state.loading = true
                 state.success = false
+                state.error = null
         })
         .addCase(updateUserWeight.fulfilled, (state,action)=>{
                 state.loading = false
@@ -206,6 +210,7 @@ const userSlice = createSlice({
         .addCase(updateTermsAcceptance.pending, (state,action)=>{
                 state.loading = true
                 state.success = false
+                state.error = null
         })
         .addCase(updateTermsAcceptance.fulfilled, (state,action)=>{
                 state.loading = false
@@ -231,6 +236,7 @@ const userSlice = createSlice({
                 state.loading = true
                 state.success = false
                 state.googleSuccess = false
+                state.error = null
         })
         .addCase(googleSignin.fulfilled, (state,action)=>{
                 state.loading = false

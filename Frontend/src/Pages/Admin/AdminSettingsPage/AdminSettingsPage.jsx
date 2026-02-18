@@ -29,7 +29,7 @@ export default function AdminSettingsPage() {
 
     const dispatch = useDispatch()
 
-    const { admin, adminUpdated, adminDpUpdated, loading, error } = useSelector((state) => state.admin)
+    const { admin, adminUpdated, adminDpUpdated, loading, adminError } = useSelector((state) => state.admin)
 
     const {setPageBgUrl, setHeaderZIndex} = useOutletContext()  
     setHeaderZIndex(0)
@@ -61,12 +61,14 @@ export default function AdminSettingsPage() {
             dispatch(resetStates())
             setPhotoDispatched(false)
         }
-        if(error){
-            sonnerToast.error(error)
-            dispatch(resetStates())
+    }, [adminDpUpdated])
+
+    useEffect(() => {
+        if(adminError){
             setPhotoDispatched(false)
+            dispatch(resetStates())
         }
-    }, [adminDpUpdated, error])
+    }, [adminError])
 
     const regexMap = {
         firstName: /^[A-Za-z]{2,}$/,

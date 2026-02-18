@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react'
+import React, {useState, useEffect, useRef, useMemo} from 'react'
 import {useDispatch, useSelector} from 'react-redux'
 import {motion} from "framer-motion"
 
@@ -7,7 +7,6 @@ import {toast as sonnerToast} from 'sonner'
 
 import {addPeerAccount, sendMoneyToUser, requestMoneyFromUser, resetWalletStates} from '../../../../Slices/walletSlice'
 import {decryptData} from '../../../../Utils/decryption'
-import useModalHelpers from '../../../../Hooks/ModalHelpers'
 import useTermsConsent from "../../../../Hooks/useTermsConsent"
 import TermsDisclaimer from "../../../../Components/TermsDisclaimer/TermsDisclaimer"
 
@@ -30,11 +29,14 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
 
     const [userTermsConsent, setUserTermsConsent] = useState(false)
 
+    const {acceptTermsOnFirstAction} = useTermsConsent()
+
     const dispatch = useDispatch()
     const {safeWallet, walletLoading, walletError, peerAccountAdded, moneySent, moneyRequested} = useSelector(state=> state.wallet)
 
-    const modalRef = useRef(null)
-    useModalHelpers({open: isTransferModalOpen, onClose: ()=> setIsTransferModalOpen(false), modalRef})
+    const decryptedWallet = useMemo(() => {
+      return decryptData(safeWallet)
+    }, [safeWallet])
 
     useEffect(()=> {
       if(complexModal){
@@ -66,12 +68,10 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
             dispatch(resetWalletStates())
         }
         if(walletError){
-            sonnerToast.error(walletError)
             if(walletError.includes("doesn't match any existing FitLab user")){
               setNewPeerAccountErrors(error=> ({...error, accountNumber: walletError.toString()}))
               setIsAddingPeerAccount(true)
             }
-            dispatch(resetWalletStates())
         }
     }, [moneySent, moneyRequested, peerAccountAdded, walletError])
 
@@ -222,7 +222,6 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
           
           <motion.div
             className="max-h-[80vh] overflow-y-auto custom-scrollbar"
-            ref={modalRef}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.1 }}
@@ -274,16 +273,16 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
                 { !selectedPeerAccount ? (
                   <div className="space-y-4">
                     {
-                    ((!isRequester && decryptData(safeWallet)?.beneficiaryAccounts.length > 0) ||
-                      (isRequester && decryptData(safeWallet)?.creditorAccounts.length > 0)) &&
+                    ((!isRequester && decryptedWallet?.beneficiaryAccounts.length > 0) ||
+                      (isRequester && decryptedWallet?.creditorAccounts.length > 0)) &&
                         <div className="space-y-2">
                             <label className="text-sm font-medium"> {!isRequester ? 'Select Recipient' : 'Select Creditor'} </label>
                             <div className="space-y-2">
                               { 
                                (function generateRecepientOrCreditor(){
 
-                                  const accountGroup = !isRequester ? decryptData(safeWallet)?.beneficiaryAccounts
-                                      : decryptData(safeWallet)?.creditorAccounts
+                                  const accountGroup = !isRequester ? decryptedWallet?.beneficiaryAccounts
+                                      : decryptedWallet?.creditorAccounts
                                   
                                   return (
                                     accountGroup.map((account)=> (
@@ -307,8 +306,8 @@ export default function MoneyTransferModal({isTransferModalOpen, setIsTransferMo
                             </div>
                         </div>
                     }
-                    <div className={`relative ${!isRequester && decryptData(safeWallet)?.beneficiaryAccounts.length <= 0 && 'hidden' }
-                         ${isRequester && decryptData(safeWallet)?.creditorAccounts.length <= 0 && 'hidden' } `}>
+                    <div className={`relative ${!isRequester && decryptedWallet?.beneficiaryAccounts.length <= 0 && 'hidden' }
+                         ${isRequester && decryptedWallet?.creditorAccounts.length <= 0 && 'hidden' } `}>
                       <div className="absolute inset-0 flex items-center">
                         <span className="w-full border-t"></span>
                       </div>

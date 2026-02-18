@@ -1,11 +1,20 @@
-import React from 'react'
+import React, {useState} from 'react'
+import {useOutletContext} from 'react-router-dom'
 import { motion } from "framer-motion"
 
 import { User, Clock, Phone, PhoneOff, MessageSquare } from "lucide-react"
 
+import CustomerMessageModal from '../../../Components/CustomerMessageModal/CustomerMessageModal'
+
 
 export default function UserQueueCard({ user, position, onAccept, onDecline, disabled }) {
   const waitTime = Math.floor((Date.now() - (user.joinTime || Date.now())) / 1000 / 60)
+
+  const [openMessageModal, setOpenMessageModal] = useState({customer: null})
+  
+  const {setHeaderZIndex} = useOutletContext()  
+  setHeaderZIndex(0)
+
 
   return (
     <motion.div
@@ -64,11 +73,30 @@ export default function UserQueueCard({ user, position, onAccept, onDecline, dis
       </div>
 
       <div className="mt-3 pt-3 border-t border-gray-200">
-        <button className="flex items-center space-x-2 text-sm text-gray-500 hover:text-secondary transition-colors duration-200">
+        <button 
+            onClick={()=> {
+                setOpenMessageModal({customer: {
+                  _id: user.userId, username: user.username
+                }})
+                setHeaderZIndex(300)
+            }}
+            className="flex items-center space-x-2 text-sm text-gray-500 hover:text-secondary transition-colors duration-200"
+        >
           <MessageSquare className="h-4 w-4" />
           <span>Send message</span>
         </button>
       </div>
+
+      <CustomerMessageModal 
+          isOpen={openMessageModal.customer} 
+          onClose={()=> {
+            setOpenMessageModal({customer: null})
+            setHeaderZIndex(0)
+          }} 
+          customer={openMessageModal.customer} 
+          addSubtitle="For real-time communication, take up this call or navigate to the support section in the sidebar and use text chat."
+      />
+
     </motion.div>
   )
 }

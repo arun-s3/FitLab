@@ -67,7 +67,7 @@ export default function AdminCreateOfferPage(){
 
   const { products, productCounts } = useSelector(state=> state.productStore)
   
-  const {loading, offerCreated} = useSelector(state=> state.offers)
+  const {loading, offerCreated, offerError} = useSelector(state=> state.offers)
   const dispatch = useDispatch()
 
   const {setPageBgUrl} = useOutletContext()
@@ -178,6 +178,13 @@ export default function AdminCreateOfferPage(){
     setStartDate(null); setEndDate();
     setSelectedCategories({}); setSelectedProducts([]); setShowCategories(false); setShowSearchResults(false)
   }, [offerCreated])
+
+  useEffect(()=> {
+      if(offerError) {
+          sonnerToast.error(offerError)
+          dispatch(resetOfferStates())
+      }
+  }, [offerError])
 
   useEffect(()=> {
     const handleClickOutside = (e) => {

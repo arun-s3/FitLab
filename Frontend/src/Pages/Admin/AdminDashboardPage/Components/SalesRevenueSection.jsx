@@ -4,8 +4,10 @@ import { motion, AnimatePresence } from "framer-motion"
 
 import {AreaChart, Area, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, 
   Legend, ResponsiveContainer} from "recharts"
+
 import { ArrowUp, ArrowDown, IndianRupee, TrendingUp, ShoppingBag, ChevronDown, ChevronUp, TriangleAlert, TrendingDown } from "lucide-react"
-import axios from 'axios'
+
+import apiClient from '../../../../Api/apiClient'
 
 import {useTogglerEnabled} from "../../../../Hooks/ToggleEnabler"
 import {BusinessAnalyticsContext} from '.././AdminDashboardPage'
@@ -47,10 +49,10 @@ export default function SalesRevenueSection() {
 
       const [revenueResponse, avgOrdersResponse, totalOrdersResponse, categoryDatasResponse] = await Promise.allSettled(
           [
-              axios.get(`/admin/dashboard/revenue/total`, { withCredentials: true }),
-              axios.get(`/admin/dashboard/orders/average`, { withCredentials: true }),
-              axios.get(`/admin/dashboard/orders/total`, { withCredentials: true }),
-              axios.get(`/admin/dashboard/revenue/category`, { withCredentials: true }),
+              apiClient.get(`/admin/dashboard/revenue/total`),
+              apiClient.get(`/admin/dashboard/orders/average`),
+              apiClient.get(`/admin/dashboard/orders/total`),
+              apiClient.get(`/admin/dashboard/revenue/category`),
           ],
       )
 
@@ -143,10 +145,10 @@ export default function SalesRevenueSection() {
       try{
         let response = null
         if(activeTab === 'monthly'){
-          response = await axios.get(`/admin/dashboard/revenue/monthly`, { withCredentials: true })
+          response = await apiClient.get(`/admin/dashboard/revenue/monthly`)
         }
         if(activeTab === 'weekly'){
-          response = await axios.get(`/admin/dashboard/revenue/weekly`, { withCredentials: true })
+          response = await apiClient.get(`/admin/dashboard/revenue/weekly`)
         }
         if(response?.data){
           setStatus((status) => ({ ...status, revenueTrendsData: "success" }))
@@ -162,7 +164,7 @@ export default function SalesRevenueSection() {
     }
     const loadHourlyRevenue = async()=> {
       try{
-        const response = await axios.get(`/admin/dashboard/revenue/hourly/:${salesDate}`, { withCredentials: true })
+        const response = await apiClient.get(`/admin/dashboard/revenue/hourly/:${salesDate}`)
         if(response.data){
             setHourlySalesDatas(response.data.daySalesDatas)
             setStatus((status) => ({ ...status, hourlySalesDatas: "success" }))

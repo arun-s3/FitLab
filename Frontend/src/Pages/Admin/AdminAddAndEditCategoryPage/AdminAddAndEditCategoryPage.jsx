@@ -11,8 +11,10 @@ import {TbCirclesRelation} from "react-icons/tb"
 import {RiDiscountPercentLine} from "react-icons/ri"
 import {SlBadge} from "react-icons/sl"
 import {IoIosClose} from "react-icons/io"
+
 import {toast as sonnerToast} from 'sonner'
-import axios from 'axios'
+
+import apiClient from '../../../Api/apiClient'
 
 import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
 import FileUpload from '../../../Components/FileUpload/FileUpload'
@@ -99,9 +101,16 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
         }
    },[location])
 
+   useEffect(()=> {
+       if(error){
+           sonnerToast.error(error)
+           dispatch(resetStates())
+       }
+    }, [error])
+
    const loadCategoryInfo = async(id)=> {
         try{
-            const response = await axios.get(`/admin/products/category/${id}`, { withCredentials: true })
+            const response = await apiClient.get(`/admin/products/category/${id}`)
             if(response && response.status === 200){
                 return {
                     parentCategory: response.data.category.parentCategory.name,

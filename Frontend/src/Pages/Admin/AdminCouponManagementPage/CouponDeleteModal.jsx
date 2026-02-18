@@ -10,7 +10,7 @@ import {deleteCoupon, resetCouponStates} from '../../../Slices/couponSlice'
 
 export default function CouponDeleteModal ({ isOpen, onClose, coupon }){
 
-  const {couponRemoved} = useSelector(state=> state.coupons)
+  const {couponRemoved, couponError} = useSelector(state=> state.coupons)
   const dispatch = useDispatch()
 
   const modalRef = useRef(null)
@@ -22,6 +22,13 @@ export default function CouponDeleteModal ({ isOpen, onClose, coupon }){
       dispatch(resetCouponStates())
     }
   },[couponRemoved])
+
+  useEffect(()=> {
+      if(couponError) {
+          sonnerToast.error(couponError)
+          dispatch(resetCouponStates())
+      }
+  }, [couponError])
 
   if (!isOpen) return null
 

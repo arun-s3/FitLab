@@ -4,8 +4,11 @@ import {useSelector, useDispatch} from 'react-redux'
 import {motion, AnimatePresence} from "framer-motion"
 
 import {BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer} from "recharts"
+
 import {Package, AlertTriangle, BarChart3, ChevronDown, ChevronUp} from "lucide-react"
-import axios from 'axios'
+
+import apiClient from '../../../../Api/apiClient'
+
 import {toast as sonnerToast} from 'sonner'
 
 import { restockProduct, resetStates } from "../../../../Slices/productSlice"
@@ -38,7 +41,7 @@ export default function InventoryInsightsSection() {
   })
 
   const dispatch = useDispatch()
-  const { productRestocked } = useSelector((state) => state.productStore)
+  const { productRestocked, error } = useSelector((state) => state.productStore)
 
   useEffect(() => {
       if (productRestocked) {
@@ -61,9 +64,9 @@ export default function InventoryInsightsSection() {
       const newStats = []
 
       const [productStockResponse, productLowStockResponse, categoryStockDatasResponse] = await Promise.allSettled([
-          axios.get(`/admin/dashboard/products/stock`, { withCredentials: true }),
-          axios.get(`/admin/dashboard/products/stock/low`, { withCredentials: true }),
-          axios.get(`/admin/dashboard/category/stock`, { withCredentials: true }),
+          apiClient.get(`/admin/dashboard/products/stock`),
+          apiClient.get(`/admin/dashboard/products/stock/low`),
+          apiClient.get(`/admin/dashboard/category/stock`),
       ])
 
       if (productStockResponse.status === "fulfilled") {
@@ -120,6 +123,13 @@ export default function InventoryInsightsSection() {
           setFetchChartData(false)
       }
     }, [fetchChartData])
+
+    useEffect(()=> {
+        if(error) {
+            sonnerToast.error(error)
+            dispatch(resetStates())
+        }
+    }, [error])
   
   const refreshCharts = () => {
       setStatus({
@@ -347,7 +357,7 @@ export default function InventoryInsightsSection() {
                                                               Product stock %
                                                           </span>
                                                       </div>{" "}
-                                                      openRestockModal
+                                                      
                                                   </td>
                                                   <td className='py-3 px-4'>
                                                       <button className='invisible text-sm font-medium'>Restock</button>

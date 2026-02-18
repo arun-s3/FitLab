@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react'
 import  './AdminPageLayout.css'
 import {Link, Outlet, useLocation} from 'react-router-dom'
-import {useDispatch} from 'react-redux'
+import {useDispatch, useSelector} from 'react-redux'
 import {motion, AnimatePresence} from 'framer-motion'
 
 import {MdOutlineDashboardCustomize, MdLogout} from "react-icons/md"
@@ -17,8 +17,10 @@ import {CiSquareChevRight} from "react-icons/ci"
 import {RiRobot2Line} from "react-icons/ri"
 import {MapPinned, Headset} from "lucide-react"
 
+import {toast as sonnerToast} from 'sonner'
+
 import AdminHeader from '../../Components/AdminHeader/AdminHeader'
-import {adminSignout} from '../../Slices/adminSlice'
+import {adminSignout, resetStates} from '../../Slices/adminSlice'
 
 
 export default function AdminPageLayout(){
@@ -42,6 +44,15 @@ export default function AdminPageLayout(){
     const [sidebarOpen, setSidebarOpen] = useState(false)
 
     const [pageBgUrl, setPageBgUrl] = useState('admin-bg.jpg')
+
+    const { adminLoading, adminError } = useSelector(state => state.admin)
+
+    useEffect(()=> {
+          if(adminError) {
+              sonnerToast.error(adminError, { id: "admin-error" })
+              dispatch(resetStates())
+          }
+    }, [adminError])
 
     const createPageBg = (url)=> {
       return {

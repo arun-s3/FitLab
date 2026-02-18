@@ -1,6 +1,6 @@
 import React, {useState, useEffect, useRef} from 'react'
 import {useOutletContext} from 'react-router-dom'
-import './AdminOrderHistroyPage.css'
+import './AdminOrderHistoryPage.css'
 import {useDispatch, useSelector} from 'react-redux'
 
 import {ShoppingBag, Package, RefreshCcw, CircleOff, Download, Search, MoreHorizontal, TriangleAlert,
@@ -9,8 +9,10 @@ import {RiArrowDropDownLine} from "react-icons/ri"
 import {TbCreditCardRefund} from "react-icons/tb"
 import {MdSort} from "react-icons/md"
 import {format} from "date-fns"
+
 import {toast as sonnerToast} from 'sonner'
-import axios from 'axios'
+
+import apiClient from '../../../Api/apiClient'
 
 import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
 import {DateSelector} from '../../../Components/Calender/Calender'
@@ -100,7 +102,7 @@ export default function AdminOrderHistoryPage(){
 
     async function findStatus(){
       try{
-          const response = await axios.get(`/order/statusCounts`, {withCredentials: true})
+          const response = await apiClient.get(`/order/statusCounts`)
           if(response?.data.statusCounts) {
               setStatusCounts(response.data.statusCounts) 
           }
@@ -136,15 +138,18 @@ export default function AdminOrderHistoryPage(){
           sonnerToast.success("Updated the status of return request to the user successfully!")
           dispatch(resetOrderStates())
       }
-      if(orderError){
-          sonnerToast.error(orderError)
-          dispatch(resetOrderStates())
-      }
       if(refundSuccess){ 
         sonnerToast.success("The user is successfully refunded!")
         dispatch(resetOrderStates())
       }
-    }, [handledOrderDecision, refundSuccess, orderError])
+    }, [handledOrderDecision, refundSuccess])
+
+    useEffect(()=> {
+      if(orderError){
+          sonnerToast.error(orderError)
+          dispatch(resetOrderStates())
+      }
+    }, [orderError])
 
     useEffect(()=> {
         if(setHeaderZIndex && showReturnRequestModal && showReturnRequestModal.status){

@@ -7,7 +7,6 @@ const User = require('../Models/userModel')
 const {errorHandler} = require('../Utils/errorHandler') 
 
 
-
 const createCoupon = async (req, res, next)=> {
     try {
       console.log("Inside createCoupon of couponController")

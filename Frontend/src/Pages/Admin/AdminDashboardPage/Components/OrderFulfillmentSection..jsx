@@ -4,8 +4,10 @@ import { motion, AnimatePresence } from "framer-motion"
 
 import {BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip,
   Legend, ResponsiveContainer} from "recharts"
+
 import { Package, Clock, CheckCircle, ChevronDown, ChevronUp } from "lucide-react"
-import axios from 'axios'
+
+import apiClient from '../../../../Api/apiClient'
 
 import {BusinessAnalyticsContext} from '.././AdminDashboardPage'
 import { useTogglerEnabled } from "../../../../Hooks/ToggleEnabler"
@@ -43,10 +45,10 @@ export default function OrdersFulfillmentSection() {
 
       const [orderStatsResponse, ordersOverTimeResponse, topProductsResponse, orderStatusPercentRes] =
           await Promise.allSettled([
-              axios.get(`/admin/dashboard/orders/stats`, { withCredentials: true }),
-              axios.get(`/admin/dashboard/orders/stats/monthly`, { withCredentials: true }),
-              axios.get(`/admin/dashboard/products/top`, { withCredentials: true }),
-              axios.get(`/admin/dashboard/orders/status-percent`, { withCredentials: true }),
+              apiClient.get(`/admin/dashboard/orders/stats`),
+              apiClient.get(`/admin/dashboard/orders/stats/monthly`),
+              apiClient.get(`/admin/dashboard/products/top`),
+              apiClient.get(`/admin/dashboard/orders/status-percent`),
           ])
 
       if (orderStatsResponse.status === "fulfilled") {

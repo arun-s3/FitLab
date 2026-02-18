@@ -40,7 +40,7 @@ export default function AdminDashboard({
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={onToggleAvailability}
-                  className={`flex items-center space-x-2 px-8 py-[11px] rounded-[11px] font-semibold transition-all duration-300 shadow-lg ${
+                  className={`flex items-center space-x-2 px-8 py-[11px] rounded-[7px] font-semibold transition-all duration-300 shadow-lg ${
                     adminStatus === "available"
                       ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white hover:from-green-600 hover:to-emerald-700"
                       : "bg-gradient-to-r from-primary to-primaryDark text-white hover:from-yellow-300 hover:to-yellow-600"
@@ -55,7 +55,7 @@ export default function AdminDashboard({
         <motion.div variants={container} initial="hidden" animate="show" className="pt-16 max-w-7xl mx-auto">
 
         <motion.div variants={item} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-2xl p-6 border border-blue-200/50">
+          <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-[10px] p-6 border border-blue-200/50">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-primaryDark rounded-xl">
                 <Users className="h-6 w-6 text-white" />
@@ -66,7 +66,7 @@ export default function AdminDashboard({
             <p className="text-yellow-400 text-[13px]">Users waiting for support</p>
           </div>
 
-          <div className="bg-gradient-to-br from-green-50 to-emerald-100 rounded-2xl p-6 border border-green-200/50">
+          <div className="bg-gradient-to-br from-green-50 to-emerald-100 rounded-[10px] p-6 border border-green-200/50">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-green-500 rounded-xl">
                 <Video className="h-6 w-6 text-white" />
@@ -77,7 +77,7 @@ export default function AdminDashboard({
             <p className="text-green-600 text-[13px]">Ongoing video calls</p>
           </div>
 
-          <div className="bg-gradient-to-br from-purple-50 to-pink-100 rounded-2xl p-6 border border-purple-200/50">
+          <div className="bg-gradient-to-br from-purple-50 to-pink-100 rounded-[10px] p-6 border border-purple-200/50">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-purple-500 rounded-xl">
                 <Clock className="h-6 w-6 text-white" />
@@ -92,7 +92,7 @@ export default function AdminDashboard({
         </motion.div>
 
         <motion.div variants={item}>
-          <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-6 md:p-8">
+          <div className="bg-white rounded-[12px] shadow-xl border border-gray-100 p-6 md:p-8">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-gray-800 flex items-center">
                 <Bell className="mr-3 h-6 w-6 text-secondary" />

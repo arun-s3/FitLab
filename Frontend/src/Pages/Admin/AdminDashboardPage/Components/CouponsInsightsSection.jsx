@@ -16,7 +16,8 @@ import {
   ReferenceLine,
 } from "recharts"
 import { Tag, Percent, TrendingUp, ArrowUp, ChevronUp, ChevronDown, TrendingDown } from "lucide-react"
-import axios from 'axios'
+
+import apiClient from '../../../../Api/apiClient'
 
 import {OperationsAnalyticsContext} from '../AdminDashboardPage'
 import {useTogglerEnabled} from "../../../../Hooks/ToggleEnabler"
@@ -47,10 +48,10 @@ export default function CouponsOffersInsightsSection() {
 
       const [couponRevenueResponse, couponStatsResponse, couponRedemptionRes, discountImpactRes] =
           await Promise.allSettled([
-              axios.get(`/admin/dashboard/coupons/revenue`, { withCredentials: true }),
-              axios.get(`/admin/dashboard/coupons/stats`, { withCredentials: true }),
-              axios.get(`/admin/dashboard/coupons/redemptions`, { withCredentials: true }),
-              axios.get(`/admin/dashboard/coupons/impact`, { withCredentials: true }),
+              apiClient.get(`/admin/dashboard/coupons/revenue`),
+              apiClient.get(`/admin/dashboard/coupons/stats`),
+              apiClient.get(`/admin/dashboard/coupons/redemptions`),
+              apiClient.get(`/admin/dashboard/coupons/impact`),
           ])
 
       let statsError = false

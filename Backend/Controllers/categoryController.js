@@ -1,8 +1,10 @@
 const category = require('../Models/categoryModel')
 const Category = require('../Models/categoryModel')
 const Product = require('../Models/productModel')
+
 const cloudinary = require('../Utils/cloudinary')
 const {errorHandler} = require('../Utils/errorHandler')
+
 
 const packCategoryData = async (req)=>{
     try{

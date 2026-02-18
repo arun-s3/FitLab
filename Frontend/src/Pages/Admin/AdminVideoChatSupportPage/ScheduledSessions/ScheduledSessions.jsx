@@ -1,11 +1,16 @@
 import React, { useState, useEffect, useContext } from "react"
+import {useOutletContext} from 'react-router-dom'
 import { motion } from "framer-motion"
 
 import { Calendar, Filter } from "lucide-react"
-import axios from 'axios'
 import {intervalToDuration, formatDuration} from 'date-fns'
 
+import {toast as sonnerToast} from 'sonner'
+
+import apiClient from '../../../../Api/apiClient'
+
 import ScheduledSessionCard from "./ScheduledSessionCard"
+import CustomerMessageModal from '../../../../Components/CustomerMessageModal/CustomerMessageModal'
 import {AdminSocketContext} from '../../../../Components/AdminSocketProvider/AdminSocketProvider'
 
 
@@ -24,6 +29,11 @@ export default function ScheduledSessions({ currentScheduledSession, onStartSche
 
   const [scheduledSessions, setScheduledSessions] = useState([])
   const [filteredSessions, setFilteredSessions] = useState([])
+  
+  const [openMessageModal, setOpenMessageModal] = useState({customer: null})
+
+  const {setHeaderZIndex} = useOutletContext()  
+  setHeaderZIndex(0)
 
   const checkUserActive = (username)=> {
     return activeUsers.some(user=> user.username === username && user.isOnline)
@@ -32,9 +42,10 @@ export default function ScheduledSessions({ currentScheduledSession, onStartSche
   useEffect(()=> {
     async function fetchSessions(){
       try{
-        const response = await axios.get(`/video-chat/`, {withCredentials: true})
+        const response = await apiClient.get(`/video-chat/sessions`)
         if(response.status === 200){
           const sessions = response.data.sessions
+          console.log("sessions---->", sessions)
           if(sessions && sessions.length > 0){
             const sessionsWithDetails = sessions.map(session=> {
               const today = new Date()
@@ -128,11 +139,11 @@ export default function ScheduledSessions({ currentScheduledSession, onStartSche
 
       let statusMatch = false
       if(status){
-        if (filterStatus === "all") {
-          statusMatch = true
-        } else if (filterStatus === "active") {
+        if (status === "all") {
+          statusMatch = true 
+        } else if (status === "active") {
           statusMatch = session.isUserActive
-        } else if (filterStatus === "inactive") {
+        } else if (status === "inactive") {
           statusMatch = !session.isUserActive
         }
       }
@@ -177,7 +188,7 @@ export default function ScheduledSessions({ currentScheduledSession, onStartSche
       variants={container}
       initial="hidden"
       animate="show"
-      className="bg-white rounded-3xl shadow-xl border border-gray-100 p-6 md:p-8"
+      className="bg-white rounded-[12px] shadow-xl border border-gray-100 p-6 md:p-8"
     >
       <motion.div variants={item} className="flex flex-col md:flex-row md:items-center justify-between mb-6">
         <div>
@@ -245,12 +256,35 @@ export default function ScheduledSessions({ currentScheduledSession, onStartSche
           {filteredSessions && filteredSessions.length > 0 &&
             filteredSessions.map((session, index) => (
              <motion.div key={session.sessionId} variants={item} transition={{ delay: index * 0.1 }}>
-               <ScheduledSessionCard session={session} onStartCall={() => onStartScheduledCall(session)} onEndCall={()=> onEndScheduledCall(session)} socket={socket} 
-                   currentScheduledSession={currentScheduledSession}/>
+               <ScheduledSessionCard 
+                    session={session} 
+                    onStartCall={() => onStartScheduledCall(session)} 
+                    onEndCall={()=> onEndScheduledCall(session)} 
+                    socket={socket} 
+                    currentScheduledSession={currentScheduledSession} 
+                    messageUser={()=> {
+                        setOpenMessageModal({customer: {
+                          _id: session.userId._id, username: session.userId.username, email: session.userId.email
+                        }})
+                        setHeaderZIndex(300)
+                    }}
+                />
              </motion.div>
           ))}
         </div>
       )}
+
+      <CustomerMessageModal 
+          isOpen={openMessageModal.customer} 
+          onClose={()=> {
+            setOpenMessageModal({customer: null})
+            setHeaderZIndex(0)
+          }} 
+          customer={openMessageModal.customer} 
+          addSubtitle="For real-time communication, please video call the user or navigate to the support section in the sidebar
+            and use text chat."
+      />
+      
     </motion.div>
   )
 }

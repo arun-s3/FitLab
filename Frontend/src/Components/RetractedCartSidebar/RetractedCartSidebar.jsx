@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react'
+import {useLocation} from 'react-router-dom'
 import {useSelector} from 'react-redux'
 
 import {toast as sonnerToast} from 'sonner'
@@ -11,6 +12,8 @@ export default function RetractedCartSidebar(){
 
     const [isCartOpen, setIsCartOpen] = useState(false)
     const [packedupCart, setPackedupCart] = useState({})
+
+    const location = useLocation()
     
     const {cart, productAdded, productRemoved, error} = useSelector(state=> state.cart) 
 
@@ -18,10 +21,6 @@ export default function RetractedCartSidebar(){
         if(cart?.products && cart.products.length > 0){
             setPackedupCart(cart)
             setIsCartOpen(true)
-        }
-        if(error && error.toLowerCase().includes('product')){
-          sonnerToast.error(error)
-          dispatch(resetCartStates())
         }
         if(productAdded){
           setPackedupCart(cart)
@@ -32,7 +31,15 @@ export default function RetractedCartSidebar(){
           setPackedupCart(cart)
           dispatch(resetCartStates())
         }
-    },[cart, error, productAdded, productRemoved])
+    },[cart, productAdded, productRemoved])
+
+    useEffect(()=> {
+        if(location.pathname === '/cart' || location.pathname === '/checkout') return
+        if(error){
+          sonnerToast.error(error)
+          dispatch(resetCartStates())
+        }
+    },[error])
 
     const updateQuantity = (id, newQuantity) => {
         dispatch( addToCart({productId: id, quantity: newQuantity}) )

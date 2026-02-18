@@ -52,26 +52,31 @@ export default function AddressManagementPage({editAddresses = false}){
     },[radioCheckedAddressType])
     
     useEffect(()=> {
-        if(error){
-            sonnerToast.error(error)
-            dispatch(resetStates())
-        }
         if(addressCreated){
             sonnerToast.success("New Address registered successfully!") 
             dispatch(resetStates())
             navigate('/account/addresses', {replace: true})
         }
+    },[addressCreated])
+
+    useEffect(()=> {
         if(addressUpdated){
             sonnerToast.success("Address Updated successfully!")
             dispatch(resetStates())
             navigate('/account/addresses', {replace: true})
         }
-    },[addressCreated, addressUpdated, error])
+    },[addressUpdated])
+
+    useEffect(()=> {
+        if(error){
+            sonnerToast.error(error)
+            dispatch(resetStates())
+        }
+    },[error])
 
     useEffect(() => {
         dispatch(resetStates())
     }, [dispatch])
-
 
     const inputChangeHandler = useCallback((e) => {
         const {id, value} = e.target;

@@ -12,13 +12,15 @@ import {CiSquareChevRight} from "react-icons/ci"
 import {RiSpamLine} from "react-icons/ri"
 import {MdSettingsBackupRestore} from "react-icons/md"
 import {SquareChartGantt, MessageSquare} from 'lucide-react'
+
 import {toast as sonnerToast} from 'sonner'
-import axios from 'axios'
+
+import apiClient from '../../../Api/apiClient'
 
 import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
 import Modal from '../../../Components/Modal/Modal'
 import CustomerDetailsModal from './CustomerDetailsModal'
-import CustomerMessageModal from './CustomerMessageModal'
+import CustomerMessageModal from '../../../Components/CustomerMessageModal/CustomerMessageModal'
 import useFlexiDropdown from '../../../Hooks/FlexiDropdown'
 import {SitePrimaryMinimalButtonWithShadow} from '../../../Components/SiteButtons/SiteButtons'
 import {showUsers, toggleBlockUser, updateRiskyUserStatus, resetStates} from '../../../Slices/adminSlice'
@@ -30,7 +32,7 @@ import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
 export default function AdminCustomersPageV1() {
 
     const dispatch = useDispatch()
-    const { adminLoading, adminError, adminMessage, allUsers, totalUsers } = useSelector(state => state.admin)
+    const { adminLoading, adminMessage, allUsers, totalUsers } = useSelector(state => state.admin)
 
     const [localUsers, setLocalUsers] = useState([]);
     const [tempUsers, setTempUsers] = useState([])
@@ -100,16 +102,12 @@ export default function AdminCustomersPageV1() {
 
     }, [tempUsers, activeSorter.field, activeSorter.order]);
     
-
     useEffect(() => {
         if (adminMessage) {
             sonnerToast.success(`The User is ${adminMessage.toLowerCase()}`)
+            dispatch(resetStates());
         }
-        if(adminError){
-            sonnerToast.error(adminError)
-        }
-        dispatch(resetStates());
-    }, [adminMessage, adminError, dispatch]);
+    }, [adminMessage, dispatch])
 
     const toggleBlockHandler = (id) => {
         setLocalUsers(prevUsers =>
@@ -216,7 +214,7 @@ export default function AdminCustomersPageV1() {
 
     const getUserStats = async(user)=> { 
       try { 
-        const response = await axios.get(`/admin/stats/${user._id}`,{ withCredentials: true })
+        const response = await apiClient.get(`/admin/stats/${user._id}`)
         if(response.status === 200){
           setOpenUserDetailsModal({customerData: user, orderStats: response.data.stats, address: response.data.address})
           setHeaderZIndex(300)

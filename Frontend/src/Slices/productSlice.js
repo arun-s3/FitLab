@@ -74,7 +74,7 @@ const initialState = {
     productCounts: null,
     maxPriceAvailable: 100000,
     loading: false,
-    error: false,
+    error: null,
     success:false,
     message: null,
     productCreated: false,
@@ -88,7 +88,7 @@ const productSlice = createSlice({
     reducers: {
         resetStates: (state, action)=>{
             state.loading = false
-            state.error = false
+            state.error = null
             state.productCreated = false
             state.productUpdated = false
             state.productRestocked = false
@@ -97,23 +97,23 @@ const productSlice = createSlice({
     extraReducers: (builder)=>{
         builder
             .addCase(createProduct.fulfilled, (state, action) => {
-                state.error = false
+                state.error = null
                 state.loading = false
                 state.productCreated = true
                 // state.products.push(action.payload.mainProduct)
             })
             .addCase(createProduct.pending, (state, action) => {
                 state.loading = true
-                state.error = false
+                state.error = null
                 state.productCreated = false
             })
             .addCase(createProduct.rejected, (state, action) => {
                 state.loading = false
-                state.error = true
+                state.error = action.payload
                 state.productCreated = false
             })
             .addCase(updateProduct.fulfilled, (state, action) => {
-                state.error = false
+                state.error = null
                 state.loading = false
                 state.productUpdated = true
                 const updatingProductIndex = state.products.findIndex(
@@ -123,38 +123,38 @@ const productSlice = createSlice({
             })
             .addCase(updateProduct.pending, (state, action) => {
                 state.loading = true
-                state.error = false
+                state.error = null
                 state.productUpdated = false
             })
             .addCase(updateProduct.rejected, (state, action) => {
                 state.loading = false
-                state.error = true
+                state.error = action.payload
                 state.productUpdated = false
             })
             .addCase(getAllProducts.fulfilled, (state, action) => {
                 state.loading = false
-                state.error = false
+                state.error = null
                 state.products = action.payload.productBundle
                 state.productCounts = action.payload.productCounts
                 state.maxPriceAvailable = action.payload.maxPriceAvailable
             })
             .addCase(getAllProducts.pending, (state, action) => {
                 state.loading = true
-                state.error = false
+                state.error = null
             })
             .addCase(getAllProducts.rejected, (state, action) => {
                 state.loading = false
-                state.error = true
+                state.error = action.payload
             })
             .addCase(restockProduct.pending, (state, action) => {
                 state.loading = true
-                state.error = false
+                state.error = null
                 state.productRestocked = false
             })
 
             .addCase(restockProduct.fulfilled, (state, action) => {
                 state.loading = false
-                state.error = false
+                state.error = null
                 state.productRestocked = true
 
                 state.products = state.products.map((product) =>
@@ -165,29 +165,29 @@ const productSlice = createSlice({
             .addCase(restockProduct.rejected, (state, action) => {
                 state.loading = false
                 state.error = true
-                state.productRestocked = false
+                state.productRestocked = action.payload
             })
 
             .addCase(searchProduct.fulfilled, (state, action) => {
                 state.loading = false
-                state.error = false
+                state.error = null
                 state.products = action.payload.products
                 state.productCounts = action.payload.productCounts
                 state.maxPriceAvailable = action.payload.maxPriceAvailable
             })
             .addCase(searchProduct.pending, (state, action) => {
                 state.loading = true
-                state.error = false
+                state.error = null
             })
             .addCase(searchProduct.rejected, (state, action) => {
                 state.loading = false
-                state.error = true
+                state.error = action.payload
             })
             .addCase(toggleProductStatus.fulfilled, (state, action) => {
                 state.success = true
                 state.message = action.payload.productBlocked
                 state.loading = false
-                state.error = false
+                state.error = null
                 const updatingProductIndex = state.products.findIndex(
                     (product) => product._id === action.payload.productId,
                 )
@@ -195,11 +195,11 @@ const productSlice = createSlice({
             })
             .addCase(toggleProductStatus.pending, (state, action) => {
                 state.loading = true
-                state.error = false
+                state.error = null
             })
             .addCase(toggleProductStatus.rejected, (state, action) => {
                 state.loading = false
-                state.error = true
+                state.error = action.payload
             })
     }
 })

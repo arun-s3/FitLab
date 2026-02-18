@@ -12,7 +12,7 @@ export default function SelectCategoryForAdmin({category, setCategory, editCateg
 
     const [categoryStatus, setCategoryStatus] = useState({strength:false, cardio:false, supplements:false, accessories:false})
 
-    const {categories, error} = useSelector(state=> state.categoryStore)
+    const {categories} = useSelector(state=> state.categoryStore)
     const dispatch = useDispatch()
 
     useEffect(()=>{
@@ -31,13 +31,6 @@ export default function SelectCategoryForAdmin({category, setCategory, editCateg
             setCategoryStatus(updatedStatus);
         }
     }, [editCategory])
-
-    useEffect(()=> {
-        if(error){
-            sonnerToast.error(error)
-            dispatch(resetStates())
-        }
-    }, [error])
     
     const categorySelectHandler = (e) => {
         if (e.target.checked) {

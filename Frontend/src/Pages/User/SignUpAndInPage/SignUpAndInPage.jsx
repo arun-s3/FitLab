@@ -95,24 +95,6 @@ export default function SignUpAndInPage({type}){
             }
             dispatch(resetStates())
         }
-        if(error){
-            if(error === 'Bad request- User already logged in!'){
-                if(user){
-                    navigate('/',{replace:true})
-                }else clearCookiesAndSignIn()
-            }
-            else if(error.includes('is Blocked')){
-                toast.error(error)
-                navigate('/blocked', {
-                    replace: true, 
-                    state: {NoDirectAccesss: true}
-                })
-            }
-            else{
-                sonnerToast.error(error || "Something went wrong.")
-                dispatch(resetStates())
-            }
-        }
         dispatch(resetStates())
     })
     
@@ -134,6 +116,29 @@ export default function SignUpAndInPage({type}){
             })
         }
     }, [user, admin])
+
+    useEffect(()=> {
+        if(error){
+            if(error === 'Bad request- User already logged in!'){
+                if(user){
+                    navigate('/',{replace:true})
+                }
+                else clearCookiesAndSignIn()
+            }
+            else if(error.includes('is Blocked')){
+                toast.error(error)
+                navigate('/blocked', {
+                    replace: true, 
+                    state: {NoDirectAccesss: true}
+                })
+
+            }
+            else{
+                sonnerToast.error(error || "Something went wrong.")
+            }
+            dispatch(resetStates())
+        }
+    }, [error])
 
     const handleChange = (e)=>{
         setFormData({...formData, [e.target.id.toString()]:e.target.value})

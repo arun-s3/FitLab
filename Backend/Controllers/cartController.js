@@ -14,7 +14,6 @@ const {errorHandler} = require('../Utils/errorHandler')
 const QTY_PER_PERSON = 5
 
 
-
 const addToCart = async (req, res, next)=> {
   try {  
     console.log("Inside addToCart of cartController")

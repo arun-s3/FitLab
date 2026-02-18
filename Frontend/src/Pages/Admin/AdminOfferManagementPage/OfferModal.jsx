@@ -52,7 +52,6 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
   const [productQueryOptions, setProductQueryOptions] = useState({page: 1, limit: 6})
 
   const { products, productCounts } = useSelector(state=> state.productStore)
-  const { adminLoading, adminError, adminSuccess, adminMessage, allUsers } = useSelector(state => state.admin)
   
   const {offerCreated, offerUpdated} = useSelector(state=> state.offers)
   const dispatch = useDispatch()

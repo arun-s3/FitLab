@@ -161,11 +161,6 @@ const productSchema = mongoose.Schema({
       type: Number,
       default: 0,
     },
-    // user: {
-    //    type: mongoose.Schema.ObjectId,
-    //    ref: "User",
-    //    // required: true,
-    //  },
     }, {timestamps:true});
 
 const product = mongoose.model('Product', productSchema)

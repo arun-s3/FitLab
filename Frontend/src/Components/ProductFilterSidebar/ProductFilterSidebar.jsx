@@ -7,11 +7,13 @@ import {MdOutlineArrowDropDownCircle} from "react-icons/md"
 import CategoryDisplay from '../CategoryDisplay/CategoryDisplay'
 import PriceSliderAndFilter from '../PriceSliderAndFilter/PriceSliderAndFilter'
 import RatingSlider from '../RatingSlider/RatingSlider'
+import StockFilter from "./StockFilter"
 import {capitalizeFirstLetter} from '../../Utils/helperFunctions'
 import {DateSelector} from '../Calender/Calender'
 
 
-export default function ProductFilterSidebar({isOpen, onClose, popularProducts, muscleGroups, brands, isAdmin = false, applySidebarFilters}){
+export default function ProductFilterSidebar({isOpen, onClose, popularProducts, muscleGroups, brands, isAdmin = false, saveCurrentFilters,
+    savedFilters, applySidebarFilters, onClearedFilters}){
 
   const [expandedSections, setExpandedSections] = useState({
     category: true,
@@ -22,6 +24,7 @@ export default function ProductFilterSidebar({isOpen, onClose, popularProducts, 
     productStatus: true,
     dateRange: true,
     rating: true,
+    stock: true
   })
 
   const [selectedFilters, setSelectedFilters] = useState({
@@ -46,6 +49,8 @@ export default function ProductFilterSidebar({isOpen, onClose, popularProducts, 
   const [popularProductsShowLabel, setPopularProductsShowLabel] = useState('See more')
 
   const [categoryFilter, setCategoryFilter] = useState({categories: []})
+
+  const [maxStock, setMaxStock] = useState(null)
 
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState(false)
   const productStatusOptions = [
@@ -74,6 +79,18 @@ export default function ProductFilterSidebar({isOpen, onClose, popularProducts, 
       }))
     }
   }, [startDate, endDate])
+
+  useEffect(()=> {
+    const hasPreviousFilters = Object.keys(savedFilters).length > 0
+    if(isOpen && hasPreviousFilters) {
+        setSelectedFilters(savedFilters.selectedFilters)
+        setRating(savedFilters.rating)
+        setCategoryFilter(savedFilters.categoryFilter)
+        setMinPrice(savedFilters.minPrice)
+        setMaxPrice(savedFilters.maxPrice)
+        setMaxStock(savedFilters.maxStock)
+    }
+  }, [isOpen, savedFilters])
 
   const toggleSection = (section) => {
     setExpandedSections((prev) => ({
@@ -133,9 +150,9 @@ export default function ProductFilterSidebar({isOpen, onClose, popularProducts, 
         if(firstSlideRef.current){
             appliedFilters = {minPrice, maxPrice}
         }
-        // appliedFilters.targetMuscles = 
-        appliedFilters = {...appliedFilters, ...selectedFilters, rating, categories: categoryFilter.categories}
+        appliedFilters = {...appliedFilters, ...selectedFilters, rating, maxStock, categories: categoryFilter.categories}
         applySidebarFilters(appliedFilters)
+        saveCurrentFilters({selectedFilters, rating, maxStock, categoryFilter, minPrice, maxPrice})
         onClose()
     }
 
@@ -149,9 +166,11 @@ export default function ProductFilterSidebar({isOpen, onClose, popularProducts, 
         endDate: ""
       })
       setRating(0)
+      setMaxStock(null)
       setCategoryFilter({categories: []})
+      saveCurrentFilters({})
+      onClearedFilters()
     }
-
 
 
   return (
@@ -225,8 +244,34 @@ export default function ProductFilterSidebar({isOpen, onClose, popularProducts, 
 
                     <div className="ml-[10px] w-[96%]">
 
-                        <CategoryDisplay type='checkboxType' filter={categoryFilter} setFilter={setCategoryFilter}/>
-
+                        {
+                            savedFilters.categoryFilter && savedFilters.categoryFilter.categories.length > 0 
+                                ? 
+                                <div className="flex gap-[7px]">
+                                    <div className="border border-inputBorderLow px-4 py-[7px] rounded-[8px] max-w-[15rem]">
+                                        <p className="flex items-start gap-[7px]">
+                                            <span className="text-[12px] font-medium text-muted whitespace-nowrap"> Categories: </span>
+                                            <span className="text-[12px] text-secondary whitespace-pre-wrap line-clamp-2 break-words">
+                                                {savedFilters.categoryFilter.categories.toString()} 
+                                            </span>
+                                        </p> 
+                                        {savedFilters.categoryFilter?.subCategories &&
+                                            <p className="mt-[5px] flex items-start gap-[7px]"> 
+                                                <span className="text-[12px] font-medium text-muted whitespace-nowrap"> Sub-Categories: </span>
+                                                <span className="text-[12px] text-secondary whitespace-pre-wrap line-clamp-2 break-words">
+                                                 {savedFilters.categoryFilter.subCategories} 
+                                                </span>
+                                            </p>
+                                        }
+                                    </div>
+                                    <X className="w-[15px] h-[15px] text-red-500 cursor-pointer hover:scale-110" onClick={()=> {
+                                        const {categoryFilter, ...rest} = savedFilters
+                                        saveCurrentFilters(rest)
+                                    }} />
+                                </div>
+                                :
+                                <CategoryDisplay type='checkboxType' filter={categoryFilter} setFilter={setCategoryFilter}/>
+                        }                        
                     </div>
                 }
               </div>
@@ -464,12 +509,12 @@ export default function ProductFilterSidebar({isOpen, onClose, popularProducts, 
                               className="space-y-2 overflow-visible">
                                 <div className="flex items-center space-x-2 text-gray-700 hover:text-secondary cursor-pointer">
                                     <motion.input type='checkbox' 
-                                        className='className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-0' 
+                                        className='w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-0' 
                                         whileHover={{ rotate: 45 }}
                                         id={product}
                                         checked={selectedFilters.popularProducts.includes(product)}
                                         onChange={(e)=> handleProductChange(product)}/>
-                                    <label HTMLfor={product}
+                                    <label htmlFor={product}
                                         className="text-sm text-inherit dark:text-gray-300">
                                         { capitalizeFirstLetter(product) } 
                                     </label>
@@ -490,7 +535,7 @@ export default function ProductFilterSidebar({isOpen, onClose, popularProducts, 
                   onClick={() => toggleSection("price")}
                   className="flex items-center justify-between w-full text-left"
                 >
-                  <h3 className="text-[15px] font-medium tracking-[0.5px] text-gray-900 dark:text-whitee"> Price Range </h3>
+                  <h3 className="text-[15px] font-medium tracking-[0.5px] text-gray-900 dark:text-white"> Price Range </h3>
                   {expandedSections.price ? (
                     <ChevronUp className="w-4 h-4 text-gray-500" />
                   ) : (
@@ -505,6 +550,7 @@ export default function ProductFilterSidebar({isOpen, onClose, popularProducts, 
                           priceSetter={{setMinPrice, setMaxPrice}} 
                           firstSlide={firstSlideRef} 
                         />
+
                     </div>
                 }
                 </div>  
@@ -623,6 +669,7 @@ export default function ProductFilterSidebar({isOpen, onClose, popularProducts, 
 
                             <RatingSlider rating={rating} 
                               setRating={setRating} 
+                              givenRating={savedFilters?.rating ? savedFilters.rating : null}
                               indentSlider='10px'/>
 
                         </div>
@@ -632,9 +679,49 @@ export default function ProductFilterSidebar({isOpen, onClose, popularProducts, 
                 </AnimatePresence>
               </div>
 
+              {
+                isAdmin &&
+                    <div className="space-y-3">
+                        <button
+                          onClick={() => toggleSection("stock")}
+                          className="mt-16 flex items-center justify-between w-full text-left"
+                        >
+                          <h3 className="text-[15px] font-medium tracking-[0.5px] text-gray-900 dark:text-white"> Stocks </h3>
+                          {expandedSections.stock ? (
+                            <ChevronUp className="w-4 h-4 text-gray-500" />
+                          ) : (
+                            <ChevronDown className="w-4 h-4 text-gray-500" />
+                          )}
+                        </button>
+
+                        <AnimatePresence>
+                          {expandedSections.stock && (
+                            <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                                className="ml-[10px]"
+                            >
+                            {
+                                <div className="mt-[5px] w-[90%]">
+                                
+                                    <StockFilter
+                                        onStockChange={(value)=> setMaxStock(value)}
+                                        onReset={()=> setMaxStock(null)}
+                                        givenStock={maxStock}
+                                    />
+                                </div>
+                            }
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                    </div>
+              }
+
             </div>
 
-            <div className="sticky bottom-0 p-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
+            <div className="sticky bottom-0 p-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 z-[100]">
               <button
                 onClick={applyFilters}
                 className="w-full bg-purple-500 hover:bg-purple-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"

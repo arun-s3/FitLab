@@ -101,7 +101,7 @@ export default function ErrorPage404() {
             <motion.figure 
                 className='ml-8 xs-sm:ml-0 w-[20rem] h-[8rem] xxs-sm:w-[25rem] xxs-sm:h-[8rem] xs-sm:w-[32rem] xs-sm:h-[12rem] sm:w-[35rem] sm:h-[16rem] lg:w-[32rem] lg:h-[12rem] x-lg:w-[37rem] x-lg:h-[16rem] lg:ml-[-2rem] x-lg:ml-[-5rem] xl:ml-0'
             >
-                <motion.img alt='Error 403' 
+                <motion.img 
                     src='/Images/404Error.png' 
                     className='w-full h-full'
                 />

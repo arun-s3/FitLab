@@ -120,8 +120,7 @@ export default function ProductList(){
 
     useEffect(()=>{
         setQueryOptions(queryOptions=> (
-            {...queryOptions, filter: {...queryOptions.filter, ...filter}, sort: sorts, page: currentPage, limit,
-                 averageRating: rating}
+            {...queryOptions, filter: {...queryOptions.filter, ...filter, averageRating: rating}, sort: sorts, page: currentPage, limit}
         ))
     },[filter, sorts, currentPage, limit, rating])
 

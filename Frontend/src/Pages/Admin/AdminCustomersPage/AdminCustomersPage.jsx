@@ -6,6 +6,7 @@ import {motion} from "framer-motion"
 
 import {RiArrowDropDownLine} from 'react-icons/ri'
 import {MdBlock} from 'react-icons/md'
+import {CgUnblock} from "react-icons/cg"
 import {FaSortUp,FaSortDown} from "react-icons/fa6"
 import {VscCaseSensitive} from "react-icons/vsc"
 import {CiSquareChevRight} from "react-icons/ci"
@@ -153,21 +154,21 @@ export default function AdminCustomersPageV1() {
         }
     }
 
-    const searchHandler = (e)=>{
-        if(e.target.value.trim()==""){
+    const searchHandler = (value, currentMatchCase)=>{
+        if(value.trim()==""){
             setSearchData(null)
             dispatch(showUsers({queryOptions: {page: currentPage, limit}}))
         }
         else{
-            setSearchData(e.target.value.trim())
-            if(matchCase){
-                const searchRegex = new RegExp(`^(${e.target.value.trim()})`) 
+            setSearchData(value.trim())
+            if(matchCase || currentMatchCase){
+                const searchRegex = new RegExp(`^(${value.trim()})`) 
                 setLocalUsers( localUsers.filter(user=>
                     searchRegex.test(user.username) || searchRegex.test(user.email) || searchRegex.test(user.mobile)) 
                 )
             }
             else{
-                const searchValue = e.target.value.toString().toLowerCase()
+                const searchValue = value.toString().toLowerCase()
                 setLocalUsers( localUsers.filter(user=> 
                     user.username.toLowerCase().includes(searchValue) 
                     || user.email.toLowerCase().includes(searchValue)
@@ -266,10 +267,16 @@ export default function AdminCustomersPageV1() {
                             <td colSpan='2'>
                                 <div className='flex gap-[8px]' id='searcher'>
                                     <input type='search' placeholder='Search..' className='secondaryLight-box text-[13px] border-primary
-                                                   rounded-[8px] text-secondary w-full h-[35px] pl-[10px]' onChange={(e)=>searchHandler(e)}/>
+                                                   rounded-[8px] text-secondary w-full h-[35px] pl-[10px] focus:ring-secondary'
+                                                    onChange={(e)=>searchHandler(e.target.value)}/>
                                     <span className='self-end px-[3px] mb-[3px] bg-primary rounded-[4px] cursor-pointer relative case-tooltip' 
                                             style={matchCase? {outlineWidth:'1.5px', outlineColor:'#9f2af0', outlineOffset:'2px', outlineStyle:'solid'}:null}
-                                                    onClick={()=>{console.log("clicked Matchcase-->"+matchCase); setMatchCase(!matchCase)}}>
+                                                    onClick={()=>{
+                                                        setMatchCase(!matchCase)
+                                                        if(searchData.trim()){
+                                                            searchHandler(searchData, true)
+                                                        }
+                                                    }}>
                                         <VscCaseSensitive/>
                                     </span>
                                 </div>
@@ -398,7 +405,7 @@ export default function AdminCustomersPageV1() {
                                 </div>
                             </td>
                             <td className='text-left'>
-                                <p className=''>{showUsers && adminLoading?"LOADING...":""}</p>
+                                <p className='text-[11px]'>{showUsers && adminLoading?"LOADING...":""}</p>
                                 <p className=''>
                                     <span className='text-[12px]'>
                                     {timerDelay?
@@ -458,7 +465,11 @@ export default function AdminCustomersPageV1() {
                                                     ? <SitePrimaryMinimalButtonWithShadow type='button' tailwindClasses='basis-[103px] !hover:bg-yellow-400' 
                                                             clickHandler={() => toggleBlockHandler(user._id)}>
                                                             {user.isBlocked ? "Unblock" : "Block"} 
-                                                            <MdBlock style={user.isBlocked? {color:'#22c55e'}:{color:'#e74c3c'}}/>
+                                                            {
+                                                               user.isBlocked 
+                                                                   ? <CgUnblock className='text-green-600'/>
+                                                                   : <MdBlock className='text-red-500'/>
+                                                            }
                                                         </SitePrimaryMinimalButtonWithShadow>
                                                     :  <SitePrimaryMinimalButtonWithShadow type='button' 
                                                             tailwindClasses='basis-[103px] whitespace-nowrap !hover:bg-yellow-400' 

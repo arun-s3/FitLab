@@ -12,11 +12,11 @@ const regexPatterns = {
     weightsPattern: /^\d+(\.\d+)?$/,
     colorsPattern: /^[A-Za-z]{3,}(?:\s[A-Za-z]{2,})*$/,
     brandPattern: /^(?!^\d+$)[a-zA-Z0-9\s,'-]{1,50}$/, 
-    subtitlePattern: /^[\w\s.,!'"-]{20,300}$/,   
-    descriptionPattern: /^[\w\s.,!'"-]{30,2000}$/,
+    subtitlePattern: /^[\p{L}\p{N}\s.,!'"&()\-:/%+#]{20,300}$/u,   
+    descriptionPattern: /^[\p{L}\p{N}\s.,!'"&()\-:/%+#]{20,300}$/u,
 
     categoryNamePattern: /^[a-zA-Z\s,'-]{2,50}$/,
-    categoryDescriptionPattern: /^[a-zA-Z0-9\s.,'!?&()\n-]{2,160}$/, 
+    categoryDescriptionPattern: /^[\p{L}\p{N}\s.,'"!?&()\-:/%+#]{2,300}$/u, 
     categoryDiscountPattern: /^(100|[1-9]?[0-9])(\.\d{1,2})?$/,
     categoryBadgePattern: /^[a-zA-Z\s_-]{2,15}$/, 
 

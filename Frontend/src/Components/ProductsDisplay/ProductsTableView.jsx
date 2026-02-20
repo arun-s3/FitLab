@@ -1,12 +1,24 @@
 import React, {useState, useEffect} from 'react'
 
+import {useNavigate, useLocation} from 'react-router-dom'
+import {useDispatch} from 'react-redux'
+
 import {FaSortUp,FaSortDown} from "react-icons/fa6"
 import {MdBlock} from 'react-icons/md'
+import {CgUnblock} from "react-icons/cg"
+import {PackagePlus} from 'lucide-react'
+
+import {toggleProductStatus} from "../../Slices/productSlice"
 
 
-export default function ProductsTableView({products, setProducts}){
+export default function ProductsTableView({products, setProducts, restockProduct}){
 
     const [activeSorter, setActiveSorter] = useState({field:'',order:''})
+
+    const navigate = useNavigate()
+    const dispatch = useDispatch()
+
+    const location = useLocation()
 
     useEffect(() => {
         let tempProducts = [...products]
@@ -45,6 +57,19 @@ export default function ProductsTableView({products, setProducts}){
          } else {
              setProducts(sortedProducts)
          }
+     }
+
+     const editProductHandler = (product)=> {
+        navigate(
+            {
+                pathname: "./edit",
+                search: `?id=${product._id}`,
+            },
+            { state: {
+                 product,
+                 from: location.pathname 
+            }},
+        )
      }
 
 
@@ -167,11 +192,19 @@ export default function ProductsTableView({products, setProducts}){
                         </td>
                         <td>
                             <div className='flex items-center gap-[10px] action-buttons'>
-                                <button type='button' onClick={() => deleteHandler(product._id)} 
+                                <button type='button' onClick={() => editProductHandler(product)} 
                                         className='text-red-500'> Edit 
                                 </button>
-                                <button type='button' className='basis-[103px]' onClick={() => toggleBlockHandler(product.id)}>
-                                     {product?.isBlocked ? "Unblock" : "Block"} <MdBlock/>
+                                <button type='button' className='basis-[103px]' onClick={() => dispatch(toggleProductStatus(product._id))}>
+                                     {product.isBlocked ? "Unblock" : "Block"} 
+                                     {
+                                        product?.isBlocked 
+                                            ? <CgUnblock className='text-green-600'/>
+                                            : <MdBlock className='text-red-500'/>
+                                     }
+                                </button>
+                                <button type='button' className='!px-[10px] !py-[5px]' onClick={() => restockProduct(product)}> 
+                                    <PackagePlus className='w-[15px] h-[15px] !text-green-600 '/>
                                 </button>
                             </div>
                         </td>

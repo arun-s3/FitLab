@@ -33,6 +33,14 @@ export default function PriceSliderAndFilter({priceGetter, priceSetter, firstSli
     const [minInputPrice, setMinInputPrice] = useState(0)
     const [maxInputPrice, setMaxInputPrice] = useState(null)
 
+    // const {maxPriceAvailable} = useSelector(state=> state.productStore)
+
+    // useEffect(()=> {
+    //     if(maxPriceAvailable){
+    //         maxPriceRupee.current = maxPriceAvailable
+    //     }
+    // },[maxPriceAvailable])
+
     useEffect(()=>{
         setMinInputPrice(minPrice)
         setMaxInputPrice(maxPrice)
@@ -54,7 +62,6 @@ export default function PriceSliderAndFilter({priceGetter, priceSetter, firstSli
              minPriceUnit = secondRange.current
              maxPriceUnit = firstRange.current
          }
-
          setMinPrice(calculatePrice(e,minPriceUnit))
          setMaxPrice(calculatePrice(e,maxPriceUnit))
      }
@@ -95,7 +102,6 @@ export default function PriceSliderAndFilter({priceGetter, priceSetter, firstSli
          else{
              rangeEnd.current = draggedPoint
          }
-          
          range.current = rangeEnd.current - e.target.style.width
          e.target.style.left = range.current.toString() + 'px'
          secondRange && displayRange()
@@ -123,15 +129,26 @@ export default function PriceSliderAndFilter({priceGetter, priceSetter, firstSli
      }
      const dragOverHandler = (e)=>{
          e.preventDefault()
+         // if(collisionCheck.current){
+         //     e.preventDefault()
+         // }
      }
      const dropHandler = (e)=>{
          checkDragging.current = false
          checkMouseDown.current = false
          dragCursor.current = false
          e.preventDefault()
+         // if(collisionCheck.current){
+         //     e.preventDefault()
+         // } 
      }
-   
+ 
+     
      const mouseDownHandler = (e)=>{
+        // if(checkDragging.current){
+        //     console.log("Inside mouseDownHandler")
+        //     checkMouseDown.current = true
+        // }
          leftValueNow.current = parseInt(window.getComputedStyle(e.target).left);  
          currentX.current = e.clientX
          checkDragging.current = true  
@@ -175,7 +192,6 @@ export default function PriceSliderAndFilter({priceGetter, priceSetter, firstSli
          const maxPricePercentage = maxPriceLimit/maxPriceRupee.current
          const minPriceUnit = minPricePercentage * parentWidthPx
          const maxPriceUnit = maxPricePercentage * parentWidthPx
- 
          firstRange.current=maxPriceUnit
          maxPriceRef.current.style.left = `${firstRange.current}px`
          secondRange.current=minPriceUnit
@@ -191,18 +207,15 @@ export default function PriceSliderAndFilter({priceGetter, priceSetter, firstSli
              priceErrorRef.current.style.visibility = 'visible'
              priceErrorRef.current.textContent = "Minimum and Maximum price limits must be numbers!"
              setTimeout(()=> priceErrorRef.current.style.visibility = 'hidden', 3000)
-          }
-          else if(minInputPrice < 0 || maxInputPrice < 0){
+          }else if(minInputPrice < 0 || maxInputPrice < 0){
              priceErrorRef.current.style.visibility = 'visible'
              priceErrorRef.current.textContent = "Please enter positive numbers!"
              setTimeout(()=> priceErrorRef.current.style.visibility = 'hidden', 3000)
-          }
-          else if(minInputPrice > maxInputPrice){
+          }else if(minInputPrice > maxInputPrice){
              priceErrorRef.current.style.visibility = 'visible'
              priceErrorRef.current.textContent = "Minimum price limit should be leseer than Maximum price limit!"
              setTimeout(()=> priceErrorRef.current.style.visibility = 'hidden', 3000)
-          }
-          else{
+          }else{
              priceErrorRef.current.style.visibility = 'hidden'
  
              calculateRangeFromPrice(minInputPrice, maxInputPrice)
@@ -238,11 +251,11 @@ export default function PriceSliderAndFilter({priceGetter, priceSetter, firstSli
         >
             <p className={`${(mountingComponent=='AdminProductListPage'? 'text-[13px] ':'text-[15px] ') + 'text-secondary text-center'}`}>
                 {minPrice} - { maxPrice 
-                ? (maxPrice !== maxPriceRupee.current 
-                    ? maxPrice 
-                    : maxPrice + "+") 
-                : "-"
-            }
+    ? (maxPrice !== maxPriceRupee.current 
+        ? maxPrice 
+        : maxPrice + "+") 
+    : "-"
+}
             </p>
             <div id='pricerange-wrapper' className='relative mt-[1rem]' onDragOver={(e)=>dragOverHandler(e)} 
                                                 onDrop={(e)=>dropHandler(e)} ref={priceRangeWrapperRef}>

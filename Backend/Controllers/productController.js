@@ -241,6 +241,8 @@ const getSingleProduct = async (req, res, next)=> {
         }
       }
     }
+
+    console.log("mergedProduct------------->", JSON.stringify(mergedProduct, null, 2))
     res.status(200).json({ product: mergedProduct });
   }
   catch (error){
@@ -250,144 +252,195 @@ const getSingleProduct = async (req, res, next)=> {
 }
 
 
+const getAllProducts = async (req, res, next) => {
+  try {
+    console.log("Inside getAllProducts controller--")
 
-const getAllProducts = async (req, res, next)=> {
-    try {
-      console.log("Inside getAllProducts controller--")
-  
-      const {queryOptions} = req.body
-      console.log("queryOptions-->", JSON.stringify(queryOptions))
-      console.log("queryOptions.filter-->", JSON.stringify(queryOptions.filter))
-      console.log("queryOptions.searchData-->", JSON.stringify(queryOptions.searchData))
-  
-      let filters = {}
-      let sortCriteria = {}
-      let skipables = 0
-      let limit = 0
+    const { queryOptions } = req.body
 
-      if (queryOptions?.searchData && queryOptions.searchData.trim() !== '') {
-        console.log("Inside queryOptions.searchData")
-        filters.$or = [
-          { title: { $regex: queryOptions.searchData, $options: "i" } },
-          { subtitle: { $regex: queryOptions.searchData, $options: "i" } },
-        ]
-      }
-  
-      if (queryOptions?.filter?.brands && queryOptions?.filter?.brands.length > 0) {
-        filters.brand = queryOptions.filter.brands 
-      }
-      if (queryOptions?.filter?.categories && queryOptions?.filter?.categories.length > 0) {
-        filters.category = { $in: queryOptions.filter.categories }
-      }
-      if (queryOptions?.filter?.subCategories && queryOptions?.filter?.subCategories.length > 0) {
-        filters.subCategory = queryOptions.filter.subCategories
-      }
-      if (queryOptions?.filter?.targetMuscles && queryOptions?.filter?.targetMuscles.length > 0) {
-        filters.targetMuscles = queryOptions.filter.targetMuscles
-      }
-      if (queryOptions?.filter?.products && queryOptions?.filter?.products.length > 0) {
-        filters.title = { $in: queryOptions.filter.products }
-      }
-      
-      if (queryOptions?.filter?.maxPrice){
-        if(queryOptions.filter.maxPrice !== MAXPRICE){
-          console.log("Inside queryOptions.filter.maxPrice !== MAXPRICE")
-          filters.price = { $gte: queryOptions.filter.minPrice, $lte: queryOptions.filter.maxPrice }
-        }else{
-          console.log("Inside queryOptions.filter.maxPrice == MAXPRICE")
-          filters.price = { $gte: queryOptions.filter.minPrice }
-        }
-      }
-      if(!queryOptions?.filter?.maxPrice && queryOptions?.filter?.minPrice){
-        filters.price = { $gte: queryOptions.filter.minPrice }
-      }
+    console.log("queryOptions---->", JSON.stringify(queryOptions))
 
-      if (queryOptions?.status && queryOptions?.status !== 'all') {
-        filters.isBlocked = queryOptions.status === 'blocked'
+    let filters = {}
+    let sortCriteria = {}
+    let limit = 9
+    let page = 1
+
+    if (queryOptions?.searchData?.trim()) {
+      filters.$or = [
+        { title: { $regex: queryOptions.searchData, $options: "i" } },
+        { subtitle: { $regex: queryOptions.searchData, $options: "i" } },
+      ]
+    }
+
+    if (queryOptions?.filter?.brands?.length) {
+      filters.brand = { $in: queryOptions.filter.brands }
+    }
+
+    if (queryOptions?.filter?.categories?.length) {
+      filters.category = { $in: queryOptions.filter.categories }
+    }
+
+    if (queryOptions?.filter?.subCategories?.length) {
+      filters.subCategory = { $in: queryOptions.filter.subCategories }
+    }
+
+    if (queryOptions?.filter?.targetMuscles?.length) {
+      filters.targetMuscles = { $in: queryOptions.filter.targetMuscles }
+    }
+
+    if (queryOptions?.filter?.products?.length) {
+      filters.title = { $in: queryOptions.filter.products }
+    }
+
+    if (queryOptions?.status && queryOptions.status !== "all") {
+      filters.isBlocked = queryOptions.status === "blocked"
+    }
+
+    if (queryOptions?.startDate || queryOptions?.endDate) {
+      filters.createdAt = {}
+      if (queryOptions.startDate) {
+        filters.createdAt.$gte = new Date(queryOptions.startDate)
       }
-      if (queryOptions?.startDate || queryOptions?.endDate) {
-        filters.createdAt = {}
-        if (queryOptions.startDate) {
-          filters.createdAt.$gte = new Date(queryOptions.startDate)
-        }
-        if (queryOptions.endDate) {
-          filters.createdAt.$lte = new Date(queryOptions.endDate)
-        }
+      if (queryOptions.endDate) {
+        filters.createdAt.$lte = new Date(queryOptions.endDate)
       }
-  
-      if (queryOptions?.sort) {
-        for (const sortKey in queryOptions.sort){
-          const sortOrder = queryOptions.sort[sortKey]
-          if(sortKey === 'featured') {
-            sortCriteria = { ratings: -1 }
-          } else if(sortKey === 'bestSellers'){
-            sortCriteria = { totalReviews: -1 }
-          } else if(sortKey === 'newestArrivals'){
-            sortCriteria = { createdAt: -1 }
-          } else{
-            sortCriteria[sortKey] = Number.parseInt(sortOrder)
-          }
-        }
-        console.log("sortCriteria---->", JSON.stringify(sortCriteria))
-      }
-      if (Object.keys(sortCriteria).length === 0) {
+    }
+
+    if (queryOptions?.sort) {
+      for (const sortKey in queryOptions.sort) {
+        const sortOrder = queryOptions.sort[sortKey]
+
+        if (sortKey === "featured") {
+          sortCriteria = { averageRating: -1 }
+        } else if (sortKey === "bestSellers") {
+          sortCriteria = { totalReviews: -1 }
+        } else if (sortKey === "newestArrivals") {
           sortCriteria = { createdAt: -1 }
-      }
-  
-      if (queryOptions?.limit) {
-        limit = parseInt(queryOptions.limit)
-      }
-      if (queryOptions?.page) {
-        skipables = (parseInt(queryOptions.page) - 1) * limit
-      }
-
-      const mainFilter = { ...filters, variantOf: { $in: [null, undefined] } }
-
-      const mainProducts = await Product.find(mainFilter)
-        .populate({
-          path: "variants",
-          select: "weight size motorPower color stock price",
-        })
-        .sort(sortCriteria)
-        .skip(skipables)
-        .limit(limit)
-        .lean()
-
-      const mergedProducts = mainProducts.map((main) => {
-        const variants = main.variants || []
-        const variantKey = main.variantType
-
-        const variantValues = variantKey
-          ? [main[variantKey], ...variants.map((v) => v[variantKey])].filter(Boolean)
-          : []
-        const prices = [main.price, ...variants.map((v) => v.price)]
-        const stocks = [main.stock, ...variants.map((v) => v.stock)]
-        const totalStock = stocks.reduce((sum, s) => sum + (s || 0), 0)
-
-        return {
-          ...main,
-          ...(variantKey ? { [`${variantKey}s`]: variantValues } : {}),
-          prices,
-          stocks,
-          totalStock,
+        } else {
+          sortCriteria[sortKey] = parseInt(sortOrder)
         }
+      }
+    }
+
+    if (Object.keys(sortCriteria).length === 0) {
+      sortCriteria = { createdAt: -1 }
+    }
+
+    if (queryOptions?.limit) {
+      limit = parseInt(queryOptions.limit)
+    }
+
+    if (queryOptions?.page) {
+      page = parseInt(queryOptions.page)
+    }
+
+    const mainFilter = {
+      ...filters,
+      variantOf: null,
+    }
+
+    const mainProducts = await Product.find(mainFilter)
+      .populate({
+        path: "variants",
+        select: "weight size motorPower color stock price",
       })
+      .sort(sortCriteria)
+      .lean()
 
-      const productCounts = await Product.countDocuments(mainFilter)
+    const mergedProducts = mainProducts.map((main) => {
+      const variants = main.variants || []
+      const variantKey = main.variantType
 
-      const maxPriceAggregation = await Product.aggregate([
-        { $match: filters },
-        { $group: { _id: null, maxPrice: { $max: "$price" } } },
-      ])
+      const variantValues = variantKey
+        ? [main[variantKey], ...variants.map((v) => v[variantKey])].filter(Boolean)
+        : []
 
-      const maxPriceAvailable = maxPriceAggregation[0]?.maxPrice || 100000
+      const prices = [main.price, ...variants.map((v) => v.price)]
+      const stocks = [main.stock, ...variants.map((v) => v.stock)]
+      const totalStock = stocks.reduce((sum, s) => sum + (s || 0), 0)
 
-      res.status(200).json({productBundle: mergedProducts, productCounts, maxPriceAvailable})
+      return {
+        ...main,
+        ...(variantKey ? { [`${variantKey}s`]: variantValues } : {}),
+        prices,
+        stocks,
+        totalStock,
+      }
+    })
+
+    let filteredProducts = mergedProducts
+
+    const minPrice = queryOptions?.filter?.minPrice
+    const maxPrice = queryOptions?.filter?.maxPrice
+
+    const hasMin = typeof minPrice === "number"
+    const hasMax = typeof maxPrice === "number"
+
+    if (hasMin || hasMax) {
+      filteredProducts = mergedProducts.filter((product) =>
+        product.prices.some((price) => {
+          if (hasMin && hasMax) {
+            return price >= minPrice && price <= maxPrice
+          }
+          if (hasMin) {
+            return price >= minPrice
+          }
+          if (hasMax) {
+            return price <= maxPrice
+          }
+          return true
+        })
+      )
     }
-    catch (error){
-      console.log("Error in productController-getProducts -->", error.message)
-      next(error)
+
+    const selectedRating = queryOptions?.filter?.averageRating
+    const hasRatingFilter =
+      typeof selectedRating === "number" && selectedRating > 0
+
+    if (hasRatingFilter) {
+      filteredProducts = filteredProducts.filter(
+        (product) =>
+          typeof product.averageRating === "number" &&
+          product.averageRating >= selectedRating
+      )
     }
+
+    let maxStock = queryOptions?.filter?.maxStock
+
+    if (maxStock !== undefined && maxStock !== null && maxStock !== "") {
+      maxStock = parseInt(maxStock)
+
+      if (!isNaN(maxStock)) {
+        filteredProducts = filteredProducts.filter(
+          (product) =>
+            typeof product.totalStock === "number" &&
+            product.totalStock <= maxStock
+        )
+      }
+    }
+
+    console.log("filteredProducts-------->", JSON.stringify(filteredProducts, null, 2))
+
+    const productCounts = filteredProducts.length
+
+    console.log("productCounts-------->", productCounts)
+
+    const skip = (page - 1) * limit
+
+    const paginatedProducts = filteredProducts.slice(
+      skip,
+      skip + limit
+    )
+
+    res.status(200).json({
+      productBundle: paginatedProducts,
+      productCounts,
+    //   maxPriceAvailable,
+    })
+  } catch (error) {
+    console.log("Error in productController-getProducts -->", error.message)
+    next(error)
+  }
 }
 
 
@@ -767,66 +820,119 @@ const updateProduct = async (req, res, next) => {
   try {
     console.log("Inside updateProduct controller--")
 
-    const {id} = req.params
-    console.log("Id from params -->", id)
+    const { id } = req.params
 
     const existingProduct = await Product.findById(id)
+
+    const packMergedProduct = (main) => {
+        const variants = main.variants || []
+        const variantKey = main.variantType
+
+        const variantValues = variantKey
+          ? [main[variantKey], ...variants.map((v) => v[variantKey])].filter(Boolean)
+          : []
+
+        const prices = [main.price, ...variants.map((v) => v.price)]
+        const stocks = [main.stock, ...variants.map((v) => v.stock)]
+
+        const totalStock = stocks.reduce((sum, s) => sum + (s || 0), 0)
+
+        return {
+          ...main,
+          ...(variantKey ? { [`${variantKey}s`]: variantValues } : {}),
+          prices,
+          stocks,
+          totalStock,
+        }
+    }
+
     if (!existingProduct) {
       return next(errorHandler(404, "No such product available to update"))
     }
 
     const updatedData = await packProductData(req, next)
-
     const { variantType } = req.body
 
     if (!variantType) {
-      const updatedProduct = await Product.findByIdAndUpdate(id, { $set: updatedData }, { new: true })
-      return res.status(200).json({ updatedProduct: true, product: updatedProduct })
+      await Product.findByIdAndUpdate(id, { $set: updatedData })
+
+      const mainProduct = await Product.findById(id)
+        .populate({
+          path: "variants",
+          select: "weight size motorPower color stock price",
+        })
+        .lean()
+
+      return res.status(200).json({
+        updatedProduct: true,
+        product: packMergedProduct(mainProduct),
+      })
     }
 
-    const variantValues = Array.isArray(req.body[variantType]) ? req.body[variantType] : [req.body[variantType]]
-    const stocks = Array.isArray(req.body.stock) ? req.body.stock : [req.body.stock]
-    const prices = Array.isArray(req.body.price) ? req.body.price : [req.body.price]
+    const variantValues = Array.isArray(req.body[variantType])
+      ? req.body[variantType]
+      : [req.body[variantType]]
+
+    const stocks = Array.isArray(req.body.stock)
+      ? req.body.stock
+      : [req.body.stock]
+
+    const prices = Array.isArray(req.body.price)
+      ? req.body.price
+      : [req.body.price]
 
     if (variantValues.length !== stocks.length) {
       return next(errorHandler(400, `${variantType} and stock count must match!`))
     }
+
     if (variantValues.length !== prices.length) {
       return next(errorHandler(400, `${variantType} and price count must match!`))
     }
 
+    const singularVariantKey = variantType.slice(0, -1)
+
     const mainUpdate = {
       ...updatedData,
-      [variantType.slice(0, -1)]: variantValues[0],
-      variantType: variantType.slice(0, -1),
+      [singularVariantKey]: variantValues[0],
+      variantType: singularVariantKey,
       stock: stocks[0],
       price: prices[0],
     }
 
-    const updatedMain = await Product.findByIdAndUpdate(id, { $set: mainUpdate }, { new: true })
+    const updatedMain = await Product.findByIdAndUpdate(
+      id,
+      { $set: mainUpdate },
+      { new: true }
+    )
 
     const existingVariants = await Product.find({ variantOf: id })
-    const updatedVariants = []
 
     if (existingVariants.length !== variantValues.length - 1) {
       await Product.deleteMany({ variantOf: id })
       updatedMain.variants = []
     }
 
+    const updatedVariants = []
+
     for (let i = 1; i < variantValues.length; i++) {
       const variantPayload = {
         ...updatedData,
-        [variantType.slice(0, -1)]: variantValues[i],
-        variantType: variantType.slice(0, -1),
+        [singularVariantKey]: variantValues[i],
+        variantType: singularVariantKey,
         stock: stocks[i],
         price: prices[i],
         variantOf: updatedMain._id,
       }
 
-      let variantDoc;
-      if (existingVariants[i - 1]){
-        variantDoc = await Product.findByIdAndUpdate(existingVariants[i - 1]._id, { $set: variantPayload }, { new: true })
-      } else{
+      let variantDoc
+
+      if (existingVariants[i - 1]) {
+        variantDoc = await Product.findByIdAndUpdate(
+          existingVariants[i - 1]._id,
+          { $set: variantPayload },
+          { new: true }
+        )
+      } else {
         variantDoc = await new Product(variantPayload).save()
       }
 
@@ -836,17 +942,28 @@ const updateProduct = async (req, res, next) => {
 
     await updatedMain.save()
 
-    res.status(200).json({
+    const mainProduct = await Product.findById(id)
+      .populate({
+        path: "variants",
+        select: "weight size motorPower color stock price",
+      })
+      .lean()
+
+      const product = packMergedProduct(mainProduct)
+
+      console.log("UPDATED PRODUCT------>", JSON.stringify(mainProduct, null, 2))
+
+    return res.status(200).json({
       updatedProduct: true,
-      mainProduct: updatedMain,
-      variants: updatedVariants.length ? updatedVariants : null,
-    });
-  } 
-  catch (error){
+      product
+    })
+  }
+  catch (error) {
     console.log("Error in productController-updateProduct -->", error.message)
     next(error)
   }
 }
+
 
 
 const restockProduct = async (req, res, next) => {

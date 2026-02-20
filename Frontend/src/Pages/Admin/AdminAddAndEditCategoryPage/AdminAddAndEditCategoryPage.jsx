@@ -113,8 +113,8 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
             const response = await apiClient.get(`/admin/products/category/${id}`)
             if(response && response.status === 200){
                 return {
-                    parentCategory: response.data.category.parentCategory.name,
-                    relatedCategory: response.data.category.relatedCategory.map(cat=> cat.name)
+                    parentCategory: response.data.category?.parentCategory?.name || null,
+                    relatedCategory: response.data.category?.relatedCategory?.map(cat=> cat.name) || []
                 }
             }
         }
@@ -142,14 +142,17 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
                 setCategoryData({
                     "categoryName": editCategoryItem.current.name,
                     "categoryDescription": editCategoryItem.current.description,
-                    "categoryDiscount": editCategoryItem.current?.discount || null,
-                    "categoryBadge": editCategoryItem.current?.badge ||null,
+                    "categoryDiscount": editCategoryItem.current?.discount || 0,
+                    "categoryBadge": editCategoryItem.current?.badge || null,
                     "startDate": editCategoryItem.current?.seasonalActivation?.startDate || null,
                     "endDate": editCategoryItem.current?.seasonalActivation?.endDate || null,
                 })
 
-                setStartDate(new Date(editCategoryItem.current?.seasonalActivation?.startDate) || null)
-                setEndDate(new Date(editCategoryItem.current?.seasonalActivation?.endDate) || null)
+                const start = editCategoryItem.current?.seasonalActivation?.startDate
+                const end = editCategoryItem.current?.seasonalActivation?.endDate
+                            
+                setStartDate(start ? new Date(start) : null)
+                setEndDate(end ? new Date(end) : null)
 
                 const categoryParentAndRelated = await loadCategoryInfo(editCategoryItem.current._id)
                 setParentCategory(categoryParentAndRelated.parentCategory || null)
@@ -196,7 +199,7 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
 
     const inputBlurHandler = (e, fieldName, options)=>{
          if(!fieldName=='categoryBadge'){
-            e.target.value.trim()? null : e.target.previousElementSibling.style.display = 'inline-block'
+            e.target.value.trim() ? null : e.target.previousElementSibling.style.display = 'inline-block'
          }else{
             e.target.parentElement.firstElementChild.style.display = 'inline-block'
          }
@@ -269,15 +272,21 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
         if(!images.length) delete categoryData['images']
         const requiredFields = ["categoryName","categoryDescription","images"]
         if( (Object.keys(categoryData).length >= 3 && requiredFields.every(field=> Object.keys(categoryData).includes(field) )) && Object.values(categoryData).find(inputValues=> inputValues !== 'undefined')){
+            console.log("categoryData---->",categoryData)
             const formData = new FormData()
             const {images, ...rest} = categoryData
-            for (let field in rest){
-                if( Array.isArray(rest[field]) ){
-                    rest[field].forEach((item) => {
-                        formData.append(`${field}[]`, item); 
-                    });
-                }else{
-                    formData.append(field, rest[field])
+            for (let field in rest) {
+                const value = rest[field]
+
+                if (value === null || value === undefined || value === "") continue
+
+                if (Array.isArray(value)) {
+                    value.forEach((item) => {
+                        if (item !== null && item !== undefined)
+                            formData.append(`${field}[]`, item)
+                    })
+                } else {
+                    formData.append(field, value)
                 }
             }
             const compressedImageBlobs = async(image)=>{
@@ -291,12 +300,13 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
             } 
             const newBlob = await compressedImageBlobs(images[0])
             formData.append('image', newBlob, 'categoryImg')
+            console.log("formData---->",formData)
 
             for(let field in categoryData){
                 !categoryData[field] && delete categoryData[field]
             }
             editCategory? dispatch( updateCategory( {formData, id: editCategoryItem.current._id}) ) : dispatch( createCategory( {formData}) )
-            sonnerToast.info("Uploading the informations...")
+            sonnerToast.info("Uploading the category...")
         } 
         else{
             if(!Object.keys(categoryData).length){

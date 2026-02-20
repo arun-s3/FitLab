@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import './RatingSlider.css'
 import {motion, AnimatePresence} from "framer-motion"
 
@@ -6,7 +6,7 @@ import {Star} from "lucide-react"
 import {MdToggleOff, MdToggleOn} from "react-icons/md"
 
 
-export default function RatingSlider({rating, setRating, indentSlider = null}){
+export default function RatingSlider({rating, setRating, givenRating = null, indentSlider = null}){
 
   const [isDragging, setIsDragging] = useState(false)
 
@@ -15,6 +15,13 @@ export default function RatingSlider({rating, setRating, indentSlider = null}){
 
   const [sliderRate, setSliderRate] = useState(0)
   const [radioRate, setRadioRate] = useState(0)
+
+  useEffect(()=> {
+    if(givenRating){
+        setSliderRate(givenRating)
+        setRadioRate(givenRating)
+    }
+  }, [givenRating])
 
   const handleSliderToggle = (e)=> {
     if(enableSliderRate){

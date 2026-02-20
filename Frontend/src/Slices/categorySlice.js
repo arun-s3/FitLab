@@ -94,7 +94,19 @@ export const toggleCategoryStatus = createAsyncThunk('toggleCategoryStatus', asy
 export const updateCategory = createAsyncThunk('updateCategory', async({formData, id}, thunkAPI)=>{
     try{
         const response = await apiClient.post(`/admin/products/category/edit/${id}`, formData, {headers: {'Content-Type': 'multipart/form-data'}})
+        console.log("response.data.category----->", response.data.category)
         return {category: response.data.category, id}
+    }
+    catch(error){
+        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
+        return thunkAPI.rejectWithValue(errorMessage)
+    }
+})
+
+export const searchCategoryByName = createAsyncThunk('searchCategoryByName', async({query}, thunkAPI)=>{
+    try{
+        const response = await apiClient.get(`/admin/products/category/search?name=${query}`)
+        return response.data
     }
     catch(error){
         const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
@@ -114,6 +126,7 @@ const initialState = {
     tempDatas: {},
     categoryCreated: false,
     categoryUpdated: false,
+    categoryStatusToggled: false,
     loading: false,
     error: null,
     success:false,
@@ -131,6 +144,7 @@ const categorySlice = createSlice({
             state.message = ''
             state.categoryCreated = false
             state.categoryUpdated = false
+            state.categoryStatusToggled = false
         },
         resetSubcategories: (state, action)=>{
             state.populatedSubCategories = {}
@@ -272,6 +286,7 @@ const categorySlice = createSlice({
             state.error = null;
             state.message = action.payload.message
             state.blockedCategoryList = JSON.parse(JSON.stringify(action.payload.blockStatusIdList))
+            state.categoryStatusToggled = true
         })
         .addCase(toggleCategoryStatus.pending, (state,action)=>{
             state.loading = true
@@ -282,6 +297,7 @@ const categorySlice = createSlice({
             state.loading = false
             state.error = action.payload
             state.categoryUpdated = false
+            state.categoryStatusToggled = false
         })
         .addCase(updateCategory.fulfilled, (state, action)=>{
             state.error = null
@@ -296,6 +312,23 @@ const categorySlice = createSlice({
             state.success = false
         })
         .addCase(updateCategory.rejected, (state,action)=>{
+            state.loading = false
+            state.error = action.payload
+            state.success = true
+        })
+        .addCase(searchCategoryByName.fulfilled, (state,action)=>{
+            state.error = null
+            state.loading = false
+            state.success = true
+            state.categories = action.payload.categoriesData
+            state.categoryCounts = action.payload.categoriesCount
+        })
+        .addCase(searchCategoryByName.pending, (state,action)=>{
+            state.loading = true
+            state.error = null
+            state.success = false
+        })
+        .addCase(searchCategoryByName.rejected, (state,action)=>{
             state.loading = false
             state.error = action.payload
             state.success = true

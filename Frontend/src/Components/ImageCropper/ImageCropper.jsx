@@ -43,7 +43,7 @@ const ImageCropper = ({ images, onCropComplete, imageCropperState, setImageCropp
       if(images.every(img=> img.isCropped)){
           setImageCropperState(false);
       }else{
-        sonnerToast.error("Some images have not yet being cropped!")
+        sonnerToast.info("Crop images before you submit!")
       }
   }
   },[images])

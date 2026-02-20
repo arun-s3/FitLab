@@ -38,13 +38,13 @@ export default function AdminProductListPage(){
     const [showFilter, setShowFilter] = useState(false)
     const [filter, setFilter] = useState({status: 'all', categories: [], brands: []})
     const [totalFilter, setTotalFilter] = useState({})
-    const mouseInFilter = useRef(true)
+    const [currentFilters, setCurrentFilters] = useState({})
 
     const [limit, setLimit] = useState(9)  
     const [currentPage, setCurrentPage] = useState(1)
     const [totalPages, setTotalPages] = useState(20)  
 
-    const [sorts, setSorts] = useState({})
+    const [sorts, setSorts] = useState({}) 
     const [queryOptions, setQueryOptions] = useState({page: 1, limit: 9})
 
     const [isProductRestocking, setIsProductRestocking] = useState(false)
@@ -56,7 +56,7 @@ export default function AdminProductListPage(){
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
-    const {products, productCounts, productRestocked, message, error} = useSelector(state=> state.productStore)
+    const {products, productCounts, productRestocked, productStatusToggled, message, error} = useSelector(state=> state.productStore)
 
     const {setHeaderZIndex, setPageBgUrl} = useOutletContext() 
     setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.94),rgba(255,255,255,0.94)), url('/Images/admin-ProductsListBg.jpg')`)
@@ -89,10 +89,11 @@ export default function AdminProductListPage(){
     },[products])
 
     useEffect(()=> {
-        if(message && message?.includes('block')){
-          sonnerToast.success(`${message} successfully`)
+        if(productStatusToggled && message){
+          sonnerToast.success(message)
+          dispatch(resetStates())
         }
-      },[message])
+      },[productStatusToggled, message])
 
     useEffect(()=>{
         setTotalFilter({...filter, minPrice, maxPrice})
@@ -155,10 +156,11 @@ export default function AdminProductListPage(){
             setMinPrice(appliedFilters.minPrice)
         }
         if(appliedFilters.maxPrice){
-            setMinPrice(appliedFilters.maxPrice)
+            setMaxPrice(appliedFilters.maxPrice)
         }
-        const {categories, brands, targetMuscles, startDate, endDate, productStatus: status, popularProducts: products, rating} = appliedFilters
-        setFilter({...filter, categories, brands, targetMuscles, products, startDate, endDate, status, averageRating: rating})
+        const {categories, brands, targetMuscles, startDate, endDate, productStatus: status, popularProducts: products,
+             rating, maxStock} = appliedFilters
+        setFilter({...filter, categories, brands, targetMuscles, products, startDate, endDate, status, averageRating: rating, maxStock})
     }
 
     const exportFile = async (type) => {
@@ -208,8 +210,9 @@ export default function AdminProductListPage(){
                     className='w-full md:w-auto flex items-center justify-between md:justify-normal gap-[10px] xx-md:gap-[10px]
                  lg:gap-[1.5rem] x-md:gap-[1.5rem]'>
                     <SitePrimaryButtonWithShadow
-                        tailwindClasses='xxs-sm:text-[13px] x-md:text-[14px] xx-md:text-[13px] lg:text-[14px] xxs-sm:py-[3px]
-                            xx-md:py-[3px] lg:py-[4px] x-md:py-[4px] xxs-sm:rounded-[6px] xx-md:rounded-[6px] lg:rounded-[8px] x-md:rounded-[8px]'
+                        tailwindClasses={`xxs-sm:text-[13px] x-md:text-[14px] xx-md:text-[13px] lg:text-[14px] xxs-sm:py-[3px]
+                            xx-md:py-[3px] lg:py-[4px] x-md:py-[4px] xxs-sm:rounded-[6px] xx-md:rounded-[6px] lg:rounded-[8px] 
+                            x-md:rounded-[8px] ${isFilterSidebarOpen && 'bg-primaryDark'}`}
                         className='chip relative'
                         animated={true}
                         clickHandler={(e) => {
@@ -296,13 +299,18 @@ export default function AdminProductListPage(){
 
             {isFilterSidebarOpen && (
                 <ProductFilterSidebar
-                    isOpen={isFilterSidebarOpen}
+                    isOpen={isFilterSidebarOpen} 
                     onClose={() => setIsFilterSidebarOpen(false)}
                     isAdmin={true}
                     popularProducts={popularProducts}
                     muscleGroups={muscleGroups}
                     brands={brands}
                     applySidebarFilters={applySidebarFilters}
+                    saveCurrentFilters={setCurrentFilters}
+                    savedFilters={currentFilters}
+                    onClearedFilters={()=> 
+                        setQueryOptions( {sort: {...queryOptions.sort, ...sorts}, page: currentPage, limit} )
+                    }
                 />
             )}
 

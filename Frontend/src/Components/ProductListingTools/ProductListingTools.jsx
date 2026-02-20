@@ -87,12 +87,11 @@ export default function ProductListingTools({admin, showByGrid, setShowByGrid, s
 
             <input type='search'
                 placeholder={wishlistDisplay ? 'Search Wishlist...' : 'Search Fitlab..'} 
-                className={`h-[34px] lg:w-[47%] x-lg:w-[25rem] xl:w-[34rem] text-secondary rounded-[7px] placeholder:text-[11px] 
+                className={`h-[34px] lg:w-[47%] x-lg:w-[25rem] xl:w-[34rem] text-secondary rounded-[7px] placeholder:text-[11px] text-[13px]
                   ${wishlistDisplay ? 'border-2 border-dropdownBorder shadow-sm focus:ring-2 focus:ring-secondary focus:border-0 focus:shadow-lg' 
                     : 'search-fitlab focus:shadow-lg'} `}
                 onChange={(e)=> searchHandler(e)} 
             />
-
 
             <div className='flex gap-[2rem] items-center justify-between lg:justify-normal'>
             

@@ -314,10 +314,10 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
                                                     admin &&
                                                     navigate(
                                                         {
-                                                            pathname: "../edit",
+                                                            pathname: "./edit",
                                                             search: `?id=${product._id}`,
                                                         },
-                                                        { state: { product } },
+                                                        { state: { product, from: location.pathname } },
                                                     )
                                                 }>
                                                 <i>
@@ -336,7 +336,7 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
                                                 </i>
                                             </span>
                                             <span
-                                                data-label='Block'
+                                                data-label={product.isBlocked ? 'Unblock' : 'Block'}
                                                 className='w-[30px] md:bg-white l-md:bg-transparent xx-lg:bg-white x-xl:bg-transparent p-[5px] border rounded-[20px] 
                         z-[2] flex items-center justify-center relative cursor-pointer admin-control md:border-mutedDashedSeperation
                         l-md:border-inputBorderLow xx-lg:border-mutedDashedSeperation x-xl:border-inputBorderLow admin-control'
@@ -591,7 +591,7 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
           </motion.div>
           {showByTable && (
               <div>
-                  <ProductsTableView products={products} setProducts={setProducts} />
+                  <ProductsTableView products={products} setProducts={setProducts} restockProduct={openRestockModal}/>
               </div>
           )}
 

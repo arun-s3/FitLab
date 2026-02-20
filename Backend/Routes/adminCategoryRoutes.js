@@ -2,10 +2,12 @@ const express = require('express')
 const adminCategoryRouter = express.Router()
 const upload = require('../Utils/multer')
 const {createCategory, getAllCategories, getFirstLevelCategories, findCategoryById, getCategoryNames, getCategoryIdByName,
-         getNestedSubcategoryNames, toggleCategoryStatus, updateCategory, countProductsByCategory} = require('../Controllers/categoryController')
+         getNestedSubcategoryNames, toggleCategoryStatus, updateCategory, 
+         countProductsByCategory, searchCategoryByName} = require('../Controllers/categoryController')
 
 adminCategoryRouter.get('/', getAllCategories)
 adminCategoryRouter.get('/getFirstLevelCategories', getFirstLevelCategories)
+adminCategoryRouter.get('/search', searchCategoryByName)
 adminCategoryRouter.get('/:id', findCategoryById)
 adminCategoryRouter.post('/add', upload.single('image'), createCategory)
 adminCategoryRouter.get('/status/:id', toggleCategoryStatus)

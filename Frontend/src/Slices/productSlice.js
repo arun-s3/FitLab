@@ -77,6 +77,7 @@ const initialState = {
     error: null,
     success:false,
     message: null,
+    productStatusToggled: false,
     productCreated: false,
     productUpdated: false ,
     productRestocked: false
@@ -91,6 +92,7 @@ const productSlice = createSlice({
             state.error = null
             state.productCreated = false
             state.productUpdated = false
+            state.productStatusToggled = false
             state.productRestocked = false
         }
     },
@@ -185,13 +187,14 @@ const productSlice = createSlice({
             })
             .addCase(toggleProductStatus.fulfilled, (state, action) => {
                 state.success = true
-                state.message = action.payload.productBlocked
+                state.message = action.payload.message
                 state.loading = false
                 state.error = null
                 const updatingProductIndex = state.products.findIndex(
                     (product) => product._id === action.payload.productId,
                 )
-                state.products[updatingProductIndex].isBlocked = state.message === "Blocked" ? true : false
+                state.products[updatingProductIndex].isBlocked = action.payload.productBlocked === "Blocked" ? true : false
+                state.productStatusToggled = true
             })
             .addCase(toggleProductStatus.pending, (state, action) => {
                 state.loading = true
@@ -200,6 +203,7 @@ const productSlice = createSlice({
             .addCase(toggleProductStatus.rejected, (state, action) => {
                 state.loading = false
                 state.error = action.payload
+                state.productStatusToggled = false
             })
     }
 })

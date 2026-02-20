@@ -101,7 +101,7 @@ export default function AdminAddAndEditProductPage({ editProduct }){
                 });
                 setCategory(editProductItem.current.category)
                 setSubCategory(editProductItem.current.subCategory)
-                images.forEach((img,index)=> console.log(`image[${index}]from state of location on Edit-->`, JSON.stringify(img)))
+                
                 const newImages = await Promise.all(
                     editProductItem.current.images.map(async (img) => {
                         const blob = await convertToBlob(img.url);

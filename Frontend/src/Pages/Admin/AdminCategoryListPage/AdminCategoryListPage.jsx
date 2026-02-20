@@ -1,12 +1,11 @@
-import React,{useState, useEffect} from 'react'
+import React,{useState, useEffect, useRef} from 'react'
 import './AdminCategoryListPage.css'
 import {useNavigate, useOutletContext} from 'react-router-dom'
 import {useDispatch, useSelector} from 'react-redux'
+import {debounce} from 'lodash'
 
 import {toast as sonnerToast} from 'sonner'
 import {format} from "date-fns"
-import {IoArrowBackSharp} from "react-icons/io5"
-import {FaSortUp,FaSortDown} from "react-icons/fa6"
 import {MdBlock, MdDeleteOutline} from 'react-icons/md'
 import {CgUnblock} from "react-icons/cg"
 import {RiFileEditLine} from "react-icons/ri"
@@ -14,7 +13,7 @@ import {MdOutlineEdit} from "react-icons/md"
 import {MdOutlineArrowDropDownCircle, MdArrowDropDownCircle} from "react-icons/md"
 import {RiDropdownList} from "react-icons/ri"
 
-import {getAllCategories, getCategoriesOfType, getSingleCategory, toggleCategoryStatus, resetSubcategories, resetStates} 
+import {getAllCategories, getCategoriesOfType, getSingleCategory, toggleCategoryStatus, resetSubcategories, searchCategoryByName, resetStates} 
                 from '../../../Slices/categorySlice'
 import {SearchInput} from '../../../Components/FromComponents/FormComponents'
 import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
@@ -23,7 +22,8 @@ import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleS
 export default function AdminCategoryListPage(){
 
   const dispatch = useDispatch()
-  const {categories, message, error, populatedSubCategories, allSubCategories, blockedCategoryList} = useSelector(state=> state.categoryStore)
+  const {categories, message, error, populatedSubCategories, allSubCategories, blockedCategoryList, 
+    categoryStatusToggled} = useSelector(state=> state.categoryStore)
 
   const [subCategories, setSubCategories] = useState({})
   const [openSubcategories, setOpenSubcategories] = useState({})
@@ -32,6 +32,7 @@ export default function AdminCategoryListPage(){
 
   const [showTheseCategories, setShowTheseCategories] = useState([])
   const [toggleTab, setToggleTab] = useState({goTo: 'all'})
+  const [previousTab, setPreviousTab] = useState(null)
 
   const {setPageBgUrl} = useOutletContext() 
      setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.94),rgba(255,255,255,0.94)), url('/Images/admin-ProductsListBg.jpg')`)
@@ -65,7 +66,7 @@ export default function AdminCategoryListPage(){
   },[message])
 
   useEffect(()=> {
-     if(error){
+     if(error){ 
          sonnerToast.error(error)
          dispatch(resetStates())
      }
@@ -88,7 +89,7 @@ export default function AdminCategoryListPage(){
 //   },[populatedSubCategories, allSubCategories])
 
   useEffect(() => {
-    if (populatedSubCategories && allSubCategories) {
+    // if (populatedSubCategories && allSubCategories) {
       // Filter subcategories for the current parentId
       const filteredSubCategories = allSubCategories.filter(
         (scat) => scat.parentCategory === populatedSubCategories.parentId
@@ -106,7 +107,7 @@ export default function AdminCategoryListPage(){
           parentLevelCount: populatedSubCategories.parentLevelCount,
         },
       }));
-    }
+    // }
   }, [populatedSubCategories, allSubCategories]);
 
 //   useEffect(()=>{
@@ -150,15 +151,6 @@ useEffect(() => {
     }
 }, [blockedCategoryList]);
 
-   const [activeSorter, setActiveSorter] = useState({field:'',order:''})
-   const sortHandler = (e,type,order)=>{
-       if(e.target.style.height=='15px'){
-         e.target.style.height='10px'
-         e.target.style.color='rgba(159, 42, 240, 0.5)'
-     }else {
-         setActiveSorter({field:type, order})
-     }
-    }
    const showCategories = (type)=>{
        setToggleTab({goTo: type})
        if(type == 'all'){
@@ -174,6 +166,17 @@ useEffect(() => {
             dispatch(getCategoriesOfType({status:'blocked'}))
        }
    }
+
+   useEffect(()=> {
+     if(categoryStatusToggled){ 
+        setPreviousTab(toggleTab.goTo)
+        const gotoTab = toggleTab.goTo === 'blocked' ? previousTab ? previousTab : 'all' : 'blocked'
+        setTimeout(()=> {
+            showCategories(gotoTab)
+            dispatch(resetStates())
+        }, 1500)
+     }
+  }, [categoryStatusToggled])
 
 const closeNestedSubcategories = (id) => {
     if (subCategories[id]) {
@@ -208,6 +211,34 @@ const showSubcategories = (id) => {
     }))
 }
 
+const parseDate = (value) => {
+    if (!value) return null
+    
+    if (typeof value === "number") {
+      return new Date(value < 1000000000000 ? value * 1000 : value)
+    }
+  
+    return new Date(value)
+}
+
+const debouncedSearch = useRef(
+    debounce((query)=> {
+        dispatch(searchCategoryByName({query}))
+    }, 600) 
+).current;
+
+const searchHandler = (e)=> {
+    const query = e.target.value
+    if(query.trim()) {
+        setPreviousTab(toggleTab.goTo)
+        debouncedSearch(query)
+    } else {
+        debouncedSearch.cancel() 
+        showCategories(previousTab)
+    }
+}
+
+
 const tableBodyGenerator = (categories, isSubcategory, parentLevelCount)=> {
     
     return(
@@ -237,22 +268,38 @@ const tableBodyGenerator = (categories, isSubcategory, parentLevelCount)=> {
                                     <div className='relative'>
                                         <div className='flex flex-col gap-[2px] justify-center h-[122px] border-l-[3.5px] border-[#8f8989] '>
                                             <span className='w-[200px] capitalize text-[10px] text-[#8f8989] tracking-[0.2px] text-right         
-                                                        break-words px-[10px] py-[5px] rounded-[5px] mt-[15px]'>    {/*  border border-[#94a3b8]  bg-[#f5f5f5]*/}
+                                                        break-words px-[10px] py-[5px] rounded-[5px] mt-[15px] whitespace-pre-wrap line-clamp-6'>    {/*  border border-[#94a3b8]  bg-[#f5f5f5]*/}
                                                  {category.description} 
                                             </span>
                                         </div>
                                         <div className='absolute left-[10px] top-[5px] flex gap-[25px] w-full'> 
-                                            <span className=' border border-[#eae0f0] px-[10px] rounded-[7px] text-[10px] tracking-[0.3px] 
-                                                    text-secondary' style={!category.badge ? {display:'none'}: {}}> 
-                                                {category?.badge} 
-                                            </span> 
-                                            <span className={`border border-[#eae0f0] px-[10px] rounded-[7px] flex items-center gap-[2px]
-                                                font-[500] text-[10px] text-secondary
-                                                ${(category.isBlocked || (blockedCategoryList?.length && blockedCategoryList?.find(cat=> cat.id == category._id)?.status) ) ? 'bg-red-500' : 'bg-green-500'}`}
-                                                    style={!category.badge ? {marginLeft:'auto', marginRight:'20px'}: {}}>
-                                                <span className='text-primary mr-[2px]'> &bull; </span> 
-                                                <span className='text-[10px] text-white'> 10 Products   </span>
-                                            </span>
+                                            <div className='flex items-center gap-[5px]'>
+                                                {
+                                                    category?.badge 
+                                                        && <span className=' border border-[#eae0f0] px-[10px] rounded-[7px] text-[10px] tracking-[0.3px] 
+                                                            text-secondary' style={!category.badge ? {display:'none'}: {}}> 
+                                                            {category?.badge} 
+                                                           </span>
+                                                } 
+                                                <span className={`w-[4px] h-[4px] rounded-full 
+                                                    ${category.isBlocked ? 'bg-red-500' : 'bg-green-600'}`}></span>
+                                            </div>
+                                            { (category?.productCount || category?.productCount === 0 ) &&
+                                                <span className={`border border-[#eae0f0] px-[10px] rounded-[7px] flex items-center gap-[2px]
+                                                    font-[500] text-[10px] text-secondary
+                                                    ${(category.isBlocked || 
+                                                        (blockedCategoryList?.length 
+                                                            && blockedCategoryList?.find(cat=> cat.id == category._id)?.status) ) 
+                                                            ? 'bg-red-500' 
+                                                            : 'bg-green-500'}`
+                                                    }
+                                                        style={!category.badge ? {marginLeft:'auto', marginRight:'20px'}: {}}>
+                                                    <span className='text-primary mr-[2px]'> &bull; </span> 
+                                                    <span className='text-[10px] text-white'>
+                                                     {category.productCount + ' Products'}   
+                                                    </span>
+                                                </span>
+                                            }
                                         </div>
                                     </div>
                                 </div>
@@ -260,19 +307,21 @@ const tableBodyGenerator = (categories, isSubcategory, parentLevelCount)=> {
                         </td>
                         <td>{category.discount + '%'}</td>
                         <td className='text-green-500'>
-                            {category?.relatedCategory ? category.relatedCategory.map(cat=> <span> {cat} </span>) : null}
+                            {category?.relatedCategory ? category.relatedCategory.map(cat=> <span> {cat.name} </span>) : null}
                         </td>
                         <td className='text-muted text-[13px]'> 
                             <p>
                                 {
-                                    category?.seasonalActivation.startDate 
-                                        && format(new Date(category?.seasonalActivation?.startDate), "MMM dd, yy" ) + " (Starts)"
+                                    category?.seasonalActivation?.startDate 
+                                        ? format(parseDate(category?.seasonalActivation?.startDate), "MMM dd, yy" ) + " (Starts)"
+                                        : null
                                 }
                             </p>  
                             <p className='mt-[5px]'>
                                 {
-                                    category?.seasonalActivation.endDate 
-                                        && format(new Date(category?.seasonalActivation?.endDate), "MMM dd, yy" ) + " (Ends)"
+                                    category?.seasonalActivation?.endDate 
+                                        ? format(parseDate(category?.seasonalActivation?.endDate), "MMM dd, yy" ) + " (Ends)"
+                                        : null
                                 }
                             </p>
                         </td>
@@ -293,8 +342,11 @@ const tableBodyGenerator = (categories, isSubcategory, parentLevelCount)=> {
                                              }})}>    
                                          <i> <RiFileEditLine/> </i>
                                        </span>
-                                       <span data-label='Block' className='w-[30px] p-[5px] border rounded-[20px] z-[2] flex items-center justify-center
-                                            relative cursor-pointer admin-control'  onClick={()=> dispatch(toggleCategoryStatus(category._id))}>  
+                                       <span data-label={category.isBlocked ? 'Unblock' : 'Block'} 
+                                            className='w-[30px] p-[5px] border rounded-[20px] z-[2] flex items-center justify-center
+                                                relative cursor-pointer admin-control'  
+                                            onClick={()=> dispatch(toggleCategoryStatus(category._id))}
+                                        >  
                                          <i> <MdBlock/> </i>
                                        </span>
                                 </div>
@@ -305,7 +357,13 @@ const tableBodyGenerator = (categories, isSubcategory, parentLevelCount)=> {
                                     : null
                         }
                 </React.Fragment>
-                ) : null
+                ) : <tr> 
+                        <td colSpan='5'>
+                            <p className='mt-20 text-[17px] text-muted tracking-[0.4px] text-center w-full h-[7rem]'>
+                                 No categories found! 
+                            </p> 
+                        </td>
+                    </tr>
             }  
         </>
     )
@@ -339,7 +397,13 @@ const tableBodyGenerator = (categories, isSubcategory, parentLevelCount)=> {
             <h4 className={toggleTab.goTo == 'blocked' ? 'opacity-[1]' : 'opacity-[0.75]'}> Blocked </h4>
         </div>
         <div className='border py-[1rem] px-[2rem] bg-white container'>
-        <SearchInput/>
+
+        <input type='search'
+            placeholder='Search Category...'
+            className={`h-[34px] lg:w-[47%] x-lg:w-[25rem] xl:w-[34rem] text-secondary border border-inputBorderLow rounded-[7px]
+                placeholder:text-[11px] text-[13px] search-fitlab focus:shadow-lg focus:ring-secondary focus:border-secondary`}
+            onChange={(e)=> searchHandler(e)} 
+        />
 
         <table cellSpacing={10} cellPadding={6} className='border-spacing-[24px] w-full mt-[2rem]'>
         <thead>
@@ -347,61 +411,21 @@ const tableBodyGenerator = (categories, isSubcategory, parentLevelCount)=> {
                 <td colSpan='2'>
                     <div className='flex items-center'>
                         <span className='table-label'>Category</span>
-                        <i className='flex flex-col gap-[2px] h-[5px]'>
-                            <FaSortUp  onClick = {(e)=>{ sortHandler(e,"categoryName",1)}} 
-                                    style={{height: activeSorter.field === "categoryName" && activeSorter.order === 1 ?'15px':'10px',
-                                                color: activeSorter.field === "categoryName" && activeSorter.order === 1 ? 
-                                                            'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
-                            <FaSortDown onClick = {(e)=>sortHandler(e,"categoryName",-1)} 
-                                style={{height: activeSorter.field === "categoryName" && activeSorter.order === -1 ?'15px':'10px',
-                                            color: activeSorter.field === "categoryName" && activeSorter.order === -1 ? 
-                                            'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)' }}/>
-                        </i>
                     </div> 
                 </td>
                 <td>
                     <div className='flex items-center'>
                         <span className='table-label'>Discount</span>
-                        <i className='flex flex-col h-[5px]'>
-                            <FaSortUp onClick = {(e)=>sortHandler(e,"categoryBadge",1)}
-                                style={{height: activeSorter.field === "categoryBadge" && activeSorter.order === 1 ?'15px':'10px',
-                                            color: activeSorter.field === "categoryBadge" && activeSorter.order === 1 ? 
-                                                'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
-                            <FaSortDown onClick = {(e)=>sortHandler(e,"categoryBadge",-1)}
-                                style={{height: activeSorter.field === "categoryBadge" && activeSorter.order === -1 ?'15px':'10px',
-                                             color: activeSorter.field === "categoryBadge" && activeSorter.order === -1 ? 
-                                                'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
-                        </i>
                     </div>
                 </td>
                 <td>
                     <div className='flex items-center'>
                         <span className='table-label'>Related category</span>
-                        {/* <i className='flex flex-col h-[5px]'>
-                            <FaSortUp onClick = {(e)=>sortHandler(e,"categoryDiscount",1)}
-                                style={{height: activeSorter.field === "categoryDiscount" && activeSorter.order === 1 ?'15px':'10px',
-                                            color: activeSorter.field === "categoryDiscount" && activeSorter.order === 1 ? 
-                                                'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
-                            <FaSortDown onClick = {(e)=>sortHandler(e,"categoryDiscount",-1)}
-                                style={{height: activeSorter.field === "categoryDiscount" && activeSorter.order === -1 ?'15px':'10px',
-                                             color: activeSorter.field === "categoryDiscount" && activeSorter.order === -1 ? 
-                                                'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
-                        </i> */}
                     </div>
                 </td>
                 <td>
                     <div className='flex items-center'>
                         <span className='table-label'>Seasonal Activation</span>
-                        <i className='flex flex-col h-[5px]'>
-                            <FaSortUp onClick = {(e)=>sortHandler(e,"relatedCategory",1)  }
-                                style={{height: activeSorter.field === "relatedCategory" && activeSorter.order === 1 ?'15px':'10px',
-                                            color: activeSorter.field === "relatedCategory" && activeSorter.order === 1 ? 
-                                                'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
-                            <FaSortDown onClick = {(e)=>sortHandler(e,"relatedCategory",-1)}
-                                style={{height: activeSorter.field === "relatedCategory" && activeSorter.order === -1 ?'15px':'10px',
-                                             color: activeSorter.field === "relatedCategory" && activeSorter.order === -1 ? 
-                                                'rgba(159, 42, 240, 1)' : 'rgba(159, 42, 240, 0.5)'}}/>
-                        </i>
                     </div>
                 </td>
                 <td></td>

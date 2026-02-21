@@ -12,14 +12,15 @@ import {toast} from 'react-toastify'
 
 import CategoryDisplay from "../../../Components/CategoryDisplay/CategoryDisplay"
 import FileUpload from '../../../Components/FileUpload/FileUpload'
+import {handleImageCompression} from '../../../Utils/compressImages'
 import {updateOffer, resetOfferStates} from '../../../Slices/offerSlice'
-import {searchProduct, getAllProducts} from '../../../Slices/productSlice'
-import {showUsers} from '../../../Slices/adminSlice'
+import {getAllProducts} from '../../../Slices/productSlice'
 import {camelToCapitalizedWords} from "../../../Utils/helperFunctions"
+import {CustomHashLoader} from '../../../Components/Loader/Loader'
 import useModalHelpers from '../../../Hooks/ModalHelpers'
 
 
-export default function OfferModal({ isOpen, onClose, offer, isEditing }){
+export default function OfferModal({ isOpen, onClose, offer }){
 
   const [formData, setFormData] = useState({
     name: "",
@@ -37,7 +38,7 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
   
   const [images, setImages] = useState([])  
 
-  const [showCategories, setShowCategories] = useState(true)
+  const [showCategories, setShowCategories] = useState(true) 
   const [selectedCategories, setSelectedCategories] = useState({})
   const [selectedProducts, setSelectedProducts] = useState([])
 
@@ -53,7 +54,7 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
 
   const { products, productCounts } = useSelector(state=> state.productStore)
   
-  const {offerCreated, offerUpdated} = useSelector(state=> state.offers)
+  const {offerCreated, offerUpdated, loading} = useSelector(state=> state.offers)
   const dispatch = useDispatch()
 
   const modalRef = useRef(null)
@@ -76,9 +77,12 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
         } catch (error) {
         }
       }
-      const blob = await convertToBlob(offer.offerBanner.url)
-      const newImage = {...offer.offerBanner, blob}
-      setImages([newImage])
+      
+      if(offer.offerBanner?.url) {
+        const blob = await convertToBlob(offer.offerBanner.url)
+        const newImage = {...offer.offerBanner, blob}
+        setImages([newImage])
+      }
 
       setFormData({...offer, startDate: offer.startDate.split("T")[0], endDate: offer.endDate.split("T")[0] })
     }
@@ -113,19 +117,18 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
     }
 
     if(selectedProducts){
-      setFormData(formData=> (
-        { ...formData, applicableProducts: [...selectedProducts.map(product=> product.title)] }
-      ))
       if(selectedProducts.length > 0){
         setError(error=> {
          const {applicableProducts, ...rest} = error
          return rest
         })
+        setFormData(formData=> (
+          { ...formData, applicableProducts: [...selectedProducts.map(product=> product.title)] }
+        ))
       }
-      // if(selectedProducts.length === 0){
-      //   console.log("Inside if(selectedProducts.length === 0 && !switchApplicableType)")
-      //   setError(error=> ( {...error, applicableProducts: 'Choose atleast one product!'} ) )
-      // }
+      if(selectedProducts.length === 0){
+        setError(error=> ( {...error, applicableProducts: 'Choose atleast one product!'} ) )
+      }
     }
   },[selectedCategories, selectedProducts])
 
@@ -139,6 +142,23 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
     if(offerUpdated){
       sonnerToast.success('An offer is successfully updated!')
       dispatch(resetOfferStates())
+      setFormData({
+      name: "",
+      description: "",
+      discountType: "percentage",
+      discountValue: "",
+      startDate: "",
+      endDate: "",
+      minimumOrderValue: "",
+      applicableType: "allProducts",
+      applicableCategories: [],
+      applicableProducts: [],
+      recurringOffer: false
+    })
+    setSelectedCategories({}) 
+    setShowCategories(false) 
+    setSelectedProducts([])
+    onClose()
     }
   }, [offerCreated, offerUpdated])
 
@@ -289,7 +309,7 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
     }
   }
 
-  const handleSubmit = (e)=> {
+  const handleSubmit = async(e)=> {
     e.preventDefault()
     const {name, startDate, endDate, discountType, discountValue, applicableType} =  formData
     if(!name || !startDate || !endDate || !discountType || !discountValue || !applicableType){
@@ -317,13 +337,45 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
       return
     }
 
-    // let offerId
-    // if(isEditing){
-    //   offerId = coupon._id
-    // } 
-    // offer ? dispatch( updateOffer({offerDetails: formData, offerId}) )  : dispatch( createOffer({offerDetails: formData}) ) 
-    dispatch( updateOffer({offerDetails: formData, offerId: offer._id}) )
-    onClose()
+    let newBlob
+    if(images.length > 0){
+      const compressedImageBlob = async(image)=>{
+        if(image.size > (5*1024*1024)){
+            const newBlob = await handleImageCompression(image.blob)
+            sonnerToast.info("The image has been compressed automatically as its size exceeded 5 MB!")
+            return newBlob
+        }else{
+            return image.blob
+        }
+      } 
+      newBlob = await compressedImageBlob(images[0])
+    }
+
+    const offerData = new FormData()
+
+    Object.keys(formData).forEach((key) => {
+      const value = formData[key]
+
+      if (value === null || value === undefined || value === "") return
+
+      if (Array.isArray(value)) {
+        value.forEach((item) => {
+          if (item !== null && item !== undefined) {
+            offerData.append(`${key}[]`, item)
+          }
+        })
+      } else {
+        offerData.append(key, value)
+      }
+    })
+
+    if(images.length > 0){
+      offerData.append('offerBanner', newBlob, 'offerImg')
+    }
+
+    sonnerToast.info("Updating the offer...")
+
+    dispatch( updateOffer({offerDetails: offerData, offerId: offer._id}) )
   }
 
   if (!isOpen) return null
@@ -481,35 +533,20 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
                 {/* { !isEditing ? 'Select Categories' : 'Selected Categories' } */}
                 Select Categories
               </label>
-              <div id="applicableCategories" className="mt-[5px] px-[15px] py-[7px] border border-dropdownBorder rounded-[5px]">
-                {/* {categories.map((category)=> (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))} */}
-                {
-                  showCategories &&
-                  <CategoryDisplay type='checkboxType' filter={selectedCategories} setFilter={setSelectedCategories} />
-                }        
-                {/* {
-                !showCategories &&
-                <h5 className="mt-[10px] mb-[5px] text-[12px] text-muted font-[450] hover:underline transition duration-150 cursor-pointer" 
-                  onClick={()=> { setFormData(formData=> (
-                        {...formData, applicableCategories: []}
-                        ));
-                       setShowCategories(true)}}>
-                Choose different Categories
-                </h5>
-                } */}
-              </div>
+             {
+                showCategories &&
+                    <div id="applicableCategories" className="mt-[5px] px-[15px] py-[7px] border border-dropdownBorder rounded-[5px]">
+                        <CategoryDisplay type='checkboxType' filter={selectedCategories} setFilter={setSelectedCategories} />
+                    </div>
+             }
               {
-                 formData?.applicableCategories?.length > 0 && showCategories &&
+                formData?.applicableCategories?.length > 0 && 
                 <div className="mt-[10px] flex gap-[10px]">
                   { 
                     formData.applicableCategories.map(category=> (
                       <div key={category._id} className="px-[5px] py-[2px] flex items-center gap-[4px]">
                         <GoDotFill className="w-[10px] h-[10px] text-primaryDark"/>
-                        <span className="text-[11px] text-secondary capitalize"> {category} </span>
+                        <span className="text-[11px] text-secondary capitalize"> {category?.name || category} </span>
                       </div>
                     ))
                   }
@@ -546,9 +583,8 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
                       products.length > 0 ?
                       products.map(product=> (
                         <li key={product._id} className="flex items-center gap-[7px]">
-                            <input type='checkbox' id='selectProducts' className="h-[13px] w-[13px] border border-primary rounded-[3px]
-                              focus:ring-0 focus:outline-none checked:bg-primary checked:border-primary checked:text-white 
-                                appearance-none active:bg-primary active:border-primary active:text-white cursor-pointer"
+                            <input type='checkbox' id='selectProducts' className="h-[15px] w-[15px] border border-primary rounded-[3px]
+                              focus:ring-0 focus:outline-none focus:border-none text-primary cursor-pointer"
                                  onChange={(e)=> productCheckHandler(e, product.title)}
                                  checked={ selectedProducts.some(item=> item.title === product.title) || false }/>
                             <label htmlFor='selectProducts' id='choices' className="text-[12px] capitalize cursor-pointer hover:text-secondary hover:font-medium">
@@ -666,9 +702,10 @@ export default function OfferModal({ isOpen, onClose, offer, isEditing }){
               focus:ring-secondary">
                 Cancel
             </button>
-            <button type="submit" className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white
-             bg-secondary hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary">
-                Update Offer
+            <button type="submit" className="min-w-28 px-4 py-2 border border-transparent rounded-md shadow-sm text-sm 
+                font-medium text-white bg-secondary hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2
+                focus:ring-secondary">
+                {loading? <CustomHashLoader color='#fff' loading={loading}/> : 'Update Offer'}   
             </button>
           </div>
 

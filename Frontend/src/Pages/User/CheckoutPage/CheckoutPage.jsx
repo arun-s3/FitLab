@@ -295,7 +295,6 @@ export default function CheckoutPage(){
     }
     catch(error){
       setIsLoading(false)
-      console.error('Error in placeOrder:', error)
       if (!error.response) {
         sonnerToast.error("Network error. Please check your internet.")
       }else if (error.response && error.response.status !== 500){

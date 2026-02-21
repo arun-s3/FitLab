@@ -28,11 +28,7 @@ export default function Carousal({products, isLoading = false, error = false, re
     }
     return visible
   }
-
-   useEffect(()=> {
-          console.log("error---->", error)
-      }, [error])
-
+  
   const visibleProducts = getVisibleProducts()
 
   return (

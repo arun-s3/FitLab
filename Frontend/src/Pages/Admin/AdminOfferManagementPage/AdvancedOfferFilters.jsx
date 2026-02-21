@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import './AdvancedOfferFilters.css'
 
 import {BadgePercent, BadgeIndianRupee, Truck, ChevronDown, Tag, ListTodo, Check, ChevronUp, Plus, Minus} from "lucide-react"
@@ -27,6 +27,29 @@ export default function AdvancedOfferFilters({queryOptions, setQueryOptions, clo
       {name: "All", value: "all"}, {name: "All Products", value: "allProducts"}, {name: "Specific Products", value: "products"},
       {name: "Specific Categories", value: "categories"}
     ]   
+
+    useEffect(()=> {
+        const hasFilters = Object.keys(queryOptions).length > 0
+        if(hasFilters) {
+            if(queryOptions?.discountType) {
+                 setDiscountType(type=> ({...type, value: queryOptions.discountType}))
+            }
+            if(queryOptions?.applicableType) {
+                const applicableTypeLabel = allApplicableTypes.find(type=> type.value === queryOptions.applicableType).name
+                setApplicableType(type=> ({
+                    ...type, name: applicableTypeLabel, value: queryOptions.applicableType
+                }))
+            }
+            if(queryOptions?.usedCount) {
+                setIsDisabled(status=> ({...status, usedCount: false}))
+                setUsedCount(queryOptions.usedCount)
+            }
+            if(queryOptions?.minimumOrderValue) {
+                setIsDisabled(status=> ({...status, minimumOrderValue: false}))
+                setMinimumOrderValue(queryOptions.minimumOrderValue)
+            }
+        }
+    }, [])
 
     const getDiscountIcon = (discountType)=> {
       switch(discountType){

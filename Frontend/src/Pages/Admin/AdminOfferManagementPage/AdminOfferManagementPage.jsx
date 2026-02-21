@@ -372,9 +372,18 @@ export default function AdminOfferManagementPage(){
                     }
 
                     <OfferModal isOpen={isModalOpen} onClose={()=> { setIsModalOpen(false); setEditingOffer(null); }}
-                        offer={editingOffer} isEditing={editingOffer ? true : false}/>
+                        offer={editingOffer} isEditing={editingOffer ? true : false}/> 
 
-                    <OfferDeleteModal isOpen={isDeleteModalOpen} onClose={()=> {setIsDeleteModalOpen(false); setOfferToDelete(null)}}
+                    <OfferDeleteModal isOpen={isDeleteModalOpen} 
+                        onClose={()=> {
+                          if(allOffers.length <= 1){
+                              setQueryOptions(query=> {
+                                return {...query, page: currentPage - 1}
+                              })
+                          }
+                            setIsDeleteModalOpen(false)
+                            setOfferToDelete(null)
+                          }}
                         offer={offerToDelete} />
                         
                 </div>

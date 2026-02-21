@@ -58,5 +58,5 @@ export default function useModalHelpers({ open, onClose, modalRef }){
     //   previouslyFocusedRef.current?.focus?.()
     }
 
-  }, [open, onClose, modalRef])
+  }, [open])
 }

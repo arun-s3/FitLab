@@ -6,7 +6,6 @@ import {useNavigate, useLocation, useOutletContext} from 'react-router-dom'
 import {BiCategory} from "react-icons/bi"
 import {MdOutlineCategory, MdArrowDropDown} from "react-icons/md"
 import {CgDetailsMore} from "react-icons/cg"
-import {CiCalendarDate} from "react-icons/ci"
 import {TbCirclesRelation} from "react-icons/tb"
 import {RiDiscountPercentLine} from "react-icons/ri"
 import {SlBadge} from "react-icons/sl"
@@ -67,16 +66,6 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
     useEffect(()=>{
         setCategoryData({...categoryData, images, parentCategory, relatedCategory, startDate, endDate})
     },[images, parentCategory, relatedCategory, startDate, endDate])
-
-    // useEffect(()=>{
-    //     console.log(`Inside useEffect for success-${success}`)
-    //     if(success){
-    //         success && toast.success('Created Category succesfully!')
-    //         // productUpdated && toast.success('Updated product succesfully!')
-    //         dispatch(resetStates())
-    //         // setTimeout(()=> {navigate('/admin/products/category/list', {replace: true})}, 1000)
-    //     }
-    // },[success])
 
     useEffect(()=>{
         dispatch(getAllCategories)
@@ -272,7 +261,6 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
         if(!images.length) delete categoryData['images']
         const requiredFields = ["categoryName","categoryDescription","images"]
         if( (Object.keys(categoryData).length >= 3 && requiredFields.every(field=> Object.keys(categoryData).includes(field) )) && Object.values(categoryData).find(inputValues=> inputValues !== 'undefined')){
-            console.log("categoryData---->",categoryData)
             const formData = new FormData()
             const {images, ...rest} = categoryData
             for (let field in rest) {
@@ -300,7 +288,6 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
             } 
             const newBlob = await compressedImageBlobs(images[0])
             formData.append('image', newBlob, 'categoryImg')
-            console.log("formData---->",formData)
 
             for(let field in categoryData){
                 !categoryData[field] && delete categoryData[field]

@@ -42,21 +42,7 @@ export default function AdminCategoryListPage(){
       dispatch( getAllCategories() )
     }                  
     getFitlabCategories()
-    // dispatch(resetSubcategories())
   }, []);
-
-//   useEffect(()=>{
-//     setShowTheseCategories(categories)
-//     if(toggleTab.goTo = 'active'){
-//         dispatch(getCategoriesOfType({status:'active'}))
-//     }
-//     if(toggleTab.goTo = 'blocked'){
-//         dispatch(getCategoriesOfType({status:'blocked'}))
-//     }
-//     if(toggleTab.goTo = 'all'){
-//         dispatch(getAllCategories({}))
-//     }
-//   },[toggleTab])
 
   useEffect(()=> {
     if(message){
@@ -72,25 +58,7 @@ export default function AdminCategoryListPage(){
      }
   }, [error])
 
-//   useEffect(()=>{
-//     if(populatedSubCategories){
-//         setSubCategories({...subCategories, [populatedSubCategories.parentId]: populatedSubCategories.subCategories})
-//         setOpenSubcategories({...openSubcategories, [populatedSubCategories.parentId]: {...openSubcategories[populatedSubCategories.parentId], parentLevelCount: populatedSubCategories.parentLevelCount}})
-//         console.log("subCategories-->", JSON.stringify(subCategories))
-//     }
-//   },[populatedSubCategories])
-
-//   useEffect(()=>{
-//     if(populatedSubCategories && allSubCategories){
-//         console.log("allSubCategories from AdminCategoryListPage--->", JSON.stringify(allSubCategories))
-//         setSubCategories({...subCategories, [populatedSubCategories.parentId]: allSubCategories.map(scat=> scat.parentCategory===populatedSubCategories.parentId)})
-//         setOpenSubcategories({...openSubcategories, [populatedSubCategories.parentId]: {...openSubcategories[populatedSubCategories.parentId], parentLevelCount: populatedSubCategories.parentLevelCount}})
-//     }
-//   },[populatedSubCategories, allSubCategories])
-
   useEffect(() => {
-    // if (populatedSubCategories && allSubCategories) {
-      // Filter subcategories for the current parentId
       const filteredSubCategories = allSubCategories.filter(
         (scat) => scat.parentCategory === populatedSubCategories.parentId
       );
@@ -107,19 +75,7 @@ export default function AdminCategoryListPage(){
           parentLevelCount: populatedSubCategories.parentLevelCount,
         },
       }));
-    // }
   }, [populatedSubCategories, allSubCategories]);
-
-//   useEffect(()=>{
-//     if(blockedCategoryList && blockedCategoryList.length){
-//         parentCategoryList = Object.keys(subCategories)
-//         parentCategoryList.forEach(parentCat=> {
-//             if(blockedCategoryList.forEach(blockedCat=> {
-//                 if(blockedCat.parentCategory === parentCat){
-//                     setSubCategories(subcat=> ({...subcat, {subcat[parentCat]: {subcat[parentCat].map(cat=> {...cat, isBlocked: blockedCat.status}})}} }))
-//             }
-         
-//   },[blockedCategoryList])
 
 useEffect(() => {
     if (blockedCategoryList && blockedCategoryList.length) {
@@ -127,13 +83,11 @@ useEffect(() => {
             const updatedSubCategories = { ...prevSubCategories };
 
             Object.keys(prevSubCategories).forEach((parentCat) => {
-                // Check if the parent category has blocked categories
                 const blockedForParent = blockedCategoryList.filter(
                     (blockedCat) => blockedCat.parentCategory === parentCat
                 );
 
                 if (blockedForParent.length) {
-                    // Map through the subcategories of the current parent
                     updatedSubCategories[parentCat] = updatedSubCategories[parentCat].map((cat) => {
                         const matchedBlockedCat = blockedForParent.find(
                             (blockedCat) => blockedCat.id === cat._id
@@ -248,14 +202,11 @@ const tableBodyGenerator = (categories, isSubcategory, parentLevelCount)=> {
                  <React.Fragment key={category._id}>
                     <tr id='category-content' className='border-b border-dashed border-[#84788A85]'>
                         <td colSpan='2' className='py-[20px] pl-[1.5rem]' style={isSubcategory? {paddingLeft: `${ parentLevelCount ? (parentLevelCount * 3) : 2.5}rem`} : {}}>
-                            {/* <div className='flex items-center gap-[1rem]'> */}
                                 <div className='flex items-center gap-[5px] relative'>
-                                    {/* ICONS WERE HERE */}
                                     {(toggleTab.goTo !== 'blocked' && toggleTab.goTo !== 'active') && category?.subCategory && category?.subCategory.length ? 
                                         <i onClick={()=> showSubcategories(category._id)} className='ml-[5px] absolute top-[8.3rem] 
                                                 left-[-34px] cursor-pointer' id='open-subcategory' data-label={openSubcategories[category._id]?.['status']? 'Close Subcategories' : 'Show Subcategories'}>
                                             <MdOutlineArrowDropDownCircle/> 
-                                            {/* <RiDropdownList/> */}
                                         </i> : null
                                        }
                                     <figure className='w-[150px] h-[150px] rounded-[8px] border-primary bg-[#f3f5f7] relative'>
@@ -326,14 +277,6 @@ const tableBodyGenerator = (categories, isSubcategory, parentLevelCount)=> {
                             </p>
                         </td>
                         <td>
-                            {/* <div className='flex items-center gap-[10px] action-buttons'> */}
-                                {/* <button type='button' onClick={() => deleteHandler(category._id)} 
-                                        className='text-red-500 text-secondary text-[13px] font-[450] px-[11px]'> <MdOutlineEdit/>  <span className='text-white'> Edit </span>
-                                </button>
-                                <button type='button' className='basis-[103px] p-[4px] bg-white' onClick={() => toggleBlockHandler(category.id)}>
-                                     {category?.isBlocked ? <CgUnblock/> : <MdBlock/>} 
-                                </button> */}
-                                {/* // */}
                                 <div className='w-[35px] flex flex-col gap-[2rem] text-secondary'>
                                        <span data-label='Edit' className='w-[30px] p-[5px] border rounded-[20px] z-[2] flex items-center justify-center 
                                              relative cursor-pointer admin-control' onClick={()=> navigate('./edit', {state: {

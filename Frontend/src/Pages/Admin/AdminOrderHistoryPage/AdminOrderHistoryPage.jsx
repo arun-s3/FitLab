@@ -362,16 +362,6 @@ export default function AdminOrderHistoryPage(){
                history seamlessly."/>
 
           </div>
-          
-            <SitePrimaryButtonWithShadow tailwindClasses='h-[30px] self-end'>
-              <i>
-                  <Download className='h-[15px] w-[15px]'/>
-              </i>
-              <span> Export </span>
-              <i>
-                  <RiArrowDropDownLine/>
-              </i>
-            </SitePrimaryButtonWithShadow>
             
       </header>
       <main>

@@ -419,11 +419,11 @@ const getAllProducts = async (req, res, next) => {
       }
     }
 
-    console.log("filteredProducts-------->", JSON.stringify(filteredProducts, null, 2))
+    // console.log("filteredProducts-------->", JSON.stringify(filteredProducts, null, 2))
 
     const productCounts = filteredProducts.length
 
-    console.log("productCounts-------->", productCounts)
+    // console.log("productCounts-------->", productCounts)
 
     const skip = (page - 1) * limit
 

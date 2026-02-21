@@ -344,7 +344,7 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
               <label htmlFor="code" className="block text-sm font-medium text-gray-700">
                 Coupon Code
               </label>
-              <input type="text" id="code" name="code" value={formData.code} onChange={handleChange} 
+              <input type="text" id="code" name="code" value={formData.code} onChange={handleChange} className="uppercase"
                 onBlur={(e)=> inputBlurHandler(e, "code")} style={{paddingLeft: '30px'}}/>
               <RiCoupon4Line className="absolute top-[60%] left-[10px] w-[13px] h-[13px] text-muted"/>
               <span className='error right-0'> {error.code && error.code} </span>
@@ -551,14 +551,13 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
                 {
                   showSearchResults.products && 
                   <ul className="absolute top-[110%] w-full bg-white list-none flex flex-col gap-[7px] px-[7px] py-[10px] border
-                   border-dropdownBorder rounded-[4px]">
+                   border-dropdownBorder rounded-[4px] z-[100]">
                     { 
                       products.length > 0 ?
                       products.filter(product=> !product.variantOf).map(product=> (
                         <li key={product._id} className="flex items-center gap-[7px]">
                             <input type='checkbox' id='selectProducts' className="h-[15px] w-[15px] border border-primary rounded-[3px]
-                              focus:ring-0 focus:outline-none checked:bg-primary checked:border-primary checked:text-white 
-                                appearance-none active:bg-primary active:border-primary active:text-white cursor-pointer"
+                              focus:ring-0 focus:outline-none focus:border-none text-primary cursor-pointer"
                                  onChange={(e)=> productCheckHandler(e, product.title)}
                                  checked={ selectedProducts.some(item=> item.title === product.title) || false }/>
                             <label htmlFor='selectProducts' className="text-[12px] capitalize cursor-pointer hover:text-secondary hover:font-medium">
@@ -638,17 +637,16 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }){
                 {
                   showSearchResults.customers && 
                   <ul className="absolute top-[110%] w-full bg-white list-none flex flex-col gap-[7px] px-[7px] py-[10px] border
-                   border-dropdownBorder rounded-[4px]">
+                   border-dropdownBorder rounded-[4px] z-[100]">
                     { 
                       allUsers.length > 0 ?
                       allUsers.map(user=> (
                         <li key={user._id} className="flex items-center gap-[7px]">
-                            <input type='checkbox' id='selectProducts' className="h-[15px] w-[15px] border border-primary rounded-[3px]
-                              focus:ring-0 focus:outline-none checked:bg-primary checked:border-primary checked:text-white 
-                                appearance-none active:bg-primary active:border-primary active:text-white cursor-pointer"
+                            <input type='checkbox' id='customersSearch' className="h-[15px] w-[15px] border border-primary rounded-[3px]
+                              focus:ring-0 focus:outline-none focus:border-none text-primary cursor-pointer"
                                  onChange={(e)=> customerCheckHandler(e, user.username)}
-                                 checked={ selectedCustomers.includes(user.username) || false }/>
-                            <label htmlFor='selectProducts' className="text-[12px] capitalize cursor-pointer hover:text-secondary hover:font-medium">
+                                 checked={ selectedCustomers.some(customer=> customer.username === user.username) || false }/>
+                            <label htmlFor='customersSearch' className="text-[12px] capitalize cursor-pointer hover:text-secondary hover:font-medium">
                                {user.username} 
                             </label>
                         </li>

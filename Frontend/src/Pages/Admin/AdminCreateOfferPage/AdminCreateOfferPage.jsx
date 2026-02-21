@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react"
-import {useOutletContext} from 'react-router-dom'
+import {useNavigate, useLocation, useOutletContext} from 'react-router-dom'
 import './AdminCreateOfferPage.css'
 import { useSelector, useDispatch } from "react-redux"
 import {debounce} from 'lodash'
@@ -20,9 +20,8 @@ import {handleImageCompression} from '../../../Utils/compressImages'
 import {CustomHashLoader} from '../../../Components/Loader/Loader'
 import {DateSelector} from '../../../Components/Calender/Calender'
 import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
-import {createOffer, updateOffer, resetOfferStates} from '../../../Slices/offerSlice'
-import {searchProduct, getAllProducts} from '../../../Slices/productSlice'
-import {showUsers} from '../../../Slices/adminSlice'
+import {createOffer, resetOfferStates} from '../../../Slices/offerSlice'
+import {getAllProducts} from '../../../Slices/productSlice'
 import {camelToCapitalizedWords} from "../../../Utils/helperFunctions"
 
 
@@ -61,8 +60,6 @@ export default function AdminCreateOfferPage(){
 
   const productSearchRef = useRef(null)
 
-  // const [switchApplicableType, setSwitchApplicableType] = useState(false)
-
   const [customerQueryOptions, setCustomerQueryOptions] = useState({page: 1, limit: 6})
 
   const { products, productCounts } = useSelector(state=> state.productStore)
@@ -70,46 +67,14 @@ export default function AdminCreateOfferPage(){
   const {loading, offerCreated, offerError} = useSelector(state=> state.offers)
   const dispatch = useDispatch()
 
+  const navigate = useNavigate()
+  const location = useLocation()
+
   const {setPageBgUrl} = useOutletContext()
   setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.94),rgba(255,255,255,0.94)), url('/Images/admin-bg5.png')`)
   
 
   const userGroupValues = ["all", "newUsers", "returningUsers", "VIPUsers"]
-
-  
-//   useEffect(() => {
-//     if (offer){
-//       if(offer.applicableProducts.length > 0){
-//         setSelectedProducts([...offer.applicableProducts])
-//       }
-//       setShowCategories(false)
-//       // if(offer.applicableCategories.length > 0){
-//       //   setSelectedCategories({categories: [...offer.applicableCategories]})
-//       // }
-//       setFormData({...offer, startDate: offer.startDate.split("T")[0], endDate: offer.endDate.split("T")[0] })
-//     } else {
-//       setFormData({
-//         name: "",
-//         description: "",
-//         discountType: "percentage",
-//         discountValue: "",
-//         maxDiscount: "",
-//         startDate: "",
-//         endDate: "",
-//         minimumOrderValue: "",
-//         applicableType: "allProducts",
-//         applicableCategories: [],
-//         applicableProducts: [],
-//       })
-//     }
-
-//   }, [offer])
-
-  // useEffect(()=> {
-  //   if( Object.keys(error).some(error=> error.trim() !== '') ){
-  //     setTimeout(()=> setError({}), 3000)
-  //   }
-  // }, [error])
 
   useEffect(()=> {
     if (selectedCategories?.categories) {
@@ -139,10 +104,9 @@ export default function AdminCreateOfferPage(){
          return rest
         })
       }
-      // if(selectedProducts.length === 0){
-      //   console.log("Inside if(selectedProducts.length === 0 && !switchApplicableType)")
-      //   setError(error=> ( {...error, applicableProducts: 'Choose atleast one product!'} ) )
-      // }
+      if(selectedProducts.length === 0){
+        setError(error=> ( {...error, applicableProducts: 'Choose atleast one product!'} ) )
+      }
     }
   },[selectedCategories, selectedProducts])
 
@@ -172,11 +136,15 @@ export default function AdminCreateOfferPage(){
     if(offerCreated){
       sonnerToast.success('An offer is successfully created!')
       dispatch(resetOfferStates())
+      setFormData({})
+      setImages([])
+      setStartDate(null); setEndDate();
+      setSelectedCategories({}); setSelectedProducts([]); setShowCategories(false); setShowSearchResults(false)
+      setTimeout(()=> {navigate('/admin/offers', {
+          replace: true, 
+          state: { from: location.pathname }
+      })}, 1000)
     }
-    setFormData({})
-    setImages([])
-    setStartDate(null); setEndDate();
-    setSelectedCategories({}); setSelectedProducts([]); setShowCategories(false); setShowSearchResults(false)
   }, [offerCreated])
 
   useEffect(()=> {
@@ -222,26 +190,6 @@ export default function AdminCreateOfferPage(){
       ))
     }
   }
-
-//   const handleChange = (e) => {
-//     console.log("Inside handleChange...");
-//     const { name, value, type, checked } = e.target;
-    
-//     setFormData((prev) => {
-//         console.log("Previous State: ", prev);
-        
-//         const updatedState = {
-//             ...prev,
-//             [name]: type === "checkbox" ? checked : type === "select-multiple"
-//                 ? Array.from(e.target.selectedOptions, (option) => option.value)
-//                 : value
-//         };
-
-//         console.log("Updated State: ", updatedState);
-//         return updatedState;
-//     });
-// };
-
 
   const handleRecurringOffer = (e)=> {
     const value = Boolean(parseInt(e.target.value))
@@ -424,7 +372,7 @@ export default function AdminCreateOfferPage(){
       const compressedImageBlob = async(image)=>{
         if(image.size > (5*1024*1024)){
             const newBlob = await handleImageCompression(image.blob)
-            sonnerToast.info("The image has been compressed as its size exceeded 5 MB!")
+            sonnerToast.info("The image has been compressed automatically as its size exceeded 5 MB!")
             return newBlob
         }else{
             return image.blob
@@ -434,12 +382,20 @@ export default function AdminCreateOfferPage(){
     }
 
     const offerData = new FormData()
-    Object.keys(formData).forEach((key)=> {
-        if (Array.isArray(formData[key])) {
-            formData[key].forEach((item) => offerData.append(key, item))
-        }else{
-            offerData.append(key, formData[key])
-        }
+    Object.keys(formData).forEach((key) => {
+      const value = formData[key]
+
+      if (value === null || value === undefined || value === "") return
+
+      if (Array.isArray(value)) {
+        value.forEach((item) => {
+          if (item !== null && item !== undefined) {
+            offerData.append(`${key}[]`, item)
+          }
+        })
+      } else {
+        offerData.append(key, value)
+      }
     })
 
     if(images.length > 0){
@@ -449,7 +405,6 @@ export default function AdminCreateOfferPage(){
     dispatch( createOffer({offerDetails: offerData}) ) 
     sonnerToast.info("Uploading the offer...")
   }
-
 
 
   return (
@@ -680,9 +635,8 @@ export default function AdminCreateOfferPage(){
                                 products.length > 0 ?
                                 products.filter(product=> !product.variantOf).map(product=> (
                                   <li key={product._id} className="flex items-center gap-[7px]">
-                                      <input type='checkbox' id='selectProducts' className="h-[13px] w-[13px] border border-primary rounded-[3px]
-                                        focus:ring-0 focus:outline-none checked:bg-primary checked:border-primary checked:text-white 
-                                          appearance-none active:bg-primary active:border-primary active:text-white cursor-pointer"
+                                      <input type='checkbox' id='selectProducts' className="h-[15px] w-[15px] border border-primary rounded-[3px]
+                                        focus:ring-0 focus:outline-none focus:border-none text-primary cursor-pointer"
                                            onChange={(e)=> productCheckHandler(e, product.title)}
                                            checked={ selectedProducts.some(item=> item.title === product.title) || false }/>
                                       <label htmlFor='selectProducts' id='choices' className="text-[12px] capitalize cursor-pointer hover:text-secondary hover:font-medium">

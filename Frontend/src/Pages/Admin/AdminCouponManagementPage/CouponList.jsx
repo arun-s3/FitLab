@@ -73,7 +73,7 @@ export default function CouponList({ coupons, onEdit, onDelete, onDeactivate, on
                   
                     <div className="text-sm text-gray-500">
                       {coupon?.applicableType === "allProducts" || coupon?.applicableType === "products" ? (
-                        <span className="relative" onMouseEnter={()=> setShowItemsOf(coupon?.code)} onMouseLeave={()=> setShowItemsOf("")}>
+                        <span className="relative" onMouseEnter={()=> setShowItemsOf(coupon?.code)}  onMouseLeave={()=> setShowItemsOf("")}>
                           <span> Products - </span>
                           <span className={`text-[11px] ${coupon.status === 'active' ? 'text-secondary' : 'text-muted' }
                             hover:underline hover:font-medium transition duration-300 cursor-pointer`}>
@@ -88,11 +88,11 @@ export default function CouponList({ coupons, onEdit, onDelete, onDeactivate, on
                                 Applies to all products
                               </div>
                             ) : (
-                              <ul className={`absolute bottom-[100%] left-[50%] py-[10px] px-[22px] list-disc bg-white
-                                ${coupon?.applicableProducts?.length > 6 ? "h-[10rem] overflow-y-scroll" : "h-fit"} 
+                              <ul className={`absolute bottom-[100%] left-[50%] py-[10px] px-[22px] list-disc bg-white shadow-md
+                                ${coupon?.applicableProducts?.length > 6 ? "max-h-[15rem] overflow-y-scroll" : "h-fit"} 
                                   border border-dropdownBorder rounded-[4px] z-[10]`}>
-                                {coupon?.applicableProducts?.filter(product=> !product.variantOf).map((product) => (
-                                  <li key={product.title} className="capitalize text-primaryDark">
+                                {coupon?.applicableProducts?.map((product) => (
+                                  <li key={product.title} className="capitalize text-muted">
                                     {product.title}
                                   </li>
                                 ))}
@@ -112,7 +112,7 @@ export default function CouponList({ coupons, onEdit, onDelete, onDeactivate, on
                               ${coupon?.applicableCategories?.length > 6 ? "h-[10rem] overflow-y-scroll" : "h-fit"} border
                                border-dropdownBorder rounded-[4px] z-[10]`}>
                               {coupon?.applicableCategories?.map((category) => (
-                                <li key={category.name} className="capitalize text-primaryDark">
+                                <li key={category.name} className="capitalize text-muted">
                                   {category.name}
                                 </li>
                               ))}
@@ -130,12 +130,12 @@ export default function CouponList({ coupons, onEdit, onDelete, onDeactivate, on
                           </span>
                           {
                             showCustomersOf === coupon.code &&
-                            <ul className={`absolute bottom-[100%] left-[50%] py-[10px] px-[22px] list-disc bg-white
-                              ${coupon?.assignedCustomers?.length > 6 ? "h-[10rem] overflow-y-scroll" : "h-fit"} border border-dropdownBorder
+                            <ul className={`absolute bottom-[100%] left-[50%] py-[10px] px-[22px] list-disc bg-white shadow-md
+                              ${coupon?.assignedCustomers?.length > 6 ? "max-h-[15rem] overflow-y-scroll" : "h-fit"} border border-dropdownBorder
                                  rounded-[4px] z-[10]`}>
                               {
                                 coupon.assignedCustomers.map(customer=> (
-                                  <li key={customer.username} className="capitalize text-primaryDark">
+                                  <li key={customer.username} className="capitalize text-muted">
                                         {customer.username}
                                   </li>
                                 ))

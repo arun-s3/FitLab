@@ -10,8 +10,6 @@ export default function PriceSliderAndFilter({priceGetter, priceSetter, firstSli
 
     const {minPrice, maxPrice} = priceGetter
     const {setMinPrice, setMaxPrice} = priceSetter
-    // const {inputLocalMinPrice : inputForeignMinPrice , inputForeignMaxPrice} = foreignPriceGetter
-    // const {setInputLocalMinPrice : setInputForeignMinPrice, setInputLocalMaxPrice : setInputForeignMaxPrice} = foreignPriceSetter
 
     let firstRangeStart = useRef(0); let secondRangeStart = useRef(0)
     let firstRangeEnd = useRef(0);  let secondRangeEnd = useRef(0)
@@ -110,80 +108,27 @@ export default function PriceSliderAndFilter({priceGetter, priceSetter, firstSli
      
      const dragHandler = (e, handler)=>{
          if(handler=='firstHandler'){
-             // const leftValueNow = parseInt(window.getComputedStyle(e.target).left); 
-             // const moveFromLeft = leftValueNow + (e.clientX-currentX)
-             // e.target.style.left = `${moveFromLeft}px`
              e.target.style.cursor = 'grabbing'
              const currentHandlerRect = e.target.getBoundingClientRect()
              const otherHandlerRect = e.target.nextElementSibling.getBoundingClientRect()
-            //  if(currentHandlerRect.right >= otherHandlerRect.left ){
-            //      console.log("Collision alert!")
-            //      collisionCheck.current = true
-            //      e.target.style.left = `${otherHandlerRect.left - 1}px`
-            //      // e.target.draggable = false
-            //  }
-            //  if(currentHandlerRect.right< otherHandlerRect.left){
-            //      // e.target.draggable = true
-            //  }
          }
      }
      const dragOverHandler = (e)=>{
          e.preventDefault()
-         // if(collisionCheck.current){
-         //     e.preventDefault()
-         // }
      }
      const dropHandler = (e)=>{
          checkDragging.current = false
          checkMouseDown.current = false
          dragCursor.current = false
          e.preventDefault()
-         // if(collisionCheck.current){
-         //     e.preventDefault()
-         // } 
      }
  
      
      const mouseDownHandler = (e)=>{
-        // if(checkDragging.current){
-        //     console.log("Inside mouseDownHandler")
-        //     checkMouseDown.current = true
-        // }
          leftValueNow.current = parseInt(window.getComputedStyle(e.target).left);  
          currentX.current = e.clientX
          checkDragging.current = true  
          e.target.style.cursor = 'pointer' 
-     }
-     const mouseMoveHandler = (e)=>{
-        // if(checkDragging.current && checkMouseDown.current){
-        //     console.log(`Inside mouseMoveHandler, checkDragging.current and checkMouseDown.current-->${checkDragging.current} & ${checkMouseDown.current}`)
-        //     leftValueNow.current = rangeStart.current + e.clientX
-        //     e.target.style.left = `${leftValueNow.current}px`
-        // }
-        // console.log("Inside mouseMoveHandler")
-        //  if(checkDragging.current){
-        //      console.log("checkDragging.current" + checkDragging.current)
-        //      let moveFromLeft = leftValueNow.current + (e.clientX-currentX.current)
-        //      console.log("moveFromLeft"+ moveFromLeft)
-        //      if(moveFromLeft < 0){
-        //         console.log("moveFromLeft < 0")
-        //         console.log("e.target.style.left before--"+ e.target.style.left)
-        //         e.target.style.left = '0px'
-        //         console.log("e.target.style.left now--"+ e.target.style.left)
-        //         return
-        //      }
-        //      if(moveFromLeft > window.getComputedStyle(e.target.parentElement).width){
-        //         console.log("e.target.style.left before--"+ e.target.style.left)
-        //         e.target.style.left = `${window.getComputedStyle(e.target.parentElement).width}px`
-        //         console.log("e.target.style.left now--"+ e.target.style.left)
-        //         return
-        //      }
-        //      else  e.target.style.left = `${moveFromLeft}px`
-        //  }
-     }
-     const mouseUpHandler = (e)=>{
-         // checkDragging.current? checkDragging.current = !checkDragging.current: null
-         // checkDragging.current = false
      }
  
      const calculateRangeFromPrice = (minPriceLimit, maxPriceLimit)=>{
@@ -267,7 +212,7 @@ export default function PriceSliderAndFilter({priceGetter, priceSetter, firstSli
                            border-[2px] border-[#AFD0FF]' onDragStart={(e)=>dragStartHandler(e, firstRangeStart)} onDrag={(e)=>dragHandler(e, "firstHandler")}
                                onDragEnd={(e)=>dragEndHandler(e, firstRangeStart, firstRangeEnd, firstRange)} 
                                    onClick={(e)=>{e.target.draggable=true; collisionCheck.current=false;}} onMouseDown={(e)=>mouseDownHandler(e)}
-                                    onMouseMove={(e)=>mouseMoveHandler(e)} onMouseUp={(e)=>mouseUpHandler(e)} ref={minPriceRef}></div>  {/* ref={rangeHandlerRef} */}
+                                    ref={minPriceRef}></div>  {/* ref={rangeHandlerRef} */}
                     <div draggable='true' className='absolute left-[9px] top-[-8px] w-[20px] h-[20px] rounded-[10px] 
                          border-[2px] border-[#AFD0FF]' onDragStart={(e)=>dragStartHandler(e, secondRangeStart)} onDrag={(e)=>dragHandler(e, "secondHandler")}
                              onDragEnd={(e)=>dragEndHandler(e, secondRangeStart, secondRangeEnd, secondRange)} 

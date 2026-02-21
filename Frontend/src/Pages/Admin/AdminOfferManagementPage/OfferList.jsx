@@ -11,8 +11,6 @@ export default function OfferList({ offers, onEdit, onDelete, onSort, onDeactiva
   const [showItemsOf, setShowItemsOf] = useState('')
   const [order, setOrder] = useState(-1)
 
-  const [scaledImg, setScaledImg] = useState([])
-
   const tableHeaders = [
     {value: 'Offer', icon: true, sortBy:'name'}, {value: 'Target Users', icon: false}, 
     {value: 'Discount', icon: false}, {value: 'Recurring Offer', icon: false}, {value: 'Start Date', icon: true, sortBy:'startDate'},
@@ -46,11 +44,7 @@ export default function OfferList({ offers, onEdit, onDelete, onSort, onDeactiva
         <tbody className="bg-white divide-y divide-gray-200">
           { offers && offers.length > 0 ? offers.map((offer, index)=> (
             <tr key={offer?._id} className={`${(index % 2 == 0) ? 'bg-transparent': 'bg-[#eee]'} relative hover:bg-[rgb(249, 245, 252)]`}>
-            {
-            scaledImg.some(img=> img.id === offer._id) &&
-              <img src={ scaledImg.find(img=> img.id === offer._id).url } className='fixed top-[30%] left-[35%] w-[900px] h-[300px]
-                 inset-0 bg-black bg-opacity-50 object-cover rounded-[4px] shadow-lg z-[100]'/> 
-            }
+            
               <td className="pl-4 py-4 max-w-[280px] border-r border-dashed border-[#A399A880]">
                 <div className="min-w-0 mb-4 flex items-center gap-[10px]">
                   <BadgePercent className='w-[15px] h-[15px] text-muted'/>
@@ -61,14 +55,21 @@ export default function OfferList({ offers, onEdit, onDelete, onSort, onDeactiva
                 </div>
                 {
                   offer.offerBanner ?
-                  <figure className='relative w-[150px] h-[50px] p-[2px] rounded-[4px]'>
+                  <figure className='relative group inline-block w-[150px] h-[50px] p-[2px] rounded-[4px]' >
                     <img src={offer.offerBanner.url} alt={offer.offerBanner.name} className='w-[150px] h-[50px] object-cover
                       border border-primaryDark rounded-[4px]'/> 
-                    <i className='absolute bottom-[-10px] left-[5px] w-[12%] h-[50%] z-[20] cursor-pointer'
-                       onMouseEnter={()=> setScaledImg(images=> [...images, {id: offer._id, url: offer.offerBanner.url}] )} 
-                        onMouseLeave={()=> setScaledImg(images=> images.filter(img=> img.id !== offer._id))}> 
+                    <i className='absolute bottom-[-10px] left-[5px] w-[12%] h-[50%] z-[20] cursor-pointer'> 
                     <Scaling className='w-[15px] h-[15px] text-white hover:transition hover:scale-110 hover:duration-500'/>
                     </i>
+                    <div className="fixed inset-0 pointer-events-none">
+                      <img
+                        src={offer.offerBanner.url}
+                        className="absolute top-[30%] left-[35%] w-[900px] h-[300px]
+                        object-cover rounded shadow-lg
+                        opacity-0 group-hover:opacity-100
+                        transition-opacity duration-200"
+                      />
+                    </div>
                   </figure> 
                   : null
                 }
@@ -235,7 +236,7 @@ export default function OfferList({ offers, onEdit, onDelete, onSort, onDeactiva
                   offer?.lastUsedAt ? 
                   <div className={` absolute !text-[11px] text-gray-500 capitalize 
                     ${offer.status === 'active' ? 'text-green-500' : 'text-red-500' }`}>
-                    { 'Last Used -' + format( new Date(offer.lastUsedAt), "MMMM dd, yyyy" ) }
+                    { 'Last Used -' + format( new Date(offer.lastUsedAt), "MMM dd, yyyy" ) }
                   </div>
                   : null
                 }

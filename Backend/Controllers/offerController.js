@@ -14,7 +14,7 @@ const {errorHandler} = require('../Utils/errorHandler')
 const createOffer = async (req, res, next)=> {
     try {
         console.log("Inside createOffer of offerController")
-        console.log('req.body.offerDetails', JSON.stringify(req.body))
+        console.log('req.body', JSON.stringify(req.body))
         const {
             name,
             description,
@@ -76,7 +76,7 @@ const createOffer = async (req, res, next)=> {
 
         let productIds = [];
         if (Array.isArray(applicableProducts) && applicableProducts.length > 0) {
-            const products = await Product.find({ title: { $in: applicableProducts } }, "_id")
+            const products = await Product.find({ title: { $in: applicableProducts }, variantOf: null }, "_id")
             productIds = products.map(prod => prod._id);
         }
 
@@ -100,7 +100,16 @@ const createOffer = async (req, res, next)=> {
 
         await newOffer.save();
 
-        return res.status(201).json({ success: true, message: "Offer created successfully!", offer: newOffer })
+        const populatedOffer = await Offer.findById(newOffer._id)
+          .populate("applicableProducts", "title price")
+          .populate("applicableCategories", "name")
+        
+        return res.status(201).json({
+          success: true,
+          message: "Offer created successfully!",
+          offer: populatedOffer
+        })
+
     } 
     catch (error){
         console.error("Error creating offer:", error.message)
@@ -270,9 +279,9 @@ const getAllOffers = async (req, res, next) => {
 
     const totalOffers = await Offer.countDocuments(filterConditions)
 
-    console.log("totalOffers--->", totalOffers)
-    console.log("Offers--->", JSON.stringify(offers, null, 2))
-    console.log("OFFER NAMES--->", offers.map(offer=> offer.name))
+    // console.log("totalOffers--->", totalOffers)
+    // console.log("Offers--->", JSON.stringify(offers, null, 2))
+    // console.log("OFFER NAMES--->", offers.map(offer=> offer.name))
 
 
     return res.status(200).json({
@@ -289,11 +298,10 @@ const getAllOffers = async (req, res, next) => {
 }
 
   
-
 const updateOffer = async (req, res, next)=> {
     try {
         console.log("Inside updateOffer of offerController")
-        console.log("req.body.offerDetails", JSON.stringify(req.body))
+        console.log("req.body", JSON.stringify(req.body))
 
         const { offerId } = req.params
         const {
@@ -311,7 +319,7 @@ const updateOffer = async (req, res, next)=> {
             endDate,
             recurringOffer,
             recurringFrequency,
-        } = req.body.offerDetails
+        } = req.body
 
         console.log(`Updating offer: ${offerId}`)
 
@@ -351,15 +359,20 @@ const updateOffer = async (req, res, next)=> {
 
         let categoryIds = []
         if (Array.isArray(applicableCategories) && applicableCategories.length > 0) {
+            console.log("applicableCategories is of type array.")
             const categories = await Category.find({ name: { $in: applicableCategories } }, "_id")
             categoryIds = categories.map(cat => cat._id)
         }
 
         let productIds = []
         if (Array.isArray(applicableProducts) && applicableProducts.length > 0) {
-            const products = await Product.find({ title: { $in: applicableProducts } }, "_id")
+            console.log("applicableProducts is of type array.")
+            const products = await Product.find({ title: { $in: applicableProducts }, variantOf: null }, "_id")
             productIds = products.map(prod => prod._id)
         }
+
+        console.log("categoryIds------->", JSON.stringify(categoryIds))
+        console.log("productIds------------>", JSON.stringify(productIds))
 
         const updatedOffer = await Offer.findByIdAndUpdate(
             offerId,
@@ -385,7 +398,16 @@ const updateOffer = async (req, res, next)=> {
 
         console.log("updatedOffer--->", updatedOffer)
 
-        return res.status(200).json({ success: true, message: "Offer updated successfully!", offer: updatedOffer })
+        const populatedOffer = await Offer.findById(updatedOffer._id)
+          .populate("applicableProducts", "title price")
+          .populate("applicableCategories", "name")
+        
+        return res.status(201).json({
+          success: true,
+          message: "Offer created successfully!",
+          offer: populatedOffer
+        })
+
     }
     catch(error){
         console.error("Error updating offer:", error.message)

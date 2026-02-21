@@ -53,7 +53,7 @@ const createCoupon = async (req, res, next)=> {
 
       let productIds = []
       if (Array.isArray(applicableProducts) && applicableProducts.length > 0) {
-        const products = await Product.find({ title: { $in: applicableProducts } }, "_id")
+        const products = await Product.find({ title: { $in: applicableProducts }, variantOf: null }, "_id")
         productIds = products.map((prod) => prod._id);
       }
 
@@ -88,8 +88,18 @@ const createCoupon = async (req, res, next)=> {
       });
   
       await newCoupon.save()
+
+      const populatedCoupon = await Coupon.findById(newCoupon._id)
+        .populate("applicableProducts", "title price")
+        .populate("applicableCategories", "name")
+        .populate("assignedCustomers", "username email")
+      
+      return res.status(201).json({
+        success: true,
+        message: "Coupon created successfully!",
+        coupon: populatedCoupon
+      })
   
-      return res.status(201).json({ success: true, message: "Coupon created successfully!", coupon: newCoupon })
     } 
     catch (error) {
       console.error("Error creating coupon:", error.message)
@@ -148,10 +158,10 @@ const updateCoupon = async (req, res, next)=> {
     }
 
     const categoryIds = applicableCategories?.length
-      ? await Category.find({ name: { $in: applicableCategories } }, "_id") : []
+      ? await Category.find({ name: { $in: applicableCategories }}, "_id") : []
 
     const productIds = applicableProducts?.length
-      ? await Product.find({ title: { $in: applicableProducts } }, "_id") : []
+      ? await Product.find({ title: { $in: applicableProducts }, variantOf: null }, "_id") : []
 
     const userIds = assignedCustomers?.length
       ? await User.find({ username: { $in: assignedCustomers } }, "_id") : []
@@ -184,7 +194,16 @@ const updateCoupon = async (req, res, next)=> {
       { new: true}
     )
 
-    return res.status(200).json({ success: true, message: "Coupon updated successfully!", coupon: updatedCoupon });
+    const populatedCoupon = await Coupon.findById(updatedCoupon._id)
+      .populate("applicableProducts", "title price")
+      .populate("applicableCategories", "name")
+      .populate("assignedCustomers", "username email")
+
+    return res.status(200).json({
+      success: true,
+      message: "Coupon updated successfully!",
+      coupon: populatedCoupon
+    })
 
   }
   catch(error){

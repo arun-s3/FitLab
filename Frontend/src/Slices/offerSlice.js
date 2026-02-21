@@ -24,7 +24,7 @@ export const getAllOffers = createAsyncThunk('offer/list', async ({queryOptions}
 
 export const updateOffer = createAsyncThunk('offer/update', async ({offerDetails, offerId}, thunkAPI)=> {
   try {
-    const response = await apiClient.post(`/offers/update/${offerId}`, {offerDetails})
+    const response = await apiClient.post(`/offers/update/${offerId}`, offerDetails, {headers: {'Content-Type': 'multipart/form-data'}})
     return response.data
   }catch(error){
     const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'

@@ -3178,6 +3178,10 @@ select {
   max-height: 24rem;
 }
 
+.max-h-\[15rem\] {
+  max-height: 15rem;
+}
+
 .max-h-\[19rem\] {
   max-height: 19rem;
 }
@@ -10207,22 +10211,9 @@ select {
   border-bottom-width: 0px;
 }
 
-.checked\:border-primary:checked {
-  border-color: rgba(215, 241, 72, 1);
-}
-
-.checked\:bg-primary:checked {
-  background-color: rgba(215, 241, 72, 1);
-}
-
 .checked\:bg-primaryDark:checked {
   --tw-bg-opacity: 1;
   background-color: rgb(241 196 15 / var(--tw-bg-opacity));
-}
-
-.checked\:text-white:checked {
-  --tw-text-opacity: 1;
-  color: rgb(255 255 255 / var(--tw-text-opacity));
 }
 
 .focus-within\:border-none:focus-within {
@@ -11301,19 +11292,6 @@ select {
   --tw-scale-x: .95;
   --tw-scale-y: .95;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
-.active\:border-primary:active {
-  border-color: rgba(215, 241, 72, 1);
-}
-
-.active\:bg-primary:active {
-  background-color: rgba(215, 241, 72, 1);
-}
-
-.active\:text-white:active {
-  --tw-text-opacity: 1;
-  color: rgb(255 255 255 / var(--tw-text-opacity));
 }
 
 .active\:shadow-none:active {

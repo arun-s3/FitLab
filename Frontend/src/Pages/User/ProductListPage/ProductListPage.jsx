@@ -49,6 +49,7 @@ export default function ProductList(){
     const [showCategoryTypeOf, setShowCategoryTypeOf] = useState(null)
 
     const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(false)
+    const [currentFilters, setCurrentFilters] = useState({})
 
     const [openCouponApplicableModal, setOpenCouponApplicableModal] = useState({status: false, code: '', products: [], categories: []})
 
@@ -254,6 +255,13 @@ export default function ProductList(){
                                     muscleGroups={muscleGroups}
                                     brands={brands}
                                     applySidebarFilters={applySidebarFilters}
+                                    saveCurrentFilters={setCurrentFilters}
+                                    savedFilters={currentFilters}
+                                    onClearedFilters={()=> 
+                                        setQueryOptions(queryOptions=> (
+                                            {sort: sorts, page: currentPage, limit}
+                                        ))
+                                    }
                                 />
                         }
 

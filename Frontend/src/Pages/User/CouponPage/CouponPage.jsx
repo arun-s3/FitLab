@@ -45,7 +45,7 @@ export default function CouponPage(){
   const [queryOptions, setQueryOptions] = useState({page: 1, limit: 6})
   
   const {coupons: allCoupons, totalCoupons} = useSelector(state=> state.coupons)
-  const {cart, couponApplied, couponRemoved, error} = useSelector(state=> state.cart)
+  const {cart, couponApplied, couponRemoved, couponMessage, error} = useSelector(state=> state.cart)
   const {user} = useSelector(state=> state.user)
   
   const dispatch = useDispatch()
@@ -80,6 +80,13 @@ export default function CouponPage(){
       dispatch(resetCartStates())
     }
   },[error])
+
+  useEffect(()=> {
+    if(couponMessage){
+      sonnerToast.info(couponMessage)
+      dispatch(resetCartStates())
+    }
+  },[couponMessage])
 
   useEffect(()=> {
     if(couponApplied){

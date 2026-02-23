@@ -57,7 +57,7 @@ const PaymentSummary = forwardRef((
         }
       }
     }
-  }, [user, navigate, baseApiUrl])
+  }, [user, navigate])
 
   useImperativeHandle(ref, () => ({
     clickCheckout: () => {

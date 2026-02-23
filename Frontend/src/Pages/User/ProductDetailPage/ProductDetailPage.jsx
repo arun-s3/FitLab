@@ -38,7 +38,7 @@ export default function ProductDetailPage(){
   const [searchParam, setSearchParam] = useSearchParams()
   const currentProductId = searchParam.get('id')
 
-  const {cart, productAdded, loading, error} = useSelector(state=> state.cart)
+  const {cart, productAdded, loading, couponMessage, error} = useSelector(state=> state.cart)
   const {user} = useSelector(state=> state.user)
 
   const dispatch = useDispatch()
@@ -66,6 +66,7 @@ export default function ProductDetailPage(){
         const product = await fetchProduct()
         if(product){
             setProductDetails(product)
+            console.log("Finding best offer.....")
             dispatch( getBestOffer({productId: product._id, quantity}) )
         }
       }
@@ -90,6 +91,13 @@ export default function ProductDetailPage(){
       dispatch(resetCartStates())
     }
   },[error])
+
+  useEffect(()=> {
+      if(couponMessage){
+        sonnerToast.info(couponMessage)
+        dispatch(resetCartStates())
+      }
+  },[couponMessage])
 
   const headerBg = {
       backgroundImage: "url('/Images/header-bg.png')",

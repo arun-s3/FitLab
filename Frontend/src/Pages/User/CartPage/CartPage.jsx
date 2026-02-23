@@ -39,7 +39,7 @@ export default function ShoppingCartPage(){
 
   const [cartProductIds, setCartProductIds] = useState([])
 
-  const {cart, error, couponApplied} = useSelector(state=> state.cart)
+  const {cart, error, message, couponApplied} = useSelector(state=> state.cart)
   const {bestCoupon, couponMessage} = useSelector(state=> state.coupons)
   const {user} = useSelector(state=> state.user)
 
@@ -56,7 +56,7 @@ export default function ShoppingCartPage(){
 
   useEffect(()=> {
     dispatch(getTheCart())
-    if(!bestCoupon && Object.keys(bestCoupon).length === 0){
+    if(Object.keys(bestCoupon).length === 0){
       dispatch(getBestCoupon())
     }
   },[])
@@ -92,6 +92,13 @@ export default function ShoppingCartPage(){
       dispatch(resetCartStates())
     }
   },[error])
+
+  useEffect(()=> {
+    if(message){
+      sonnerToast.info(message)
+      dispatch(resetCartStates())
+    }
+  },[message])
 
   const addQuantity = (id, quantity)=> {
     dispatch( addToCart({productId: id, quantity}) )

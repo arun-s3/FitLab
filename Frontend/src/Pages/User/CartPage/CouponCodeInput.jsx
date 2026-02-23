@@ -18,7 +18,7 @@ export default function CouponCodeInput({couponCode, setCouponCode, bestCouponAp
   const dispatch = useDispatch() 
 
   useEffect(()=> {
-    if(bestCoupon && Object.keys(bestCoupon).length > 0 && !couponCode && cart && !cart.couponUsed){
+    if(Object.keys(bestCoupon).length > 0 && !couponCode && cart && !cart?.couponUsed){
       setCouponCode(bestCoupon.code)
       dispatch( applyCoupon({couponCode: bestCoupon.code}) )
       setBestCouponAppliedStatus({dispatched: true, applied: false})

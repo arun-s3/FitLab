@@ -553,7 +553,7 @@ const getSimilarProducts = async (req, res, next)=> {
       return next(errorHandler(400, "Please provide an array of product IDs"))
     }
 
-    console.log("productIds---->", productIds)
+    // console.log("productIds---->", productIds)
 
     const referenceProducts = await Product.find({ _id: { $in: productIds } })
 
@@ -619,7 +619,7 @@ const getSimilarProducts = async (req, res, next)=> {
       }
     })
 
-    console.log("Similar products →", formattedSimilarProducts)
+    // console.log("Similar products →", formattedSimilarProducts)
     res.status(200).json({ similarProducts: formattedSimilarProducts });
   }
   catch (error) {

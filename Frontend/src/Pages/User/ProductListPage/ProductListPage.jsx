@@ -54,7 +54,7 @@ export default function ProductList(){
     const [openCouponApplicableModal, setOpenCouponApplicableModal] = useState({status: false, code: '', products: [], categories: []})
 
     const {products, productCounts, error: productError} = useSelector(state=> state.productStore)
-    const {cart, productAdded, error, message} = useSelector(state=> state.cart)   
+    const {cart, productAdded, error, message, couponMessage} = useSelector(state=> state.cart)   
     const {wishlistError} = useSelector(state=> state.wishlist) 
     
     const location = useLocation()
@@ -82,6 +82,13 @@ export default function ProductList(){
             dispatch(resetWishlistStates())
         }
     }, [wishlistError])
+
+    useEffect(()=> {
+      if(couponMessage){
+        sonnerToast.info(couponMessage)
+        dispatch(resetCartStates())
+      }
+    },[couponMessage])
 
     const headerBg = {
         backgroundImage: "url('/Images/header-bg.png')",

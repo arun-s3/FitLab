@@ -96,16 +96,20 @@ export default function CartTable({products, omIncQuantity, onDecQuantity, onRem
                           <div className="text-center text-[13px] s-sm:text-[15px] tracking-[0.3px]">
                             <p>
                               <span className={`${product?.offerApplied && product?.offerDiscount && 
-                                'mr-[5px] x-sm:mr-[10px] line-through decoration-[1.6px] decoration-red-500'}`}>
+                                `mr-[5px] x-sm:mr-[10px] ${!product?.maxOfferDiscountApplied 
+                                    && 'line-through decoration-[1.6px] decoration-red-500'} `}`}>
                                 ₹{(product.price)} 
                               </span> 
                               {
-                                product?.offerApplied && product?.offerDiscount &&
-                                <span> ₹{(product.price - product.offerDiscount).toFixed(2)} </span>
+                                product?.offerApplied && product?.offerDiscount && !product?.maxOfferDiscountApplied 
+                                  ?  <span> ₹{(product.price - product.offerDiscount).toFixed(2)} </span>
+                                  :  product?.offerApplied && product?.offerDiscount && product?.maxOfferDiscountApplied
+                                  && <span className='text-[12px] text-green-500'> You save ₹{(product.offerDiscount).toFixed(2)} </span>
                               }
                             </p>
                             {
                             product?.offerApplied && product?.offerDiscount &&
+                            <div>
                             <p className='ml-[1rem] x-sm:ml-[2rem] px-[3px] x-sm:px-[5px] py-[2px] flex items-center gap-[2px] 
                               x-sm:gap-[3px] text-[9px] s-sm:text-[10px] text-secondary'>
                               <BadgePlus className='w-[11px] h-[11px] s-sm:w-[13px] s-sm:h-[13px] text-muted'/>
@@ -119,6 +123,13 @@ export default function CartTable({products, omIncQuantity, onDecQuantity, onRem
                                 - {product.offerApplied.name}
                               </span>
                             </p>
+                            {
+                            product.offerApplied?.maxDiscount &&
+                                <span className='ml-[27px] text-[9px] s-sm:text-[10px] text-secondary '>
+                                    {`Max-discount: ₹ ${product.offerApplied?.maxDiscount}`}
+                                </span>
+                            }
+                            </div>
                             }
                           </div>
                           <div className="flex items-center justify-center space-x-[5px] s-sm:space-x-[8px]">
@@ -137,8 +148,18 @@ export default function CartTable({products, omIncQuantity, onDecQuantity, onRem
                             </button>
                           </div>
                           <div className="flex items-center justify-between">
-                            <span className="text-center flex-1 text-[13px] s-sm:text-[15px] tracking-[0.3px]">
-                              ₹{product.total.toLocaleString()}
+                            <span className={`text-center flex-1 text-[13px] s-sm:text-[15px] tracking-[0.3px]`}>
+
+                                <span className={`${product?.offerApplied && product?.offerDiscount && product?.maxOfferDiscountApplied &&
+                                    'line-through decoration-[1.6px] decoration-red-500'
+                                }`}>
+                                    ₹{(product.total + product?.offerDiscount).toLocaleString()}
+                                </span>
+                                {
+                                product?.offerApplied && product?.offerDiscount && product?.maxOfferDiscountApplied &&
+                                  <span className='block'> ₹{product.total.toLocaleString()} </span>
+                                }
+
                             </span>
                             <button className="text-red-500 hover:text-red-700" 
                               onClick={()=> onRemoveProduct(product.productId._id, product.title)}

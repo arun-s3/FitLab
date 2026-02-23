@@ -12,49 +12,58 @@ const recalculateAndValidateCoupon = async(req, res, next, userId, cart, coupon,
       console.log("coupon inside recalculateAndValidateCoupon-->", coupon)
       console.log(`${typeof absoluteTotal}....${typeof deliveryCharge}.....${typeof deliveryCharge}`)
 
-      let sendResponse = '';
+      let couponWarning = '';
+      let shouldCouponRemove = false
   
       if (!coupon || coupon.status !== "active"){
-        errorHandler(400, "Invalid or expired coupon code.")
+        shouldCouponRemove = true
+        couponWarning = "Invalid or expired coupon code.Hence coupon wont be applicable"
+        return {couponDiscount: 0, deliveryCharge, shouldCouponRemove, couponWarning}
+        // return next(errorHandler(400, "Invalid or expired coupon code."))
       }
 
       // const coupon = await Coupon.findOne({ _id: coupon._id })
       const now = new Date()
       if (now < coupon.startDate || now > coupon.endDate){
-          coupon.status = "expired"
-          await coupon.save()
-          errorHandler(400, "Coupon is expired or not yet active.")
+          shouldCouponRemove = true
+          couponWarning = "Coupon is expired or not yet active. Hence coupon wont be applicable"
+        //   return next(errorHandler(400, "Coupon is expired or not yet active."))
       }
 
       const userUsage = coupon.usedBy.find((usage) => usage.userId.toString() === userId)
       if (userUsage && userUsage.count >= coupon.usageLimitPerCustomer) {
-      errorHandler(400, "You have already used this coupon the maximum number of times.")
+        shouldCouponRemove = true
+        couponWarning = "You have already used this coupon the maximum number of times. Hence coupon wont be applicable"
+        // return next(errorHandler(400, "You have already used this coupon the maximum number of times."))
       }
       if (coupon.oneTimeUse && userUsage) {
-        errorHandler(400, "This coupon can only be used once per user.")
+        shouldCouponRemove = true
+        couponWarning = "This coupon can only be used once per user."
       }
       if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit){
-          coupon.status = "usedUp"
-          await coupon.save()
-          errorHandler(400, "Coupon usage limit reached.")
+          shouldCouponRemove = true
+          couponWarning = "Coupon usage limit reached."
+        //   return next(errorHandler(400, "Coupon usage limit reached."))
       }
   
       if(coupon.customerSpecific && !coupon.assignedCustomers.some(user=> user.equals(new mongoose.Types.ObjectId(userId)))){
-        errorHandler(400, "This is a restricted users' coupon and cannot be applied to your account!")
+        shouldCouponRemove = true
+        couponWarning = "This is a restricted users' coupon and cannot be applied to your account!"
+        // return next(errorHandler(400, "This is a restricted users' coupon and cannot be applied to your account!"))
       }
   
       const userOrderCount = await Order.countDocuments({ userId, couponUsed: coupon._id })
       if (coupon.usageLimitPerCustomer !== null && userOrderCount >= coupon.usageLimitPerCustomer){
-          errorHandler(400, "You have already used this coupon the maximum allowed times.")
+        shouldCouponRemove = true
+        couponWarning = "You have already used this coupon the maximum allowed times. . Hence coupon wont be applicable"
+        // return next(errorHandler(400, "You have already used this coupon the maximum allowed times."))
       }
   
       let discountAmount = 0;
   
-      // for (const item of cart.products){
-      //     orderTotal += item.quantity * item.price
-      // }
       if (absoluteTotal < coupon.minimumOrderValue) {
-        errorHandler(400, `Your order must be at least ₹ ${coupon.minimumOrderValue} to use this coupon.`)
+        couponWarning = `Your order must be at least ₹ ${coupon.minimumOrderValue} to use this coupon.`
+        // return next(errorHandler(400, `Your order must be at least ₹ ${coupon.minimumOrderValue} to use this coupon.`))
       }
   
       let isCouponApplicable = false
@@ -75,9 +84,10 @@ const recalculateAndValidateCoupon = async(req, res, next, userId, cart, coupon,
       }
   
       if (!isCouponApplicable) {
-        if(fetchErrors) return next(errorHandler(400, "Coupon is not applicable to selected products."))
-        sendResponse = "Coupon is not applicable to the selected products. "
-      }
+        shouldCouponRemove = true
+        couponWarning = "Coupon is not applicable to selected products."
+        // return next(errorHandler(400, "Coupon is not applicable to selected products."))
+       }
   
       if(isCouponApplicable){
           if (coupon.discountType === "percentage") {
@@ -112,8 +122,8 @@ const recalculateAndValidateCoupon = async(req, res, next, userId, cart, coupon,
                 }
                 discountAmount = totalBOGODiscount;
               }else {
-                if(fetchErrors) errorHandler(400, "BOGO coupon requires at least two eligible products.")
-                sendResponse = "BOGO coupon requires at least two eligible products."
+                    couponWarning = "BOGO coupon requires at least two eligible products."
+                    // return next(errorHandler(400, "BOGO coupon requires at least two eligible products."))
               }
             }
         }
@@ -123,11 +133,11 @@ const recalculateAndValidateCoupon = async(req, res, next, userId, cart, coupon,
   
       console.log(`finalTotal-----${finalTotal},discountAmount------> ${discountAmount}, deliveryCharge------>${deliveryCharge}`)
   
-      return {absoluteTotalWithTaxes: finalTotal, couponDiscount: discountAmount, deliveryCharge, sendResponse}
+      return {absoluteTotalWithTaxes: finalTotal, couponDiscount: discountAmount, deliveryCharge, shouldCouponRemove, couponWarning}
   }
   catch(error){
     console.error("Error in recalculateAndValidateCoupon:", error.message)
-    errorHandler(500, "Internal Server Error.")
+    return next(errorHandler(500, "Internal server error"))
   }
 }
 

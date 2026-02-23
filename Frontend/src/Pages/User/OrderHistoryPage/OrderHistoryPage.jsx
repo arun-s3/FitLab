@@ -75,7 +75,7 @@ export default function OrderHistoryPage(){
 
     const {orders, totalOrders, canceledReturnRequest, loading, orderError} = useSelector(state=> state.order)
 
-    const {productAdded, error} = useSelector(state=> state.cart)
+    const {productAdded, couponMessage, error} = useSelector(state=> state.cart)
 
     const dispatch = useDispatch()
 

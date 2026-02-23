@@ -44,36 +44,42 @@ const addToCart = async (req, res, next)=> {
     if (quantity > QTY_PER_PERSON) {
       return next(errorHandler(400, `You cannot add more than ${QTY_PER_PERSON} items of this product to your cart.`))
     }
-  
-    const {offerDiscountType, bestDiscount, offerApplied, isBOGO, offerOrProductDiscount} = await calculateBestOffer(userId, productId, quantity)
-    productTotal = (product.price - bestDiscount) * quantity
-
-    let offerDetails = null
-    if(bestDiscount > 0){
-      offerDetails = {
-        offerApplied,
-        offerDiscountType,
-        offerDiscount: bestDiscount,
-        ...(isBOGO ? {extraQuantity: quantity} : {} ),
-        offerOrProductDiscount
-      }
-    }
-
-    console.log("productTotal now-->", productTotal)
-
-    const productDetails = {
-      productId,
-      title: product.title,
-      subtitle: product.subtitle,
-      category: product.category,
-      thumbnail: product.thumbnail.url,
-      quantity,
-      price: product.price,
-      total: productTotal,
-      ...offerDetails
-    }
-
+    
+    let appliedOfferId = null
+    
     if (!cart) {
+      const {offerDiscountType, bestDiscount, offerApplied, maxOfferDiscountApplied, isBOGO, actualProductQuantity,
+               offerOrProductDiscount} = await calculateBestOffer(userId, productId, quantity)
+      let productTotal = (product.price * actualProductQuantity) - bestDiscount
+      
+      let offerDetails = {}
+      if(bestDiscount > 0){
+        offerDetails = {
+          offerApplied,
+          maxOfferDiscountApplied: Boolean(maxOfferDiscountApplied),
+          offerDiscountType,
+          offerDiscount: bestDiscount,
+          ...(isBOGO ? {extraQuantity: Math.floor(actualProductQuantity / 2)} : {} ),
+          offerOrProductDiscount
+        }
+      }
+
+      appliedOfferId = offerApplied
+  
+      console.log("productTotal now-->", productTotal)
+  
+      const productDetails = {
+        productId,
+        title: product.title,
+        subtitle: product.subtitle,
+        category: product.category,
+        thumbnail: product.thumbnail.url,
+        quantity: actualProductQuantity,
+        price: product.price,
+        total: productTotal,
+        ...offerDetails
+      }
+  
       console.log("Creating new cart...")
       cart = new Cart({userId, products: [productDetails], absoluteTotal: productTotal})
     }else{
@@ -93,24 +99,63 @@ const addToCart = async (req, res, next)=> {
           return next( errorHandler(400, `You cannot add more than ${QTY_PER_PERSON} items of this product to your cart.`))
         }
 
-        existingProduct.quantity += quantity
-        existingProduct.total += productTotal
+        const {offerDiscountType, bestDiscount, offerApplied, maxOfferDiscountApplied, isBOGO, actualProductQuantity,
+               offerOrProductDiscount} = await calculateBestOffer(userId, productId, quantity)
+        let productTotal = (product.price * actualProductQuantity) - bestDiscount
+
+        existingProduct.quantity = actualProductQuantity
+        existingProduct.total = productTotal
         existingProduct.offerApplied = offerApplied
         existingProduct.offerDiscountType = offerDiscountType
         existingProduct.offerDiscount = bestDiscount
+        existingProduct.maxOfferDiscountApplied = Boolean(maxOfferDiscountApplied)
         existingProduct.offerOrProductDiscount = offerOrProductDiscount
         if(isBOGO){
-          existingProduct.extraQuantity = existingProduct.quantity + quantity
-        } 
+          existingProduct.extraQuantity = Math.floor(actualProductQuantity / 2)
+        } else {
+            existingProduct.extraQuantity = 0
+        }
+
+        appliedOfferId = offerApplied
 
       }else{
         console.log("Creating new product in the cart...")
-        cart.products.push(productDetails)
+        const {offerDiscountType, bestDiscount, offerApplied, maxOfferDiscountApplied, isBOGO, actualProductQuantity,
+               offerOrProductDiscount} = await calculateBestOffer(userId, productId, quantity)
+        const productTotal = (product.price * actualProductQuantity) - bestDiscount
+         
+        let offerDetails = {}
+        if(bestDiscount > 0){
+          offerDetails = {
+            offerApplied,
+            maxOfferDiscountApplied: Boolean(maxOfferDiscountApplied),
+            offerDiscountType,
+            offerDiscount: bestDiscount,
+            ...(isBOGO ? {extraQuantity: Math.floor(actualProductQuantity / 2)} : {} ),
+            offerOrProductDiscount
+          }
+        }
+  
+        cart.products.push({
+            productId,
+            title: product.title,
+            subtitle: product.subtitle,
+            category: product.category,
+            thumbnail: product.thumbnail.url,
+            quantity: actualProductQuantity,
+            price: product.price,
+            total: productTotal,
+            ...offerDetails
+          })
+
+          appliedOfferId = offerApplied
       }
-      // cart.absoluteTotal += productTotal
-      cart.absoluteTotal = cart.products.reduce((acc, item) => acc + item.total, 0)
-      console.log('absoluteTotal before calculating taxes and charges-->', cart.absoluteTotal)
+      
     }
+
+    cart.absoluteTotal = cart.products.reduce( (acc, item) => acc + item.total, 0 )
+
+    console.log('absoluteTotal before calculating taxes and charges-->', cart.absoluteTotal)
     // await cart.save();
 
     const {deliveryCharges, gstCharge, absoluteTotalWithTaxes} = calculateCharges(cart.absoluteTotal, cart.products)
@@ -118,39 +163,53 @@ const addToCart = async (req, res, next)=> {
     console.log('absoluteTotal after calculating taxes and charges-->', cart.absoluteTotal)
     // cart.deliveryCharge = deliveryCharges
     // cart.absoluteTotalWithTaxes = absoluteTotalWithTaxes
+    const currentAbsoluteTotalWithTaxes = absoluteTotalWithTaxes
     let couponMessages = ''
     if(cart.couponUsed){
       console.log("Inside if cart.couponUsed")
       const coupon = await Coupon.findOne({ _id: cart.couponUsed }).populate("applicableCategories", "name")
       console.log("couponUsed found inside cart-->", coupon)
-      const {absoluteTotalWithTaxes, couponDiscount, deliveryCharge, sendResponse} =
-         await recalculateAndValidateCoupon(req, res, next, userId, cart, coupon, cart.absoluteTotal, parseInt(deliveryCharges), parseInt(gstCharge))
+      const {absoluteTotalWithTaxes, couponDiscount, deliveryCharge, shouldCouponRemove, couponWarning} =
+         await recalculateAndValidateCoupon(req, res, next, userId, cart, coupon, cart.absoluteTotal, Number(deliveryCharges), Number(gstCharge))
 
       console.log(`absoluteTotalWithTaxes-----${absoluteTotalWithTaxes},couponDiscount------> ${couponDiscount}, deliveryCharge------>${deliveryCharge}`)
       console.log('absoluteTotal after processsing recalculateAndValidateCoupon-->', cart.absoluteTotal)
-      if(sendResponse){
-        couponMessages = sendResponse
+
+      if(couponWarning){
+        console.log("Inside if couponWarning")
+        couponMessages = couponWarning
+          if(shouldCouponRemove) {
+            cart.couponUsed = null
+            if(cart.couponDiscount){
+                cart.couponDiscount = 0
+            }
+            cart.deliveryCharge = Number(deliveryCharges) 
+            cart.absoluteTotalWithTaxes = Number(currentAbsoluteTotalWithTaxes)
+          }
+      } else {
+          cart.couponDiscount = Number(couponDiscount)
+          cart.deliveryCharge = Number(deliveryCharge)
+          cart.absoluteTotalWithTaxes = Number(absoluteTotalWithTaxes)
       }
-      cart.couponDiscount = parseInt(couponDiscount)
-      cart.deliveryCharge = parseInt(deliveryCharge)
-      cart.absoluteTotalWithTaxes = parseInt(absoluteTotalWithTaxes)
     }else{
       console.log("Inside else cart.couponUsed")
-      cart.deliveryCharge = parseInt(deliveryCharges)
-      cart.absoluteTotalWithTaxes = parseInt(absoluteTotalWithTaxes)
+      cart.deliveryCharge = Number(deliveryCharges)
+      cart.absoluteTotalWithTaxes = Number(absoluteTotalWithTaxes)
     }
 
-    if(offerApplied){
-      const offer = await Offer.findOne({_id: offerApplied}) 
-      offer.redemptionCount += 1
-      offer.save()
+    if (appliedOfferId) {
+      const offer = await Offer.findById(appliedOfferId)
+      if (offer) {
+        offer.redemptionCount += 1
+        await offer.save()
+      }
     }
 
     await cart.save();
     const updatedCart = await Cart.findOne({ userId })
                           .populate("couponUsed").populate("products.productId").populate("products.offerApplied")
     console.log("updatedCart---->", updatedCart)
-    res.status(200).json({ message: couponMessages + "Product added to cart successfully", cart: updatedCart })
+    res.status(200).json({ couponMessages: couponMessages + "Product added to cart successfully", cart: updatedCart })
   }catch (error){
     console.log("Error in cartController-addToCart-->" + error.message)
     next(error)
@@ -158,65 +217,80 @@ const addToCart = async (req, res, next)=> {
 }
 
 
-const reduceFromCart = async (req, res, next)=> {
-  try{
-    console.log("Inside reduceFromCart of cartController")
+const reduceFromCart = async (req, res, next) => {
+  try {
     const userId = req.user._id
     const { productId, quantity } = req.body
 
-    console.log("req.user._id--->", userId)
-    console.log("quantity--->", quantity)
-
-    if (!productId || !quantity) {
+    if (!productId || quantity <= 0) {
       return next(errorHandler(400, "Invalid product or quantity!"))
     }
 
     const product = await Product.findById(productId)
-    let cart = await Cart.findOne({userId})
-
-    console.log("Product found-->", JSON.stringify(product))
 
     if (!product) {
       return next(errorHandler(404, "Product not found!"))
     }
-    if (product.blocked) {
+    if (product.isBlocked) {
       return next(errorHandler(403, "This product is currently blocked!"))
     }
+
+    let cart = await Cart.findOne({ userId })
+
     if (!cart) {
-      return next(errorHandler(404, "Cart not found!"));
+      return next(errorHandler(404, "Cart not found!"))
     }
 
-    const existingProductIndex = cart.products.findIndex( (item)=> item.productId.toString() === productId )
+    const existingProductIndex = cart.products.findIndex(
+      (item) => item.productId.toString() === productId
+    )
 
     if (existingProductIndex < 0) {
-      return next(errorHandler(404, "No such product found in your cart!"))
+      return next(errorHandler(404, "No such product in cart!"))
     }
-      
-    console.log("Updating existing product in the cart...")
+
     const existingProduct = cart.products[existingProductIndex]
-    console.log("existingProduct.quantity---->", existingProduct.quantity)
 
-    // if (existingProduct.quantity - quantity <= 0) {
-    //   return next(errorHandler(400, 'No product to reduce!'))
-    // }
-    let costToReduce = existingProduct.price * quantity
-    if(existingProduct?.offerDiscount > 0 || existingProduct?.offerApplied){
-      costToReduce = (existingProduct.price - existingProduct.offerDiscount) * quantity
-    }
-    existingProduct.quantity -= quantity
-    existingProduct.total -= costToReduce   
-    if (existingProduct.extraQuantity && existingProduct.offerApplied) {
-      existingProduct.extraQuantity -= quantity
-    }  
-    if (existingProduct.quantity <= 0) {
+    const newQuantity = existingProduct.quantity - quantity
+
+    let productRemoved = false
+    if (newQuantity <= 0) {
       cart.products.splice(existingProductIndex, 1)
-    }   
-
-    cart.absoluteTotal -= costToReduce
-
-    if(existingProduct.quantity){
-      console.log(`Quantity now-->${cart.products[existingProductIndex].quantity}...Total now-->${cart.products[existingProductIndex].total}`)
+      productRemoved = true
     }
+    else {
+      const {
+        offerDiscountType,
+        bestDiscount,
+        offerApplied,
+        maxOfferDiscountApplied,
+        isBOGO,
+        actualProductQuantity,
+        offerOrProductDiscount
+      } = await calculateBestOffer(userId, productId, -quantity)
+
+      console.log("maxOfferDiscountApplied---->", maxOfferDiscountApplied)
+
+      const productTotal =
+        (product.price * actualProductQuantity) - bestDiscount
+
+      existingProduct.quantity = actualProductQuantity
+      existingProduct.total = productTotal
+      existingProduct.offerApplied = offerApplied
+      existingProduct.offerDiscountType = offerDiscountType
+      existingProduct.offerDiscount = bestDiscount
+      existingProduct.maxOfferDiscountApplied = Boolean(maxOfferDiscountApplied)
+      existingProduct.offerOrProductDiscount = offerOrProductDiscount
+
+      if (isBOGO) {
+        existingProduct.extraQuantity =
+          Math.floor(actualProductQuantity / 2)
+      } else {
+        existingProduct.extraQuantity = 0
+      }
+    }
+
+    cart.absoluteTotal = cart.products.reduce( (acc, item) => acc + item.total, 0 )
 
     if(cart.products.length > 0){
       const {deliveryCharges, gstCharge, absoluteTotalWithTaxes} = calculateCharges(cart.absoluteTotal, cart.products)
@@ -227,39 +301,50 @@ const reduceFromCart = async (req, res, next)=> {
         const coupon = await Coupon.findOne({ _id: cart.couponUsed })
         console.log("couponUsed found inside cart-->", coupon)
         const {absoluteTotalWithTaxes, couponDiscount, deliveryCharge} =
-           await recalculateAndValidateCoupon(req, res, next, userId, cart, coupon, cart.absoluteTotal, parseInt(deliveryCharges), parseInt(gstCharge))
+           await recalculateAndValidateCoupon(req, res, next, userId, cart, coupon, cart.absoluteTotal, Number(deliveryCharges), Number(gstCharge))
 
         console.log(`absoluteTotalWithTaxes-----${absoluteTotalWithTaxes},couponDiscount------> ${couponDiscount}, deliveryCharge------>${deliveryCharge}`)
 
-        cart.couponDiscount = parseInt(couponDiscount)
-        cart.deliveryCharge = parseInt(deliveryCharge)
-        cart.absoluteTotalWithTaxes = parseInt(absoluteTotalWithTaxes)
+        cart.couponDiscount = Number(couponDiscount)
+        cart.deliveryCharge = Number(deliveryCharge)
+        cart.absoluteTotalWithTaxes = Number(absoluteTotalWithTaxes)
       }else{
         console.log("Inside else cart.couponUsed")
-        cart.deliveryCharge = parseInt(deliveryCharges)
-        cart.absoluteTotalWithTaxes = parseInt(absoluteTotalWithTaxes)
+        cart.deliveryCharge = Number(deliveryCharges)
+        cart.absoluteTotalWithTaxes = Number(absoluteTotalWithTaxes)
       }
-  }else{
-        cart.couponUsed = null
-        cart.couponDiscount = 0
-        cart.deliveryCharge = 0
-        cart.gst = 0
-        cart.absoluteTotalWithTaxes = 0
-  }
+    }else{
+          cart.couponUsed = null
+          cart.couponDiscount = 0
+          cart.deliveryCharge = 0
+          cart.gst = 0
+          cart.absoluteTotalWithTaxes = 0
+    }
 
     await cart.save();
+
+    console.log("cart.products[existingProductIndex].maxOfferDiscountApplied---->", cart.products[existingProductIndex].maxOfferDiscountApplied)
     // const updatedCart = await Cart.findOne({ userId })
     //                     .populate("couponUsed").populate("products.productId").populate("products.offerApplied")
     // console.log("updatedCart---->", updatedCart)
-    res.status(200).json({ message: "Product added to cart successfully", cart, userId,
-      total: existingProduct.quantity > 0 ? cart.products[existingProductIndex].total : 0,
+
+    res.status(200).json({ 
+      message: "Product quantity reduced successfully", 
+      cart, 
+      userId,
+      total: !productRemoved && cart.products[existingProductIndex]
+        ? cart.products[existingProductIndex].total
+        : 0,
       absoluteTotal: cart.absoluteTotal,
+      maxOfferDiscountApplied: cart.products[existingProductIndex].maxOfferDiscountApplied,
       couponDiscount: cart.couponDiscount,
       deliveryCharge: cart.deliveryCharge,
       gst: cart.gst,
-      absoluteTotalWithTaxes: cart.absoluteTotalWithTaxes})
+      absoluteTotalWithTaxes: cart.absoluteTotalWithTaxes
+    })
+
   }
-  catch (error){
+  catch (error) {
     console.error('Error fetching products from cart:', error.message);
     next(error)
   }
@@ -269,9 +354,9 @@ const reduceFromCart = async (req, res, next)=> {
 const removeFromCart = async (req, res, next)=> {
   try {
     console.log("Inside removeFromCart of cartController")
+
     const userId = req.user._id
-    const {productId} = req.body
-    console.log('productId----->', productId)
+    const { productId } = req.body
 
     if (!productId) {
       return next(errorHandler(400, "Product ID is required"))
@@ -279,72 +364,94 @@ const removeFromCart = async (req, res, next)=> {
 
     let cart = await Cart.findOne({ userId })
     if (!cart) {
-      console.log("Cart not found for user")
       return next(errorHandler(404, "Cart not found"))
     }
 
-    const productIndex = cart.products.findIndex((item)=> item.productId.toString() === productId.toString())
+    const productIndex = cart.products.findIndex(
+      (item)=> item.productId.toString() === productId.toString()
+    )
+
     if (productIndex === -1) {
-      console.log("Product not found in the cart")
       return next(errorHandler(404, "Product not found in the cart"))
     }
 
-    const productToRemove = cart.products[productIndex]
-    const amountToDeduct = productToRemove.total
     cart.products.splice(productIndex, 1)
-    cart.absoluteTotal -= amountToDeduct
-    // if (cart.products.length === 0) {
-    //   cart.discount = 0 
-    // }
+
+    cart.absoluteTotal = cart.products.reduce( (acc, item) => acc + item.total, 0 )
+
+    if (cart.absoluteTotal < 0) {
+      cart.absoluteTotal = 0
+    }
+
     if(cart.products.length > 0){
 
-      const {deliveryCharges, gstCharge, absoluteTotalWithTaxes} = calculateCharges(cart.absoluteTotal, cart.products)
-      cart.gst = gstCharge
-      // cart.deliveryCharge = deliveryCharges
-      // cart.absoluteTotalWithTaxes = absoluteTotalWithTaxes
+      const { deliveryCharges, gstCharge, absoluteTotalWithTaxes } = calculateCharges(cart.absoluteTotal, cart.products)
 
-      if(cart.couponUsed){
+      cart.gst = gstCharge
+
+      if(cart.couponUsed && absoluteTotalWithTaxes > 0){
+
         const coupon = await Coupon.findOne({ _id: cart.couponUsed })
         console.log("cart.gst--->", cart.gst)
-        const {absoluteTotalWithTaxes, couponDiscount, deliveryCharge} =
-          await recalculateAndValidateCoupon(req, res, next, userId, cart, coupon, cart.absoluteTotal, parseInt(deliveryCharges), parseInt(gstCharge))
+
+        const {
+          absoluteTotalWithTaxes: recalculatedTotal,
+          couponDiscount,
+          deliveryCharge
+        } = await recalculateAndValidateCoupon(
+          req,
+          res,
+          next,
+          userId,
+          cart,
+          coupon,
+          cart.absoluteTotal,
+          Number(deliveryCharges),
+          Number(gstCharge)
+        )
+
         console.log("cart.gst recalculateAndValidateCoupon--->", cart.gst)
 
-
-        cart.couponDiscount = parseInt(couponDiscount)
-        cart.deliveryCharge = parseInt(deliveryCharge)
-        cart.absoluteTotalWithTaxes = parseInt(absoluteTotalWithTaxes)
+        cart.couponDiscount = Number(couponDiscount)
+        cart.deliveryCharge = Number(deliveryCharge)
+        cart.absoluteTotalWithTaxes = Number(recalculatedTotal)
         console.log("cart.gst just before saving--->", cart.gst)
-      }else{
+      } else {
         console.log("Inside else cart.couponUsed")
-        cart.deliveryCharge = parseInt(deliveryCharges)
-        cart.absoluteTotalWithTaxes = parseInt(absoluteTotalWithTaxes)
+        cart.deliveryCharge = Number(deliveryCharges)
+        cart.absoluteTotalWithTaxes = Number(absoluteTotalWithTaxes)
       }
-    }else{
-        cart.couponUsed = null
-        cart.couponDiscount = 0
-        cart.deliveryCharge = 0
-        cart.gst = 0
-        cart.absoluteTotalWithTaxes = 0
+
+    } else {
+      cart.couponUsed = null
+      cart.couponDiscount = 0
+      cart.deliveryCharge = 0
+      cart.gst = 0
+      cart.absoluteTotalWithTaxes = 0
+      cart.absoluteTotal = 0
     }
 
     console.log("cart now--->", cart)
     await cart.save();
 
     res.status(200).json({
-      message: 'Product removed from cart successfully', cart, userId,
+      message: 'Product removed from cart successfully',
+      cart,
+      userId,
       absoluteTotal: cart.absoluteTotal,
       couponDiscount: cart.couponDiscount,
       deliveryCharge: cart.deliveryCharge,
       gst: cart.gst,
       absoluteTotalWithTaxes: cart.absoluteTotalWithTaxes
     })
+
   }
   catch (error){
     console.log("Error in cartController-removeFromCart-->", error.message)
     next(error)
   }
 }
+
 
 const getTheCart = async (req, res, next)=> {
   try {
@@ -556,8 +663,8 @@ const removeCoupon = async (req, res, next)=> {
     const { deliveryCharges, gstCharge, absoluteTotalWithTaxes } = calculateCharges(cart.absoluteTotal, cart.products);
 
     cart.gst = gstCharge
-    cart.deliveryCharge = parseInt(deliveryCharges)
-    cart.absoluteTotalWithTaxes = parseInt(absoluteTotalWithTaxes)
+    cart.deliveryCharge = Number(deliveryCharges)
+    cart.absoluteTotalWithTaxes = Number(absoluteTotalWithTaxes)
 
     await cart.save()
 

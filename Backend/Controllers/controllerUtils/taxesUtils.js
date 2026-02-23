@@ -1,9 +1,3 @@
-const mongoose = require("mongoose")
-const Cart = require("../../Models/cartModel")
-const Order = require("../../Models/orderModel")
-const Coupon = require("../../Models/couponModel")
-const {errorHandler} = require("../../Utils/errorHandler")
-
 
 const GST_GYM_PERCENTAGE = 0.18
 const GST_SUPPLEMENTS_PERCENTAGE = 0.12
@@ -30,13 +24,12 @@ const calculateCharges = (absoluteTotal, products)=> {
   
       products.forEach((product) => {
         let gstRate = GST_GYM_PERCENTAGE
-        if (product.category === "supplements") gstRate = GST_SUPPLEMENTS_PERCENTAGE
-        let productPrice = product.price
-        if(product?.offerDiscount){
-          productPrice -= product.offerDiscount
-        }
-        const productGST = productPrice * product.quantity * gstRate 
+        if (product.category.some(cat=> cat === "supplements")) gstRate = GST_SUPPLEMENTS_PERCENTAGE
+        
+        const taxableAmount = product.total
+        const productGST = taxableAmount * gstRate
         totalGST += productGST
+
         if(product?.weight && product.offerDiscountType !== 'freeShipping'){
           actualDeliveryCharge += product.weight > 15 ? 200 : 50
         }

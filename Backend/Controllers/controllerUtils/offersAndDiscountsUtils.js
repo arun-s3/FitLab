@@ -16,7 +16,7 @@ const USER_INACTIVE_PERIOD = 6 * 30 * 24 * 60 * 60 * 1000
 const findUserGroup = async(userId)=> {
     try{
         const lastOrder = await Order.findOne({ userId, 'paymentDetails.paymentStatus': 'completed'}).sort({ orderDate: -1 })
-        console.log("lastOrder-->", lastOrder)
+        // console.log("lastOrder-->", lastOrder)
         let userType = !lastOrder || lastOrder == null
           ? 'newUsers' : (Date.now() - new Date(lastOrder.orderDate).getTime() > USER_INACTIVE_PERIOD) ? 'returningUsers' : 'all'
         console.log("userType inside findUserGroup-->", userType)
@@ -52,10 +52,28 @@ const calculateBestOffer = async (userId, productId, quantity)=> {
           errorHandler(404, "Product not found!")
       }
 
+      const cart = await Cart.findOne({ userId })
+      let existingQuantity = 0
+  
+      if (cart) {
+        const existingItem = cart.products.find(
+          item => item.productId.toString() === productId.toString()
+        )
+        if (existingItem) {
+          existingQuantity = existingItem.quantity
+        }
+      }
+  
+      const finalQuantity = existingQuantity + quantity
+  
+      console.log("existingQuantity:", existingQuantity)
+      console.log("newQuantity:", quantity)
+      console.log("finalQuantity:", finalQuantity)
+
       const userType = await findUserGroup(userId)
       console.log("userType--->", userType)
 
-      const orderValue = product.price * quantity
+      const orderValue = product.price * finalQuantity
 
       const offers = await Offer.find({
         targetUserGroup: {$in: [userType, 'all']},
@@ -72,20 +90,25 @@ const calculateBestOffer = async (userId, productId, quantity)=> {
       let bestDiscount = 0;
       let offerDiscountType = null;
       let bestOffer = null;
+      let maxOfferDiscountApplied = false;
       let isBOGO = false;
       let offerDetails = null;
     
       const calculateDiscount = (offer)=> {
         console.log("Inside calculateDiscount for offer--->", offer)
         if (offer.discountType === "percentage") {
-          discount = (product.price * quantity * offer.discountValue) / 100
-          if (offer.maxDiscount) {
+          discount = (product.price * finalQuantity * offer.discountValue) / 100
+          if (offer?.maxDiscount) {
+            console.log("MAX DISCOUNTIS BEING UT UPr--->", offer.maxDiscount)
             discount = Math.min(discount, offer.maxDiscount)
+            if(discount === offer.maxDiscount) {
+                maxOfferDiscountApplied = true
+            }
           }
         }
         else if (offer.discountType === "fixed") {
           discount = offer.discountValue
-          if (offer.maxDiscount) {
+          if (offer?.maxDiscount) {
             discount = Math.min(discount, offer.maxDiscount)
           }
         } 
@@ -116,7 +139,7 @@ const calculateBestOffer = async (userId, productId, quantity)=> {
       })
 
       const productDiscount = product.discountType === 'fixed' ? Math.min(product.discountValue, product.maxDiscount)
-                              : Math.min(product.price * quantity * product.discountValue/100, product.maxDiscount)
+                              : Math.min(product.price * finalQuantity * product.discountValue/100, product.maxDiscount)
       if (productDiscount > bestDiscount) {
         bestDiscount = productDiscount
         bestOffer = 'productDiscount'
@@ -151,9 +174,10 @@ const calculateBestOffer = async (userId, productId, quantity)=> {
         offerOrProductDiscount = {offerOrProductDiscount: 'offer'}
       }
 
-      console.log(`offerApplied: bestOffer--->${bestOffer}..bestDiscount--->${bestDiscount}..offerDiscountType-->${offerDiscountType}...isBOGO-->${isBOGO}`)
+      console.log(`offerApplied: bestOffer--->${bestOffer}..bestDiscount--->${bestDiscount}..offerDiscountType-->${offerDiscountType}...isBOGO-->${isBOGO}...maxOfferDiscountApplied-->${maxOfferDiscountApplied}`)
       
-      return { offerDiscountType, bestDiscount, offerApplied: bestOffer, offerDetails, isBOGO, ...offerOrProductDiscount }
+      return { offerDiscountType, bestDiscount, maxOfferDiscountApplied, offerApplied: bestOffer, offerDetails, 
+        isBOGO, actualProductQuantity: finalQuantity, ...offerOrProductDiscount }
  
   } catch (error) {
       console.error("Error in calculateBestOffer:", error.message)

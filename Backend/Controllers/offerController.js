@@ -468,12 +468,13 @@ const getBestOffer = async (req, res, next)=> {
           return next(errorHandler(403, "This product is currently blocked and cannot be added to the cart."))
         }
 
-        const {offerDiscountType, bestDiscount, offerApplied, isBOGO, offerDetails} = await calculateBestOffer(userId, productId, quantity) 
+        const {offerDiscountType, bestDiscount, maxOfferDiscountApplied, offerApplied, isBOGO, 
+            offerDetails} = await calculateBestOffer(userId, productId, quantity) 
 
         res.status(200).json({
             message: "Found the best offer!", offerDiscountType, bestDiscount, offerApplied, isBOGO,
             bestOffer: {
-                offerDiscountType, bestDiscount, offerApplied, isBOGO, offerDetails
+                offerDiscountType, bestDiscount, maxOfferDiscountApplied, offerApplied, isBOGO, offerDetails
             }
         })
     }

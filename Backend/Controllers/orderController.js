@@ -81,6 +81,8 @@ const createOrder = async (req, res, next)=> {
         cart.deliveryPrice = deliveryCharges
         cart.totalAmountWithTax  = absoluteTotalWithTaxes
 
+        let currentAbsoluteTotalWithTaxes = absoluteTotalWithTaxes
+
         const now = new Date()
 
         let coupon = null
@@ -94,10 +96,25 @@ const createOrder = async (req, res, next)=> {
               coupon = await Coupon.findOne({ _id: cart.couponUsed })
             }
             
-            const {absoluteTotalWithTaxes, couponDiscount, deliveryCharge} =
+            const {absoluteTotalWithTaxes, couponDiscount, deliveryCharge, couponWarning} =
                 await recalculateAndValidateCoupon(req, res, next, userId, coupon, cart.absoluteTotal, parseInt(deliveryCharges), parseInt(gstCharge))
    
             console.log(`absoluteTotalWithTaxes-----${absoluteTotalWithTaxes},couponDiscount------> ${couponDiscount}, deliveryCharge------>${deliveryCharge}`)
+
+            if(couponWarning){
+              console.log("Inside if couponWarning")
+                if(shouldCouponRemove) {
+                  cart.couponUsed = null
+                  if(cart.couponDiscount){
+                      cart.couponDiscount = 0
+                  }
+                  cart.deliveryCharge = parseInt(deliveryCharges)
+                  cart.absoluteTotalWithTaxes = parseInt(currentAbsoluteTotalWithTaxes)
+                  await cart.save()
+                  return next(errorHandler(403, couponWarning))
+                }
+            } 
+
             deliveryPrice = deliveryCharge
             couponDiscounts = couponDiscount
             totalAmountWithTax = absoluteTotalWithTaxes

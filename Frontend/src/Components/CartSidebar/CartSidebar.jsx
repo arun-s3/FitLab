@@ -21,7 +21,7 @@ export default function CartSidebar({ isOpen, onClose, retractedView }) {
   const [isProductRemovalModalOpen, setIsProductRemovalModalOpen] = useState(false)
   const [productToRemove, setProductToRemove] = useState({})
 
-  const {cart, productAdded, productRemoved, loading, error, message} = useSelector(state=> state.cart)
+  const {cart, productAdded, productRemoved, loading, error, couponMessage} = useSelector(state=> state.cart)
   const navigate = useNavigate()
 
   const location = useLocation()
@@ -50,6 +50,13 @@ export default function CartSidebar({ isOpen, onClose, retractedView }) {
       dispatch(resetCartStates())
     }
   },[error])
+
+  useEffect(()=> {
+      if(couponMessage){
+        sonnerToast.info(couponMessage)
+        dispatch(resetCartStates())
+      }
+  },[couponMessage])
 
   useEffect(()=> {
     if(packedupCart?.products && packedupCart.products.length <= 0){

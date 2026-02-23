@@ -8,6 +8,7 @@ import StarGenerator from '../../../Components/StarGenerator/StarGenerator'
 import {capitalizeFirstLetter} from '../../../Utils/helperFunctions'
 import {SiteSecondaryFillButton} from '../../../Components/SiteButtons/SiteButtons'
 import {CustomHashLoader} from '../../../Components/Loader/Loader'
+import {calculateOfferPricing} from '../../../Utils/offerCalculator'
 
 
 export default function ProductDetail({product = null, quantity, setQuantity, onAddToCart, isLoading}){
@@ -39,7 +40,7 @@ export default function ProductDetail({product = null, quantity, setQuantity, on
         setCurrentImageIndex(thumbnailIndex)
       }
     }, [product])
-    
+
     const sectionVariants = {
       hidden: { opacity: 0, y: 8 },
       show: {
@@ -234,31 +235,38 @@ export default function ProductDetail({product = null, quantity, setQuantity, on
                       className='mt-[-3px] xs-sm:mt-[-5px] text-green-500'
                       variants={itemVariants}
                     > 
-                    &#8377; { (product.prices[variantValueIndex] - bestOffer.bestDiscount).toFixed(2)  }  
+                    &#8377; { calculateOfferPricing(bestOffer?.offerDetails, product.prices[variantValueIndex], quantity).totalFinalPrice }  
                     </motion.span>
                   }
                 </motion.div>
                 {
-                  bestOffer && bestOffer.offerApplied &&
+                  bestOffer && 
                   <motion.p 
-                  className={`mb-[5px] px-[8px] xs-sm:px-[10px] py-[2px] bg-inputBgSecondary self-start xs-sm:self-end flex items-center
-                    gap-[3px] text-[12px] xs-sm:text-[13px] font-medium text-secondary border border-inputBorderSecondary rounded-[4px] 
+                  className={`mb-[5px] px-[18px] xs-sm:px-[10px] py-[5px] bg-inputBgSecondary self-start xs-sm:self-end flex items-center
+                    gap-[3px] text-[12px] font-medium text-secondary border border-inputBorderSecondary rounded-[7px] 
                     hover:underline hover:transition hover:duration-300 flex-wrap`}
                   variants={itemVariants}
                   >
                       <span>
-                        {bestOffer && bestOffer?.offerDetails &&
+                        {bestOffer !== 'productDiscount' && bestOffer?.offerDetails &&
                           `${bestOffer.offerDiscountType === 'percentage' ?
                          `${bestOffer.offerDetails.discountValue} %` : `₹ ${'-' + bestOffer.offerDetails.discountValue}`} Offer `
                         }
                       </span>
                       <span className='pl-[3px] xs-sm:pl-[5px] capitalize text-red-500'>
-                        {bestOffer && bestOffer.offerDetails &&
+                        {bestOffer?.offerDetails &&
                           '-' + ' ' + bestOffer.offerDetails.name + '!'
                         }
                       </span> 
                       {
-                        bestOffer && bestOffer.isBogo &&
+                        bestOffer !== 'productDiscount' && bestOffer?.offerDetails && bestOffer?.offerDetails?.maxDiscount &&
+                          <span className='pl-[3px] xs-sm:pl-[5px] capitalize text-green-500'>
+                                  {`(Max discount: ₹ ${bestOffer?.offerDetails?.maxDiscount})`}
+                          </span>
+                      }
+
+                      {
+                        bestOffer !== 'productDiscount' && bestOffer.isBogo &&
                         <figure className='h-[80px] xs-sm:h-[100px] w-auto'>
                           <img src='/Images/bogo.png' className='h-[80px] xs-sm:h-[100px] w-auto object-cover'/>
                         </figure>

@@ -48,7 +48,7 @@ export default function CheckoutPage(){
 
     const [retryStripePaymentStatus, setRetryStripePaymentStatus] = useState(false)
 
-    const {cart, productRemoved, error} = useSelector(state=> state.cart)
+    const {cart, productRemoved, couponMessage, error} = useSelector(state=> state.cart)
     const {addresses} = useSelector(state=> state.address)
     const {orderCreated, orderMessage, orderError} = useSelector(state=> state.order)
 
@@ -78,6 +78,13 @@ export default function CheckoutPage(){
         dispatch(resetCartStates())
       }
     },[error])
+
+    useEffect(()=> {
+       if(couponMessage){
+         sonnerToast.info(couponMessage)
+         dispatch(resetCartStates())
+       }
+     },[couponMessage])
 
     useEffect(()=> {
       if(addresses && !deliverAddressMade){

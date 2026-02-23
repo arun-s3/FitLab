@@ -94,7 +94,6 @@ export const toggleCategoryStatus = createAsyncThunk('toggleCategoryStatus', asy
 export const updateCategory = createAsyncThunk('updateCategory', async({formData, id}, thunkAPI)=>{
     try{
         const response = await apiClient.post(`/admin/products/category/edit/${id}`, formData, {headers: {'Content-Type': 'multipart/form-data'}})
-        console.log("response.data.category----->", response.data.category)
         return {category: response.data.category, id}
     }
     catch(error){

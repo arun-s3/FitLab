@@ -15,7 +15,7 @@ export default function RetractedCartSidebar(){
 
     const location = useLocation()
     
-    const {cart, productAdded, productRemoved, error} = useSelector(state=> state.cart) 
+    const {cart, productAdded, productRemoved, couponMessage, error} = useSelector(state=> state.cart) 
 
     useEffect(()=> {
         if(cart?.products && cart.products.length > 0){
@@ -40,6 +40,13 @@ export default function RetractedCartSidebar(){
           dispatch(resetCartStates())
         }
     },[error])
+
+    useEffect(()=> {
+      if(couponMessage){
+        sonnerToast.info(couponMessage)
+        dispatch(resetCartStates())
+      }
+    },[couponMessage])
 
     const updateQuantity = (id, newQuantity) => {
         dispatch( addToCart({productId: id, quantity: newQuantity}) )

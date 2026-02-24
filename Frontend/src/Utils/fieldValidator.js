@@ -12,6 +12,7 @@ const regexPatterns = {
     weightsPattern: /^\d+(\.\d+)?$/,
     colorsPattern: /^[A-Za-z]{3,}(?:\s[A-Za-z]{2,})*$/,
     brandPattern: /^(?!^\d+$)[a-zA-Z0-9\s,'-]{1,50}$/, 
+    discountValuePattern: /^\d{1,}$/,
     subtitlePattern: /^[\p{L}\p{N}\s.,!'"&()\-:/%+#]{20,300}$/u,   
     descriptionPattern: /^[\p{L}\p{N}\s.,!'"&()\-:/%+#]{20,300}$/u,
 
@@ -97,7 +98,7 @@ export const handleInputValidation = (fieldName, value, options, limits)=>{
             }
         }
     }
-    if(!Array.isArray(value) && !value.trim().length){
+    if(!Array.isArray(value) && !value ){
         if(options?.optionalField){ 
             return{
                 error: false,
@@ -127,10 +128,12 @@ export const handleInputValidation = (fieldName, value, options, limits)=>{
                 return regexPatterns.validator(fieldName, value, "Please enter a valid size!")
             case "motorPowers":
                 return regexPatterns.validator(fieldName, value, "Please enter a valid motor power value!")
-            case "colors":
+            case "colors": 
                 return regexPatterns.validator(fieldName, value, "Please enter a valid color!")
             case "brand":
                 return regexPatterns.validator(fieldName, value, "Please enter a valid Brand number!")
+            case "discountValue":
+                return regexPatterns.validator(fieldName, value, "Please enter a valid discount rate!")
             case "subtitle":
                 return regexPatterns.validator(fieldName, value, "Please enter a valid product Subtitle! Must have atleast 20 characters and shouldn't cross 300 characters.")
             case "description":
@@ -211,8 +214,8 @@ export const cancelErrorState = (e, borderColor = 'transparent', options)=>{
 
     if(e.target.innerText.endsWith('empty')){
         setTimeout(()=>{
-            e.target.innerText = options.optionalMsg ? options.optionalMsg : ''
-            conosle.log('ErrorMsg cleared..')
+            if(!options) return
+            e.target.innerText = options?.optionalMsg ? options.optionalMsg : ''
             if(options.optionalMsg) e.target.style.color = 'rgb(125, 124, 140)'
             inputElement.style.borderColor = borderColor    
         }, 2000)

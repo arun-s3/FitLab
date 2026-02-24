@@ -5,6 +5,9 @@ import {useDispatch, useSelector} from 'react-redux'
 import {motion} from 'framer-motion'
 
 import {toast as sonnerToast} from 'sonner'
+
+import apiClient from '../../Api/apiClient'
+
 import {MdFavorite, MdFavoriteBorder} from "react-icons/md"
 import {RiFileEditLine} from "react-icons/ri"
 import {MdBlock} from "react-icons/md"
@@ -16,6 +19,8 @@ import WishlistOptionsModal from '../WishlistModals/WishlistOptionsModal'
 import RemoveWishlistItemModal from '../WishlistModals/RemoveWishlistItemModal'
 import ProductsTableView from './ProductsTableView'
 import RestockModal from '../RestockModal/RestockModal'
+import ProductDiscountBadge from '../DiscountBadges/ProductDiscountBadge'
+import CategoryDiscountBadge from '../DiscountBadges/CategoryDiscountBadge'
 import PaginationV2 from '../PaginationV2/PaginationV2'
 import AnimatedStarGenerator from '../AnimatedStarGenerator/AnimatedStarGenerator'
 
@@ -51,6 +56,8 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
   const [removeProductFromWishlist, setRemoveProductFromWishlist] = useState('')
 
   const [selectedList, setSelectedList] = useState(null)
+
+  const [discountedCategories, setDiscountedCategories] = useState([])
 
   useEffect(()=> {
     dispatch(getUserWishlist())
@@ -96,6 +103,24 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
       dispatch(resetWishlistStates())
     }
   },[wishlistError])
+
+  useEffect(()=> {
+    const getDiscountedCategories = async(categories)=> { 
+        try { 
+          const response = await apiClient.post(`/admin/products/category/discounts`, {names: categories})
+          if(response.status === 200){
+            const tranformedCategories = response.data.discountedCategories.map(cat=> capitalizeFirstLetter(cat))
+            setDiscountedCategories(tranformedCategories)
+          }
+        }catch (error) {
+          console.error(error)
+        }
+      }
+    
+    if(queryOptions?.filter?.categories && queryOptions?.filter?.categories.length > 0) {
+      getDiscountedCategories(queryOptions?.filter?.categories)
+    }
+  }, [queryOptions])
 
   useEffect(() => {
       if (productRestocked) {
@@ -234,6 +259,18 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
                   )
               })()}
 
+            {
+                discountedCategories && discountedCategories.length > 0 && 
+                    <div className='mb-8'>
+                        <CategoryDiscountBadge 
+                            style='!py-[12px] !ml-4 !text-[13px]'
+                            iconSize={18}
+                            color='purple'
+                            content = {`Products under these categories have active discounts: ${discountedCategories.toString()}`}
+                        />
+                    </div>
+            }
+
           <motion.div
               variants={container}
               initial='hidden'
@@ -252,6 +289,7 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
           ${wishlistDisplay && "ml-[15px] xx-lg:ml-[1.5rem]"} ${products.length === 0 && "!flex !justify-center !items-center"}`}
               id='products-display'
               style={admin ? { justifyItems: "center" } : {}}>
+
               {!showByTable && products && products.length > 0
                   ? products.map((product) => (
                         <motion.div
@@ -579,6 +617,16 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
                                             ))}
                                         </div>
                                     )}
+                                    {product?.discountValue 
+                                        ?
+                                        <div className='mt-4'>
+                                            <ProductDiscountBadge 
+                                                style='!text-[12px]'
+                                                content='Product discount available'
+                                            />
+                                        </div>
+                                        : null
+                                    }
                                 </div>
                             </div>
                         </motion.div>

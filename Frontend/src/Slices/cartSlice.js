@@ -75,7 +75,7 @@ const initialState = {
   error: null,
   success: false,
   message: null,
-  couponMessages: null
+  couponMessage: null
 }
 
 const cartSlice = createSlice({
@@ -86,7 +86,7 @@ const cartSlice = createSlice({
       state.loading = false
       state.error = null
       state.message = null
-      state.couponMessages = null
+      state.couponMessage = null
       state.success = false
       state.productAdded = false
       state.productRemoved = false
@@ -100,7 +100,7 @@ const cartSlice = createSlice({
         state.loading = false
         state.success = true
         state.message = action.payload.message
-        state.couponMessages = action.payload?.couponMessages
+        state.couponMessage = action.payload?.couponMessage
         state.cart = action.payload.cart
         state.productAdded = true
       })
@@ -112,7 +112,7 @@ const cartSlice = createSlice({
         state.loading = false
         state.error = action.payload
         state.message = action.payload?.message || action.payload
-        state.couponMessages = action.payload?.couponMessages || null
+        state.couponMessage = action.payload?.couponMessage || null
         state.success = false
       })
       .addCase(reduceFromCart.fulfilled, (state, action) => {
@@ -120,7 +120,7 @@ const cartSlice = createSlice({
         state.loading = false;
         state.success = true;
         state.message = action.payload.message;
-        state.couponMessages = action.payload?.couponMessages || null
+        state.couponMessage = action.payload?.couponMessage || null
         
         const productIndex = state.cart.products.findIndex( (item)=> item.productId._id === action.payload.productId )
         if (productIndex === -1){
@@ -165,7 +165,7 @@ const cartSlice = createSlice({
         state.loading = false
         state.error = action.payload
         state.message = action.payload.message
-        state.couponMessages = action.payload?.couponMessages || null
+        state.couponMessage = action.payload?.couponMessage || null
         state.success = false
         state.productReduced = false
       })
@@ -174,7 +174,7 @@ const cartSlice = createSlice({
         state.loading = false;
         state.success = true;
         state.message = action.payload.message;
-        state.couponMessages = action.payload?.couponMessages || null
+        state.couponMessage = action.payload?.couponMessage || null
         
         const productIndex = state.cart.products.findIndex( (item) => item.productId._id.toString() === action.payload.productId.toString() )
 
@@ -207,7 +207,7 @@ const cartSlice = createSlice({
         state.loading = false
         state.error = action.payload
         state.message = action.payload.message
-        state.couponMessages = action.payload?.couponMessages || null
+        state.couponMessage = action.payload?.couponMessage || null
         state.success = false
       })
       .addCase(getTheCart.fulfilled, (state, action) => {
@@ -232,7 +232,7 @@ const cartSlice = createSlice({
         state.loading = false
         state.success = true
         state.message = action.payload.message
-        state.couponMessages = action.payload?.couponMessages || null
+        state.couponMessage = action.payload?.couponMessage || null
         state.couponApplied = true
 
         if( action.payload?.newTotal ){
@@ -249,7 +249,7 @@ const cartSlice = createSlice({
         state.loading = false
         state.error = action.payload
         state.message = action.payload.message
-        state.couponMessages = action.payload?.couponMessages || null
+        state.couponMessage = action.payload?.couponMessage || null
         state.success = false
       })
       .addCase(removeCoupon.fulfilled, (state, action) => {
@@ -257,7 +257,7 @@ const cartSlice = createSlice({
         state.loading = false
         state.success = true
         state.message = action.payload.message
-        state.couponMessages = action.payload?.couponMessages || null
+        state.couponMessage = action.payload?.couponMessage || null
         state.couponApplied = false
         state.cart.absoluteTotalWithTaxes = action.payload.absoluteTotalWithTaxes
         state.cart.deliveryCharge = action.payload.deliveryCharge
@@ -272,7 +272,7 @@ const cartSlice = createSlice({
         state.loading = false
         state.error = action.payload
         state.message = action.payload.message
-        state.couponMessages = action.payload?.couponMessages || null
+        state.couponMessage = action.payload?.couponMessage || null
         state.success = false
       })
     }

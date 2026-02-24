@@ -13,7 +13,7 @@ export default function OfferCategoryModal({ categories, onClose }) {
 
     const [productCount, setProductCount] = useState(0)
 
-    const getProductsCountUnderCategory = async()=> { 
+    const getProductsCountUnderCategory = async()=> {     
         try { 
           const response = await apiClient.get(`/admin/products/category/count/${categories[currentIndex]._id}`)
           if(response.status === 200){

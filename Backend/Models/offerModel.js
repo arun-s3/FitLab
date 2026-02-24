@@ -109,15 +109,13 @@ const offerSchema = new mongoose.Schema(
       },
       required: false
     },
-    redemptionCount: {
+    impressionCount: {
+      type: Number,
+      default: 0 
+    },
+    completedCount: {
       type: Number,
       default: 0, 
-    },
-    conversionRate: {
-      type: Number,
-      default: 0, // % of users who applied vs. completed order
-      min: 0,
-      max: 100,
     },
     lastUsedAt: {
       type: Date,

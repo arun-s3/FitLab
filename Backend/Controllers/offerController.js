@@ -469,12 +469,13 @@ const getBestOffer = async (req, res, next)=> {
         }
 
         const {offerDiscountType, bestDiscount, maxOfferDiscountApplied, offerApplied, isBOGO, 
-            offerDetails} = await calculateBestOffer(userId, productId, quantity) 
+            offerDetails, offerOrOtherDiscount, nonOfferDiscountValue} = await calculateBestOffer(userId, productId, quantity) 
 
         res.status(200).json({
             message: "Found the best offer!", offerDiscountType, bestDiscount, offerApplied, isBOGO,
             bestOffer: {
-                offerDiscountType, bestDiscount, maxOfferDiscountApplied, offerApplied, isBOGO, offerDetails
+                offerDiscountType, bestDiscount, maxOfferDiscountApplied, offerApplied, isBOGO, offerDetails, 
+                offerOrOtherDiscount, nonOfferDiscountValue
             }
         })
     }
@@ -511,5 +512,50 @@ const toggleOfferStatus = async (req, res, next)=> {
 }
 
 
+const increaseOfferImpression = async (req, res, next) => {
+  try {
+    console.log("Inside increaseOfferImpression controller")
 
-module.exports = {createOffer, getAllOffers, updateOffer, deleteOffer, getBestOffer, toggleOfferStatus}
+    const { offerId } = req.params
+
+    if (!offerId) {
+      return next(errorHandler(400, "Offer ID is required"))
+    }
+
+    const now = new Date()
+
+    const updatedOffer = await Offer.findOneAndUpdate(
+      {
+        _id: offerId,
+        status: "active",
+        startDate: { $lte: now },
+        endDate: { $gte: now }
+      },
+      {
+        $inc: { impressionCount: 1 }
+      },
+      {
+        new: true
+      }
+    );
+
+    if (!updatedOffer) {
+      return next(errorHandler(404, "Active offer not found or expired"))
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Impression count increased",
+      impressionCount: updatedOffer.impressionCount
+    });
+
+  }
+  catch (error) {
+    console.error("Error increasing impression count:", error.message)
+    next(error)
+  }
+}
+
+
+
+module.exports = {createOffer, getAllOffers, updateOffer, deleteOffer, getBestOffer, toggleOfferStatus, increaseOfferImpression}

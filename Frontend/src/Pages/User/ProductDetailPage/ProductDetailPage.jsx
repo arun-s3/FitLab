@@ -66,7 +66,6 @@ export default function ProductDetailPage(){
         const product = await fetchProduct()
         if(product){
             setProductDetails(product)
-            console.log("Finding best offer.....")
             dispatch( getBestOffer({productId: product._id, quantity}) )
         }
       }

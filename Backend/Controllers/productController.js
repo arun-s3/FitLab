@@ -65,6 +65,8 @@ const packProductData = async (req, next)=>{
             title: req.body.title, 
             subtitle: req.body.subtitle,
             brand: req.body.brand,
+            discountValue: req.body.discountValue,
+            discountType: req.body.discountType,
             category: req.body.category,
             subCategory: req.body.subCategory,
             targetMuscles: req.body.targetMuscles || [],

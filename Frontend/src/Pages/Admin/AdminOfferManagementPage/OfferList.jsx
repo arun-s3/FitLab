@@ -211,9 +211,13 @@ export default function OfferList({ offers, onEdit, onDelete, onSort, onDeactiva
                   : null
                 }
                 {
-                  offer?.conversionRate ?
+                  offer?.completedCount >= 0 && offer?.impressionCount >= 0 ?
                   <p className={`text-[11px] ${offer.status === 'active' ? 'text-secondary' : 'text-muted' } `}>
-                    Conversion Rate - { offer.conversionRate + ' %' } 
+                    Conversion Rate - {
+                        offer.impressionCount > 0
+                        ? ((offer.completedCount / offer.impressionCount) * 100).toFixed(2) + '%'
+                        : 0 + '%'
+                    } 
                   </p>
                   : null
                 }

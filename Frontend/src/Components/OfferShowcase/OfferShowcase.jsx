@@ -6,7 +6,7 @@ import { ChevronLeft, ChevronRight, X } from "lucide-react"
 
 import OfferProductsModal from "./OfferProductsModal"
 import OfferCategoryModal from "./OfferCategoryModal"
-import {getAllOffers} from '../../../src/Slices/offerSlice'
+import {getAllOffers, increaseOfferImpression} from '../../../src/Slices/offerSlice'
 
 
 export default function OfferShowcase({sectionStyle, containerStyle, headlineStyle}) {
@@ -20,6 +20,8 @@ export default function OfferShowcase({sectionStyle, containerStyle, headlineSty
   const [queryOptions, setQueryOptions] = useState({page: 1, limit: 1, status: 'active'})
 
   const [currentOffer, setCurrentOffer] = useState(null)
+
+  const [impressionCounter, setImpressionCounter] = useState(null)
 
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(20)  
@@ -48,6 +50,16 @@ export default function OfferShowcase({sectionStyle, containerStyle, headlineSty
       }
   }, [offers])
 
+  useEffect(()=> {
+      if(offers && offers.length > 0){
+          setCurrentOffer(offers[0])
+          const thumbnail = offers[0].applicableType === 'products' 
+                  ? offers[0].applicableProducts?.[0]?.thumbnail.url 
+                  : offers[0].applicableCategories?.[0]?.image.url
+          setAltOfferBanner(thumbnail)
+      }
+  }, [offers])
+
   const handlePrevious = () => {
     if(currentPage - 1 === 0){
         setCurrentPage(totalOffers)
@@ -62,12 +74,24 @@ export default function OfferShowcase({sectionStyle, containerStyle, headlineSty
     else setCurrentPage(page=> page += 1)
   }
 
+  const handleOfferImpression = (offer) => {
+    const key = `offer_seen_${offer._id}`
+    const alreadySeen = sessionStorage.getItem(key)
+  
+    if (!alreadySeen) {
+      dispatch(increaseOfferImpression({ offerId: offer._id }))
+      sessionStorage.setItem(key, "true")
+    }
+  }
+
   const openProductsModal = (offer) => {
+    handleOfferImpression(offer)
     setSelectedOffer(offer)
     setOpenModal({type: "products", datas: offer.applicableProducts})
   }
 
   const openCategoriesModal = (offer) => {
+    handleOfferImpression(offer)
     setSelectedOffer(offer)
     setOpenModal({type: "categories", datas: offer.applicableCategories})
   }

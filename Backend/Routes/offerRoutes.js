@@ -2,8 +2,8 @@ const express = require('express')
 const offerRouter = express.Router()
 const upload = require('../Utils/multer')
 const {isLogin, isLogout} = require('../Middlewares/Authentication')
-const {createOffer, getAllOffers, updateOffer, deleteOffer, getBestOffer, toggleOfferStatus} = require('../Controllers/offerController')
-
+const {createOffer, getAllOffers, updateOffer, deleteOffer, getBestOffer, toggleOfferStatus, 
+    increaseOfferImpression} = require('../Controllers/offerController')
 
 
 offerRouter.post('/add', upload.single('offerBanner'), createOffer) // put isLogin later
@@ -12,8 +12,7 @@ offerRouter.post('/update/:offerId', upload.single('offerBanner'), updateOffer) 
 offerRouter.delete('/delete/:offerId', deleteOffer) // put isLogin later
 offerRouter.post('/bestOffers', isLogin, getBestOffer) 
 offerRouter.patch('/toggle-status/:offerId', toggleOfferStatus)
-
-
+offerRouter.patch('/impression/:offerId', increaseOfferImpression)
 
 
 module.exports = offerRouter

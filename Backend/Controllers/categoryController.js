@@ -164,7 +164,7 @@ const getCategoryIdByName = async (req, res, next)=> {
     }
 
     console.log("Required category id----->", category._id)
-    res.status(200).json({id: category._id, name: category.name, subCategory: category.subCategory})
+    res.status(200).json({id: category._id, name: category.name, subCategory: category.subCategory, category})
   }
   catch (error) {
     console.error("Error fetching category ID:", error);
@@ -274,24 +274,6 @@ const getAllCategories = async (req, res, next) => {
 }
 
 
-// const getEveryCategoryNames = async(req,res,next)=> {
-//     try{
-//         console.log("Inside getEveryCategories of categoryController")
-//         const everyCategoryNames = await Category.find({},{name:1})
-//         if (!everyCategoryNames.length) {
-//             next(errorHandler(404, "No categories found!"))
-//         }
-//         if(everyCategoryNames){
-//             console.log("Every category names---->", JSON.stringify(everyCategoryNames))
-//             res.status(200).json({everyCategoryNames})
-//         }
-//     }
-//     catch(error){
-//         console.log("Error in categoryController getEveryCategories-->"+ error.message)
-//         next(error)
-//     }
-// }
-
 const getFirstLevelCategories = async(req,res,next)=> {
     try{
         console.log("Inside getFirstLevelCategories of categoryController")
@@ -321,28 +303,7 @@ const getFirstLevelCategories = async(req,res,next)=> {
         next(error)
     }
 }
-// const getCategoriesOfType = async (req, res, next) => {
-//     try {
-//         let {status} = req.query;
-//         let categoriesData, categoriesCount
 
-//         if (status !== 'all') {
-//             status = status === 'active' ? false : true
-//             categoriesData = await Category.find({isBlocked: status})
-//         } else {
-//             categoriesData = await Category.find({})
-//         }
-//         categoriesCount = categoriesData.length
-//         if (categoriesData.length > 0) {
-//             res.status(200).json({ success: true, categoriesData, categoriesCount })
-//         } else {
-//             res.status(404).json({ success: false, categoriesData, categoriesCount, message: "No categories found" })
-//         }
-//     } catch (error) {
-//         console.log("Error in categoryController getCategoriesOfType --> " + error.message)
-//         next(error)
-//     }
-// }
 
 const getCategoryNames = async (req, res, next) => {
     try {
@@ -393,97 +354,39 @@ const getNestedSubcategoryNames = async (req, res, next) => {
     }
 }
 
-// const getNestedSubcategoryNames = async (req, res, next) => {
-//     try {
-//       const { id } = req.params;
-//       const subcategoryNames = [];
-  
-//       const findParentLevelCount = async (subCategoryId, level = 0) => {
-//         if (!subCategoryId) return level;
-//         const subCategory = await Category.findOne({ _id: subCategoryId }).populate('parentCategory');
-//         return subCategory.parentCategory ? findParentLevelCount(subCategory.parentCategory._id, level + 1) : level;
-//       };
-  
-//       const findSubcategoryNames = async (id) => {
-//         const category = await Category.findOne({ _id: id }).populate('subCategory');
-//         if (category) {
-//           const parentLevelCount = await findParentLevelCount(category._id);
-//           subcategoryNames.push({
-//             _id: category._id,
-//             name: category.name,
-//             badge: category.badge,
-//             parentCategory: category.parentCategory,
-//             subCategory: category.subCategory,
-//             parentLevelCount,
-//           });
-  
-//           for (const sub of category.subCategory) {
-//             await findSubcategoryNames(sub._id);
-//           }
-//         }
-//       };
-  
-//       await findSubcategoryNames(id);
-//       res.status(200).json({ nestedSubcategoryNames: subcategoryNames });
-//     } catch (error) {
-//       next(error);
-//     }
-//   };
-  
 
-// const findCategoryTreeById = async (req,res,next) => {      // --IMPLEMENT THIS--
-//     try {
-//         const {id} = req.query;
-//         const categoryTree = await buildCategoryTree(id)
-//         res.status(200).json({ success: true, categoryTree })
-//     } catch (error) {
-//         console.log('Error fetching category hierarchy:', error.message)
-//         next(error)
-//     }
-// }
+const getDiscountedCategoriesByNames = async (req, res, next) => {
+  try {
+    const { names } = req.body
 
-// async function buildCategoryTree(id) {
-//     const category = await Category.findById(id).populate('subCategory').exec()
-    
-//     if (!category) return null
-//     const categoryNode = {
-//         _id: category._id,
-//         name: category.name,
-//         subCategory: []
-//     }
-//     for (const subcat of category.subCategory) {
-//         const subCategoryTree = await buildCategoryTree(subcat._id)
-//         categoryNode.subCategory.push(subCategoryTree || subcat)
-//     }
+    console.log("Inside getDiscountedCategoriesByNames, received names:", names)
 
-//     return categoryNode
-// }
+    if (!Array.isArray(names) || names.length === 0) {
+      return next(errorHandler(400, "Category names array is required"))
+    }
 
-// const toggleCategoryStatus = async(req,res,next)=>{
-//     try{
-//         console.log("Inside toggleCategoryStatus controller--")
-//         const {id} = req.params
-//         console.log("ID-->", id)
-//         const category = await Category.findOne({_id:id},{password:0})
-//         if (!category) {
-//             return next(errorHandler(404, "No such category found!"));
-//         }
-//         const status = category.isBlocked
-//         console.log("Blocked status before-->", status)
-//         const returnedCategory = await Category.findOneAndUpdate({_id:id},{$set: {isBlocked: !status}}, {new: true})
-//         if(returnedCategory){
-//             const status = returnedCategory.isBlocked? 'Blocked' : 'Unblocked'
-//             console.log("Blocked status now-->", status)
-//             res.status(200).json({categoryBlocked: status, categoryId:id})
-//         }
-//         else{
-//             next(errorHandler(400, "No such category available to update status!"))
-//         }
-//     }
-//     catch(error){
-//         console.log("Error in toggleCategoryStatus controller-->", error.message)
-//     }
-// }
+    const now = new Date()
+
+    const categories = await Category.find({
+      name: { $in: names },
+      discount: { $gt: 0 },
+      isActive: true,
+      isBlocked: false,
+    }).select("name discount")
+
+    const discountedCategoryNames = categories.map(cat => cat.name)
+
+    console.log("Discounted categories found:", discountedCategoryNames)
+
+    res.status(200).json({ discountedCategories: discountedCategoryNames })
+
+  }
+  catch (error) {
+    console.error("Error in getDiscountedCategoriesByNames:", error.message)
+    next(error)
+  }
+}
+
 
 const toggleCategoryStatus = async(req,res,next)=>{
     try{
@@ -690,4 +593,5 @@ const searchCategoryByName = async (req, res, next) => {
 
 
 module.exports = {createCategory, getAllCategories, getFirstLevelCategories, findCategoryById, getCategoryIdByName, searchCategoryByName,
-            getCategoryNames, getNestedSubcategoryNames, toggleCategoryStatus, updateCategory, countProductsByCategory}
+            getCategoryNames, getNestedSubcategoryNames, getDiscountedCategoriesByNames, toggleCategoryStatus, 
+            updateCategory, countProductsByCategory}

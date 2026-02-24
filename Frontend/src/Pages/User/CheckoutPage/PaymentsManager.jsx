@@ -6,7 +6,7 @@ import {camelToCapitalizedWords} from '../../../Utils/helperFunctions'
 
 
 export default function PaymentManager({paymentMethod, setPaymentMethod, optionClickHandler, optionChangeHandler, 
-  cartTotal, stripeOrPaypalPayment, onPaymentError, retryStripePaymentStatus, setRetryStripePaymentStatus}){
+  cartTotal, isRequirementsFulfilled, stripeOrPaypalPayment, onPaymentError, retryStripePaymentStatus, setRetryStripePaymentStatus}){
 
     const [cardsEnterError, setCardsEnterError] = useState('')
     
@@ -122,7 +122,12 @@ export default function PaymentManager({paymentMethod, setPaymentMethod, optionC
                                   >
                                     <StripePayment 
                                       amount={cartTotal.toFixed(2)} 
-                                      onPayment={(id)=> stripeOrPaypalPayment('stripe', id)}
+                                      onPayment={(id)=> {
+                                        const requirementsFulfilledStatus = isRequirementsFulfilled()
+                                        if(requirementsFulfilledStatus) {
+                                            stripeOrPaypalPayment('stripe', id)
+                                        }
+                                      }}
                                       ref={retryStripePaymentRef}
                                       onError={onPaymentError}
                                     />

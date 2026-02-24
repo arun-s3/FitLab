@@ -85,8 +85,10 @@ const createOrder = async (req, res, next)=> {
 
         const now = new Date()
 
+        console.log("cart?.couponUsed----->", cart?.couponUsed)
+
         let coupon = null
-        if (couponCode || cart.couponUsed){
+        if (couponCode || cart?.couponUsed){
             if(couponCode){
               console.log("Inside if couponCode")
               coupon = await Coupon.findOne({ code: couponCode.toUpperCase() })
@@ -96,8 +98,8 @@ const createOrder = async (req, res, next)=> {
               coupon = await Coupon.findOne({ _id: cart.couponUsed })
             }
             
-            const {absoluteTotalWithTaxes, couponDiscount, deliveryCharge, couponWarning} =
-                await recalculateAndValidateCoupon(req, res, next, userId, coupon, cart.absoluteTotal, parseInt(deliveryCharges), parseInt(gstCharge))
+            const {absoluteTotalWithTaxes, couponDiscount, deliveryCharge, shouldCouponRemove, couponWarning} =
+                await recalculateAndValidateCoupon(req, res, next, userId, cart, coupon, cart.absoluteTotal, Number(deliveryCharges), Number(gstCharge))
    
             console.log(`absoluteTotalWithTaxes-----${absoluteTotalWithTaxes},couponDiscount------> ${couponDiscount}, deliveryCharge------>${deliveryCharge}`)
 
@@ -108,8 +110,8 @@ const createOrder = async (req, res, next)=> {
                   if(cart.couponDiscount){
                       cart.couponDiscount = 0
                   }
-                  cart.deliveryCharge = parseInt(deliveryCharges)
-                  cart.absoluteTotalWithTaxes = parseInt(currentAbsoluteTotalWithTaxes)
+                  cart.deliveryCharge = Number(deliveryCharges)
+                  cart.absoluteTotalWithTaxes = Number(currentAbsoluteTotalWithTaxes)
                   await cart.save()
                   return next(errorHandler(403, couponWarning))
                 }
@@ -128,29 +130,8 @@ const createOrder = async (req, res, next)=> {
             if (item.quantity > product.stock) {
                 return next(errorHandler(400, `Insufficient stock for some products! Please check again.`))
             }
-            product.stock -= item.quantity
-            await product.save()
-
-            if(item.offerApplied){
-              const offer = await Offer.findOne({_id: item.offerApplied}) 
-
-              offer.usedCount += 1
-              offer.lastUsedAt = new Date()
-
-              const userUsage = offer.usedBy.find((usage) => usage.userId.toString() === userId.toString())
-              if(userUsage){
-                  userUsage.count += 1
-              }else{
-                  offer.usedBy.push({ userId, count: 1 })
-              }
-
-              const totalUsersApplied = offer.usedBy.reduce((acc, curr) => acc + curr.count, 0)
-              offer.conversionRate = totalUsersApplied > 0
-                  ? ((offer.usedCount / offer.redemptionCount) * 100).toFixed(2) : 0
-
-              await offer.save()
-            }
         }
+        
         const fitlabOrderId = await generateUniqueFitlabOrderId()
 
         const order = new Order({
@@ -177,26 +158,92 @@ const createOrder = async (req, res, next)=> {
             || paymentDetails.paymentMethod === 'paypal'){
           const payment = await Payment.findOne({paymentId: paymentDetails.transactionId})
           payment.orderId = order._id
-          payment.save();
+          await payment.save();
         }
 
-        if (coupon){
-            coupon.usedCount += 1
+        for (const item of cart.products){
 
-            const userUsage = coupon.usedBy.find((usage)=> usage.userId.toString() === userId)
-            if (userUsage) {
-              userUsage.count += 1
-            }else if(coupon.usageLimitPerCustomer){
-              coupon.usedBy.push({ userId, count: 1 })
-            }
-            if(coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
-                coupon.status = "usedUp"
-            }
-            if(now > coupon.endDate) {
-                coupon.status = "expired"
+            const result = await Product.updateOne(
+              { _id: item.productId, stock: { $gte: item.quantity } },
+              { $inc: { stock: -item.quantity } }
+            )
+            if (result.modifiedCount === 0) {
+              return next(errorHandler(403, "Stock changed. Try again."))
             }
 
-            await coupon.save();
+            if(item.offerApplied){
+              const result = await Offer.updateOne(
+                { 
+                  _id: item.offerApplied,
+                  "usedBy.userId": userId
+                },
+                {
+                  $inc: { 
+                    usedCount: 1,
+                    completedCount: 1,
+                    "usedBy.$.count": 1
+                  },
+                  $set: { lastUsedAt: new Date() }
+                }
+              )
+  
+              if (result.modifiedCount === 0) {
+                await Offer.updateOne(
+                  { _id: item.offerApplied },
+                  {
+                    $inc: { usedCount: 1, completedCount: 1 },
+                    $set: { lastUsedAt: new Date() },
+                    $push: { usedBy: { userId, count: 1 } }
+                  }
+                )
+              }
+            }
+        }
+
+        if (coupon) {
+          const existingUserUpdate = await Coupon.updateOne(
+            {
+              _id: coupon._id,
+              "usedBy.userId": userId
+            },
+            {
+              $inc: {
+                usedCount: 1,
+                "usedBy.$.count": 1
+              }
+            }
+          )
+      
+          if (existingUserUpdate.modifiedCount === 0) {
+            await Coupon.updateOne(
+              { _id: coupon._id },
+              {
+                $inc: { usedCount: 1 },
+                $push: { usedBy: { userId, count: 1 } }
+              }
+            )
+          }
+      
+          if (coupon.usageLimit || coupon.endDate) {
+            const updatedCoupon = await Coupon.findById(coupon._id).select("usedCount usageLimit endDate");
+        
+            let newStatus = null
+        
+            if (updatedCoupon.usageLimit && updatedCoupon.usedCount >= updatedCoupon.usageLimit) {
+              newStatus = "usedUp"
+            }
+        
+            if (updatedCoupon.endDate && now > updatedCoupon.endDate) {
+              newStatus = "expired"
+            }
+        
+            if (newStatus) {
+              await Coupon.updateOne(
+                { _id: coupon._id },
+                { $set: { status: newStatus } }
+              );
+            }
+          }
         }
 
         cart.products = []
@@ -896,20 +943,23 @@ const processRefund = async (req, res, next)=> {
   try {
     console.log('Inside processRefund...')
 
-    const { orderId, productId, refundType } = req.body.refundInfos
+    const { orderId, productId, refundType, fitlabAutoInitiated = {status: false} } = req.body.refundInfos
 
-    console.log(`Refund request received for orderId: ${orderId}, productId: ${productId}, refundType: ${refundType}`)
+    console.log(`Refund request received for orderId: ${orderId}, productId: ${productId}, refundType: ${refundType}, fitlabAutoInitiated: ${fitlabAutoInitiated}`)
 
-    if (!orderId || !refundType)
+    if ((!orderId || !refundType) && !fitlabAutoInitiated.status)
       return next(errorHandler(400, "Missing required fields: orderId or refundType."))
 
-    const order = await Order.findById(orderId)
-    if (!order) return next(errorHandler(404, "Order not found."))
+    let order = null
+    if(!fitlabAutoInitiated.status) {
+        order = await Order.findById(orderId)
+        if (!order) return next(errorHandler(404, "Order not found."))
+    }   
 
     let refundAmount = 0
     let refundedProducts = []
 
-    if (refundType === 'product') {
+    if (refundType === 'product' && !fitlabAutoInitiated.status) {
       if (!productId)
         return next(errorHandler(400, "Product ID is required for product refund."))
 
@@ -933,8 +983,8 @@ const processRefund = async (req, res, next)=> {
       await order.save()
     }
 
-    else if (refundType === 'order') {
-      if (order.orderReturnStatus !== 'accepted')
+    else if (refundType === 'order'  && !fitlabAutoInitiated.status) {
+      if (order.orderReturnStatus !== 'accepted' && !fitlabAutoInitiated.status)
         return next(errorHandler(400, "Refund can only be processed for accepted returns."))
 
       refundAmount = order.products.reduce((acc, p) => acc + p.total, 0)
@@ -946,7 +996,11 @@ const processRefund = async (req, res, next)=> {
       await order.save()
     }
 
-    const userId = order.userId
+    if(fitlabAutoInitiated.status) {
+        refundAmount = fitlabAutoInitiated.refundAmount
+    }
+
+    const userId = fitlabAutoInitiated.status ? fitlabAutoInitiated.userId : order.userId
     const wallet = await Wallet.findOne({ userId })
     if (!wallet) {
       const uniqueAccountNumber = await generateUniqueAccountNumber()
@@ -981,9 +1035,13 @@ const processRefund = async (req, res, next)=> {
 
     console.log(`Refund of ₹${refundAmount} credited to wallet ${wallet.accountNumber}`)
 
+    const message = fitlabAutoInitiated.status
+        ? `Refund of ₹${refundAmount} processed successfully to wallet.`
+        : `Your order could not be completed due to server error, so ₹${refundAmount} has been safely credited back to your wallet.`
+
     res.status(200).json({
       success: true,
-      message: `Refund of ₹${refundAmount} processed successfully to wallet.`,
+      message,
       refundAmount,
       walletBalance: wallet.balance
     })

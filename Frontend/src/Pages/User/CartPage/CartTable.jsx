@@ -95,36 +95,56 @@ export default function CartTable({products, omIncQuantity, onDecQuantity, onRem
                           </div>
                           <div className="text-center text-[13px] s-sm:text-[15px] tracking-[0.3px]">
                             <p>
-                              <span className={`${product?.offerApplied && product?.offerDiscount && 
-                                `mr-[5px] x-sm:mr-[10px] ${!product?.maxOfferDiscountApplied 
+                              <span className={`${product?.offerDiscount && 
+                                `mr-[5px] x-sm:mr-[10px] ${!product?.maxOfferDiscountApplied && product?.offerOrOtherDiscount === 'offer' 
                                     && 'line-through decoration-[1.6px] decoration-red-500'} `}`}>
                                 ₹{(product.price)} 
                               </span> 
                               {
-                                product?.offerApplied && product?.offerDiscount && !product?.maxOfferDiscountApplied 
+                                product?.offerOrOtherDiscount === 'offer' 
+                                && product?.offerApplied 
+                                && product?.offerDiscount 
+                                && !product?.maxOfferDiscountApplied 
                                   ?  <span> ₹{(product.price - product.offerDiscount).toFixed(2)} </span>
                                   :  product?.offerApplied && product?.offerDiscount && product?.maxOfferDiscountApplied
                                   && <span className='text-[12px] text-green-500'> You save ₹{(product.offerDiscount).toFixed(2)} </span>
                               }
                             </p>
                             {
-                            product?.offerApplied && product?.offerDiscount &&
+                            product?.offerDiscount &&
                             <div>
                             <p className='ml-[1rem] x-sm:ml-[2rem] px-[3px] x-sm:px-[5px] py-[2px] flex items-center gap-[2px] 
                               x-sm:gap-[3px] text-[9px] s-sm:text-[10px] text-secondary'>
                               <BadgePlus className='w-[11px] h-[11px] s-sm:w-[13px] s-sm:h-[13px] text-muted'/>
                               <span className="truncate">
                               {
-                                `${product.offerApplied.discountType === 'percentage' ?
-                               `${product.offerApplied.discountValue} %` : `₹ ${product.offerApplied.discountValue}`} Offer `
+                              product?.offerOrOtherDiscount === 'offer' && 
+                                `${product.offerApplied.discountType === 'percentage' 
+                               ? `${product.offerApplied.discountValue} %` 
+                               : `₹ ${product.offerApplied.discountValue}`} Offer `
+                              }
+                              {
+                              product?.offerOrOtherDiscount === 'product' && 
+                                `${product.offerDiscountType === 'percentage'
+                                ? `${product.nonOfferDiscountValue} %` 
+                                : `₹ ${product.nonOfferDiscountValue}`} Product discount `
+                              }
+                              {
+                              product?.offerOrOtherDiscount === 'category' && 
+                                `${product.offerDiscountType === 'percentage' 
+                               ? `${product.nonOfferDiscountValue} %` 
+                               : `₹ ${product.nonOfferDiscountValue}`} Category discount `
                               }
                               </span>
-                              <span className='capitalize truncate hidden x-sm:inline'>
-                                - {product.offerApplied.name}
-                              </span>
+                              {
+                              product?.offerOrOtherDiscount === 'offer' && 
+                                <span className='capitalize truncate hidden x-sm:inline'>
+                                  - {product.offerApplied.name}
+                                </span>
+                              }
                             </p>
                             {
-                            product.offerApplied?.maxDiscount &&
+                            product?.offerOrOtherDiscount === 'offer' && product.offerApplied?.maxDiscount &&
                                 <span className='ml-[27px] text-[9px] s-sm:text-[10px] text-secondary '>
                                     {`Max-discount: ₹ ${product.offerApplied?.maxDiscount}`}
                                 </span>
@@ -150,13 +170,22 @@ export default function CartTable({products, omIncQuantity, onDecQuantity, onRem
                           <div className="flex items-center justify-between">
                             <span className={`text-center flex-1 text-[13px] s-sm:text-[15px] tracking-[0.3px]`}>
 
-                                <span className={`${product?.offerApplied && product?.offerDiscount && product?.maxOfferDiscountApplied &&
+                                <span className={`${
+                                    (product?.offerOrOtherDiscount === 'offer' 
+                                        && product?.offerApplied 
+                                        && product?.offerDiscount 
+                                        && product?.maxOfferDiscountApplied
+                                    )
+                                    || (product?.offerOrOtherDiscount !== 'offer' 
+                                        && product?.offerDiscount
+                                    ) &&
                                     'line-through decoration-[1.6px] decoration-red-500'
                                 }`}>
                                     ₹{(product.total + product?.offerDiscount).toLocaleString()}
                                 </span>
                                 {
-                                product?.offerApplied && product?.offerDiscount && product?.maxOfferDiscountApplied &&
+                                (product?.offerOrOtherDiscount === 'offer' && product?.offerDiscount && product?.maxOfferDiscountApplied)
+                                || (product?.offerOrOtherDiscount !== 'offer') &&
                                   <span className='block'> ₹{product.total.toLocaleString()} </span>
                                 }
 

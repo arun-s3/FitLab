@@ -30,7 +30,7 @@
     color: var(--SECONDARY);
     margin-bottom: 2px;
 }
-#AdminAddProduct main .product-input-wrapper input{
+#AdminAddProduct main .product-input-wrapper input, #AdminAddProduct main .product-input-wrapper .discountType{
     width: 100%;
     height: 2.4rem;
     border: 1px solid var(--PRIMARY);

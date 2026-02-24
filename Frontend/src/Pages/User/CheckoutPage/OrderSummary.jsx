@@ -1,18 +1,20 @@
 import React, {useState, useEffect} from 'react'
-import {useSelector} from 'react-redux'
+import {useSelector, useDispatch} from 'react-redux'
 import {motion, AnimatePresence} from "framer-motion"
 
-import {MapPin, Minus} from 'lucide-react'
+import {MapPin, Minus, X} from 'lucide-react'
 import {toast as sonnerToast} from 'sonner'
 
 import PaypalPayment from '../PaymentPages/PayPalPayment'
 import {SiteSecondaryFillImpButton} from '../../../Components/SiteButtons/SiteButtons'
 import {CustomHashLoader} from '../../../Components/Loader/Loader'
+import {removeCoupon, resetCartStates} from '../../../Slices/cartSlice'
 import useTermsConsent from "../../../Hooks/useTermsConsent"
 import TermsDisclaimer from "../../../Components/TermsDisclaimer/TermsDisclaimer"
 
 
-export default function OrderSummary({shippingAddress, paymentMethod, onApplyDiscount, placeOrder, onPaymentError, isLoading}){
+export default function OrderSummary({shippingAddress, paymentMethod, cancelPaymentMethods, onApplyDiscount, placeOrder, onPaymentError
+    , isLoading, isRequirementsFulfilled, setUserTermsConsent, didUserConsentTerms}){
 
     const [couponCode, setCouponCode] = useState('')
     const [appliedDiscount, setAppliedDiscount] = useState('')
@@ -22,9 +24,30 @@ export default function OrderSummary({shippingAddress, paymentMethod, onApplyDis
 
     const {cart} = useSelector(state=> state.cart)
 
-    const [userTermsConsent, setUserTermsConsent] = useState(false)
+    const dispatch = useDispatch()
 
     const {acceptTermsOnFirstAction} = useTermsConsent()
+
+    const clearCoupon = ()=> {
+        onApplyDiscount(null)
+        sonnerToast.warning("Removing coupon...")
+        dispatch(removeCoupon())
+    }
+
+    useEffect(()=> {
+        if(paymentMethod === 'paypal' || paymentMethod === 'cards') {
+            const requirementsFulfilledStatus = isRequirementsFulfilled()
+            if(!requirementsFulfilledStatus) {
+                cancelPaymentMethods()
+            }
+        }
+    }, [paymentMethod])
+
+    useEffect(()=> {
+        if(!didUserConsentTerms) {
+            cancelPaymentMethods()
+        }
+    }, [didUserConsentTerms])
     
 
     return (
@@ -153,8 +176,12 @@ export default function OrderSummary({shippingAddress, paymentMethod, onApplyDis
                         <motion.div
                             className='flex justify-between !mt-[2rem]'
                             initial={{ opacity: 0, y: 5 }}
-                            animate={{ opacity: 1, y: 0 }}>
-                            <span className='text-green-600'> Coupon Discount </span>
+                            animate={{ opacity: 1, y: 0 }}> 
+                            <div className='flex items-center gap-[7px]'>
+                                <X className='w-[15px] h-[15px] text-red-500 cursor-pointer'
+                                    onClick={()=> clearCoupon()}/>
+                                <span className='text-green-600'> Coupon Discount </span>
+                            </div>
                             <span className='flex items-center gap-[5px]'>
                                 <Minus className='w-[13px]' /> ₹{cart.couponDiscount.toFixed(2)}
                             </span>
@@ -186,7 +213,7 @@ export default function OrderSummary({shippingAddress, paymentMethod, onApplyDis
                             <SiteSecondaryFillImpButton
                                 className={`!mt-0 px-[50px] py-[9px] rounded-[7px] ${paymentMethod === "cards" && "hidden"}`}
                                 clickHandler={() => {
-                                    if (userTermsConsent) {
+                                    if (didUserConsentTerms) {
                                         acceptTermsOnFirstAction()
                                         placeOrder()
                                     } else {
@@ -205,7 +232,7 @@ export default function OrderSummary({shippingAddress, paymentMethod, onApplyDis
                                 )}
                             </SiteSecondaryFillImpButton>
                         </motion.div>
-                    ) : cart && cart?.absoluteTotalWithTaxes ? (
+                    ) : cart && cart?.absoluteTotalWithTaxes && didUserConsentTerms ? (
                         <motion.div className='mt-[1rem]' initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                             <PaypalPayment
                                 amount={cart.absoluteTotalWithTaxes.toFixed(2)}

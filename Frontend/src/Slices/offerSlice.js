@@ -72,6 +72,16 @@ export const toggleOfferStatus = createAsyncThunk('offer/toggleOfferStatus', asy
   }
 })
 
+export const increaseOfferImpression = createAsyncThunk('offer/increaseOfferImpression', async ({offerId}, thunkAPI)=> {
+  try {
+    const response = await apiClient.patch(`/offers/impression/${offerId}`)
+    return {offerId, impressionCount: response.data.impressionCount}
+  }catch(error){
+    const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
+    return thunkAPI.rejectWithValue(errorMessage)
+  }
+})
+
 
 const initialState = {
     offers: [], 
@@ -199,6 +209,23 @@ const offerSlice = createSlice({
         state.offerError = null
       })
       .addCase(toggleOfferStatus.rejected, (state, action) => {
+        state.offerError = action.payload
+        state.offerToggled = false
+      })
+      .addCase(increaseOfferImpression.fulfilled, (state, action)=> {
+        state.offerError = null
+        state.offerToggled = true
+        state.offers = state.offers.map(offer=> {
+          if(offer._id === action.payload.offerId){
+            offer.impressionCount = action.payload.impressionCount
+          }
+          return offer
+        })
+      })
+      .addCase(increaseOfferImpression.pending, (state)=> {
+        state.offerError = null
+      })
+      .addCase(increaseOfferImpression.rejected, (state, action) => {
         state.offerError = action.payload
         state.offerToggled = false
       })

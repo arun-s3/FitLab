@@ -84,7 +84,7 @@ const couponSchema = new mongoose.Schema(
     ],
     oneTimeUse: {
       type: Boolean,
-      default: true,
+      default: false,
     },
     startDate: {
       type: Date,

@@ -39,7 +39,7 @@ export default function ShoppingCartPage(){
 
   const [cartProductIds, setCartProductIds] = useState([])
 
-  const {cart, error, message, couponApplied} = useSelector(state=> state.cart)
+  const {cart, error, couponMessage: message, couponApplied} = useSelector(state=> state.cart)
   const {bestCoupon, couponMessage} = useSelector(state=> state.coupons)
   const {user} = useSelector(state=> state.user)
 
@@ -81,17 +81,12 @@ export default function ShoppingCartPage(){
 
   useEffect(()=> {
     if(bestCoupon && couponApplied && couponMessage && couponMessage?.includes('Best')){
-      toast.success(couponMessage + ' and applied to the cart!', {autoClose: 4500})
+      if(cart.products && cart.products.length > 0) {
+        toast.success(couponMessage + ' and applied to the cart!', {autoClose: 4500})
+      } 
       dispatch(resetCartStates())
     }
   },[couponApplied, bestCoupon])
-
-  useEffect(()=> {
-    if(error){
-      sonnerToast.error(error)
-      dispatch(resetCartStates())
-    }
-  },[error])
 
   useEffect(()=> {
     if(message){
@@ -99,6 +94,13 @@ export default function ShoppingCartPage(){
       dispatch(resetCartStates())
     }
   },[message])
+
+  useEffect(()=> {
+    if(error){
+      sonnerToast.error(error)
+      dispatch(resetCartStates())
+    }
+  },[error])
 
   const addQuantity = (id, quantity)=> {
     dispatch( addToCart({productId: id, quantity}) )

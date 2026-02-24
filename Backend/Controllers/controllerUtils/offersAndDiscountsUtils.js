@@ -52,6 +52,8 @@ const calculateBestOffer = async (userId, productId, quantity)=> {
           errorHandler(404, "Product not found!")
       }
 
+      console.log("PRODUCT CONSIDERING----->", JSON.stringify(product, null, 2))
+
       const cart = await Cart.findOne({ userId })
       let existingQuantity = 0
   
@@ -138,11 +140,78 @@ const calculateBestOffer = async (userId, productId, quantity)=> {
           }
       })
 
-      const productDiscount = product.discountType === 'fixed' ? Math.min(product.discountValue, product.maxDiscount)
-                              : Math.min(product.price * finalQuantity * product.discountValue/100, product.maxDiscount)
-      if (productDiscount > bestDiscount) {
+    // ---------------- PRODUCT DISCOUNT ----------------
+      let productDiscount = 0
+        
+      if (product.discountType) {
+        if (product.discountType === 'fixed') {
+          productDiscount = product.maxDiscount
+            ? Math.min(product.discountValue, product.maxDiscount)
+            : product.discountValue
+        } else if (product.discountType === 'percentage') {
+          const calculated = (product.price * finalQuantity * product.discountValue) / 100
+          productDiscount = product.maxDiscount
+            ? Math.min(calculated, product.maxDiscount)
+            : calculated
+        }
+      }
+      
+      // ---------------- CATEGORY DISCOUNT ----------------
+      let bestCategoryDiscount = 0
+      let bestCategory = null
+      
+      const categories = await Category.find({
+        name: { $in: product.category },
+        isBlocked: false,
+        isActive: true
+      })
+      
+      categories.forEach((cat) => {
+        if (!cat.discount || cat.discount <= 0) return
+      
+        const now = new Date()
+        if (
+          cat.seasonalActivation?.startDate &&
+          cat.seasonalActivation?.endDate
+        ) {
+          if (
+            now < cat.seasonalActivation.startDate ||
+            now > cat.seasonalActivation.endDate
+          ) {
+            return
+          }
+        }
+    
+        const categoryDiscount =
+          (product.price * finalQuantity * cat.discount) / 100
+
+        console.log("categoryDiscount----->", categoryDiscount)
+        console.log("product.price----->", product.price)
+        console.log("finalQuantity----->", finalQuantity)
+        console.log("cat.discount----->", cat.discount)
+
+        console.log("productDiscount----->", productDiscount)
+        console.log("product.discountType----->", product.discountType)
+    
+        if (categoryDiscount > bestCategoryDiscount) {
+          bestCategoryDiscount = categoryDiscount
+          bestCategory = cat
+        }
+      })
+
+      let nonOfferDiscountValue = 0
+
+      if (productDiscount > bestDiscount && productDiscount > bestCategoryDiscount) {
         bestDiscount = productDiscount
         bestOffer = 'productDiscount'
+        offerDiscountType = product.discountType
+        nonOfferDiscountValue = product.discountValue
+      }
+      else if (bestCategoryDiscount > bestDiscount && bestCategoryDiscount > productDiscount) {
+        bestDiscount = bestCategoryDiscount
+        bestOffer = 'categoryDiscount'
+        offerDiscountType = 'percentage'
+        nonOfferDiscountValue = bestCategory.discount
       }
       // Check if product is already in the cart
       // let existingItem = cart.products.find(item => item.productId.toString() === productId)
@@ -162,22 +231,27 @@ const calculateBestOffer = async (userId, productId, quantity)=> {
       // }
 
       // await cart.save();
-      let offerOrProductDiscount = null
-      if(bestOffer == null){
-        offerOrProductDiscount = {offerOrProductDiscount: null}
+      let offerOrOtherDiscount = null
+
+      if (bestOffer == null) {
+        offerOrOtherDiscount = { offerOrOtherDiscount: null }
       }
-      else if(bestOffer === 'productDiscount'){
-        offerOrProductDiscount = {offerOrProductDiscount: 'discount'}
+      else if (bestOffer === 'productDiscount') {
+        offerOrOtherDiscount = { offerOrOtherDiscount: 'product' }
         bestOffer = null
       }
-      else{
-        offerOrProductDiscount = {offerOrProductDiscount: 'offer'}
+      else if (bestOffer === 'categoryDiscount') {
+        offerOrOtherDiscount = { offerOrOtherDiscount: 'category' }
+        bestOffer = null
+      }
+      else {
+        offerOrOtherDiscount = { offerOrOtherDiscount: 'offer' }
       }
 
       console.log(`offerApplied: bestOffer--->${bestOffer}..bestDiscount--->${bestDiscount}..offerDiscountType-->${offerDiscountType}...isBOGO-->${isBOGO}...maxOfferDiscountApplied-->${maxOfferDiscountApplied}`)
       
       return { offerDiscountType, bestDiscount, maxOfferDiscountApplied, offerApplied: bestOffer, offerDetails, 
-        isBOGO, actualProductQuantity: finalQuantity, ...offerOrProductDiscount }
+        isBOGO, actualProductQuantity: finalQuantity, nonOfferDiscountValue, ...offerOrOtherDiscount }
  
   } catch (error) {
       console.error("Error in calculateBestOffer:", error.message)

@@ -1,13 +1,17 @@
 import React, {useState, useEffect, useRef} from 'react'
-import {useSelector} from 'react-redux'
+import {useDispatch, useSelector} from 'react-redux'
 import {motion, AnimatePresence} from 'framer-motion'
 
 import {Minus, Plus, Heart} from 'lucide-react'
 
+import ProductDiscountBadge from '../../../Components/DiscountBadges/ProductDiscountBadge'
+import CategoryDiscountBadge from '../../../Components/DiscountBadges/CategoryDiscountBadge'
+import OfferDiscountBadge from '../../../Components/DiscountBadges/OfferDiscountBadge'
 import StarGenerator from '../../../Components/StarGenerator/StarGenerator'
 import {capitalizeFirstLetter} from '../../../Utils/helperFunctions'
 import {SiteSecondaryFillButton} from '../../../Components/SiteButtons/SiteButtons'
 import {CustomHashLoader} from '../../../Components/Loader/Loader'
+import {increaseOfferImpression} from '../../../Slices/offerSlice'
 import {calculateOfferPricing} from '../../../Utils/offerCalculator'
 
 
@@ -25,6 +29,8 @@ export default function ProductDetail({product = null, quantity, setQuantity, on
   
     const {bestOffer} = useSelector(state=> state.offers)
 
+    const dispatch = useDispatch()
+
     useEffect(()=> {
       if(product && Object.keys(product).length > 0){
         
@@ -40,6 +46,21 @@ export default function ProductDetail({product = null, quantity, setQuantity, on
         setCurrentImageIndex(thumbnailIndex)
       }
     }, [product])
+
+    useEffect(() => {
+      const handleOfferImpression = (offer) => {
+        const key = `offer_seen_${offer._id}`
+        const alreadySeen = sessionStorage.getItem(key)
+      
+        if (!alreadySeen) {
+          dispatch(increaseOfferImpression({ offerId: offer._id }))
+          sessionStorage.setItem(key, "true")
+        }
+      }
+      if (bestOffer) {
+        handleOfferImpression(bestOffer)
+      }
+    }, [bestOffer])
 
     const sectionVariants = {
       hidden: { opacity: 0, y: 8 },
@@ -204,10 +225,21 @@ export default function ProductDetail({product = null, quantity, setQuantity, on
                 <motion.span className="text-[13px] xs-sm:text-[14px] text-gray-500"> ({`${product.totalReviews}`} Reviews) </motion.span>
               </motion.div>
               <motion.h1 
-                className="text-[20px] xs-sm:text-[22px] s-sm:text-[24px] max-xxs-sm:break-words font-bold capitalize leading-tight"
+                className="flex gap-4 text-[20px] xs-sm:text-[22px] s-sm:text-[24px] max-xxs-sm:break-words 
+                  font-bold capitalize leading-tight"
                 variants={itemVariants}
               > 
                 {capitalizeFirstLetter(product.title)}
+
+                {
+                    bestOffer?.offerOrOtherDiscount === 'offer' 
+                      ? <OfferDiscountBadge />
+                      : bestOffer?.offerOrOtherDiscount === 'product'
+                      ? <ProductDiscountBadge />
+                      : bestOffer?.offerOrOtherDiscount === 'category'
+                      && <CategoryDiscountBadge />
+                }
+                      
               </motion.h1>
               <motion.p 
                 className="text-gray-600 text-[14px] xs-sm:text-base leading-relaxed break-words whitespace-normal 
@@ -235,12 +267,21 @@ export default function ProductDetail({product = null, quantity, setQuantity, on
                       className='mt-[-3px] xs-sm:mt-[-5px] text-green-500'
                       variants={itemVariants}
                     > 
-                    &#8377; { calculateOfferPricing(bestOffer?.offerDetails, product.prices[variantValueIndex], quantity).totalFinalPrice }  
+                    &#8377; {
+                        bestOffer.offerOrOtherDiscount === 'offer' ?
+                          calculateOfferPricing(
+                            {...bestOffer?.offerDetails, offerOrOtherDiscount: bestOffer?.offerOrOtherDiscount}, 
+                            product.prices[variantValueIndex], 
+                            quantity
+                          ).totalFinalPrice
+                        : 
+                          calculateOfferPricing(bestOffer, product.prices[variantValueIndex], quantity).totalFinalPrice
+                    }  
                     </motion.span>
                   }
                 </motion.div>
                 {
-                  bestOffer && 
+                  bestOffer && bestOffer.offerOrOtherDiscount &&
                   <motion.p 
                   className={`mb-[5px] px-[18px] xs-sm:px-[10px] py-[5px] bg-inputBgSecondary self-start xs-sm:self-end flex items-center
                     gap-[3px] text-[12px] font-medium text-secondary border border-inputBorderSecondary rounded-[7px] 
@@ -248,25 +289,32 @@ export default function ProductDetail({product = null, quantity, setQuantity, on
                   variants={itemVariants}
                   >
                       <span>
-                        {bestOffer !== 'productDiscount' && bestOffer?.offerDetails &&
+                        {bestOffer && bestOffer.offerOrOtherDiscount === 'offer' &&
                           `${bestOffer.offerDiscountType === 'percentage' ?
                          `${bestOffer.offerDetails.discountValue} %` : `₹ ${'-' + bestOffer.offerDetails.discountValue}`} Offer `
                         }
+                        {bestOffer && bestOffer.offerOrOtherDiscount === 'product' &&
+                          `${bestOffer.offerDiscountType === 'percentage' ?
+                         `${bestOffer.nonOfferDiscountValue} %` : `₹ ${'-' + bestOffer.nonOfferDiscountValue}`} Product Discount `
+                        }
+                        {bestOffer && bestOffer.offerOrOtherDiscount === 'category' &&
+                         `${bestOffer.nonOfferDiscountValue} % Catgeory Discount `
+                        }
                       </span>
                       <span className='pl-[3px] xs-sm:pl-[5px] capitalize text-red-500'>
-                        {bestOffer?.offerDetails &&
+                        {bestOffer && bestOffer.offerOrOtherDiscount === 'offer' && bestOffer?.offerDetails &&
                           '-' + ' ' + bestOffer.offerDetails.name + '!'
                         }
                       </span> 
                       {
-                        bestOffer !== 'productDiscount' && bestOffer?.offerDetails && bestOffer?.offerDetails?.maxDiscount &&
+                        bestOffer && bestOffer.offerOrOtherDiscount === 'offer' && bestOffer?.offerDetails && bestOffer?.offerDetails?.maxDiscount &&
                           <span className='pl-[3px] xs-sm:pl-[5px] capitalize text-green-500'>
                                   {`(Max discount: ₹ ${bestOffer?.offerDetails?.maxDiscount})`}
                           </span>
                       }
 
                       {
-                        bestOffer !== 'productDiscount' && bestOffer.isBogo &&
+                        bestOffer && bestOffer.offerOrOtherDiscount === 'offer' && bestOffer.isBogo &&
                         <figure className='h-[80px] xs-sm:h-[100px] w-auto'>
                           <img src='/Images/bogo.png' className='h-[80px] xs-sm:h-[100px] w-auto object-cover'/>
                         </figure>

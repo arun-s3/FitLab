@@ -5,8 +5,7 @@ const Coupon = require("../../Models/couponModel")
 const {errorHandler} = require("../../Utils/errorHandler")
 
 
-
-const recalculateAndValidateCoupon = async(req, res, next, userId, cart, coupon, absoluteTotal, deliveryCharge, gstCharge, fetchErrors = false)=> {
+const recalculateAndValidateCoupon = async(req, res, next, userId, cart, coupon, absoluteTotal, deliveryCharge, gstCharge)=> {
   try{
       console.log("Inside recalculateAndValidateCoupon--")
       console.log("coupon inside recalculateAndValidateCoupon-->", coupon)
@@ -14,56 +13,62 @@ const recalculateAndValidateCoupon = async(req, res, next, userId, cart, coupon,
 
       let couponWarning = '';
       let shouldCouponRemove = false
+
+      console.log("coupon----->", coupon)
   
       if (!coupon || coupon.status !== "active"){
         shouldCouponRemove = true
         couponWarning = "Invalid or expired coupon code.Hence coupon wont be applicable"
         return {couponDiscount: 0, deliveryCharge, shouldCouponRemove, couponWarning}
-        // return next(errorHandler(400, "Invalid or expired coupon code."))
       }
 
-      // const coupon = await Coupon.findOne({ _id: coupon._id })
       const now = new Date()
       if (now < coupon.startDate || now > coupon.endDate){
           shouldCouponRemove = true
           couponWarning = "Coupon is expired or not yet active. Hence coupon wont be applicable"
-        //   return next(errorHandler(400, "Coupon is expired or not yet active."))
-      }
-
-      const userUsage = coupon.usedBy.find((usage) => usage.userId.toString() === userId)
-      if (userUsage && userUsage.count >= coupon.usageLimitPerCustomer) {
-        shouldCouponRemove = true
-        couponWarning = "You have already used this coupon the maximum number of times. Hence coupon wont be applicable"
-        // return next(errorHandler(400, "You have already used this coupon the maximum number of times."))
-      }
-      if (coupon.oneTimeUse && userUsage) {
-        shouldCouponRemove = true
-        couponWarning = "This coupon can only be used once per user."
-      }
-      if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit){
-          shouldCouponRemove = true
-          couponWarning = "Coupon usage limit reached."
-        //   return next(errorHandler(400, "Coupon usage limit reached."))
+          return {couponDiscount: 0, deliveryCharge, shouldCouponRemove, couponWarning}
       }
   
-      if(coupon.customerSpecific && !coupon.assignedCustomers.some(user=> user.equals(new mongoose.Types.ObjectId(userId)))){
+      if(coupon.customerSpecific && !coupon.assignedCustomers.some(user=> user.toString() === userId.toString())){
         shouldCouponRemove = true
         couponWarning = "This is a restricted users' coupon and cannot be applied to your account!"
-        // return next(errorHandler(400, "This is a restricted users' coupon and cannot be applied to your account!"))
+        return {couponDiscount: 0, deliveryCharge, shouldCouponRemove, couponWarning}
       }
-  
-      const userOrderCount = await Order.countDocuments({ userId, couponUsed: coupon._id })
-      if (coupon.usageLimitPerCustomer !== null && userOrderCount >= coupon.usageLimitPerCustomer){
+
+      const userOrderCount = await Order.countDocuments({
+        userId,
+        couponUsed: coupon._id,
+        "paymentDetails.paymentStatus": "completed"
+      })
+      
+      if (coupon.oneTimeUse && userOrderCount > 0) {
         shouldCouponRemove = true
-        couponWarning = "You have already used this coupon the maximum allowed times. . Hence coupon wont be applicable"
-        // return next(errorHandler(400, "You have already used this coupon the maximum allowed times."))
+        couponWarning = "This coupon can only be used once."
+        return {couponDiscount: 0, deliveryCharge, shouldCouponRemove, couponWarning}
+      }
+      
+      if (coupon.usageLimitPerCustomer !== null && userOrderCount >= coupon.usageLimitPerCustomer) {
+        shouldCouponRemove = true
+        couponWarning = "You have reached usage limit."
+        return {couponDiscount: 0, deliveryCharge, shouldCouponRemove, couponWarning}
+      }
+       
+      const totalUsage = await Order.countDocuments({
+        couponUsed: coupon._id,
+        "paymentDetails.paymentStatus": "completed"
+      })
+      
+      if (coupon.usageLimit && totalUsage >= coupon.usageLimit) {
+        shouldCouponRemove = true
+        couponWarning = "Coupon usage limit reached."
+        return {couponDiscount: 0, deliveryCharge, shouldCouponRemove, couponWarning}
       }
   
       let discountAmount = 0;
   
       if (absoluteTotal < coupon.minimumOrderValue) {
         couponWarning = `Your order must be at least ₹ ${coupon.minimumOrderValue} to use this coupon.`
-        // return next(errorHandler(400, `Your order must be at least ₹ ${coupon.minimumOrderValue} to use this coupon.`))
+        return {couponDiscount: 0, deliveryCharge, shouldCouponRemove, couponWarning}
       }
   
       let isCouponApplicable = false
@@ -74,7 +79,8 @@ const recalculateAndValidateCoupon = async(req, res, next, userId, cart, coupon,
           console.log(`CouponApplicableCategories---> ${JSON.stringify(coupon.applicableCategories.map(cat=> cat.name))}`)
           const product = item.productId
           if(coupon.applicableType === "allProducts" ||
-              (coupon.applicableType === "products" && coupon.applicableProducts.includes(product._id)) ||
+              (coupon.applicableType === "products" && 
+                coupon.applicableProducts.some(id => id.toString() === product._id.toString())) ||
               (coupon.applicableType === "categories" && 
                 product.category.some(catName => coupon.applicableCategories.some(cat=> cat.name === catName)))
             ){
@@ -86,45 +92,67 @@ const recalculateAndValidateCoupon = async(req, res, next, userId, cart, coupon,
       if (!isCouponApplicable) {
         shouldCouponRemove = true
         couponWarning = "Coupon is not applicable to selected products."
-        // return next(errorHandler(400, "Coupon is not applicable to selected products."))
+        return {couponDiscount: 0, deliveryCharge, shouldCouponRemove, couponWarning}
        }
   
       if(isCouponApplicable){
           if (coupon.discountType === "percentage") {
-            discountAmount = Math.min(absoluteTotal * (coupon.discountValue / 100), coupon.maxDiscount || absoluteTotal)
+            const maxAllowed = coupon.maxDiscount !== null && coupon.maxDiscount !== undefined ? coupon.maxDiscount : absoluteTotal
+
+            discountAmount = Math.min(
+              absoluteTotal * (coupon.discountValue / 100),
+              maxAllowed
+            )
         } else if (coupon.discountType === "fixed") {
             discountAmount = Math.min(coupon.discountValue, absoluteTotal)
         } else if (coupon.discountType === "freeShipping") {
             deliveryCharge = 0
         } else if (coupon.discountType === "buyOneGetOne") {
-            if(!cart?.offerApplied || (cart?.offerApplied && cart?.offerDiscountType !== "buyOneGetOne")){
-              let eligibleProducts = []
-              for (const item of cart.products) {
-                  const product = item.productId
-                  if (
-                      coupon.applicableType === "allProducts" ||
-                      (coupon.applicableType === "products" && coupon.applicableProducts.includes(product._id)) ||
-                      (coupon.applicableType === "categories" && 
-                        product.category.some(catName => coupon.applicableCategories.some(cat=> cat.name === catName)))
-                  ) {
-                      eligibleProducts.push(item)
-                  }
-              }
-              if (eligibleProducts.length >= 2) {
-                eligibleProducts.sort((a, b)=> a.price - b.price)
-              
-                let freeItemsCount = 0
-                let totalBOGODiscount = 0
-              
-                for (let i = 1; i < eligibleProducts.length; i += 2) {
-                    totalBOGODiscount += eligibleProducts[i].price
-                    freeItemsCount++
+        
+            let eligibleProducts = []
+
+            for (const item of cart.products) {
+                const product = item.productId
+            
+                if (
+                    coupon.applicableType === "allProducts" ||
+                    (coupon.applicableType === "products" && 
+                        coupon.applicableProducts.some(id => id.toString() === product._id.toString())) ||
+                    (coupon.applicableType === "categories" && 
+                      product.category.some(catName =>
+                          coupon.applicableCategories.some(cat => cat.name === catName)
+                      )
+                    )
+                ) {
+                    eligibleProducts.push(item)
                 }
-                discountAmount = totalBOGODiscount;
-              }else {
-                    couponWarning = "BOGO coupon requires at least two eligible products."
-                    // return next(errorHandler(400, "BOGO coupon requires at least two eligible products."))
-              }
+            }
+        
+            let expandedPrices = []
+        
+            for (const item of eligibleProducts) {
+                if (item.offerApplied) continue
+                
+                for (let i = 0; i < item.quantity; i++) {
+                    const unitPrice = item.total / item.quantity
+                    expandedPrices.push(unitPrice)
+                }
+            }
+        
+            if (expandedPrices.length < 2) {
+                couponWarning = "Buy One Get One coupon requires at least two eligible products."
+                return {couponDiscount: 0, deliveryCharge, shouldCouponRemove, couponWarning}
+            } else {
+                expandedPrices.sort((a, b) => a - b)
+            
+                let totalBOGODiscount = 0
+                const freeItemsCount = Math.floor(expandedPrices.length / 2)
+            
+                for (let i = 0; i < freeItemsCount; i++) {
+                    totalBOGODiscount += expandedPrices[i]
+                }
+            
+                discountAmount = totalBOGODiscount
             }
         }
       }

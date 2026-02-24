@@ -136,10 +136,11 @@ export default function OrderManager({products, orderReviewError, onIncQuantity,
                               </motion.button>
                             </div> 
                             <span className="text-[14px] font-[450] flex flex-col w-auto x-lg:w-[10rem]">
-                              <span className={`${ product?.offerApplied && 'line-through decoration-[1.6px] decoration-red-500'}`}>
+                              <span className={`${ product?.offerApplied && product?.offerDiscount && !product?.maxOfferDiscountApplied &&
+                                 'line-through decoration-[1.6px] decoration-red-500'}`}>
                                 &#8377; {(product.price).toFixed(2)} 
                               </span>
-                              { product?.offerApplied && product?.offerDiscount &&
+                              { product?.offerApplied && product?.offerDiscount && !product?.maxOfferDiscountApplied &&
                                 <span className='w-full x-lg:w-[125%]'>
                                   ₹{(product.price - product.offerDiscount).toFixed(2)}
                                 </span>
@@ -170,6 +171,13 @@ export default function OrderManager({products, orderReviewError, onIncQuantity,
                             </span>
                           </motion.div>
                       }
+
+                      { product?.offerApplied && product?.offerDiscount && product?.maxOfferDiscountApplied &&
+                        <span className='mt-[5px] w-full x-lg:w-[125%] text-[11px] text-green-600'>
+                          ₹{(product.offerDiscount).toFixed(2)} Saved from total!
+                        </span>
+                      }
+
                       <p className='mt-[5px] h-[5px] text-[10px] text-red-500 tracking-[0.3px]'> {orderReviewError} </p>
                     </motion.div>
                 )

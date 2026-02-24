@@ -66,7 +66,6 @@ export default function OrderDetailsModal({ isOpen, onClose, order }){
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -76,7 +75,6 @@ export default function OrderDetailsModal({ isOpen, onClose, order }){
             className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
           />
 
-          {/* Modal */}
           <motion.div
             initial={{ opacity: 0, scale: 0.92, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -88,7 +86,6 @@ export default function OrderDetailsModal({ isOpen, onClose, order }){
               onClick={(e) => e.stopPropagation()}
               className="w-full max-w-2xl max-h-[90vh] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden"
             >
-              {/* Header */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -114,13 +111,11 @@ export default function OrderDetailsModal({ isOpen, onClose, order }){
                 </div>
               </motion.div>
 
-              {/* Content */}
               <div 
                 className="flex-1 overflow-y-auto px-8 py-8 space-y-8" 
                 ref={modalRef}
                 style={{backgroundImage: "linear-gradient(to right, rgba(255,255,255,0.95), rgba(255,255,255,0.95)), url('/Images/admin-bg1.png')" }}
               >
-                {/* Status Badges */}
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -141,7 +136,6 @@ export default function OrderDetailsModal({ isOpen, onClose, order }){
                   </div>
                 </motion.div>
 
-                {/* Timeline */}
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -191,7 +185,6 @@ export default function OrderDetailsModal({ isOpen, onClose, order }){
                   )}
                 </motion.div>
 
-                {/* Products Section */}
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
                   <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
                     <Package className="w-5 h-5 text-slate-700" />
@@ -246,7 +239,6 @@ export default function OrderDetailsModal({ isOpen, onClose, order }){
                           </div>
                         </div>
 
-                        {/* Discount Info */}
                         {product.offerDiscount > 0 && (
                           <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-200 p-4 rounded-lg mt-3">
                             <div className="bg-emerald-100 p-2 rounded-lg">
@@ -254,7 +246,7 @@ export default function OrderDetailsModal({ isOpen, onClose, order }){
                             </div>
                             <div className="text-sm flex-1">
                               <span className="font-semibold text-emerald-900">
-                                {product.offerOrProductDiscount === "offer" ? "Offer" : "Discount"}
+                                {product.offerOrOtherDiscount === "offer" ? "Offer" : product.offerOrOtherDiscount === "product" ? "Product" : "Category"}
                               </span>
                               <p className="text-emerald-700 mt-1">
                                 {product.offerDiscountType === "percentage"
@@ -294,7 +286,6 @@ export default function OrderDetailsModal({ isOpen, onClose, order }){
                   </div>
                 </motion.div>
 
-                {/* Shipping Address */}
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -307,9 +298,6 @@ export default function OrderDetailsModal({ isOpen, onClose, order }){
                     </div>
                     Shipping Address
                   </h3>
-                  {/* <p className="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap break-words font-medium">
-                    {order.shippingAddress}
-                  </p> */}
                   {order.shippingAddress && (
                     <div className="text-slate-700 text-sm leading-relaxed font-medium space-y-1">
                       <p>{order.shippingAddress.firstName} {order.shippingAddress.lastName}</p>
@@ -326,7 +314,6 @@ export default function OrderDetailsModal({ isOpen, onClose, order }){
                   )}
                 </motion.div>
 
-                {/* Payment Information */}
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -365,7 +352,6 @@ export default function OrderDetailsModal({ isOpen, onClose, order }){
                   </div>
                 </motion.div>
 
-                {/* Price Breakdown */}
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -416,7 +402,6 @@ export default function OrderDetailsModal({ isOpen, onClose, order }){
                   </div>
                 </motion.div>
 
-                {/* Cancellation/Return Reasons */}
                 {(order.orderCancelReason || order.orderReturnReason) && (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
@@ -446,7 +431,6 @@ export default function OrderDetailsModal({ isOpen, onClose, order }){
                 )}
               </div>
 
-              {/* Footer */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}

@@ -19,9 +19,10 @@ import CheckoutPausedModal from './Modals/CheckoutPausedModal'
 import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
 import OrderStepper from '../../../Components/OrderStepper/OrderStepper'
 import FeaturesDisplay from '../../../Components/FeaturesDisplay/FeaturesDisplay'
+import useTermsConsent from "../../../Hooks/useTermsConsent"
 import Footer from '../../../Components/Footer/Footer'
 import {getTheCart, addToCart, reduceFromCart, removeFromCart, resetCartStates} from '../../../Slices/cartSlice'
-import {createOrder, resetOrderStates} from '../../../Slices/orderSlice'
+import {createOrder, processRefund, resetOrderStates} from '../../../Slices/orderSlice'
 import {getAllAddress, resetStates} from '../../../Slices/addressSlice'
 
 
@@ -37,6 +38,7 @@ export default function CheckoutPage(){
     const [orderReviewError, setOrderReviewError] = useState('')
 
     const [isLoading, setIsLoading] = useState(false)
+    const [orderPlaced, setOrderPlaced] = useState(false)
 
     const [openChatBox, setOpenChatBox] = useState(false)
     const [isPaymentFailedModalOpen, setIsPaymentFailedModalOpen] = useState({status: false, msg: null})
@@ -48,9 +50,14 @@ export default function CheckoutPage(){
 
     const [retryStripePaymentStatus, setRetryStripePaymentStatus] = useState(false)
 
+    const [autoInitiateRefund, setAutoInitiateRefund] = useState(false)
+
+    const {acceptTermsOnFirstAction} = useTermsConsent()
+    const [userTermsConsent, setUserTermsConsent] = useState(false)
+
     const {cart, productRemoved, couponMessage, error} = useSelector(state=> state.cart)
     const {addresses} = useSelector(state=> state.address)
-    const {orderCreated, orderMessage, orderError} = useSelector(state=> state.order)
+    const {orderCreated, orderMessage, orderError, orderFailed, refundSuccess, refundFailed} = useSelector(state=> state.order)
 
     const dispatch = useDispatch()
     const navigate = useNavigate()
@@ -85,6 +92,42 @@ export default function CheckoutPage(){
          dispatch(resetCartStates())
        }
      },[couponMessage])
+
+    useEffect(()=> {
+        const initiateRefundProcess = ()=> {
+            const fitlabAutoInitiated = {status: true, userId: cart.userId, refundAmount: cart.absoluteTotalWithTaxes}
+            dispatch(processRefund({refundInfos: {fitlabAutoInitiated}}))
+        }
+       if(orderPlaced && orderFailed && !autoInitiateRefund){
+         sonnerToast.info(`
+            Your order could not be completed due to server error, so ₹${cart.absoluteTotalWithTaxes} has been safely credited back to your wallet.
+        `)
+         initiateRefundProcess()
+         setAutoInitiateRefund(true) 
+       }
+     },[orderPlaced, orderFailed])
+
+     useEffect(()=> {
+       if(orderPlaced && orderFailed && refundSuccess && autoInitiateRefund){
+         sonnerToast.info(`
+            Your order could not be completed due to server error, so ₹${cart.absoluteTotalWithTaxes} 
+            has been safely credited back to your wallet.
+        `, {duration: 5500})
+         setOrderPlaced(false)
+         setAutoInitiateRefund(false)
+         dispatch(resetOrderStates())
+       }
+        if(orderPlaced && orderFailed && refundFailed && autoInitiateRefund){
+         sonnerToast.info(`
+            We encountered an issue while processing your order and were unable to complete the 
+            automatic refund of ₹${cart.absoluteTotalWithTaxes} to your wallet. Our support team will assist you promptly.
+            Please contact customer care.
+        `, {duration: 5500})
+         setOrderPlaced(false)
+         setAutoInitiateRefund(false)
+         dispatch(resetOrderStates())
+       }
+     },[refundSuccess, refundFailed])
 
     useEffect(()=> {
       if(addresses && !deliverAddressMade){
@@ -243,7 +286,34 @@ export default function CheckoutPage(){
     setOrderFreshSources(true)
   }
 
+  const fulfillRequirements = ()=> {
+    if(paymentMethod === '') {
+      sonnerToast.error('Please select a payment Method!')
+      setIsLoading(false)
+      return false
+    }
+    if(Object.keys(shippingAddress).length === 0) {
+      sonnerToast.error('Please select a delivery address!')
+      setIsLoading(false)
+      return false
+    }
+    if (userTermsConsent) {
+      acceptTermsOnFirstAction()
+    } else {
+        sonnerToast.warning(
+            "Please review and accept our Terms & Conditions and Privacy Policy to continue.",
+            { duration: 5500 },
+        )
+        return false
+    }
+    return true
+  }
+
   const placeOrder= async()=> {
+
+    const requirementsFulfilledStatus = fulfillRequirements()
+    if(!requirementsFulfilledStatus) return
+
     setIsLoading(true)
     if(!checkProductsAvailability()){
       const unavailableProducts = cart.products.filter(product=> 
@@ -254,17 +324,8 @@ export default function CheckoutPage(){
       setIsCheckoutPauseModalOpen(true)
       return
     } 
+
     try{
-      if(paymentMethod === ''){
-        sonnerToast.error('Please select a payment Method!')
-        setIsLoading(false)
-        return
-      }
-      if(Object.keys(shippingAddress).length === 0){
-        sonnerToast.error('Please select a delivery address!')
-        setIsLoading(false)
-        return
-      }
       if(paymentMethod === 'razorpay'){
         try{
             const response = await apiClient.post(`/payment/razorpay/order`, {amount: cart.absoluteTotalWithTaxes.toFixed(2)})
@@ -286,11 +347,20 @@ export default function CheckoutPage(){
             sonnerToast.success("Payment via Wallet successfull!", {autoClose: 4000})
             const paymentDetails = {paymentMethod: 'wallet', paymentStatus: 'completed', transactionId: response.data.transactionId}
             dispatch( createOrder({orderDetails: {...orderDetails, paymentDetails}}) ) 
+            setOrderPlaced(true)
           }
         }
         catch(error){
-          sonnerToast.error(error.message, {duration: 4000})
-          setIsPaymentFailedModalOpen({status: true, msg: 'Network Error'})
+            if (!error.response) {
+              sonnerToast.error("Network error. Please check your internet.", {duration: 4000})
+              setIsPaymentFailedModalOpen({status: true, msg: "Network error. Please check your internet."})
+            } else if (error.response?.status === 400 || error.response?.status === 404) {
+              sonnerToast.error(error.response.data.message, {duration: 4000})
+              setIsPaymentFailedModalOpen({status: true, msg: error.response.data.message})
+            } else {
+              sonnerToast.error("Something went wrong! Please retry later.", {duration: 4000})
+              setIsPaymentFailedModalOpen({status: true, msg: "Something went wrong! Please retry later."})
+            }          
         }
         finally{
             setIsLoading(false)
@@ -298,6 +368,7 @@ export default function CheckoutPage(){
       }
       else{
         dispatch( createOrder({orderDetails}) ) 
+        setOrderPlaced(true)
       }
     }
     catch(error){
@@ -342,12 +413,14 @@ export default function CheckoutPage(){
                 if (verifiedData?.data?.message.toLowerCase().includes('success')) {
                     setIsLoading(true)
                     sonnerToast.success(verifiedData.data.message, {duration: 4000})
+                    console.log("orderDetails----->", orderDetails)
                     dispatch( createOrder({
                       orderDetails: {
                         ...orderDetails, 
                         paymentDetails: {paymentMethod: 'razorpay', transactionId: response.razorpay_payment_id, paymentStatus: 'completed'}
                       }
                     }) ) 
+                    setOrderPlaced(true)
                 }else{
                     toast.error('Payment Failed! Try again later!', {autoClose: 4000})
                     setIsPaymentFailedModalOpen({status: true, msg: "Payment Failed! Try again later!"})
@@ -368,7 +441,7 @@ export default function CheckoutPage(){
     razorpayWindow.open()
 }
 
-const handleStripeOrPaypalPayment = (paymentGateway, paymentId)=> {
+const handleStripeOrPaypalPayment = (paymentGateway, paymentId)=> {                                  
   setIsLoading(true)
   sonnerToast.success("Payment Successfull!", {duration: 4000})
   const paymentMethod = paymentGateway
@@ -378,6 +451,7 @@ const handleStripeOrPaypalPayment = (paymentGateway, paymentId)=> {
       paymentDetails: {paymentMethod, transactionId: paymentId, paymentStatus: 'completed'}
     }
   }) ) 
+  setOrderPlaced(true)
 }
 
 const handleRetryCheckout = ()=> {
@@ -489,6 +563,7 @@ const handleRetryPayment = ()=> {
                                       optionClickHandler={radioClickHandler} 
                                       optionChangeHandler={radioChangeHandler} 
                                       cartTotal={cart && cart.absoluteTotalWithTaxes ? cart.absoluteTotalWithTaxes : null} 
+                                      isRequirementsFulfilled={fulfillRequirements}
                                       stripeOrPaypalPayment={handleStripeOrPaypalPayment}
                                       retryStripePaymentStatus={retryStripePaymentStatus} 
                                       setRetryStripePaymentStatus={setRetryStripePaymentStatus}
@@ -509,9 +584,13 @@ const handleRetryPayment = ()=> {
                                 <OrderSummary 
                                   shippingAddress={shippingAddress} 
                                   paymentMethod={paymentMethod} 
+                                  cancelPaymentMethods={()=> setPaymentMethod('')}
                                   onApplyDiscount={handleApplyDiscount}
                                   placeOrder={sourceItAgainAndOrder}
                                   onPaymentError={(msg)=> setIsPaymentFailedModalOpen({status: true, msg})}
+                                  isRequirementsFulfilled={fulfillRequirements}
+                                  setUserTermsConsent={setUserTermsConsent} 
+                                  didUserConsentTerms={userTermsConsent}
                                   isLoading={isLoading}
                                 />
                             </motion.div>

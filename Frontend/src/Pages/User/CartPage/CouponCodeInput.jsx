@@ -12,6 +12,8 @@ export default function CouponCodeInput({couponCode, setCouponCode, bestCouponAp
 
   const [isReplaceModalOpen, setIsReplaceModalOpen] = useState(false)
 
+  const [manualAppliedCoupon, setManualAppliedCoupon] = useState(false)
+
   const {cart, couponApplied} = useSelector(state=> state.cart)
   const {bestCoupon, couponMessage} = useSelector(state=> state.coupons)
 
@@ -26,11 +28,14 @@ export default function CouponCodeInput({couponCode, setCouponCode, bestCouponAp
   }, [bestCoupon])
 
   useEffect(()=> {
-    if(couponApplied){
+    if(couponApplied && !manualAppliedCoupon){
       if(bestCoupon && bestCouponAppliedStatus.dispatched){
         setBestCouponAppliedStatus({dispatched: true, applied: true})
       }
       setCouponCode(cart?.couponUsed?.code.toUpperCase())
+      if(manualAppliedCoupon) {
+        setManualAppliedCoupon(false)
+      }
     }
   },[couponApplied])
 
@@ -39,7 +44,8 @@ export default function CouponCodeInput({couponCode, setCouponCode, bestCouponAp
   }
 
   const applyTheCoupon = ()=> {
-    if(couponCode.trim() !== '' && cart?.couponUsed && cart.couponUsed.code !== couponCode){
+    setManualAppliedCoupon(true)
+    if(couponCode?.trim() !== '' && cart?.couponUsed && cart.couponUsed.code !== couponCode){
       setIsReplaceModalOpen(true)
     }else{
       dispatch( applyCoupon({couponCode}) )

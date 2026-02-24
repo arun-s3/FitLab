@@ -5,6 +5,8 @@ import { Elements } from "@stripe/react-stripe-js"
 
 import {toast} from 'react-toastify'
 
+import apiClient from '../../../Api/apiClient'
+
 import CardPayment from "./CardPayment"
 
 
@@ -27,15 +29,24 @@ const StripePayment = forwardRef( ({ amount, onPayment, payButtonText = 'Pay and
   }), [tryStripePaymentAgain])
 
   useEffect(() => {
-    fetch(`/payment/stripe/order`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ amount })
-    })
-      .then(res=> res.json())
-      .then(data=> setClientSecret(data.clientSecret))
-      .catch(error=> toast.error(error.message))
-  }, [amount])
+  const createStripeIntent = async () => {
+    try {
+      const response = await apiClient.post(`/payment/stripe/order`, { amount })
+      if (response?.data?.clientSecret) {
+        setClientSecret(response.data.clientSecret)
+      }else {
+        toast.error("Unable to initialize Stripe payment.")
+      }
+    }
+    catch (error) {
+      toast.error(error.response?.data?.message || "Payment initialization failed.")
+    }
+  }
+
+  if (amount) {
+    createStripeIntent()
+  }
+}, [amount])
 
   const options = {
     clientSecret,
@@ -69,7 +80,8 @@ const StripePayment = forwardRef( ({ amount, onPayment, payButtonText = 'Pay and
 
   return (
     <>
-      {clientSecret ? (
+      {clientSecret 
+        ? (
         <Elements stripe={stripePromise} options={options}>
 
           <CardPayment 
@@ -81,7 +93,10 @@ const StripePayment = forwardRef( ({ amount, onPayment, payButtonText = 'Pay and
 
         </Elements>
 
-      ) : 'Loading.....'}
+      ) 
+        :
+        <p className='mt-4 text-muted text-[15px]'> Loading..... </p>
+       }
     </>
   );
 }

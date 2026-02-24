@@ -4,26 +4,31 @@ import {useLocation, useNavigate, useOutletContext} from 'react-router-dom'
 import {useSelector, useDispatch} from 'react-redux'
 import {motion} from 'framer-motion'
 
-import {GoPackage} from "react-icons/go";
-import {MdCurrencyRupee} from "react-icons/md";
-import {LuPackageSearch} from "react-icons/lu";
-import {LiaWeightSolid} from "react-icons/lia";
-import {BsLightningCharge} from "react-icons/bs";
-import {AiOutlineSafetyCertificate} from "react-icons/ai";
-import {CgDetailsMore} from "react-icons/cg";
-import {TbWeight} from "react-icons/tb";
-import {IoColorPaletteOutline} from "react-icons/io5";
+import {GoPackage} from "react-icons/go"
+import {MdCurrencyRupee} from "react-icons/md"
+import {LuPackageSearch} from "react-icons/lu"
+import {LiaWeightSolid} from "react-icons/lia"
+import {BsLightningCharge} from "react-icons/bs"
+import {AiOutlineSafetyCertificate} from "react-icons/ai"
+import {CgDetailsMore} from "react-icons/cg"
+import {TbWeight} from "react-icons/tb"
+import {GoTag} from "react-icons/go"
+import {TbSquarePercentage} from "react-icons/tb"
+import {TbCirclePercentage} from "react-icons/tb"
+import {MdOutlineArrowDropDownCircle} from "react-icons/md"
+import {IoColorPaletteOutline} from "react-icons/io5"
 
 import {toast as sonnerToast} from 'sonner'
 import {toast} from 'react-toastify'
 
 import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
-import FileUpload from '../../../Components/FileUpload/FileUpload';
-import TagGenerator from '../../../Components/TagGenerator/TagGenerator';
+import FileUpload from '../../../Components/FileUpload/FileUpload'
+import TagGenerator from '../../../Components/TagGenerator/TagGenerator'
 import PlaceholderIcon from '../../../Components/PlaceholderIcon/PlaceholderIcon'
-import SelectCategoryForAdmin,{SelectSubCategoryForAdmin} from '../../../Components/SelectCategoryForAdmin/SelectCategoryForAdmin';
+import SelectCategoryForAdmin,{SelectSubCategoryForAdmin} from '../../../Components/SelectCategoryForAdmin/SelectCategoryForAdmin'
+import useFlexiDropdown from '../../../Hooks/FlexiDropdown'
 import {createProduct, updateProduct, resetStates} from '../../../Slices/productSlice'
-import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons';
+import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
 import {CustomHashLoader} from '../../../Components/Loader/Loader'
 import {handleImageCompression} from '../../../Utils/compressImages'
 import {handleInputValidation, displaySuccess, displayErrorAndReturnNewFormData, cancelErrorState} from '../../../Utils/fieldValidator'
@@ -37,7 +42,7 @@ export default function AdminAddAndEditProductPage({ editProduct }){
     const [images, setImages] = useState([])
     const [category, setCategory] = useState([])
     const [subCategory, setSubCategory] = useState('')
-    const [productData, setProductData] = useState({targetMuscles: []})
+    const [productData, setProductData] = useState({targetMuscles: [], discountType: 'percentage', discountValue: 0})
 
     const {setPageBgUrl} = useOutletContext() 
     setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.9),rgba(255,255,255,0.9)), url('/Images/admin-bg.jpg')`)
@@ -47,6 +52,9 @@ export default function AdminAddAndEditProductPage({ editProduct }){
     const [startedSubmission, setStartedSubmission] = useState(false)
 
     const [categoryImgPreview, setCategoryImgPreview] = useState('')
+
+    const {openDropdowns, dropdownRefs, toggleDropdown} = useFlexiDropdown(['discountDropdown'])
+    
     const categoryBgImage = {
         backgroundImage: `linear-gradient(to right, rgba(243, 230, 251, 0.85), rgba(243, 230, 251, 0.85)), url('/Images${categoryImgPreview}')`,
         backgroundPosition:'center',
@@ -151,6 +159,20 @@ export default function AdminAddAndEditProductPage({ editProduct }){
         abs: "/Images/MuscleGroups/abs.jpg",
     }
 
+    const discountLabel = (() => {
+      if (!productData?.discountType) return null
+
+      const value = Math.max(Number(productData?.discountValue) || 0, 0)
+
+      if (productData.discountType === "percentage") {
+        return `${value} %`
+      }
+      if (productData.discountType === "fixed") {
+        return `₹ ${value}`
+      }
+      return null
+    })()
+
     const changeHandler = (e, fieldName)=> {
         setProductData({...productData, [fieldName]: e.target.value})
     }
@@ -214,6 +236,24 @@ export default function AdminAddAndEditProductPage({ editProduct }){
             ? datas.targetMuscles.filter((m) => m !== muscle)
             : [...datas?.targetMuscles, muscle]
         }))
+    }
+
+    const radioClickHandler = (e)=>{
+      const value = e.target.value
+      const checkStatus = productData.discountType === value
+      if(checkStatus){
+          return
+      }else{
+          setProductData(data=> {
+            return {...data, discountType: value}
+          })
+          const changeEvent = new Event('change', {bubbles:true})
+          e.target.dispatchEvent(changeEvent)
+      }
+    }
+  
+    const radioChangeHandler = (e, value)=>{
+      e.target.checked = (productData.discountType === value)
     }
 
     const submitHandler = async (e)=>{
@@ -290,6 +330,7 @@ export default function AdminAddAndEditProductPage({ editProduct }){
                 formData.append('thumbnailImageIndex', thumbnailIndex)
             }else{
                 sonnerToast.error('Please select a Thumbnail!')
+                return
             }
             editProduct?  dispatch( updateProduct({formData, id: editProductItem.current._id}) ) : dispatch( createProduct({formData}) )
             sonnerToast.info("Uploading your product...")
@@ -354,7 +395,51 @@ export default function AdminAddAndEditProductPage({ editProduct }){
                                 <p className='error' onClick={(e)=> cancelErrorState(e, primaryColor.current)}></p>
                             </div>
                         </div>
+                        <div className='flex gap-[5px] items-center'>
+                            <div className='input-wrapper'>
+                                <label for='product-discount-value'> Discount (optional) </label>
+                                <div className='relative'>
+                                    <PlaceholderIcon icon={<GoTag/>} fromTop={35}/>
+                                    <input type='text' id='product-discount-value' required className='pl-[21px]' onFocus={(e)=> inputFocusHandler(e)} 
+                                       onBlur={(e)=> inputBlurHandler(e, "discountValue", {optionalField: true})} onChange={(e)=> changeHandler(e, "discountValue")} value={productData.discountValue}/>
+                                    <p className='error !absolute !top-[2.4rem] left-0 !h-0 !mt-0' onClick={(e)=> cancelErrorState(e, primaryColor.current, {optionalField: true})}></p>
+                                </div>
+                            </div>
+                            <div className='input-wrapper'>
+                                <label for='product-discount-value'> Discount Type </label>
+                                <div className='relative discountType' 
+                                  onClick={(e)=> toggleDropdown('discountDropdown')} ref={dropdownRefs.discountDropdown}>
+                                    <PlaceholderIcon fromTop={35} icon={<TbCirclePercentage/>}/>
+                                    <span className="text-[13px] text-[#554c4c] font-[470] tracking-[0.3px] capitalize flex justify-end items-center mt-[8px] mr-12">
+                                      {productData.discountType} (ie {discountLabel})
+                                    </span>
+                                    <MdOutlineArrowDropDownCircle className='h-[15px] w-[15px] absolute top-[25%] right-[8px]
+                                     text-[#6b7280] text-[11px] cursor-pointer'/>
+                                    {openDropdowns.discountDropdown && 
+                                    <ul className='list-none  px-[10px] py-[1rem] absolute top-[44px] right-0 flex flex-col gap-[10px] justify-center 
+                                            w-full text-[10px] bg-white border border-borderLight2 rounded-[8px] z-[5] cursor-pointer'>
+                                        {
+                                         ['Percentage', 'Fixed'].map(type=> (
+                                           <li key={`${type}`}> 
+                                            <span>  
+                                                <input type='radio' value={type.toLowerCase()} onClick={(e)=> radioClickHandler(e)}
+                                                    className='!w-[12px] !h-[12px] !rounded-full !text-secondary'
+                                                    onChange={(e)=> radioChangeHandler(e, type.toLowerCase())} 
+                                                    checked={productData.discountType === type.toLowerCase()}/>
+                                                <span className='text-[14px]'> {type} </span>
+                                            </span>
+                                           </li>
+                                         ))
+                                        }
+                                    </ul>
+                                    }
+                                    {/* <input type='text' placeholder='' id='product-discount-type' required className='pl-[21px]' onFocus={(e)=> inputFocusHandler(e)} 
+                                            onBlur={(e)=> inputBlurHandler(e, "stock")} onChange={(e)=> changeHandler(e, "discountType")} value={productData.discountType}/> */}
+                                </div>
+                            </div>
+                        </div>
                     </div>
+
                     <div className='flex justify-center items-center product-input-wrapper'>
                         <div className='input-wrapper'>
                             <label for='product-subtitle' className='flex items-center gap-[10px]'>

@@ -119,6 +119,7 @@ export const cancelReturnRequest = createAsyncThunk('order/cancelReturnRequest',
 
 export const processRefund = createAsyncThunk('order/processRefund', async ({refundInfos}, thunkAPI)=> {
   try {
+    console.log("{refundInfos}----->", {refundInfos})
     const response = await apiClient.post(`order/refund`, {refundInfos})
     return {...refundInfos}
   }catch(error){
@@ -131,6 +132,7 @@ export const processRefund = createAsyncThunk('order/processRefund', async ({ref
 const initialState = {
   orders: [], 
   orderCreated: false,
+  orderFailed: false,
   OrderRemoved: false,
   orderCancelled: false,
   orderReturnRequested: true,
@@ -138,6 +140,7 @@ const initialState = {
   handledOrderDecision: false,
   canceledReturnRequest: false,
   refundSuccess: false, 
+  refundFailed: false,
   totalUsersOrders: null,
   totalOrders:null,
   loading: false,
@@ -156,12 +159,14 @@ const orderSlice = createSlice({
       state.orderMessage = null
       state.orderSuccess = false
       state.orderCreated = false
+      state.orderFailed = false
       state.orderCancelled = false 
       state.orderUpdated = false 
       state.orderReturnRequested = false
       state.handledOrderDecision = false
       state.canceledReturnRequest = false
       state.refundSuccess = false
+      state.refundFailed = false
     }
   },
   extraReducers: (builder) => {
@@ -183,6 +188,7 @@ const orderSlice = createSlice({
         state.orderError = action.payload
         state.orderMessage = action.payload.message
         state.orderSuccess = false
+        state.orderFailed = true
       })
       .addCase(getOrders.fulfilled, (state, action) => {
         state.orderError = null
@@ -564,7 +570,7 @@ const orderSlice = createSlice({
               }
             }
           
-            else if (action.payload.refundType === 'order') {
+            else if (action.payload.refundType === 'order' || action.payload?.fitlabAutoInitiated?.status) {
               order.orderStatus = 'refunded'
               order.products.forEach(p => (p.productStatus = 'refunded'))
             }
@@ -580,6 +586,7 @@ const orderSlice = createSlice({
         state.orderError = action.payload
         state.orderSuccess = false
         state.refundSuccess = false
+        state.refundFailed = true
       })
 
     }

@@ -60,7 +60,7 @@ const CardPayment = forwardRef( ({onPayment, payButtonText, displayError}, ref)=
       setMessage("Payment succeeded!")
       setIsLoading(false)
   
-      if (error.type === "card_error" || error.type === "validation_error") {
+      if (error?.type === "card_error" || error?.type === "validation_error") {
         setMessage(error.message)
         toast.error(error.message, {autoClose: 4000})
         displayError(error.message)
@@ -73,7 +73,7 @@ const CardPayment = forwardRef( ({onPayment, payButtonText, displayError}, ref)=
       setIsLoading(false)
     }
     catch(error){
-      if(error.response.status !== 500){
+      if(error.response?.status !== 500){
         toast.error(error.message, {autoClose: 4000})
       }else{
         toast.error("An unexpected error occurred.", {autoClose: 4000})

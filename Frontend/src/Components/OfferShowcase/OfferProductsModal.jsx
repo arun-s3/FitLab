@@ -66,6 +66,15 @@ export default function OfferProductsModal({ offer, applicableProducts, onClose 
     )
   }
 
+  const processProductPage = ()=> {    
+    navigate({
+        pathname: '/shop/product', 
+        search: `?id=${products[currentIndex]._id}`
+      }, 
+      {state: {product: products[currentIndex]}}
+    )
+  }
+
 
   return (
     <motion.div
@@ -112,12 +121,7 @@ export default function OfferProductsModal({ offer, applicableProducts, onClose 
                             src={products[currentIndex].thumbnail.url}
                             alt={products[currentIndex].title}
                             className="w-full h-full object-cover rounded-lg cursor-pointer"
-                            onClick={()=> navigate({
-                                pathname: '/shop/product', 
-                                search: `?id=${products[currentIndex]._id}`
-                              }, 
-                              {state: {product: products[currentIndex]}}
-                            )}
+                            onClick={()=> processProductPage()}
                           />
                         ) : (
                           <div className="text-slate-400 dark:text-slate-500 text-center">

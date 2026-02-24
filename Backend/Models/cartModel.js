@@ -60,9 +60,13 @@ const cartSchema=new mongoose.Schema({
                 type: Number,
                 default: 0
             },
-            offerOrProductDiscount: {
+            offerOrOtherDiscount: {
                 type: String,
-                enum: ["offer", "discount"]
+                enum: ["offer", "product", "category"]
+            },
+            nonOfferDiscountValue : {
+                type: Number,
+                default: 0
             },
             total: {
                 type: Number,

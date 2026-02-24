@@ -30,10 +30,6 @@ const productSchema = mongoose.Schema({
      type: Number,
      default: 0,
     },
-    maxDiscount: {
-     type: Number,
-     default: null,
-    },
     brand: {
        type: String,
        required: [true, "Must enter the brand name"]

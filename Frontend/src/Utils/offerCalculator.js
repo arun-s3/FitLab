@@ -26,24 +26,28 @@ export function calculateOfferPricing(offer, unitPrice, quantity = 1) {
     }
 
     let rawDiscount = 0
-
-    if (offer.discountType === "percentage") {
-        rawDiscount = (totalOriginalPrice * offer.discountValue) / 100
-    } else if (offer.discountType === "fixed") {
-        rawDiscount = offer.discountValue
-    } else if (offer.discountType === "freeShipping") {
-        rawDiscount = 0
-    } else if (offer.discountType === "buyOneGetOne") {
-        const freeItems = Math.floor(quantity / 2)
-        rawDiscount = freeItems * unitPrice
-    }
-
     let finalDiscount = rawDiscount
     let maxDiscountApplied = false
 
-    if (offer.maxDiscount !== null && offer.maxDiscount !== undefined && rawDiscount > offer.maxDiscount) {
-        finalDiscount = offer.maxDiscount
-        maxDiscountApplied = true
+    if(offer?.offerOrOtherDiscount === 'offer') {
+        
+        if (offer.discountType === "percentage") {
+            rawDiscount = (totalOriginalPrice * offer.discountValue) / 100
+        } else if (offer.discountType === "fixed") {
+            rawDiscount = offer.discountValue
+        } else if (offer.discountType === "freeShipping") {
+            rawDiscount = 0
+        } else if (offer.discountType === "buyOneGetOne") {
+            const freeItems = Math.floor(quantity / 2)
+            rawDiscount = freeItems * unitPrice
+        }
+    
+        if (offer.maxDiscount !== null && offer.maxDiscount !== undefined && rawDiscount > offer.maxDiscount) {
+            finalDiscount = offer.maxDiscount
+            maxDiscountApplied = true
+        }
+    }else {
+        finalDiscount = offer.bestDiscount
     }
 
     const totalFinalPrice = Math.max(totalOriginalPrice - finalDiscount, 0)

@@ -5,7 +5,7 @@ import {motion, AnimatePresence} from "framer-motion"
 import { X, Calendar, Users, Clock, Flag} from "lucide-react"
 import {toast as sonnerToast} from 'sonner'
 
-import {createList, updateList} from "../../../../Slices/wishlistSlice"
+import {createList, updateList, resetWishlistStates} from "../../../../Slices/wishlistSlice"
 import FileUpload from "../../../../Components/FileUpload/FileUpload"
 import {handleImageCompression} from '../../../../Utils/compressImages'
 import {SiteSecondaryFillButton} from "../../../../Components/SiteButtons/SiteButtons"
@@ -28,7 +28,9 @@ export default function WishlistModal({ isOpen, onClose, listDetails, setLoading
 
   const [thumbnailPic, setThumbnailPic] = useState([])  
 
-  const {loading} = useSelector((state) => state.wishlist)
+  const [didSubmit, setDidSubmit] = useState(false)
+
+  const {loading, listUpdated} = useSelector((state) => state.wishlist)
   const dispatch = useDispatch()
 
   const modalRef = useRef(null)
@@ -69,6 +71,28 @@ export default function WishlistModal({ isOpen, onClose, listDetails, setLoading
     }
   }, [thumbnailPic])
 
+  const closeModal = ()=> {
+    setWishlistDetails({
+      name: "",
+      description: "",
+      isPublic: false,
+      sharedWith: "",
+      reminderDate: "",
+      expiryDate: "",
+      priority: 2,
+      thumbnail: null,
+    })
+    setThumbnailPic([])
+    onClose()
+  }
+
+  useEffect(()=> {
+      if(listDetails && didSubmit && listUpdated) {
+        dispatch(resetWishlistStates())
+        closeModal()
+      }
+  }, [listUpdated])
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
     setWishlistDetails((prev) => ({
@@ -92,21 +116,6 @@ export default function WishlistModal({ isOpen, onClose, listDetails, setLoading
       y: 0,
       transition: { duration: 0.35, ease: "easeOut" },
     },
-  }
-
-  const closeModal = ()=> {
-    setWishlistDetails({
-      name: "",
-      description: "",
-      isPublic: false,
-      sharedWith: "",
-      reminderDate: "",
-      expiryDate: "",
-      priority: 2,
-      thumbnail: null,
-    })
-    setThumbnailPic([])
-    onClose()
   }
 
   const handleSubmit = async(e) => {
@@ -143,7 +152,7 @@ export default function WishlistModal({ isOpen, onClose, listDetails, setLoading
       ? dispatch(updateList({ updateListDetails: formData }))
       : dispatch(createList({ wishlistDetails: formData }))
 
-    closeModal()
+    setDidSubmit(true)
   }
 
   if (!isOpen) return null
@@ -329,7 +338,7 @@ export default function WishlistModal({ isOpen, onClose, listDetails, setLoading
                   className="text-sm font-medium hover:bg-purple-700 transition-colors"
                 >
                   {loading ? (
-                    <CustomHashLoader loading={loading} />
+                    <CustomHashLoader loading={loading} color='#fff'/>
                   ) : listDetails ? (
                     "Update Wishlist"
                   ) : (

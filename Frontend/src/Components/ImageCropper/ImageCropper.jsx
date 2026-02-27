@@ -9,7 +9,7 @@ import {FaArrowLeft, FaArrowRight} from "react-icons/fa6"
 import {IoCloseSharp} from "react-icons/io5"
 
 import {SiteButtonSquare, SitePrimaryButtonWithShadow, SitePrimaryMinimalButtonWithShadow} from "../SiteButtons/SiteButtons"
-import { getCroppedImg } from "../ImageCropper/ImageCropperUtilities"
+import { getCroppedImg } from "../../Utils/ImageCropperUtilities"
 
 
 const ImageCropper = ({ images, onCropComplete, imageCropperState, setImageCropperState, imageCropperDefaultIndex,

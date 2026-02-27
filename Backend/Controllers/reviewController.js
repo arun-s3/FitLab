@@ -41,6 +41,10 @@ const createReview = async (req, res, next)=> {
       return next(errorHandler(404, "Product not available to be reviewed"))
     }
 
+    if (!rating || !title) {
+      return next(errorHandler(400, "Please update the rating and title"))
+    }
+
     const mainProductId = product.variantOf ? product.variantOf : product._id
 
     const existingReview = await Review.findOne({
@@ -90,6 +94,10 @@ const updateReview = async (req, res, next)=> {
     const daysSinceCreated = (Date.now() - new Date(review.createdAt)) / (1000 * 60 * 60 * 24)
     if (daysSinceCreated > 30) {
       return next(errorHandler(400, "You can edit your review within 30 days only"))
+    }
+
+    if (!rating || !title) {
+      return next(errorHandler(400, "Please update the rating and title"))
     }
 
     review.title = title

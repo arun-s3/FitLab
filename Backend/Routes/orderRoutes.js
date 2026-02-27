@@ -3,7 +3,7 @@ const orderRouter = express.Router()
 const upload = require('../Utils/multer')
 const {createOrder, applyCoupon, getOrders, getAllUsersOrders, cancelOrderProduct, cancelOrder, deleteProductFromOrderHistory, changeProductStatus,
      changeOrderStatus, initiateReturn, handleReturnDecision, cancelReturnRequest, processRefund, getOrderCounts, 
-     getTodaysLatestOrder, generateInvoice} = require('../Controllers/orderController')
+     getTodaysLatestOrder, checkIfUserBoughtProduct, generateInvoice} = require('../Controllers/orderController')
 const {isLogin, isLogout} = require('../Middlewares/Authentication')
 
 
@@ -18,6 +18,7 @@ orderRouter.patch('/cancel/:orderId', cancelOrder)
 orderRouter.post('/delete/:orderId', deleteProductFromOrderHistory)
 orderRouter.get('/statusCounts', getOrderCounts)
 orderRouter.get('/latest', isLogin, getTodaysLatestOrder)
+orderRouter.get('/purchaseStatus/:productId', isLogin, checkIfUserBoughtProduct)
 orderRouter.post('/return', upload.fields([{name:'images', maxCount:10}]), initiateReturn)
 orderRouter.post('/return/decision', handleReturnDecision)
 orderRouter.post('/return/cancel', cancelReturnRequest) 

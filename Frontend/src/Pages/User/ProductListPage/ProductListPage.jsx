@@ -20,6 +20,8 @@ import {resetWishlistStates} from '../../../Slices/wishlistSlice'
 import {ProtectedUserContext} from '../../../Components/ProtectedUserRoutes/ProtectedUserRoutes'
 import ProductFilterSidebar from '../../../Components/ProductFilterSidebar/ProductFilterSidebar'
 import FilterModule from './FilterModule'
+import OfferShowcase from '../../../Components/OfferShowcase/OfferShowcase'
+import Footer from '../../../Components/Footer/Footer'
 
 
 export default function ProductList(){
@@ -245,6 +247,7 @@ export default function ProductList(){
                             queryOptions={queryOptions}
                             couponApplicableItems={openCouponApplicableModal}
                             checkAuthOrOpenModal={checkAuthOrOpenModal}
+                            footRoom={false}
                         />
 
                     </div>
@@ -284,7 +287,13 @@ export default function ProductList(){
                         }
 
                 </section>
+
             </main>
+
+            <OfferShowcase />
+
+            <Footer/>
+
         </>
     )
 }

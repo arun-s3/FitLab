@@ -117,13 +117,6 @@ export default function TextChatBox({closeable, onCloseChat, boxHeight, boxWidth
                 </div>
               </div>
               <div className={`flex items-center space-x-2 ${isStatic && 'hidden'}`}>
-                {/* {
-                  isMinimized ? 
-                    <Maximize2 size={20} className="hover:bg-white hover:text-secondary p-1 rounded transition-colors cursor-pointer"
-                       onClick={()=> setIsMinimized(false)}/> 
-                    : <Minimize2 size={20} className="hover:bg-white hover:text-secondary p-1 rounded transition-colors cursor-pointer"
-                        onClick={()=> setIsMinimized(true)}/>
-                  } */}
                 <button onClick={toggleChat} className="hover:bg-white hover:text-secondary p-1 rounded transition-colors">
                   <X size={16} />
                 </button>

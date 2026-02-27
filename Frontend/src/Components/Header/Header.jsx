@@ -11,7 +11,7 @@ import {User, Heart, Headset, Store, Activity, Bot, LogIn} from "lucide-react"
 import {toast as sonnerToast} from 'sonner'
 
 import UserHead from '../UserHead/UserHead'
-import NotificationBell from './NotificationBell'
+import NotificationBell from '../Notification/NotificationBell'
 import VideoCallCommonModal from '../../Pages/User/VideoCallCommonModal/VideoCallCommonModal'
 import {SiteButton} from '../SiteButtons/SiteButtons'
 import MobileSidebar from './MobileSidebar'

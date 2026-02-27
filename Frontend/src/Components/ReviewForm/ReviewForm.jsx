@@ -4,7 +4,8 @@ import { motion } from "framer-motion"
 import {toast as sonnerToast} from 'sonner'
 
 
-export default function ReviewForm({onSubmit, editReview = null, onEditSubmission, provideRating, hideRating = false, containerStyle = null}) {    
+export default function ReviewForm({onSubmit, editReview = null, onEditSubmission, provideRating = null, hideRating = false, 
+    containerStyle = null}) {    
 
   const [rating, setRating] = useState(5)
   const [title, setTitle] = useState("")
@@ -25,7 +26,9 @@ export default function ReviewForm({onSubmit, editReview = null, onEditSubmissio
   }, [editReview])
 
   useEffect(()=> {
-    setRating(provideRating)
+    if(provideRating) {
+      setRating(provideRating)
+    }
   }, [provideRating])
 
   const handleSubmit = (e) => {

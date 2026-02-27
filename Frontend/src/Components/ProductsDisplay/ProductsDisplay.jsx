@@ -31,8 +31,9 @@ import {capitalizeFirstLetter, camelToCapitalizedWords} from '../../Utils/helper
 import {addToCart} from '../../Slices/cartSlice'
 
 
-export default function ProductsDisplay({gridView, showByTable, customGridViewStyles, currentPage, limiter, queryOptions, showTheseProducts, admin, 
-  restockingProduct, wishlistDisplay, currentList, setCurrentPage, totalPages, couponApplicableItems = null, checkAuthOrOpenModal = null}) {
+export default function ProductsDisplay({gridView, showByTable, customGridViewStyles, currentPage, limiter, queryOptions, showTheseProducts,
+   admin, restockingProduct, wishlistDisplay, currentList, setCurrentPage, totalPages, couponApplicableItems = null, footRoom = true,
+   checkAuthOrOpenModal = null}) {
 
   const dispatch = useDispatch()
   const {products:items, productRestocked} = useSelector(state=> state.productStore)
@@ -686,7 +687,7 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
               onClose={() => setIsRestockModalOpen(false)}
               onSave={handleRestockProduct}
           />
-          <div className='h-[7rem] w-full'></div>
+          <div className={footRoom ? 'h-[7rem] w-full' : ''}></div>
       </>
   )
 }

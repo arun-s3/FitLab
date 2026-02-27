@@ -413,7 +413,6 @@ export default function CheckoutPage(){
                 if (verifiedData?.data?.message.toLowerCase().includes('success')) {
                     setIsLoading(true)
                     sonnerToast.success(verifiedData.data.message, {duration: 4000})
-                    console.log("orderDetails----->", orderDetails)
                     dispatch( createOrder({
                       orderDetails: {
                         ...orderDetails, 

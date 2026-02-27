@@ -4,7 +4,7 @@ import {useSelector} from 'react-redux'
 
 import {toast as sonnerToast} from 'sonner'
 import Cropper from "react-easy-crop"
-import {getCroppedImg} from "../ImageCropper/ImageCropperUtilities"
+import {getCroppedImg} from "../../Utils/ImageCropperUtilities"
 import {LuUndo2} from "react-icons/lu"
 import {LuRedo2} from "react-icons/lu"
 

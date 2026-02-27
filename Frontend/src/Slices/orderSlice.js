@@ -119,7 +119,6 @@ export const cancelReturnRequest = createAsyncThunk('order/cancelReturnRequest',
 
 export const processRefund = createAsyncThunk('order/processRefund', async ({refundInfos}, thunkAPI)=> {
   try {
-    console.log("{refundInfos}----->", {refundInfos})
     const response = await apiClient.post(`order/refund`, {refundInfos})
     return {...refundInfos}
   }catch(error){

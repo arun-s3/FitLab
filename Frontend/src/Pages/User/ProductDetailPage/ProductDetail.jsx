@@ -1,8 +1,11 @@
-import React, {useState, useEffect, useRef} from 'react'
+import React, {useState, useEffect, useRef, useContext} from 'react'
 import {useDispatch, useSelector} from 'react-redux'
 import {motion, AnimatePresence} from 'framer-motion'
 
-import {Minus, Plus, Heart} from 'lucide-react'
+import {Minus, Plus} from 'lucide-react'
+import {MdFavorite, MdFavoriteBorder} from "react-icons/md"
+
+import {toast as sonnerToast} from 'sonner'
 
 import ProductDiscountBadge from '../../../Components/DiscountBadges/ProductDiscountBadge'
 import CategoryDiscountBadge from '../../../Components/DiscountBadges/CategoryDiscountBadge'
@@ -12,6 +15,10 @@ import {capitalizeFirstLetter} from '../../../Utils/helperFunctions'
 import {SiteSecondaryFillButton} from '../../../Components/SiteButtons/SiteButtons'
 import {CustomHashLoader} from '../../../Components/Loader/Loader'
 import {increaseOfferImpression} from '../../../Slices/offerSlice'
+import {ProtectedUserContext} from '../../../Components/ProtectedUserRoutes/ProtectedUserRoutes'
+import {addProductToList, removeProductFromList, getUserWishlist, resetWishlistStates} from '../../../Slices/wishlistSlice'
+import WishlistOptionsModal from '../../../Components/WishlistModals/WishlistOptionsModal'
+import WishlistModal from '../WishlistPage/Modals/WishlistModal'
 import {calculateOfferPricing} from '../../../Utils/offerCalculator'
 
 
@@ -26,7 +33,14 @@ export default function ProductDetail({product = null, quantity, setQuantity, on
     const containerRef = useRef(null)
 
     const [isZoomed, setIsZoomed] = useState(false)
+
+    const {setIsAuthModalOpen, checkAuthOrOpenModal} = useContext(ProtectedUserContext)
+    setIsAuthModalOpen({status: false, accessFor: 'shopping'})
+
+    const [isWishlistOptionsModalOpen, setIsWishlistOptionsModalOpen] = useState(false)
+    const [isWishlistModalOpen, setIsWishlistModalOpen] = useState(false)
   
+    const {wishlist, listProductAdded, listProductRemoved, wishlistError} = useSelector(state=> state.wishlist)
     const {bestOffer} = useSelector(state=> state.offers)
 
     const dispatch = useDispatch()
@@ -61,6 +75,82 @@ export default function ProductDetail({product = null, quantity, setQuantity, on
         handleOfferImpression(bestOffer)
       }
     }, [bestOffer])
+
+    useEffect(()=> {
+      dispatch(getUserWishlist())
+    },[])
+
+    useEffect(()=> {
+      if(listProductAdded){ 
+        sonnerToast.success("The product have been added to the Wishlist!")
+        dispatch(resetWishlistStates())
+      }
+      if(listProductRemoved){
+        sonnerToast.success("The product have been removed from the Wishlist!")
+        dispatch(resetWishlistStates())
+      }
+    }, [listProductAdded, listProductRemoved])
+    
+    useEffect(()=> {
+      if(wishlistError){
+        sonnerToast.error(wishlistError)
+        dispatch(resetWishlistStates())
+      }
+    },[wishlistError])
+
+    const images = product?.images || []
+    const mainImageUrl = images[currentImageIndex]?.url || product?.thumbnail?.url || ""
+
+    const selectImage = (index)=> {
+      thumbnailRef.current.src = product.images[index].url
+      setCurrentImageIndex(index)
+    }
+
+    const handleMouseMove = (e)=> {
+      if (!isZoomed || !thumbnailRef.current || !containerRef.current) return
+
+      const { left, top, width, height } = containerRef.current.getBoundingClientRect()
+      const x = ((e.clientX - left) / width) * 100
+      const y = ((e.clientY - top) / height) * 100
+
+      thumbnailRef.current.style.transformOrigin = `${x}% ${y}%`
+      thumbnailRef.current.style.transform = "scale(1.6)"
+    }
+
+    const handleMouseLeave = ()=> {
+      setIsZoomed(false)
+      if (thumbnailRef.current) {
+        thumbnailRef.current.style.transformOrigin = "center center"
+        thumbnailRef.current.style.transform = "scale(1)"
+      }
+    }
+
+    const addToWishlist = ()=> {
+      if(checkAuthOrOpenModal && checkAuthOrOpenModal()) return
+      const requiredProductVariantId = variantValueIndex === 0 ? product._id : product.variants[variantValueIndex - 1]._id
+      const userCreatedListsExists = Object.keys(wishlist).length && wishlist?.lists.some(list=> list.name === 'Default Shopping List') 
+                                      && wishlist?.lists.length > 1
+      if(userCreatedListsExists){
+        setIsWishlistOptionsModalOpen(true)
+      }else{
+        dispatch(addProductToList({productId: requiredProductVariantId}))
+      }
+    }
+    
+    const deleteFromWishlist = ()=> {
+      if(checkAuthOrOpenModal && checkAuthOrOpenModal()) return
+      const requiredProductVariantId = variantValueIndex === 0 ? product._id : product.variants[variantValueIndex - 1]._id
+      const productOfDefaultList = Object.keys(wishlist).length && wishlist?.lists.some(list=> {
+         list.name === 'Default Shopping List' && list.products.some(item=> item.product === product._id)
+      }) 
+                                      
+      if(productOfDefaultList){
+        dispatch(removeProductFromList({productId: product._id}))
+      }else{
+        const targetList = wishlist.lists.find((list)=> list.products.find(item=> item.product === requiredProductVariantId))
+        dispatch(removeProductFromList( {listName: targetList.name, productId: requiredProductVariantId } ))
+      }
+    }
 
     const sectionVariants = {
       hidden: { opacity: 0, y: 8 },
@@ -101,34 +191,7 @@ export default function ProductDetail({product = null, quantity, setQuantity, on
       hover: { scale: 1.02, boxShadow: "0 10px 30px rgba(0,0,0,0.14)" },
       tap: { scale: 0.98 },
     }
-
-    const images = product?.images || []
-    const mainImageUrl = images[currentImageIndex]?.url || product?.thumbnail?.url || ""
-
-    const selectImage = (index)=> {
-        thumbnailRef.current.src = product.images[index].url
-        setCurrentImageIndex(index)
-    }
-
-    const handleMouseMove = (e)=> {
-      if (!isZoomed || !thumbnailRef.current || !containerRef.current) return
-
-      const { left, top, width, height } = containerRef.current.getBoundingClientRect()
-      const x = ((e.clientX - left) / width) * 100
-      const y = ((e.clientY - top) / height) * 100
-
-      thumbnailRef.current.style.transformOrigin = `${x}% ${y}%`
-      thumbnailRef.current.style.transform = "scale(1.6)"
-    }
-
-    const handleMouseLeave = ()=> {
-      setIsZoomed(false)
-      if (thumbnailRef.current) {
-        thumbnailRef.current.style.transformOrigin = "center center"
-        thumbnailRef.current.style.transform = "scale(1)"
-      }
-    }
-
+    
 
     return (
 
@@ -413,8 +476,22 @@ export default function ProductDetail({product = null, quantity, setQuantity, on
                   <SiteSecondaryFillButton 
                     variant="outline" 
                     size="icon" 
-                    className="p-[10px] xs-sm:p-[12px]">
-                      <Heart className="w-[14px] h-[14px] xs-sm:w-[16px] xs-sm:h-[16px]" />
+                    className="!px-[10px] !py-[8px]">
+                      {
+                        wishlist.lists.some((list) =>
+                            list.products.some((item) => item.product === product._id),
+                        ) ? (
+                            <MdFavorite
+                                className='hover:scale-110 transition-transform duration-100 text-secondary'
+                                onClick={() => deleteFromWishlist()}
+                            />
+                        ) : (
+                            <MdFavoriteBorder
+                                className='hover:scale-110 transition-transform duration-100 text-secondary'
+                                onClick={() => addToWishlist()}
+                            />
+                        )
+                      }
                   </SiteSecondaryFillButton>
                 </motion.div>
               </motion.div>
@@ -430,6 +507,19 @@ export default function ProductDetail({product = null, quantity, setQuantity, on
               </motion.div>
             </motion.div>
           </motion.div>
+
+          <WishlistOptionsModal
+              isOpen={isWishlistOptionsModalOpen}
+              onClose={() => setIsWishlistOptionsModalOpen(false)}
+              product={product}
+              setIsWishlistModalOpen={setIsWishlistModalOpen}
+              wishlist={wishlist}
+          />
+   
+          <WishlistModal 
+            isOpen={isWishlistModalOpen} 
+            onClose={() => setIsWishlistModalOpen(false)} 
+          />
 
         </section>
     )

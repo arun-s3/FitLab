@@ -691,6 +691,43 @@ const getTodaysLatestOrder = async (req, res, next)=> {
 }
 
 
+const checkIfUserBoughtProduct = async (req, res, next) => {
+  try {
+    console.log("Inside checkIfUserBoughtProduct controller");
+
+    const userId = req.user._id
+    const { productId } = req.params
+
+    if (!productId) {
+      return next(errorHandler(400, "Product ID is required"))
+    }
+
+    const order = await Order.findOne({
+      userId,
+      products: {
+        $elemMatch: {
+          productId: productId,
+          productStatus: "delivered",
+        }
+      }
+    });
+
+    console.log("order---->", order)
+
+    const hasPurchased = !!order
+
+    console.log("hasPurchased---->", hasPurchased)
+
+    return res.status(200).json({success: true, hasPurchased})
+
+  }
+  catch (error) {
+    console.error("Error checking purchase history:", error.message)
+    next(error)
+  }
+}
+
+
 const initiateReturn = async (req, res, next)=> {
   try {
     console.log("Inside initiateReturn...")
@@ -1160,4 +1197,4 @@ const generateInvoice = async (req, res, next) => {
 
 module.exports = {createOrder, getOrders, getAllUsersOrders, cancelOrderProduct, cancelOrder, deleteProductFromOrderHistory, 
         changeOrderStatus, changeProductStatus, initiateReturn, handleReturnDecision, cancelReturnRequest, 
-        processRefund, getOrderCounts, getTodaysLatestOrder, generateInvoice}
+        processRefund, getOrderCounts, getTodaysLatestOrder, checkIfUserBoughtProduct, generateInvoice}

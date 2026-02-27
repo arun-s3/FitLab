@@ -1,4 +1,5 @@
 import React,{useState, useEffect, useRef} from "react"
+import {useSelector} from 'react-redux'
 import { motion } from "framer-motion"
 
 import apiClient from '../../../Api/apiClient'
@@ -27,6 +28,12 @@ export default function ReviewsPanel({ productId, productRating, totalReviews })
 
   const [reviewSet, setReviewSet] = useState({firstIndex: 0, lastIndex: 3})  
 
+  const [userReviewed, setUserReviewed] = useState(false)
+
+  const [purchaseStatus, setPurchaseStatus] = useState(false)
+
+  const {user} = useSelector(state=> state.user)
+
   const reviewFormRef = useRef(null)
 
   async function loadReviews(){  
@@ -44,9 +51,32 @@ export default function ReviewsPanel({ productId, productRating, totalReviews })
     }
   }
 
+  const userPurchaseStatus = async() => {
+    try{
+      const response = await apiClient.get(`/order/purchaseStatus/${productId}`)
+      if(response.data.success){
+        setPurchaseStatus(response.data.hasPurchased) 
+      }
+    }
+    catch(error){
+      setPurchaseStatus(false)
+    }
+   }
+
   useEffect(()=> {
     loadReviews()
+    userPurchaseStatus()
   }, [])
+
+  useEffect(()=> {
+    if(user && reviews && reviews.length > 0) {
+        const userCurrentReview = reviews.find(review=> review.userId.username === user.username)
+        if(userCurrentReview) {
+            setUserReviewed(true)
+            setEditReview(userCurrentReview)
+        }
+    }
+  }, [reviews, user])
 
   useEffect(()=> {
     if(reviews && totalReviews && totalPages && limit){
@@ -54,7 +84,7 @@ export default function ReviewsPanel({ productId, productRating, totalReviews })
       setTotalPages(Math.ceil(totalReviews/limit))
     }
   }, [currentPage])   
-
+  
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -78,10 +108,12 @@ export default function ReviewsPanel({ productId, productRating, totalReviews })
         const response = await apiClient.post(`/review/add`, {productId, ...newReview})
         if(response?.data?.success){
           sonnerToast.success("Your review has been submitted successfully!")
+          setUserReviewed(true)
           loadReviews()
         }
       }
       catch(error){
+        setUserReviewed(false)
         if (!error.response) {
           sonnerToast.error("Network error. Please check your internet.")
         } else if (error.response.status === 400 || error.response.status === 404) {
@@ -157,15 +189,26 @@ export default function ReviewsPanel({ productId, productRating, totalReviews })
 
         <motion.div className="lg:col-span-3" variants={containerVariants}>
           <motion.button
-            onClick={() => setShowForm(status=> !status)}
+            onClick={() => {
+                if(!purchaseStatus) return
+                setShowForm(status=> !status)
+            }}
             className="w-full mb-8 px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 
-              hover:to-purple-800 text-white font-semibold rounded-lg transition transform"
+              hover:to-purple-800 text-white font-semibold rounded-lg transition transform disabled:cursor-not-allowed"
+            disabled={!purchaseStatus}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             variants={itemVariants}
           >
-            {showForm ? "Cancel" : "Write a Review"}
+            {!userReviewed ? showForm ? "Cancel" : "Write a Review" : "Edit your review"}
           </motion.button>
+
+          {
+            !purchaseStatus &&
+              <p className="-mt-4 text-[13px] text-red-500 tracking-[0.4px]">
+                Only customers who have purchased this product can leave a review.
+              </p>
+          }
 
           {showForm && (
             <motion.div

@@ -469,8 +469,12 @@ const removeFromCart = async (req, res, next)=> {
 
 const getTheCart = async (req, res, next)=> {
   try {
-    const userId = req.user._id
+    const userId = req?.user?._id || null
     console.log("Fetching cart for user:", userId)
+
+    if(!userId) {
+        return res.status(200).json({message: 'Your cart is empty', cart: []})
+    }
 
     const cart = await Cart.findOne({ userId })
                           .populate("couponUsed").populate("products.productId").populate("products.offerApplied")
@@ -497,7 +501,10 @@ const applyCoupon = async (req, res, next)=> {
         return res.status(200).json({ message: "No coupon code received!" })
       }
 
+      console.log("couponCode---->", couponCode)
+
       const coupon = await Coupon.findOne({ code: couponCode.toUpperCase() })
+      console.log("coupon---->", coupon)
       let cart = await Cart.findOne({ userId }).populate("products.productId")
 
       if (!coupon || coupon.status !== "active"){

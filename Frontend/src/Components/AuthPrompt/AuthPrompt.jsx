@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react'
 import {useLocation, useNavigate} from 'react-router-dom'
 import {motion} from "framer-motion"
 
-import {ShoppingCart, Heart, User, MapPin, MapPinPlus, CreditCard, TicketPercent, ShoppingBag, ArrowRight} from "lucide-react"
+import {ShoppingCart, Heart, User, MapPin, MapPinPlus, CreditCard, TicketPercent, ShoppingBag, Activity, ArrowRight} from "lucide-react"
 
 
 export default function AuthPrompt(){
@@ -13,6 +13,7 @@ export default function AuthPrompt(){
   const [config, setConfig] = useState(null)
 
   const getPageConfig = (pageName)=> {
+    console.log("pageName---->", pageName)
     const configs = {
       cart: {
         icon: ShoppingCart,
@@ -53,6 +54,12 @@ export default function AuthPrompt(){
         icon: TicketPercent,
         title: "Exclusive Coupons",
         description: "View, apply, and manage discount coupons to save more on your purchases"
+      },
+      fitness_tracker: {
+        icon: Activity,
+        title: "Fitness & Health Tracker",
+        description:
+          "Create workout templates, track live exercises with timer and calorie burn, monitor body metrics, and get AI-powered insights with performance dashboards",
       }
     }
     return configs[pageName] || configs.cart

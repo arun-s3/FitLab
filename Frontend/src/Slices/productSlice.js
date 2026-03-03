@@ -4,7 +4,7 @@ import apiClient from '../Api/apiClient'
 
 export const createProduct = createAsyncThunk('createProduct', async({formData}, thunkAPI)=>{
     try{
-        const response = await apiClient.post('/admin/products/add', formData, {headers: {'Content-Type': 'multipart/form-data'}})
+        const response = await apiClient.post('/products/add', formData, {headers: {'Content-Type': 'multipart/form-data'}})
         return response.data
     }
     catch(error){
@@ -15,7 +15,7 @@ export const createProduct = createAsyncThunk('createProduct', async({formData},
 
 export const updateProduct = createAsyncThunk('updateProduct', async({formData, id}, thunkAPI)=>{
     try{
-        const response = await apiClient.put(`/admin/products/edit/${id}`, formData, {headers: {'Content-Type': 'multipart/form-data'}})
+        const response = await apiClient.put(`/products/edit/${id}`, formData, {headers: {'Content-Type': 'multipart/form-data'}})
         return response.data
     }
     catch(error){
@@ -26,7 +26,7 @@ export const updateProduct = createAsyncThunk('updateProduct', async({formData, 
 
 export const toggleProductStatus = createAsyncThunk('toggleProductStatus', async(id, thunkAPI)=>{
     try{
-        const response = await apiClient.get(`/admin/products/status/${id}`)
+        const response = await apiClient.get(`/products/status/${id}`)
         return response.data
     }
     catch(error){
@@ -48,7 +48,7 @@ export const getAllProducts = createAsyncThunk('getAllProducts', async({queryOpt
 
 export const restockProduct = createAsyncThunk('restockProduct', async({ productId, quantity }, thunkAPI)=>{
     try{
-        const response = await apiClient.put("/admin/products/restock", { productId, quantity })
+        const response = await apiClient.put("/products/restock", { productId, quantity })
         return { productId, quantity }
     }
     catch(error){

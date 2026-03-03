@@ -299,6 +299,10 @@ async function textChatBoxSocket(io) {
 
           const { message, userGoal, userId } = messageData
 
+          if(!userId) {
+            socket.emit("coach-error", { message: "Please sign in to access Coach+" })
+          }
+
           io.to(userId).emit("coach-loading", true)
           const response = await runAICoach({userId, query: message, userGoal})
 

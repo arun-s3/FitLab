@@ -27,6 +27,7 @@ const CardPayment = forwardRef( ({onPayment, payButtonText, displayError}, ref)=
   }
 
   const handleSubmit = async ()=> {
+
     if (!stripe || !elements) {
       return
     }
@@ -97,7 +98,7 @@ const CardPayment = forwardRef( ({onPayment, payButtonText, displayError}, ref)=
         <PaymentElement onChange={handleElementChange}/> 
 
           <button 
-            type="submit" 
+            type="button" 
             disabled={isLoading || !stripe || !elements || isDisabled} 
             className={`w-full bg-secondary text-white py-3 px-4 rounded-md font-medium hover:bg-purple-800 transition-colors 
               ${ (isLoading || !stripe || !elements || isDisabled) && 'cursor-not-allowed'}`} onClick={handleSubmit}>

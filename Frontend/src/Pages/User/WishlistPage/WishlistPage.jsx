@@ -74,11 +74,13 @@ export default function WishlistPage(){
                     lg:justify-items-start max-lg:!ml-0`
 
     useEffect(()=> {
+        if(!user) return
         dispatch(getTheCart())
         dispatch(getUserWishlist())
     },[])
 
     useEffect(()=> {
+        if(!user) return
         dispatch( getAllWishlistProducts({queryOptions}))
     }, [wishlist])
 
@@ -96,6 +98,7 @@ export default function WishlistPage(){
     },[sorts, currentPage, limit])
 
     useEffect(()=>{
+        if(!user) return
         if(Object.keys(queryOptions).length){
             dispatch( getAllWishlistProducts({queryOptions}))
         }

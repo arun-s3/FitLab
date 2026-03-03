@@ -1,6 +1,6 @@
 const express = require('express')
 const fitnessRouter = express.Router()
-const {isLogin, isLogout} = require('../Middlewares/Authentication')
+const {isLogin, optionalAuth, isLogout} = require('../Middlewares/Authentication')
 const {
     getExerciseThumbnail,
     getExerciseVideos,
@@ -25,12 +25,12 @@ const {getWeeklyStats, getMonthlyStats, getWorkoutFrequencyStats, getWorkoutVolu
      getCaloriesStats, getWeightInsights, getBodyPartInsights, getHealthScoreInsights} = require('../Controllers/fitnessDashboardController')
 
 
-fitnessRouter.get('/thumbnail/:name', getExerciseThumbnail)
-fitnessRouter.get('/videos/:name', getExerciseVideos)
-fitnessRouter.post('/exercises/list', getExercisesList)
-fitnessRouter.get("/exercises/bodyparts", getExerciseBodyParts)
-fitnessRouter.get("/exercises/muscles", getExerciseMuscles)
-fitnessRouter.get("/exercises/equipments", getExerciseEquipments)
+fitnessRouter.get('/thumbnail/:name', optionalAuth, getExerciseThumbnail)
+fitnessRouter.get('/videos/:name', optionalAuth, getExerciseVideos)
+fitnessRouter.post('/exercises/list', optionalAuth, getExercisesList)
+fitnessRouter.get("/exercises/bodyparts", optionalAuth, getExerciseBodyParts)
+fitnessRouter.get("/exercises/muscles", optionalAuth, getExerciseMuscles)
+fitnessRouter.get("/exercises/equipments", optionalAuth, getExerciseEquipments)
 
 fitnessRouter.post('/tracker/exercise-library/add', isLogin, addExercise)
 fitnessRouter.get('/tracker/exercise-library/list', isLogin, getUserExerciseLibrary)
@@ -44,7 +44,7 @@ fitnessRouter.post('/tracker/workout/save-calories', isLogin, updateCaloriesForE
 
 fitnessRouter.post('/tracker/health/update', isLogin, addOrUpdateDailyHealthProfile)
 fitnessRouter.get('/tracker/health', isLogin, getLatestHealthProfile)
-fitnessRouter.get('/tracker/health/check', isLogin, checkWeeklyHealthProfile)
+fitnessRouter.get('/tracker/health/check', optionalAuth, checkWeeklyHealthProfile)
 
 fitnessRouter.get('/tracker/stats/week', isLogin, getWeeklyStats)
 fitnessRouter.get('/tracker/stats/month', isLogin, getMonthlyStats)

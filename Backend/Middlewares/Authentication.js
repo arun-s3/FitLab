@@ -8,7 +8,7 @@ const isLogin = async (req, res, next) => {
         const token = req.cookies?.accessToken
         if (!token) {
             console.log("No accessToken found inside cookie")
-            return res.status(401).json({ message: "Unauthorized" })
+            return res.status(401).json({ message: "Unauthorized", guest: true})
         }
 
         let decoded
@@ -38,14 +38,35 @@ const isLogin = async (req, res, next) => {
     }
 }
 
+const optionalAuth = async (req, res, next) => {
+    try {
+        const token = req.cookies?.accessToken
+
+        if (!token) {
+            req.user = null
+            return next()
+        }
+
+        const decoded = verifyAccessToken(token)
+        const currentUser = await User.findById(decoded.userId).select("-password")
+
+        req.user = currentUser || null
+        next()
+    } catch {
+        req.user = null 
+        next()
+    }
+}
+
 const authorizeAdmin = async(req,res,next)=>{
     try{
         console.log("Admin from authorizeAdmin-->"+ JSON.stringify(req.user))
+        console.log("req.user-->"+ JSON.stringify(req.user))
         if(req.user && req.user.isAdmin){
             next()
         }
         else{
-            res.status(401).json({message:"Not an Admin!! UNAUTHORIZED!"})
+            res.status(403).json({message:" Since you are not an Admin, you are unauthorized!"})
         }
     }
     catch(error){
@@ -71,4 +92,4 @@ const isLogout = (req,res,next)=>{
   }
 }
 
-module.exports = {isLogin, authorizeAdmin, isLogout}
+module.exports = {isLogin, optionalAuth, authorizeAdmin, isLogout}

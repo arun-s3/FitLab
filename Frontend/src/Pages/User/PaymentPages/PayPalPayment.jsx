@@ -54,17 +54,12 @@ export default function PaypalPayment({amount, onPayment, onError}) {
     const makePaypalOrder = async()=> {
         try {            
             const usdAmount = await findUsdAmount(amount)
-            
-            const response = await fetch(`/payment/paypal/order`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({amount: usdAmount.toFixed(2)})
-            })
-            
-            const orderData = await response.json()
 
+            const response = await apiClient.post(`/payment/paypal/order`, {
+               amount: usdAmount.toFixed(2)
+            })
+            const orderData = response.data
+            
             if (orderData.id) {
                 return orderData.id
             }else{

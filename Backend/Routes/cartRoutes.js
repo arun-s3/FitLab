@@ -1,10 +1,10 @@
 const express = require('express')
 const cartRouter = express.Router()
 const {addToCart, reduceFromCart, removeFromCart, getTheCart, calculateCharges, applyCoupon, removeCoupon} = require('../Controllers/cartController')
-const {isLogin, isLogout} = require('../Middlewares/Authentication')
+const {isLogin, optionalAuth} = require('../Middlewares/Authentication')
 
 
-cartRouter.get('/', isLogin, getTheCart)
+cartRouter.get('/', optionalAuth, getTheCart)
 cartRouter.post('/add', isLogin, addToCart)
 cartRouter.post('/reduce', isLogin, reduceFromCart)
 cartRouter.post('/delete', isLogin, removeFromCart)

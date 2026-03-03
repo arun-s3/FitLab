@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react"
+import { useSelector } from 'react-redux'
 import { motion, AnimatePresence } from "framer-motion"
 
 import apiClient from '../../../Api/apiClient'
@@ -44,6 +45,8 @@ export default function WorkoutSessionCard() {
 
   const [openExerciseDeleteModal, setOpenExerciseDeleteModal] = useState({exercise: null})
 
+  const {user} = useSelector(state=> state.user)
+
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(20) 
   const limit = 3
@@ -74,6 +77,7 @@ export default function WorkoutSessionCard() {
   }
 
   useEffect(()=> {
+    if(!user) return
     setLoading(true)
     getExercises()
   }, [])

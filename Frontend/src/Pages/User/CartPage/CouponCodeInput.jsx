@@ -14,12 +14,14 @@ export default function CouponCodeInput({couponCode, setCouponCode, bestCouponAp
 
   const [manualAppliedCoupon, setManualAppliedCoupon] = useState(false)
 
+  const {user} = useSelector(state=> state.user)
   const {cart, couponApplied} = useSelector(state=> state.cart)
   const {bestCoupon, couponMessage} = useSelector(state=> state.coupons)
 
   const dispatch = useDispatch() 
 
   useEffect(()=> {
+    if(!user) return
     if(Object.keys(bestCoupon).length > 0 && !couponCode && cart && !cart?.couponUsed){
       setCouponCode(bestCoupon.code)
       dispatch( applyCoupon({couponCode: bestCoupon.code}) )

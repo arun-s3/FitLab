@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect, useContext } from "react"
+import {useNavigate} from 'react-router-dom'
+import {useSelector} from 'react-redux'
 import { motion, AnimatePresence } from "framer-motion"
 
 import { Bot, X, Send, User } from "lucide-react"
@@ -20,6 +22,10 @@ export default function CoachPlus({autoOpen, onCloseChat}) {
 
   const {isConnected, coachMessages, newCoachMessage, isCoachLoading, setIsCoachLoading, coachError, 
         handleSendMessageToCoach, handleUserTypingForCoach} = useContext(SocketContext)
+
+  const {user} = useSelector(state=> state.user)
+
+  const navigate = useNavigate()
   
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -215,6 +221,27 @@ export default function CoachPlus({autoOpen, onCloseChat}) {
               </AnimatePresence>
 
               <AnimatePresence>
+                {!user && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="flex justify-start"
+                  >
+                    <p className="p-4 text-[13px] text-secondary tracking-[0.3px] text-wrap bg-purple-100 border border-purple-300 rounded-lg">
+                        <span 
+                            className="cursor-pointer hover:underline hoevr:underline-offset-2"
+                            onClick={()=> setTimeout(()=> navigate('/signin'), 150)}
+                        > Sign in </span> 
+                        to unlock Coach+, your intelligent personal fitness assistant. Get precise, customized guidance
+                        for your goals, equipment setup, lifestyle habits, supplements, products
+                        — just like having your own personal coach.
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <AnimatePresence>
                 {(coachError || connectionError) && (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
@@ -255,7 +282,7 @@ export default function CoachPlus({autoOpen, onCloseChat}) {
                 />
                 <motion.button
                   onClick={handleSendMessageToCoach}
-                  disabled={!newCoachMessage.trim() || !isConnected}
+                  disabled={!newCoachMessage.trim() || !isConnected || !user}
                   className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-purple-600 text-white
                    hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:bg-gray-300
                     disabled:cursor-not-allowed"

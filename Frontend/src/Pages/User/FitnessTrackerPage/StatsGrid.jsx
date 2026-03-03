@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from "react"
 import './FitnessTrackerStyles.css'
+import {useSelector} from 'react-redux'
 import {motion, AnimatePresence} from "framer-motion"
 
 import apiClient from '../../../Api/apiClient'
@@ -70,10 +71,13 @@ export default function StatsGrid({ timeRange, onFetchedDatas }) {
       color: "from-green-500 to-green-600",
     },
   ])
+
+  const {user} = useSelector(state=> state.user)
   
     useEffect(() => {
       const fetchAllStats = async ()=> {    
         setLoading(true) 
+        
         try{
           const response = await apiClient.get(`/fitness/tracker/stats/${timeRange}`)
           if(response.status === 200){
@@ -107,6 +111,27 @@ export default function StatsGrid({ timeRange, onFetchedDatas }) {
             setLoading(false)
         }
       }
+
+        if(!user) {
+          setStatCards((prev) =>
+            prev.map((card) => {
+              if (card.label === "Workouts") {
+                return { ...card, value: "0" };
+              }
+              if (card.label === "Total Volume") {
+                return { ...card, value: "0" };
+              }
+              if (card.label === "Calories Burned") {
+                return { ...card, value: "0" };
+              }
+              if (card.label === "Current Streak") {
+                return { ...card, value: "0" };
+              }
+              return card;
+            })
+          )
+          return
+        }
     
       fetchAllStats();
     }, [timeRange])

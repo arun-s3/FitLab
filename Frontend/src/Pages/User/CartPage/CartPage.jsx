@@ -55,6 +55,7 @@ export default function ShoppingCartPage(){
   }
 
   useEffect(()=> {
+    if(!user) return
     dispatch(getTheCart())
     if(Object.keys(bestCoupon).length === 0){
       dispatch(getBestCoupon())
@@ -267,7 +268,7 @@ export default function ShoppingCartPage(){
 
           {
             !user &&
-              <div className='mt-16 '>
+              <div className='mt-16 flex justify-center'>
               
                 <AuthPrompt />
 

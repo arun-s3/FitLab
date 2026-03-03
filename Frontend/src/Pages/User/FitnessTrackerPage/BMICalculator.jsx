@@ -9,6 +9,8 @@ import HealthAiInsights from "./AiModules/HealthAiInsights"
 import {updateUserWeight} from '../../../Slices/userSlice'
 import useTermsConsent from "../../../Hooks/useTermsConsent"
 import TermsDisclaimer from "../../../Components/TermsDisclaimer/TermsDisclaimer"
+import AuthPrompt from "../../../Components/AuthPrompt/AuthPrompt"
+import AuthModal from "../../../Components/AuthModal/AuthModal"
 
 
 export default function BMICalculator() {
@@ -29,6 +31,8 @@ export default function BMICalculator() {
   const [results, setResults] = useState(null)
   const [showResults, setShowResults] = useState(false)
 
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState({status: false, accessFor: 'this feature'})
+
   const dispatch = useDispatch()
 
   const {user} = useSelector(state=> state.user)
@@ -36,6 +40,7 @@ export default function BMICalculator() {
   const {acceptTermsOnFirstAction} = useTermsConsent()
 
   useEffect(()=> {
+    if(!user) return
     getLatestHealthProfile()
   }, [])
 
@@ -48,6 +53,18 @@ export default function BMICalculator() {
     }
   }, [user])
 
+  const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+  const checkAuthOrOpenModal = async()=> {
+      if(user){
+        return false
+      }else{
+        await delay(2000);
+        setIsAuthModalOpen(prev => ({ ...prev, status: true}))
+        return true
+      }
+  }
+
   const handleChange = (e) => {
     const { name, value } = e.target
     if (value === "" || /^[0-9]+$/.test(value)){
@@ -59,6 +76,7 @@ export default function BMICalculator() {
   }
 
   const updateHealthProfile = async(healthProfile)=> {
+    if(checkAuthOrOpenModal()) return
     acceptTermsOnFirstAction()
     try { 
       const response = await apiClient.post(`/fitness/tracker/health/update`, {healthProfile})
@@ -553,11 +571,21 @@ export default function BMICalculator() {
 
           {!showResults && (
             <motion.div
-              className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl shadow-lg shadow-gray-200/50 p-8 flex items-center justify-center"
+              className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-2xl shadow-lg shadow-gray-200/50 
+                p-8 flex flex-col items-center justify-center gap-40"
               variants={itemVariants}
               initial="hidden"
               animate="visible"
             >
+              {
+                !user &&
+                  <div className='mt-4 flex justify-center'>
+                  
+                    <AuthPrompt />
+      
+                  </div>
+              }
+
               <div className="text-center">
                 <div className="text-6xl mb-4 opacity-20">📊</div>
                 <p className="text-gray-600 text-lg font-semibold">
@@ -570,11 +598,21 @@ export default function BMICalculator() {
 
         <div className="mt-12">
 
-          <HealthAiInsights/>
+          <HealthAiInsights guestMode={!user}/>
 
         </div>
 
       </div>
+
+      {
+          isAuthModalOpen.status &&
+              <AuthModal
+                  isOpen={isAuthModalOpen.status}
+                  accessFor={isAuthModalOpen.accessFor}
+                  onClose={()=> setIsAuthModalOpen(prev => ({ ...prev, status: false}))}
+              />
+      }
+
     </motion.div>
   )
 }

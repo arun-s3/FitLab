@@ -45,6 +45,7 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
   const location = useLocation()
 
   const {wishlist, wishlistProducts, listProductAdded, listProductRemoved, wishlistError} = useSelector(state=> state.wishlist)
+  const {user} = useSelector(state=> state.user)
 
   const [isRestockModalOpen, setIsRestockModalOpen] = useState(false)
   const [selectedRestockProduct, setSelectedRestockProduct] = useState(null)
@@ -61,6 +62,7 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
   const [discountedCategories, setDiscountedCategories] = useState([])
 
   useEffect(()=> {
+    if(!user) return
     dispatch(getUserWishlist())
   },[])
 
@@ -108,7 +110,7 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
   useEffect(()=> {
     const getDiscountedCategories = async(categories)=> { 
         try { 
-          const response = await apiClient.post(`/admin/products/category/discounts`, {names: categories})
+          const response = await apiClient.post(`/categories/discounts`, {names: categories})
           if(response.status === 200){
             const tranformedCategories = response.data.discountedCategories.map(cat=> capitalizeFirstLetter(cat))
             setDiscountedCategories(tranformedCategories)

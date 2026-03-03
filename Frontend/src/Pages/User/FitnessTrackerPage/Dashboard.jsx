@@ -1,4 +1,5 @@
 import React, {useState} from "react"
+import {useSelector} from 'react-redux'
 import {motion} from "framer-motion"
 
 import MonthlyWeeklyChart from "./MonthlyWeeklyCharts"
@@ -11,6 +12,8 @@ export default function Dashboard() {
   const [timeRange, setTimeRange] = useState("week")
 
   const [dashboardDatas, setDashboardDatas] = useState(null)
+
+  const {user} = useSelector(state=> state.user)
 
   const tempSaveForAiInsight = (dataType, datas)=> {
     setDashboardDatas(dashboardDatas=> (
@@ -82,7 +85,7 @@ export default function Dashboard() {
 
       <div className="!mt-14">
       
-        <FitnessAiInsights receivedSourceDatas={dashboardDatas} periodType={timeRange} />
+        <FitnessAiInsights receivedSourceDatas={dashboardDatas} periodType={timeRange} guestMode={!user}/>
       
       </div>
 

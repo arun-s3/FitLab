@@ -99,7 +99,7 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
 
    const loadCategoryInfo = async(id)=> {
         try{
-            const response = await apiClient.get(`/admin/products/category/${id}`)
+            const response = await apiClient.get(`/categories/${id}`)
             if(response && response.status === 200){
                 return {
                     parentCategory: response.data.category?.parentCategory?.name || null,

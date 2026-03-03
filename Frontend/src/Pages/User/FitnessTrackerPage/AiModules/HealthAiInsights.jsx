@@ -10,7 +10,7 @@ import apiClient from '../../../../Api/apiClient'
 import AiInsightCards from "../../../../Components/AiInsightCards/AiInsightCards"
 
 
-export default function HealthAiInsights() { 
+export default function HealthAiInsights({guestMode = false}) { 
 
     const [latestHealthDatas, setLatestHealthDatas] = useState(null)
     const [latestHealthInsights, setLatestHealthInsights] = useState(null)
@@ -114,6 +114,7 @@ export default function HealthAiInsights() {
     }
 
     useEffect(()=> {
+      if(guestMode) return
       getInsightDataSources()
     }, [])
 
@@ -130,6 +131,7 @@ export default function HealthAiInsights() {
                     sectionSubtitle="Personalized insights generated from your recent health metrics"
                     sourceDatasLoading={loading}
                     parentFetchError={error}
+                    guestMessage="Please log in to access the Health Tracker and receive personalized health insights."
                 />
 
             }

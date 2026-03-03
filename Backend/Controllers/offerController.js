@@ -449,7 +449,7 @@ const getBestOffer = async (req, res, next)=> {
         console.log("Inside getBestOffer of offerController")
         console.log("req.user--->", JSON.stringify(req.user))
 
-        const userId = req.user._id
+        const userId = req?.user?._id || null
         const {productId, quantity} = req.body
 
         console.log(`productId-----> ${productId}...quantity-----> ${quantity}`)

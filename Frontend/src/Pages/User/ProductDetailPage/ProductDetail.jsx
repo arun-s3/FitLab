@@ -42,6 +42,7 @@ export default function ProductDetail({product = null, quantity, setQuantity, on
   
     const {wishlist, listProductAdded, listProductRemoved, wishlistError} = useSelector(state=> state.wishlist)
     const {bestOffer} = useSelector(state=> state.offers)
+    const {user} = useSelector(state=> state.user)
 
     const dispatch = useDispatch()
 
@@ -77,6 +78,7 @@ export default function ProductDetail({product = null, quantity, setQuantity, on
     }, [bestOffer])
 
     useEffect(()=> {
+      if(!user) return
       dispatch(getUserWishlist())
     },[])
 

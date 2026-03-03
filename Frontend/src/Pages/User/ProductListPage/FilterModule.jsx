@@ -40,7 +40,7 @@ export default function FilterModule({filter, setFilter, rating, setRating, popu
     useEffect(()=> {
         async function getCategoryName(){
             try{
-                const response = await apiClient.get(`/admin/products/category/id/${categoryType}`)
+                const response = await apiClient.get(`/categories/id/${categoryType}`)
                 setShowSubcategoriesOf({id: response.data.id, subCategory: response.data.subCategory})
               }
               catch(error){

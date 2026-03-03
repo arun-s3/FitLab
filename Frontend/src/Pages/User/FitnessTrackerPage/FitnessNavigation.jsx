@@ -18,7 +18,6 @@ export default function FitnessNav({ currentPage, setCurrentPage }) {
         if(response.data.shouldShowReminder) setOpenReminderModal({status: true, isNewUser: response.data.isNewUser})
       }
     }catch (error) {
-      console.error(error)
       return
     }
   }

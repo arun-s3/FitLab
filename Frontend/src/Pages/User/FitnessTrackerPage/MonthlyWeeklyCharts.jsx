@@ -1,6 +1,8 @@
 import React, {useEffect, useState} from "react"
 import './FitnessTrackerStyles.css'
+import { useSelector } from 'react-redux'
 import { motion } from "framer-motion"
+
 import {LineChart, Line, BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell, XAxis, YAxis, 
   CartesianGrid, Tooltip, ResponsiveContainer} from "recharts"
 
@@ -40,6 +42,8 @@ export default function MonthlyWeeklyCharts({ title, dataKey, timeRange, onFetch
 
     const [loading, setLoading] = useState(false)
 
+    const {user} = useSelector(state=> state.user)
+
     useEffect(() => {
         const fetchAllStats = async () => {
             try {
@@ -59,7 +63,8 @@ export default function MonthlyWeeklyCharts({ title, dataKey, timeRange, onFetch
                 setLoading(false)
             }   
         }
-
+        
+        if(!user) return
         setLoading(true)
         fetchAllStats()
     }, [])

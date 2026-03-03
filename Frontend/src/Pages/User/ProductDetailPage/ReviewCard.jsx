@@ -15,7 +15,7 @@ export default function ReviewCard({ review, index, onEdit }){
   const {user} = useSelector(state=> state.user)
 
   const [helpfulCount, setHelpfulCount] = useState(review.helpful.length)
-  const [isHelpful, setIsHelpful] = useState(review.helpful.includes(user._id))
+  const [isHelpful, setIsHelpful] = useState(user ? review?.helpful?.includes(user._id) : false)
 
   const [editTooltip, setEditTooltip] = useState(false)
   const [editingReview, setEditingReview] = useState(false)
@@ -107,7 +107,7 @@ export default function ReviewCard({ review, index, onEdit }){
 
       <h4 className="relative font-semibold text-gray-900 dark:text-white mb-3 text-[16px] flex items-start gap-[10px]">
         <span className="max-w-[90%]"> {review.title} </span>
-        {
+        { user &&
           review.userId.username === user.username &&
           <>
             <UserPen 

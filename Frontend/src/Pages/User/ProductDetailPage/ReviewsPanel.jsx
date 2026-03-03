@@ -52,6 +52,7 @@ export default function ReviewsPanel({ productId, productRating, totalReviews })
   }
 
   const userPurchaseStatus = async() => {
+    if(!user) return
     try{
       const response = await apiClient.get(`/order/purchaseStatus/${productId}`)
       if(response.data.success){

@@ -15,16 +15,15 @@ apiClient.interceptors.response.use( response => response, async error => {
             originalRequest._retry = true;
 
             try {
-                await apiClient.post("/refresh-token", {}, { withCredentials: true })
+                await apiClient.post("/refresh-token")
 
                 return apiClient(originalRequest);
             } catch {
-                const currentPath = window.location.pathname;
-                const isAdminRoute = currentPath.startsWith("/admin");
-
-                if (!currentPath.includes("signin")) {
-                  window.location.replace(  isAdminRoute ? "/admin/signin" : "/signin" );
+                if (error.response?.status === 401 && error.response.data?.guest) {
+                //   return { success: false, guest: true };
+                    throw error
                 }
+                throw error
             }
     }
     return Promise.reject(error);

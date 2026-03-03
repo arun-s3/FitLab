@@ -62,7 +62,7 @@ const orderSchema = new mongoose.Schema({
             },
             offerOrOtherDiscount: {
                 type: String,
-                enum: ["offer", "discount", "category"]
+                enum: ["offer", "product", "category"]
             },
             total: {
                 type: Number,

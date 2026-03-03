@@ -1,6 +1,8 @@
 const express = require('express')
 const userRouter = express.Router()
-const {isLogin, isLogout} = require('../Middlewares/Authentication')
+
+const {isLogin, optionalAuth, authorizeAdmin, isLogout} = require('../Middlewares/Authentication')
+
 const upload = require('../Utils/multer')
 const {createUser, createRefreshToken, sendOtp, verifyOtp, loginUser, clearAllCookies, updateForgotPassword, resetPassword,
     updateUserDetails, googleSignin, updateProfilePic, signout, getUserId,searchUsernames, totalUsersCount, generateUniqueGuestUser, 
@@ -8,25 +10,25 @@ const {createUser, createRefreshToken, sendOtp, verifyOtp, loginUser, clearAllCo
     = require('../Controllers/userController')
 
 
-userRouter.post('/refresh-token', createRefreshToken)
+userRouter.post('/refresh-token', optionalAuth, createRefreshToken)
 userRouter.post('/signup', isLogout, createUser)    
-userRouter.post('/sendOtp', sendOtp)                                                                                                         //isLogout, 
-userRouter.post('/verifyOtp', verifyOtp)                                                                                                     //isLogout,
+userRouter.post('/sendOtp', isLogin, sendOtp)                                                                                                         //isLogout, 
+userRouter.post('/verifyOtp', isLogin, verifyOtp)                                                                                                     //isLogout,
 userRouter.post('/signin', isLogout, loginUser)
-userRouter.post('/googleSignin', googleSignin)
-userRouter.get('/clear-cookies', clearAllCookies)
+userRouter.post('/googleSignin', isLogout, googleSignin)
+userRouter.get('/clear-cookies', optionalAuth, clearAllCookies)
 userRouter.post('/update', isLogin, updateUserDetails)
 userRouter.post('/password/reset', isLogin, updateForgotPassword)
 userRouter.post('/password/update', isLogin, resetPassword)
 userRouter.put('/profilePic', isLogin, upload.single('image'), updateProfilePic)
 userRouter.put('/update/weight', isLogin, updateUserWeight)
 userRouter.get('/signout', isLogin, signout)
-userRouter.get('/search/:searchTerm', isLogin, searchUsernames)
+userRouter.get('/search/:searchTerm', isLogin, authorizeAdmin, searchUsernames)
 userRouter.get('/getUserid', isLogin, getUserId) 
-userRouter.get('/totalUsers', isLogin, totalUsersCount)
-userRouter.get('/user/:username', isLogin, getUserByUsername)
+userRouter.get('/totalUsers', optionalAuth, totalUsersCount)
+userRouter.get('/user/:username', isLogin, authorizeAdmin, getUserByUsername)
 userRouter.post('/terms', isLogin, updateTermsAcceptance)
-userRouter.get('/guest', generateUniqueGuestUser)
-userRouter.get('/guest-check', verifyAndDeleteGuestUser)
+userRouter.get('/guest', optionalAuth, generateUniqueGuestUser)
+userRouter.get('/guest-check', optionalAuth, verifyAndDeleteGuestUser)
 
 module.exports = userRouter 

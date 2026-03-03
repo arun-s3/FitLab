@@ -1,4 +1,5 @@
 import React, {useState, useEffect, useRef} from "react"
+import { useSelector } from 'react-redux'
 import { motion, AnimatePresence } from "framer-motion"
 import {debounce} from 'lodash'
 
@@ -12,6 +13,7 @@ import {toast as sonnerToast} from 'sonner'
 
 import useFlexiDropdown from '../../../Hooks/FlexiDropdown'
 import {CustomHashLoader} from '../../../Components/Loader/Loader'
+import AuthModal from "../../../Components/AuthModal/AuthModal"
 
 
 export default function ExerciseForm({ onAddOrUpdateExercise, editExerciseData = null, onExerciseUpdation}) {
@@ -34,6 +36,10 @@ export default function ExerciseForm({ onAddOrUpdateExercise, editExerciseData =
     const [sets, setSets] = useState( [{ weight: "", reps: "", rpe: "5" }])
 
     const [loading, setLoading] = useState(false)
+
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState({status: false, accessFor: 'this feature'})
+
+    const {user} = useSelector(state=> state.user)
 
     const {openDropdowns, dropdownRefs, toggleDropdown} = useFlexiDropdown(['exerciseNamesDropdown', 'bodyPartsDropdown', 'equipmentsDropdown'])
 
@@ -223,9 +229,18 @@ export default function ExerciseForm({ onAddOrUpdateExercise, editExerciseData =
       }
     }
 
+    const checkAuthOrOpenModal = ()=> {
+        if(user){
+          return false
+        }else{
+          setIsAuthModalOpen(prev => ({ ...prev, status: true}))
+          return true
+        }
+    }
+
     const handleSubmit = async(e) => {
       e.preventDefault()
-      setLoading(true)
+      if(checkAuthOrOpenModal()) return
       if (!formData.name || sets.length === 0 || sets.some(set=> !set.reps)) {
         sonnerToast.error("Please fill in all required fields")
         return
@@ -245,7 +260,9 @@ export default function ExerciseForm({ onAddOrUpdateExercise, editExerciseData =
         })),
         notes: formData.notes || "",
       }
-      
+
+      setLoading(true)
+
       if(!editExerciseData){
         await addNewExercise(exercise)
       }else{
@@ -528,6 +545,16 @@ export default function ExerciseForm({ onAddOrUpdateExercise, editExerciseData =
         }  
         
       </motion.button>
+
+        {
+            isAuthModalOpen.status &&
+                <AuthModal
+                    isOpen={isAuthModalOpen.status}
+                    accessFor={isAuthModalOpen.accessFor}
+                    onClose={()=> setIsAuthModalOpen(prev => ({ ...prev, status: false}))}
+                />
+        }
+
     </motion.form>
   )
 }

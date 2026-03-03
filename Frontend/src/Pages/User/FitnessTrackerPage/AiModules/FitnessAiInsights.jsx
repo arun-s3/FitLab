@@ -13,7 +13,7 @@ import apiClient from '../../../../Api/apiClient'
 import AiInsightCards from "../../../../Components/AiInsightCards/AiInsightCards"
 
 
-export default function FitnessAiInsights({receivedSourceDatas, periodType}) { 
+export default function FitnessAiInsights({receivedSourceDatas, periodType, guestMode = false}) { 
 
     const [periodFitnessDatas, setPeriodFitnessDatas] = useState(null)
     const [fitnessInsights, setFitnessInsights] = useState(null)
@@ -90,6 +90,7 @@ export default function FitnessAiInsights({receivedSourceDatas, periodType}) {
     ]
 
     const getInsightDataSources = async()=> {
+        if(guestMode) return
         setLoading(true)
         try {  
           const latestInsightResponse = await apiClient.get(`/ai/insights/tracker`)
@@ -113,6 +114,9 @@ export default function FitnessAiInsights({receivedSourceDatas, periodType}) {
             }
           }
         }catch (error) {
+          if (error.response?.status === 401 && error.response?.data?.guest) {
+            return
+          }
           setError("Something went wrong while finding your tracking history! Please check your network and retry later")
         }finally{
           setLoading(false)
@@ -150,6 +154,7 @@ export default function FitnessAiInsights({receivedSourceDatas, periodType}) {
                     sectionSubtitle={`Personalized insights generated from your recent workouts and fitness profile in this ${periodType}`}
                     sourceDatasLoading={loading}
                     parentFetchError={error}
+                    guestMessage="Please log in to access the Fitness Tracker and receive personalized performance insights."
                 />
 
             }

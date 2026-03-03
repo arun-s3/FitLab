@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react"
+import { useSelector } from 'react-redux'
 import { motion } from "framer-motion"
 
 import {Flame, Award, Timer, Battery} from "lucide-react"
@@ -16,6 +17,8 @@ export default function WorkoutAiInsights() {
     const [loading, setLoading] = useState(false)
 
     const [error, setError] = useState(null)
+
+    const {user} = useSelector(state=> state.user)
 
     const insightsTemplates = [
         {
@@ -102,6 +105,7 @@ export default function WorkoutAiInsights() {
     }
 
     useEffect(()=> {
+      if(!user) return
       getInsightDataSources()
     }, [])
 
@@ -118,6 +122,7 @@ export default function WorkoutAiInsights() {
                     sectionSubtitle="Personalized insights generated from your recent workouts"
                     sourceDatasLoading={loading}
                     parentFetchError={error}
+                    guestMessage="Please log in to access the Fitness Tracker and receive personalized performance insights."
                 />
 
             }

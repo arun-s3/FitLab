@@ -4,7 +4,7 @@ import apiClient from '../Api/apiClient'
 
 export const createCategory = createAsyncThunk('createCategory', async({formData}, thunkAPI)=>{
     try{
-        const response = await apiClient.post('/admin/products/category/add', formData, {headers: {'Content-Type': 'multipart/form-data'}})
+        const response = await apiClient.post('/categories/add', formData, {headers: {'Content-Type': 'multipart/form-data'}})
         return response.data
     }
     catch(error){
@@ -15,7 +15,7 @@ export const createCategory = createAsyncThunk('createCategory', async({formData
 
 export const getAllCategories = createAsyncThunk('getAllCategories', async(_, thunkAPI)=>{
     try{
-        const response = await apiClient.get('/admin/products/category')
+        const response = await apiClient.get('/categories')
         return response.data
     }
     catch(error){
@@ -26,7 +26,7 @@ export const getAllCategories = createAsyncThunk('getAllCategories', async(_, th
 
 export const getCategoriesOfType = createAsyncThunk('getCategoriesOfType', async({status, isActive}, thunkAPI)=>{
     try{
-        const response = await apiClient.get(`/admin/products/category/?status=${status}&isActive=${isActive}`)
+        const response = await apiClient.get(`/categories/?status=${status}&isActive=${isActive}`)
         return response.data
     }
     catch(error){
@@ -37,7 +37,7 @@ export const getCategoriesOfType = createAsyncThunk('getCategoriesOfType', async
 
 export const getSingleCategory = createAsyncThunk('getSingleCategory', async({id}, thunkAPI)=>{
     try{
-        const response = await apiClient.get(`/admin/products/category/${id}`)
+        const response = await apiClient.get(`/categories/${id}`)
         return {populatedSubCategories: response.data.populatedSubCategories, parentLevelCount:response.data.parentLevelCount, id, parentName: response.data.parentName}
     }
     catch(error){
@@ -48,7 +48,7 @@ export const getSingleCategory = createAsyncThunk('getSingleCategory', async({id
 
 export const getCategoryNames = createAsyncThunk('getCategoryNames', async({id}, thunkAPI)=>{
     try{
-        const response = await apiClient.get(`/admin/products/category/getNames/${id}`)
+        const response = await apiClient.get(`/categories/getNames/${id}`)
         return response.data
     }
     catch(error){
@@ -59,7 +59,7 @@ export const getCategoryNames = createAsyncThunk('getCategoryNames', async({id},
 
 export const getNestedSubcategoryNames = createAsyncThunk('getNestedSubcategoryNames', async({id}, thunkAPI)=>{
     try{
-        const response = await apiClient.get(`/admin/products/category/getNestedSubcategoryNames/${id}`)
+        const response = await apiClient.get(`/categories/getNestedSubcategoryNames/${id}`)
         return response.data
     }
     catch(error){
@@ -70,7 +70,7 @@ export const getNestedSubcategoryNames = createAsyncThunk('getNestedSubcategoryN
 
 export const getFirstLevelCategories = createAsyncThunk('getFirstLevelCategories', async(_, thunkAPI)=>{
     try{
-        const response = await apiClient.get(`/admin/products/category/getFirstLevelCategories`)
+        const response = await apiClient.get(`/categories/getFirstLevelCategories`)
         return response.data
     }
     catch(error){
@@ -82,7 +82,7 @@ export const getFirstLevelCategories = createAsyncThunk('getFirstLevelCategories
 
 export const toggleCategoryStatus = createAsyncThunk('toggleCategoryStatus', async(id, thunkAPI)=>{
     try{
-        const response = await apiClient.get(`/admin/products/category/status/${id}`)
+        const response = await apiClient.get(`/categories/status/${id}`)
         return response.data
     }
     catch(error){
@@ -93,7 +93,7 @@ export const toggleCategoryStatus = createAsyncThunk('toggleCategoryStatus', asy
 
 export const updateCategory = createAsyncThunk('updateCategory', async({formData, id}, thunkAPI)=>{
     try{
-        const response = await apiClient.post(`/admin/products/category/edit/${id}`, formData, {headers: {'Content-Type': 'multipart/form-data'}})
+        const response = await apiClient.post(`/categories/edit/${id}`, formData, {headers: {'Content-Type': 'multipart/form-data'}})
         return {category: response.data.category, id}
     }
     catch(error){
@@ -104,7 +104,7 @@ export const updateCategory = createAsyncThunk('updateCategory', async({formData
 
 export const searchCategoryByName = createAsyncThunk('searchCategoryByName', async({query}, thunkAPI)=>{
     try{
-        const response = await apiClient.get(`/admin/products/category/search?name=${query}`)
+        const response = await apiClient.get(`/categories/search?name=${query}`)
         return response.data
     }
     catch(error){

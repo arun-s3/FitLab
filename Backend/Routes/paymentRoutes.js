@@ -10,12 +10,12 @@ paymentRouter.get('/razorpay/key', isLogin, getRazorpayKey)
 paymentRouter.post('/razorpay/order', isLogin, createRazorpayPayment)
 paymentRouter.post('/razorpay/verify', isLogin, verifyRazorpayPayment)
 
-paymentRouter.post('/stripe/order', createStripePayment)
+paymentRouter.post('/stripe/order', isLogin, createStripePayment)
 paymentRouter.post('/stripe/save', isLogin, saveStripePayment)
 
 paymentRouter.get('/paypal/clientid', isLogin, getPaypalClientId)
-paymentRouter.post('/paypal/order', createPaypalOrder)
-paymentRouter.post('/paypal/capture', capturePaypalOrder)
+paymentRouter.post('/paypal/order', isLogin, createPaypalOrder)
+paymentRouter.post('/paypal/capture', isLogin, capturePaypalOrder)
 paymentRouter.post('/paypal/save', isLogin, savePaypalPayment)
 
 

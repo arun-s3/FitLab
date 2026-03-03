@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react"
+import { useSelector } from 'react-redux'
 import { motion } from "framer-motion"
 
 import {Bot} from "lucide-react"
@@ -63,7 +64,7 @@ const cardVariants = {
 }
 
 export default function AiInsightCards({insightsTemplates, requiredSourceDatas, existingAiInsights, sectionTitle, sectionSubtitle, cardStyles,
-  sourceDatasLoading, excludeAndReturnItemTitles = null, onReturnExclusiveDatas, parentFetchError = null}){
+  sourceDatasLoading, excludeAndReturnItemTitles = null, onReturnExclusiveDatas, parentFetchError = null, guestMessage = null}){
 
   const [selectedInsight, setSelectedInsight] = useState(null)
 
@@ -75,6 +76,9 @@ export default function AiInsightCards({insightsTemplates, requiredSourceDatas, 
 
   const hasReturnedExclusive = useRef(false)
   const hasCreatedCards = useRef(false)
+
+  const {user} = useSelector(state=> state.user)
+  const {admin} = useSelector(state=> state.admin)
 
   const createInsightCards = (aiResponse)=> {
     let aiResponseTopics = Object.keys(aiResponse)
@@ -124,6 +128,7 @@ export default function AiInsightCards({insightsTemplates, requiredSourceDatas, 
   }
 
   useEffect(()=> {
+    if(!user && !admin) return
     if(insightsTemplates && insightsTemplates.length > 0 && existingAiInsights && !hasCreatedCards.current){
         hasCreatedCards.current = true  
         createInsightCards(existingAiInsights)
@@ -206,7 +211,7 @@ export default function AiInsightCards({insightsTemplates, requiredSourceDatas, 
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className={`${parentFetchError || error 
+        className={`${parentFetchError || error || (!user && !admin && guestMessage)
             ? 'flex justify-center items-center text-[13px] text-red-500 tracking-[0.5px]' 
             : cardStyles 
             ? cardStyles 
@@ -287,6 +292,13 @@ export default function AiInsightCards({insightsTemplates, requiredSourceDatas, 
             <p className="w-full text-[15px] text-red-500 text-center tracking-[0.4px]">
               {parentFetchError || error}
             </p>
+        }
+
+        {
+            !user && !admin && guestMessage &&
+              <p p className="mt-8 w-full text-[15px] text-secondary text-center tracking-[0.4px]">
+                {guestMessage} 
+              </p>
         }
 
       </motion.div>

@@ -167,7 +167,7 @@ export default function AdminProductListPage(){
         setHeaderZIndex(10)
         if(products && products.length > 0){
             try {
-                const response = await apiClient.post(`/admin/products/export/${type}`, {products}, {responseType: 'blob'})
+                const response = await apiClient.post(`/products/export/${type}`, {products}, {responseType: 'blob'})
 
                 const fileBlob = new Blob([response.data], { type: type === 'csv' ? 'text/csv' : 'application/pdf'})
 

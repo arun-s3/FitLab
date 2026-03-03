@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react'
+import { useSelector } from 'react-redux'
 import { motion } from "framer-motion"
 
 import { Clock, Flame, Dumbbell, TriangleAlert, RotateCcw, Play } from "lucide-react"
@@ -9,6 +10,7 @@ import {toast as sonnerToast} from 'sonner'
 
 import {estimateCalories} from "../../../Utils/exerciseFunctions"
 import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
+import AuthPrompt from "../../../Components/AuthPrompt/AuthPrompt"
 
 
 export default function RecentWorkouts({refreshHistory, stopRefreshHistory, resumeTodayWorkout}) {
@@ -29,6 +31,8 @@ export default function RecentWorkouts({refreshHistory, stopRefreshHistory, resu
   const [selectedWorkoutId, setSelectedWorkoutId] = useState(null) 
   const [loadingResume, setLoadingResume] = useState(false)
 
+  const {user} = useSelector(state=> state.user)
+
   const ShowError = ()=> (
       <div className='flex justify-center items-center gap-[5px] w-full h-full'>
           <TriangleAlert className='mb-[18px] text-primary w-[28px] h-[28px]' />
@@ -47,6 +51,7 @@ export default function RecentWorkouts({refreshHistory, stopRefreshHistory, resu
   )
 
   async function listWorkoutHistory(){
+    if(!user) return
     try {   
       const response = await apiClient.get(`/fitness/tracker/workout/list?page=${currentPage}&limit=${limit}`)
       if(response.status === 200){
@@ -71,13 +76,14 @@ export default function RecentWorkouts({refreshHistory, stopRefreshHistory, resu
   }
 
   useEffect(() => {
+      if(!user) return
       if (refetch) {
           setLoading(true)
           listWorkoutHistory()
       }
   }, [refetch])
 
-  useEffect(()=> {
+  useEffect(()=> {   
     if(refreshHistory){
       setLoading(true)
       setSelectedWorkoutId(null)
@@ -86,7 +92,8 @@ export default function RecentWorkouts({refreshHistory, stopRefreshHistory, resu
   }, [refreshHistory])
 
   useEffect(()=> {
-      listWorkoutHistory()
+    if(!user) return
+    listWorkoutHistory()
   }, [currentPage])
 
   const handleResumeWorkout = (workout)=> {
@@ -260,6 +267,16 @@ export default function RecentWorkouts({refreshHistory, stopRefreshHistory, resu
                   />
               )}
           </HistoryWrapper>
+            
+          {
+            !user &&
+              <div className='mt-12 flex justify-center'>
+              
+                <AuthPrompt />
+  
+              </div>
+          }
+
       </>
   )
 }

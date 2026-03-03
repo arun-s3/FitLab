@@ -11,7 +11,7 @@ import RemoveCouponModal from "./RemoveCouponModal"
 import AuthPrompt from '../../../Components/AuthPrompt/AuthPrompt'
 import {UserPageLayoutContext} from '../../../Layouts/UserPageLayout/UserPageLayout'
 import {ProtectedUserContext} from '../../../Components/ProtectedUserRoutes/ProtectedUserRoutes'
-import {getEligibleCoupons} from '../../../Slices/couponSlice'
+import {getEligibleCoupons, getAllCoupons} from '../../../Slices/couponSlice'
 import {applyCoupon, removeCoupon, getTheCart, resetCartStates} from '../../../Slices/cartSlice'
 import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
 
@@ -55,7 +55,7 @@ export default function CouponPage(){
   useEffect(()=> {
     if(allCoupons.length > 0){
       setCoupons(allCoupons)
-      dispatch(getTheCart())
+      if(user) dispatch(getTheCart())
     }
     if(totalCoupons && totalPages && limit){
       setTotalPages(Math.ceil(totalPages/limit))
@@ -70,7 +70,9 @@ export default function CouponPage(){
   
   useEffect(() => {
     if(Object.keys(queryOptions).length > 0){
-      dispatch( getEligibleCoupons({userId: user ? user._id : '', queryOptions}) )
+      if(!user) {
+        dispatch( getAllCoupons({queryOptions}) )
+      }else dispatch( getEligibleCoupons({userId: user._id, queryOptions}) )
     }
   }, [queryOptions])
 
@@ -153,6 +155,7 @@ export default function CouponPage(){
   }
 
   const removeTheCoupon = ()=> {
+    if(checkAuthOrOpenModal("coupon features")) return
     dispatch(removeCoupon())
   }
 

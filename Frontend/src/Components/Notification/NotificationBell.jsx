@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react"
+import { useSelector } from 'react-redux'
 import { motion, AnimatePresence } from "framer-motion"
 
 import { Bell } from "lucide-react"
@@ -21,6 +22,8 @@ export default function NotificationBell({notifications, setNotifications, onNot
   const limit = 5
 
   const [fetchError, setFetchError] = useState(false)
+
+  const {user} = useSelector(state=> state.user)
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -62,6 +65,7 @@ export default function NotificationBell({notifications, setNotifications, onNot
   }
 
   useEffect(()=> {
+    if(!user) return
     getNotifications()
   }, [])
 

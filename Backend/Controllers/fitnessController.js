@@ -844,11 +844,12 @@ const getLatestHealthProfile = async (req, res, next) => {
 const checkWeeklyHealthProfile = async (req, res, next) => {
   try {
     console.log("Inside checkWeeklyHealthProfile...")
-    const userId = req.user._id
+    const userId = req?.user?._id || null
 
     const user = await User.findById(userId)
+
     if (!user) {
-      return res.status(404).json({ success: false, notAnUser: true })
+      return res.status(200).json({success: true, isNewUser: true, shouldShowReminder: false})
     }
 
     const createdAt = new Date(user.createdAt)

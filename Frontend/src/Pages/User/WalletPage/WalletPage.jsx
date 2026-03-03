@@ -54,6 +54,7 @@ export default function WalletPage() {
     const dispatch = useDispatch()
 
     const {safeWallet, walletError} = useSelector(state=> state.wallet)
+    const {user} = useSelector(state=> state.user)
 
     const membershipCredits = 3
 
@@ -62,6 +63,7 @@ export default function WalletPage() {
     },[])
 
     useEffect(() => {
+      if(!user) return
       if(Object.keys(queryOptions).length > 0){
         dispatch( getOrCreateWallet({queryOptions}) )
       }

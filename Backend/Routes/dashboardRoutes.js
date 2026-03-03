@@ -22,7 +22,6 @@ const {getOfferRevenueStats, getOfferStats, getTopUsedOffers, getMonthlyOfferSta
 const {getWalletAndRefundStats, getPaymentMethodStats, getMonthlyRefundRequests} = require('../Controllers/dashboardControllers/paymentInsightsController')
 
 
-
 dashboardRouter.get('/revenue/total', isLogin, authorizeAdmin, getAnnualRevenueStats) 
 dashboardRouter.get('/revenue/monthly', isLogin, authorizeAdmin, getMonthlyRevenue) 
 dashboardRouter.get('/revenue/weekly', isLogin, authorizeAdmin, getWeeklyRevenue) 

@@ -78,6 +78,7 @@ export default function ReviewsSection() {
               : userId?.username 
 
             return {
+              id: userId._id,
               name: fullName,
               avatar: userId?.profilePic || 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png'
                 || '/default-avatar.png',
@@ -129,6 +130,7 @@ export default function ReviewsSection() {
           {
             testimonials && testimonials.map((testimony, index)=> (
               <ReviewCard
+                key={testimony?.id || index}
                 avatar={testimony.avatar}
                 name={testimony.name}
                 title={testimony.title}

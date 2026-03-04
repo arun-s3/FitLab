@@ -613,6 +613,7 @@ export default function ProductsDisplay({gridView, showByTable, customGridViewSt
                                         <div className='mt-[10px]'>
                                             {product.tags.map((tag) => (
                                                 <span
+                                                    key={tag}
                                                     className={`px-[14px] py-[1px] ${admin ? "text-[12px]" : wishlistDisplay ? "text-[11px]" : "text-[13px]"} 
                         border-[1.5px]  border-[#eae0f0] rounded-[7px] text-secondary mr-[1rem]`}>
                                                     {tag}

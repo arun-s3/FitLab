@@ -354,7 +354,7 @@ export default function UserAccountPage(){
                                    rounded-[6px] py-[8px] pl-[10px] pr-[2px] text-[14px] z-[5] cursor-pointer'>
                                     {
                                       allAddressTypes.map(type=> (
-                                        <li className='hover:text-secondary' onClick={()=> setAddressType(type)}> 
+                                        <li key={type} className='hover:text-secondary' onClick={()=> setAddressType(type)}> 
                                           { (type && camelToCapitalizedWords(type)) } 
                                         </li>
                                       ))

@@ -51,8 +51,8 @@ export default function CancelForm({openSelectReasons, setOpenSelectReasons, can
                   <ul className='absolute top-[115%] left-0 w-[17rem] px-[25px] py-[15px] h-fit bg-white text-[13px]
                    flex flex-col gap-[10px] border border-dropdownBorder rounded-[6px] z-[5] cursor-pointer'>
                     {
-                      commonReasonTitles.map(reasonTitle=> (
-                        <li onClick={(e)=> cancelReasonHandler(e, {title: true})}> {reasonTitle} </li>
+                      commonReasonTitles.map((reasonTitle, index)=> (
+                        <li key={index} onClick={(e)=> cancelReasonHandler(e, {title: true})}> {reasonTitle} </li>
                       ))
                     }
                     

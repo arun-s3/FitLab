@@ -358,7 +358,7 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
                     <div className='flex gap-[27px] flex-wrap mt-[20px]' id='image-section'>
                     {
                     images.map((image,index)=> 
-                        (<div key={image.name} className='flex flex-col'>
+                        (<div key={image?.name || index} className='flex flex-col'>
                             <figure key={image.name} className='relative w-[75px] h-[75px] rounded-[5px]'>
                                 <img src={image.url} alt={image.name} className='w-[75px] h-[75px] rounded-[5px] object-cover'/>
                                 <span className='absolute top-0 right-[-17px] h-full flex flex-col justify-between text-secondary cursor-pointer '> 

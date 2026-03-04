@@ -258,7 +258,7 @@ const tableBodyGenerator = (categories, isSubcategory, parentLevelCount)=> {
                         </td>
                         <td>{category.discount + '%'}</td>
                         <td className='text-green-500'>
-                            {category?.relatedCategory ? category.relatedCategory.map(cat=> <span> {cat.name} </span>) : null}
+                            {category?.relatedCategory ? category.relatedCategory.map(cat=> <span key={cat.name}> {cat.name} </span>) : null}
                         </td>
                         <td className='text-muted text-[13px]'> 
                             <p>

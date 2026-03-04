@@ -54,6 +54,7 @@ export default function PaymentManager({paymentMethod, setPaymentMethod, optionC
             {
               paymentOptions.map((option, index)=> (
                     <div 
+                      key={option.name}
                       className={`px-[15px] py-[10px] 
                         ${option.name === 'cards' 
                             ? 'col-span-2 xx-xl:w-[38rem] deskt:w-[42rem]' 

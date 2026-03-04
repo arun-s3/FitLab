@@ -422,8 +422,8 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
                                         }}>
                                 {relatedCategory && 
                                  <div className='flex items-center gap-[5px] ml-[10%]'>
-                                 { relatedCategory.map(cat=> (
-                                     <span className=' flex items-center gap-[2px] border border-secondary rounded-[10px] px-[9px] py-[1px] text-[10px] text-secondary'> 
+                                 { relatedCategory.map((cat, index)=> (
+                                     <span key={index} className=' flex items-center gap-[2px] border border-secondary rounded-[10px] px-[9px] py-[1px] text-[10px] text-secondary'> 
                                          <span> {cat} </span>
                                          <IoIosClose className='w-[15px] h-[15px]' onClick={(e)=> {
                                             setRelatedCategory(relatedCat=> relatedCat.filter(rcat=> rcat !== cat))
@@ -495,7 +495,7 @@ export default function AdminAddAndEditCategoryPage(  {editCategory}){
                                                 rounded-[5px] bg-white border border-primary rounded-tl-none rounded-tr-none '
                                                  ref={badgeListRef}>
                                         {commonBadges.current.map(name=>
-                                             <span className='text-[11px] text-secondary capitalize w-full text-center hover:bg-primary cursor-pointer' 
+                                             <span key={name} className='text-[11px] text-secondary capitalize w-full text-center hover:bg-primary cursor-pointer' 
                                                         onClick={(e)=> selectListHandler(name,'categoryBadge',e)} > 
                                                     {name}
                                              </span>

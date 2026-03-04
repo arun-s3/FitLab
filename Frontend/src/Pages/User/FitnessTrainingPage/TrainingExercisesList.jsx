@@ -111,6 +111,7 @@ export default function TrainingExercisesList({selectedBodyParts, searchQuery, e
                                   exercises.length > 0 &&
                                   exercises.map((exercise, index) => (
                                       <ExerciseCard
+                                          key={exercise?.exerciseId || exercise?.name}
                                           exercise={exercise}
                                           index={index}
                                           onChooseExercise={onSelectExercise}

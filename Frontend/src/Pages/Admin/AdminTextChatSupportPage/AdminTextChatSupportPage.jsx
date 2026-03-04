@@ -342,7 +342,7 @@ export default function AdminTextChatSupportPage() {
                 exit={{y: -50, opacity: 0, scale: 0.5}}>
                 { usernameList.list.length > 0 ? 
                   usernameList.list.map(username=> (
-                    <span className="w-full px-[5px] text-[12px] text-muted flex items-center gap-[5px] hover:bg-primaryDark
+                    <span key={username} className="w-full px-[5px] text-[12px] text-muted flex items-center gap-[5px] hover:bg-primaryDark
                      hover:text-secondary rounded-[4px] cursor-pointer" onClick={()=> selectSearchedUser(username)}>
                        {
                         (

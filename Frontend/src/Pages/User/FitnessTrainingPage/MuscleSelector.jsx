@@ -11,7 +11,7 @@ import {CustomHashLoader} from '../../../Components/Loader/Loader'
 export default function MuscleSelector({bodyParts, setSearchedBodyPart, onSearchBodyPart, selectedBodyParts, listExercises, isLoading,
     bodyPartsLoading}) {
 
-    const [searchedKeyword, setSearchedKeyword] = useState(null)
+    const [searchedKeyword, setSearchedKeyword] = useState('')
 
     const searchRef = useRef(null)
     const applyRef = useRef(null)
@@ -110,7 +110,7 @@ export default function MuscleSelector({bodyParts, setSearchedBodyPart, onSearch
                     bodyParts &&
                     bodyParts.map((bodyPart, idx) => (
                         <motion.button
-                            key={bodyPart}
+                            key={idx}
                             initial={{ opacity: 0, y: 10 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             transition={{ delay: idx * 0.05 }}

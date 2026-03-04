@@ -212,7 +212,7 @@ export default function ProductDetailPage(){
                               <ul className="list-disc list-inside space-y-[8px]">
                                 {
                                   productDetails.additionalInformation.map(info=> (
-                                    <li>
+                                    <li key={info}>
                                       {capitalizeFirstLetter(info)}
                                     </li>
                                   ))

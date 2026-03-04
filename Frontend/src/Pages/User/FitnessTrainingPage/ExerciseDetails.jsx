@@ -120,8 +120,8 @@ export default function ExerciseDetails({exercise, onGoBack}) {
               <article className="text-[14px] text-[#757584] leading-relaxed mb-6">
                 <ul className='flex flex-col gap-[10px]'>
                 {
-                  exercise.instructions.map(step=> (
-                    <li className="before:content-['▶'] before:text-primaryDark before:mr-2">
+                  exercise.instructions.map((step, index)=> (
+                    <li key={index} className="before:content-['▶'] before:text-primaryDark before:mr-2">
                       {step}
                     </li>
                   ))

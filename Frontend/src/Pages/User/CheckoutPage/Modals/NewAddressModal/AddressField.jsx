@@ -32,7 +32,8 @@ export default function AddressField({infoArray, fieldType='input', formData, on
         {
             infoArray.map((info, index)=> (
                 fieldType !== 'textarea' ?
-                <div className={`${index === infoArray.length-1 && !nonFullWidthFields.includes(info) ? 'col-span-2' : null} relative`}>
+                <div key={info}
+                    className={`${index === infoArray.length-1 && !nonFullWidthFields.includes(info) ? 'col-span-2' : null} relative`}>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                         {camelToCapitalizedWords(info)} 
                     </label>
@@ -53,7 +54,7 @@ export default function AddressField({infoArray, fieldType='input', formData, on
                       <ErrorMessage error={errors[info]} />
                 </div>
                 :
-                <div>
+                <div key={info}>
                     <textarea
                       name={info}
                       value={formData[info]}

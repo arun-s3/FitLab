@@ -58,7 +58,7 @@ export default function Footer({goToShopByCategorySec}) {
                           </h6>
                       </li>
                       {mainCategories.map((category) => (
-                          <li className='capitalize' onClick={() => jumpToShopByCategorySec()}>
+                          <li key={category} className='capitalize' onClick={() => jumpToShopByCategorySec()}>
                               {category}
                           </li>
                       ))}

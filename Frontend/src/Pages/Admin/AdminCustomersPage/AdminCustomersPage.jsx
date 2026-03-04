@@ -330,7 +330,7 @@ export default function AdminCustomersPageV1() {
                                                   cursor-pointer'>
                                                     {
                                                       [6, 10, 15, 20, 25, 30, 35, 40].map( limit=> (
-                                                        <li onClick={()=> setLimit(limit)}> {limit} </li>
+                                                        <li key={limit} onClick={()=> setLimit(limit)}> {limit} </li>
                                                       ))
                                                     }
                                             </ul>

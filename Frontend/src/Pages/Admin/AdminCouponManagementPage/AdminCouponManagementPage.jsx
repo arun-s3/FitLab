@@ -293,7 +293,7 @@ export default function AdminCouponManagementPage(){
                                       cursor-pointer'>
                                         {
                                           [6, 10, 20, 30, 40].map( limit=> (
-                                            <li onClick={()=> limitHandler(limit)}> {limit} </li>
+                                            <li key={limit} onClick={()=> limitHandler(limit)}> {limit} </li>
                                           ))
                                         }
                                    </ul>

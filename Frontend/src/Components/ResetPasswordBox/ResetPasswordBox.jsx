@@ -229,8 +229,8 @@ export default function ResetPasswordBox({setOpenSecurityMenu, admin}){
             <ul className="space-y-2">
               <h2 className="font-semibold text-secondary mb-2">Password must contain:</h2>
             {
-              requirementSubtitles.map(subtitle=> (
-                <li className={`flex items-center gap-2 ${subtitle.requirement ? "text-green-500 line-through" : "text-gray-600"}`}>
+              requirementSubtitles.map((subtitle, index)=> (
+                <li key={index} className={`flex items-center gap-2 ${subtitle.requirement ? "text-green-500 line-through" : "text-gray-600"}`}>
                   <Check className="w-4 h-4" />
                   {subtitle.value}
                 </li>

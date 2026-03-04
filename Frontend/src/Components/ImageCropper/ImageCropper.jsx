@@ -140,7 +140,7 @@ const ImageCropper = ({ images, onCropComplete, imageCropperState, setImageCropp
               </i>
                 {
                   images.map((image,index)=> 
-                         (<div key={image.url} data-label={image.name}
+                         (<div key={image?.url || index} data-label={image.name}
                              className={`relative flex flex-col cursor-pointer rounded-[5px] ${images.length > 0 &&  index >= startIndex && index < endIndex ? '' : 'hidden'}
                                   ${buildOutline && (buildOutline === image.name) ? 'outline outline-[1.7px] outline-secondary outline-offset-[5px]' : ''}
                                     ${image?.isCropped || (index == currentImageIndex)? '' : 'image-list-overlay'}`}

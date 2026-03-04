@@ -465,7 +465,7 @@ export default function AdminOrderHistoryPage(){
                  <div className='options'>
                    {
                     ["Past 1 Month", "Past 3 Months", "Past 6 Months", "Past 12 Months", "All Orders"].map(option=> (
-                      <span onClick={(e)=> orderDurationHandler(e)}> {option} </span>
+                      <span key={option} onClick={(e)=> orderDurationHandler(e)}> {option} </span>
                     ))
                    }
                  </div>
@@ -524,7 +524,7 @@ export default function AdminOrderHistoryPage(){
                       <tr className="border-b border-gray-100">
                         {
                           ["Customer Name", "City", "Date", "Products", "Status", "Tax(GST)", "Total", "Payment Status"].map(tableHeader=> (
-                            <th className="px-6 py-3 text-left text-sm font-medium text-gray-500 capitalize"> {tableHeader} </th>
+                            <th key={tableHeader} className="px-6 py-3 text-left text-sm font-medium text-gray-500 capitalize"> {tableHeader} </th>
                           ))
                         }
                         <th className="px-6 py-3 text-center text-sm font-medium text-gray-500 capitalize"> Action </th>

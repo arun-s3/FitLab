@@ -275,7 +275,7 @@ export default function WorkoutSessionCard() {
                             <ul className="list-disc ml-8">
                             {
                               exercise.sets.map((set, index)=> (
-                                <li className="text-gray-600 text-[13px] mt-[5px]">
+                                <li key={index} className="text-gray-600 text-[13px] mt-[5px]">
                                   {`Set-${index + 1}: ${set.reps} reps  with ${set.weight}kg (${set.rpe}/10 RPE)`}
                                 </li>
                               ))

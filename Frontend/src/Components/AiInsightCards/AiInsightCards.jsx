@@ -266,8 +266,8 @@ export default function AiInsightCards({insightsTemplates, requiredSourceDatas, 
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">{insight.title}</h3>
                   <ul className="ml-[5px] list-disc dark:text-gray-400 text-sm leading-relaxed">
                     {
-                      insight.description.map(content=> (
-                        <li className="text-gray-600 text-[13px] mt-[5px]"> {content} </li>
+                      insight.description.map((content, index)=> (
+                        <li key={index} className="text-gray-600 text-[13px] mt-[5px]"> {content} </li>
                       ))
                     }
                   </ul>

@@ -147,7 +147,7 @@ export default function AddressFields({editAddresses, addressData, setAddressDat
                           gap-[5px] mob:gap-0 s-sm:gap-[1rem] justify-between s-sm:justify-normal address-types'>
                                 {
                                     addressTypes.map(type=> (
-                                        <div>
+                                        <div key={type}>
                                             <input type='radio' 
                                                 id={type} 
                                                 onClick={(e)=> onRadioClick(e)} 

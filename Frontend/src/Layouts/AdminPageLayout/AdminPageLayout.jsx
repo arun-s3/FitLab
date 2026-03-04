@@ -226,7 +226,7 @@ export default function AdminPageLayout(){
                             >
                             {
                                 menuItems.map(item=> (
-                                    <motion.li className={`${compressList && item.id !== 'dashboard' ? 'mt-[-10px]' : 'mt-0'}`} 
+                                    <motion.li key={item.id} className={`${compressList && item.id !== 'dashboard' ? 'mt-[-10px]' : 'mt-0'}`} 
                                         onClick={()=>toggleSublist(item.id)}
                                         variants={child}
                                     > 
@@ -246,8 +246,8 @@ export default function AdminPageLayout(){
                                                     </div>
                                                     {   
                                                     showSubmenu[item.id] &&
-                                                        item.submenu.map(subItem=> (
-                                                            <AnimatePresence>
+                                                        item.submenu.map((subItem, index)=> (
+                                                            <AnimatePresence key={subItem?.id || index}>
                                                                 <motion.ul className='pt-[1rem] pl-[1rem] list-none flex flex-col
                                                                      gap-[10px] justify-center items-start text-white text-[12.5px] sublist'
                                                                     variants={container}

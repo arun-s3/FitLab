@@ -180,6 +180,7 @@ export default function FilterModule({filter, setFilter, rating, setRating, popu
                                 {
                                     popularProducts.slice(0, 5 + morePopularProducts).map(product=> (
                                         <motion.li
+                                            key={product}
                                             variants={child}
                                             whileHover={{ scale: 1.08 }}>
                                                 <div>

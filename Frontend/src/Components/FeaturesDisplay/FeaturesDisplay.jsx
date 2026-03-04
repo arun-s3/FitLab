@@ -32,7 +32,7 @@ export default function FeaturesDisplay({darkVariant = false, topRoom = true}){
             style={darkVariant ? darkBg : {background: '#F8F1FF'}}>
           {
            features && features.length > 0 && features.map(feature=> (
-              <div className="text-center">
+              <div key={feature.title} className="text-center">
                 <div className="w-[4rem] h-[4rem] bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-[1rem]">
                   <svg className="w-[2rem] h-[2rem] text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     {feature.icon}

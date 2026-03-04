@@ -352,7 +352,8 @@ export default function CustomerInsightsSection() {
                   { status.vipCustomersDatas === 'success' && vipCustomersDatas.length > 0 ?
                         vipCustomersDatas.map((customer, index) => (
                           <motion.tr
-                          className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50"
+                            key={index}
+                            className="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50"
                           >
                           <td className="py-3 px-4">
                             <div className="flex items-center">

@@ -147,7 +147,7 @@ export default function MobileSidebar({currentPageChatBoxStatus = false, current
                       {
                         topBarIcons &&
                         topBarIcons.map(item=> (
-                          <span className="grid h-8 w-8 place-items-center rounded-full bg-white/5 ring-1 ring-white/10 cursor-pointer">
+                          <span key={item.label} className="grid h-8 w-8 place-items-center rounded-full bg-white/5 ring-1 ring-white/10 cursor-pointer">
                             <item.Icon className="h-4 w-4" 
                               onClick={()=> {
                                 item?.path && navigate(item.path)
@@ -394,6 +394,7 @@ export default function MobileSidebar({currentPageChatBoxStatus = false, current
                       showOptions.notice &&
                         noticeItems.map(item=> (
                           <button
+                            key={item.label}
                             className="group flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-sm hover:bg-white/5"
                             onClick={() =>  {navigate(item.path);  setOpen(false)}}
                           >

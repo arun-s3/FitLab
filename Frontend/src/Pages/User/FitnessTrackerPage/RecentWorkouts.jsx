@@ -106,7 +106,7 @@ export default function RecentWorkouts({refreshHistory, stopRefreshHistory, resu
 
     return (
       <motion.div
-          key={workout.id}
+          key={workout._id}
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.05 }}
@@ -231,8 +231,9 @@ export default function RecentWorkouts({refreshHistory, stopRefreshHistory, resu
           <HistoryWrapper heading="Today's Workouts" iconNeeded={false}>
               {!loading && todayWorkouts && todayWorkouts.length > 0 ? (
                   todayWorkouts.map((workouts) =>
-                      workouts.exercises.map((exercise) => (
+                      workouts.exercises.map((exercise, index) => (
                           <HistoryCard
+                              key={exercise?._id || index}
                               workout={exercise}
                               allowResumeExercise={true}
                               workoutCompleted={workouts.exerciseCompleted}
@@ -249,7 +250,7 @@ export default function RecentWorkouts({refreshHistory, stopRefreshHistory, resu
           <HistoryWrapper heading='Workout History' headerStyle='mt-8'>
               {!loading && olderWorkouts && olderWorkouts.length > 0 ? (
                   olderWorkouts.map((workouts) =>
-                      workouts.exercises.map((exercise) => <HistoryCard workout={exercise} date={workouts.date} />),
+                      workouts.exercises.map((exercise) => <HistoryCard key={exercise?._id || index} workout={exercise} date={workouts.date} />),
                   )
               ) : !loading && !error && (!olderWorkouts || todayWorkouts.length === 0) ? (
                   <p className='my-8 text-[13px] text-muted text-center'> No workout history to show! </p>

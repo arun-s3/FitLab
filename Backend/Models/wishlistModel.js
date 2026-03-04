@@ -1,87 +1,86 @@
 const mongoose = require("mongoose")
 
-const wishlistSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.ObjectId,
-    ref: "User",
-    required: true,
-  },
-  lists: [
+const wishlistSchema = new mongoose.Schema(
     {
-      name: {
-        type: String,
-        required: true 
-      },
-      description: {
-        type: String 
-      },
-      thumbnail: {
-        name: {
-          type: String,
-          // required: true
-        },
-        size: {
-          type: Number,
-          // required: true
-        },
-        url: {
-          type: String,
-          // required: true
-        },
-        public_id:{
-          type: String,
-          // required: true
-        } 
-      },
-      priority: { 
-        type: Number,
-        enum: [1, 2, 3], // 1-High, 2-Medium, 3-Low
-        default: 2 
-      }, 
-      isPublic: { 
-        type: Boolean,
-        default: false 
-      },
-      sharedWith: [
-        { 
+        userId: {
             type: mongoose.Schema.ObjectId,
-            ref: "User" 
-        }
-      ],
-      reminderDate: {
-        type: Date 
-      },
-      priceDropAlert: {
-        type: Boolean,
-        default: false
-      },
-      products: [
-        {
-          product: {
-            type: mongoose.Schema.ObjectId,
-            ref: "Product" 
-          },
-          productPriority: {
-            type: Number,
-            enum: [1, 2, 3], // 1-High, 2-Medium, 3-Low
-            default: 2 
-          },
-          notes: {
-            type: String 
-          },
-          addedAt: {
-            type: Date,
-            default: Date.now 
-          },
+            ref: "User",
+            required: true,
         },
-      ],
-      createdAt: {
-        type: Date,
-        default: Date.now 
-      },
+        lists: [
+            {
+                name: {
+                    type: String,
+                    required: true,
+                },
+                description: {
+                    type: String,
+                },
+                thumbnail: {
+                    name: {
+                        type: String,
+                    },
+                    size: {
+                        type: Number,
+                    },
+                    url: {
+                        type: String,
+                    },
+                    public_id: {
+                        type: String,
+                    },
+                },
+                priority: {
+                    type: Number,
+                    enum: [1, 2, 3], // 1-High, 2-Medium, 3-Low
+                    default: 2,
+                },
+                isPublic: {
+                    type: Boolean,
+                    default: false,
+                },
+                sharedWith: [
+                    {
+                        type: mongoose.Schema.ObjectId,
+                        ref: "User",
+                    },
+                ],
+                reminderDate: {
+                    type: Date,
+                },
+                priceDropAlert: {
+                    type: Boolean,
+                    default: false,
+                },
+                products: [
+                    {
+                        product: {
+                            type: mongoose.Schema.ObjectId,
+                            ref: "Product",
+                        },
+                        productPriority: {
+                            type: Number,
+                            enum: [1, 2, 3], // 1-High, 2-Medium, 3-Low
+                            default: 2,
+                        },
+                        notes: {
+                            type: String,
+                        },
+                        addedAt: {
+                            type: Date,
+                            default: Date.now,
+                        },
+                    },
+                ],
+                createdAt: {
+                    type: Date,
+                    default: Date.now,
+                },
+            },
+        ],
     },
-  ],
-}, { timestamps: true })
+    { timestamps: true },
+)
 
 const Wishlist = mongoose.model("Wishlist", wishlistSchema)
 

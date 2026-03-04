@@ -2,14 +2,10 @@ const cron = require("node-cron")
 const Wallet = require("../Models/walletModel")
 const stripeLib = require("stripe")
 
+
 module.exports = function walletCron(io) {
 
   cron.schedule("0 * * * *", async () => {
-    console.log("Checking auto-recharge wallets...")
-
-    console.log("IO exists?", !!global.io)
-    console.log("io === global.io ?", io === global.io)
-
     const stripe = stripeLib(process.env.STRIPE_SECRET_KEY)
 
     try {
@@ -22,24 +18,12 @@ module.exports = function walletCron(io) {
         const { userId, balance, autoRecharge } = wallet
         const { paymentMethod, rechargeAmount } = autoRecharge
         const room = String(userId)
-
-        console.log(
-          `userId--->${userId}, balance--->${balance}, paymentMethod--->${paymentMethod} and rechargeAmount--->${rechargeAmount}`
-        )
-
         const roomNames = [...io.sockets.adapter.rooms.keys()]
-        console.log("Room names:", roomNames.length ? roomNames : "(no rooms?)")
-
         const hasRoom = io.sockets.adapter.rooms.has(room)
-        console.log(`Has room ${room}?`, hasRoom)
-
         const socketsSet = await io.in(room).allSockets()
-        console.log(`Sockets in ${room}:`, socketsSet.size ? [...socketsSet] : "(none)")
-
         let warnPayload
         
         if (!socketsSet.size) {
-          console.log(`No connected sockets for user ${room} — skipping emit.`)
         } else {
           warnPayload = {
             amount: rechargeAmount,
@@ -52,7 +36,6 @@ module.exports = function walletCron(io) {
 
           if(paymentMethod === "razorpay"){
             try {
-              console.log("Attempting room emit to", room)
               io.to(room).emit("warnRazorpayRecharge", warnPayload)
               for (const sid of socketsSet) {
                 try {
@@ -60,18 +43,16 @@ module.exports = function walletCron(io) {
                   if (socketInstance) {
                     socketInstance.emit("warnRazorpayRecharge", warnPayload);
                   }
-                } catch (err) {
-                  console.log("Error emitting to individual socket", sid, err.message)
+                } catch (error) {
+                    console.error(error)
                 }
               }
-              console.log("Room + individual emits attempted for warnRazorpayRecharge")
-            } catch (err) {
-              console.log("Error during room emit:", err.message)
+            } catch (error) {
+                console.error(error)
             }
           }
 
           if (paymentMethod === "stripe") {
-            console.log("Triggering Stripe auto-recharge for", userId)
             try {
               const paymentIntent = await stripe.paymentIntents.create({
                 amount: rechargeAmount * 100,
@@ -94,9 +75,6 @@ module.exports = function walletCron(io) {
               wallet.balance += rechargeAmount
               wallet.autoRecharge.needsRecharge = false
               await wallet.save();
-
-              console.log("Successfully completed stripe auto-recharge for", userId)
-
               const successPayload = {
                 amount: rechargeAmount,
                 balance: wallet.balance,
@@ -113,16 +91,11 @@ module.exports = function walletCron(io) {
                       fs.emit && fs.emit("walletRechargeSuccess", successPayload);
                     }
                   }
-                  console.log("walletRechargeSuccess emitted to room and sockets")
-                } catch (err) {
-                  console.log("Error emitting walletRechargeSuccess:", err.message)
+                } catch (error) {
+                    console.error(error)
                 }
-              } else {
-                console.log("No sockets present to send walletRechargeSuccess for", room)
               }
             } catch (error) {
-              console.log("Stripe Auto-Recharge Failed:", error.message)
-
               wallet.transactions.push({
                 type: "auto-recharge",
                 amount: rechargeAmount,
@@ -141,7 +114,7 @@ module.exports = function walletCron(io) {
         }
       }
     } catch (error) {
-      console.log("Cron Auto-Recharge Error:", error.message)
+      console.error(error)
     }
   })
 }

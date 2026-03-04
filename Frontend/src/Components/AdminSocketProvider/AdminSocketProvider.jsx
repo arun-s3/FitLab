@@ -75,13 +75,11 @@ export default function AdminSocketProvider() {
 
     // socket.on("user-selected", (user) => {
     //   if(!selectedUser){
-    //     console.log("Inside on- user-selected")
     //     handleUserSelect(user)
     //   }
     // }) ---> Test this later for admin multiple tab synchronous
 
     // socket.on("admin-message-sent", (message) => {
-    //   console.log("Inside on- admin-message-sent....selectedUser--->", selectedUser)
     //   if(selectedUser?.username && selectedUser.username === message.username){
     //     console.log("Message sent by admin--->", message)
     //     setMessages((prev) => ({

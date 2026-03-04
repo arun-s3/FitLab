@@ -1,10 +1,7 @@
-const {PERIOD_BUSINESS_PROMPT} = require("./Prompts/businessPrompts")
+const { PERIOD_BUSINESS_PROMPT } = require("./Prompts/businessPrompts")
+
 
 function buildBusinessPrompts(businessDashboardDatas) {
-
-    // console.log(`businessDashboardDatas of this from buildPeriodFitnessPrompts---->`, JSON.stringify(businessDashboardDatas))
-    // console.log("LAST_WORKOUT_PROMPT---->", PERIOD_BUSINESS_PROMPT)
-
     return `
         ${PERIOD_BUSINESS_PROMPT}
 
@@ -52,9 +49,7 @@ function buildBusinessPrompts(businessDashboardDatas) {
           ]
         }
         `
-
 }
 
-module.exports = {buildBusinessPrompts}
 
-
+module.exports = { buildBusinessPrompts }

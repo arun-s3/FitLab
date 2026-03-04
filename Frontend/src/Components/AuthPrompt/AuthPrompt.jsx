@@ -13,7 +13,6 @@ export default function AuthPrompt(){
   const [config, setConfig] = useState(null)
 
   const getPageConfig = (pageName)=> {
-    console.log("pageName---->", pageName)
     const configs = {
       cart: {
         icon: ShoppingCart,

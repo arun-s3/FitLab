@@ -1,870 +1,740 @@
 const Wallet = require('../Models/walletModel')
 const Payment = require('../Models/paymentModel')
-const razorpay = require('../Utils/razorpay')
-const Order = require('../Models/orderModel')
-const Cart = require('../Models/cartModel')
-const Product = require('../Models/productModel')
 
-const crypto = require("crypto")
 const {v4: uuidv4} = require('uuid')
 
-const {startAutoRecharge, generateUniqueAccountNumber, generateTransactionId} = require('../Controllers/controllerUtils/walletUtils')
+const {generateUniqueAccountNumber, generateTransactionId} = require('../Controllers/controllerUtils/walletUtils')
 const {encryptData} = require('../Controllers/controllerUtils/encryption')
 
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
-const {paypal, client} = require('../Utils/paypal')
 
 const {errorHandler} = require('../Utils/errorHandler') 
 
 
+const getOrCreateWallet = async (req, res, next) => {
+    try {
+        const userId = req.user._id
+        const queryOptions = req.body?.queryOptions || {}
 
-// const getOrCreateWallet = async (req, res, next)=> {
-//     try{
-//         console.log("Inside getOrCreateWallet of walletController")   
-//         const userId = req.user._id
+        const wallet = await Wallet.findOne({ userId })
 
-//         const wallet = await Wallet.findOne({ userId }).select('-userId -transactions.transactionId')
-//         console.log("wallet now--->", wallet)
+        if (!wallet) {
+            const uniqueAccountNumber = await generateUniqueAccountNumber()
+            const newWallet = new Wallet({
+                userId,
+                accountNumber: uniqueAccountNumber,
+                balance: 0,
+                transactions: [],
+            })
+            await newWallet.save()
+            const { userId: _, ...safeWallet } = newWallet.toObject()
+            const encryptedWallet = encryptData(safeWallet)
 
-//         if (!wallet) {
-//           const uniqueAccountNumber = await generateUniqueAccountNumber()
-//           console.log("Creating new wallet....")
-//           console.log("uniqueAccountNumber--->", uniqueAccountNumber)
-//           const newWallet = new Wallet({
-//             userId,
-//             accountNumber: uniqueAccountNumber,
-//             balance: 0,
-//             transactions: []
-//           })
-//           await newWallet.save();
-//           console.log("Wallet created successfully:", newWallet)
+            return res.status(200).json({ safeWallet: encryptedWallet, message: "wallet created" })
+        } else {
+            let transactions = wallet.transactions || []
+            let transactionsCount
 
-//           const {userId: _, ...safeWallet} = newWallet.toObject()
-//           const encryptedWallet = encryptData(safeWallet)
+            if (Object.keys(queryOptions).length > 0) {
+                const {
+                    page = 1,
+                    status,
+                    userLevel,
+                    paymentMethod,
+                    type,
+                    limit,
+                    startDate,
+                    endDate,
+                    sortBy = "createdAt",
+                    sort = -1,
+                } = queryOptions
+                if (status && status !== "all") {
+                    transactions = transactions.filter((txn) => txn.status === status)
+                }
 
-//           res.status(200).json({safeWallet: encryptedWallet, message: 'wallet created'});
-//         }else{
-//             console.log("Already has a wallet....")
-//             console.log("wallet--->", JSON.stringify(wallet))
-            
-//             const encryptedWallet = encryptData(wallet)
+                if (userLevel) {
+                    transactions = transactions.filter((txn) => txn.transactionAccountDetails.type === "user")
+                }
 
-//             res.status(200).json({safeWallet: encryptedWallet, message: 'wallet sent'});
-//         }
-//     }
-//     catch(error){
-//         console.log("Error in walletController-getOrCreateWallet:", error.message)
-//         next(error)
-//     }
-// }
+                if (paymentMethod && paymentMethod !== "all") {
+                    transactions = transactions.filter(
+                        (txn) =>
+                            txn.transactionAccountDetails.type === "gateway" &&
+                            txn.transactionAccountDetails.account.toLowerCase() === paymentMethod.toLowerCase(),
+                    )
+                }
 
+                if (type && type !== "all") {
+                    transactions = transactions.filter(
+                        (txn) => txn.type && txn.type.toLowerCase() === type.toLowerCase(),
+                    )
+                }
 
-const getOrCreateWallet = async (req, res, next)=> {
-  try {
-    console.log("Inside getOrCreateWallet of walletController")
+                transactionsCount = transactions.length
 
-    const userId = req.user._id
-    const queryOptions = req.body?.queryOptions || {}
+                if (startDate && endDate) {
+                    const start = new Date(startDate)
+                    const end = new Date(endDate)
+                    transactions = transactions.filter((txn) => {
+                        const created = new Date(txn.createdAt)
+                        return created >= start && created <= end
+                    })
+                }
 
-    const wallet = await Wallet.findOne({ userId })
-    // const wallet = await Wallet.findOne({ userId }).select('-userId -transactions.transactionId')
+                transactions.sort((a, b) => {
+                    if (sortBy === "amount") {
+                        return sort === 1 ? a.amount - b.amount : b.amount - a.amount
+                    } else if (sortBy === "createdAt") {
+                        return sort === 1
+                            ? new Date(a.createdAt) - new Date(b.createdAt)
+                            : new Date(b.createdAt) - new Date(a.createdAt)
+                    }
+                    return 0
+                })
 
-    console.log("wallet now--->", wallet)
+                if (limit) {
+                    const startSlice = (page - 1) * limit
+                    const endSlice = startSlice + limit
+                    transactions = transactions.slice(startSlice, endSlice)
+                }
+            }
 
-    if (!wallet) {
-      const uniqueAccountNumber = await generateUniqueAccountNumber()
-      console.log("Creating new wallet....")
-      console.log("uniqueAccountNumber--->", uniqueAccountNumber)
+            const { userId: _, ...walletWithoutUserId } = wallet.toObject()
+            const transactionsWithoutIds = transactions.map((txn) => {
+                delete txn.transactionId
+                return txn
+            })
+            const walletWithoutIds = { ...walletWithoutUserId, transactions: transactionsWithoutIds }
+            const encryptedWallet = encryptData(walletWithoutIds)
 
-      const newWallet = new Wallet({
-        userId,
-        accountNumber: uniqueAccountNumber,
-        balance: 0,
-        transactions: [],
-      })
-      await newWallet.save();
-      console.log("Wallet created successfully:", newWallet)
-
-      const { userId: _, ...safeWallet } = newWallet.toObject()
-      const encryptedWallet = encryptData(safeWallet)
-
-      return res.status(200).json({ safeWallet: encryptedWallet, message: 'wallet created' })
-    } else {
-      console.log("Already has a wallet....")
-
-      let transactions = wallet.transactions || []
-      let transactionsCount
-
-      if (Object.keys(queryOptions).length > 0) {
-        const {
-          page = 1,
-          status,
-          userLevel,
-          paymentMethod,
-          type,
-          limit,
-          startDate,
-          endDate,
-          sortBy = 'createdAt',
-          sort = -1, 
-        } = queryOptions;
-
-        console.log("Applying queryOptions--->", queryOptions)
-
-        if (status && status !== 'all'){
-          transactions = transactions.filter(txn=> txn.status === status)
+            return res.status(200).json({ safeWallet: encryptedWallet, message: "wallet sent", transactionsCount })
         }
-
-        if (userLevel){
-          transactions = transactions.filter(txn=> txn.transactionAccountDetails.type === 'user')
-        }
-
-        if (paymentMethod && paymentMethod !== 'all'){
-          transactions = transactions.filter(txn=> 
-            txn.transactionAccountDetails.type === 'gateway' &&
-            txn.transactionAccountDetails.account.toLowerCase() === paymentMethod.toLowerCase()
-          )
-        }
-
-        if (type && type !== 'all'){
-          transactions = transactions.filter(txn => txn.type && txn.type.toLowerCase() === type.toLowerCase());
-        }
-
-        transactionsCount = transactions.length
-
-        if (startDate && endDate){
-          const start = new Date(startDate)
-          const end = new Date(endDate)
-          transactions = transactions.filter(txn=> {
-            const created = new Date(txn.createdAt)
-            return created >= start && created <= end
-          })
-        }
-
-        transactions.sort((a, b) => {
-          if (sortBy === 'amount') {
-            return sort === 1 ? a.amount - b.amount : b.amount - a.amount
-          } else if (sortBy === 'createdAt') {
-            return sort === 1 
-              ? new Date(a.createdAt) - new Date(b.createdAt)
-              : new Date(b.createdAt) - new Date(a.createdAt)
-          }
-          return 0
-        })
-
-        if (limit) {
-          const startSlice = (page - 1) * limit
-          const endSlice = startSlice + limit
-          transactions = transactions.slice(startSlice, endSlice)
-        }
-      }
-
-      const { userId: _, ...walletWithoutUserId } = wallet.toObject()
-      const transactionsWithoutIds = transactions.map(txn=> {
-        delete txn.transactionId
-        return txn
-      })
-      const walletWithoutIds = { ...walletWithoutUserId, transactions: transactionsWithoutIds }
-      console.log("walletWithFilteredTransactions--->", JSON.stringify(walletWithoutIds))
-
-      const encryptedWallet = encryptData(walletWithoutIds)
-
-      return res.status(200).json({ safeWallet: encryptedWallet, message: 'wallet sent' , transactionsCount })
+    } catch (error) {
+        console.error(error)
+        next(error)
     }
-  }
-  catch (error){
-    console.log("Error in walletController-getOrCreateWallet:", error.message)
-    next(error)
-  }
 }
 
 
-const addFundsToWallet = async (req, res, next)=> {
+const addFundsToWallet = async (req, res, next) => {
     try {
-      console.log("Inside addFundsToWallet controller")
-  
-      const userId = req.user._id
-      const { amount, notes, paymentMethod, paymentId } = req.body.paymentDetails
-  
-      if (!amount || amount <= 0) {
-        return next(errorHandler(400, "Invalid amount provided"))
-      }
-      if (!["paypal", "stripe", "razorpay"].includes(paymentMethod)) {
-        return next(errorHandler(400, "Invalid payment method"))
-      }
-  
-      if (!paymentMethod || !["paypal", "stripe", "razorpay"].includes(paymentMethod)) {
-        return next(errorHandler(400, "Invalid or missing payment gateway"))
-      }
-  
-      let wallet = await Wallet.findOne({userId})
-      // let wallet = await Wallet.findOne({userId}).select('-userId -transactions.transactionId')
+        const userId = req.user._id
+        const { amount, notes, paymentMethod, paymentId } = req.body.paymentDetails
 
-  
-      if (!wallet) {
-        const uniqueAccountNumber = await generateUniqueAccountNumber()
-          console.log("Creating new wallet....")
-          console.log("uniqueAccountNumber--->", uniqueAccountNumber)
-          wallet = new Wallet({
-            userId,
-            accountNumber: uniqueAccountNumber,
-            balance: 0,
-            transactions: []
-          })
-          console.log("Wallet created successfully:", wallet)
-      }
-  
-      wallet.balance += parseInt(amount)
-  
-      const payment = await Payment.findOne({paymentId})
-      if (!payment) {
-        return next(errorHandler(404, "Payment not found"))
-      }
-      const isAlreadyAdded = wallet.transactions.some(transaction=> transaction.transactionId === paymentId)
-      if (isAlreadyAdded){
-        return res.status(200).json({ message: "Payment already added to wallet" })
-      }      
+        if (!amount || amount <= 0) {
+            return next(errorHandler(400, "Invalid amount provided"))
+        }
+        if (!["paypal", "stripe", "razorpay"].includes(paymentMethod)) {
+            return next(errorHandler(400, "Invalid payment method"))
+        }
 
-      const transactionDetails = {
-        type: "credit",
-        amount,
-        transactionId: paymentId,
-        transactionAccountDetails: {
-          type: "gateway",
-          account: paymentMethod
-        },
-        notes,
-        status: "success",
-        createdAt: payment.paymentDate
-      }
-      wallet.transactions.unshift(transactionDetails)
-  
-      await wallet.save()
-  
-      console.log("Funds added successfully to wallet:", wallet._id);
+        if (!paymentMethod || !["paypal", "stripe", "razorpay"].includes(paymentMethod)) {
+            return next(errorHandler(400, "Invalid or missing payment gateway"))
+        }
 
-      delete transactionDetails.transactionId
-      const {userId: _, ...safeWallet} = wallet.toObject()
-      safeWallet.transactions.unshift(transactionDetails)
+        let wallet = await Wallet.findOne({ userId })
+        // let wallet = await Wallet.findOne({userId}).select('-userId -transactions.transactionId')
 
-    if (wallet.autoRecharge.isEnabled && wallet.balance < wallet.autoRecharge.thresholdAmount){
-      console.log("Wallet is below threshold; Hence Recharge will be scheduled")
-      wallet.autoRecharge.needsRecharge = true
-    }
+        if (!wallet) {
+            const uniqueAccountNumber = await generateUniqueAccountNumber()
+            wallet = new Wallet({
+                userId,
+                accountNumber: uniqueAccountNumber,
+                balance: 0,
+                transactions: [],
+            })
+        }
 
-      const encryptedWallet = encryptData(safeWallet)
-      res.status(200).json({ safeWallet: encryptedWallet, message: "Funds added successfully to wallet" })
-    }
-    catch (error) {
-      console.error("Error in addFundsToWallet controller:", error.message)
-      next(error)
+        wallet.balance += parseInt(amount)
+
+        const payment = await Payment.findOne({ paymentId })
+        if (!payment) {
+            return next(errorHandler(404, "Payment not found"))
+        }
+        const isAlreadyAdded = wallet.transactions.some((transaction) => transaction.transactionId === paymentId)
+        if (isAlreadyAdded) {
+            return res.status(200).json({ message: "Payment already added to wallet" })
+        }
+
+        const transactionDetails = {
+            type: "credit",
+            amount,
+            transactionId: paymentId,
+            transactionAccountDetails: {
+                type: "gateway",
+                account: paymentMethod,
+            },
+            notes,
+            status: "success",
+            createdAt: payment.paymentDate,
+        }
+        wallet.transactions.unshift(transactionDetails)
+
+        await wallet.save()
+        delete transactionDetails.transactionId
+        const { userId: _, ...safeWallet } = wallet.toObject()
+        safeWallet.transactions.unshift(transactionDetails)
+
+        if (wallet.autoRecharge.isEnabled && wallet.balance < wallet.autoRecharge.thresholdAmount) {
+            wallet.autoRecharge.needsRecharge = true
+        }
+
+        const encryptedWallet = encryptData(safeWallet)
+        res.status(200).json({ safeWallet: encryptedWallet, message: "Funds added successfully to wallet" })
+    } catch (error) {
+        console.error(error)
+        next(error)
     }
 }
 
 
 const getUserNameFromAccountNumber = async (req, res, next) => {
-  try {
-    const {acc} = req.params
+    try {
+        const { acc } = req.params
 
-    if (!acc) {
-      return next(errorHandler(404, "Account number is required"))
+        if (!acc) {
+            return next(errorHandler(404, "Account number is required"))
+        }
+
+        const wallet = await Wallet.findOne({ accountNumber: acc }).populate("userId", "username")
+
+        if (!wallet || !wallet.userId) {
+            return next(errorHandler(404, "User not found with this account number"))
+        }
+
+        res.status(200).json({
+            username: wallet.userId.username,
+            message: "User found successfully",
+        })
+    } catch (error) {
+        console.error(error)
+        next(error)
     }
-
-    const wallet = await Wallet.findOne({ accountNumber: acc }).populate('userId', 'username')
-
-    if (!wallet || !wallet.userId) {
-      return next(errorHandler(404, "User not found with this account number"))
-    }
-
-    res.status(200).json({
-      username: wallet.userId.username,
-      message: 'User found successfully'
-    })
-  }
-  catch (error) {
-    console.error('Error finding user from account number:', error.message)
-    next(error)
-  }
 }
 
 
 const addPeerAccount = async (req, res, next) => {
-  try {
-    console.log("Inside addPeerAccount controller")
-    const userId = req.user._id 
-    const {accountNumber, name, isBeneficiary} = req.body.accountDetails
+    try {
+        const userId = req.user._id
+        const { accountNumber, name, isBeneficiary } = req.body.accountDetails
 
-    if (!accountNumber || !name) {
-      return next(errorHandler(400, "Account number and name are required"))
+        if (!accountNumber || !name) {
+            return next(errorHandler(400, "Account number and name are required"))
+        }
+        const wallet = await Wallet.findOne({ userId })
+        if (!wallet) {
+            return next(errorHandler(404, "Wallet not found for the user"))
+        }
+
+        const alreadyExists = isBeneficiary
+            ? wallet.beneficiaryAccounts.some((acc) => acc.accountNumber === accountNumber)
+            : wallet.creditorAccounts.some((acc) => acc.accountNumber === accountNumber)
+
+        if (alreadyExists) {
+            return next(errorHandler(409, `${isBeneficiary ? "Beneficiary" : "Creditor"} already added`))
+        }
+
+        const walletExists = await Wallet.findOne({ accountNumber })
+        if (!walletExists) {
+            return next(errorHandler(404, "The entered account number doesn't match any existing FitLab user"))
+        }
+
+        if (isBeneficiary) {
+            wallet.beneficiaryAccounts.push({ accountNumber, name })
+        } else {
+            wallet.creditorAccounts.push({ accountNumber, name })
+        }
+
+        await wallet.save()
+
+        const walletWithoutIds = await Wallet.findOne({ userId }).select("-userId -transactions.transactionId")
+        const encryptedWallet = encryptData(walletWithoutIds)
+
+        res.status(200).json({ safeWallet: encryptedWallet, message: "Peer account added successfully" })
+    } catch (error) {
+        console.error(error)
+        next(error)
     }
-    console.log(`account number---> ${accountNumber}, name-----> ${name} and isBeneficiary-----> ${isBeneficiary}`)
-
-    const wallet = await Wallet.findOne({userId})
-    if (!wallet) {
-      return next(errorHandler(404, "Wallet not found for the user"))
-    }
-
-    const alreadyExists = isBeneficiary 
-        ? wallet.beneficiaryAccounts.some(acc=> acc.accountNumber === accountNumber)
-        : wallet.creditorAccounts.some(acc=> acc.accountNumber === accountNumber)
-
-    if (alreadyExists) {
-      return next(errorHandler(409, `${isBeneficiary ? 'Beneficiary' : 'Creditor'} already added`))
-    }
-
-    const walletExists = await Wallet.findOne({accountNumber})
-    if(!walletExists){
-      return next(errorHandler(404, "The entered account number doesn't match any existing FitLab user"))
-    }
-
-    if(isBeneficiary){
-      wallet.beneficiaryAccounts.push({accountNumber, name})
-    }else{
-      wallet.creditorAccounts.push({accountNumber, name})
-    }
-    
-    await wallet.save();
-
-    const walletWithoutIds = await Wallet.findOne({ userId }).select('-userId -transactions.transactionId')
-    const encryptedWallet = encryptData(walletWithoutIds)
-
-    res.status(200).json({safeWallet: encryptedWallet, message: 'Peer account added successfully'})
-  }
-  catch(error){
-    const peerType = req?.body?.accountDetails?.isBeneficiary ? 'Beneficiary' : 'Creditor'
-    console.error(`Error adding ${peerType}:`, error.message)
-    next(error)
-  }
 }
 
 
-const sendMoneyToUser = async (req, res, next)=> {
-  try {
-    console.log("Inside sendMoneyToUser controller")
-    const userId = req.user._id
-    const {recipientAccountNumber, amount, notes} = req.body.paymentDetails
+const sendMoneyToUser = async (req, res, next) => {
+    try {
+        const userId = req.user._id
+        const { recipientAccountNumber, amount, notes } = req.body.paymentDetails
+        if (!recipientAccountNumber || !amount || amount <= 0) {
+            return next(errorHandler(400, "Invalid recepient account number or amount"))
+        }
+        if (!amount || amount <= 0) {
+            return next(errorHandler(400, "Invalid amount provided"))
+        }
 
-    console.log(`recipientAccountNumber---> ${recipientAccountNumber}, amount----> ${amount} and notes---> ${notes}`)
+        const wallet = await Wallet.findOne({ userId })
+        if (!wallet) return next(errorHandler(404, "Your wallet not found"))
 
-    if (!recipientAccountNumber || !amount || amount <= 0){
-      return next(errorHandler(400, "Invalid recepient account number or amount"))
+        if (wallet.accountNumber === recipientAccountNumber) {
+            return next(errorHandler(400, "Cannot transfer to your own account"))
+        }
+        if (wallet.balance < amount) {
+            return next(errorHandler(400, "Insufficient balance"))
+        }
+
+        const recipientWallet = await Wallet.findOne({ accountNumber: "FTL" + recipientAccountNumber })
+        if (!recipientWallet) return next(errorHandler(404, "Recipient wallet not found"))
+
+        const transactionId = uuidv4()
+
+        wallet.balance -= parseFloat(amount)
+        const walletTransactionDetails = {
+            type: "debit",
+            amount,
+            transactionId,
+            transactionAccountDetails: {
+                type: "user",
+                account: recipientWallet.accountNumber,
+            },
+            notes,
+            status: "success",
+            createdAt: new Date(),
+        }
+        wallet.transactions.unshift(walletTransactionDetails)
+
+        recipientWallet.balance += parseFloat(amount)
+        recipientWallet.transactions.unshift({
+            type: "credit",
+            amount,
+            transactionId,
+            transactionAccountDetails: {
+                type: "user",
+                account: wallet.accountNumber,
+            },
+            notes,
+            status: "success",
+            createdAt: new Date(),
+        })
+
+        if (wallet.autoRecharge.isEnabled && wallet.balance < wallet.autoRecharge.thresholdAmount) {
+            wallet.autoRecharge.needsRecharge = true
+        }
+
+        await wallet.save()
+        await recipientWallet.save()
+
+        delete walletTransactionDetails.transactionId
+        const { userId: _, ...safeWallet } = wallet.toObject()
+        safeWallet.transactions.unshift(walletTransactionDetails)
+        const encryptedWallet = encryptData(safeWallet)
+
+        res.status(200).json({ safeWallet: encryptedWallet, message: "Money sent successfully" })
+    } catch (error) {
+        console.error(error)
+        next(error)
     }
-    if (!amount || amount <= 0) {
-      return next(errorHandler(400, "Invalid amount provided"))
-    }
-
-    const wallet = await Wallet.findOne({ userId })
-    if (!wallet) return next(errorHandler(404, "Your wallet not found"))
-
-    if (wallet.accountNumber === recipientAccountNumber) {
-      return next(errorHandler(400, "Cannot transfer to your own account"))
-    }
-    if (wallet.balance < amount) {
-      return next(errorHandler(400, "Insufficient balance"))
-    }
-
-    const recipientWallet = await Wallet.findOne({accountNumber: 'FTL' + recipientAccountNumber})
-    if (!recipientWallet) return next(errorHandler(404, "Recipient wallet not found"))
-
-    const transactionId = uuidv4()
-
-    wallet.balance -= parseFloat(amount)
-    const walletTransactionDetails = {
-      type: 'debit',
-      amount,
-      transactionId,
-      transactionAccountDetails: {
-        type: 'user',
-        account: recipientWallet.accountNumber
-      },
-      notes,
-      status: 'success',
-      createdAt: new Date()
-    }
-    wallet.transactions.unshift(walletTransactionDetails)
-
-    recipientWallet.balance += parseFloat(amount)
-    recipientWallet.transactions.unshift({
-      type: 'credit',
-      amount,
-      transactionId,
-      transactionAccountDetails: {
-        type: 'user',
-        account: wallet.accountNumber
-      },
-      notes,
-      status: 'success',
-      createdAt: new Date()
-    })
-
-    if (wallet.autoRecharge.isEnabled && wallet.balance < wallet.autoRecharge.thresholdAmount){
-      console.log("Wallet is below threshold; Hence Recharge will be scheduled")
-      wallet.autoRecharge.needsRecharge = true
-    }
-
-    await wallet.save()
-    await recipientWallet.save()
-
-    delete walletTransactionDetails.transactionId
-    const {userId: _, ...safeWallet} = wallet.toObject()
-    safeWallet.transactions.unshift(walletTransactionDetails)
-    const encryptedWallet = encryptData(safeWallet)
-
-    res.status(200).json({ safeWallet: encryptedWallet, message: "Money sent successfully" })
-  }
-  catch (error){
-    console.error("Error in sendMoneyToUser:", error.message)
-    next(error)
-  }
 }
 
 
-const requestMoneyFromUser = async (req, res, next)=> {
-  try {
-    console.log("Inside requestMoneyFromUser controller")
-    const userId = req.user._id
-    const {destinationAccountNumber, amount, notes} = req.body.paymentDetails
+const requestMoneyFromUser = async (req, res, next) => {
+    try {
+        const userId = req.user._id
+        const { destinationAccountNumber, amount, notes } = req.body.paymentDetails
+        if (!destinationAccountNumber) {
+            return next(errorHandler(400, "Invalid destination account number!"))
+        }
+        if (!amount || amount <= 0) {
+            return next(errorHandler(400, "Invalid amount provided"))
+        }
 
-    console.log(`destinationAccountNumber---> ${destinationAccountNumber}, amount----> ${amount} and notes---> ${notes}`)
+        const wallet = await Wallet.findOne({ userId: userId })
+        const destinationWallet = await Wallet.findOne({ accountNumber: "FTL" + destinationAccountNumber })
 
-    if (!destinationAccountNumber) {
-      return next(errorHandler(400, "Invalid destination account number!"))
+        if (!destinationWallet) {
+            return next(errorHandler(400, "The entered account number doesn't match any existing FitLab user!"))
+        }
+        if (!wallet) return next(errorHandler(404, "Your wallet not found"))
+
+        if (wallet.accountNumber === destinationAccountNumber) {
+            return next(errorHandler(400, "Cannot request to your own account"))
+        }
+
+        const transactionId = uuidv4()
+
+        destinationWallet.transactions.push({
+            type: "request_received",
+            amount,
+            transactionId,
+            transactionAccountDetails: {
+                type: "user",
+                account: wallet.accountNumber,
+            },
+            notes: notes || `Money request from ${wallet.accountNumber}`,
+            status: "pending",
+        })
+
+        const transactionDetails = {
+            type: "request_sent",
+            amount,
+            transactionId,
+            transactionAccountDetails: {
+                type: "user",
+                account: destinationWallet.accountNumber,
+            },
+            notes: notes || `Money requested from ${destinationWallet.accountNumber}`,
+            status: "pending",
+        }
+        wallet.transactions.push(transactionDetails)
+
+        await destinationWallet.save()
+        await wallet.save()
+
+        delete transactionDetails.transactionId
+        const { userId: _, ...safeWallet } = wallet.toObject()
+        safeWallet.transactions.unshift(transactionDetails)
+        const encryptedWallet = encryptData(safeWallet)
+
+        if (wallet.autoRecharge.isEnabled && wallet.balance < wallet.autoRecharge.thresholdAmount) {
+            wallet.autoRecharge.needsRecharge = true
+        }
+
+        return res.status(200).json({ safeWallet: encryptedWallet, message: "Money request sent successfully." })
+    } catch (error) {
+        console.error(error)
+        next(error)
     }
-    if (!amount || amount <= 0) {
-      return next(errorHandler(400, "Invalid amount provided"))
-    }
-
-    const wallet = await Wallet.findOne({ userId: userId })
-    const destinationWallet = await Wallet.findOne({ accountNumber: 'FTL' + destinationAccountNumber })
-
-    if (!destinationWallet) {
-      return next(errorHandler(400, "The entered account number doesn't match any existing FitLab user!"))
-    }
-
-    console.log("destinationWallet--->", destinationWallet)
-
-    if (!wallet) return next(errorHandler(404, "Your wallet not found"))
-
-    if (wallet.accountNumber === destinationAccountNumber) {
-      return next(errorHandler(400, "Cannot request to your own account"))
-    }
-
-    const transactionId = uuidv4()
-
-    destinationWallet.transactions.push({
-      type: 'request_received',
-      amount,
-      transactionId,
-      transactionAccountDetails: {
-        type: 'user',
-        account: wallet.accountNumber,
-      },
-      notes: notes || `Money request from ${wallet.accountNumber}`,
-      status: 'pending'
-    })
-
-    const transactionDetails = {
-      type: 'request_sent',
-      amount,
-      transactionId,
-      transactionAccountDetails: {
-        type: 'user',
-        account: destinationWallet.accountNumber,
-      },
-      notes: notes || `Money requested from ${destinationWallet.accountNumber}`,
-      status: 'pending'
-    }
-    wallet.transactions.push(transactionDetails)
-
-    await destinationWallet.save()
-    await wallet.save()
-
-    delete transactionDetails.transactionId
-    const {userId: _, ...safeWallet} = wallet.toObject()
-    safeWallet.transactions.unshift(transactionDetails)
-    const encryptedWallet = encryptData(safeWallet)
-    
-    if (wallet.autoRecharge.isEnabled && wallet.balance < wallet.autoRecharge.thresholdAmount){
-      console.log("Wallet is below threshold; Hence Recharge will be scheduled")
-      wallet.autoRecharge.needsRecharge = true
-    }
-
-    return res.status(200).json({ safeWallet: encryptedWallet, message: 'Money request sent successfully.' })
-  }
-  catch (error){
-    console.error('Error in requestMoney:', error)
-    next(error)
-  }
 }
 
 
-const confirmMoneyRequest = async (req, res, next)=> {
-  try {
-    console.log("Inside confirmMoneyRequest controller")
+const confirmMoneyRequest = async (req, res, next) => {
+    try {
+        const userId = req.user._id
+        const transaction_id = req.body.transaction_id
+        if (!transaction_id) {
+            return next(errorHandler(400, "Transaction ID is required"))
+        }
 
-    const userId = req.user._id
-    const transaction_id = req.body.transaction_id
+        const userWallet = await Wallet.findOne({ userId })
+        if (!userWallet) return next(errorHandler(404, "Your wallet not found"))
 
-    console.log(`Confirming transaction_id ---> ${transaction_id}`)
+        const receivedRequest = userWallet.transactions.find(
+            (tx) => tx._id.toString() === transaction_id && tx.type === "request_received" && tx.status === "pending",
+        )
 
-    if (!transaction_id){
-      return next(errorHandler(400, "Transaction ID is required"))
+        if (!receivedRequest) {
+            return next(errorHandler(404, "Pending money request not found"))
+        }
+
+        const { amount, transactionAccountDetails, transactionId: userTransactionId } = receivedRequest
+
+        if (userWallet.balance < amount) {
+            return next(errorHandler(400, "Insufficient balance to confirm the request"))
+        }
+
+        const requesterWallet = await Wallet.findOne({ accountNumber: transactionAccountDetails.account })
+        if (!requesterWallet) {
+            return next(errorHandler(404, "Requester wallet not found"))
+        }
+
+        userWallet.balance -= parseFloat(amount)
+        requesterWallet.balance += parseFloat(amount)
+
+        receivedRequest.status = "success"
+        receivedRequest.completedAt = new Date()
+
+        const userWalletTransactionDetails = {
+            type: "debit",
+            amount,
+            transactionId: uuidv4(),
+            transactionAccountDetails: {
+                type: "user",
+                account: requesterWallet.accountNumber,
+            },
+            notes: `Confirmed money request to ${requesterWallet.accountNumber}`,
+            status: "success",
+            createdAt: new Date(),
+        }
+
+        userWallet.transactions.unshift(userWalletTransactionDetails)
+
+        const sentRequest = requesterWallet.transactions.find(
+            (tx) => tx.transactionId === userTransactionId && tx.type === "request_sent" && tx.status === "pending",
+        )
+
+        if (sentRequest) {
+            sentRequest.status = "success"
+            sentRequest.completedAt = new Date()
+        }
+
+        requesterWallet.transactions.unshift({
+            type: "credit",
+            amount,
+            transactionId: uuidv4(),
+            transactionAccountDetails: {
+                type: "user",
+                account: userWallet.accountNumber,
+            },
+            notes: `Money received from ${userWallet.accountNumber}`,
+            status: "success",
+            createdAt: new Date(),
+        })
+
+        await userWallet.save()
+        await requesterWallet.save()
+
+        delete userWalletTransactionDetails.transactionId
+        const { userId: _, ...safeWallet } = userWallet.toObject()
+        safeWallet.transactions.unshift(userWalletTransactionDetails)
+        const encryptedWallet = encryptData(safeWallet)
+
+        return res
+            .status(200)
+            .json({
+                safeWallet: encryptedWallet,
+                message: "Money request confirmed and amount transferred successfully",
+            })
+    } catch (error) {
+        console.error(error)
+        next(error)
     }
-
-    const userWallet = await Wallet.findOne({ userId })
-    if (!userWallet) return next(errorHandler(404, "Your wallet not found"))
-
-    const receivedRequest = userWallet.transactions.find(
-      (tx)=> tx._id.toString() === transaction_id && tx.type === 'request_received' && tx.status === 'pending'
-    );
-
-    if (!receivedRequest) {
-      return next(errorHandler(404, "Pending money request not found"))
-    }
-
-    const {amount, transactionAccountDetails, transactionId: userTransactionId} = receivedRequest
-
-    if (userWallet.balance < amount) {
-      return next(errorHandler(400, "Insufficient balance to confirm the request"))
-    }
-
-    const requesterWallet = await Wallet.findOne({ accountNumber: transactionAccountDetails.account })
-    if (!requesterWallet) {
-      return next(errorHandler(404, "Requester wallet not found"))
-    }
-
-    userWallet.balance -= parseFloat(amount)
-    requesterWallet.balance += parseFloat(amount)
-
-    receivedRequest.status = 'success'
-    receivedRequest.completedAt = new Date()
-
-    const userWalletTransactionDetails = {
-      type: 'debit',
-      amount,
-      transactionId: uuidv4(),
-      transactionAccountDetails: {
-        type: 'user',
-        account: requesterWallet.accountNumber
-      },
-      notes: `Confirmed money request to ${requesterWallet.accountNumber}`,
-      status: 'success',
-      createdAt: new Date()
-    }
-
-    userWallet.transactions.unshift(userWalletTransactionDetails);
-
-    const sentRequest = requesterWallet.transactions.find(
-      (tx)=> tx.transactionId === userTransactionId && tx.type === 'request_sent' && tx.status === 'pending'
-    )
-
-    if (sentRequest){
-      sentRequest.status = 'success'
-      sentRequest.completedAt = new Date()
-    }
-
-    requesterWallet.transactions.unshift({
-      type: 'credit',
-      amount,
-      transactionId: uuidv4(),
-      transactionAccountDetails: {
-        type: 'user',
-        account: userWallet.accountNumber
-      },
-      notes: `Money received from ${userWallet.accountNumber}`,
-      status: 'success',
-      createdAt: new Date()
-    });
-
-    await userWallet.save()
-    await requesterWallet.save()
-
-    delete userWalletTransactionDetails.transactionId
-    const { userId: _, ...safeWallet } = userWallet.toObject()
-    safeWallet.transactions.unshift(userWalletTransactionDetails)
-    const encryptedWallet = encryptData(safeWallet)
-
-    return res.status(200).json({safeWallet: encryptedWallet, message: "Money request confirmed and amount transferred successfully"});
-  }
-  catch (error){
-    console.error("Error in confirmMoneyRequest:", error.message)
-    next(error)
-  }
 }
 
 
-const declineMoneyRequest = async (req, res, next)=> {
-  try {
-    console.log("Inside declineMoneyRequest controller")
+const declineMoneyRequest = async (req, res, next) => {
+    try {
+        const userId = req.user._id
+        const transaction_id = req.body.transaction_id
+        if (!transaction_id) {
+            return next(errorHandler(400, "Transaction ID is required"))
+        }
 
-    const userId = req.user._id
-    const transaction_id = req.body.transaction_id
+        const userWallet = await Wallet.findOne({ userId })
+        if (!userWallet) return next(errorHandler(404, "Your wallet not found"))
 
-    console.log(`Declining transaction_id ---> ${transaction_id}`)
+        const receivedRequest = userWallet.transactions.find(
+            (tx) => tx._id.toString() === transaction_id && tx.type === "request_received" && tx.status === "pending",
+        )
 
-    if (!transaction_id){
-      return next(errorHandler(400, "Transaction ID is required"))
+        if (!receivedRequest) {
+            return next(errorHandler(404, "Pending money request not found"))
+        }
+
+        const { transactionAccountDetails, transactionId: userTransactionId } = receivedRequest
+
+        const requesterWallet = await Wallet.findOne({ accountNumber: transactionAccountDetails.account })
+        if (!requesterWallet) {
+            return next(errorHandler(404, "Requester wallet not found"))
+        }
+
+        receivedRequest.status = "failed"
+        receivedRequest.completedAt = new Date()
+
+        const sentRequest = requesterWallet.transactions.find(
+            (tx) => tx.transactionId === userTransactionId && tx.type === "request_sent" && tx.status === "pending",
+        )
+
+        if (sentRequest) {
+            sentRequest.status = "failed"
+            sentRequest.completedAt = new Date()
+        }
+
+        await userWallet.save()
+        await requesterWallet.save()
+
+        const walletWithoutIds = await Wallet.findOne({ userId }).select("-userId -transactions.transactionId")
+        const encryptedWallet = encryptData(walletWithoutIds)
+
+        return res.status(200).json({ safeWallet: encryptedWallet, message: "Money request declined successfully." })
+    } catch (error) {
+        console.error(error)
+        next(error)
     }
-
-    const userWallet = await Wallet.findOne({ userId })
-    if (!userWallet) return next(errorHandler(404, "Your wallet not found"))
-
-    const receivedRequest = userWallet.transactions.find(
-      (tx) => tx._id.toString() === transaction_id && tx.type === 'request_received' && tx.status === 'pending'
-    )
-
-    if (!receivedRequest) {
-      return next(errorHandler(404, "Pending money request not found"))
-    }
-
-    const { transactionAccountDetails, transactionId: userTransactionId } = receivedRequest
-
-    const requesterWallet = await Wallet.findOne({ accountNumber: transactionAccountDetails.account })
-    if (!requesterWallet) {
-      return next(errorHandler(404, "Requester wallet not found"))
-    }
-
-    receivedRequest.status = 'failed'
-    receivedRequest.completedAt = new Date()
-
-    const sentRequest = requesterWallet.transactions.find(
-      (tx) => tx.transactionId === userTransactionId && tx.type === 'request_sent' && tx.status === 'pending'
-    )
-
-    if (sentRequest){
-      sentRequest.status = 'failed'
-      sentRequest.completedAt = new Date()
-    }
-
-    await userWallet.save();
-    await requesterWallet.save();
-
-    const walletWithoutIds = await Wallet.findOne({ userId }).select('-userId -transactions.transactionId')
-    const encryptedWallet = encryptData(walletWithoutIds)
-
-    return res.status(200).json({ safeWallet: encryptedWallet, message: "Money request declined successfully." });
-
-  } catch (error) {
-    console.error("Error in declineMoneyRequest:", error.message)
-    next(error)
-  }
 }
 
 
-const payOrderWithWallet = async(req, res, next)=> {
-  try {
-    console.log("Inside payOrderWithWallet controller")
+const payOrderWithWallet = async (req, res, next) => {
+    try {
+        const userId = req.user._id
+        const { amount, notes } = req.body
 
-    const userId = req.user._id
-    const {amount, notes} = req.body
+        const wallet = await Wallet.findOne({ userId })
+        if (!wallet) {
+            return next(errorHandler(404, "Wallet not found."))
+        }
+        if (wallet.balance < amount) {
+            return next(errorHandler(400, "Insufficient wallet balance."))
+        }
+        wallet.balance -= amount
+        const transactionId = generateTransactionId()
+        const newTransaction = {
+            type: "debit",
+            amount,
+            transactionId: transactionId,
+            transactionAccountDetails: {
+                type: "fitlab",
+                account: "fitlab-order-paid",
+            },
+            notes,
+            status: "success",
+            createdAt: new Date(),
+        }
+        wallet.transactions.push(newTransaction)
 
-    const wallet = await Wallet.findOne({ userId })
-    if (!wallet) {
-      return next(errorHandler(404, "Wallet not found."))
+        if (wallet.autoRecharge.isEnabled && wallet.balance < wallet.autoRecharge.thresholdAmount) {
+            wallet.autoRecharge.needsRecharge = true
+        }
+
+        await wallet.save()
+        return res.status(200).json({ message: "Payment successful via wallet.", transactionId })
+    } catch (error) {
+        console.error(error)
+        next(error)
     }
-
-    console.log("amount-->", amount)
-    if (wallet.balance < amount) {
-      return next(errorHandler(400, "Insufficient wallet balance."))
-    }
-
-    console.log("Wallet balance before payment---->", wallet.balance)
-    wallet.balance -= amount
-    console.log("Wallet balance after payment---->", wallet.balance)
-
-    const transactionId = generateTransactionId()
-    console.log("transactionId-->", transactionId)
-
-    const newTransaction = {
-      type: 'debit',
-      amount,
-      transactionId: transactionId,
-      transactionAccountDetails: {
-        type: 'fitlab',
-        account: 'fitlab-order-paid',
-      },
-      notes,
-      status: 'success',
-      createdAt: new Date()
-    }
-
-    console.log('newTransaction--->', JSON.stringify(newTransaction))
-    wallet.transactions.push(newTransaction)
-
-    if (wallet.autoRecharge.isEnabled && wallet.balance < wallet.autoRecharge.thresholdAmount){
-      console.log("Wallet is below threshold; Hence Recharge will be scheduled")
-      wallet.autoRecharge.needsRecharge = true
-    }
-
-    await wallet.save();
-
-    console.log("Wallet payment successful")
-
-    return res.status(200).json({message: "Payment successful via wallet.", transactionId});
-  }
-  catch (error){
-    console.error("Error in payOrderWithWallet controller:", error.message)
-    next(error)
-  }
 }
 
 
-const updateAutoRechargeSettings = async(req, res, next)=> {
-  try {
-    console.log("Inside updateAutoRechargeSettings...")
-    const userId = req.user._id
-    console.log("req.body.settings----->", JSON.stringify(req.body.settings))
-    const {isEnabled, thresholdAmount, rechargeAmount, paymentMethod} = req.body.settings
+const updateAutoRechargeSettings = async (req, res, next) => {
+    try {
+        const userId = req.user._id
+        const { isEnabled, thresholdAmount, rechargeAmount, paymentMethod } = req.body.settings
 
-    const wallet = await Wallet.findOne({userId})
+        const wallet = await Wallet.findOne({ userId })
 
-    wallet.autoRecharge.isEnabled = isEnabled
-    wallet.autoRecharge.thresholdAmount = thresholdAmount
-    wallet.autoRecharge.rechargeAmount = rechargeAmount
-    wallet.autoRecharge.paymentMethod = paymentMethod
+        wallet.autoRecharge.isEnabled = isEnabled
+        wallet.autoRecharge.thresholdAmount = thresholdAmount
+        wallet.autoRecharge.rechargeAmount = rechargeAmount
+        wallet.autoRecharge.paymentMethod = paymentMethod
 
-    await wallet.save();
-    console.log("Saved settings!")
+        await wallet.save()
+        if (paymentMethod === "razorpay") {
+            res.status(200).json({ paymentMethod: "razorpay", message: "Auto-Recharge settings updated successfully" })
+        }
 
-    if (paymentMethod === "razorpay") {
-      res.status(200).json({paymentMethod: 'razorpay', message: 'Auto-Recharge settings updated successfully'})
+        if (paymentMethod === "stripe") {
+            let customer
+            if (!wallet.autoRecharge.customerId) {
+                customer = await stripe.customers.create({
+                    email: req.user.email,
+                    name: req.user.username,
+                })
+                wallet.autoRecharge.customerId = customer.id
+            } else {
+                customer = await stripe.customers.retrieve(wallet.autoRecharge.customerId)
+            }
+
+            const setupIntent = await stripe.setupIntents.create({
+                customer: customer.id,
+                payment_method_types: ["card"],
+            })
+            wallet.autoRecharge.setupIntentClientSecret = setupIntent.client_secret
+
+            await wallet.save()
+        }
+        if (paymentMethod === "razorpay") {
+            wallet.autoRecharge.needsRecharge = true
+        }
+
+        const walletWithoutIds = await Wallet.findOne({ userId }).select("-userId -transactions.transactionId")
+        const encryptedWallet = encryptData(walletWithoutIds)
+
+        res.status(200).json({
+            safeWallet: encryptedWallet,
+            paymentMethod: "stripe",
+            stripeClientSecret: paymentMethod === "stripe" ? wallet.autoRecharge.setupIntentClientSecret : null,
+            message: "Auto-Recharge settings updated successfully",
+        })
+    } catch (error) {
+        console.error(error)
+        next(error)
     }
-
-    if (paymentMethod === 'stripe') {
-      console.log('Payment method choosen is stripe')
-      let customer
-      if (!wallet.autoRecharge.customerId) {
-        customer = await stripe.customers.create({
-          email: req.user.email,
-          name: req.user.username,
-        }) 
-        wallet.autoRecharge.customerId = customer.id
-      }else{
-        customer = await stripe.customers.retrieve(wallet.autoRecharge.customerId)
-      }
-    
-      const setupIntent = await stripe.setupIntents.create({
-        customer: customer.id,
-        payment_method_types: ['card'],
-      })
-      console.log("setupIntent------>", JSON.stringify(setupIntent))
-    
-      wallet.autoRecharge.setupIntentClientSecret = setupIntent.client_secret
-    
-      // wallet.autoRecharge.isEnabled = false
-      await wallet.save()
-    }
-    if (paymentMethod === 'razorpay') {
-      wallet.autoRecharge.needsRecharge = true
-    }
-
-    const walletWithoutIds = await Wallet.findOne({ userId }).select('-userId -transactions.transactionId')
-    const encryptedWallet = encryptData(walletWithoutIds)
-
-    res.status(200).json({
-      safeWallet: encryptedWallet, 
-      paymentMethod: 'stripe',
-      stripeClientSecret: paymentMethod === 'stripe' ? wallet.autoRecharge.setupIntentClientSecret : null,
-      message: 'Auto-Recharge settings updated successfully'
-    });
-  }
-  catch(error){
-    console.error('Error updating auto-recharge settings:', error)
-    next(error)
-  }
 }
 
 
 const saveStripePaymentMethod = async (req, res, next) => {
-  try{
-    console.log("Inside saveStripePaymentMethod...")
-    const {paymentMethodId} = req.body
-    const userId = req.user._id
+    try {
+        const { paymentMethodId } = req.body
+        const userId = req.user._id
+        const wallet = await Wallet.findOne({ userId })
 
-    console.log("paymentMethodId---->", paymentMethodId)
+        wallet.autoRecharge.paymentMethodId = paymentMethodId
+        wallet.autoRecharge.isEnabled = true
+        wallet.autoRecharge.needsRecharge = true
 
-    const wallet = await Wallet.findOne({userId})
+        await wallet.save()
 
-    wallet.autoRecharge.paymentMethodId = paymentMethodId
-    wallet.autoRecharge.isEnabled = true
-    wallet.autoRecharge.needsRecharge = true
-
-    await wallet.save();
-
-    res.status(200).json({message: "Stripe auto-recharge enabled successfully", success: true})
-  }
-  catch(error){
-    console.error('Error inside saveStripePaymentMethod:', error.message)
-    next(error)
-  }
+        res.status(200).json({ message: "Stripe auto-recharge enabled successfully", success: true })
+    } catch (error) {
+        console.error(error)
+        next(error)
+    }
 }
 
 
 const rechargeWalletWithRazorpayMoney = async (req, res, next) => {
-  try{
-    console.log("Inside rechargeWalletWithRazorpayMoney...")
-    const {amount, razorpayPaymentId} = req.body
-    const userId = req.user._id
+    try {
+        const { amount, razorpayPaymentId } = req.body
+        const userId = req.user._id
+        const wallet = await Wallet.findOne({ userId })
 
-    console.log("amount----------->", amount)
+        wallet.transactions.push({
+            type: "auto-recharge",
+            amount: amount / 100,
+            transactionId: razorpayPaymentId,
+            transactionAccountDetails: {
+                type: "gateway",
+                account: "razorpay",
+            },
+            status: "success",
+            notes: "Razorpay auto-recharge processed",
+        })
+        wallet.balance += Number.parseInt(amount) / 100
+        wallet.autoRecharge.needsRecharge = false
+        await wallet.save()
 
-    const wallet = await Wallet.findOne({userId})
-
-    wallet.transactions.push({
-      type: "auto-recharge",
-      amount: amount/100,
-      transactionId: razorpayPaymentId,
-      transactionAccountDetails: {
-        type: "gateway",
-        account: "razorpay",
-      },
-      status: "success",
-      notes: "Razorpay auto-recharge processed",
-    })
-    wallet.balance += Number.parseInt(amount)/100
-
-    console.log("wallet.balance----------->", wallet.balance)
-    
-    wallet.autoRecharge.needsRecharge = false
-    await wallet.save();
-
-    res.status(200).json({ success: true });
-  }
-  catch(error){
-    console.error('Error inside rechargeWalletWithRazorpayMoney:', error.message)
-    next(error)
-  }
-}
-
-
-const skipAutoRecharge = async (req, res, next)=> {
-  try {
-    const userId = req.user._id
-
-    const wallet = await Wallet.findOne({ userId })
-
-    if (!wallet.autoRecharge.isEnabled) {
-      return res.status(400).json({
-        success: false,
-        message: "Auto-recharge is not enabled",
-      });
+        res.status(200).json({ success: true })
+    } catch (error) {
+        console.error(error)
+        next(error)
     }
-
-    wallet.autoRecharge.needsRecharge = false
-    await wallet.save();
-
-    return res.status(200).json({
-      success: true,
-      message: "Auto-recharge skipped successfully",
-    });
-  } catch (error) {
-    console.error("Skip auto-recharge error:", error)
-    next(error)
-  }
 }
 
 
+const skipAutoRecharge = async (req, res, next) => {
+    try {
+        const userId = req.user._id
 
-module.exports = {getOrCreateWallet, addFundsToWallet, getUserNameFromAccountNumber, addPeerAccount, sendMoneyToUser,
-   requestMoneyFromUser, confirmMoneyRequest, declineMoneyRequest, payOrderWithWallet, updateAutoRechargeSettings, 
-   saveStripePaymentMethod, rechargeWalletWithRazorpayMoney, skipAutoRecharge}
+        const wallet = await Wallet.findOne({ userId })
+
+        if (!wallet.autoRecharge.isEnabled) {
+            return res.status(400).json({
+                success: false,
+                message: "Auto-recharge is not enabled",
+            })
+        }
+
+        wallet.autoRecharge.needsRecharge = false
+        await wallet.save()
+
+        return res.status(200).json({
+            success: true,
+            message: "Auto-recharge skipped successfully",
+        })
+    } catch (error) {
+        console.error(error)
+        next(error)
+    }
+}
+
+
+module.exports = {
+    getOrCreateWallet,
+    addFundsToWallet,
+    getUserNameFromAccountNumber,
+    addPeerAccount,
+    sendMoneyToUser,
+    requestMoneyFromUser,
+    confirmMoneyRequest,
+    declineMoneyRequest,
+    payOrderWithWallet,
+    updateAutoRechargeSettings,
+    saveStripePaymentMethod,
+    rechargeWalletWithRazorpayMoney,
+    skipAutoRecharge,
+}

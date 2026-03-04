@@ -31,7 +31,6 @@ const SocketListener = ({children}) => {
           }
 
           socket.on("notifySupportCalling", (sessionId) => {
-            console.log("Inside on notifySupportCalling....")
             handleOpenModal()
             // setOpenVideoCallModal(true)
           })

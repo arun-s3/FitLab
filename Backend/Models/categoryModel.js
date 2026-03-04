@@ -1,75 +1,75 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose")
 
 const categorySchema = mongoose.Schema({
-    name:{
+    name: {
         type: String,
-        required: true
+        required: true,
     },
     description: {
         type: String,
-        required: true
+        required: true,
     },
     discount: {
         type: Number,
-        default: 0
+        default: 0,
     },
     badge: {
         type: String,
-        default: null
+        default: null,
     },
-    parentCategory:{
+    parentCategory: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Category',
-        default: null
+        ref: "Category",
+        default: null,
     },
     subCategory: {
         type: [mongoose.Schema.Types.ObjectId],
-        ref: 'Category',
-        default: []
+        ref: "Category",
+        default: [],
     },
     relatedCategory: {
         type: [mongoose.Schema.Types.ObjectId],
-        ref: 'Category',
-        default: []
+        ref: "Category",
+        default: [],
     },
     seasonalActivation: {
-        startDate:{
+        startDate: {
             type: Date,
-            default: null
+            default: null,
         },
-        endDate:{
+        endDate: {
             type: Date,
-            default: null
-        }
+            default: null,
+        },
     },
-    image:{
+    image: {
         name: {
-          type: String,
-          required: true
+            type: String,
+            required: true,
         },
         size: {
-          type: Number,
-          required: true
+            type: Number,
+            required: true,
         },
         url: {
-          type: String,
-          required: true
+            type: String,
+            required: true,
         },
-        public_id:{
-          type: String,
-          required: true
-        }
-      },
-   isBlocked:{
-      type: Boolean,
-      default: false
-   },
-   isActive: {
-      type: Boolean,
-      default: true
-    }
+        public_id: {
+            type: String,
+            required: true,
+        },
+    },
+    isBlocked: {
+        type: Boolean,
+        default: false,
+    },
+    isActive: {
+        type: Boolean,
+        default: true,
+    },
 })
 
-const category = mongoose.model('Category', categorySchema)
-    
+const category = mongoose.model("Category", categorySchema)
+
 module.exports = category

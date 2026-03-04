@@ -1,263 +1,202 @@
-const mongoose = require("mongoose")
 const Product = require("../../Models/productModel")
 const Category = require("../../Models/categoryModel")
 const Cart = require("../../Models/cartModel")
 const Order = require("../../Models/orderModel")
-const Coupon = require("../../Models/couponModel")
 const Offer = require("../../Models/offerModel")
 
-const {errorHandler} = require("../../Utils/errorHandler")
-
+const { errorHandler } = require("../../Utils/errorHandler")
 
 const VIP_SPENDING_TRESHHOLD = 100000
 const USER_INACTIVE_PERIOD = 6 * 30 * 24 * 60 * 60 * 1000
 
 
-const findUserGroup = async(userId)=> {
-    try{
-        const lastOrder = await Order.findOne({ userId, 'paymentDetails.paymentStatus': 'completed'}).sort({ orderDate: -1 })
-        // console.log("lastOrder-->", lastOrder)
-        let userType = !lastOrder || lastOrder == null
-          ? 'newUsers' : (Date.now() - new Date(lastOrder.orderDate).getTime() > USER_INACTIVE_PERIOD) ? 'returningUsers' : 'all'
-        console.log("userType inside findUserGroup-->", userType)
-
+const findUserGroup = async (userId) => {
+    try {
+        const lastOrder = await Order.findOne({ userId, "paymentDetails.paymentStatus": "completed" }).sort({
+            orderDate: -1,
+        })
+        let userType =
+            !lastOrder || lastOrder == null
+                ? "newUsers"
+                : Date.now() - new Date(lastOrder.orderDate).getTime() > USER_INACTIVE_PERIOD
+                  ? "returningUsers"
+                  : "all"
         const totalSpent = await Order.aggregate([
-            { $match: { userId, 'paymentDetails.paymentStatus': 'completed' } },
-            { $group: { _id: null, totalSpent: { $sum: "$absoluteTotalWithTaxes" } } }
+            { $match: { userId, "paymentDetails.paymentStatus": "completed" } },
+            { $group: { _id: null, totalSpent: { $sum: "$absoluteTotalWithTaxes" } } },
         ])
-            
-        userType = !totalSpent.length ? userType : totalSpent[0].totalSpent >= VIP_SPENDING_TRESHHOLD ? 'VIP' : userType
-      
-        console.log("returning userType-->", userType)
+
+        userType = !totalSpent.length ? userType : totalSpent[0].totalSpent >= VIP_SPENDING_TRESHHOLD ? "VIP" : userType
         return userType
-    }
-    catch(error){
-        console.error("Error in findUserGroup:", error.message)
+    } catch (error) {
+        console.error(error)
         errorHandler(500, "Internal Server Error.")
     }
 }
 
 
-const calculateBestOffer = async (userId, productId, quantity)=> {
-  try {
-      console.log("Inside calculateBestOffer")
-      console.log(`userId--->${userId}, productId--->${productId}, quantity---${quantity}`)
-
-      // const cart = await Cart.findOne({ userId }).populate("products.productId")
-      // if (!cart){
-      //     errorHandler(404, "Cart not found!")
-      // }
-      const product = await Product.findById(productId)
-      if (!product){
-          errorHandler(404, "Product not found!")
-      }
-
-      console.log("PRODUCT CONSIDERING----->", JSON.stringify(product, null, 2))
-
-      const cart = await Cart.findOne({ userId })
-      let existingQuantity = 0
-  
-      if (cart) {
-        const existingItem = cart.products.find(
-          item => item.productId.toString() === productId.toString()
-        )
-        if (existingItem) {
-          existingQuantity = existingItem.quantity
+const calculateBestOffer = async (userId, productId, quantity) => {
+    try {
+        const product = await Product.findById(productId)
+        if (!product) {
+            errorHandler(404, "Product not found!")
         }
-      }
-  
-      const finalQuantity = existingQuantity + quantity
-  
-      console.log("existingQuantity:", existingQuantity)
-      console.log("newQuantity:", quantity)
-      console.log("finalQuantity:", finalQuantity)
+        const cart = await Cart.findOne({ userId })
+        let existingQuantity = 0
 
-      const userType = await findUserGroup(userId)
-      console.log("userType--->", userType)
-
-      const orderValue = product.price * finalQuantity
-
-      const offers = await Offer.find({
-        targetUserGroup: {$in: [userType, 'all']},
-        startDate: { $lte: new Date() },
-        endDate: { $gte: new Date() },
-        status: "active",
-        $or: [
-          { minimumOrderValue: { $exists: false } }, 
-          { minimumOrderValue: { $lte: orderValue } }, 
-        ],
-      });
-
-      let discount = 0;
-      let bestDiscount = 0;
-      let offerDiscountType = null;
-      let bestOffer = null;
-      let maxOfferDiscountApplied = false;
-      let isBOGO = false;
-      let offerDetails = null;
-    
-      const calculateDiscount = (offer)=> {
-        console.log("Inside calculateDiscount for offer--->", offer)
-        if (offer.discountType === "percentage") {
-          discount = (product.price * finalQuantity * offer.discountValue) / 100
-          if (offer?.maxDiscount) {
-            console.log("MAX DISCOUNTIS BEING UT UPr--->", offer.maxDiscount)
-            discount = Math.min(discount, offer.maxDiscount)
-            if(discount === offer.maxDiscount) {
-                maxOfferDiscountApplied = true
+        if (cart) {
+            const existingItem = cart.products.find((item) => item.productId.toString() === productId.toString())
+            if (existingItem) {
+                existingQuantity = existingItem.quantity
             }
-          }
         }
-        else if (offer.discountType === "fixed") {
-          discount = offer.discountValue
-          if (offer?.maxDiscount) {
-            discount = Math.min(discount, offer.maxDiscount)
-          }
-        } 
-        else if (offer.discountType === "buyOneGetOne") {
-          isBOGO = true
+
+        const finalQuantity = existingQuantity + quantity
+        const userType = await findUserGroup(userId)
+        const orderValue = product.price * finalQuantity
+
+        const offers = await Offer.find({
+            targetUserGroup: { $in: [userType, "all"] },
+            startDate: { $lte: new Date() },
+            endDate: { $gte: new Date() },
+            status: "active",
+            $or: [{ minimumOrderValue: { $exists: false } }, { minimumOrderValue: { $lte: orderValue } }],
+        })
+
+        let discount = 0
+        let bestDiscount = 0
+        let offerDiscountType = null
+        let bestOffer = null
+        let maxOfferDiscountApplied = false
+        let isBOGO = false
+        let offerDetails = null
+
+        const calculateDiscount = (offer) => {
+            if (offer.discountType === "percentage") {
+                discount = (product.price * finalQuantity * offer.discountValue) / 100
+                if (offer?.maxDiscount) {
+                    discount = Math.min(discount, offer.maxDiscount)
+                    if (discount === offer.maxDiscount) {
+                        maxOfferDiscountApplied = true
+                    }
+                }
+            } else if (offer.discountType === "fixed") {
+                discount = offer.discountValue
+                if (offer?.maxDiscount) {
+                    discount = Math.min(discount, offer.maxDiscount)
+                }
+            } else if (offer.discountType === "buyOneGetOne") {
+                isBOGO = true
+            }
+            if (discount > bestDiscount) {
+                bestDiscount = discount
+                offerDetails = offer
+                bestOffer = offer._id
+                offerDiscountType = offer.discountType
+            }
         }
-        if (discount > bestDiscount) {
-          bestDiscount = discount
-          offerDetails = offer
-          bestOffer = offer._id
-          offerDiscountType = offer.discountType
+
+        const categoryIds = await Category.find({ name: { $all: product.category } }, { _id: 1 })
+        offers.forEach((offer) => {
+            if (
+                offer.applicableType === "categories" &&
+                categoryIds.some((id) => offer.applicableCategories.includes(id))
+            ) {
+                calculateDiscount(offer)
+            }
+            if (offer.applicableType === "products" && offer.applicableProducts.includes(productId.toString())) {
+                calculateDiscount(offer)
+            }
+            if (offer.applicableType === "allProducts") {
+                calculateDiscount(offer)
+            }
+        })
+
+        // PRODUCT DISCOUNT 
+        let productDiscount = 0
+
+        if (product.discountType) {
+            if (product.discountType === "fixed") {
+                productDiscount = product.maxDiscount
+                    ? Math.min(product.discountValue, product.maxDiscount)
+                    : product.discountValue
+            } else if (product.discountType === "percentage") {
+                const calculated = (product.price * finalQuantity * product.discountValue) / 100
+                productDiscount = product.maxDiscount ? Math.min(calculated, product.maxDiscount) : calculated
+            }
         }
-      }
-      
-      const categoryIds = await Category.find({ name: {$all: product.category} }, {_id: 1})
-      console.log("categoryIds--->", categoryIds)
 
-      offers.forEach((offer)=> {
-          if (offer.applicableType === 'categories' && categoryIds.some(id=> offer.applicableCategories.includes(id))) {
-              calculateDiscount(offer)
-          }
-          if (offer.applicableType === 'products' && offer.applicableProducts.includes(productId.toString())){
-            calculateDiscount(offer)
-          }
-          if (offer.applicableType === 'allProducts'){
-            calculateDiscount(offer)
-          }
-      })
+        // CATEGORY DISCOUNT
+        let bestCategoryDiscount = 0
+        let bestCategory = null
 
-    // ---------------- PRODUCT DISCOUNT ----------------
-      let productDiscount = 0
-        
-      if (product.discountType) {
-        if (product.discountType === 'fixed') {
-          productDiscount = product.maxDiscount
-            ? Math.min(product.discountValue, product.maxDiscount)
-            : product.discountValue
-        } else if (product.discountType === 'percentage') {
-          const calculated = (product.price * finalQuantity * product.discountValue) / 100
-          productDiscount = product.maxDiscount
-            ? Math.min(calculated, product.maxDiscount)
-            : calculated
+        const categories = await Category.find({
+            name: { $in: product.category },
+            isBlocked: false,
+            isActive: true,
+        })
+
+        categories.forEach((cat) => {
+            if (!cat.discount || cat.discount <= 0) return
+
+            const now = new Date()
+            if (cat.seasonalActivation?.startDate && cat.seasonalActivation?.endDate) {
+                if (now < cat.seasonalActivation.startDate || now > cat.seasonalActivation.endDate) {
+                    return
+                }
+            }
+
+            const categoryDiscount = (product.price * finalQuantity * cat.discount) / 100
+            if (categoryDiscount > bestCategoryDiscount) {
+                bestCategoryDiscount = categoryDiscount
+                bestCategory = cat
+            }
+        })
+
+        let nonOfferDiscountValue = 0
+
+        if (productDiscount > bestDiscount && productDiscount > bestCategoryDiscount) {
+            bestDiscount = productDiscount
+            bestOffer = "productDiscount"
+            offerDiscountType = product.discountType
+            nonOfferDiscountValue = product.discountValue
+        } else if (bestCategoryDiscount > bestDiscount && bestCategoryDiscount > productDiscount) {
+            bestDiscount = bestCategoryDiscount
+            bestOffer = "categoryDiscount"
+            offerDiscountType = "percentage"
+            nonOfferDiscountValue = bestCategory.discount
         }
-      }
-      
-      // ---------------- CATEGORY DISCOUNT ----------------
-      let bestCategoryDiscount = 0
-      let bestCategory = null
-      
-      const categories = await Category.find({
-        name: { $in: product.category },
-        isBlocked: false,
-        isActive: true
-      })
-      
-      categories.forEach((cat) => {
-        if (!cat.discount || cat.discount <= 0) return
-      
-        const now = new Date()
-        if (
-          cat.seasonalActivation?.startDate &&
-          cat.seasonalActivation?.endDate
-        ) {
-          if (
-            now < cat.seasonalActivation.startDate ||
-            now > cat.seasonalActivation.endDate
-          ) {
-            return
-          }
+
+        let offerOrOtherDiscount = null
+
+        if (bestOffer == null) {
+            offerOrOtherDiscount = { offerOrOtherDiscount: null }
+        } else if (bestOffer === "productDiscount") {
+            offerOrOtherDiscount = { offerOrOtherDiscount: "product" }
+            bestOffer = null
+        } else if (bestOffer === "categoryDiscount") {
+            offerOrOtherDiscount = { offerOrOtherDiscount: "category" }
+            bestOffer = null
+        } else {
+            offerOrOtherDiscount = { offerOrOtherDiscount: "offer" }
         }
-    
-        const categoryDiscount =
-          (product.price * finalQuantity * cat.discount) / 100
 
-        console.log("categoryDiscount----->", categoryDiscount)
-        console.log("product.price----->", product.price)
-        console.log("finalQuantity----->", finalQuantity)
-        console.log("cat.discount----->", cat.discount)
-
-        console.log("productDiscount----->", productDiscount)
-        console.log("product.discountType----->", product.discountType)
-    
-        if (categoryDiscount > bestCategoryDiscount) {
-          bestCategoryDiscount = categoryDiscount
-          bestCategory = cat
+        return {
+            offerDiscountType,
+            bestDiscount,
+            maxOfferDiscountApplied,
+            offerApplied: bestOffer,
+            offerDetails,
+            isBOGO,
+            actualProductQuantity: finalQuantity,
+            nonOfferDiscountValue,
+            ...offerOrOtherDiscount,
         }
-      })
-
-      let nonOfferDiscountValue = 0
-
-      if (productDiscount > bestDiscount && productDiscount > bestCategoryDiscount) {
-        bestDiscount = productDiscount
-        bestOffer = 'productDiscount'
-        offerDiscountType = product.discountType
-        nonOfferDiscountValue = product.discountValue
-      }
-      else if (bestCategoryDiscount > bestDiscount && bestCategoryDiscount > productDiscount) {
-        bestDiscount = bestCategoryDiscount
-        bestOffer = 'categoryDiscount'
-        offerDiscountType = 'percentage'
-        nonOfferDiscountValue = bestCategory.discount
-      }
-      // Check if product is already in the cart
-      // let existingItem = cart.products.find(item => item.productId.toString() === productId)
-
-      // if (existingItem) {
-      //     existingItem.quantity += quantity
-      //     if(isBOGO){
-      //       existingItem.quantity += quantity
-      //     }
-      // } else {
-      //     cart.items.push({ product: productId, quantity: quantity + extraQuantity });
-      // }
-
-      // // Apply the best discount
-      // if (bestOffer && bestOffer.discountType !== "buyOneGetOne") {
-      //     cart.totalPrice -= bestDiscount;
-      // }
-
-      // await cart.save();
-      let offerOrOtherDiscount = null
-
-      if (bestOffer == null) {
-        offerOrOtherDiscount = { offerOrOtherDiscount: null }
-      }
-      else if (bestOffer === 'productDiscount') {
-        offerOrOtherDiscount = { offerOrOtherDiscount: 'product' }
-        bestOffer = null
-      }
-      else if (bestOffer === 'categoryDiscount') {
-        offerOrOtherDiscount = { offerOrOtherDiscount: 'category' }
-        bestOffer = null
-      }
-      else {
-        offerOrOtherDiscount = { offerOrOtherDiscount: 'offer' }
-      }
-
-      console.log(`offerApplied: bestOffer--->${bestOffer}..bestDiscount--->${bestDiscount}..offerDiscountType-->${offerDiscountType}...isBOGO-->${isBOGO}...maxOfferDiscountApplied-->${maxOfferDiscountApplied}`)
-      
-      return { offerDiscountType, bestDiscount, maxOfferDiscountApplied, offerApplied: bestOffer, offerDetails, 
-        isBOGO, actualProductQuantity: finalQuantity, nonOfferDiscountValue, ...offerOrOtherDiscount }
- 
-  } catch (error) {
-      console.error("Error in calculateBestOffer:", error.message)
-      errorHandler(500, "Internal Server Error.")
-  }
+    } catch (error) {
+        console.error(error)
+        errorHandler(500, "Internal Server Error.")
+    }
 }
 
 
-module.exports = {findUserGroup, calculateBestOffer}
+module.exports = { findUserGroup, calculateBestOffer }

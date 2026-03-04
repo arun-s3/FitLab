@@ -230,11 +230,11 @@ export default function CoachPlus({autoOpen, onCloseChat}) {
                   >
                     <p className="p-4 text-[13px] text-secondary tracking-[0.3px] text-wrap bg-purple-100 border border-purple-300 rounded-lg">
                         <span 
-                            className="cursor-pointer hover:underline hoevr:underline-offset-2"
+                            className="text-green-500 cursor-pointer hover:underline hoevr:underline-offset-2"
                             onClick={()=> setTimeout(()=> navigate('/signin'), 150)}
                         > Sign in </span> 
                         to unlock Coach+, your intelligent personal fitness assistant. Get precise, customized guidance
-                        for your goals, equipment setup, lifestyle habits, supplements, products
+                        for your fitness goals, equipment setup, lifestyle habits, supplements, products
                         — just like having your own personal coach.
                     </p>
                   </motion.div>

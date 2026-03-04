@@ -6,14 +6,11 @@ const cloudinary = require('../Utils/cloudinary')
 const {errorHandler} = require('../Utils/errorHandler')
 
 
-const packCategoryData = async (req)=>{
-    try{
-        console.log("req.body-->", JSON.stringify(req.body))
-        console.log("req.file-->", JSON.stringify(req.file))
-        console.log("Image path:", req.file.path);
+const packCategoryData = async (req) => {
+    try {
         const result = await cloudinary.uploader.upload(req.file.path, {
-            folder: 'category/image',
-            resource_type: 'image',
+            folder: "category/image",
+            resource_type: "image",
         })
         const uploadedImage = {
             public_id: result.public_id,
@@ -21,577 +18,549 @@ const packCategoryData = async (req)=>{
             url: result.secure_url,
             size: result.bytes,
         }
-        console.log("uploadedImages-->", JSON.stringify(uploadedImage))
-
         const categoryDatas = {
-            name: req.body.categoryName, 
-            description: req.body.categoryDescription, 
-            discount: req.body?.categoryDiscount || 0, 
-            badge: req.body?.categoryBadge && req.body?.categoryBadge !== "null" ? req.body.categoryBadge : null,   
+            name: req.body.categoryName,
+            description: req.body.categoryDescription,
+            discount: req.body?.categoryDiscount || 0,
+            badge: req.body?.categoryBadge && req.body?.categoryBadge !== "null" ? req.body.categoryBadge : null,
             image: uploadedImage,
-        } 
+        }
 
-        if(req.body?.relatedCategory){
+        if (req.body?.relatedCategory) {
             const relatedCategoryList = req.body.relatedCategory
             let relatedCategory = []
             for (const cat of relatedCategoryList) {
-                const categoryDoc = await Category.findOne({name: cat}, {_id: 1})
+                const categoryDoc = await Category.findOne({ name: cat }, { _id: 1 })
                 if (categoryDoc) {
                     relatedCategory.push(categoryDoc._id)
                 }
             }
-            console.log("relatedCategory[]-->", relatedCategory)
             categoryDatas.relatedCategory = relatedCategory
-            console.log("categoryDatas.relatedCategory-->", JSON.stringify(categoryDatas.relatedCategory))
         }
 
         const parseDate = (value) => {
             if (!value || value === "null") return null
-        
+
             const date = new Date(value)
             return isNaN(date.getTime()) ? null : date
         }
-        
+
         const start = parseDate(req.body.startDate)
         const end = parseDate(req.body.endDate)
-        
+
         if (start || end) {
             const now = new Date()
-        
+
             categoryDatas.seasonalActivation = {
                 startDate: start,
-                endDate: end
+                endDate: end,
             }
-        
+
             if (start && end) {
                 categoryDatas.isActive = start <= now && end >= now
             }
         }
 
-        for(field in categoryDatas){
+        for (field in categoryDatas) {
             !categoryDatas[field] && delete categoryDatas[field]
         }
-        console.log("Category Name-->" ,categoryDatas.name)
-        console.log("categoryDatas--->", JSON.stringify(categoryDatas))
-
         return categoryDatas
-    }
-    catch(error){
-        console.log("Error in packCategoryData function-->"+error.message);
+    } catch (error) {
+        console.error(error)
     }
 }
 
-const createCategory = async(req,res,next)=>{
+const createCategory = async (req, res, next) => {
     try {
-        console.log("Inside createCategory controller, received categoryForm-->", JSON.stringify(req.body.categoryName))
         const categoryDatas = await packCategoryData(req)
         const newCategory = new Category(categoryDatas)
-        const savedCategory = await newCategory.save();
-        if(savedCategory){
-            if(req.body.parentCategory !== 'null' && req.body.parentCategory !== null && req.body.parentCategory !== '' && req.body.parentCategory !== undefined){
-                const parentCategoryDoc = await Category.findOne({name: req.body.parentCategory})
-                if(parentCategoryDoc){
-                    console.log("Putting up Subcategory field")
-                    const updatedCategory = await Category.updateOne({_id: savedCategory._id},{$set: {parentCategory: parentCategoryDoc._id}})
+        const savedCategory = await newCategory.save()
+        if (savedCategory) {
+            if (
+                req.body.parentCategory !== "null" &&
+                req.body.parentCategory !== null &&
+                req.body.parentCategory !== "" &&
+                req.body.parentCategory !== undefined
+            ) {
+                const parentCategoryDoc = await Category.findOne({ name: req.body.parentCategory })
+                if (parentCategoryDoc) {
+                    const updatedCategory = await Category.updateOne(
+                        { _id: savedCategory._id },
+                        { $set: { parentCategory: parentCategoryDoc._id } },
+                    )
                     let updatedParentCategoryDoc
-                    if(updatedCategory){
-                        updatedParentCategoryDoc = await Category.updateOne({_id: parentCategoryDoc._id}, {$push: {subCategory: savedCategory._id}})
+                    if (updatedCategory) {
+                        updatedParentCategoryDoc = await Category.updateOne(
+                            { _id: parentCategoryDoc._id },
+                            { $push: { subCategory: savedCategory._id } },
+                        )
                     }
-                    if(!updatedParentCategoryDoc){
-                        await Category.deleteOne({_id: savedCategory._id})
+                    if (!updatedParentCategoryDoc) {
+                        await Category.deleteOne({ _id: savedCategory._id })
                         next(errorHandler(500, "Internal Server Error!"))
                     }
-                }else{
+                } else {
                     next(errorHandler(500, "No such parent category found!"))
                 }
-                res.status(201).json({createCategory:'true', category:savedCategory});  
+                res.status(201).json({ createCategory: "true", category: savedCategory })
             }
-            res.status(201).json({createCategory:'true', category: {...savedCategory, productCount: 0}});  
+            res.status(201).json({ createCategory: "true", category: { ...savedCategory, productCount: 0 } })
         }
-    } 
-    catch (error) { 
-        console.log("Error in categoryController-createCategory-->"+error.message);
+    } catch (error) {
         next(error)
+        console.error(error)
     }
 }
 
 const findCategoryById = async (req, res, next) => {
     try {
-        const { id } = req.params;
-        console.log("id-->", id);
-
-        console.log("Inside findCategoryById controller...")
-
+        const { id } = req.params
         const category = await Category.findOne({ _id: id })
-            .populate('subCategory').populate('parentCategory').populate('relatedCategory').exec();
-
-        console.log("\n\n" + "CATEGORY NAME FROM BACKEND---->", category.name)
+            .populate("subCategory")
+            .populate("parentCategory")
+            .populate("relatedCategory")
+            .exec()
         if (!category) {
-            return res.status(404).json({ success: false, message: 'Category not found' });
+            return res.status(404).json({ success: false, message: "Category not found" })
         }
-        const subCategories = category.subCategory;
+        const subCategories = category.subCategory
 
-        let parentLevelCount = await findParentLevelCount(subCategories[0]?._id);
+        let parentLevelCount = await findParentLevelCount(subCategories[0]?._id)
 
         async function findParentLevelCount(subCategoryId, level = 0) {
-            if (!subCategoryId) return level;
-            const subCategory = await Category.findOne({ _id: subCategoryId }).populate('parentCategory').exec();
-            return subCategory.parentCategory ? findParentLevelCount(subCategory.parentCategory._id, level + 1) : level;
+            if (!subCategoryId) return level
+            const subCategory = await Category.findOne({ _id: subCategoryId }).populate("parentCategory").exec()
+            return subCategory.parentCategory ? findParentLevelCount(subCategory.parentCategory._id, level + 1) : level
         }
-        console.log("Sending populatedSubcategories-->", JSON.stringify({ success: true, populatedSubCategories: subCategories, parentName: category.name, parentLevelCount }));
-        res.status(200).json({ success: true, category, parentName: category.name, populatedSubCategories: subCategories, parentLevelCount });
+        res.status(200).json({
+            success: true,
+            category,
+            parentName: category.name,
+            populatedSubCategories: subCategories,
+            parentLevelCount,
+        })
     } catch (error) {
-        console.error('Error in categoryController findCategoryById--->', error.message);
-        res.status(500).json({ success: false, message: 'An error occurred' });
-    }
-}
-
-
-const getCategoryIdByName = async (req, res, next)=> {
-  try {
-    const {name} = req.params
-    console.log("Inside getCategoryIdByName, received category name-->", name)
-
-    if (!name || !name.trim()) {
-      next(errorHandler(400, "Category name is required"))
-    }
-
-    const category = await Category.findOne({
-      name: { $regex: new RegExp(`^${name}$`, "i") }}).select("_id name subCategory")
-
-    if (!category) {
-      next(errorHandler(404, "Category not found"))
-    }
-
-    console.log("Required category id----->", category._id)
-    res.status(200).json({id: category._id, name: category.name, subCategory: category.subCategory, category})
-  }
-  catch (error) {
-    console.error("Error fetching category ID:", error);
-    next(error)
-  }
-}
-
-
-const getAllCategories = async (req, res, next) => {
-  try {
-    console.log("Inside getAllCategories")
-    console.log("req.query -->", JSON.stringify(req.query))
-
-    let { status, isActive } = req.query
-    let filter = {}
-    let categoriesData, categoriesCount
-
-    if (Object.keys(req.query).length > 0) {
-
-      if (status === "active") filter.isBlocked = false
-      else if (status === "blocked") filter.isBlocked = true
-
-      if (isActive === "true") filter.isActive = true
-      else if (isActive === "false") filter.isActive = false
-
-      categoriesData = await Category
-        .find(filter)
-        .populate({
-          path: "relatedCategory",
-          select: "name image isActive isBlocked discount"
-        })
-        .lean()
-      categoriesCount = categoriesData.length
-
-    } else {
-      categoriesData = await Category
-        .find({ parentCategory: null })
-        .populate({
-          path: "relatedCategory",
-          select: "name image isActive isBlocked discount"
-        })
-        .lean()
-      categoriesCount = categoriesData.length
-    }
-
-    if (categoriesData.length === 0) {
-      return res.status(200).json({
-        success: false,
-        categoriesData: [],
-        categoriesCount: 0,
-        message: "No categories found"
-      })
-    }
-
-    const categoryNames = categoriesData.map(cat => cat.name)
-
-    const productCounts = await Product.aggregate([
-      {
-        $match: {
-          category: { $in: categoryNames }
-        }
-      },
-      {
-        $unwind: "$category"
-      },
-      {
-        $match: {
-          category: { $in: categoryNames }
-        }
-      },
-      {
-        $group: {
-          _id: "$category",
-          count: { $sum: 1 }
-        }
-      }
-    ])
-
-    const countMap = {}
-    productCounts.forEach(item => {
-      countMap[item._id] = item.count
-    })
-
-    const enrichedCategories = categoriesData.map(cat => ({
-      ...cat,
-      productCount: countMap[cat.name] || 0
-    }))
-
-    console.log("Categories with productCount -->",
-      enrichedCategories.map(c => ({
-        name: c.name,
-        productCount: c.productCount
-      }))
-    )
-
-    res.status(200).json({
-      success: true,
-      categoriesData: enrichedCategories,
-      categoriesCount
-    })
-
-  } 
-  catch (error) {
-    console.log("Error in categoryController getAllCategories --> " + error.message)
-    next(error)
-  }
-}
-
-
-const getFirstLevelCategories = async(req,res,next)=> {
-    try{
-        console.log("Inside getFirstLevelCategories of categoryController")
-        const categories = await Category.find({parentCategory: null})
-        console.log("Toppest level categories found in getFirstLevelCategories---->", JSON.stringify(categories))
-        let firstLevelCategories = []
-        if(categories.length){
-            firstLevelCategories = await Promise.all(
-                categories.map( async (cat)=> {
-                    if(cat.subCategory){
-                        return await Category.findOne({_id: cat._id}).populate('subCategory').exec()
-                    }else{
-                        return cat
-                    }
-                })
-            )
-        }
-        if(firstLevelCategories.length){
-            console.log("firstLevelCategories from getFirstLevelCategories--->", JSON.stringify(firstLevelCategories))
-            res.status(200).json({firstLevelCategories})
-        }else{
-            next(errorHandler(404, "No categories found!"))
-        }
-    }
-    catch(error){
-        console.log("Error in categoryController getFirstLevelCategories-->"+ error.message)
+        console.error(error)
         next(error)
     }
 }
 
+const getCategoryIdByName = async (req, res, next) => {
+    try {
+        const { name } = req.params
+        if (!name || !name.trim()) {
+            next(errorHandler(400, "Category name is required"))
+        }
+
+        const category = await Category.findOne({
+            name: { $regex: new RegExp(`^${name}$`, "i") },
+        }).select("_id name subCategory")
+
+        if (!category) {
+            next(errorHandler(404, "Category not found"))
+        }
+        res.status(200).json({ id: category._id, name: category.name, subCategory: category.subCategory, category })
+    } catch (error) {
+        console.error("Error fetching category ID:", error)
+        next(error)
+    }
+}
+
+const getAllCategories = async (req, res, next) => {
+    try {
+        let { status, isActive } = req.query
+        let filter = {}
+        let categoriesData, categoriesCount
+
+        if (Object.keys(req.query).length > 0) {
+            if (status === "active") filter.isBlocked = false
+            else if (status === "blocked") filter.isBlocked = true
+
+            if (isActive === "true") filter.isActive = true
+            else if (isActive === "false") filter.isActive = false
+
+            categoriesData = await Category.find(filter)
+                .populate({
+                    path: "relatedCategory",
+                    select: "name image isActive isBlocked discount",
+                })
+                .lean()
+            categoriesCount = categoriesData.length
+        } else {
+            categoriesData = await Category.find({ parentCategory: null })
+                .populate({
+                    path: "relatedCategory",
+                    select: "name image isActive isBlocked discount",
+                })
+                .lean()
+            categoriesCount = categoriesData.length
+        }
+
+        if (categoriesData.length === 0) {
+            return res.status(200).json({
+                success: false,
+                categoriesData: [],
+                categoriesCount: 0,
+                message: "No categories found",
+            })
+        }
+
+        const categoryNames = categoriesData.map((cat) => cat.name)
+
+        const productCounts = await Product.aggregate([
+            {
+                $match: {
+                    category: { $in: categoryNames },
+                },
+            },
+            {
+                $unwind: "$category",
+            },
+            {
+                $match: {
+                    category: { $in: categoryNames },
+                },
+            },
+            {
+                $group: {
+                    _id: "$category",
+                    count: { $sum: 1 },
+                },
+            },
+        ])
+
+        const countMap = {}
+        productCounts.forEach((item) => {
+            countMap[item._id] = item.count
+        })
+
+        const enrichedCategories = categoriesData.map((cat) => ({
+            ...cat,
+            productCount: countMap[cat.name] || 0,
+        }))
+
+        res.status(200).json({
+            success: true,
+            categoriesData: enrichedCategories,
+            categoriesCount,
+        })
+    } catch (error) {
+        next(error)
+        console.error(error)
+    }
+}
+
+const getFirstLevelCategories = async (req, res, next) => {
+    try {
+        const categories = await Category.find({ parentCategory: null })
+        let firstLevelCategories = []
+        if (categories.length) {
+            firstLevelCategories = await Promise.all(
+                categories.map(async (cat) => {
+                    if (cat.subCategory) {
+                        return await Category.findOne({ _id: cat._id }).populate("subCategory").exec()
+                    } else {
+                        return cat
+                    }
+                }),
+            )
+        }
+        if (firstLevelCategories.length) {
+            res.status(200).json({ firstLevelCategories })
+        } else {
+            next(errorHandler(404, "No categories found!"))
+        }
+    } catch (error) {
+        next(error)
+        console.error(error)
+    }
+}
 
 const getCategoryNames = async (req, res, next) => {
     try {
-        const {id} = req.params    
+        const { id } = req.params
         if (!category) {
             return next(errorHandler(404, "No such category available!"))
         }
         const parentCategoryName = category.parentCategory?.name || null
-        const relatedCategoryNames = category.relatedCategory?.map(cat => cat?.name || null) || []
-        res.status(200).json({categoryDatas:{parentCategoryName, relatedCategoryNames}})
+        const relatedCategoryNames = category.relatedCategory?.map((cat) => cat?.name || null) || []
+        res.status(200).json({ categoryDatas: { parentCategoryName, relatedCategoryNames } })
     } catch (error) {
-        console.error("Error in categoryController getCategoryNames -->", error.message)
+        console.error(error)
         next(error)
     }
 }
 
 const getNestedSubcategoryNames = async (req, res, next) => {
     try {
-        const { id } = req.params;
-        let subcategoryNames = []  
+        const { id } = req.params
+        let subcategoryNames = []
         let parentLevelCounts = []
 
         async function findParentLevelCount(subCategoryId, level = 0) {
-            if (!subCategoryId) return level;
-            const subCategory = await Category.findOne({ _id: subCategoryId }).populate('parentCategory').exec();
-            return subCategory.parentCategory ? findParentLevelCount(subCategory.parentCategory._id, level + 1) : level;
+            if (!subCategoryId) return level
+            const subCategory = await Category.findOne({ _id: subCategoryId }).populate("parentCategory").exec()
+            return subCategory.parentCategory ? findParentLevelCount(subCategory.parentCategory._id, level + 1) : level
         }
 
         const findSubcategoryNames = async (id) => {
-            const category = await Category.findOne({_id: id},{_id:1, name:1, badge:1, parentCategory:1, subCategory:1});
+            const category = await Category.findOne(
+                { _id: id },
+                { _id: 1, name: 1, badge: 1, parentCategory: 1, subCategory: 1 },
+            )
             if (category) {
-                let parentLevelCount = await findParentLevelCount(category._id);
-                subcategoryNames.push({_id:category._id, name: category.name, badge: category.badge, parentCategory: category.parentCategory, subCategory: category.subCategory, parentLevelCount})
+                let parentLevelCount = await findParentLevelCount(category._id)
+                subcategoryNames.push({
+                    _id: category._id,
+                    name: category.name,
+                    badge: category.badge,
+                    parentCategory: category.parentCategory,
+                    subCategory: category.subCategory,
+                    parentLevelCount,
+                })
                 // parentLevelCounts.push(parentLevelCount)
                 if (category.subCategory && category.subCategory.length) {
-                    await Promise.all(category.subCategory.map(async (cat) => {
-                        await findSubcategoryNames(cat._id);
-                    }))
+                    await Promise.all(
+                        category.subCategory.map(async (cat) => {
+                            await findSubcategoryNames(cat._id)
+                        }),
+                    )
                 }
             }
         }
         await findSubcategoryNames(id)
-        console.log("nestedSubcategoryNames from backend-->", JSON.stringify(subcategoryNames))
-        res.status(200).json({nestedSubcategoryNames: subcategoryNames})
+        res.status(200).json({ nestedSubcategoryNames: subcategoryNames })
     } catch (error) {
-        console.error("Error in categoryController getNestedSubcategoryNames -->", error.message)
+        console.error(error)
         next(error)
     }
 }
 
-
 const getDiscountedCategoriesByNames = async (req, res, next) => {
-  try {
-    const { names } = req.body
+    try {
+        const { names } = req.body
+        if (!Array.isArray(names) || names.length === 0) {
+            return next(errorHandler(400, "Category names array is required"))
+        }
 
-    console.log("Inside getDiscountedCategoriesByNames, received names:", names)
+        const now = new Date()
 
-    if (!Array.isArray(names) || names.length === 0) {
-      return next(errorHandler(400, "Category names array is required"))
+        const categories = await Category.find({
+            name: { $in: names },
+            discount: { $gt: 0 },
+            isActive: true,
+            isBlocked: false,
+        }).select("name discount")
+
+        const discountedCategoryNames = categories.map((cat) => cat.name)
+        res.status(200).json({ discountedCategories: discountedCategoryNames })
+    } catch (error) {
+        console.error(error)
+        next(error)
     }
-
-    const now = new Date()
-
-    const categories = await Category.find({
-      name: { $in: names },
-      discount: { $gt: 0 },
-      isActive: true,
-      isBlocked: false,
-    }).select("name discount")
-
-    const discountedCategoryNames = categories.map(cat => cat.name)
-
-    console.log("Discounted categories found:", discountedCategoryNames)
-
-    res.status(200).json({ discountedCategories: discountedCategoryNames })
-
-  }
-  catch (error) {
-    console.error("Error in getDiscountedCategoriesByNames:", error.message)
-    next(error)
-  }
 }
 
-
-const toggleCategoryStatus = async(req,res,next)=>{
-    try{
-        console.log("Inside toggleCategoryStatus controller--")
-        const {id} = req.params
-        console.log("ID-->", id)
+const toggleCategoryStatus = async (req, res, next) => {
+    try {
+        const { id } = req.params
         let status, newStatus
         const blockStatusIdList = []
 
-        const category = await Category.findOne({_id:id})
+        const category = await Category.findOne({ _id: id })
         status = category.isBlocked
-        console.log("Blocked status before-->", status)
+        const statusToggler = async (id) => {
+            const category = await Category.findOne({ _id: id })
 
-        const statusToggler = async (id)=> {
-            const category = await Category.findOne({_id:id})
-            // if (!category) {
-            //     return next(errorHandler(404, "No such category found!"));
-            // }
-            const returnedCategory = await Category.findOneAndUpdate({_id:id},{$set: {isBlocked: !status}}, {new: true})
-            if(returnedCategory){
+            const returnedCategory = await Category.findOneAndUpdate(
+                { _id: id },
+                { $set: { isBlocked: !status } },
+                { new: true },
+            )
+            if (returnedCategory) {
                 newStatus = returnedCategory.isBlocked
-                console.log("Blocked status now-->", newStatus)
-                blockStatusIdList.push({id: returnedCategory._id, name: returnedCategory.name, status: newStatus, parentCategory:returnedCategory.parentCategory})
-                if(returnedCategory.subCategory  && returnedCategory.subCategory.length > 0){
+                blockStatusIdList.push({
+                    id: returnedCategory._id,
+                    name: returnedCategory.name,
+                    status: newStatus,
+                    parentCategory: returnedCategory.parentCategory,
+                })
+                if (returnedCategory.subCategory && returnedCategory.subCategory.length > 0) {
                     for (const id of returnedCategory.subCategory) {
-                        await statusToggler(id);
-                      }
+                        await statusToggler(id)
+                    }
                 }
             }
-            // else{
-            //     next(errorHandler(400, "No such category available to update status!"))
-            // }
         }
 
         await statusToggler(id)
-        console.log("BLOCKSTATUSLIST-------->",JSON.stringify(blockStatusIdList))
-        res.status(200).json({blockStatusIdList, message: newStatus? 'Blocked successfully!' : 'Unblocked successfully!'})
-    }
-    catch(error){
-        console.log("Error in toggleCategoryStatus controller-->", error.message)
+        res.status(200).json({
+            blockStatusIdList,
+            message: newStatus ? "Blocked successfully!" : "Unblocked successfully!",
+        })
+    } catch (error) {
+        next(error)
+        console.error(error)
     }
 }
 
-const updateCategory = async (req, res, next) => {    
+const updateCategory = async (req, res, next) => {
     try {
-        console.log("Inside updateCategory of categoryController--")
-        const {id} = req.params;
-        console.log("Id from params-->",id)
-        const category = await Category.findOne({_id: id})
+        const { id } = req.params
+        const category = await Category.findOne({ _id: id })
         let parentCategoryDoc
-        if(category){
+        if (category) {
             const categoryDatas = await packCategoryData(req)
-            console.log("req.body.parentCategory before If condn-->", req.body.parentCategory)
-            // const parentCategory = req.body?.parentCategory ?? false
-            if(req.body.parentCategory !== 'null' && req.body.parentCategory !== null && req.body.parentCategory !== '' && req.body.parentCategory !== undefined){
-                console.log("req.body.parentCategory-->", req.body.parentCategory)
-                parentCategoryDoc = await Category.findOne({name: req.body.parentCategory})
-                if(parentCategoryDoc){
-                    console.log("Putting up Subcategory field")
-                    const updatedCategory = await Category.updateOne({_id: id},{$set: {...categoryDatas, parentCategory: parentCategoryDoc._id}})
+            if (
+                req.body.parentCategory !== "null" &&
+                req.body.parentCategory !== null &&
+                req.body.parentCategory !== "" &&
+                req.body.parentCategory !== undefined
+            ) {
+                parentCategoryDoc = await Category.findOne({ name: req.body.parentCategory })
+                if (parentCategoryDoc) {
+                    const updatedCategory = await Category.updateOne(
+                        { _id: id },
+                        { $set: { ...categoryDatas, parentCategory: parentCategoryDoc._id } },
+                    )
                     let updatedParentCategoryDoc
-                    if(updatedCategory){
-                        updatedParentCategoryDoc = await Category.updateOne({_id: parentCategoryDoc._id}, {$push: {subCategory: id}})
+                    if (updatedCategory) {
+                        updatedParentCategoryDoc = await Category.updateOne(
+                            { _id: parentCategoryDoc._id },
+                            { $push: { subCategory: id } },
+                        )
                     }
-                    if(!updatedParentCategoryDoc){
-                        await Category.deleteOne({_id: updatedCategory._id})
+                    if (!updatedParentCategoryDoc) {
+                        await Category.deleteOne({ _id: updatedCategory._id })
                         next(errorHandler(500, "Internal Server Error!"))
                     }
-                }else{
+                } else {
                     next(errorHandler(500, "No such parent category found!"))
                 }
-                res.status(200).json({updatedCategory: true,
-                    category: {...categoryDatas, ...(parentCategoryDoc ? { parentCategory: parentCategoryDoc._id } : {})
-                }})
-            }else {
-                console.log("Updating without parentCategory")
-                        
-                await Category.updateOne( { _id: id }, { $set: categoryDatas } )
-            
-                const updatedCategoryDoc = await Category.findById(id).lean()
-            
-                const productCount = await Product.countDocuments({
-                    category: updatedCategoryDoc.name
+                res.status(200).json({
+                    updatedCategory: true,
+                    category: {
+                        ...categoryDatas,
+                        ...(parentCategoryDoc ? { parentCategory: parentCategoryDoc._id } : {}),
+                    },
                 })
+            } else {
+                await Category.updateOne({ _id: id }, { $set: categoryDatas })
 
-                console.log("productCount-------------->", productCount)
-            
+                const updatedCategoryDoc = await Category.findById(id).lean()
+
+                const productCount = await Product.countDocuments({
+                    category: updatedCategoryDoc.name,
+                })
                 return res.status(200).json({
                     updatedCategory: true,
                     category: {
                         ...updatedCategoryDoc,
-                        productCount
-                    }
+                        productCount,
+                    },
                 })
             }
             res.status(200).json({
                 updatedCategory: true,
-                category: {...categoryDatas, productCount, ...(parentCategoryDoc ? { parentCategory: parentCategoryDoc._id } : {})
-                }})
+                category: {
+                    ...categoryDatas,
+                    productCount,
+                    ...(parentCategoryDoc ? { parentCategory: parentCategoryDoc._id } : {}),
+                },
+            })
+        } else {
+            next(errorHandler(400, "No such category available to update"))
         }
-       else{
-        next(errorHandler(400, "No such category available to update"))
-       }       
     } catch (error) {
-        console.log("Error in categoryController-updateCategory-->"+error.message);
         next(error)
+        console.error(error)
     }
-  }
-  
+}
 
 const countProductsByCategory = async (req, res, next) => {
-  try {
-    console.log("Inside countProductsByCategory controller")
-    const { categoryId } = req.params 
-    if (!categoryId) return next(errorHandler(400, "Category ID is required!"))
+    try {
+        const { categoryId } = req.params
+        if (!categoryId) return next(errorHandler(400, "Category ID is required!"))
 
-    const category = await Category.findById(categoryId) 
-    if (!category) return next(errorHandler(404, "Category not found!"))
-        
-    const getAllSubcategoryNames = async (categoryId, collected = []) => {
-      const category = await Category.findById(categoryId)
-      if (!category) return collected
+        const category = await Category.findById(categoryId)
+        if (!category) return next(errorHandler(404, "Category not found!"))
 
-      collected.push(category.name) 
+        const getAllSubcategoryNames = async (categoryId, collected = []) => {
+            const category = await Category.findById(categoryId)
+            if (!category) return collected
 
-      for (const subId of category.subCategory) {
-        await getAllSubcategoryNames(subId, collected) 
-      }
+            collected.push(category.name)
 
-      return collected;
+            for (const subId of category.subCategory) {
+                await getAllSubcategoryNames(subId, collected)
+            }
+
+            return collected
+        }
+
+        const allCategoryNames = await getAllSubcategoryNames(categoryId)
+        const count = await Product.countDocuments({
+            category: { $in: allCategoryNames },
+        })
+        return res.status(200).json({
+            success: true,
+            categoriesIncluded: allCategoryNames,
+            productCount: count,
+        })
+    } catch (error) {
+        console.error(error)
+        next(error)
     }
-
-    const allCategoryNames = await getAllSubcategoryNames(categoryId)
-
-    console.log("Categories found-->", JSON.stringify(allCategoryNames))
-
-    const count = await Product.countDocuments({
-      category: { $in: allCategoryNames }
-    });
-
-    console.log("Product count-->", count)
-
-    return res.status(200).json({
-      success: true,
-      categoriesIncluded: allCategoryNames,
-      productCount: count
-    });
-
-  }
-  catch (error) {
-    console.error("Error in countProductsByCategory:", error)
-    next(error)
-  }
 }
-
 
 const searchCategoryByName = async (req, res, next) => {
-  try {
-    console.log("Inside searchCategoryByName controller")
+    try {
+        const { name } = req.query
+        if (!name || !name.trim()) {
+            return res.status(400).json({
+                success: false,
+                message: "Category name is required for search",
+            })
+        }
 
-    const { name } = req.query
+        const categoriesData = await Category.find({
+            name: { $regex: name.trim(), $options: "i" },
+        })
 
-    console.log("Search name -->", name)
+        const categoriesCount = categoriesData.length
 
-    if (!name || !name.trim()) {
-      return res.status(400).json({
-        success: false,
-        message: "Category name is required for search"
-      })
+        if (categoriesCount > 0) {
+            res.status(200).json({
+                success: true,
+                categoriesData,
+                categoriesCount,
+            })
+        } else {
+            res.status(200).json({
+                success: false,
+                categoriesData: [],
+                categoriesCount: 0,
+                message: "No matching categories found",
+            })
+        }
+    } catch (error) {
+        next(error)
+        console.error(error)
     }
-
-    const categoriesData = await Category.find({
-      name: { $regex: name.trim(), $options: "i" }
-    })
-
-    const categoriesCount = categoriesData.length
-
-    console.log("Matching categories -->",
-      categoriesData.map(cat => cat.name)
-    )
-
-    if (categoriesCount > 0) {
-      res.status(200).json({
-        success: true,
-        categoriesData,
-        categoriesCount
-      })
-    } else {
-      res.status(200).json({
-        success: false,
-        categoriesData: [],
-        categoriesCount: 0,
-        message: "No matching categories found"
-      })
-    }
-
-  }
-  catch (error) {
-    console.log("Error in searchCategoryByName -->", error.message)
-    next(error)
-  }
 }
 
 
 
-module.exports = {createCategory, getAllCategories, getFirstLevelCategories, findCategoryById, getCategoryIdByName, searchCategoryByName,
-            getCategoryNames, getNestedSubcategoryNames, getDiscountedCategoriesByNames, toggleCategoryStatus, 
-            updateCategory, countProductsByCategory}
+module.exports = {
+    createCategory,
+    getAllCategories,
+    getFirstLevelCategories,
+    findCategoryById,
+    getCategoryIdByName,
+    searchCategoryByName,
+    getCategoryNames,
+    getNestedSubcategoryNames,
+    getDiscountedCategoriesByNames,
+    toggleCategoryStatus,
+    updateCategory,
+    countProductsByCategory,
+}

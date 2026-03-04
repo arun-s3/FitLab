@@ -289,8 +289,6 @@ export default function SocketProvider() {
 
       const handleSendMessageToCoach = () => {
         if (!newCoachMessage.trim() || !socket) return 
-
-        console.log("roomId---->", roomId)
     
         const messageData = {
           roomId,

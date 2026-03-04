@@ -2,22 +2,17 @@ const waitingQueue = []
 const activeSessions = new Map()
 const adminSessions = new Map()
 
-async function videoChatBoxSocket(io){
 
+async function videoChatBoxSocket(io){
 
   if(io){
     io.on("connection", (socket)=> {
-      console.log("Client for video chat connected:", socket.id);
-      
       socket.on("joinQueue", ({ userId, username}) => {
-        
-        console.log("Emiting checkAdminStatus to admin...")
         io.to("admin-room").emit("checkAdminStatus", {userId, socketId: socket.id})
 
         const isUserWaiting = waitingQueue.some(user=> user.userId === userId)
         const isUserInSession = Object.values(Object.fromEntries(activeSessions)).some(user=> user.userId === userId)
         if(!isUserWaiting && !isUserInSession){
-          console.log("Inside on joinQueue,")
           const queuePosition = waitingQueue.length + 1;
           const userQueueData = {
             userId,
@@ -30,9 +25,6 @@ async function videoChatBoxSocket(io){
           waitingQueue.push(userQueueData)
 
           socket.emit("JoinedQueue")
-
-
-          console.log("Emiting queueUpdate....")
           socket.emit("queueUpdate", {
             position: queuePosition,
             estimatedWaitTime: queuePosition * 3,
@@ -43,8 +35,6 @@ async function videoChatBoxSocket(io){
       })
 
       socket.on("adminStatusChecked", ({userId, socketId, status})=> {
-        console.log("Inside on adminStatusChecked and emiting currentAdminStatus to user...")
-        console.log("status---->", status)
         io.to(socketId).emit("currentAdminStatus", {adminId: "admin-room", status})
       })
 
@@ -58,22 +48,17 @@ async function videoChatBoxSocket(io){
         socket.emit("queueUpdate", {
           queue: waitingQueue,
         });
-
-        console.log("Object.values(Object.fromEntries(activeSessions))------>", Object.values(Object.fromEntries(activeSessions)))
-
         socket.emit("activeSessionsUpdate", {
           sessions: Array.from(activeSessions.values()),
         });
       });
 
       socket.on("acceptCall", ({ adminId, userId, username }) => {
-        console.log("Inside acceptCall....")
         const userIndex = waitingQueue.findIndex(user => user.userId === userId);
 
         if (userIndex !== -1) {
           const user = waitingQueue[userIndex];
           const sessionId = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-          console.log("sessionId generated--->", sessionId)
           waitingQueue.splice(userIndex, 1);
 
           const sessionData = {
@@ -88,17 +73,12 @@ async function videoChatBoxSocket(io){
           };
 
           activeSessions.set(sessionId, sessionData);
-          console.log("activeSessions now--->", activeSessions)
           const adminData = adminSessions.get(adminId);
           if (adminData) {
             adminData.status = "busy";
             adminData.currentSession = sessionId;
           }
-
-          console.log("Emiting callReady....")
           io.to(user.socketId).emit("callReady", { sessionId });
-
-          console.log("Emiting sessionStarted....")
           socket.emit("sessionStarted", sessionData);
 
           socket.join(sessionId);
@@ -115,13 +95,10 @@ async function videoChatBoxSocket(io){
       });
 
       socket.on("startScheduledCall", ({ adminId, adminSocketId, userSocketId, currentScheduledSession }) => {
-        console.log("Inside startScheduledCall....")
         const userIndex = waitingQueue.findIndex(user => user.userId === currentScheduledSession.userId);
 
-        // if (userIndex !== -1) {
           const user = waitingQueue[userIndex];
           const sessionId = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-          console.log("sessionId generated--->", sessionId)
           waitingQueue.splice(userIndex, 1);
 
           const sessionData = {
@@ -136,37 +113,16 @@ async function videoChatBoxSocket(io){
           };
 
           activeSessions.set(sessionId, sessionData);
-          console.log("activeSessions now--->", activeSessions)
           const adminData = adminSessions.get(adminId);
           if (adminData) {
             adminData.status = "busy";
             adminData.currentSession = sessionId;
           }
-
-          console.log("Emiting notifySupportCalling....")
           io.to(userSocketId).emit("notifySupportCalling", sessionId, currentScheduledSession);
 
-          // console.log("Emiting callReady....")
-          // io.to(userSocketId).emit("callReady", { sessionId });
-
-          // console.log("Emiting sessionStarted....")
-          // socket.emit("sessionStarted", sessionData);
-
-          // socket.join(sessionId);
-          // io.sockets.sockets.get(userSocketId)?.join(sessionId);
-
-          // io.to("admin-room").emit("queueUpdate", {
-          //   queue: waitingQueue,
-          // });
-
-          // io.to("admin-room").emit("activeSessionsUpdate", {
-          //   sessions: Array.from(activeSessions.values()),
-          // });
-        // }
       });
 
       socket.on("startScheduledSession", (sessionId)=> {
-        console.log("Inside startScheduledSession...")
         const sessionData = activeSessions.get(sessionId) 
         io.to("admin-room").emit("sessionStarted", sessionData)
       })
@@ -195,12 +151,9 @@ async function videoChatBoxSocket(io){
       })
 
       socket.on("adminStatusChange", ({ adminId, status }) => {
-        console.log("Inside on adminStatusChange...")
         const adminData = adminSessions.get(adminId);
         if (adminData) {
           adminData.status = status;
-          console.log("Emiting currentAdminStatus...")
-          console.log("current status--->", status)
           waitingQueue.forEach(queue=> {
             io.to(queue.socketId).emit("currentAdminStatus", {adminId, status})
           })
@@ -209,7 +162,6 @@ async function videoChatBoxSocket(io){
 
 
       socket.on("joinSession", ({ sessionId }) => {
-        console.log("Inside on joinSession")
         socket.join(sessionId);
       });
 
@@ -230,25 +182,17 @@ async function videoChatBoxSocket(io){
       });
 
       socket.on("endSession", ({ sessionId }) => {
-        console.log("Inside on endSession...")
         const session = activeSessions.get(sessionId);
 
         if (session) {
-          console.log("Emiting sessionEnded...")
           socket.to(sessionId).emit("sessionEnded");
 
           const adminData = adminSessions.get(session.adminId);
-          console.log("adminData on endSession--->",adminData)
           if (adminData) {
             adminData.status = "available";
             adminData.currentSession = null;
           }
-
-          console.log("activeSessions before deleting sessionId---->", activeSessions)
           activeSessions.delete(sessionId);
-          console.log("activeSessions before deleting sessionId---->", activeSessions)
-
-          console.log("Emiting activeSessionsUpdate...")
           io.to("admin-room").emit("activeSessionsUpdate", {
             sessions: Array.from(activeSessions.values()),
           });
@@ -308,7 +252,6 @@ async function videoChatBoxSocket(io){
       });
 
       socket.on("adminStoppedScheduledSession", ({ userId }) => {
-        console.log("Inside adminStoppedScheduledSession....")
         const currentsession = Array.from(activeSessions.values()).find(session=> session.userId === userId)
         const sessionId = currentsession.sessionId
         const session = activeSessions.get(sessionId);
@@ -330,15 +273,12 @@ async function videoChatBoxSocket(io){
             sessions: Array.from(activeSessions.values()),
           });
         }
-
-        console.log("Emiting unNotifySupportCalling....")
         io.to(currentsession.userSocketId).emit("unNotifySupportCalling");
 
         socket.leave(sessionId);
       });
 
       socket.on("unNotifiedSupportCalling", ()=>{
-        console.log("Inside on unNotifiedSupportCalling....")
         io.to("admin-room").emit("stoppedSupportCalling") 
       })
 

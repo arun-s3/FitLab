@@ -1,10 +1,7 @@
-const {LATEST_FITNESS_PROMPT} = require("./Prompts/periodFitnessProfilePrompts")
+const { LATEST_FITNESS_PROMPT } = require("./Prompts/periodFitnessProfilePrompts")
+
 
 function buildPeriodFitnessPrompts(fitnessProfile, period) {
-
-    console.log(`fitnessProfile of this ${period} from buildPeriodFitnessPrompts---->`, JSON.stringify(fitnessProfile))
-    console.log("LAST_WORKOUT_PROMPT---->", LATEST_FITNESS_PROMPT)
-
     return `
         ${LATEST_FITNESS_PROMPT}
 
@@ -53,4 +50,5 @@ function buildPeriodFitnessPrompts(fitnessProfile, period) {
         `
 }
 
-module.exports = {buildPeriodFitnessPrompts}
+
+module.exports = { buildPeriodFitnessPrompts }

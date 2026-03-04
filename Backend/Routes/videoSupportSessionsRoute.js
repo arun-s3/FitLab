@@ -1,13 +1,10 @@
-const express = require('express')
+const express = require("express")
 const sessionRouter = express.Router()
-const {bookSession, getAllSessions} = require('../Controllers/videoSupportSessionsController')
-const {isLogin} = require('../Middlewares/Authentication')
+const { bookSession, getAllSessions } = require("../Controllers/videoSupportSessionsController")
 
+const { isLogin } = require("../Middlewares/Authentication")
 
-
-sessionRouter.post('/book', isLogin, bookSession)
-sessionRouter.get('/sessions', isLogin, getAllSessions)
-
-
+sessionRouter.post("/book", isLogin, bookSession)
+sessionRouter.get("/sessions", isLogin, getAllSessions)
 
 module.exports = sessionRouter

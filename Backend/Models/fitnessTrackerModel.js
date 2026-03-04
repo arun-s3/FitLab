@@ -1,32 +1,32 @@
-const mongoose = require("mongoose");
-const ExerciseSchema = require("./exerciseModel");
+const mongoose = require("mongoose")
+const ExerciseSchema = require("./exerciseModel")
 
 const FitnessTrackerSchema = new mongoose.Schema(
-  {
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true
+    {
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true,
+        },
+        date: {
+            type: Date,
+            default: Date.now,
+        },
+        totalDuration: {
+            type: Number,
+            default: 0,
+        },
+        exercises: [ExerciseSchema],
+        totalCalories: {
+            type: Number,
+            default: 0,
+        },
+        totalWorkoutVolume: {
+            type: Number,
+            default: 0,
+        },
     },
-    date: {
-      type: Date,
-      default: Date.now
-    },
-    totalDuration: {
-      type: Number,
-      default: 0
-    },
-    exercises: [ExerciseSchema],
-    totalCalories: {
-      type: Number,
-      default: 0
-    },
-    totalWorkoutVolume: {
-      type: Number,
-      default: 0
-    }
-  },
-  { timestamps: true }
-);
+    { timestamps: true },
+)
 
-module.exports = mongoose.model("FitnessTracker", FitnessTrackerSchema);
+module.exports = mongoose.model("FitnessTracker", FitnessTrackerSchema)

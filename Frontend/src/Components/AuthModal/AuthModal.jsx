@@ -25,10 +25,6 @@ export default function AuthModal({isOpen, onClose, accessFor = "this feature"})
         onClose()
     }   
 
-    useEffect(()=> {
-      console.log("Is AuthModal Open------------>", isOpen)
-    }, [isOpen])
-
 
     return (
 

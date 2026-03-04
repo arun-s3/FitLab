@@ -1,14 +1,13 @@
-const express = require('express')
-const webhookRouter = express.Router() 
-const {handleRazorpayWebhook} = require('../Webhooks/razorpayWebhook')
-const {handleStripeWebhook} = require('../Webhooks/stripeWebhook')
+const express = require("express")
+const webhookRouter = express.Router()
 
-const {isLogin} = require('../Middlewares/Authentication')
+const { handleRazorpayWebhook } = require("../Webhooks/razorpayWebhook")
+const { handleStripeWebhook } = require("../Webhooks/stripeWebhook")
 
+const { isLogin } = require("../Middlewares/Authentication")
 
 // webhookRouter.post('/razorpay', isLogin, express.raw({type: 'application/json'}), handleRazorpayWebhook)
 
-webhookRouter.post('/stripe', isLogin, express.raw({ type: 'application/json' }), handleStripeWebhook)
-
+webhookRouter.post("/stripe", isLogin, express.raw({ type: "application/json" }), handleStripeWebhook)
 
 module.exports = webhookRouter

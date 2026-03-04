@@ -1,4 +1,5 @@
-const {AI_COACH_PROMPT} = require("./Prompts/aiCoachPrompt")
+const { AI_COACH_PROMPT } = require("./Prompts/aiCoachPrompt")
+
 
 function buildAICoachPrompt({
     userQuery,
@@ -7,12 +8,8 @@ function buildAICoachPrompt({
     healthProfile,
     recentOrders,
     wishlistItems,
-    userGoal
+    userGoal,
 }) {
-
-    console.log("userQuery from buildAICoachPrompt---->", userQuery)
-    console.log("AI_COACH_PROMPT---->", AI_COACH_PROMPT)
-
     return `
         ${AI_COACH_PROMPT}
 
@@ -74,4 +71,5 @@ function buildAICoachPrompt({
       `
 }
 
-module.exports = {buildAICoachPrompt}
+
+module.exports = { buildAICoachPrompt }

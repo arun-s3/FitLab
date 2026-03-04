@@ -1,48 +1,42 @@
-// models/paymentModel.js
-const mongoose = require('mongoose')
+const mongoose = require("mongoose")
 
 const paymentSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-  },
-  orderId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Order'
-  },
-  paymentId: {
-    type: String, 
-    required: true
-  },
-  paymentOrderId: {
-    type: String,
-    required: true
-  },
-  paymentSignature: {
-    type: String,
-  },
-  amount: {
-    type: Number,
-    required: true,
-  },
-//   status: {
-//     type: String,
-//     enum: ['created', 'paid', 'failed', 'refunded'],
-//     default: 'created',
-//   },
-  paymentMethod: {
-    type: String, // e.g., "razorpay", "wallet"
-    required: true,
-  },
-  receipt: {
-    type: String,
-    default: ''
-  },
-  paymentDate: {
-    type: Date,
-    default: Date.now(),
-  }
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+    },
+    orderId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Order",
+    },
+    paymentId: {
+        type: String,
+        required: true,
+    },
+    paymentOrderId: {
+        type: String,
+        required: true,
+    },
+    paymentSignature: {
+        type: String,
+    },
+    amount: {
+        type: Number,
+        required: true,
+    },
+    paymentMethod: {
+        type: String, // e.g., "razorpay", "wallet"
+        required: true,
+    },
+    receipt: {
+        type: String,
+        default: "",
+    },
+    paymentDate: {
+        type: Date,
+        default: Date.now(),
+    },
 })
 
-module.exports = mongoose.model('Payment', paymentSchema)
+module.exports = mongoose.model("Payment", paymentSchema)

@@ -44,8 +44,9 @@ export default function ScheduledSessions({ currentScheduledSession, onStartSche
       try{
         const response = await apiClient.get(`/video-chat/sessions`)
         if(response.status === 200){
+            
           const sessions = response.data.sessions
-          console.log("sessions---->", sessions)
+
           if(sessions && sessions.length > 0){
             const sessionsWithDetails = sessions.map(session=> {
               const today = new Date()

@@ -2,6 +2,7 @@ const Wallet = require('../../Models/walletModel')
 const Razorpay = require('../../Utils/razorpay')
 const { v4: uuidv4 } = require('uuid')
 
+
 const generateUniqueAccountNumber = async ()=> {
     let accountNumber
     let exists = true
@@ -27,7 +28,6 @@ async function startAutoRecharge(wallet) {
     const amountToRecharge = wallet.autoRecharge.rechargeAmount * 100; // in paise
 
     if (wallet.autoRecharge.paymentMethod === "razorpay") {
-      // Create an automatic payment order
       const options = {
         amount: amountToRecharge, 
         currency: 'INR',
@@ -36,32 +36,20 @@ async function startAutoRecharge(wallet) {
 
       Razorpay.orders.create(options, (error, order)=> {
           if (error) {
-              console.log(error)
+              console.error(error)
               return next(errorHandler(500, "Something Went Wrong!"))
           }
-          console.log(order)
           return {data: order}
       })
 
-      // Use the saved payment method ID or subscription-like flow to auto-capture
-      // Example (pseudo):
-      // await razorpayInstance.payments.capture(savedPaymentId, amountToRecharge, "INR");
-
       wallet.balance += wallet.autoRecharge.rechargeAmount;
       await wallet.save();
-
-      console.log(`Auto-recharge successful for user ${wallet.user}`);
     }
 
-    // Similar logic for PayPal/Stripe
-
-  } catch (err) {
-    console.error("Auto recharge failed:", err);
+  } catch (error) {
+    console.error(error);
   }
 }
-
-
-
 
 
 module.exports = {generateUniqueAccountNumber, generateTransactionId, startAutoRecharge}

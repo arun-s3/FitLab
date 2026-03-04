@@ -1,11 +1,7 @@
-// import { LAST_WORKOUT_PROMPT } from "./Prompts/lastWorkoutPrompts"
-const {LATEST_WORKOUT_PROMPT} = require("./Prompts/latestWorkoutPrompts")
+const { LATEST_WORKOUT_PROMPT } = require("./Prompts/latestWorkoutPrompts")
+
 
 function buildLastWorkoutPrompt(workout, prevWorkout) {
-
-    console.log("workout from buildLastWorkoutPrompt---->", JSON.stringify(workout))
-    console.log("LAST_WORKOUT_PROMPT---->", LATEST_WORKOUT_PROMPT)
-
     return `
         ${LATEST_WORKOUT_PROMPT}
 
@@ -62,4 +58,5 @@ function buildLastWorkoutPrompt(workout, prevWorkout) {
         `
 }
 
-module.exports = {buildLastWorkoutPrompt}
+
+module.exports = { buildLastWorkoutPrompt }

@@ -1,36 +1,33 @@
-const mongoose=require('mongoose')
-const Offer = require('./offerModel')
-const Coupon = require('./couponModel')
+const mongoose = require("mongoose")
 
-
-const cartSchema=new mongoose.Schema({
+const cartSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', 
+        ref: "User",
         required: true,
     },
     products: [
         {
             productId: {
                 type: mongoose.Schema.Types.ObjectId,
-                ref: 'Product',
-                required: true
-            },  
+                ref: "Product",
+                required: true,
+            },
             title: {
                 type: String,
-                required: true
+                required: true,
             },
             subtitle: {
                 type: String,
-                required: true
+                required: true,
             },
-            category:{
+            category: {
                 type: [String],
-                required: true
+                required: true,
             },
             thumbnail: {
                 type: String,
-                required: true
+                required: true,
             },
             quantity: {
                 type: Number,
@@ -38,11 +35,11 @@ const cartSchema=new mongoose.Schema({
             },
             price: {
                 type: Number,
-                required: true
+                required: true,
             },
             offerApplied: {
                 type: mongoose.Schema.Types.ObjectId,
-                ref: 'Offer',
+                ref: "Offer",
             },
             offerDiscountType: {
                 type: String,
@@ -50,38 +47,38 @@ const cartSchema=new mongoose.Schema({
             },
             offerDiscount: {
                 type: Number,
-                default: 0
+                default: 0,
             },
             maxOfferDiscountApplied: {
                 type: Boolean,
-                default: false
+                default: false,
             },
             extraQuantity: {
                 type: Number,
-                default: 0
+                default: 0,
             },
             offerOrOtherDiscount: {
                 type: String,
-                enum: ["offer", "product", "category"]
+                enum: ["offer", "product", "category"],
             },
-            nonOfferDiscountValue : {
+            nonOfferDiscountValue: {
                 type: Number,
-                default: 0
+                default: 0,
             },
             total: {
                 type: Number,
-                required: true
-            }
-        }
+                required: true,
+            },
+        },
     ],
     absoluteTotal: {
         type: Number,
         required: true,
-        default: 0
+        default: 0,
     },
     discount: {
-        type:Number,
-        default:0
+        type: Number,
+        default: 0,
     },
     gst: {
         type: Number,
@@ -96,10 +93,10 @@ const cartSchema=new mongoose.Schema({
     couponUsed: {
         type: mongoose.Schema.ObjectId,
         ref: "Coupon",
-        default: null
+        default: null,
     },
     couponDiscount: {
-        type: Number
+        type: Number,
     },
     absoluteTotalWithTaxes: {
         type: Number,
@@ -108,8 +105,6 @@ const cartSchema=new mongoose.Schema({
     },
 })
 
-
-
-const cart = mongoose.model('Cart', cartSchema)
+const cart = mongoose.model("Cart", cartSchema)
 
 module.exports = cart

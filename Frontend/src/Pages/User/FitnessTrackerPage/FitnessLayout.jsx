@@ -19,7 +19,7 @@ export default function FitnessLayout({children}) {
         />
       </div>
 
-      <div className="relative z-10">
+      <div className="relative">
         <div className="max-w-7xl mx-auto px-4 py-8 pt-4">
 
           <div className="pb-8">{children}</div>

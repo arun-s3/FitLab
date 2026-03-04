@@ -1,9 +1,8 @@
-const express = require('express')
+const express = require("express")
 const contactRouter = express.Router()
-const {createContactMessage} = require('../Controllers/contactMessageController')
 
+const { createContactMessage } = require("../Controllers/contactMessageController")
 
-contactRouter.post('/', createContactMessage)
-
+contactRouter.post("/", createContactMessage)
 
 module.exports = contactRouter

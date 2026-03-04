@@ -1,27 +1,23 @@
-const {verifyAccessToken} = require('../Utils/jwt')
-const User = require('../Models/userModel')
+const { verifyAccessToken } = require("../Utils/jwt")
+const User = require("../Models/userModel")
 
 
 const isLogin = async (req, res, next) => {
     try {
-        console.log("Inside isLogin middeware...")
         const token = req.cookies?.accessToken
         if (!token) {
-            console.log("No accessToken found inside cookie")
-            return res.status(401).json({ message: "Unauthorized", guest: true})
+            return res.status(401).json({ message: "Unauthorized", guest: true })
         }
 
         let decoded
         try {
             decoded = verifyAccessToken(token)
         } catch (err) {
-            console.log("Cannot decode...Access token expired")
             return res.status(401).json({ message: "Access token expired" })
         }
 
         const currentUser = await User.findById(decoded.userId).select("-password")
         if (!currentUser) {
-            console.log("currentUser--->", currentUser)
             return res.status(401).json({ message: "User not found" })
         }
 
@@ -34,9 +30,11 @@ const isLogin = async (req, res, next) => {
         req.user = currentUser
         next()
     } catch (error) {
+        console.error(error)
         next(error)
     }
 }
+
 
 const optionalAuth = async (req, res, next) => {
     try {
@@ -53,43 +51,39 @@ const optionalAuth = async (req, res, next) => {
         req.user = currentUser || null
         next()
     } catch {
-        req.user = null 
+        req.user = null
+        console.error(error)
         next()
     }
 }
 
-const authorizeAdmin = async(req,res,next)=>{
-    try{
-        console.log("Admin from authorizeAdmin-->"+ JSON.stringify(req.user))
-        console.log("req.user-->"+ JSON.stringify(req.user))
-        if(req.user && req.user.isAdmin){
+
+const authorizeAdmin = async (req, res, next) => {
+    try {
+        if (req.user && req.user.isAdmin) {
             next()
+        } else {
+            res.status(403).json({ message: " Since you are not an Admin, you are unauthorized!" })
         }
-        else{
-            res.status(403).json({message:" Since you are not an Admin, you are unauthorized!"})
-        }
-    }
-    catch(error){
-        console.log("Admin AuthError--"+error.message)
+    } catch (error) {
+        console.error(error)
         next(error)
     }
-    
 }
 
-const isLogout = (req,res,next)=>{
-   try{
-        if(!req.cookies.accessToken){
+
+const isLogout = (req, res, next) => {
+    try {
+        if (!req.cookies.accessToken) {
             next()
+        } else {
+            res.status(400).json({ message: "Bad request- User already logged in!" })
         }
-        else{
-            console.log("Cookies exits, hence logged in!")
-            res.status(400).json({message:"Bad request- User already logged in!"})
-        }
-   }
-   catch(error){
-       console.log("User AuthError--"+error.message)
-       next(error)
-  }
+    } catch (error) {
+        console.error(error)
+        next(error)
+    }
 }
 
-module.exports = {isLogin, optionalAuth, authorizeAdmin, isLogout}
+
+module.exports = { isLogin, optionalAuth, authorizeAdmin, isLogout }

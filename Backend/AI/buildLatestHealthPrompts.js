@@ -1,10 +1,7 @@
-const {LATEST_HEALTH_PROMPT} = require("./Prompts/latestHealthProfilePrompts")
+const { LATEST_HEALTH_PROMPT } = require("./Prompts/latestHealthProfilePrompts")
+
 
 function buildLatestHealthPrompt(profile, prevProfile) {
-
-    console.log("health profile from buildLatestHealthPrompt---->", JSON.stringify(profile))
-    console.log("LATEST_HEALTH_PROMPT---->", LATEST_HEALTH_PROMPT)
-
     return `
         ${LATEST_HEALTH_PROMPT}
 
@@ -63,4 +60,5 @@ function buildLatestHealthPrompt(profile, prevProfile) {
         `
 }
 
-module.exports = {buildLatestHealthPrompt}
+
+module.exports = { buildLatestHealthPrompt }

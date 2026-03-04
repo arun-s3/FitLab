@@ -68,7 +68,6 @@ export default function OffersInsightsSection() {
 
       if (offerRevenueResponse.status === "fulfilled") {
           const response = offerRevenueResponse.value
-          console.log("offerRevenueResponse----->", response.data) || response.data.changePercentage === "N/A"
 
           const changeValue =
               response.data.changePercentage && response.data.changePercentage !== "N/A"

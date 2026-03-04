@@ -1,12 +1,11 @@
-const express = require('express')
+const express = require("express")
 const geographyRouter = express.Router()
-const {isLogin, isLogout, authorizeAdmin} = require('../Middlewares/Authentication')
 
-const {getCustomerHeatmapData, getUserAndOrderStatsByState} = require('../Controllers/userGeographyController')
+const { isLogin, authorizeAdmin } = require("../Middlewares/Authentication")
 
+const { getCustomerHeatmapData, getUserAndOrderStatsByState } = require("../Controllers/userGeographyController")
 
-geographyRouter.get('/map', isLogin, authorizeAdmin, getCustomerHeatmapData) 
-geographyRouter.get('/stats', isLogin, authorizeAdmin, getUserAndOrderStatsByState) 
-
+geographyRouter.get("/map", isLogin, authorizeAdmin, getCustomerHeatmapData)
+geographyRouter.get("/stats", isLogin, authorizeAdmin, getUserAndOrderStatsByState)
 
 module.exports = geographyRouter

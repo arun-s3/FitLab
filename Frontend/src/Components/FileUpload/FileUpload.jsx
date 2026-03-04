@@ -54,7 +54,6 @@ export default function FileUpload({images, setImages, imageLimit, needThumbnail
                 // imageMessageDisplay.current.parentElement.style.visibility = 'visible'
                 // imageMessageDisplay.current.style.display = 'none'
                 // setImageMessage("Make sure you crop every image later before submitting")
-                console.log("INSIDE  if(!imageCropperState && !editingMode")
                 setError("Make sure you crop every image later before submitting")
                 toast.warn("Make sure you crop every image later before submitting")
                 setCropWarnOnce(true)

@@ -17,13 +17,10 @@ async function textChatBoxSocket(io) {
         socket.join("admin-room")
         
         socket.emit("active-users-update", Array.from(activeUsers.values()))
-        console.log("Admin connected:", socket.id)
-
         socket.emit("admin-status", true)
       })
 
       const guestCounter = ()=> {
-        console.log('Getting guest count')
         const currentJoinedUserDatas = Object.values(Object.fromEntries(activeUsers))
         const guestCount = currentJoinedUserDatas.reduce((count, data) => {
           if (data.username.startsWith('guest') && data.isOnline) {
@@ -31,25 +28,17 @@ async function textChatBoxSocket(io) {
           }
           return count
         }, 0)
-        console.log("guestCount-->", guestCount)
         return guestCount
       }
 
       socket.on("user-login", async(userData)=> {
-        console.log('New user comes up-->', userData.username)
-        console.log("userData.username.startsWith('guest')-->", userData.username.startsWith('guest'))
-        console.log("activeUsers--->", activeUsers)
         const joinedUserDatas = Object.values(Object.fromEntries(activeUsers))
-        console.log("joinedUserDatas--->", joinedUserDatas)
         const usernameJoined = joinedUserDatas.some(data=> (data.username === userData.username))
-        console.log("usernameJoined--->", usernameJoined)
-
         if(!userData.username.startsWith('guest')){
           await User.findByIdAndUpdate(userData.userId, {lastSeen: new Date()})
         }
 
         const isAdminJoined = adminSessions.size > 0
-        console.log("isAdminJoined--->", isAdminJoined)
         socket.emit("admin-status", isAdminJoined)
         
         if(!usernameJoined){
@@ -71,7 +60,6 @@ async function textChatBoxSocket(io) {
           if(usernameJoinedButOffline){
             const activeButOfflineUser = joinedUserDatas.find(data=> (data.username === userData.username) && !data.isOnline)
             activeUsers.delete(activeButOfflineUser.socketId)
-            console.log("Deleted old copy of user and put new one....")
             const newUserData =  {
               socketId: socket.id,
               userId: userData.userId,
@@ -84,44 +72,30 @@ async function textChatBoxSocket(io) {
             io.to("admin-room").emit('reconnect-if-user-selected', newUserData)
           }
         }
-        console.log("activeUsers--->", activeUsers)
-        console.log("activeUsers in array--->", Array.from(activeUsers.values()))
         io.to("admin-room").emit("active-users-update", Array.from(activeUsers.values()))
       })
 -
       socket.on("user-join-room", async(roomId) => {
-        console.log("Inside on user-join-room...")
         socket.join(roomId)
-        console.log(`User ${socket.id} joined room ${roomId}`)
         const isAdminJoined = adminSessions.size > 0
-        
-        console.log("isAdminJoined--->", isAdminJoined)
-
         const messages = await TextChat.find({ roomId }).sort({ createdAt: 1 })
         socket.emit("chat-history", messages)
 
         if(isAdminJoined){
-          console.log("Emiting let-user-connect-admin...")
-
           io.to("admin-room").emit('let-user-connect-admin', roomId)
           io.to("admin-room").emit('chat-history-with-user', messages)
         }
       })
 
       socket.on("admin-permits-user-connection", (roomId)=> {
-        console.log("Inside on admin-permits-user-connection...")
         socket.join(roomId)
       })
 
       socket.on("admin-joins-every-rooms", async()=> {
-        console.log("Inside on join-every-rooms...")
         if(activeUsers.size > 0){
           activeUsers.forEach(async (userData)=> {
             socket.join(userData.userId)
-            console.log(`Admin joined room ${userData.userId}`)
-
             const isAdminJoined = adminSessions.size > 0
-            console.log("isAdminJoined--->", isAdminJoined)
             io.to(userData.userId).emit("admin-status", isAdminJoined)
 
             const messages = await TextChat.find({ roomId: userData.userId }).sort({ createdAt: 1 })
@@ -133,13 +107,10 @@ async function textChatBoxSocket(io) {
 
       socket.on("delete-guest", (user)=> {
         if(user){
-          console.log('Inside delete-guest..., guest details--->', user)
           const joinedUserDatas = Object.values(Object.fromEntries(activeUsers))
           const guestUser = joinedUserDatas.find(data=> (data.username === user.username))
-          console.log("guestUser-->", guestUser)
           if(guestUser?.socketId && activeUsers.has(guestUser.socketId)){
             activeUsers.delete(guestUser.socketId)
-            console.log("guestUser deleted")
             const guestCount = guestCounter()
             io.to("admin-room").emit('guest-counts', guestCount)
             io.to("admin-room").emit("active-users-update", Array.from(activeUsers.values()))
@@ -148,13 +119,11 @@ async function textChatBoxSocket(io) {
       })
 
       socket.on("count-all-guests", ()=> {
-        console.log('Inside count-all-guests...')
         const guestCount = guestCounter()
         io.to("admin-room").emit("guest-counts", guestCount)
       })
 
       socket.on("send-message", async(data) => {
-        console.log("Inside send-message..data-->", data)
         if (activeUsers.has(socket.id)) {
           const user = activeUsers.get(socket.id)
           user.lastSeen = new Date().toISOString()
@@ -180,15 +149,12 @@ async function textChatBoxSocket(io) {
           isAdmin: false,
           isGuest: data.sender.startsWith('guest')
         })
-        console.log("user sent message saved---->", savedMessage)
-
         io.to(data.roomId).emit("receive-message", messageData)
 
         io.to("admin-room").emit("new-message-notification", messageData)
       })
 
       socket.on("admin-send-message", async(data) => {
-        console.log("admin sent message---->", data)
         const messageData = {
           id: Date.now(),
           message: data.message,
@@ -209,16 +175,12 @@ async function textChatBoxSocket(io) {
           isAdmin: true,
           isGuest: false
         })
-        console.log("admin sent message saved---->", savedMessage)
-
         io.to(data.roomId).emit("receive-message", messageData)
 
         io.to("admin-room").emit("admin-message-sent", messageData)
       })
 
       socket.on("typing", (data) => {
-
-        console.log("Inside typing..data-->", data)
         io.to(data.roomId).emit("user-typing-admin", {
           userId: data.roomId,
           isTyping: data.isTyping,
@@ -236,7 +198,6 @@ async function textChatBoxSocket(io) {
       })
 
       socket.on("load-chat-history-with-user", async(userId)=> {
-        console.log("Inside on join-every-rooms...")
         const messages = await TextChat.find({ userId }).sort({ createdAt: 1 })
         io.to("admin-room").emit('chat-history-with-user', messages)
       })
@@ -267,8 +228,6 @@ async function textChatBoxSocket(io) {
       })
 
       socket.on("disconnect", async() => {
-        console.log("User disconnected:", socket.id)
-
         if(adminSessions.has(socket.id)){
           activeUsers.forEach(async (userData)=> {
             io.to(userData.userId).emit("admin-status", false)
@@ -284,7 +243,6 @@ async function textChatBoxSocket(io) {
           if(!user.username.startsWith('guest')){
             await User.findByIdAndUpdate(user.userId, {lastSeen: new Date()})
           }
-          console.log('Disconnecting user--->', user)
           activeUsers.set(socket.id, user)
 
           io.to("admin-room").emit("update-last-seen", user)
@@ -295,8 +253,6 @@ async function textChatBoxSocket(io) {
 
       socket.on("coach-ask", async (messageData) => {
         try {
-          console.log("Inside on coach-ask, messageData----->", JSON.stringify(messageData))
-
           const { message, userGoal, userId } = messageData
 
           if(!userId) {
@@ -305,8 +261,6 @@ async function textChatBoxSocket(io) {
 
           io.to(userId).emit("coach-loading", true)
           const response = await runAICoach({userId, query: message, userGoal})
-
-          console.log("Emiting coach-response")
           const coachMessageToUser = ({
             roomId: messageData.roomId,
             userId: messageData.userId,

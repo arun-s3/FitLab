@@ -1,10 +1,10 @@
-const express = require('express')
+const express = require("express")
 const notificationRouter = express.Router()
-const {getUserNotifications} = require('../Controllers/notificationController')
-const {isLogin, isLogout} = require('../Middlewares/Authentication')
 
+const { getUserNotifications } = require("../Controllers/notificationController")
 
-notificationRouter.get('/', isLogin, getUserNotifications)
+const { isLogin } = require("../Middlewares/Authentication")
 
+notificationRouter.get("/", isLogin, getUserNotifications)
 
 module.exports = notificationRouter

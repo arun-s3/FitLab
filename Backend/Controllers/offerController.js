@@ -1,20 +1,15 @@
 const Offer = require('../Models/offerModel')
-const Order = require('../Models/orderModel')
-const Cart = require('../Models/cartModel')
 const Product = require('../Models/productModel') 
 const Category = require('../Models/categoryModel')
-const User = require('../Models/userModel')
 const cloudinary = require('../Utils/cloudinary')
 
 const {calculateBestOffer, findUserGroup} = require('./controllerUtils/offersAndDiscountsUtils')
+
 const {errorHandler} = require('../Utils/errorHandler') 
 
 
-
-const createOffer = async (req, res, next)=> {
+const createOffer = async (req, res, next) => {
     try {
-        console.log("Inside createOffer of offerController")
-        console.log('req.body', JSON.stringify(req.body))
         const {
             name,
             description,
@@ -31,16 +26,11 @@ const createOffer = async (req, res, next)=> {
             recurringOffer,
             recurringFrequency,
         } = req.body
-
-        console.log(`name--->${name}, discountType--->${discountType}, startDate--->${startDate}, endDate--->${endDate}`)
-
         let uploadedImage = null
-        if(req.file){
-            console.log("req.file-->", JSON.stringify(req.file))
-            console.log("Image path:", req.file.path)
+        if (req.file) {
             const result = await cloudinary.uploader.upload(req.file.path, {
-                folder: 'offer/image',
-                resource_type: 'image',
+                folder: "offer/image",
+                resource_type: "image",
             })
             uploadedImage = {
                 public_id: result.public_id,
@@ -48,36 +38,35 @@ const createOffer = async (req, res, next)=> {
                 url: result.secure_url,
                 size: result.bytes,
             }
-            console.log("uploadedImage-->", JSON.stringify(uploadedImage))
         }
 
-        if (!name || !discountType || !startDate || !endDate){
+        if (!name || !discountType || !startDate || !endDate) {
             return next(errorHandler(400, "Required fields are missing!"))
         }
 
-        if (discountType === 'percentage' && (!discountValue || discountValue <= 0)){
+        if (discountType === "percentage" && (!discountValue || discountValue <= 0)) {
             return next(errorHandler(400, "Discount value is missing or invalid!"))
         }
 
-        if (new Date(endDate) <= new Date(startDate)){
+        if (new Date(endDate) <= new Date(startDate)) {
             return next(errorHandler(400, "End date must be after start date!"))
         }
 
         const existingOffer = await Offer.findOne({ name: name.trim().toUpperCase() })
-        if (existingOffer){
+        if (existingOffer) {
             return next(errorHandler(400, "Offer name already exists!"))
         }
 
         let categoryIds = []
         if (Array.isArray(applicableCategories) && applicableCategories.length > 0) {
             const categories = await Category.find({ name: { $in: applicableCategories } }, "_id")
-            categoryIds = categories.map(cat => cat._id)
+            categoryIds = categories.map((cat) => cat._id)
         }
 
-        let productIds = [];
+        let productIds = []
         if (Array.isArray(applicableProducts) && applicableProducts.length > 0) {
             const products = await Product.find({ title: { $in: applicableProducts }, variantOf: null }, "_id")
-            productIds = products.map(prod => prod._id);
+            productIds = products.map((prod) => prod._id)
         }
 
         const newOffer = new Offer({
@@ -95,214 +84,120 @@ const createOffer = async (req, res, next)=> {
             endDate,
             recurringOffer,
             recurringFrequency,
-            ...(uploadedImage ? { offerBanner: uploadedImage } : {})
+            ...(uploadedImage ? { offerBanner: uploadedImage } : {}),
         })
 
-        await newOffer.save();
+        await newOffer.save()
 
         const populatedOffer = await Offer.findById(newOffer._id)
-          .populate("applicableProducts", "title price")
-          .populate("applicableCategories", "name")
-        
-        return res.status(201).json({
-          success: true,
-          message: "Offer created successfully!",
-          offer: populatedOffer
-        })
+            .populate("applicableProducts", "title price")
+            .populate("applicableCategories", "name")
 
-    } 
-    catch (error){
-        console.error("Error creating offer:", error.message)
+        return res.status(201).json({
+            success: true,
+            message: "Offer created successfully!",
+            offer: populatedOffer,
+        })
+    } catch (error) {
+        console.error(error)
         next(error)
     }
 }
 
 
-// const getAllOffers = async (req, res, next) => {
-//     try {
-//         console.log("Inside getAllOffers of offerController")
-
-//         const { queryOptions = {} } = req.body
-//         const {
-//           page = 1,
-//           limit = 6,
-//           startDate,
-//           endDate,
-//           sort = -1,
-//           sortBy = "createdAt",
-//           discountType, 
-//           applicableType,
-//           minimumOrderValue,
-//           usedCount,
-//           status,
-//           searchData 
-//         } = queryOptions
-
-//         const skip = (page - 1) * limit
-//         console.log("queryOptions--->", JSON.stringify(queryOptions))
-
-//         let filterConditions = {}
-//         if (startDate){
-//             filterConditions.startDate = { $gte: new Date(startDate) }
-//         }
-//         if (endDate){
-//             filterConditions.endDate = { $lte: new Date(endDate) }
-//         }   
-//         if (discountType && discountType !== 'all'){
-//             filterConditions.discountType = discountType
-//         }   
-//         if (applicableType && applicableType !== 'all'){
-//             filterConditions.applicableType = applicableType
-//         }
-//         if (minimumOrderValue){
-//             filterConditions.minimumOrderValue = { $lte: minimumOrderValue }
-//         }
-//         if (usedCount){
-//             filterConditions.usedCount = { $lte: usedCount }
-//         }
-//         if (status !== 'all'){
-//             filterConditions.status = status
-//         }
-//         if (searchData){
-//             filterConditions.name = { $regex: searchData, $options: "i" }
-//         }
-
-//         let sortOptions = {}
-//         if (["name", "startDate", "endDate", "redemptionCount"].includes(sortBy)) {
-//           sortOptions[sortBy] = sort
-//         } else {
-//           sortOptions.createdAt = sort
-//         }
-
-//         const offers = await Offer.find(filterConditions)
-//           .skip(skip)
-//           .limit(parseInt(limit))
-//           .sort(sortOptions)
-//           .populate("applicableProducts", "title price")
-//           .populate("applicableCategories", "name")
-//           .populate("usedBy.userId", "username email")
-
-//         const totalOffers = await Offer.countDocuments(filterConditions)
-
-//         res.status(200).json({ success: true, offers, totalOffers })
-//     }
-//     catch (error) {
-//       console.error("Error listing offers:", error.message)
-//       next(error)
-//     }
-// }
-
 const getAllOffers = async (req, res, next) => {
-  try {
-    console.log("Inside getAllOffers of offerController")
+    try {
+        const { queryOptions = {} } = req.body
+        const {
+            page = 1,
+            limit = 6,
+            startDate,
+            endDate,
+            sort = -1,
+            sortBy = "createdAt",
+            discountType,
+            applicableType,
+            minimumOrderValue,
+            usedCount,
+            status,
+            searchData,
+            targetUserGroup,
+            userId,
+        } = queryOptions
 
-    const { queryOptions = {} } = req.body
-    const {
-      page = 1,
-      limit = 6,
-      startDate,
-      endDate,
-      sort = -1,
-      sortBy = "createdAt",
-      discountType,
-      applicableType,
-      minimumOrderValue,
-      usedCount,
-      status,
-      searchData,
-      targetUserGroup,
-      userId
-    } = queryOptions
+        const skip = (page - 1) * limit
 
-    console.log("queryOptions--->", JSON.stringify(queryOptions))
+        let filterConditions = {}
 
-    const skip = (page - 1) * limit
+        if (startDate) filterConditions.startDate = { $gte: new Date(startDate) }
+        if (endDate) filterConditions.endDate = { $lte: new Date(endDate) }
 
-    let filterConditions = {}
+        if (discountType && discountType !== "all") {
+            filterConditions.discountType = discountType
+        }
 
-    if (startDate) filterConditions.startDate = { $gte: new Date(startDate) }
-    if (endDate) filterConditions.endDate = { $lte: new Date(endDate) }
+        if (applicableType && applicableType !== "all") {
+            filterConditions.applicableType = applicableType
+        }
 
-    if (discountType && discountType !== "all") {
-      filterConditions.discountType = discountType
+        if (minimumOrderValue) {
+            filterConditions.minimumOrderValue = { $lte: minimumOrderValue }
+        }
+
+        if (usedCount) {
+            filterConditions.usedCount = { $lte: usedCount }
+        }
+
+        if (status && status !== "all") {
+            filterConditions.status = status
+        }
+
+        if (searchData) {
+            filterConditions.name = { $regex: searchData, $options: "i" }
+        }
+
+        if (userId) {
+            const group = await findUserGroup(userId)
+            filterConditions = {
+                ...filterConditions,
+                $or: [{ targetUserGroup: "all" }, { targetUserGroup: group }],
+            }
+        } else if (targetUserGroup && targetUserGroup !== "all") {
+            filterConditions.targetUserGroup = targetUserGroup
+        }
+
+        let sortOptions = {}
+        if (["name", "startDate", "endDate", "redemptionCount"].includes(sortBy)) {
+            sortOptions[sortBy] = sort
+        } else {
+            sortOptions.createdAt = sort
+        }
+
+        const offers = await Offer.find(filterConditions)
+            .skip(skip)
+            .limit(parseInt(limit))
+            .sort(sortOptions)
+            .populate("applicableProducts", "title subtitle price thumbnail variantOf variants")
+            .populate("applicableCategories", "name description image")
+            .populate("usedBy.userId", "username email")
+
+        const totalOffers = await Offer.countDocuments(filterConditions)
+
+        return res.status(200).json({
+            success: true,
+            offers,
+            totalOffers,
+            appliedUserGroup: userId ? await findUserGroup(userId) : targetUserGroup || "all",
+        })
+    } catch (error) {
+        console.error(error)
+        next(error)
     }
-
-    if (applicableType && applicableType !== "all") {
-      filterConditions.applicableType = applicableType
-    }
-
-    if (minimumOrderValue) {
-      filterConditions.minimumOrderValue = { $lte: minimumOrderValue }
-    }
-
-    if (usedCount) {
-      filterConditions.usedCount = { $lte: usedCount }
-    }
-
-    if (status && status !== "all") {
-      filterConditions.status = status
-    }
-
-    if (searchData) {
-      filterConditions.name = { $regex: searchData, $options: "i" }
-    }
-
-    if (userId) {
-      const group = await findUserGroup(userId)
-      console.log("User Group for filtering:", group)
-
-      filterConditions = {
-        ...filterConditions,
-        $or: [
-          { targetUserGroup: "all" },
-          { targetUserGroup: group }
-        ]
-      }
-    } else if (targetUserGroup && targetUserGroup !== "all") {
-      filterConditions.targetUserGroup = targetUserGroup
-    }
-
-    let sortOptions = {}
-    if (["name", "startDate", "endDate", "redemptionCount"].includes(sortBy)) {
-      sortOptions[sortBy] = sort
-    } else {
-      sortOptions.createdAt = sort
-    }
-
-    const offers = await Offer.find(filterConditions)
-      .skip(skip)
-      .limit(parseInt(limit))
-      .sort(sortOptions)
-      .populate("applicableProducts", "title subtitle price thumbnail variantOf variants")
-      .populate("applicableCategories", "name description image")
-      .populate("usedBy.userId", "username email");
-
-    const totalOffers = await Offer.countDocuments(filterConditions)
-
-    // console.log("totalOffers--->", totalOffers)
-    // console.log("Offers--->", JSON.stringify(offers, null, 2))
-    // console.log("OFFER NAMES--->", offers.map(offer=> offer.name))
-
-
-    return res.status(200).json({
-      success: true,
-      offers,
-      totalOffers,
-      appliedUserGroup: userId ? await findUserGroup(userId) : targetUserGroup || "all",
-    });
-  }
-  catch (error){
-    console.error("Error listing offers:", error.message)
-    next(error)
-  }
 }
 
-  
-const updateOffer = async (req, res, next)=> {
-    try {
-        console.log("Inside updateOffer of offerController")
-        console.log("req.body", JSON.stringify(req.body))
 
+const updateOffer = async (req, res, next) => {
+    try {
         const { offerId } = req.params
         const {
             name,
@@ -321,15 +216,11 @@ const updateOffer = async (req, res, next)=> {
             recurringFrequency,
         } = req.body
 
-        console.log(`Updating offer: ${offerId}`)
-
         let uploadedImage = null
         if (req.file) {
-            console.log("req.file-->", JSON.stringify(req.file))
-            console.log("Image path:", req.file.path)
             const result = await cloudinary.uploader.upload(req.file.path, {
-                folder: 'offer/image',
-                resource_type: 'image',
+                folder: "offer/image",
+                resource_type: "image",
             })
             uploadedImage = {
                 public_id: result.public_id,
@@ -337,7 +228,6 @@ const updateOffer = async (req, res, next)=> {
                 url: result.secure_url,
                 size: result.bytes,
             }
-            console.log("uploadedImage-->", JSON.stringify(uploadedImage))
         }
 
         if (!offerId) {
@@ -349,7 +239,7 @@ const updateOffer = async (req, res, next)=> {
             return next(errorHandler(404, "Offer not found!"))
         }
 
-        if (discountType === 'percentage' && (!discountValue || discountValue <= 0)) {
+        if (discountType === "percentage" && (!discountValue || discountValue <= 0)) {
             return next(errorHandler(400, "Discount value is missing or invalid!"))
         }
 
@@ -359,21 +249,15 @@ const updateOffer = async (req, res, next)=> {
 
         let categoryIds = []
         if (Array.isArray(applicableCategories) && applicableCategories.length > 0) {
-            console.log("applicableCategories is of type array.")
             const categories = await Category.find({ name: { $in: applicableCategories } }, "_id")
-            categoryIds = categories.map(cat => cat._id)
+            categoryIds = categories.map((cat) => cat._id)
         }
 
         let productIds = []
         if (Array.isArray(applicableProducts) && applicableProducts.length > 0) {
-            console.log("applicableProducts is of type array.")
             const products = await Product.find({ title: { $in: applicableProducts }, variantOf: null }, "_id")
-            productIds = products.map(prod => prod._id)
+            productIds = products.map((prod) => prod._id)
         }
-
-        console.log("categoryIds------->", JSON.stringify(categoryIds))
-        console.log("productIds------------>", JSON.stringify(productIds))
-
         const updatedOffer = await Offer.findByIdAndUpdate(
             offerId,
             {
@@ -391,171 +275,168 @@ const updateOffer = async (req, res, next)=> {
                 endDate,
                 recurringOffer,
                 recurringFrequency,
-                ...(uploadedImage ? { offerBanner: uploadedImage } : {})
+                ...(uploadedImage ? { offerBanner: uploadedImage } : {}),
             },
-            {new: true}
+            { new: true },
         )
-
-        console.log("updatedOffer--->", updatedOffer)
-
         const populatedOffer = await Offer.findById(updatedOffer._id)
-          .populate("applicableProducts", "title price")
-          .populate("applicableCategories", "name")
-        
-        return res.status(201).json({
-          success: true,
-          message: "Offer created successfully!",
-          offer: populatedOffer
-        })
+            .populate("applicableProducts", "title price")
+            .populate("applicableCategories", "name")
 
-    }
-    catch(error){
-        console.error("Error updating offer:", error.message)
+        return res.status(201).json({
+            success: true,
+            message: "Offer created successfully!",
+            offer: populatedOffer,
+        })
+    } catch (error) {
+        console.error(error)
         next(error)
     }
 }
 
 
-const deleteOffer = async (req, res, next)=> {
+const deleteOffer = async (req, res, next) => {
     try {
-        console.log("Inside deleteOffer of offerController")
-
         const { offerId } = req.params
-        console.log("Offer ID to delete:", offerId)
-
         const offer = await Offer.findById(offerId)
-        if (!offer){
+        if (!offer) {
             return next(errorHandler(404, "Offer not found!"))
         }
 
-        if (offer.offerBanner && offer.offerBanner.public_id){
-            console.log("Deleting offer banner from Cloudinary:", offer.offerBanner.public_id)
+        if (offer.offerBanner && offer.offerBanner.public_id) {
             await cloudinary.uploader.destroy(offer.offerBanner.public_id)
         }
 
-        await Offer.findByIdAndDelete(offerId);
+        await Offer.findByIdAndDelete(offerId)
 
         return res.status(200).json({ success: true, message: "Offer deleted successfully!" })
-    }
-    catch(error){
-        console.error("Error deleting offer:", error.message)
+    } catch (error) {
+        console.error(error)
         next(error)
     }
 }
 
 
-const getBestOffer = async (req, res, next)=> {
-    try{
-        console.log("Inside getBestOffer of offerController")
-        console.log("req.user--->", JSON.stringify(req.user))
-
+const getBestOffer = async (req, res, next) => {
+    try {
         const userId = req?.user?._id || null
-        const {productId, quantity} = req.body
-
-        console.log(`productId-----> ${productId}...quantity-----> ${quantity}`)
-
+        const { productId, quantity } = req.body
         if (!productId || !quantity) {
-          return next(errorHandler(400, "Invalid product or quantity!"))
+            return next(errorHandler(400, "Invalid product or quantity!"))
         }
-    
-        const product = await Product.findById(productId)    
-        console.log("Product found-->", JSON.stringify(product))
-    
+
+        const product = await Product.findById(productId)
         if (!product) {
-          return next(errorHandler(404, "Product not found!"))
+            return next(errorHandler(404, "Product not found!"))
         }
         if (product.blocked) {
-          return next(errorHandler(403, "This product is currently blocked and cannot be added to the cart."))
+            return next(errorHandler(403, "This product is currently blocked and cannot be added to the cart."))
         }
 
-        const {offerDiscountType, bestDiscount, maxOfferDiscountApplied, offerApplied, isBOGO, 
-            offerDetails, offerOrOtherDiscount, nonOfferDiscountValue} = await calculateBestOffer(userId, productId, quantity) 
+        const {
+            offerDiscountType,
+            bestDiscount,
+            maxOfferDiscountApplied,
+            offerApplied,
+            isBOGO,
+            offerDetails,
+            offerOrOtherDiscount,
+            nonOfferDiscountValue,
+        } = await calculateBestOffer(userId, productId, quantity)
 
         res.status(200).json({
-            message: "Found the best offer!", offerDiscountType, bestDiscount, offerApplied, isBOGO,
+            message: "Found the best offer!",
+            offerDiscountType,
+            bestDiscount,
+            offerApplied,
+            isBOGO,
             bestOffer: {
-                offerDiscountType, bestDiscount, maxOfferDiscountApplied, offerApplied, isBOGO, offerDetails, 
-                offerOrOtherDiscount, nonOfferDiscountValue
-            }
+                offerDiscountType,
+                bestDiscount,
+                maxOfferDiscountApplied,
+                offerApplied,
+                isBOGO,
+                offerDetails,
+                offerOrOtherDiscount,
+                nonOfferDiscountValue,
+            },
         })
-    }
-    catch(error){
-        console.error("Error getting best offer:", error.message)
-        next(error) 
+    } catch (error) {
+        console.error(error)
+        next(error)
     }
 }
 
 
-const toggleOfferStatus = async (req, res, next)=> {
+const toggleOfferStatus = async (req, res, next) => {
     try {
-        console.log("Inside toggleOfferStatus controller")
-
         const { offerId } = req.params
-        console.log("Offer ID to toggle status:", offerId)
-
         const offer = await Offer.findById(offerId)
-        if (!offer){
+        if (!offer) {
             return res.status(404).json({ success: false, message: "Offer not found!" })
         }
 
         offer.status = offer.status === "active" ? "deactivated" : "active"
         await offer.save()
 
-        return res.status(200).json({ 
-            success: true, 
-            message: `Offer status changed to '${offer.status}' successfully!`, 
+        return res.status(200).json({
+            success: true,
+            message: `Offer status changed to '${offer.status}' successfully!`,
         })
     } catch (error) {
-        console.error("Error toggling offer status:", error.message)
+        console.error(error)
         next(error)
     }
 }
 
 
 const increaseOfferImpression = async (req, res, next) => {
-  try {
-    console.log("Inside increaseOfferImpression controller")
+    try {
+        const { offerId } = req.params
 
-    const { offerId } = req.params
+        if (!offerId) {
+            return next(errorHandler(400, "Offer ID is required"))
+        }
 
-    if (!offerId) {
-      return next(errorHandler(400, "Offer ID is required"))
+        const now = new Date()
+
+        const updatedOffer = await Offer.findOneAndUpdate(
+            {
+                _id: offerId,
+                status: "active",
+                startDate: { $lte: now },
+                endDate: { $gte: now },
+            },
+            {
+                $inc: { impressionCount: 1 },
+            },
+            {
+                new: true,
+            },
+        )
+
+        if (!updatedOffer) {
+            return next(errorHandler(404, "Active offer not found or expired"))
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Impression count increased",
+            impressionCount: updatedOffer.impressionCount,
+        })
+    } catch (error) {
+        console.error(error)
+        next(error)
     }
-
-    const now = new Date()
-
-    const updatedOffer = await Offer.findOneAndUpdate(
-      {
-        _id: offerId,
-        status: "active",
-        startDate: { $lte: now },
-        endDate: { $gte: now }
-      },
-      {
-        $inc: { impressionCount: 1 }
-      },
-      {
-        new: true
-      }
-    );
-
-    if (!updatedOffer) {
-      return next(errorHandler(404, "Active offer not found or expired"))
-    }
-
-    return res.status(200).json({
-      success: true,
-      message: "Impression count increased",
-      impressionCount: updatedOffer.impressionCount
-    });
-
-  }
-  catch (error) {
-    console.error("Error increasing impression count:", error.message)
-    next(error)
-  }
 }
 
 
-
-module.exports = {createOffer, getAllOffers, updateOffer, deleteOffer, getBestOffer, toggleOfferStatus, increaseOfferImpression}
+module.exports = {
+    createOffer,
+    getAllOffers,
+    updateOffer,
+    deleteOffer,
+    getBestOffer,
+    toggleOfferStatus,
+    increaseOfferImpression,
+}

@@ -63,7 +63,7 @@ export default function FitnessNav({ currentPage, setCurrentPage }) {
                   )}
 
                   <motion.div
-                    className={`relative flex items-center gap-2 z-10 ${
+                    className={`relative flex items-center gap-2 ${
                       isActive ? "text-purple-600" : "text-gray-600 hover:text-gray-900"
                     }`}
                     animate={{ scale: isActive ? 1 : 0.95 }}

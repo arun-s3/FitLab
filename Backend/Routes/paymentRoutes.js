@@ -1,23 +1,30 @@
-const express = require('express')
+const express = require("express")
 const paymentRouter = express.Router()
-const {createRazorpayPayment, verifyRazorpayPayment, getRazorpayKey, createStripePayment, saveStripePayment,
-    getPaypalClientId, createPaypalOrder, capturePaypalOrder, savePaypalPayment
-} = require('../Controllers/paymentController')
-const {isLogin} = require('../Middlewares/Authentication')
 
+const {
+    createRazorpayPayment,
+    verifyRazorpayPayment,
+    getRazorpayKey,
+    createStripePayment,
+    saveStripePayment,
+    getPaypalClientId,
+    createPaypalOrder,
+    capturePaypalOrder,
+    savePaypalPayment,
+} = require("../Controllers/paymentController")
 
-paymentRouter.get('/razorpay/key', isLogin, getRazorpayKey)
-paymentRouter.post('/razorpay/order', isLogin, createRazorpayPayment)
-paymentRouter.post('/razorpay/verify', isLogin, verifyRazorpayPayment)
+const { isLogin } = require("../Middlewares/Authentication")
 
-paymentRouter.post('/stripe/order', isLogin, createStripePayment)
-paymentRouter.post('/stripe/save', isLogin, saveStripePayment)
+paymentRouter.get("/razorpay/key", isLogin, getRazorpayKey)
+paymentRouter.post("/razorpay/order", isLogin, createRazorpayPayment)
+paymentRouter.post("/razorpay/verify", isLogin, verifyRazorpayPayment)
 
-paymentRouter.get('/paypal/clientid', isLogin, getPaypalClientId)
-paymentRouter.post('/paypal/order', isLogin, createPaypalOrder)
-paymentRouter.post('/paypal/capture', isLogin, capturePaypalOrder)
-paymentRouter.post('/paypal/save', isLogin, savePaypalPayment)
+paymentRouter.post("/stripe/order", isLogin, createStripePayment)
+paymentRouter.post("/stripe/save", isLogin, saveStripePayment)
 
-
+paymentRouter.get("/paypal/clientid", isLogin, getPaypalClientId)
+paymentRouter.post("/paypal/order", isLogin, createPaypalOrder)
+paymentRouter.post("/paypal/capture", isLogin, capturePaypalOrder)
+paymentRouter.post("/paypal/save", isLogin, savePaypalPayment)
 
 module.exports = paymentRouter

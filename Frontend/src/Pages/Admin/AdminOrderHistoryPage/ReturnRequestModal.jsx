@@ -25,10 +25,6 @@ export default function ReturnRequestModal({returnRequestOrder = null, returnReq
   useModalHelpers({open: isOpen, onClose, modalRef})
 
   useEffect(()=> {
-    console.log(`returnRequestOrder--->${returnRequestOrder}, returnRequestProduct--->${returnRequestProduct}, returnOrderOrProduct--->${returnOrderOrProduct}`)
-  }, [])
-
-  useEffect(()=> {
     if(returnRequestOrder || returnRequestProduct){
         const images = returnOrderOrProduct === 'order' 
             ? returnRequestOrder.orderReturnImages

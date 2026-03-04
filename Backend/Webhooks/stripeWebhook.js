@@ -17,9 +17,6 @@ const handleStripeWebhook = async (req, res, next) => {
     console.error('Webhook signature verification failed:', error.message)
     return next(errorHandler(400, `Webhook Error: ${error.message}`))
   }
-
-  console.log('Stripe Event:', event.type)
-
   if (event.type === 'invoice.payment_succeeded') {
     const invoice = event.data.object
     const subscriptionId = invoice.subscription
@@ -44,7 +41,6 @@ const handleStripeWebhook = async (req, res, next) => {
       })  
 
       await wallet.save()
-      console.log(`Wallet auto-recharged ₹${amountPaid} for user ${wallet.user} via Stripe!`)
     }
   }
 

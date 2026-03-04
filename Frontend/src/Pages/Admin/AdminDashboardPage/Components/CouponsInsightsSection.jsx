@@ -58,7 +58,6 @@ export default function CouponsOffersInsightsSection() {
 
       if (couponRevenueResponse.status === "fulfilled") {
           const response = couponRevenueResponse.value
-          console.log("couponRevenueResponse----->", response.data) || response.data.changePercentage === "N/A"
 
           const changeValue =
               response.data.changePercentage && response.data.changePercentage !== "N/A"

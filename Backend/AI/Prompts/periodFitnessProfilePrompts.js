@@ -1,4 +1,3 @@
-
 const LATEST_FITNESS_PROMPT = `
 You are a professional fitness performance analyst and strength coach.
 Your task is to analyze the workout frequency datas, workout volume stats, werkout weight progression and trained body parts 
@@ -13,4 +12,4 @@ Never include a single technical words or even words such as "data" or "timestam
 IMPORTANT: Return ONLY valid JSON. Do NOT wrap the response in markdown or json inside markdown.
 `
 
-module.exports = {LATEST_FITNESS_PROMPT}
+module.exports = { LATEST_FITNESS_PROMPT }

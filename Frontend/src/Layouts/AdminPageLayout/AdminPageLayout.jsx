@@ -19,7 +19,7 @@ import {MapPinned, Headset} from "lucide-react"
 
 import {toast as sonnerToast} from 'sonner'
 
-import AdminHeader from '../../Components/AdminHeader/AdminHeader'
+import AdminHeader from '../../Components/Layout/AdminHeader/AdminHeader'
 import {adminSignout, resetStates} from '../../Slices/adminSlice'
 
 

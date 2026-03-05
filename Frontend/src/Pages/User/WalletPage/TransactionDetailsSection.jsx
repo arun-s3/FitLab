@@ -12,8 +12,8 @@ import useFlexiDropdown from '../../../Hooks/FlexiDropdown'
 import TransactionFilters from './TransactionFilters'
 import {confirmMoneyRequest, declineMoneyRequest, resetWalletStates} from '../../../Slices/walletSlice'
 import {capitalizeFirstLetter} from '../../../Utils/helperFunctions'
-import AuthPrompt from '../../../Components/AuthPrompt/AuthPrompt'
-import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
+import AuthPrompt from '../../../Components/Features/Auth/AuthPrompt/AuthPrompt'
+import PaginationV2 from '../../../Components/UI/PaginationV2/PaginationV2'
 
 
 export default function TransactionDetailsSection({transactions, queryOptions, setQueryOptions}){

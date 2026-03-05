@@ -6,10 +6,10 @@ import { useSelector, useDispatch } from "react-redux"
 import { User, Mail, Phone, Edit2, Check, X, Lock, ArrowRight, Camera } from "lucide-react"
 import { toast as sonnerToast } from "sonner"
 
-import ResetPasswordBox from "../../../Components/ResetPasswordBox/ResetPasswordBox"
-import SelfieModal from "../../../Components/SelfieModal/SelfieModal"
-import AdminTitleSection from "../../../Components/AdminTitleSection/AdminTitleSection"
-import { SingleDateSelector } from "../../../Components/Calender/Calender"
+import ResetPasswordBox from "../../../Components/Forms/ResetPasswordBox/ResetPasswordBox"
+import SelfieModal from "../../../Components/Features/Profile/SelfieModal/SelfieModal"
+import AdminTitleSection from "../../../Components/Layout/AdminTitleSection/AdminTitleSection"
+import { SingleDateSelector } from "../../../Components/UI/Calender/Calender"
 import { updateAdminDetails, updateAdminProfilePic, resetStates } from "../../../Slices/adminSlice"
 
 

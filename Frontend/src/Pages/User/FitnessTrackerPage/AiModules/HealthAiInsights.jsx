@@ -7,7 +7,7 @@ import {RiBodyScanLine} from "react-icons/ri"
 import {GiStrongMan} from "react-icons/gi"
 import apiClient from '../../../../Api/apiClient'
 
-import AiInsightCards from "../../../../Components/AiInsightCards/AiInsightCards"
+import AiInsightCards from "../../../../Components/Features/Insights/AiInsightCards/AiInsightCards"
 
 
 export default function HealthAiInsights({guestMode = false}) { 

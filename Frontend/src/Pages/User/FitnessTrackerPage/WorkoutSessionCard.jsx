@@ -19,9 +19,9 @@ import RecentWorkouts from "./RecentWorkouts"
 import WorkoutAiInsights from "./AiModules/WorkoutAiInsights"
 import DeleteConfirmationModal from "./DeleteConfirmationModal"
 import {estimateCalories} from "../../../Utils/exerciseFunctions"
-import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
+import PaginationV2 from '../../../Components/UI/PaginationV2/PaginationV2'
 import useTermsConsent from "../../../Hooks/useTermsConsent"
-import TermsDisclaimer from "../../../Components/TermsDisclaimer/TermsDisclaimer"
+import TermsDisclaimer from "../../../Components/UI/TermsDisclaimer/TermsDisclaimer"
 
 
 export default function WorkoutSessionCard() {

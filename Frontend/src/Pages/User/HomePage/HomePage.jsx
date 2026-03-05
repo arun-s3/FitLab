@@ -6,19 +6,19 @@ import {toast as sonnerToast} from 'sonner'
 
 import apiClient from '../../../Api/apiClient'
 
-import Header from '../../../Components/Header/Header'
+import Header from '../../../Components/Layout/Header/Header'
 import HeroSection from './HeroSection'
-import Footer from "../../../Components/Footer/Footer"
+import Footer from "../../../Components/Layout/Footer/Footer"
 import TextChatBox from '../TextChatBox/TextChatBox'
-import Fallback from '../../../Components/FallbackSuspense/Fallback'
+import Fallback from '../../../Components/Common/FallbackSuspense/Fallback'
 
-const Carousal = lazy(() => import("../../../Components/Carousal/Carousal"))
+const Carousal = lazy(() => import("../../../Components/UI/Carousal/Carousal"))
 const LatestProductsCarousel = lazy(() => import("./LatestProductsCarousel"))
 const BrandsCarousal = lazy(() => import("./BrandsCarousal"))
 const FitnessQuoteSection = lazy(() => import("./FitnessQuoteSection"))
 const ShopByCategories = lazy(() => import("./ShopByCategories"))
 const FeaturesSection = lazy(() => import("./FeaturesSection"))
-const OfferShowcase = lazy(() => import("../../../Components/OfferShowcase/OfferShowcase"))
+const OfferShowcase = lazy(() => import("../../../Components/Features/Offer/OfferShowcase/OfferShowcase"))
 const FitlabHighlights = lazy(() => import("./FitlabHighlights"))
 const SpecialOfferSection = lazy(() => import("./SpecialOfferSection"))
 const TestimonialSection = lazy(() => import("./TestimonialSection"))

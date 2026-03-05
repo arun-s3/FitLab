@@ -5,10 +5,10 @@ import { motion, AnimatePresence } from "framer-motion"
 import { AlertTriangle, Clock, CheckCircle, X, ImageIcon } from "lucide-react"
 import {toast as sonnerToast} from 'sonner'
 
-import FileUpload from "../../../Components/FileUpload/FileUpload"
+import FileUpload from "../../../Components/Tools/FileUpload/FileUpload"
 import useModalHelpers from '../../../Hooks/ModalHelpers'
-import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
-import {CustomHashLoader} from '../../../Components/Loader/Loader'
+import {SiteButtonSquare} from '../../../Components/UI/SiteButtons/SiteButtons'
+import {CustomHashLoader} from '../../../Components/UI/Loader/Loader'
 import {resetOrderStates} from '../../../Slices/orderSlice'
 
 

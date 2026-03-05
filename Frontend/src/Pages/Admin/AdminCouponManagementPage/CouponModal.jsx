@@ -8,7 +8,7 @@ import { RiCoupon4Line } from "react-icons/ri"
 import {toast as sonnerToast} from 'sonner'
 import {toast} from 'react-toastify'
 
-import CategoryDisplay from "../../../Components/CategoryDisplay/CategoryDisplay"
+import CategoryDisplay from "../../../Components/Features/Category/CategoryDisplay/CategoryDisplay"
 import {createCoupon, updateCoupon, resetCouponStates} from '../../../Slices/couponSlice'
 import {searchProduct, getAllProducts} from '../../../Slices/productSlice'
 import {showUsers, resetStates} from '../../../Slices/adminSlice'

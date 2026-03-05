@@ -6,10 +6,10 @@ import { X, Calendar, Users, Clock, Flag} from "lucide-react"
 import {toast as sonnerToast} from 'sonner'
 
 import {createList, updateList, resetWishlistStates} from "../../../../Slices/wishlistSlice"
-import FileUpload from "../../../../Components/FileUpload/FileUpload"
+import FileUpload from "../../../../Components/Tools/FileUpload/FileUpload"
 import {handleImageCompression} from '../../../../Utils/compressImages'
-import {SiteSecondaryFillButton} from "../../../../Components/SiteButtons/SiteButtons"
-import {CustomHashLoader} from "../../../../Components/Loader/Loader"
+import {SiteSecondaryFillButton} from "../../../../Components/UI/SiteButtons/SiteButtons"
+import {CustomHashLoader} from "../../../../Components/UI/Loader/Loader"
 import useModalHelpers from '../../../../Hooks/ModalHelpers'
 
 

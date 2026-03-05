@@ -10,7 +10,7 @@ import {format} from "date-fns"
 
 import RefundMessage from './RefundMessage'
 import useFlexiDropdown from '../../../Hooks/FlexiDropdown'
-import {CustomPuffLoader} from '../../../Components/Loader//Loader'
+import {CustomPuffLoader} from '../../../Components/UI/Loader/Loader'
 import {deleteProductFromOrderHistory} from '../../../Slices/orderSlice'
 
 

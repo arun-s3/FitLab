@@ -7,8 +7,8 @@ import {TriangleAlert, RotateCcw} from 'lucide-react'
 import ExerciseCard from './ExerciseCard'
 import {capitalizeFirstLetter} from '../../../Utils/helperFunctions'
 
-import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
-import TermsDisclaimer from "../../../Components/TermsDisclaimer/TermsDisclaimer"
+import PaginationV2 from '../../../Components/UI/PaginationV2/PaginationV2'
+import TermsDisclaimer from "../../../Components/UI/TermsDisclaimer/TermsDisclaimer"
 
 
 export default function TrainingExercisesList({selectedBodyParts, searchQuery, exercises, isLoading, fetchError, currentPage, totalPages, 

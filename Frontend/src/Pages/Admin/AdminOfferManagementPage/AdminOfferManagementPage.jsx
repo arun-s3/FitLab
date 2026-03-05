@@ -15,17 +15,17 @@ import {FaUsersViewfinder} from "react-icons/fa6"
 
 import {toast as sonnerToast} from 'sonner'
 
-import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
+import AdminTitleSection from '../../../Components/Layout/AdminTitleSection/AdminTitleSection'
 import OfferList from "./OfferList"
 import OfferModal from "./OfferModal"
 import OfferDeleteModal from "./OfferDeleteModal"
 import useFlexiDropdown from '../../../Hooks/FlexiDropdown'
 import useStickyDropdown from '../../../Hooks/StickyDropdown'
 import AdvancedOfferFilters from './AdvancedOfferFilters'
-import {DateSelector} from '../../../Components/Calender/Calender'
+import {DateSelector} from '../../../Components/UI/Calender/Calender'
 import {getAllOffers, toggleOfferStatus, resetOfferStates} from '../../../Slices/offerSlice'
 import {camelToCapitalizedWords} from "../../../Utils/helperFunctions"
-import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
+import PaginationV2 from '../../../Components/UI/PaginationV2/PaginationV2'
 
 
 export default function AdminOfferManagementPage(){

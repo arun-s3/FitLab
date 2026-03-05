@@ -5,7 +5,7 @@ import {useNavigate} from 'react-router-dom'
 import {FaFacebook, FaInstagramSquare, FaLinkedin} from "react-icons/fa"
 import {CiFacebook, CiInstagram, CiLinkedin} from "react-icons/ci"
 
-import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
+import {SiteButtonSquare} from '../../../Components/UI/SiteButtons/SiteButtons'
 
 
 export default function HeroSection(){

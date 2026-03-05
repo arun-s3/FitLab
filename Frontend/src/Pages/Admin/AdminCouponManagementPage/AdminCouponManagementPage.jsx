@@ -13,7 +13,7 @@ import {RiArrowDropDownLine} from "react-icons/ri"
 import {MdSort} from "react-icons/md"
 import {toast as sonnerToast} from 'sonner'
 
-import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
+import AdminTitleSection from '../../../Components/Layout/AdminTitleSection/AdminTitleSection'
 import CouponList from "./CouponList"
 import CouponModal from "./CouponModal"
 import CouponDeleteModal from "./CouponDeleteModal"
@@ -21,9 +21,9 @@ import AdvancedCouponFilters from './AdvancedCouponFilters'
 import useFlexiDropdown from '../../../Hooks/FlexiDropdown'
 import useStickyDropdown from '../../../Hooks/StickyDropdown'
 import {convertToCamelCase, camelToCapitalizedWords} from "../../../Utils/helperFunctions"
-import {DateSelector} from '../../../Components/Calender/Calender'
+import {DateSelector} from '../../../Components/UI/Calender/Calender'
 import {getAllCoupons, searchCoupons, toggleCouponStatus, resetCouponStates} from '../../../Slices/couponSlice'
-import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
+import PaginationV2 from '../../../Components/UI/PaginationV2/PaginationV2'
 
 
 export default function AdminCouponManagementPage(){

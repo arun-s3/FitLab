@@ -9,7 +9,7 @@ import {toast} from 'react-toastify'
 import AddressFields from './AddressFields'
 import {UserPageLayoutContext} from '../../../Layouts/UserPageLayout/UserPageLayout'
 import {createNewAddress, editAddress, resetStates} from '../../../Slices/addressSlice'
-import AuthPrompt from '../../../Components/AuthPrompt/AuthPrompt'
+import AuthPrompt from '../../../Components/Features/Auth/AuthPrompt/AuthPrompt'
 
 
 export default function AddressManagementPage({editAddresses = false}){

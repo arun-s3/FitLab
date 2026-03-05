@@ -8,8 +8,8 @@ import TermsAndConditions, {lastUpdated, termsVersion} from  "../../../Data/Term
 import TermsAndConditionTopics from "./TermsAndConditionTopics"
 import TermsAndConditionContent from "./TermsAndConditionContent"
 import UserActionBar from "./UserActionBar"
-import Header from "../../../Components/Header/Header"
-import Footer from "../../../Components/Footer/Footer"
+import Header from "../../../Components/Layout/Header/Header"
+import Footer from "../../../Components/Layout/Footer/Footer"
 import {updateTermsAcceptance, resetStates} from '../../../Slices/userSlice'
 
 

@@ -5,9 +5,9 @@ import {VscSettings} from "react-icons/vsc"
 import {RiArrowDropUpLine} from "react-icons/ri"
 import apiClient from '../../../Api/apiClient'
 
-import CategoryDisplay from '../../../Components/CategoryDisplay/CategoryDisplay'
-import PriceSliderAndFilter from '../../../Components/PriceSliderAndFilter/PriceSliderAndFilter'
-import RatingSlider from '../../../Components/RatingSlider/RatingSlider'
+import CategoryDisplay from '../../../Components/Features/Category/CategoryDisplay/CategoryDisplay'
+import PriceSliderAndFilter from '../../../Components/Tools/PriceSliderAndFilter/PriceSliderAndFilter'
+import RatingSlider from '../../../Components/UI/RatingSlider/RatingSlider'
 import {capitalizeFirstLetter} from '../../../Utils/helperFunctions'
 
 

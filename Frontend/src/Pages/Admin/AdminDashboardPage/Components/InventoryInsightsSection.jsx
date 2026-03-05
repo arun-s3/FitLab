@@ -13,7 +13,7 @@ import {toast as sonnerToast} from 'sonner'
 
 import { restockProduct, resetStates } from "../../../../Slices/productSlice"
 
-import RestockModal from '../../../../Components/RestockModal/RestockModal'
+import RestockModal from '../../../../Components/Features/Product/RestockModal/RestockModal'
 import {OperationsAnalyticsContext} from '.././AdminDashboardPage'
 import {useTogglerEnabled} from "../../../../Hooks/ToggleEnabler"
 import ChartError from './ChartError'

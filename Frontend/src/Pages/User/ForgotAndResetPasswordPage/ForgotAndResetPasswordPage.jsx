@@ -8,10 +8,10 @@ import {Eye, EyeOff} from 'lucide-react'
 import {toast as sonnerToast} from 'sonner'
 import {toast} from 'react-toastify'
 
-import Header from '../../../Components/Header/Header'
-import Footer from '../../../Components/Footer/Footer'
-import {SiteButtonSquare, SiteSecondaryFillImpButton} from '../../../Components/SiteButtons/SiteButtons'
-import {CustomHashLoader} from '../../../Components/Loader/Loader'
+import Header from '../../../Components/Layout/Header/Header'
+import Footer from '../../../Components/Layout/Footer/Footer'
+import {SiteButtonSquare, SiteSecondaryFillImpButton} from '../../../Components/UI/SiteButtons/SiteButtons'
+import {CustomHashLoader} from '../../../Components/UI/Loader/Loader'
 
 
 export default function ForgotAndResetPasswordPage(){

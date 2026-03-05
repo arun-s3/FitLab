@@ -8,9 +8,9 @@ import {toast} from 'react-toastify'
 import {RiAdminLine} from "react-icons/ri"
 import {Eye, EyeOff} from 'lucide-react'
 
-import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
-import {CustomHashLoader} from '../../../Components/Loader/Loader'
-import Logo from '../../../Components/Logo/Logo'
+import {SiteButtonSquare} from '../../../Components/UI/SiteButtons/SiteButtons'
+import {CustomHashLoader} from '../../../Components/UI/Loader/Loader'
+import Logo from '../../../Components/UI/Logo/Logo'
 import {resetStates, adminSignin} from '../../../Slices/adminSlice'
 
 

@@ -10,9 +10,9 @@ import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js"
 
 import useModalHelpers from '../../../../Hooks/ModalHelpers'
 import {resetWalletStates} from '../../../../Slices/walletSlice'
-import {CustomHashLoader} from '../../../../Components/Loader/Loader'
+import {CustomHashLoader} from '../../../../Components/UI/Loader/Loader'
 import useTermsConsent from "../../../../Hooks/useTermsConsent"
-import TermsDisclaimer from "../../../../Components/TermsDisclaimer/TermsDisclaimer"
+import TermsDisclaimer from "../../../../Components/UI/TermsDisclaimer/TermsDisclaimer"
 
 
 export default function AutoRechargeModal({ isOpen, onClose, onSave, currentSettings = null }) {

@@ -12,8 +12,8 @@ import {IoBody} from "react-icons/io5"
 import {toast as sonnerToast} from 'sonner'
 
 import useFlexiDropdown from '../../../Hooks/FlexiDropdown'
-import {CustomHashLoader} from '../../../Components/Loader/Loader'
-import AuthModal from "../../../Components/AuthModal/AuthModal"
+import {CustomHashLoader} from '../../../Components/UI/Loader/Loader'
+import AuthModal from "../../../Components/Features/Auth/AuthModal/AuthModal"
 
 
 export default function ExerciseForm({ onAddOrUpdateExercise, editExerciseData = null, onExerciseUpdation}) {

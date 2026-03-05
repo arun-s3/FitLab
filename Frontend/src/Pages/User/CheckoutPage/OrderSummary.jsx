@@ -6,11 +6,11 @@ import {MapPin, Minus, X} from 'lucide-react'
 import {toast as sonnerToast} from 'sonner'
 
 import PaypalPayment from '../PaymentPages/PayPalPayment'
-import {SiteSecondaryFillImpButton} from '../../../Components/SiteButtons/SiteButtons'
-import {CustomHashLoader} from '../../../Components/Loader/Loader'
+import {SiteSecondaryFillImpButton} from '../../../Components/UI/SiteButtons/SiteButtons'
+import {CustomHashLoader} from '../../../Components/UI/Loader/Loader'
 import {removeCoupon, resetCartStates} from '../../../Slices/cartSlice'
 import useTermsConsent from "../../../Hooks/useTermsConsent"
-import TermsDisclaimer from "../../../Components/TermsDisclaimer/TermsDisclaimer"
+import TermsDisclaimer from "../../../Components/UI/TermsDisclaimer/TermsDisclaimer"
 
 
 export default function OrderSummary({shippingAddress, paymentMethod, cancelPaymentMethods, onApplyDiscount, placeOrder, onPaymentError

@@ -8,7 +8,7 @@ import {toast as sonnerToast} from 'sonner'
 import {addPeerAccount, sendMoneyToUser, requestMoneyFromUser, resetWalletStates} from '../../../../Slices/walletSlice'
 import {decryptData} from '../../../../Utils/decryption'
 import useTermsConsent from "../../../../Hooks/useTermsConsent"
-import TermsDisclaimer from "../../../../Components/TermsDisclaimer/TermsDisclaimer"
+import TermsDisclaimer from "../../../../Components/UI/TermsDisclaimer/TermsDisclaimer"
 
 
 export default function MoneyTransferModal({isTransferModalOpen, setIsTransferModalOpen, walletBalance, selectedPeerAccount, setSelectedPeerAccount,

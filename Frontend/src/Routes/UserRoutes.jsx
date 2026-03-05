@@ -31,19 +31,19 @@ import CustomerSupportPage from '../Pages/User/CustomerSupportPage/CustomerSuppo
 import FitnessTrainingPage from '../Pages/User/FitnessTrainingPage/FitnessTrainingPage'
 import FitnessTrackerPage from '../Pages/User/FitnessTrackerPage/FitnessTrackerPage'
 
-import ImageEditor from "../Components/ImageEditor/ImageEditor"
+import ImageEditor from "../Components/Tools/ImageEditor/ImageEditor"
 
 import UserBlockedPage from "../Pages/Errors/UserBlockedPage"
 
-import SocketProvider from "../Components/SocketProvider/SocketProvider"
+import SocketProvider from "../Components/Socket-providers/SocketProvider/SocketProvider"
 
 import UserPageLayout from '../Layouts/UserPageLayout/UserPageLayout'
 import GlobalVideoCallModalLayout from '../Pages/User/GlobalModalLayouts/GlobalVideoCallModalLayout'
-import UserRoutesWrapper from '../Components/UserRoutesWrapper/UserRoutesWrapper'
-import RoutesAccessWrapper from '../Components/RoutesAccessWrapper/RoutesAccessWrapper'
-import ProtectedUserRoutes from '../Components/ProtectedUserRoutes/ProtectedUserRoutes'
-import PrivateUserRoutes from "../Components/PrivateUserRoutes/PrivateUserRoutes"
-import RestrictedEntryRoutes from '../Components/RestrictedEntryRoutes/RestrictedEntryRoutes'
+import UserRoutesWrapper from '../Components/Route-guards/UserRoutesWrapper/UserRoutesWrapper'
+import RoutesAccessWrapper from '../Components/Route-guards/RoutesAccessWrapper/RoutesAccessWrapper'
+import ProtectedUserRoutes from '../Components/Route-guards/ProtectedUserRoutes/ProtectedUserRoutes'
+import PrivateUserRoutes from "../Components/Route-guards/ProtectedUserRoutes/ProtectedUserRoutes"
+import RestrictedEntryRoutes from '../Components/Route-guards/RestrictedEntryRoutes/RestrictedEntryRoutes'
 
 import ErrorPage404 from '../Pages/Errors/404ErrorPage'
 

@@ -6,7 +6,7 @@ import {toast} from 'react-toastify'
 
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js'
 
-import {CustomHashLoader} from '../../../Components/Loader/Loader'
+import {CustomHashLoader} from '../../../Components/UI/Loader/Loader'
 
 
 export default function PaypalPayment({amount, onPayment, onError}) {

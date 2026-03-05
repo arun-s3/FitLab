@@ -6,8 +6,8 @@ import {motion} from 'framer-motion'
 import {Minus, X} from 'lucide-react'
 import apiClient from '../../../Api/apiClient'
 
-import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
-import {CustomScaleLoader} from '../../../Components/Loader/Loader'
+import {SiteButtonSquare} from '../../../Components/UI/SiteButtons/SiteButtons'
+import {CustomScaleLoader} from '../../../Components/UI/Loader/Loader'
 import {toast as sonnerToast} from 'sonner'
 
 

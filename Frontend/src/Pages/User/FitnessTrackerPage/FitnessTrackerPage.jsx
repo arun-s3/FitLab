@@ -3,15 +3,15 @@ import {useLocation} from 'react-router-dom'
 
 import { motion } from "framer-motion"
 
-import Header from "../../../Components/Header/Header"
-import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
+import Header from "../../../Components/Layout/Header/Header"
+import BreadcrumbBar from '../../../Components/Layout/BreadcrumbBar/BreadcrumbBar'
 import FitnessLayout from "./FitnessLayout"
 import WorkoutSessionCard from "./WorkoutSessionCard"
 import Dashboard from "./Dashboard"
 import FitnessNavigation from "./FitnessNavigation"
 import BMICalculator from "./BMICalculator"
-import FeaturesDisplay from '../../../Components/FeaturesDisplay/FeaturesDisplay'
-import Footer from '../../../Components/Footer/Footer'
+import FeaturesDisplay from '../../../Components/UI/FeaturesDisplay/FeaturesDisplay'
+import Footer from '../../../Components/Layout/Footer/Footer'
 
 
 export default function FitnessTrackerPage() {

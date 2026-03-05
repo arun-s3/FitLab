@@ -18,16 +18,16 @@ import {toast as sonnerToast} from 'sonner'
 
 import apiClient from '../../../Api/apiClient'
 
-import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
-import Modal from '../../../Components/Modal/Modal'
+import AdminTitleSection from '../../../Components/Layout/AdminTitleSection/AdminTitleSection'
+import Modal from '../../../Components/Modals/Modal/Modal'
 import CustomerDetailsModal from './CustomerDetailsModal'
-import CustomerMessageModal from '../../../Components/CustomerMessageModal/CustomerMessageModal'
+import CustomerMessageModal from '../../../Components/Features/Message/CustomerMessageModal/CustomerMessageModal'
 import useFlexiDropdown from '../../../Hooks/FlexiDropdown'
-import {SitePrimaryMinimalButtonWithShadow} from '../../../Components/SiteButtons/SiteButtons'
+import {SitePrimaryMinimalButtonWithShadow} from '../../../Components/UI/SiteButtons/SiteButtons'
 import {showUsers, toggleBlockUser, updateRiskyUserStatus, resetStates} from '../../../Slices/adminSlice'
-import {AdminSocketContext} from '../../../Components/AdminSocketProvider/AdminSocketProvider'
+import {AdminSocketContext} from '../../../Components/Socket-providers/AdminSocketProvider/AdminSocketProvider'
 import {camelToCapitalizedWords} from "../../../Utils/helperFunctions"
-import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
+import PaginationV2 from '../../../Components/UI/PaginationV2/PaginationV2'
 
 
 export default function AdminCustomersPageV1() {

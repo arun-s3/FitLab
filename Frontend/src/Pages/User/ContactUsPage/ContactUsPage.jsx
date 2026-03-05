@@ -6,10 +6,10 @@ import {toast as sonnerToast} from 'sonner'
 import ContactForm from "./ContactForm"
 import LocationInfo from "./LocationInfo"
 import FaqSection from "./FaqSection"
-import Header from '../../../Components/Header/Header'
-import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
-import Footer from '../../../Components/Footer/Footer'
-import {SocketContext} from '../../../Components/SocketProvider/SocketProvider'
+import Header from '../../../Components/Layout/Header/Header'
+import BreadcrumbBar from '../../../Components/Layout/BreadcrumbBar/BreadcrumbBar'
+import Footer from '../../../Components/Layout/Footer/Footer'
+import {SocketContext} from '../../../Components/Socket-providers/SocketProvider/SocketProvider'
 
 
 export default function ContactUsPage(){

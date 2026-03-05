@@ -4,8 +4,8 @@ import {motion} from 'framer-motion'
 
 import {Search} from "lucide-react"
 
-import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
-import {CustomHashLoader} from '../../../Components/Loader/Loader'
+import {SiteButtonSquare} from '../../../Components/UI/SiteButtons/SiteButtons'
+import {CustomHashLoader} from '../../../Components/UI/Loader/Loader'
 
 
 export default function MuscleSelector({bodyParts, setSearchedBodyPart, onSearchBodyPart, selectedBodyParts, listExercises, isLoading,

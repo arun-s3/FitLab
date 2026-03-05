@@ -9,15 +9,15 @@ import {toast} from 'react-toastify'
 import {toast as sonnerToast} from 'sonner'
 
 import {UserPageLayoutContext} from '../../../Layouts/UserPageLayout/UserPageLayout'
-import ResetPasswordBox from "../../../Components/ResetPasswordBox/ResetPasswordBox"
-import {SingleDateSelector} from '../../../Components/Calender/Calender' 
+import ResetPasswordBox from "../../../Components/Forms/ResetPasswordBox/ResetPasswordBox"
+import {SingleDateSelector} from '../../../Components/UI/Calender/Calender' 
 import {updateUserDetails, resetStates as resetUserStates} from '../../../Slices/userSlice'
 import {getDefaultAddress, editAddress, resetStates as resetAddressStates} from '../../../Slices/addressSlice'
-import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
+import {SiteButtonSquare} from '../../../Components/UI/SiteButtons/SiteButtons'
 import {camelToCapitalizedWords} from '../../../Utils/helperFunctions'
 import {handleInputValidation, displaySuccess, displayErrorAndReturnNewFormData, cancelErrorState} from '../../../Utils/fieldValidator'
-import {CustomHashLoader} from '../../../Components/Loader/Loader'
-import AuthPrompt from '../../../Components/AuthPrompt/AuthPrompt'
+import {CustomHashLoader} from '../../../Components/UI/Loader/Loader'
+import AuthPrompt from '../../../Components/Features/Auth/AuthPrompt/AuthPrompt'
 
 
 export default function UserAccountPage(){

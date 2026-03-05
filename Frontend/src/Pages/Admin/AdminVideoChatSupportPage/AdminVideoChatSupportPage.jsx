@@ -3,8 +3,8 @@ import {useOutletContext} from 'react-router-dom'
 
 import VideoChatDashboard from './VideoChatDashboard'
 import VideoChatSection from './VideoChatSection'
-import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
-import {AdminSocketContext} from '../../../Components/AdminSocketProvider/AdminSocketProvider'
+import AdminTitleSection from '../../../Components/Layout/AdminTitleSection/AdminTitleSection'
+import {AdminSocketContext} from '../../../Components/Socket-providers/AdminSocketProvider/AdminSocketProvider'
 
 
 export default function AdminVideoChatSupportPage() {

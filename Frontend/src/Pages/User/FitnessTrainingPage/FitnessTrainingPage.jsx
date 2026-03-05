@@ -4,17 +4,17 @@ import {useLocation} from 'react-router-dom'
 import apiClient from '../../../Api/apiClient'
 import {toast as sonnerToast} from 'sonner'
 
-import Header from '../../../Components/Header/Header'
+import Header from '../../../Components/Layout/Header/Header'
 import TextChatBox from '../TextChatBox/TextChatBox'
 import CoachPlus from '../Coach+/Coach+'
-import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
+import BreadcrumbBar from '../../../Components/Layout/BreadcrumbBar/BreadcrumbBar'
 import FitnessCarousal from './FitnessCarousal'
 import MuscleSelector from './MuscleSelector'
 import TrainingExercisesList from './TrainingExercisesList'
 import ExerciseDetails from './ExerciseDetails'
 import FilterPanel from './FilterPanel'
-import FeaturesDisplay from '../../../Components/FeaturesDisplay/FeaturesDisplay'
-import Footer from '../../../Components/Footer/Footer'
+import FeaturesDisplay from '../../../Components/UI/FeaturesDisplay/FeaturesDisplay'
+import Footer from '../../../Components/Layout/Footer/Footer'
 
 
 export default function FitnessTrainingPage(){

@@ -13,7 +13,7 @@ import CouponsInsightsSection from './Components/CouponsInsightsSection'
 import OffersInsightsSection from './Components/OffersInsightsSection'
 import PaymentsInsightsSection from './Components/PaymentsInsightsSection'
 
-import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
+import AdminTitleSection from '../../../Components/Layout/AdminTitleSection/AdminTitleSection'
 
 export const BusinessAnalyticsContext = createContext()
 export const OperationsAnalyticsContext = createContext()

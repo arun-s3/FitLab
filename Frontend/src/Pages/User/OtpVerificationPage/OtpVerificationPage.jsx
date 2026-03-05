@@ -11,11 +11,11 @@ import {toast} from 'react-toastify'
 import {IoMail} from "react-icons/io5"
 
 import OtpBoxGenerator from './OtpBoxGenerator'
-import {SiteButtonSquare, SiteSecondaryBorderButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
-import {CustomHashLoader, CustomPacmanLoader} from '../../../Components/Loader/Loader'
+import {SiteButtonSquare, SiteSecondaryBorderButtonSquare} from '../../../Components/UI/SiteButtons/SiteButtons'
+import {CustomHashLoader, CustomPacmanLoader} from '../../../Components/UI/Loader/Loader'
 import {makeUserVerified} from '../../../Slices/userSlice'
-import Header from '../../../Components/Header/Header'
-import Footer from '../../../Components/Footer/Footer'
+import Header from '../../../Components/Layout/Header/Header'
+import Footer from '../../../Components/Layout/Footer/Footer'
 
 
 export default function OtpVerificationPage(){

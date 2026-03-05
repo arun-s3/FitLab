@@ -1,7 +1,7 @@
 import React from 'react'
 import {Route, Routes} from 'react-router-dom'
 
-import RestrictedEntryRoutes from '../Components/RestrictedEntryRoutes/RestrictedEntryRoutes'
+import RestrictedEntryRoutes from '../Components/Route-guards/RestrictedEntryRoutes/RestrictedEntryRoutes'
 
 import ErrorPage403 from '../Pages/Errors/403ErrorPage'
 import ErrorPage401 from '../Pages/Errors/401ErrorPage'

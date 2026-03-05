@@ -26,10 +26,10 @@ import AdminAiInsightsPage from '../Pages/Admin/AdminAiInsightsPage/AdminAiInsig
 import AdminSettingsPage from "../Pages/Admin/AdminSettingsPage/AdminSettingsPage"
 
 import AdminPageLayout from "../Layouts/AdminPageLayout/AdminPageLayout"
-import AdminRoutesWrapper from "../Components/AdminRoutesWrapper/AdminRoutesWrapper"
-import PrivateAdminRoutes from "../Components/PrivateAdminRoutes/PrivateAdminRoutes"
+import AdminRoutesWrapper from "../Components/Route-guards/AdminRoutesWrapper/AdminRoutesWrapper"
+import PrivateAdminRoutes from "../Components/Route-guards/PrivateAdminRoutes/PrivateAdminRoutes"
 
-import AdminSocketProvider from '../Components/AdminSocketProvider/AdminSocketProvider'
+import AdminSocketProvider from '../Components/Socket-providers/AdminSocketProvider/AdminSocketProvider'
 
 import ErrorPage404 from '../Pages/Errors/404ErrorPage'
 

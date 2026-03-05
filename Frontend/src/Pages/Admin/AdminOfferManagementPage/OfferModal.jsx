@@ -10,13 +10,13 @@ import {CgDetailsMore} from "react-icons/cg"
 import {toast as sonnerToast} from 'sonner'
 import {toast} from 'react-toastify'
 
-import CategoryDisplay from "../../../Components/CategoryDisplay/CategoryDisplay"
-import FileUpload from '../../../Components/FileUpload/FileUpload'
+import CategoryDisplay from "../../../Components/Features/Category/CategoryDisplay/CategoryDisplay"
+import FileUpload from '../../../Components/Tools/FileUpload/FileUpload'
 import {handleImageCompression} from '../../../Utils/compressImages'
 import {updateOffer, resetOfferStates} from '../../../Slices/offerSlice'
 import {getAllProducts} from '../../../Slices/productSlice'
 import {camelToCapitalizedWords} from "../../../Utils/helperFunctions"
-import {CustomHashLoader} from '../../../Components/Loader/Loader'
+import {CustomHashLoader} from '../../../Components/UI/Loader/Loader'
 import useModalHelpers from '../../../Hooks/ModalHelpers'
 
 

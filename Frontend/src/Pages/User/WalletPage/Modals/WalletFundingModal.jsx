@@ -12,7 +12,7 @@ import StripePayment from '../../PaymentPages/StripePayment'
 import {addFundsToWallet, resetWalletStates} from '../../../../Slices/walletSlice'
 import useModalHelpers from '../../../../Hooks/ModalHelpers'
 import useTermsConsent from "../../../../Hooks/useTermsConsent"
-import TermsDisclaimer from "../../../../Components/TermsDisclaimer/TermsDisclaimer"
+import TermsDisclaimer from "../../../../Components/UI/TermsDisclaimer/TermsDisclaimer"
 
 
 export default function WalletFundingModal({showFundingModal, closeFundingModal, paymentVia, setPaymentVia}){

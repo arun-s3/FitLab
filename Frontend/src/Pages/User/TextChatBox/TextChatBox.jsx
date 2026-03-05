@@ -1,7 +1,7 @@
 import React, {useState, useEffect, useRef, useContext} from "react"
 import {motion, AnimatePresence} from "framer-motion"
 
-import {SocketContext} from '../../../Components/SocketProvider/SocketProvider'
+import {SocketContext} from '../../../Components/Socket-providers/SocketProvider/SocketProvider'
 
 import {MessageSquare, X, Send, User, Headphones, Minimize2, Maximize2} from "lucide-react"
 

@@ -2,9 +2,9 @@ import React, {lazy, Suspense} from 'react'
 import {useSelector} from 'react-redux'
 
 import HeroSection from "./HeroSection"
-import Header from '../../../Components/Header/Header'
-import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
-import Footer from '../../../Components/Footer/Footer'
+import Header from '../../../Components/Layout/Header/Header'
+import BreadcrumbBar from '../../../Components/Layout/BreadcrumbBar/BreadcrumbBar'
+import Footer from '../../../Components/Layout/Footer/Footer'
 import CTASection from './CTASection'
 
 const StatsSection = lazy(() => import("./StatsSection"))
@@ -14,7 +14,7 @@ const TimelineSection = lazy(() => import("./TimelineSection"))
 const CoreValuesSection = lazy(() => import("./CoreValuesSection"))
 const FeaturesSection = lazy(() => import("./FeaturesSection"))
 
-import Fallback from '../../../Components/FallbackSuspense/Fallback'
+import Fallback from '../../../Components/Common/FallbackSuspense/Fallback'
 
 
 export default function AboutUsPage() {

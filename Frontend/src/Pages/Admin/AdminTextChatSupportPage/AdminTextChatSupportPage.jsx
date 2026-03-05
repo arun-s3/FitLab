@@ -9,8 +9,8 @@ import apiClient from '../../../Api/apiClient'
 
 import {toast as sonnerToast} from 'sonner'
 
-import {AdminSocketContext} from '../../../Components/AdminSocketProvider/AdminSocketProvider'
-import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
+import {AdminSocketContext} from '../../../Components/Socket-providers/AdminSocketProvider/AdminSocketProvider'
+import AdminTitleSection from '../../../Components/Layout/AdminTitleSection/AdminTitleSection'
 import useFlexiDropdown from '../../../Hooks/FlexiDropdown'
 
 

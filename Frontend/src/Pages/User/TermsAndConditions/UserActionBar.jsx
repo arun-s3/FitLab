@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import { motion } from "framer-motion" 
 
-import {CustomHashLoader} from '../../../Components/Loader/Loader'
+import {CustomHashLoader} from '../../../Components/UI/Loader/Loader'
 
 
 export default function UserActionBar({onUserConsent, loading, termsVersion, user}) {

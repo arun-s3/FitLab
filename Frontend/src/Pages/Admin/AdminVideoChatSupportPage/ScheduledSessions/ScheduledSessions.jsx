@@ -10,8 +10,8 @@ import {toast as sonnerToast} from 'sonner'
 import apiClient from '../../../../Api/apiClient'
 
 import ScheduledSessionCard from "./ScheduledSessionCard"
-import CustomerMessageModal from '../../../../Components/CustomerMessageModal/CustomerMessageModal'
-import {AdminSocketContext} from '../../../../Components/AdminSocketProvider/AdminSocketProvider'
+import CustomerMessageModal from '../../../../Components/Features/Message/CustomerMessageModal/CustomerMessageModal'
+import {AdminSocketContext} from '../../../../Components/Socket-providers/AdminSocketProvider/AdminSocketProvider'
 
 
 export default function ScheduledSessions({ currentScheduledSession, onStartScheduledCall, onEndScheduledCall }) {

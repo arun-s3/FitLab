@@ -13,9 +13,9 @@ import {toast as sonnerToast} from 'sonner'
 
 import apiClient from '../../../Api/apiClient'
 
-import AiInsightCards from "../../../Components/AiInsightCards/AiInsightCards"
+import AiInsightCards from "../../../Components/Features/Insights/AiInsightCards/AiInsightCards"
 import FutureRevenueChart from "./FutureRevenueChart"
-import AdminTitleSection from "../../../Components/AdminTitleSection/AdminTitleSection"
+import AdminTitleSection from "../../../Components/Layout/AdminTitleSection/AdminTitleSection"
 
 
 export default function AdminAiInsightsPage(){

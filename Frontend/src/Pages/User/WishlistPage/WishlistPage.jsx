@@ -10,16 +10,16 @@ import {toast as sonnerToast} from 'sonner'
 import {TbShoppingCartHeart} from "react-icons/tb"
 
 import ListBoard from './ListBoard'
-import ProductsDisplay from '../../../Components/ProductsDisplay/ProductsDisplay'
-import ProductListingTools from '../../../Components/ProductListingTools/ProductListingTools'
+import ProductsDisplay from '../../../Components/Features/Product/ProductsDisplay/ProductsDisplay'
+import ProductListingTools from '../../../Components/Features/Product/ProductListingTools/ProductListingTools'
 import WishlistModal from './Modals/WishlistModal'
 import ListDeletionModal from './Modals/ListDeletionModal'
 import {getAllWishlistProducts, getUserWishlist, searchList, resetWishlistStates} from '../../../Slices/wishlistSlice'
 import {getTheCart} from '../../../Slices/cartSlice'
-import CartSidebar from '../../../Components/CartSidebar/CartSidebar'
-import AuthPrompt from '../../../Components/AuthPrompt/AuthPrompt'
+import CartSidebar from '../../../Components/Features/Cart/CartSidebar/CartSidebar'
+import AuthPrompt from '../../../Components/Features/Auth/AuthPrompt/AuthPrompt'
 import {UserPageLayoutContext} from '../../../Layouts/UserPageLayout/UserPageLayout'
-import {ProtectedUserContext} from '../../../Components/ProtectedUserRoutes/ProtectedUserRoutes'
+import {ProtectedUserContext} from '../../../Components/Route-guards/ProtectedUserRoutes/ProtectedUserRoutes'
 
 
 export default function WishlistPage(){

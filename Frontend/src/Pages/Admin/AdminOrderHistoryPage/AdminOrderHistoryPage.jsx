@@ -14,13 +14,13 @@ import {toast as sonnerToast} from 'sonner'
 
 import apiClient from '../../../Api/apiClient'
 
-import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
-import {DateSelector} from '../../../Components/Calender/Calender'
-import Modal from '../../../Components/Modal/Modal'
-import CancelForm from '../../../Components/CancelForm/CancelForm'
+import AdminTitleSection from '../../../Components/Layout/AdminTitleSection/AdminTitleSection'
+import {DateSelector} from '../../../Components/UI/Calender/Calender'
+import Modal from '../../../Components/Modals/Modal/Modal'
+import CancelForm from '../../../Components/Features/Order/CancelForm/CancelForm'
 import ReturnRequestModal from './ReturnRequestModal'
-import {SitePrimaryButtonWithShadow, SiteSecondaryFillImpButton} from '../../../Components/SiteButtons/SiteButtons' 
-import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
+import {SitePrimaryButtonWithShadow, SiteSecondaryFillImpButton} from '../../../Components/UI/SiteButtons/SiteButtons' 
+import PaginationV2 from '../../../Components/UI/PaginationV2/PaginationV2'
 import {getAllUsersOrders, cancelOrder, cancelOrderProduct, changeOrderStatus,
           changeProductStatus, processRefund, resetOrderStates} from '../../../Slices/orderSlice'
 

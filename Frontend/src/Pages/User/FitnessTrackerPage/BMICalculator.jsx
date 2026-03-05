@@ -8,9 +8,9 @@ import {toast as sonnerToast} from 'sonner'
 import HealthAiInsights from "./AiModules/HealthAiInsights"
 import {updateUserWeight} from '../../../Slices/userSlice'
 import useTermsConsent from "../../../Hooks/useTermsConsent"
-import TermsDisclaimer from "../../../Components/TermsDisclaimer/TermsDisclaimer"
-import AuthPrompt from "../../../Components/AuthPrompt/AuthPrompt"
-import AuthModal from "../../../Components/AuthModal/AuthModal"
+import TermsDisclaimer from "../../../Components/UI/TermsDisclaimer/TermsDisclaimer"
+import AuthPrompt from "../../../Components/Features/Auth/AuthPrompt/AuthPrompt"
+import AuthModal from "../../../Components/Features/Auth/AuthModal/AuthModal"
 
 
 export default function BMICalculator() {

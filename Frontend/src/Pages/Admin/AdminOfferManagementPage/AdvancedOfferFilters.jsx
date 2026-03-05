@@ -7,7 +7,7 @@ import {TbPackages} from "react-icons/tb"
 import {BiCategory} from "react-icons/bi"
 
 import {camelToCapitalizedWords} from "../../../Utils/helperFunctions"
-import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
+import {SiteButtonSquare} from '../../../Components/UI/SiteButtons/SiteButtons'
 
 
 export default function AdvancedOfferFilters({queryOptions, setQueryOptions, close}){

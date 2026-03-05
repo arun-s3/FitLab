@@ -12,11 +12,11 @@ import {Eye, EyeOff} from 'lucide-react'
 import apiClient from '../../../Api/apiClient'
 import axios from 'axios'
 
-import {SiteButtonSquare, SiteSecondaryBorderButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
-import Header from '../../../Components/Header/Header'
-import Footer from '../../../Components/Footer/Footer'
+import {SiteButtonSquare, SiteSecondaryBorderButtonSquare} from '../../../Components/UI/SiteButtons/SiteButtons'
+import Header from '../../../Components/Layout/Header/Header'
+import Footer from '../../../Components/Layout/Footer/Footer'
 import {signup, signin, googleSignin, resetStates} from '../../../Slices/userSlice'
-import {CustomHashLoader, CustomScaleLoader} from '../../../Components/Loader/Loader'
+import {CustomHashLoader, CustomScaleLoader} from '../../../Components/UI/Loader/Loader'
 
 
 export default function SignUpAndInPage({type}){

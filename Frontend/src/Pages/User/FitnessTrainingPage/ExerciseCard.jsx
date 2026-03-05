@@ -6,7 +6,7 @@ import apiClient from '../../../Api/apiClient'
 
 import ExerciseDifficultyStars from './ExerciseDifficultyStars'
 import ExerciseForceType from './ExerciseForceType'
-import {CustomHashLoader} from '../../../Components/Loader/Loader'
+import {CustomHashLoader} from '../../../Components/UI/Loader/Loader'
 
 
 export default function ExerciseCard({exercise, index, onChooseExercise}){

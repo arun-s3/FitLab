@@ -4,7 +4,7 @@ import {motion} from "framer-motion"
 
 import {ChevronDown, Check, ChevronUp, ArrowLeftRight, BanknoteX, LaptopMinimalCheck, FileChartColumn} from "lucide-react"
 
-import {DateSelector} from '../../../Components/Calender/Calender'
+import {DateSelector} from '../../../Components/UI/Calender/Calender'
 import {camelToCapitalizedWords} from "../../../Utils/helperFunctions"
 
 

@@ -15,8 +15,8 @@ import {RiDropdownList} from "react-icons/ri"
 
 import {getAllCategories, getCategoriesOfType, getSingleCategory, toggleCategoryStatus, resetSubcategories, searchCategoryByName, resetStates} 
                 from '../../../Slices/categorySlice'
-import {SearchInput} from '../../../Components/FromComponents/FormComponents'
-import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
+import {SearchInput} from '../../../Components/Forms/FromComponents/FormComponents'
+import AdminTitleSection from '../../../Components/Layout/AdminTitleSection/AdminTitleSection'
 
 
 export default function AdminCategoryListPage(){

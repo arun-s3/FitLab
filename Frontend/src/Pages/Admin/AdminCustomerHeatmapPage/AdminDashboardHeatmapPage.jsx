@@ -15,7 +15,7 @@ import apiClient from '../../../Api/apiClient'
 
 import StatError from "./StatError"
 
-import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
+import AdminTitleSection from '../../../Components/Layout/AdminTitleSection/AdminTitleSection'
 
 const INDIA_TOPO_JSON = "https://raw.githubusercontent.com/markmarkoh/datamaps/master/src/js/data/ind.topo.json";
 

@@ -1,11 +1,11 @@
 import React, {useState, useEffect} from 'react'
 import {AnimatePresence, motion} from 'framer-motion'
 
-import Header from '../../../Components/Header/Header'
-import BreadcrumbBar from '../../../Components/BreadcrumbBar/BreadcrumbBar'
+import Header from '../../../Components/Layout/Header/Header'
+import BreadcrumbBar from '../../../Components/Layout/BreadcrumbBar/BreadcrumbBar'
 import OrderCompletedSummary from './OrderCompletedSummary'
-import FeaturesDisplay from '../../../Components/FeaturesDisplay/FeaturesDisplay'
-import Footer from '../../../Components/Footer/Footer'
+import FeaturesDisplay from '../../../Components/UI/FeaturesDisplay/FeaturesDisplay'
+import Footer from '../../../Components/Layout/Footer/Footer'
 
 
 export default function OrderConfirmationPage(){

@@ -5,9 +5,9 @@ import {Mail, Phone, Send} from "lucide-react"
 import {toast as sonnerToast} from 'sonner'
 
 import useTermsConsent from "../../../Hooks/useTermsConsent"
-import TermsDisclaimer from "../../../Components/TermsDisclaimer/TermsDisclaimer"
+import TermsDisclaimer from "../../../Components/UI/TermsDisclaimer/TermsDisclaimer"
 import {camelToCapitalizedWords} from '../../../Utils/helperFunctions'
-import {CustomHashLoader} from '../../../Components/Loader/Loader'
+import {CustomHashLoader} from '../../../Components/UI/Loader/Loader'
 
 
 export default function ContactForm({isSupportConnected, isCoachConnected, onSubmit}){

@@ -13,13 +13,13 @@ import {toast as sonnerToast} from 'sonner'
 
 import apiClient from '../../../Api/apiClient'
 
-import AdminTitleSection from '../../../Components/AdminTitleSection/AdminTitleSection'
-import ProductListingTools from '../../../Components/ProductListingTools/ProductListingTools'
-import {SitePrimaryButtonWithShadow} from '../../../Components/SiteButtons/SiteButtons'
+import AdminTitleSection from '../../../Components/Layout/AdminTitleSection/AdminTitleSection'
+import ProductListingTools from '../../../Components/Features/Product/ProductListingTools/ProductListingTools'
+import {SitePrimaryButtonWithShadow} from '../../../Components/UI/SiteButtons/SiteButtons'
 import {getAllProducts, resetStates} from '../../../Slices/productSlice'
 import ListingTabs from './ListingTabs'
-import ProductsDisplay from '../../../Components/ProductsDisplay/ProductsDisplay'
-import ProductFilterSidebar from '../../../Components/ProductFilterSidebar/ProductFilterSidebar'
+import ProductsDisplay from '../../../Components/Features/Product/ProductsDisplay/ProductsDisplay'
+import ProductFilterSidebar from '../../../Components/Features/Product/ProductFilterSidebar/ProductFilterSidebar'
 import ExportFileModal from './ExportFileModal'
 
 

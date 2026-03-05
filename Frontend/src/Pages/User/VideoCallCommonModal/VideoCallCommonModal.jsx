@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion"
 
 import { PhoneOff, Video, Headset, Clock, Calendar, X, Dumbbell, Weight } from "lucide-react"
 
-import {SocketContext} from '../../../Components/SocketProvider/SocketProvider'
+import {SocketContext} from '../../../Components/Socket-providers/SocketProvider/SocketProvider'
 
 
 export default function VideoCallModal({videoSessionInfo, onClose}) {

@@ -15,11 +15,11 @@ import WalletOptions from "./WalletOptions"
 import MoneyExchange from "./MoneyExchange"
 import WalletFundingModal from "./Modals/WalletFundingModal"
 import TransactionDetailsSection from "./TransactionDetailsSection"
-import {SocketContext} from '../../../Components/SocketProvider/SocketProvider'
+import {SocketContext} from '../../../Components/Socket-providers/SocketProvider/SocketProvider'
 import AutoRechargeModal from "./Modals/AutoRechargeModal"
 import CardExistsWarningModal from "./Modals/CardExistsWarningModal"
 import WalletUtilitySection from "./WalletUtilitySection"
-import {ProtectedUserContext} from '../../../Components/ProtectedUserRoutes/ProtectedUserRoutes'
+import {ProtectedUserContext} from '../../../Components/Route-guards/ProtectedUserRoutes/ProtectedUserRoutes'
 import {UserPageLayoutContext} from '../../../Layouts/UserPageLayout/UserPageLayout'
 import {decryptData} from '../../../Utils/decryption'
 import {getOrCreateWallet, updateAutoRechargeSettings, resetWalletStates} from '../../../Slices/walletSlice'

@@ -4,8 +4,8 @@ import { motion } from "framer-motion"
 import PrivacyPolicies, {lastUpdated} from "../../../Data/PrivacyPolicies"
 import PrivacyTopicsSection from "./PrivacyTopicsSection"
 import PolicyContentSection from "./PolicyContentSection"
-import Header from "../../../Components/Header/Header"
-import Footer from "../../../Components/Footer/Footer"
+import Header from "../../../Components/Layout/Header/Header"
+import Footer from "../../../Components/Layout/Footer/Footer"
 
 
 export default function PrivacyPolicyPage() {

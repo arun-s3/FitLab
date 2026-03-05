@@ -10,7 +10,7 @@ import {MdTipsAndUpdates} from "react-icons/md"
 
 import apiClient from '../../../../Api/apiClient'
 
-import AiInsightCards from "../../../../Components/AiInsightCards/AiInsightCards"
+import AiInsightCards from "../../../../Components/Features/Insights/AiInsightCards/AiInsightCards"
 
 
 export default function FitnessAiInsights({receivedSourceDatas, periodType, guestMode = false}) { 

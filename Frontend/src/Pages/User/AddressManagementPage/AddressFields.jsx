@@ -6,9 +6,9 @@ import {motion} from "framer-motion"
 import {ArrowLeft, Eraser} from 'lucide-react'
 
 import {InputLabelGenerator} from './InputLabelGenerator'
-import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
+import {SiteButtonSquare} from '../../../Components/UI/SiteButtons/SiteButtons'
 import {capitalizeFirstLetter} from '../../../Utils/helperFunctions'
-import {CustomHashLoader} from '../../../Components/Loader/Loader'
+import {CustomHashLoader} from '../../../Components/UI/Loader/Loader'
 
 
 export default function AddressFields({editAddresses, addressData, setAddressData, onChange, onRadioClick, onRadioChange, 

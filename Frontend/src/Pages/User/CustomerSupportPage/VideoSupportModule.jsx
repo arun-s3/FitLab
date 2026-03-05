@@ -6,7 +6,7 @@ import RequestForm from "./VideoSupport/RequestForm"
 import WaitingRoom from "./VideoSupport/WaitingRoom"
 import ScheduleModal from "./VideoSupport/ScheduleModal"
 import CallDeclinedModal from "./VideoSupport/CallDeclinedModal"
-import {SocketContext} from '../../../Components/SocketProvider/SocketProvider'
+import {SocketContext} from '../../../Components/Socket-providers/SocketProvider/SocketProvider'
 
 
 export default function VideoSupportModule() {

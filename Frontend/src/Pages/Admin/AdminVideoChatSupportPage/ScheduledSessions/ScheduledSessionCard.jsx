@@ -4,7 +4,7 @@ import { motion } from "framer-motion"
 
 import { User, Clock, Video, Circle, PhoneOff, MessageSquare, Calendar, AlertCircle } from "lucide-react"
 
-import CustomerMessageModal from '../../../../Components/CustomerMessageModal/CustomerMessageModal'
+import CustomerMessageModal from '../../../../Components/Features/Message/CustomerMessageModal/CustomerMessageModal'
 
 
 export default function ScheduledSessionCard({ session, onStartCall, onEndCall, socket, currentScheduledSession, messageUser }) {

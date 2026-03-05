@@ -4,7 +4,7 @@ import { motion } from "framer-motion"
 
 import { User, Clock, Phone, PhoneOff, MessageSquare } from "lucide-react"
 
-import CustomerMessageModal from '../../../Components/CustomerMessageModal/CustomerMessageModal'
+import CustomerMessageModal from '../../../Components/Features/Message/CustomerMessageModal/CustomerMessageModal'
 
 
 export default function UserQueueCard({ user, position, onAccept, onDecline, disabled }) {

@@ -6,9 +6,9 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Bot, X, Send, User } from "lucide-react"
 import {toast as sonnerToast} from 'sonner'
 
-import {SocketContext} from '../../../Components/SocketProvider/SocketProvider'
+import {SocketContext} from '../../../Components/Socket-providers/SocketProvider/SocketProvider'
 import AnimatedBotIcon from "./AnimatedBot"
-import TermsDisclaimer from "../../../Components/TermsDisclaimer/TermsDisclaimer"
+import TermsDisclaimer from "../../../Components/UI/TermsDisclaimer/TermsDisclaimer"
 
 
 export default function CoachPlus({autoOpen, onCloseChat}) {

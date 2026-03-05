@@ -7,7 +7,7 @@ import apiClient from '../../../Api/apiClient'
 
 import ExerciseVideos from './ExerciseVideos'
 import ExerciseDifficultyStars from './ExerciseDifficultyStars'
-import Carousal from '../../../Components/Carousal/Carousal'
+import Carousal from '../../../Components/UI/Carousal/Carousal'
 import {capitalizeFirstLetter} from '../../../Utils/helperFunctions'
 
 

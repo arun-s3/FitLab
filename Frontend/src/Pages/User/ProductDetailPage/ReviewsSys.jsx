@@ -3,7 +3,7 @@ import {motion, AnimatePresence} from 'framer-motion'
 
 import {Star} from 'lucide-react'
 
-import {SiteSecondaryFillButton} from '../../../Components/SiteButtons/SiteButtons'
+import {SiteSecondaryFillButton} from '../../../Components/UI/SiteButtons/SiteButtons'
 
 
 export default function ReviewsPanel({onReviewSubmit}){

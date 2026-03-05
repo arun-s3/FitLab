@@ -6,9 +6,9 @@ import apiClient from '../../../Api/apiClient'
 import {toast as sonnerToast} from 'sonner'
 
 import ReviewsStats from "./ReviewStats"
-import ReviewForm from '../../../Components/ReviewForm/ReviewForm'
+import ReviewForm from '../../../Components/Features/Review/ReviewForm/ReviewForm'
 import ReviewCard from "./ReviewCard"
-import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
+import PaginationV2 from '../../../Components/UI/PaginationV2/PaginationV2'
 
 
 export default function ReviewsPanel({ productId, productRating, totalReviews }) {

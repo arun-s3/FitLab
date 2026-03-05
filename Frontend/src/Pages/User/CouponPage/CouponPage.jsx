@@ -8,12 +8,12 @@ import {toast as sonnerToast} from 'sonner'
 import CouponTools from "./CouponTools"
 import CouponList from "./CouponList"
 import RemoveCouponModal from "./RemoveCouponModal"
-import AuthPrompt from '../../../Components/AuthPrompt/AuthPrompt'
+import AuthPrompt from '../../../Components/Features/Auth/AuthPrompt/AuthPrompt'
 import {UserPageLayoutContext} from '../../../Layouts/UserPageLayout/UserPageLayout'
-import {ProtectedUserContext} from '../../../Components/ProtectedUserRoutes/ProtectedUserRoutes'
+import {ProtectedUserContext} from '../../../Components/Route-guards/ProtectedUserRoutes/ProtectedUserRoutes'
 import {getEligibleCoupons, getAllCoupons} from '../../../Slices/couponSlice'
 import {applyCoupon, removeCoupon, getTheCart, resetCartStates} from '../../../Slices/cartSlice'
-import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
+import PaginationV2 from '../../../Components/UI/PaginationV2/PaginationV2'
 
 
 export default function CouponPage(){

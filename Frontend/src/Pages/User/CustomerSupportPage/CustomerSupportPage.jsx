@@ -2,17 +2,17 @@ import React, {useState, useEffect, lazy, Suspense} from 'react'
 import './CustomerSupportPage.css'
 import {motion} from 'framer-motion'
 
-import Header from '../../../Components/Header/Header'
-import UserSidebar from '../../../Components/UserSidebar/UserSidebar'
+import Header from '../../../Components/Layout/Header/Header'
+import UserSidebar from '../../../Components/Layout/UserSidebar/UserSidebar'
 import ChatTooltip from './VideoSupport/ChatTooltip'
-import Footer from '../../../Components/Footer/Footer'
-import Fallback from '../../../Components/FallbackSuspense/Fallback'
+import Footer from '../../../Components/Layout/Footer/Footer'
+import Fallback from '../../../Components/Common/FallbackSuspense/Fallback'
 
 const VideoSupportModule = lazy(()=> import("./VideoSupportModule"))
 const TextChatBox = lazy(()=> import("../../User/TextChatBox/TextChatBox"))
 const FaqSection = lazy(()=> import("./FaqSection"))
-const MiniTestimonialCarousal = lazy(()=> import("../../../Components/MiniTestimonialCarousal/MiniTestimonialCarousal"))
-const FeaturesDisplay = lazy(()=> import("../../../Components/FeaturesDisplay/FeaturesDisplay"))
+const MiniTestimonialCarousal = lazy(()=> import("../../../Components/Features/Testimony/MiniTestimonialCarousal/MiniTestimonialCarousal"))
+const FeaturesDisplay = lazy(()=> import("../../../Components/UI/FeaturesDisplay/FeaturesDisplay"))
 
 
 export default function CustomerSupportPage(){

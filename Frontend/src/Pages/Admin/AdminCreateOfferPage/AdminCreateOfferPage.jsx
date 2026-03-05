@@ -12,14 +12,14 @@ import {GoDotFill} from "react-icons/go"
 import {toast as sonnerToast} from 'sonner'
 import {toast} from 'react-toastify'
 
-import AdminTitleSection from "../../../Components/AdminTitleSection/AdminTitleSection"
-import PlaceholderIcon from '../../../Components/PlaceholderIcon/PlaceholderIcon'
-import CategoryDisplay from "../../../Components/CategoryDisplay/CategoryDisplay"
-import FileUpload from '../../../Components/FileUpload/FileUpload'
+import AdminTitleSection from "../../../Components/Layout/AdminTitleSection/AdminTitleSection"
+import PlaceholderIcon from '../../../Components/UI/PlaceholderIcon/PlaceholderIcon'
+import CategoryDisplay from "../../../Components/Features/Category/CategoryDisplay/CategoryDisplay"
+import FileUpload from '../../../Components/Tools/FileUpload/FileUpload'
 import {handleImageCompression} from '../../../Utils/compressImages'
-import {CustomHashLoader} from '../../../Components/Loader/Loader'
-import {DateSelector} from '../../../Components/Calender/Calender'
-import {SiteButtonSquare} from '../../../Components/SiteButtons/SiteButtons'
+import {CustomHashLoader} from '../../../Components/UI/Loader/Loader'
+import {DateSelector} from '../../../Components/UI/Calender/Calender'
+import {SiteButtonSquare} from '../../../Components/UI/SiteButtons/SiteButtons'
 import {createOffer, resetOfferStates} from '../../../Slices/offerSlice'
 import {getAllProducts} from '../../../Slices/productSlice'
 import {camelToCapitalizedWords} from "../../../Utils/helperFunctions"

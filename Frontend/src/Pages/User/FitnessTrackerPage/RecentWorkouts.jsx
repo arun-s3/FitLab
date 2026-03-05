@@ -9,8 +9,8 @@ import apiClient from '../../../Api/apiClient'
 import {toast as sonnerToast} from 'sonner'
 
 import {estimateCalories} from "../../../Utils/exerciseFunctions"
-import PaginationV2 from '../../../Components/PaginationV2/PaginationV2'
-import AuthPrompt from "../../../Components/AuthPrompt/AuthPrompt"
+import PaginationV2 from '../../../Components/UI/PaginationV2/PaginationV2'
+import AuthPrompt from "../../../Components/Features/Auth/AuthPrompt/AuthPrompt"
 
 
 export default function RecentWorkouts({refreshHistory, stopRefreshHistory, resumeTodayWorkout}) {

@@ -6,8 +6,8 @@ import {motion} from 'framer-motion'
 import apiClient from '../../../Api/apiClient'
 import {format} from "date-fns"
 
-import OrderStepper from '../../../Components/OrderStepper/OrderStepper'
-import {SiteButtonSquare, SiteButton} from '../../../Components/SiteButtons/SiteButtons'
+import OrderStepper from '../../../Components/UI/OrderStepper/OrderStepper'
+import {SiteButtonSquare, SiteButton} from '../../../Components/UI/SiteButtons/SiteButtons'
 
 
 export default function OrderCompletedSummary(){

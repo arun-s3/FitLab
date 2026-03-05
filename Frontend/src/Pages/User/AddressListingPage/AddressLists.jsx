@@ -6,7 +6,7 @@ import {motion} from 'framer-motion'
 import {Check, Trash} from 'lucide-react'
 import {RiFileEditLine} from "react-icons/ri"
 
-import {SitePrimaryButtonWithShadow} from '../../../Components/SiteButtons/SiteButtons'
+import {SitePrimaryButtonWithShadow} from '../../../Components/UI/SiteButtons/SiteButtons'
 import {setAsDefaultAddress} from '../../../Slices/addressSlice'
  
 

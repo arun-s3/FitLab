@@ -1,117 +1,117 @@
+import React, { useState, forwardRef, useImperativeHandle } from "react"
+import "./CardPayment.css"
 
-import React, {useState, forwardRef, useImperativeHandle} from "react"
-import './CardPayment.css'
+import apiClient from "../../../Api/apiClient"
 
-import apiClient from '../../../Api/apiClient'
-import {toast as sonnerToast} from 'sonner'
-import {toast} from 'react-toastify'
+import { toast as sonnerToast } from "sonner"
+import { toast } from "react-toastify"
 
 import { useStripe, useElements, PaymentElement } from "@stripe/react-stripe-js"
 
 
-const CardPayment = forwardRef( ({onPayment, payButtonText, displayError}, ref)=> {
+const CardPayment = forwardRef(({ onPayment, payButtonText, displayError }, ref) => {
 
-  const [message, setMessage] = useState(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [isDisabled, setIsDisabled] = useState(false)
+    const [message, setMessage] = useState(null)
+    const [isLoading, setIsLoading] = useState(false)
+    const [isDisabled, setIsDisabled] = useState(false)
 
-  const stripe = useStripe()
-  const elements = useElements()
+    const stripe = useStripe()
+    const elements = useElements()
 
-  const handleElementChange = (e)=> {
-    if(!e.complete){
-      setIsDisabled(true)
-    }else{
-      setIsDisabled(false)
-    }
-  }
-
-  const handleSubmit = async ()=> {
-
-    if (!stripe || !elements) {
-      return
-    }
-    setIsLoading(true)
-
-    try{
-      const {error, paymentIntent} = await stripe.confirmPayment({
-        elements,
-        redirect: "if_required", 
-      })
-    
-      if (error){
-        setMessage(error.message)
-        sonnerToast.error(error.message, {duration: 4000})
-        setIsLoading(false)
-        displayError("Only Test Cards Allowed as of now via Stripe!")
-        return
-      }
-    
-      if (paymentIntent && paymentIntent.status === "succeeded") {
-        const paymentDatas = {
-          amount: paymentIntent.amount / 100,
-          paymentOrderId: paymentIntent.client_secret,
-          paymentId: paymentIntent.id,
-          paymentMethod: "stripe",
+    const handleElementChange = (e) => {
+        if (!e.complete) {
+            setIsDisabled(true)
+        } else {
+            setIsDisabled(false)
         }
-        await apiClient.post(`/payment/stripe/save`, {paymentDatas})
-        onPayment(paymentIntent.id)
-      }
-    
-      setMessage("Payment succeeded!")
-      setIsLoading(false)
-  
-      if (error?.type === "card_error" || error?.type === "validation_error") {
-        setMessage(error.message)
-        toast.error(error.message, {autoClose: 4000})
-        displayError(error.message)
-      } else {
-        setMessage("An unexpected error occurred.")
-        toast.error("An unexpected error occurred.", {autoClose: 4000})
-        displayError("An unexpected error occurred.")
-      }
-  
-      setIsLoading(false)
     }
-    catch(error){
-      if(error.response?.status !== 500){
-        toast.error(error.message, {autoClose: 4000})
-      }else{
-        toast.error("An unexpected error occurred.", {autoClose: 4000})
-        displayError("An unexpected error occurred.")
-      }
+
+    const handleSubmit = async () => {
+        if (!stripe || !elements) {
+            return
+        }
+        setIsLoading(true)
+
+        try {
+            const { error, paymentIntent } = await stripe.confirmPayment({
+                elements,
+                redirect: "if_required",
+            })
+
+            if (error) {
+                setMessage(error.message)
+                sonnerToast.error(error.message, { duration: 4000 })
+                setIsLoading(false)
+                displayError("Only Test Cards Allowed as of now via Stripe!")
+                return
+            }
+
+            if (paymentIntent && paymentIntent.status === "succeeded") {
+                const paymentDatas = {
+                    amount: paymentIntent.amount / 100,
+                    paymentOrderId: paymentIntent.client_secret,
+                    paymentId: paymentIntent.id,
+                    paymentMethod: "stripe",
+                }
+                await apiClient.post(`/payment/stripe/save`, { paymentDatas })
+                onPayment(paymentIntent.id)
+            }
+
+            setMessage("Payment succeeded!")
+            setIsLoading(false)
+
+            if (error?.type === "card_error" || error?.type === "validation_error") {
+                setMessage(error.message)
+                toast.error(error.message, { autoClose: 4000 })
+                displayError(error.message)
+            } else {
+                setMessage("An unexpected error occurred.")
+                toast.error("An unexpected error occurred.", { autoClose: 4000 })
+                displayError("An unexpected error occurred.")
+            }
+
+            setIsLoading(false)
+        } catch (error) {
+            if (error.response?.status !== 500) {
+                toast.error(error.message, { autoClose: 4000 })
+            } else {
+                toast.error("An unexpected error occurred.", { autoClose: 4000 })
+                displayError("An unexpected error occurred.")
+            }
+        }
     }
-  }
 
-  useImperativeHandle(ref, () => ({
-    clickStripePaymentAgain: () => {
-      handleSubmit()
-    }
-  }), [handleSubmit])
+    useImperativeHandle(
+        ref,
+        () => ({
+            clickStripePaymentAgain: () => {
+                handleSubmit()
+            },
+        }),
+        [handleSubmit],
+    )
 
 
-  return (
-    <div className="w-full mx-auto rounded-lg overflow-hidden p-6" id='CardPayment'>
+    return (
+        <div className='w-full mx-auto rounded-lg overflow-hidden p-6' id='CardPayment'>
 
-      <form className="space-y-6" > 
-        
-        <PaymentElement onChange={handleElementChange}/> 
+            <form className='space-y-6'>
 
-          <button 
-            type="button" 
-            disabled={isLoading || !stripe || !elements || isDisabled} 
-            className={`w-full bg-secondary text-white py-3 px-4 rounded-md font-medium hover:bg-purple-800 transition-colors 
-              ${ (isLoading || !stripe || !elements || isDisabled) && 'cursor-not-allowed'}`} onClick={handleSubmit}>
+                <PaymentElement onChange={handleElementChange} />
 
-                {isLoading ? "Processing..." : payButtonText}
-                
-          </button>
+                <button
+                    type='button'
+                    disabled={isLoading || !stripe || !elements || isDisabled}
+                    className={`w-full bg-secondary text-white py-3 px-4 rounded-md font-medium hover:bg-purple-800 
+                        transition-colors ${(isLoading || !stripe || !elements || isDisabled) && "cursor-not-allowed"}`}
+                    onClick={handleSubmit}
+                >
+                    {isLoading ? "Processing..." : payButtonText}
+                </button>
+            </form>
 
-      </form>
-
-    </div>
-  )
-}
-)
+        </div>
+    )
+})
 
 export default CardPayment

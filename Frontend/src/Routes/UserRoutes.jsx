@@ -1,35 +1,35 @@
-import React from 'react'
+import React from "react"
 import { Route, Navigate, Routes } from "react-router-dom"
 
-import HomePage from '../Pages/User/HomePage/HomePage'
-import AboutUsPage from '../Pages/User/AboutUsPage/AboutUsPage'
-import ContactUsPage from '../Pages/User/ContactUsPage/ContactUsPage'
-import PrivacyPolicyPage from '../Pages/User/PrivacyPolicyPage/PrivacyPolicyPage'
-import TermsAndConditionsPage from '../Pages/User/TermsAndConditions/TermsAndConditionsPage'
+import HomePage from "../Pages/User/HomePage/HomePage"
+import AboutUsPage from "../Pages/User/AboutUsPage/AboutUsPage"
+import ContactUsPage from "../Pages/User/ContactUsPage/ContactUsPage"
+import PrivacyPolicyPage from "../Pages/User/PrivacyPolicyPage/PrivacyPolicyPage"
+import TermsAndConditionsPage from "../Pages/User/TermsAndConditions/TermsAndConditionsPage"
 
-import SignUpAndInPage from '../Pages/User/SignUpAndInPage/SignUpAndInPage'
-import OtpVerificationPage from '../Pages/User/OtpVerificationPage/OtpVerificationPage'
-import ForgotAndResetPasswordPage from '../Pages/User/ForgotAndResetPasswordPage/ForgotAndResetPasswordPage'
-import UserAccountPage from '../Pages/User/UserAccountPage/UserAccountPage'
+import SignUpAndInPage from "../Pages/User/SignUpAndInPage/SignUpAndInPage"
+import OtpVerificationPage from "../Pages/User/OtpVerificationPage/OtpVerificationPage"
+import ForgotAndResetPasswordPage from "../Pages/User/ForgotAndResetPasswordPage/ForgotAndResetPasswordPage"
+import UserAccountPage from "../Pages/User/UserAccountPage/UserAccountPage"
 
 import AddressManagementPage from "../Pages/User/AddressManagementPage/AddressManagementPage"
 import AddressListingPage from "../Pages/User/AddressListingPage/AddressListingPage"
 
-import ProductListPage from '../Pages/User/ProductListPage/ProductListPage'
-import ProductDetailPage from '../Pages/User/ProductDetailPage/ProductDetailPage'
-import WishlistPage from '../Pages/User/WishlistPage/WishlistPage'
-import CartPage from '../Pages/User/CartPage/CartPage'
-import CouponPage from '../Pages/User/CouponPage/CouponPage'
-import CheckoutPage from '../Pages/User/CheckoutPage/CheckoutPage'
-import OrderConfirmationPage from '../Pages/User/OrderConfirmationPage/OrderConfirmationPage'
-import OrderHistoryPage from '../Pages/User/OrderHistoryPage/OrderHistoryPage'
+import ProductListPage from "../Pages/User/ProductListPage/ProductListPage"
+import ProductDetailPage from "../Pages/User/ProductDetailPage/ProductDetailPage"
+import WishlistPage from "../Pages/User/WishlistPage/WishlistPage"
+import CartPage from "../Pages/User/CartPage/CartPage"
+import CouponPage from "../Pages/User/CouponPage/CouponPage"
+import CheckoutPage from "../Pages/User/CheckoutPage/CheckoutPage"
+import OrderConfirmationPage from "../Pages/User/OrderConfirmationPage/OrderConfirmationPage"
+import OrderHistoryPage from "../Pages/User/OrderHistoryPage/OrderHistoryPage"
 
-import WalletPage from '../Pages/User/WalletPage/WalletPage'
+import WalletPage from "../Pages/User/WalletPage/WalletPage"
 
-import CustomerSupportPage from '../Pages/User/CustomerSupportPage/CustomerSupportPage'
+import CustomerSupportPage from "../Pages/User/CustomerSupportPage/CustomerSupportPage"
 
-import FitnessTrainingPage from '../Pages/User/FitnessTrainingPage/FitnessTrainingPage'
-import FitnessTrackerPage from '../Pages/User/FitnessTrackerPage/FitnessTrackerPage'
+import FitnessTrainingPage from "../Pages/User/FitnessTrainingPage/FitnessTrainingPage"
+import FitnessTrackerPage from "../Pages/User/FitnessTrackerPage/FitnessTrackerPage"
 
 import ImageEditor from "../Components/Tools/ImageEditor/ImageEditor"
 
@@ -37,27 +37,25 @@ import UserBlockedPage from "../Pages/Errors/UserBlockedPage"
 
 import SocketProvider from "../Components/Socket-providers/SocketProvider/SocketProvider"
 
-import UserPageLayout from '../Layouts/UserPageLayout/UserPageLayout'
-import GlobalVideoCallModalLayout from '../Pages/User/GlobalModalLayouts/GlobalVideoCallModalLayout'
-import UserRoutesWrapper from '../Components/Route-guards/UserRoutesWrapper/UserRoutesWrapper'
-import RoutesAccessWrapper from '../Components/Route-guards/RoutesAccessWrapper/RoutesAccessWrapper'
-import ProtectedUserRoutes from '../Components/Route-guards/ProtectedUserRoutes/ProtectedUserRoutes'
+import UserPageLayout from "../Layouts/UserPageLayout/UserPageLayout"
+import GlobalVideoCallModalLayout from "../Pages/User/GlobalModalLayouts/GlobalVideoCallModalLayout"
+import UserRoutesWrapper from "../Components/Route-guards/UserRoutesWrapper/UserRoutesWrapper"
+import RoutesAccessWrapper from "../Components/Route-guards/RoutesAccessWrapper/RoutesAccessWrapper"
+import ProtectedUserRoutes from "../Components/Route-guards/ProtectedUserRoutes/ProtectedUserRoutes"
 import PrivateUserRoutes from "../Components/Route-guards/ProtectedUserRoutes/ProtectedUserRoutes"
-import RestrictedEntryRoutes from '../Components/Route-guards/RestrictedEntryRoutes/RestrictedEntryRoutes'
+import RestrictedEntryRoutes from "../Components/Route-guards/RestrictedEntryRoutes/RestrictedEntryRoutes"
 
-import ErrorPage404 from '../Pages/Errors/404ErrorPage'
+import ErrorPage404 from "../Pages/Errors/404ErrorPage"
 
 
-export default function UserRoutes(){
-    
+export default function UserRoutes() {
+
     return (
         <Routes>
             <Route element={<UserRoutesWrapper />}>
-
                 <Route path='image-editor' element={<ImageEditor />} />
 
                 <Route element={<SocketProvider />}>
-
                     <Route element={<GlobalVideoCallModalLayout />}>
                         <Route path='signup'>
                             <Route index element={<SignUpAndInPage type='signup' />} />
@@ -110,13 +108,11 @@ export default function UserRoutes(){
                             </Route>
                         </Route>
                     </Route>
-
                 </Route>
 
                 <Route path='*' element={<ErrorPage404 />} />
-
+                
             </Route>
         </Routes>
     )
-    
 }

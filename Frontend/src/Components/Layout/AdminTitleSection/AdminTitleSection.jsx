@@ -1,10 +1,10 @@
-import React from 'react'
+import React from "react"
 import { useNavigate, useLocation } from "react-router-dom"
 
-import {IoArrowBackSharp} from "react-icons/io5"
+import { IoArrowBackSharp } from "react-icons/io5"
 
 
-export default function AdminTitleSection ({heading, subHeading}){
+export default function AdminTitleSection({ heading, subHeading }) {
 
     const navigate = useNavigate()
     const location = useLocation()
@@ -24,8 +24,9 @@ export default function AdminTitleSection ({heading, subHeading}){
                 <i
                     onClick={handleBack}
                     className='p-[7px] h-[33px] border border-[#c4c6ca] mt-[8px] rounded-[4px] self-start text-[#666363]
-                        cursor-pointer hover:bg-gray-100 transition'>
-                        <IoArrowBackSharp style={{ color: "#666363" }} />
+                        cursor-pointer hover:bg-gray-100 transition'
+                >
+                    <IoArrowBackSharp style={{ color: "#666363" }} />
                 </i>
                 <div className='flex flex-col'>
                     <h1> {heading} </h1>

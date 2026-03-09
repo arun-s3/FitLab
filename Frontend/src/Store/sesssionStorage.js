@@ -1,14 +1,15 @@
-import createWebStorage from 'redux-persist/lib/storage/createWebStorage'
+import createWebStorage from "redux-persist/lib/storage/createWebStorage"
 
-const createSessionStorage = ()=> {
-  if (typeof window === 'undefined') {
-    return {
-      getItem: () => null,
-      setItem: () => {},
-      removeItem: () => {}
+
+const createSessionStorage = () => {
+    if (typeof window === "undefined") {
+        return {
+            getItem: () => null,
+            setItem: () => {},
+            removeItem: () => {},
+        }
     }
-  }
-  return createWebStorage('session')
+    return createWebStorage("session")
 }
 
 export default createSessionStorage()

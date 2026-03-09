@@ -1,90 +1,84 @@
 import React, { useState, useEffect } from "react"
-import {useLocation} from 'react-router-dom'
+import { useLocation } from "react-router-dom"
 
 import { motion } from "framer-motion"
 
 import Header from "../../../Components/Layout/Header/Header"
-import BreadcrumbBar from '../../../Components/Layout/BreadcrumbBar/BreadcrumbBar'
+import BreadcrumbBar from "../../../Components/Layout/BreadcrumbBar/BreadcrumbBar"
 import FitnessLayout from "./FitnessLayout"
 import WorkoutSessionCard from "./WorkoutSessionCard"
 import Dashboard from "./Dashboard"
 import FitnessNavigation from "./FitnessNavigation"
 import BMICalculator from "./BMICalculator"
-import FeaturesDisplay from '../../../Components/UI/FeaturesDisplay/FeaturesDisplay'
-import Footer from '../../../Components/Layout/Footer/Footer'
+import FeaturesDisplay from "../../../Components/UI/FeaturesDisplay/FeaturesDisplay"
+import Footer from "../../../Components/Layout/Footer/Footer"
 
 
 export default function FitnessTrackerPage() {
 
-  const [currentPage, setCurrentPage] = useState("tracker")
+    const [currentPage, setCurrentPage] = useState("tracker")
 
-  const headerBg = {
-    backgroundImage: "url('/Images/header-bg.png')",
-    backgrounSize: 'cover'
-  }
-
-  const location = useLocation()
-
-  useEffect(() => {
-    if (location.state?.goTo){
-      setTimeout(() => {
-        setCurrentPage(location.state.goTo)
-      }, 200)
+    const headerBg = {
+        backgroundImage: "url('/Images/header-bg.png')",
+        backgrounSize: "cover",
     }
-  }, [location])
+
+    const location = useLocation()
+
+    useEffect(() => {
+        if (location.state?.goTo) {
+            setTimeout(() => {
+                setCurrentPage(location.state.goTo)
+            }, 200)
+        }
+    }, [location])
 
 
-  return (
-    <section id='FitnessTrackerPage'>
-        <header style={headerBg} className='h-[5rem]'>
+    return (
+        <section id='FitnessTrackerPage'>
+
+            <header style={headerBg} className='h-[5rem]'>
+                <Header />
+            </header>
+
+            <BreadcrumbBar heading='Fitness Tracker' />
+
+            <main
+                className='pt-[10px]'
+                style={{
+                    backgroundImage:
+                        "linear-gradient(to right, rgba(255,255,255,0.94), rgba(250,245,255,0.94), rgba(243,244,246,0.94)), url('/Images/fitness-tracker-bg.png')",
+                    backgroundSize: "cover",
+                    backgroundRepeat: "no-repeat",
+                }}
+            >
+                <FitnessNavigation currentPage={currentPage} setCurrentPage={setCurrentPage} />
+
+                <FitnessLayout>
+
+                    {currentPage === "tracker" && (
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+                            <WorkoutSessionCard />
+                        </motion.div>
+                    )}
+                    {currentPage === "dashboard" && (
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+                            <Dashboard />
+                        </motion.div>
+                    )}
+                    {currentPage === "bmi" && (
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+                            <BMICalculator />
+                        </motion.div>
+                    )}
+
+                </FitnessLayout>
+            </main>
+
+            <FeaturesDisplay topRoom={false} />
+
+            <Footer />
             
-            <Header />
-            
-        </header>
-            
-        <BreadcrumbBar heading='Fitness Tracker'/>
-
-        <main 
-            className="pt-[10px]"
-            style={{
-                backgroundImage: "linear-gradient(to right, rgba(255,255,255,0.94), rgba(250,245,255,0.94), rgba(243,244,246,0.94)), url('/Images/fitness-tracker-bg.png')",
-                backgroundSize: "cover",
-                backgroundRepeat: "no-repeat"
-            }}
-        >
-
-            <FitnessNavigation currentPage={currentPage} setCurrentPage={setCurrentPage} />
-
-            <FitnessLayout>
-              {currentPage === "tracker" && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
-
-                  <WorkoutSessionCard />
-
-                </motion.div>
-              )}
-              {currentPage === "dashboard" && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
-
-                  <Dashboard />
-
-                </motion.div>
-              )}
-              {currentPage === "bmi" && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
-
-                  <BMICalculator />
-                  
-                </motion.div>
-              )}
-            </FitnessLayout>
-
-        </main>
-
-        <FeaturesDisplay topRoom={false}/>
-        
-        <Footer/>
-        
-    </section>
-  )
+        </section>
+    )
 }

@@ -10,6 +10,7 @@ function buildAICoachPrompt({
     wishlistItems,
     userGoal,
 }) {
+
     return `
         ${AI_COACH_PROMPT}
 
@@ -70,6 +71,5 @@ function buildAICoachPrompt({
         
       `
 }
-
 
 module.exports = { buildAICoachPrompt }

@@ -1,6 +1,6 @@
 
 export function calculateOfferPricing(offer, unitPrice, quantity = 1) {
-    
+
     if (!unitPrice || quantity <= 0) {
         return {
             originalUnitPrice: 0,
@@ -29,8 +29,7 @@ export function calculateOfferPricing(offer, unitPrice, quantity = 1) {
     let finalDiscount = rawDiscount
     let maxDiscountApplied = false
 
-    if(offer?.offerOrOtherDiscount === 'offer') {
-        
+    if (offer?.offerOrOtherDiscount === "offer") {
         if (offer.discountType === "percentage") {
             rawDiscount = (totalOriginalPrice * offer.discountValue) / 100
         } else if (offer.discountType === "fixed") {
@@ -41,12 +40,12 @@ export function calculateOfferPricing(offer, unitPrice, quantity = 1) {
             const freeItems = Math.floor(quantity / 2)
             rawDiscount = freeItems * unitPrice
         }
-    
+
         if (offer.maxDiscount !== null && offer.maxDiscount !== undefined && rawDiscount > offer.maxDiscount) {
             finalDiscount = offer.maxDiscount
             maxDiscountApplied = true
         }
-    }else {
+    } else {
         finalDiscount = offer.bestDiscount
     }
 

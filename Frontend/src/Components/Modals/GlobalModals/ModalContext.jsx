@@ -1,28 +1,30 @@
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useState, useContext } from "react"
+
+const ModalContext = createContext()
+
+export const useModal = () => useContext(ModalContext)
 
 
-const ModalContext = createContext();
+export default function ModalProvider({ children }) {
 
-export const useModal = () => useContext(ModalContext);
+    const [isOpen, setIsOpen] = useState(false)
+    const [modalContent, setModalContent] = useState(null)
 
-export default function ModalProvider({ children }){
-  const [isOpen, setIsOpen] = useState(false);
-  const [modalContent, setModalContent] = useState(null);
+    const openModal = (content) => {
+        setModalContent(content)
+        setIsOpen(true)
+    }
 
-  const openModal = (content) => {
-    setModalContent(content)
-    setIsOpen(true)
-  }
+    const closeModal = () => {
+        setIsOpen(false)
+        setModalContent(null)
+    }
+    
 
-  const closeModal = () => {
-    setIsOpen(false)
-    setModalContent(null)
-  }
-
-  return (
-    <ModalContext.Provider value={{ isOpen, openModal, closeModal }}>
-      {children}
-      {isOpen && modalContent}
-    </ModalContext.Provider>
-  )
+    return (
+        <ModalContext.Provider value={{ isOpen, openModal, closeModal }}>
+            {children}
+            {isOpen && modalContent}
+        </ModalContext.Provider>
+    )
 }

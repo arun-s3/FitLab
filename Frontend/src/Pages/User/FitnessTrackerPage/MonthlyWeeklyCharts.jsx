@@ -1,19 +1,34 @@
-import React, {useEffect, useState} from "react"
-import './FitnessTrackerStyles.css'
-import { useSelector } from 'react-redux'
+import React, { useEffect, useState } from "react"
+import "./FitnessTrackerStyles.css"
+import { useSelector } from "react-redux"
 import { motion } from "framer-motion"
 
-import {LineChart, Line, BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell, XAxis, YAxis, 
-  CartesianGrid, Tooltip, ResponsiveContainer} from "recharts"
+import {
+    LineChart,
+    Line,
+    BarChart,
+    Bar,
+    AreaChart,
+    Area,
+    PieChart,
+    Pie,
+    Cell,
+    XAxis,
+    YAxis,
+    CartesianGrid,
+    Tooltip,
+    ResponsiveContainer,
+} from "recharts"
 
-import {toast as sonnerToast} from 'sonner' 
-import apiClient from '../../../Api/apiClient'
+import { toast as sonnerToast } from "sonner"
 
-import {camelToCapitalizedWords} from '../../../Utils/helperFunctions'
+import apiClient from "../../../Api/apiClient"
+
+import { camelToCapitalizedWords } from "../../../Utils/helperFunctions"
 
 
 export default function MonthlyWeeklyCharts({ title, dataKey, timeRange, onFetchedDatas = () => {} }) {
-    
+
     const chartConfig = {
         workouts: { color: "#3b82f6", name: "Workouts" },
         volume: { color: "#a855f7", name: "Volume (kg)" },
@@ -42,7 +57,7 @@ export default function MonthlyWeeklyCharts({ title, dataKey, timeRange, onFetch
 
     const [loading, setLoading] = useState(false)
 
-    const {user} = useSelector(state=> state.user)
+    const { user } = useSelector((state) => state.user)
 
     useEffect(() => {
         const fetchAllStats = async () => {
@@ -56,15 +71,15 @@ export default function MonthlyWeeklyCharts({ title, dataKey, timeRange, onFetch
             } catch (error) {
                 if (!error.response) {
                     sonnerToast.error("Network error. Please check your internet.")
-                }else {
+                } else {
                     sonnerToast.error("Some error occured while loading the stats")
                 }
             } finally {
                 setLoading(false)
-            }   
+            }
         }
-        
-        if(!user) return
+
+        if (!user) return
         setLoading(true)
         fetchAllStats()
     }, [])
@@ -77,13 +92,15 @@ export default function MonthlyWeeklyCharts({ title, dataKey, timeRange, onFetch
         }
     }, [chartDatas, timeRange])
 
+
     return (
         <motion.div
             className='bg-white rounded-xl p-6 border border-gray-200 shadow-md hover:shadow-lg transition-shadow'
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5 }}
-            whileHover={{ borderColor: "rgba(59, 130, 246, 0.5)" }}>
+            whileHover={{ borderColor: "rgba(59, 130, 246, 0.5)" }}
+        >
             <h3 className='text-xl font-bold text-gray-900 mb-6'>{title}</h3>
 
             {!loading ? (

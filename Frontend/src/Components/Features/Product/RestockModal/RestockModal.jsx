@@ -132,20 +132,23 @@ export default function RestockModal({ isOpen, product, onClose, onSave }) {
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.2 }}
                     onClick={handleBackdropClick}
-                    className='fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50'>
+                    className='fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50'
+                >
                     <motion.div
                         initial={{ scale: 0.95, opacity: 0, y: 20 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 0.95, opacity: 0, y: 20 }}
                         transition={{ duration: 0.3, ease: "easeOut" }}
-                        className='bg-white rounded-lg shadow-2xl w-full max-w-md overflow-hidden'>
+                        className='bg-white rounded-lg shadow-2xl w-full max-w-md overflow-hidden'
+                    >
                         <div className='bg-gradient-to-r from-purple-500 to-purple-600 px-6 py-5 flex items-center justify-between'>
                             <h2 className='text-xl font-bold text-white'>Restock Product</h2>
                             <motion.button
                                 whileHover={{ scale: 1.1, rotate: 90 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={onClose}
-                                className='text-white hover:bg-purple-800 p-1 rounded-full transition-colors'>
+                                className='text-white hover:bg-purple-800 p-1 rounded-full transition-colors'
+                            >
                                 <X size={24} />
                             </motion.button>
                         </div>
@@ -173,18 +176,23 @@ export default function RestockModal({ isOpen, product, onClose, onSave }) {
                                         initial={{ opacity: 0, height: 0 }}
                                         animate={{ opacity: 1, height: "auto" }}
                                         transition={{ duration: 0.3 }}
-                                        className='space-y-2'>
+                                        className='space-y-2'
+                                    >
                                         <label className='mt-4 block text-sm font-semibold text-gray-900'>
                                             Select Variant ({product?.variantType})
                                         </label>
                                         <div className='relative'>
                                             <motion.button
                                                 onClick={() => setShowVariantDropdown(!showVariantDropdown)}
-                                                className='w-full px-4 py-2.5 bg-gray-50 border-2 border-gray-200 rounded-lg flex items-center justify-between hover:border-purple-300 transition-colors'>
+                                                className='w-full px-4 py-2.5 bg-gray-50 border-2 border-gray-200 
+                                                    rounded-lg flex items-center justify-between hover:border-purple-300 
+                                                    transition-colors'
+                                            >
                                                 <span className='text-gray-900 font-medium'>{getVariantLabel()}</span>
                                                 <motion.div
                                                     animate={{ rotate: showVariantDropdown ? 180 : 0 }}
-                                                    transition={{ duration: 0.2 }}>
+                                                    transition={{ duration: 0.2 }}
+                                                >
                                                     <ChevronDown size={20} className='text-gray-600' />
                                                 </motion.div>
                                             </motion.button>
@@ -196,7 +204,9 @@ export default function RestockModal({ isOpen, product, onClose, onSave }) {
                                                         animate={{ opacity: 1, y: 0 }}
                                                         exit={{ opacity: 0, y: -10 }}
                                                         transition={{ duration: 0.2 }}
-                                                        className='absolute top-full left-0 right-0 mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-lg z-10 max-h-64 overflow-y-auto'>
+                                                        className='absolute top-full left-0 right-0 mt-2 bg-white border-2
+                                                            border-gray-200 rounded-lg shadow-lg z-10 max-h-64 overflow-y-auto'
+                                                    >
                                                         {variantOptions.map((option, idx) => (
                                                             <motion.button
                                                                 key={idx}
@@ -210,13 +220,15 @@ export default function RestockModal({ isOpen, product, onClose, onSave }) {
                                                                     selectedVariantIndex === option.index
                                                                         ? "bg-purple-50 border-l-4 border-purple-600"
                                                                         : "border-l-4 border-transparent"
-                                                                }`}>
+                                                                }`}
+                                                            >
                                                                 <span
                                                                     className={
                                                                         selectedVariantIndex === option.index
                                                                             ? "text-purple-700 font-semibold"
                                                                             : "text-gray-700"
-                                                                    }>
+                                                                    }
+                                                                >
                                                                     {option.label}
                                                                 </span>
                                                                 <span className='text-xs text-gray-500 font-medium'>
@@ -254,7 +266,9 @@ export default function RestockModal({ isOpen, product, onClose, onSave }) {
                                         whileTap={{ scale: 0.95 }}
                                         onClick={decrement}
                                         disabled={quantity === 0}
-                                        className='bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-300 text-gray-700 rounded-lg p-2 transition-colors'>
+                                        className='bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-300
+                                            text-gray-700 rounded-lg p-2 transition-colors'
+                                    >
                                         <Minus size={18} />
                                     </motion.button>
 
@@ -262,7 +276,8 @@ export default function RestockModal({ isOpen, product, onClose, onSave }) {
                                         type='number'
                                         value={quantity}
                                         onChange={handleQuantityChange}
-                                        className='flex-1 bg-transparent text-center font-bold text-lg text-gray-900 focus:outline-none'
+                                        className='flex-1 bg-transparent text-center font-bold text-lg text-gray-900 
+                                            focus:outline-none'
                                         min='0'
                                     />
 
@@ -270,7 +285,9 @@ export default function RestockModal({ isOpen, product, onClose, onSave }) {
                                         whileHover={{ scale: 1.05 }}
                                         whileTap={{ scale: 0.95 }}
                                         onClick={increment}
-                                        className='bg-purple-100 hover:bg-purple-200 text-purple-600 rounded-lg p-2 transition-colors'>
+                                        className='bg-purple-100 hover:bg-purple-200 text-purple-600 rounded-lg p-2 
+                                            transition-colors'
+                                    >
                                         <Plus size={18} />
                                     </motion.button>
                                 </div>
@@ -285,7 +302,8 @@ export default function RestockModal({ isOpen, product, onClose, onSave }) {
                                             : stockDifference < 0
                                               ? "bg-red-50 text-red-700"
                                               : "bg-gray-100 text-gray-700"
-                                    }`}>
+                                    }`}
+                                >
                                     {stockDifference > 0 && `+${stockDifference} units`}
                                     {stockDifference < 0 && `${stockDifference} units`}
                                     {stockDifference === 0 && "No change"}
@@ -316,7 +334,8 @@ export default function RestockModal({ isOpen, product, onClose, onSave }) {
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ duration: 0.3 }}
-                                        className='bg-purple-50 rounded-lg p-3'>
+                                        className='bg-purple-50 rounded-lg p-3'
+                                    >
                                         <div className='flex justify-between items-center mb-2'>
                                             <span className='text-sm font-semibold text-gray-900'>
                                                 Total Stock (All Variants)
@@ -341,10 +360,12 @@ export default function RestockModal({ isOpen, product, onClose, onSave }) {
                                                 </motion.span>
                                             </div>
                                         </div>
+
                                         <p className='text-xs text-gray-600'>
                                             After restocking, your total inventory will be{" "}
                                             <span className='font-semibold'>{newTotalStocks} units</span>
                                         </p>
+
                                     </motion.div>
                                 )}
 
@@ -362,7 +383,9 @@ export default function RestockModal({ isOpen, product, onClose, onSave }) {
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
                                 onClick={onClose}
-                                className='flex-1 px-4 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-900 font-semibold rounded-lg transition-colors'>
+                                className='flex-1 px-4 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-900 
+                                    font-semibold rounded-lg transition-colors'
+                            >
                                 Cancel
                             </motion.button>
 
@@ -371,11 +394,13 @@ export default function RestockModal({ isOpen, product, onClose, onSave }) {
                                 whileTap={{ scale: 0.98 }}
                                 onClick={handleSave}
                                 disabled={isLoading || quantity === 0}
-                                className={`flex-1 px-4 py-2.5 font-semibold rounded-lg flex items-center justify-center gap-2 transition-colors ${
+                                className={`flex-1 px-4 py-2.5 font-semibold rounded-lg flex items-center justify-center
+                                    gap-2 transition-colors ${
                                     isLoading || quantity === 0
                                         ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                                         : "bg-green-600 hover:bg-green-700 text-white"
-                                }`}>
+                                }`}
+                            >
                                 {isLoading ? (
                                     <>
                                         <motion.div

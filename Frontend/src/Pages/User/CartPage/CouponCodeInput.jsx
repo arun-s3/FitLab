@@ -1,100 +1,114 @@
-import React, {useState, useEffect} from 'react'
-import './CouponCodeInput.css'
-import {useDispatch, useSelector} from 'react-redux'
+import React, { useState, useEffect } from "react"
+import "./CouponCodeInput.css"
+import { useDispatch, useSelector } from "react-redux"
 
-import {RiCoupon4Line} from "react-icons/ri"
+import { RiCoupon4Line } from "react-icons/ri"
 
-import {applyCoupon} from '../../../Slices/cartSlice'
-import ReplaceCouponModal from './Modals/ReplaceCouponModal'
+import { applyCoupon } from "../../../Slices/cartSlice"
+import ReplaceCouponModal from "./Modals/ReplaceCouponModal"
 
 
-export default function CouponCodeInput({couponCode, setCouponCode, bestCouponAppliedStatus, setBestCouponAppliedStatus}){
+export default function CouponCodeInput({
+    couponCode,
+    setCouponCode,
+    bestCouponAppliedStatus,
+    setBestCouponAppliedStatus,
+}) {
 
-  const [isReplaceModalOpen, setIsReplaceModalOpen] = useState(false)
+    const [isReplaceModalOpen, setIsReplaceModalOpen] = useState(false)
 
-  const [manualAppliedCoupon, setManualAppliedCoupon] = useState(false)
+    const [manualAppliedCoupon, setManualAppliedCoupon] = useState(false)
 
-  const {user} = useSelector(state=> state.user)
-  const {cart, couponApplied} = useSelector(state=> state.cart)
-  const {bestCoupon, couponMessage} = useSelector(state=> state.coupons)
+    const { user } = useSelector((state) => state.user)
+    const { cart, couponApplied } = useSelector((state) => state.cart)
+    const { bestCoupon } = useSelector((state) => state.coupons)
 
-  const dispatch = useDispatch() 
+    const dispatch = useDispatch()
 
-  useEffect(()=> {
-    if(!user) return
-    if(Object.keys(bestCoupon).length > 0 && !couponCode && cart && !cart?.couponUsed){
-      setCouponCode(bestCoupon.code)
-      dispatch( applyCoupon({couponCode: bestCoupon.code}) )
-      setBestCouponAppliedStatus({dispatched: true, applied: false})
+    useEffect(() => {
+        if (!user) return
+        if (Object.keys(bestCoupon).length > 0 && !couponCode && cart && !cart?.couponUsed) {
+            setCouponCode(bestCoupon.code)
+            dispatch(applyCoupon({ couponCode: bestCoupon.code }))
+            setBestCouponAppliedStatus({ dispatched: true, applied: false })
+        }
+    }, [bestCoupon])
+
+    useEffect(() => {
+        if (couponApplied && !manualAppliedCoupon) {
+            if (bestCoupon && bestCouponAppliedStatus.dispatched) {
+                setBestCouponAppliedStatus({ dispatched: true, applied: true })
+            }
+            setCouponCode(cart?.couponUsed?.code.toUpperCase())
+            if (manualAppliedCoupon) {
+                setManualAppliedCoupon(false)
+            }
+        }
+    }, [couponApplied])
+
+    const couponInputHandler = (e) => {
+        setCouponCode(e.target.value.toUpperCase())
     }
-  }, [bestCoupon])
 
-  useEffect(()=> {
-    if(couponApplied && !manualAppliedCoupon){
-      if(bestCoupon && bestCouponAppliedStatus.dispatched){
-        setBestCouponAppliedStatus({dispatched: true, applied: true})
-      }
-      setCouponCode(cart?.couponUsed?.code.toUpperCase())
-      if(manualAppliedCoupon) {
-        setManualAppliedCoupon(false)
-      }
+    const applyTheCoupon = () => {
+        setManualAppliedCoupon(true)
+        if (couponCode?.trim() !== "" && cart?.couponUsed && cart.couponUsed.code !== couponCode) {
+            setIsReplaceModalOpen(true)
+        } else {
+            dispatch(applyCoupon({ couponCode }))
+        }
     }
-  },[couponApplied])
 
-  const couponInputHandler = (e)=> {
-    setCouponCode((e.target.value).toUpperCase())
-  }
-
-  const applyTheCoupon = ()=> {
-    setManualAppliedCoupon(true)
-    if(couponCode?.trim() !== '' && cart?.couponUsed && cart.couponUsed.code !== couponCode){
-      setIsReplaceModalOpen(true)
-    }else{
-      dispatch( applyCoupon({couponCode}) )
+    const applyNewCoupon = () => {
+        dispatch(applyCoupon({ couponCode }))
     }
-  }
 
-  const applyNewCoupon = ()=> {
-    dispatch( applyCoupon({couponCode}) )
-  }
+    const putOldCoupon = () => {
+        setCouponCode(cart.couponUsed.code)
+        setIsReplaceModalOpen(false)
+    }
+    
 
-  const putOldCoupon = ()=> {
-    setCouponCode(cart.couponUsed.code)
-    setIsReplaceModalOpen(false)
-  }
+    return (
+        <div className='mt-[5rem] ml-0 sm:ml-20 lg:ml-0 s-sm:mt-[4rem] x-sm:mt-[5rem] w-full xs-sm:w-[85%] 
+           s-sm:w-[80%] x-sm:w-[75%]'
+            id='CouponCodeInput'
+        >
+            <h3 className='font-medium mb-[6px] s-sm:mb-[8px]'> Have a coupon? </h3>
+            <p className='text-[13px] xs-sm:text-[14px] text-gray-500 mb-[8px]'>
+                {" "}
+                Add your code for an instant cart discount{" "}
+            </p>
+            <div id='input-box'>
+                <div className='relative flex-1 flex justify-between items-center p-[8px] pl-12 h-[2.7rem] border
+                    border-secondaryLight2 rounded-[5px] focus:ring-0 focus:border-0 focus:outline-0'
+                >
+                    <RiCoupon4Line className='w-[18px] h-[18px] text-muted absolute left-[9px]' />
+                    <input
+                        type='text'
+                        placeholder='Coupon Code'
+                        className='ml-[-20px] w-[80%] h-[10px] border-0 outline-0 placeholder:text-[12px] xxs-sm:placeholder:text-[13px]
+                            placeholder:tracking-[0.1px] text-primaryDark caret-primaryDark'
+                        value={couponCode}
+                        onChange={(e) => couponInputHandler(e)}
+                    />
+                    <button
+                        className='px-[1.5rem] py-[8px] text-[15px] text-purple-600 font-medium'
+                        onClick={() => applyTheCoupon()}
+                    >
+                        Apply
+                    </button>
 
-    return(
-        <div className="mt-[5rem] ml-0 sm:ml-20 lg:ml-0 s-sm:mt-[4rem] x-sm:mt-[5rem] w-full xs-sm:w-[85%] 
-           s-sm:w-[80%] x-sm:w-[75%]" 
-          id='CouponCodeInput'>
-          <h3 className="font-medium mb-[6px] s-sm:mb-[8px]"> Have a coupon? </h3>
-          <p className="text-[13px] xs-sm:text-[14px] text-gray-500 mb-[8px]"> Add your code for an instant cart discount </p>
-          <div id='input-box'> 
-            <div className='relative flex-1 flex justify-between items-center p-[8px] pl-12 h-[2.7rem] border
-            border-secondaryLight2 rounded-[5px] focus:ring-0 focus:border-0 focus:outline-0'>
-              <RiCoupon4Line className='w-[18px] h-[18px] text-muted absolute left-[9px]'/>
-              <input type="text" 
-                placeholder="Coupon Code" 
-                className="ml-[-20px] w-[80%] h-[10px] border-0 outline-0 placeholder:text-[12px] xxs-sm:placeholder:text-[13px]
-                 placeholder:tracking-[0.1px] text-primaryDark caret-primaryDark" 
-                value={couponCode} 
-                onChange={(e)=> couponInputHandler(e)}
-              />
-              <button className="px-[1.5rem] py-[8px] text-[15px] text-purple-600 font-medium" onClick={()=> applyTheCoupon()}>
-                Apply
-              </button> 
-
-              <ReplaceCouponModal 
-                isOpen={isReplaceModalOpen} 
-                onClose={()=> setIsReplaceModalOpen(false)} 
-                putOldCoupon={putOldCoupon}
-                currentCoupon={cart?.couponUsed?.code} 
-                newCoupon={couponCode} onConfirm={applyNewCoupon} 
-              />
-
+                    <ReplaceCouponModal
+                        isOpen={isReplaceModalOpen}
+                        onClose={() => setIsReplaceModalOpen(false)}
+                        putOldCoupon={putOldCoupon}
+                        currentCoupon={cart?.couponUsed?.code}
+                        newCoupon={couponCode}
+                        onConfirm={applyNewCoupon}
+                    />
+                </div>
             </div>
-          </div>
-        </div> 
-
+        </div>
     )
 }

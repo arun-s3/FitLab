@@ -1,61 +1,63 @@
-import React,{ createContext, useState, useEffect, useMemo, useRef } from "react"
-import {Outlet} from 'react-router-dom'
-import {useSelector} from 'react-redux'
+import React, { createContext, useState, useEffect, useMemo, useRef } from "react"
+import { Outlet } from "react-router-dom"
+import { useSelector } from "react-redux"
 
 import { io } from "socket.io-client"
 
 import apiClient from "../../../Api/apiClient"
-import {toast as sonnerToast} from 'sonner'
-import {Wallet} from 'lucide-react'
+
+import { toast as sonnerToast } from "sonner"
+
+import { Wallet } from "lucide-react"
 
 import NotificationModal from "../../Notifications/NotificationModal/NotificationModal"
-import {decryptData} from '../../../Utils/decryption'
+import { decryptData } from "../../../Utils/decryption"
 import SemiAutoRechargeModal from "../../Features/Wallet/SemiAutoRechargeModal/SemiAutoRechargeModal"
-import VideoCallCommonModal from '../../../Pages/User/VideoCallCommonModal/VideoCallCommonModal'
+import VideoCallCommonModal from "../../Features/VideoChat/VideoCallCommonModal/VideoCallCommonModal"
 import useTermsConsent from "../../../Hooks/useTermsConsent"
 
-export const SocketContext = createContext();
+export const SocketContext = createContext()
 
 
 export default function SocketProvider() {
 
-    const {user} = useSelector((state)=> state.user)
+    const { user } = useSelector((state) => state.user)
 
     const [socket, setSocket] = useState(null)
 
     const [isConnected, setIsConnected] = useState(false)
-    const [username, setUsername] = useState(null)  
-    const [roomId, setRoomId] = useState(null) 
+    const [username, setUsername] = useState(null)
+    const [roomId, setRoomId] = useState(null)
 
     const [isAdminOnline, setIsAdminOnline] = useState(false)
 
-    const [userWasGuest, setUserWasGuest] = useState({wasGuest: false, credentials: {}})
+    const [userWasGuest, setUserWasGuest] = useState({ wasGuest: false, credentials: {} })
 
     const [messages, setMessages] = useState([
         {
-          id: 1,
-          message: "Hello! Welcome to FitLab support. How can we help you today?",
-          sender: "Support Team",
-          timestamp: new Date().toISOString(),
-          isAdmin: true,
+            id: 1,
+            message: "Hello! Welcome to FitLab support. How can we help you today?",
+            sender: "Support Team",
+            timestamp: new Date().toISOString(),
+            isAdmin: true,
         },
     ])
-    const [newMessage, setNewMessage] = useState("") 
+    const [newMessage, setNewMessage] = useState("")
 
     const [coachMessages, setCoachMessages] = useState([
         {
-          id: 1,
-          message: `👋 Hi! I’m your FitLab Coach+. I’ve reviewed your recent activity and I’m here to help with 
+            id: 1,
+            message: `👋 Hi! I’m your FitLab Coach+. I’ve reviewed your recent activity and I’m here to help with 
             workouts, recovery, supplements and fitness guidance—based on your activities and goals.
             What would you like to focus on today?`,
-          sender: "Coach",
-          timestamp: new Date().toISOString(),
-          isCoach: true,
+            sender: "Coach",
+            timestamp: new Date().toISOString(),
+            isCoach: true,
         },
-    ]) 
-    const [newCoachMessage, setNewCoachMessage] = useState("") 
+    ])
+    const [newCoachMessage, setNewCoachMessage] = useState("")
     const [isCoachLoading, setIsCoachLoading] = useState(false)
-    const [coachError, setCoachError] = useState("") 
+    const [coachError, setCoachError] = useState("")
 
     const [isTyping, setIsTyping] = useState(false)
 
@@ -68,50 +70,58 @@ export default function SocketProvider() {
     const [notifications, setNotifications] = useState([])
 
     const [openNotificationModal, setOpenNotificationModal] = useState({
-      header: null, content: null, icon: null, type: null, duration: 6000, walletRecharged: false
+        header: null,
+        content: null,
+        icon: null,
+        type: null,
+        duration: 6000,
+        walletRecharged: false,
     })
 
     const [openSemiAutoRechargeModal, setOpenSemiAutoRechargeModal] = useState({
-      status: false, walletAmount: null, autoRechargeAmount: null, recharged: false
+        status: false,
+        walletAmount: null,
+        autoRechargeAmount: null,
+        recharged: false,
     })
 
-    const messagesEndRef = useRef(null)             
+    const messagesEndRef = useRef(null)
     const typingTimeoutRef = useRef(null)
 
-    const {acceptTermsOnFirstAction} = useTermsConsent()
+    const { acceptTermsOnFirstAction } = useTermsConsent()
 
     const baseApiUrl = import.meta.env.VITE_API_BASE_URL
-    
-    useEffect(()=> { 
-      async function fetchUserId(){
-        try{
-            const guestVerificationRes = await apiClient.get(`/guest-check`)
-            if(guestVerificationRes.data.wasGuest){
-              const {userId, username} = guestVerificationRes.data.credentials
-              setUserWasGuest({wasGuest: true, credentials: {userId, username}})
+
+    useEffect(() => {
+        async function fetchUserId() {
+            try {
+                const guestVerificationRes = await apiClient.get(`/guest-check`)
+                if (guestVerificationRes.data.wasGuest) {
+                    const { userId, username } = guestVerificationRes.data.credentials
+                    setUserWasGuest({ wasGuest: true, credentials: { userId, username } })
+                }
+                const response = await apiClient.get(`/getUserid`)
+                const decryptedUserId = decryptData(response.data.encryptedUserId)
+                setRoomId(decryptedUserId)
+                setUsername(response.data.username)
+            } catch (error) {
+                console.error(error)
             }
-            const response = await apiClient.get(`/getUserid`)
-            const decryptedUserId = decryptData(response.data.encryptedUserId)
-            setRoomId(decryptedUserId)
-            setUsername(response.data.username)
-        }catch(error) {
-            console.error(error)
         }
-      } 
-      async function fetchGuestId(){
-        try{
-            const response = await apiClient.get(`/guest`)
-            setRoomId(response.data.userId)
-            setUsername(response.data.username)
-        }catch(error){
-            console.error(error)
+        async function fetchGuestId() {
+            try {
+                const response = await apiClient.get(`/guest`)
+                setRoomId(response.data.userId)
+                setUsername(response.data.username)
+            } catch (error) {
+                console.error(error)
+            }
         }
-      } 
-      if(user){
-        fetchUserId()
-      }else{
-        fetchGuestId()
-      }
+        if (user) {
+            fetchUserId()
+        } else {
+            fetchGuestId()
+        }
     }, [user])
 
     useEffect(() => {
@@ -120,31 +130,34 @@ export default function SocketProvider() {
 
     useEffect(() => {
         const socket = io(baseApiUrl, {
-            withCredentials: true, 
-        })
-    
-        socket.on("connect", () => {
-          setIsConnected(true)
-          if(userWasGuest.wasGuest){
-            socket.emit("delete-guest", {userId: userWasGuest.credentials.userId, username: userWasGuest.credentials.username})
-            setUserWasGuest({wasGuest: false, credentials: {}})
-          }
-          if(roomId && username){
-            socket.emit("user-login", { userId: roomId, username })
-            socket.emit("user-join-room", roomId)
-            socket.emit("joinFitlab", {userId: roomId, username})
-          }
+            withCredentials: true,
         })
 
-        socket.on("admin-status", status=> {
-          setIsAdminOnline(status)
+        socket.on("connect", () => {
+            setIsConnected(true)
+            if (userWasGuest.wasGuest) {
+                socket.emit("delete-guest", {
+                    userId: userWasGuest.credentials.userId,
+                    username: userWasGuest.credentials.username,
+                })
+                setUserWasGuest({ wasGuest: false, credentials: {} })
+            }
+            if (roomId && username) {
+                socket.emit("user-login", { userId: roomId, username })
+                socket.emit("user-join-room", roomId)
+                socket.emit("joinFitlab", { userId: roomId, username })
+            }
+        })
+
+        socket.on("admin-status", (status) => {
+            setIsAdminOnline(status)
         })
 
         socket.on("connect_error", (error) => {
-          setIsConnected(false)
-          setIsAdminOnline(false)
+            setIsConnected(false)
+            setIsAdminOnline(false)
         })
-    
+
         socket.on("disconnect", (reason) => {
             setIsConnected(false)
             setIsAdminOnline(false)
@@ -155,92 +168,102 @@ export default function SocketProvider() {
         // })
 
         socket.on("chat-history", (messages) => {
-          setMessages(messages)
+            setMessages(messages)
         })
-        
+
         socket.on("receive-message", (message) => {
             setMessages((prev) => [...prev, message])
         })
 
         socket.on("user-typing", (data) => {
-          if (data.sender !== username) {
-            setIsTyping(data.isTyping)
-          }
+            if (data.sender !== username) {
+                setIsTyping(data.isTyping)
+            }
         })
 
-        socket.on("notifySupportCalling", (sessionId, sessionDetails)=> {
-          setScheduledVideoCallSessionId(sessionId)
-          setVideoSessionInfo(sessionDetails)
-          setOpenVideoCallModal(true)
+        socket.on("notifySupportCalling", (sessionId, sessionDetails) => {
+            setScheduledVideoCallSessionId(sessionId)
+            setVideoSessionInfo(sessionDetails)
+            setOpenVideoCallModal(true)
         })
 
-        socket.on("unNotifySupportCalling", ()=> {
-          setScheduledVideoCallSessionId(null)
-          setVideoSessionInfo({})
-          setOpenVideoCallModal(false)
-          socket.emit("unNotifiedSupportCalling")
-        }) 
+        socket.on("unNotifySupportCalling", () => {
+            setScheduledVideoCallSessionId(null)
+            setVideoSessionInfo({})
+            setOpenVideoCallModal(false)
+            socket.emit("unNotifiedSupportCalling")
+        })
 
-        socket.on('coach-response', (message)=> {
-          setCoachMessages((prev) => [...prev, message]) 
+        socket.on("coach-response", (message) => {
+            setCoachMessages((prev) => [...prev, message])
         })
-      
-        socket.on('coach-loading', (status)=> {
-          setIsCoachLoading(status)
+
+        socket.on("coach-loading", (status) => {
+            setIsCoachLoading(status)
         })
-      
-        socket.on('coach-error', (message)=> {
-          setCoachError(message)
-          setIsCoachLoading(false)
+
+        socket.on("coach-error", (message) => {
+            setCoachError(message)
+            setIsCoachLoading(false)
         })
 
         socket.on("walletRechargeSuccess", (data) => {
-          sonnerToast.success('Recharged wallet!', {duration: 2500})
-          setOpenNotificationModal({
-            header: "Wallet Auto-Recharged", content: `Wallet recharged with ₹${data.amount} through ${data.method}`, icon: Wallet,
-            type: "success", duration: 6000, walletRecharged: true
-          })
-        }) 
+            sonnerToast.success("Recharged wallet!", { duration: 2500 })
+            setOpenNotificationModal({
+                header: "Wallet Auto-Recharged",
+                content: `Wallet recharged with ₹${data.amount} through ${data.method}`,
+                icon: Wallet,
+                type: "success",
+                duration: 6000,
+                walletRecharged: true,
+            })
+        })
 
         socket.on("warnRazorpayRecharge", (data) => {
-          if(!openSemiAutoRechargeModal.status){
-            setOpenSemiAutoRechargeModal({status: true, walletAmount: data.balance, autoRechargeAmount: data.amount})
-          }
-        }) 
+            if (!openSemiAutoRechargeModal.status) {
+                setOpenSemiAutoRechargeModal({
+                    status: true,
+                    walletAmount: data.balance,
+                    autoRechargeAmount: data.amount,
+                })
+            }
+        })
 
         socket.on("receive-notification", (data) => {
-          setNotifications(prev=> [...prev, data])
-        }) 
+            setNotifications((prev) => [...prev, data])
+        })
 
         socket.on("notification-marked-read", (id) => {
-          setNotifications(prev =>
-            prev.map(notification=> notification._id === id ? { ...notification, isRead: true } : notification)
-          )
+            setNotifications((prev) =>
+                prev.map((notification) =>
+                    notification._id === id ? { ...notification, isRead: true } : notification,
+                ),
+            )
         })
 
         socket.on("all-notifications-marked-read", () => {
-          setNotifications(prev =>
-            prev.map(notification => ({
-              ...notification,
-              isRead: true,
-            }))
-          )
-          const updatedNotifications = notifications.map(notification=> ({...notification, isRead: true}))
-          setNotifications(updatedNotifications)
-        }) 
+            setNotifications((prev) =>
+                prev.map((notification) => ({
+                    ...notification,
+                    isRead: true,
+                })),
+            )
+            const updatedNotifications = notifications.map((notification) => ({ ...notification, isRead: true }))
+            setNotifications(updatedNotifications)
+        })
 
         socket.on("notification-deleted", (id) => {
-          setNotifications(notifications=> notifications.filter(notification=> notification._id !== id))
-        }) 
+            setNotifications((notifications) => notifications.filter((notification) => notification._id !== id))
+        })
 
-        socket.on('notification-error', (message)=> {
-          sonnerToast.error(message) 
-        }) 
+        socket.on("notification-error", (message) => {
+            sonnerToast.error(message)
+        })
 
         setSocket(socket)
 
         return () => {
-          socket.disconnect()
+            socket.disconnect()
         }
     }, [roomId])
 
@@ -251,148 +274,167 @@ export default function SocketProvider() {
     useEffect(() => {
         scrollToBottom()
     }, [messages])
-    
-      const handleSendMessage = (e) => {
+
+    const handleSendMessage = (e) => {
         e.preventDefault()
         if (!newMessage.trim() || !socket) return
-    
-        const messageData = {
-          roomId,
-          message: newMessage,
-          sender: username,
-          timestamp: new Date().toISOString(),
-          isAdmin: false,
-        }
-    
-        socket.emit("send-message", messageData)
-    
-        setNewMessage("")
-    
-        socket.emit("typing", { roomId, isTyping: false, sender: username })
-      }
-    
-      const handleTyping = (e) => {
-        setNewMessage(e.target.value)
-    
-        if (!socket) return
-    
-        socket.emit("typing", { roomId, isTyping: true, sender: username })
-    
-        if (typingTimeoutRef.current) {
-          clearTimeout(typingTimeoutRef.current)
-        }
-    
-        typingTimeoutRef.current = setTimeout(() => {
-          socket.emit("typing", { roomId, isTyping: false, sender: username })
-        }, 2000)
-      }
 
-      const handleSendMessageToCoach = () => {
-        if (!newCoachMessage.trim() || !socket) return 
-    
         const messageData = {
-          roomId,
-          message: newCoachMessage,
-          sender: username,
-          userId: user._id,
-          userGoal: user.fitnessGoal, 
-          timestamp: new Date().toISOString(),
-          isCoach: false,
+            roomId,
+            message: newMessage,
+            sender: username,
+            timestamp: new Date().toISOString(),
+            isAdmin: false,
         }
-    
+
+        socket.emit("send-message", messageData)
+
+        setNewMessage("")
+
+        socket.emit("typing", { roomId, isTyping: false, sender: username })
+    }
+
+    const handleTyping = (e) => {
+        setNewMessage(e.target.value)
+
+        if (!socket) return
+
+        socket.emit("typing", { roomId, isTyping: true, sender: username })
+
+        if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current)
+        }
+
+        typingTimeoutRef.current = setTimeout(() => {
+            socket.emit("typing", { roomId, isTyping: false, sender: username })
+        }, 2000)
+    }
+
+    const handleSendMessageToCoach = () => {
+        if (!newCoachMessage.trim() || !socket) return
+
+        const messageData = {
+            roomId,
+            message: newCoachMessage,
+            sender: username,
+            userId: user._id,
+            userGoal: user.fitnessGoal,
+            timestamp: new Date().toISOString(),
+            isCoach: false,
+        }
+
         socket.emit("coach-ask", messageData)
         setCoachMessages((prev) => [...prev, messageData])
-    
+
         setNewCoachMessage("")
 
         acceptTermsOnFirstAction()
-      }
+    }
 
-      const handleUserTypingForCoach = (e) => { 
+    const handleUserTypingForCoach = (e) => {
         setNewCoachMessage(e.target.value)
-      }
+    }
 
-      const markNotificationRead = (id, userId)=> {
-        socket.emit("mark-notification-read", {notificationId: id, userId} )
-      }
+    const markNotificationRead = (id, userId) => {
+        socket.emit("mark-notification-read", { notificationId: id, userId })
+    }
 
-      const markAllNotificationRead = (userId)=> {
+    const markAllNotificationRead = (userId) => {
         socket.emit("mark-all-notifications-read", userId)
-      }
+    }
 
-      const deleteNotification = (id, userId)=> {
-        socket.emit("delete-notification", {notificationId: id, userId} )
-      }
-    
+    const deleteNotification = (id, userId) => {
+        socket.emit("delete-notification", { notificationId: id, userId })
+    }
 
-  return (
-    <SocketContext.Provider value={{
-        socket,
-        isConnected,
-        isAdminOnline,
-        userId: roomId,
-        username,
-        messages,
-        newMessage,
-        isTyping,
-        messagesEndRef,
-        typingTimeoutRef,
-        handleTyping,
-        handleSendMessage,
-        coachMessages,
-        newCoachMessage,
-        isCoachLoading,
-        setIsCoachLoading,
-        coachError,
-        handleSendMessageToCoach,
-        handleUserTypingForCoach,
-        openVideoCallModal,
-        setOpenVideoCallModal,
-        scheduledVideoCallSessionId,
-        videoSessionInfo,
-        forceEndScheduledSession,
-        setForceEndScheduledSession,
-        openSemiAutoRechargeModal, 
-        setOpenSemiAutoRechargeModal,
-        setOpenNotificationModal,
-        openNotificationModal,
-        notifications,
-        setNotifications,
-        markNotificationRead,
-        markAllNotificationRead,
-        deleteNotification
-        // VideoCallCommonModal : <VideoCallCommonModal/>
-      }}
-    >
 
-      <Outlet/>
+    return (
+        <SocketContext.Provider
+            value={{
+                socket,
+                isConnected,
+                isAdminOnline,
+                userId: roomId,
+                username,
+                messages,
+                newMessage,
+                isTyping,
+                messagesEndRef,
+                typingTimeoutRef,
+                handleTyping,
+                handleSendMessage,
+                coachMessages,
+                newCoachMessage,
+                isCoachLoading,
+                setIsCoachLoading,
+                coachError,
+                handleSendMessageToCoach,
+                handleUserTypingForCoach,
+                openVideoCallModal,
+                setOpenVideoCallModal,
+                scheduledVideoCallSessionId,
+                videoSessionInfo,
+                forceEndScheduledSession,
+                setForceEndScheduledSession,
+                openSemiAutoRechargeModal,
+                setOpenSemiAutoRechargeModal,
+                setOpenNotificationModal,
+                openNotificationModal,
+                notifications,
+                setNotifications,
+                markNotificationRead,
+                markAllNotificationRead,
+                deleteNotification,
+                // VideoCallCommonModal : <VideoCallCommonModal/>
+            }}>
 
-      <NotificationModal
-        isOpen={openNotificationModal.header}
-        onClose={()=> setOpenNotificationModal({header: null, content: null, icon: null, type: null, duration: 6000, walletRecharged: true})}
-        header={openNotificationModal.header}
-        content={openNotificationModal.content}
-        icon={openNotificationModal.icon}
-        type={openNotificationModal.type}
-        autoClose={true}
-        autoCloseDuration={openNotificationModal.duration}
-        closeButton={true}
-      />
+            <Outlet />
 
-      {
-        openSemiAutoRechargeModal && openSemiAutoRechargeModal.status &&
-         <SemiAutoRechargeModal 
-          isOpen={()=> openSemiAutoRechargeModal.status}
-          onClose={()=> setOpenSemiAutoRechargeModal({status: false, walletAmount: null, autoRechargeAmount: null, recharged: false})}
-          walletAmount={openSemiAutoRechargeModal.walletAmount}
-          autoRechargeAmount={openSemiAutoRechargeModal.autoRechargeAmount}
-          onRecharged={()=> {
-            setOpenSemiAutoRechargeModal({status: false, walletAmount: null, autoRechargeAmount: null, recharged: true})
-          }}
-         />
-       }
+            <NotificationModal
+                isOpen={openNotificationModal.header}
+                onClose={() =>
+                    setOpenNotificationModal({
+                        header: null,
+                        content: null,
+                        icon: null,
+                        type: null,
+                        duration: 6000,
+                        walletRecharged: true,
+                    })
+                }
+                header={openNotificationModal.header}
+                content={openNotificationModal.content}
+                icon={openNotificationModal.icon}
+                type={openNotificationModal.type}
+                autoClose={true}
+                autoCloseDuration={openNotificationModal.duration}
+                closeButton={true}
+            />
 
-    </SocketContext.Provider>
-  )
-
+            {openSemiAutoRechargeModal && openSemiAutoRechargeModal.status && (
+                <SemiAutoRechargeModal
+                    isOpen={() => openSemiAutoRechargeModal.status}
+                    onClose={() =>
+                        setOpenSemiAutoRechargeModal({
+                            status: false,
+                            walletAmount: null,
+                            autoRechargeAmount: null,
+                            recharged: false,
+                        })
+                    }
+                    walletAmount={openSemiAutoRechargeModal.walletAmount}
+                    autoRechargeAmount={openSemiAutoRechargeModal.autoRechargeAmount}
+                    onRecharged={() => {
+                        setOpenSemiAutoRechargeModal({
+                            status: false,
+                            walletAmount: null,
+                            autoRechargeAmount: null,
+                            recharged: true,
+                        })
+                    }}
+                />
+            )}
+            
+        </SocketContext.Provider>
+    )
 }

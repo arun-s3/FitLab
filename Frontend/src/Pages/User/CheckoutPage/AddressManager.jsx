@@ -1,67 +1,73 @@
-import React, {useState, useEffect} from 'react'
-import {useDispatch, useSelector} from 'react-redux'
-import {motion, AnimatePresence} from "framer-motion"
+import React, { useState, useEffect } from "react"
+import { useDispatch, useSelector } from "react-redux"
+import { motion, AnimatePresence } from "framer-motion"
 
-import {Check, Plus} from 'lucide-react'
-import {toast} from 'react-toastify'
-import {toast as sonnerToast} from 'sonner'
+import { Check, Plus } from "lucide-react"
 
-import NewAddressModal from './Modals/NewAddressModal/NewAddressModal'
-import {createNewAddress, getAllAddress, resetStates} from '../../../Slices/addressSlice'
+import { toast } from "react-toastify"
+import { toast as sonnerToast } from "sonner"
+
+import NewAddressModal from "./Modals/NewAddressModal/NewAddressModal"
+import { createNewAddress, getAllAddress, resetStates } from "../../../Slices/addressSlice"
 
 
-export default function AddressManager({addresses, shippingAddress, setShippingAddress, onAddressClick, onAddresChange, setDeliverAddressMade}){
+export default function AddressManager({
+    addresses,
+    shippingAddress,
+    setShippingAddress,
+    onAddressClick,
+    onAddresChange,
+    setDeliverAddressMade,
+}) {
 
     const [isModalOpen, setIsModalOpen] = useState(false)
 
     const [addressSubmitted, setAddressSubmitted] = useState(false)
 
     const dispatch = useDispatch()
-    const {error, addressCreated} = useSelector(state=> state.address)
-    const {user} = useSelector(state=> state.user)
-      
-    useEffect(()=> {
-        if(addressSubmitted && addressCreated){
+    const { error, addressCreated } = useSelector((state) => state.address)
+    const { user } = useSelector((state) => state.user)
+
+    useEffect(() => {
+        if (addressSubmitted && addressCreated) {
             dispatch(getAllAddress())
-            sonnerToast.success("New Address registered successfully!") 
+            sonnerToast.success("New Address registered successfully!")
             setIsModalOpen(false)
             setDeliverAddressMade(true)
             setAddressSubmitted(false)
         }
-    },[addressSubmitted, addressCreated])
+    }, [addressSubmitted, addressCreated])
 
-    useEffect(()=> {
-        if(addressSubmitted && error){
+    useEffect(() => {
+        if (addressSubmitted && error) {
             sonnerToast.error(error)
             dispatch(resetStates())
         }
-    },[addressSubmitted, error])
+    }, [addressSubmitted, error])
 
-    const submitAddress = (addressData)=> {
-        const {alternateMobileNumber, mobileNumber, ...rest} = addressData
-        const newAddressData = {...rest, mobile: mobileNumber, alternateMobile: alternateMobileNumber}
+    const submitAddress = (addressData) => {
+        const { alternateMobileNumber, mobileNumber, ...rest } = addressData
+        const newAddressData = { ...rest, mobile: mobileNumber, alternateMobile: alternateMobileNumber }
 
-        const optionalFieldNames = ["nickName", "landmark", "alternateMobile", "deliveryInstructions"];
-        const requiredFields = Object.keys(newAddressData).filter(
-            (field) => !optionalFieldNames.includes(field) 
-        )
+        const optionalFieldNames = ["nickName", "landmark", "alternateMobile", "deliveryInstructions"]
+        const requiredFields = Object.keys(newAddressData).filter((field) => !optionalFieldNames.includes(field))
         const missingRequiredFields = requiredFields.filter(
-            (field) => !newAddressData[field] || newAddressData[field] === ""
+            (field) => !newAddressData[field] || newAddressData[field] === "",
         )
         if (requiredFields.length < 9) {
             toast.error("Please enter all required fields!")
-            return;
+            return
         }
 
         if (missingRequiredFields.length > 0 || Object.values(newAddressData).some((value) => value === undefined)) {
             sonnerToast.error("Some of non-optional fields are not filled. Please check and submit again!")
-            return;
+            return
         }
 
-        dispatch(createNewAddress({id: user._id, addressData: newAddressData}))
+        dispatch(createNewAddress({ id: user._id, addressData: newAddressData }))
         setAddressSubmitted(true)
     }
-    
+
 
     return (
         <>
@@ -70,7 +76,8 @@ export default function AddressManager({addresses, shippingAddress, setShippingA
                   flex flex-col gap-4 lg:grid lg:grid-cols-2 lg:gap-x-4 x-lg:gap-x-[3rem] gap-y-[1rem] max-h-[30rem]`}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, ease: "easeOut" }}>
+                transition={{ duration: 0.4, ease: "easeOut" }}
+            >
                 <AnimatePresence>
                     {addresses &&
                         [...addresses]
@@ -87,18 +94,19 @@ export default function AddressManager({addresses, shippingAddress, setShippingA
                                     key={address._id}
                                     id='checkout-address'
                                     className={`m-[5px] min-w-0 flex justify-between pl-[10px] py-[8px] rounded-[6px] break-words
-                              ${
-                                  shippingAddress && shippingAddress._id === address._id
-                                      ? "outline outline-[2px] outline-primary outline-offset-2 scale-[97%]"
-                                      : ""
-                              }`}
+                                        ${
+                                            shippingAddress && shippingAddress._id === address._id
+                                                ? "outline outline-[2px] outline-primary outline-offset-2 scale-[97%]"
+                                                : ""
+                                        }`}
                                     onClick={() => setShippingAddress(address)}
                                     initial={{ opacity: 0, y: 15 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     exit={{ opacity: 0, y: -10 }}
                                     transition={{ delay: index * 0.05, duration: 0.1, ease: "easeOut" }}
                                     whileTap={{ scale: 0.98 }}
-                                    whileHover={{ scale: 1.01 }}>
+                                    whileHover={{ scale: 1.01 }}
+                                >
                                     <div className='flex gap-[5px]'>
                                         <motion.input
                                             type='radio'
@@ -110,19 +118,20 @@ export default function AddressManager({addresses, shippingAddress, setShippingA
                                         />
                                         <address
                                             className='not-italic flex flex-col justify-center text-[12px] text-[#3C3D37] capitalize
-                                        break-words min-w-0 cursor-pointer'>
+                                                break-words min-w-0 cursor-pointer'
+                                        >
                                             <span className='mb-[5px] flex items-center justify-between'>
-                                                <span
-                                                    className='px-[6px] w-fit text-[11px] text-white capitalize bg-secondary
-                                             rounded-[5px] '>
+                                                <span className='px-[6px] w-fit text-[11px] text-white capitalize bg-secondary
+                                                    rounded-[5px]'>
                                                     {address.type}
                                                 </span>
                                                 {address.defaultAddress && (
                                                     <span className='flex items-center'>
-                                                        <Check className='px-[1px] h-[15px] w-[15px] text-white bg-primary rounded-[10px]' />
+                                                        <Check className='px-[1px] h-[15px] w-[15px] text-white bg-primary 
+                                                            rounded-[10px]' />
                                                         <span
                                                             className='ml-[-7px] pl-[12px] pr-[15px] text-[11px] text-[rgb(239, 68, 68)]
-                                                   text-primaryDark font-[550] tracking-[0.2px] rounded-[6px] z-[-1]'>
+                                                                text-primaryDark font-[550] tracking-[0.2px] rounded-[6px] z-[-1]'>
                                                             Default
                                                         </span>
                                                     </span>
@@ -170,7 +179,8 @@ export default function AddressManager({addresses, shippingAddress, setShippingA
                                                 <span className='ml-[5px] break-words whitespace-pre-wrap line-clamp-3'>
                                                     {address.deliveryInstructions
                                                         ? address.deliveryInstructions
-                                                        : "N/A"}
+                                                        : "N/A"
+                                                    }
                                                 </span>
                                             </span>
                                         </address>
@@ -186,7 +196,8 @@ export default function AddressManager({addresses, shippingAddress, setShippingA
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3 }}
                 whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.95 }}>
+                whileTap={{ scale: 0.95 }}
+            >
                 <motion.span whileHover={{ rotate: 90 }} transition={{ duration: 0.3, ease: "easeInOut" }}>
                     <Plus className='h-[22px] w-[22px] text-primaryDark' />
                 </motion.span>
@@ -196,9 +207,12 @@ export default function AddressManager({addresses, shippingAddress, setShippingA
             </motion.p>
 
             {isModalOpen && (
-                <NewAddressModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={submitAddress} />
+                <NewAddressModal 
+                    isOpen={isModalOpen} 
+                    onClose={() => setIsModalOpen(false)} 
+                    onSubmit={submitAddress} 
+                />
             )}
         </>
     )
-
 }

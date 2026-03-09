@@ -1,28 +1,30 @@
-import React, {useState, useEffect} from 'react'
-import {useSelector, useDispatch} from 'react-redux'
+import React, { useState, useEffect } from "react"
+import { useSelector, useDispatch } from "react-redux"
 
-import {Menu} from "lucide-react"
+import { Menu } from "lucide-react"
 
-import AdminSidebar from '../AdminSidebar/AdminSidebar'
+import AdminSidebar from "../AdminSidebar/AdminSidebar"
 
 
-export default function AdminHeader({headerZIndex}){
+export default function AdminHeader({ headerZIndex }) {
 
     const [sidebarOpen, setSidebarOpen] = useState(false)
 
     const [profileImage, setProfileImage] = useState(null)
-    
-    const {admin} = useSelector(state=> state.admin)
+
+    const { admin } = useSelector((state) => state.admin)
     const dispatch = useDispatch()
 
     const headerBgImg = {
-       backgroundImage: "linear-gradient(to right, black, var(--SECONDARY) 400%)"
+        backgroundImage: "linear-gradient(to right, black, var(--SECONDARY) 400%)",
     }
 
     useEffect(() => {
         if (admin) {
             const defaultDp = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
-            setProfileImage(!admin?.profilePic || admin?.profilePic === defaultDp ? "/Images/adminDp.jpg" : admin.profilePic)
+            setProfileImage(
+                !admin?.profilePic || admin?.profilePic === defaultDp ? "/Images/adminDp.jpg" : admin.profilePic,
+            )
         }
     }, [admin])
 
@@ -31,7 +33,8 @@ export default function AdminHeader({headerZIndex}){
         <header
             className='bg-black h-[5rem] w-full flex justify-between items-center px-[33px] fixed top-0'
             id='admin-wrapper-header'
-            style={{ ...headerBgImg, zIndex: headerZIndex }}>
+            style={{ ...headerBgImg, zIndex: headerZIndex }}
+        >
             <div className='xx-md:hidden mt-[15p] p-[5px] bg-transparent border border-[#7f7d8085] rounded-[7px] shadow-sm'>
                 <button
                     onClick={() => setSidebarOpen(true)}
@@ -55,6 +58,7 @@ export default function AdminHeader({headerZIndex}){
                     <span className='h-[5px] w-[5px] rounded-[10px] bg-gray-500 absolute top-[15%] right-[19%]'></span>
                 </i> */}
                 <div className='flex gap-[5px] justify-center items-center'>
+                    
                     <span className='w-[30px] h-auto rounded-[20px] relative'>
                         <img
                             alt='admin-dp'
@@ -64,12 +68,15 @@ export default function AdminHeader({headerZIndex}){
                         />
                         <span className='h-[8px] w-[8px] rounded-[10px] bg-green-400 absolute bottom-0 right-0'></span>
                     </span>
+
                     <div className='flex flex-col'>
                         <span className='text-[13px] font-bold text-white'> {admin.username} </span>
                         <span className='text-[12px] text-[#b2afaf]'> Admin </span>
                     </div>
+
                 </div>
             </div>
+
         </header>
     )
 }

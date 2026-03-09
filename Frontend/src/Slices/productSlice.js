@@ -1,73 +1,75 @@
-import {createSlice, createAsyncThunk} from '@reduxjs/toolkit'
-import apiClient from '../Api/apiClient'
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
+import apiClient from "../Api/apiClient"
 
-
-export const createProduct = createAsyncThunk('createProduct', async({formData}, thunkAPI)=>{
-    try{
-        const response = await apiClient.post('/products/add', formData, {headers: {'Content-Type': 'multipart/form-data'}})
+export const createProduct = createAsyncThunk("createProduct", async ({ formData }, thunkAPI) => {
+    try {
+        const response = await apiClient.post("/products/add", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+        })
         return response.data
-    }
-    catch(error){
-        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
+    } catch (error) {
+        const errorMessage =
+            error.response?.data?.message || error.message || "Something went wrong.  Please try again later."
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
 
-export const updateProduct = createAsyncThunk('updateProduct', async({formData, id}, thunkAPI)=>{
-    try{
-        const response = await apiClient.put(`/products/edit/${id}`, formData, {headers: {'Content-Type': 'multipart/form-data'}})
+export const updateProduct = createAsyncThunk("updateProduct", async ({ formData, id }, thunkAPI) => {
+    try {
+        const response = await apiClient.put(`/products/edit/${id}`, formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+        })
         return response.data
-    }
-    catch(error){
-        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
+    } catch (error) {
+        const errorMessage =
+            error.response?.data?.message || error.message || "Something went wrong.  Please try again later."
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
 
-export const toggleProductStatus = createAsyncThunk('toggleProductStatus', async(id, thunkAPI)=>{
-    try{
+export const toggleProductStatus = createAsyncThunk("toggleProductStatus", async (id, thunkAPI) => {
+    try {
         const response = await apiClient.get(`/products/status/${id}`)
         return response.data
-    }
-    catch(error){
-        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
+    } catch (error) {
+        const errorMessage =
+            error.response?.data?.message || error.message || "Something went wrong.  Please try again later."
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
 
-export const getAllProducts = createAsyncThunk('getAllProducts', async({queryOptions}, thunkAPI)=>{
-    try{
-        const response = await apiClient.post('/products',{queryOptions})
+export const getAllProducts = createAsyncThunk("getAllProducts", async ({ queryOptions }, thunkAPI) => {
+    try {
+        const response = await apiClient.post("/products", { queryOptions })
         return response.data
-    }
-    catch(error){
-        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
+    } catch (error) {
+        const errorMessage =
+            error.response?.data?.message || error.message || "Something went wrong.  Please try again later."
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
 
-export const restockProduct = createAsyncThunk('restockProduct', async({ productId, quantity }, thunkAPI)=>{
-    try{
+export const restockProduct = createAsyncThunk("restockProduct", async ({ productId, quantity }, thunkAPI) => {
+    try {
         const response = await apiClient.put("/products/restock", { productId, quantity })
         return { productId, quantity }
-    }
-    catch(error){
-        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
+    } catch (error) {
+        const errorMessage =
+            error.response?.data?.message || error.message || "Something went wrong.  Please try again later."
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
 
-export const searchProduct = createAsyncThunk('searchProduct', async({find}, thunkAPI)=>{
-    try{
+export const searchProduct = createAsyncThunk("searchProduct", async ({ find }, thunkAPI) => {
+    try {
         const response = await apiClient.get(`/products/search?find=${find}`)
         return response.data
-    }
-    catch(error){
-        const errorMessage = error.response?.data?.message || error.message || 'Something went wrong.  Please try again later.'
+    } catch (error) {
+        const errorMessage =
+            error.response?.data?.message || error.message || "Something went wrong.  Please try again later."
         return thunkAPI.rejectWithValue(errorMessage)
     }
 })
-
 
 const initialState = {
     products: [],
@@ -75,28 +77,29 @@ const initialState = {
     maxPriceAvailable: 100000,
     loading: false,
     error: null,
-    success:false,
+    success: false,
     message: null,
     productStatusToggled: false,
     productCreated: false,
-    productUpdated: false ,
-    productRestocked: false
+    productUpdated: false,
+    productRestocked: false,
 }
 
+
 const productSlice = createSlice({
-    name: 'product',
+    name: "product",
     initialState,
     reducers: {
-        resetStates: (state, action)=>{
+        resetStates: (state, action) => {
             state.loading = false
             state.error = null
             state.productCreated = false
             state.productUpdated = false
             state.productStatusToggled = false
             state.productRestocked = false
-        }
+        },
     },
-    extraReducers: (builder)=>{
+    extraReducers: (builder) => {
         builder
             .addCase(createProduct.fulfilled, (state, action) => {
                 state.error = null
@@ -193,7 +196,8 @@ const productSlice = createSlice({
                 const updatingProductIndex = state.products.findIndex(
                     (product) => product._id === action.payload.productId,
                 )
-                state.products[updatingProductIndex].isBlocked = action.payload.productBlocked === "Blocked" ? true : false
+                state.products[updatingProductIndex].isBlocked =
+                    action.payload.productBlocked === "Blocked" ? true : false
                 state.productStatusToggled = true
             })
             .addCase(toggleProductStatus.pending, (state, action) => {
@@ -205,8 +209,9 @@ const productSlice = createSlice({
                 state.error = action.payload
                 state.productStatusToggled = false
             })
-    }
+    },
 })
 
+
 export default productSlice.reducer
-export const {resetStates} = productSlice.actions
+export const { resetStates } = productSlice.actions

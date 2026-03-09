@@ -1,34 +1,36 @@
-import React,{useState, useEffect, useRef, useContext} from 'react'
-import {useLocation} from 'react-router-dom'
-import './ProductListPage.css'
-import {useDispatch, useSelector} from 'react-redux'
-import {debounce} from 'lodash'
-import {motion} from "framer-motion"
+import React, { useState, useEffect, useRef, useContext } from "react"
+import { useLocation } from "react-router-dom"
+import "./ProductListPage.css"
+import { useDispatch, useSelector } from "react-redux"
+import { debounce } from "lodash"
+import { motion } from "framer-motion"
 
-import {toast} from 'react-toastify'
-import {toast as sonnerToast} from 'sonner'
+import { toast } from "react-toastify"
 
-import Header from '../../../Components/Layout/Header/Header'
-import BreadcrumbBar from '../../../Components/Layout/BreadcrumbBar/BreadcrumbBar'
-import ProductsDisplay from '../../../Components/Features/Product/ProductsDisplay/ProductsDisplay'
-import ProductListingTools from '../../../Components/Features/Product/ProductListingTools/ProductListingTools'
-import CartSidebar from '../../../Components/Features/Cart/CartSidebar/CartSidebar'
-import CouponApplicableModal from './CouponApplicableModal'
-import {getAllProducts, resetStates} from '../../../Slices/productSlice'
-import {getTheCart, resetCartStates} from '../../../Slices/cartSlice'
-import {resetWishlistStates} from '../../../Slices/wishlistSlice'
-import {ProtectedUserContext} from '../../../Components/Route-guards/ProtectedUserRoutes/ProtectedUserRoutes'
-import ProductFilterSidebar from '../../../Components/Features/Product/ProductFilterSidebar/ProductFilterSidebar'
-import FilterModule from './FilterModule'
-import OfferShowcase from '../../../Components/Features/Offer/OfferShowcase/OfferShowcase'
-import Footer from '../../../Components/Layout/Footer/Footer'
+import { toast as sonnerToast } from "sonner"
+
+import Header from "../../../Components/Layout/Header/Header"
+import BreadcrumbBar from "../../../Components/Layout/BreadcrumbBar/BreadcrumbBar"
+import ProductsDisplay from "../../../Components/Features/Product/ProductsDisplay/ProductsDisplay"
+import ProductListingTools from "../../../Components/Features/Product/ProductListingTools/ProductListingTools"
+import CartSidebar from "../../../Components/Features/Cart/CartSidebar/CartSidebar"
+import CouponApplicableModal from "./CouponApplicableModal"
+import ProductFilterSidebar from "../../../Components/Features/Product/ProductFilterSidebar/ProductFilterSidebar"
+import FilterModule from "./FilterModule"
+import OfferShowcase from "../../../Components/Features/Offer/OfferShowcase/OfferShowcase"
+import Footer from "../../../Components/Layout/Footer/Footer"
+
+import { getAllProducts, resetStates } from "../../../Slices/productSlice"
+import { getTheCart, resetCartStates } from "../../../Slices/cartSlice"
+import { resetWishlistStates } from "../../../Slices/wishlistSlice"
+import { ProtectedUserContext } from "../../../Components/Route-guards/ProtectedUserRoutes/ProtectedUserRoutes"
 
 
-export default function ProductList(){
+export default function ProductList() {
 
-    const {setIsAuthModalOpen, checkAuthOrOpenModal} = useContext(ProtectedUserContext)
-    setIsAuthModalOpen({status: false, accessFor: 'shopping'})
-    
+    const { setIsAuthModalOpen, checkAuthOrOpenModal } = useContext(ProtectedUserContext)
+    setIsAuthModalOpen({ status: false, accessFor: "shopping" })
+
     const [minPrice, setMinPrice] = useState(0)
     const [maxPrice, setMaxPrice] = useState(3750)
     let firstSlideRef = useRef(false)
@@ -37,14 +39,14 @@ export default function ProductList(){
 
     const [showByGrid, setShowByGrid] = useState(true)
 
-    const [filter, setFilter] = useState({categories: [], products: [], brands: [], targetMuscles: []})
+    const [filter, setFilter] = useState({ categories: [], products: [], brands: [], targetMuscles: [] })
     const [sorts, setSorts] = useState({})
 
-    const [limit, setLimit] = useState(9) 
+    const [limit, setLimit] = useState(9)
     const [currentPage, setCurrentPage] = useState(1)
-    const [totalPages, setTotalPages] = useState(20)  
+    const [totalPages, setTotalPages] = useState(20)
 
-    const [queryOptions, setQueryOptions] = useState({page: 1, limit:12})
+    const [queryOptions, setQueryOptions] = useState({ page: 1, limit: 12 })
 
     const [isCartOpen, setIsCartOpen] = useState(false)
 
@@ -53,163 +55,194 @@ export default function ProductList(){
     const [isFilterSidebarOpen, setIsFilterSidebarOpen] = useState(false)
     const [currentFilters, setCurrentFilters] = useState({})
 
-    const [openCouponApplicableModal, setOpenCouponApplicableModal] = useState({status: false, code: '', products: [], categories: []})
+    const [openCouponApplicableModal, setOpenCouponApplicableModal] = useState({
+        status: false,
+        code: "",
+        products: [],
+        categories: [],
+    })
 
-    const {products, productCounts, error: productError} = useSelector(state=> state.productStore)
-    const {cart, productAdded, error, message, couponMessage} = useSelector(state=> state.cart)   
-    const {wishlistError} = useSelector(state=> state.wishlist) 
-    
+    const { products, productCounts, error: productError } = useSelector((state) => state.productStore)
+    const { cart, productAdded, error, message, couponMessage } = useSelector((state) => state.cart)
+    const { wishlistError } = useSelector((state) => state.wishlist)
+
     const location = useLocation()
 
-    useEffect(()=> {
-        if(location && location.state?.showCouponApplicableModal){
-            const {couponCode, products, categories} = location.state
-            setTimeout(()=> setOpenCouponApplicableModal({status: true, code: couponCode, products, categories}), 1500)
+    useEffect(() => {
+        if (location && location.state?.showCouponApplicableModal) {
+            const { couponCode, products, categories } = location.state
+            setTimeout(
+                () => setOpenCouponApplicableModal({ status: true, code: couponCode, products, categories }),
+                1500,
+            )
         }
-        if(location && location.state?.category){
-            const {category} = location.state
+        if (location && location.state?.category) {
+            const { category } = location.state
             setShowCategoryTypeOf(category)
         }
     }, [location])
 
-    useEffect(()=> {
-      if(products && productCounts && totalPages && limit){
-        setTotalPages(Math.ceil(productCounts/limit))
-      }
+    useEffect(() => {
+        if (products && productCounts && totalPages && limit) {
+            setTotalPages(Math.ceil(productCounts / limit))
+        }
     }, [products, productCounts])
 
-    useEffect(()=> {
-        if(wishlistError) {
+    useEffect(() => {
+        if (wishlistError) {
             sonnerToast.error(wishlistError, { id: "wishlist-error" })
             dispatch(resetWishlistStates())
         }
     }, [wishlistError])
 
-    useEffect(()=> {
-      if(couponMessage){
-        sonnerToast.info(couponMessage)
-        dispatch(resetCartStates())
-      }
-    },[couponMessage])
+    useEffect(() => {
+        if (couponMessage) {
+            sonnerToast.info(couponMessage)
+            dispatch(resetCartStates())
+        }
+    }, [couponMessage])
 
     const headerBg = {
         backgroundImage: "url('/Images/header-bg.png')",
-        backgrounSize: 'cover'
+        backgrounSize: "cover",
     }
 
-
     const sortMenu = [
-        {name: 'Price: High to Low', value:'price', order:'-1', invisibleOnTable: true},
-        {name: 'Price: Low to High', value:'price', order:'1', invisibleOnTable: true},
-        {name: 'Ratings: High to Low', value:'averageRating', order:'1'}, {name: 'Ratings: Low to High', value:'averageRating', order:'-1'},
-        {name: 'Featured', value:'featured'},
-        {name: 'Best Sellers', value:'bestSellers'}, {name: 'Newest Arrivals', value:'newestArrivals'}
+        { name: "Price: High to Low", value: "price", order: "-1", invisibleOnTable: true },
+        { name: "Price: Low to High", value: "price", order: "1", invisibleOnTable: true },
+        { name: "Ratings: High to Low", value: "averageRating", order: "1" },
+        { name: "Ratings: Low to High", value: "averageRating", order: "-1" },
+        { name: "Featured", value: "featured" },
+        { name: "Best Sellers", value: "bestSellers" },
+        { name: "Newest Arrivals", value: "newestArrivals" },
     ]
 
     const popularProducts = [
-        'benches', 'gymbell', 'treadmill', 'Ellipticals', 'bikes', 'proteinPowders', 'mutistationMachines', 'resistanceBands', 'yogaMats'
+        "benches",
+        "gymbell",
+        "treadmill",
+        "Ellipticals",
+        "bikes",
+        "proteinPowders",
+        "mutistationMachines",
+        "resistanceBands",
+        "yogaMats",
     ]
 
     const brands = ["Nike", "Adidas", "Under Armour", "Reebok", "Puma", "Gymshark"]
 
-    const muscleGroups = ["Chest", "Back", "Shoulders", "Biceps", "Triceps", "Forearms", "Quadriceps", "Hamstrings", "Glutes", "Calves",
-        "Core", "Abs", "Full Body", "Cardio"]
-
+    const muscleGroups = [
+        "Chest",
+        "Back",
+        "Shoulders",
+        "Biceps",
+        "Triceps",
+        "Forearms",
+        "Quadriceps",
+        "Hamstrings",
+        "Glutes",
+        "Calves",
+        "Core",
+        "Abs",
+        "Full Body",
+        "Cardio",
+    ]
 
     const dispatch = useDispatch()
 
     const debouncedProducts = useRef(
-        debounce(()=> {
-            dispatch( getAllProducts({queryOptions}) )
-        }, 1000) 
+        debounce(() => {
+            dispatch(getAllProducts({ queryOptions }))
+        }, 1000),
     ).current
 
-    useEffect(()=> {
+    useEffect(() => {
         dispatch(getTheCart())
-    },[])
+    }, [])
 
-    useEffect(()=>{
-        setQueryOptions(queryOptions=> (
-            {...queryOptions, filter: {...queryOptions.filter, ...filter, averageRating: rating}, sort: sorts, page: currentPage, limit}
-        ))
-    },[filter, sorts, currentPage, limit, rating])
+    useEffect(() => {
+        setQueryOptions((queryOptions) => ({
+            ...queryOptions,
+            filter: { ...queryOptions.filter, ...filter, averageRating: rating },
+            sort: sorts,
+            page: currentPage,
+            limit,
+        }))
+    }, [filter, sorts, currentPage, limit, rating])
 
-    useEffect(()=>{
-        if(Object.keys(queryOptions).length){
-            dispatch( getAllProducts({queryOptions}))
+    useEffect(() => {
+        if (Object.keys(queryOptions).length) {
+            dispatch(getAllProducts({ queryOptions }))
         }
-    },[queryOptions])
+    }, [queryOptions])
 
-    useEffect(()=>{
-        if(firstSlideRef.current){
-            setFilter({...filter, minPrice, maxPrice})
+    useEffect(() => {
+        if (firstSlideRef.current) {
+            setFilter({ ...filter, minPrice, maxPrice })
         }
-    },[minPrice, maxPrice])
+    }, [minPrice, maxPrice])
 
-    useEffect(()=> {
-        if(cart?.products && cart.products.length > 0){
-          setIsCartOpen(true)
+    useEffect(() => {
+        if (cart?.products && cart.products.length > 0) {
+            setIsCartOpen(true)
         }
-        if(error && error.toLowerCase().includes('product')){
-          toast.error(error)
-          dispatch(resetCartStates())
+        if (error && error.toLowerCase().includes("product")) {
+            toast.error(error)
+            dispatch(resetCartStates())
         }
-        if(productAdded){
-          setIsCartOpen(true)
-          dispatch(resetCartStates())
+        if (productAdded) {
+            setIsCartOpen(true)
+            dispatch(resetCartStates())
         }
-        if(message && message.includes("Coupon is not applicable to the selected products")){
-            toast.warn(message, {autoClose: 5000})
+        if (message && message.includes("Coupon is not applicable to the selected products")) {
+            toast.warn(message, { autoClose: 5000 })
         }
-    },[error, productAdded, message, cart])
+    }, [error, productAdded, message, cart])
 
-    useEffect(()=> {
-         if(productError) {
-             sonnerToast.error(productError)
-             dispatch(resetStates())
-         }
+    useEffect(() => {
+        if (productError) {
+            sonnerToast.error(productError)
+            dispatch(resetStates())
+        }
     }, [productError])
 
-    const applySidebarFilters = (appliedFilters)=> {
-        if(appliedFilters.minPrice){
+    const applySidebarFilters = (appliedFilters) => {
+        if (appliedFilters.minPrice) {
             setMinPrice(appliedFilters.minPrice)
         }
-        if(appliedFilters.maxPrice){
+        if (appliedFilters.maxPrice) {
             setMinPrice(appliedFilters.maxPrice)
         }
-        if(appliedFilters.rating){
+        if (appliedFilters.rating) {
             setRating(appliedFilters.rating)
         }
-        const {categories, brands, targetMuscles} = appliedFilters
-        setFilter({...filter, categories, brands, targetMuscles, products: appliedFilters.popularProducts})
+        const { categories, brands, targetMuscles } = appliedFilters
+        setFilter({ ...filter, categories, brands, targetMuscles, products: appliedFilters.popularProducts })
     }
 
 
-    return(
-        <>  
-            <header style={headerBg}  className='h-[5rem]'>
-
-                <Header/>
-
+    return (
+        <>
+            <header style={headerBg} className='h-[5rem]'>
+                <Header />
             </header>
-            
+
             <BreadcrumbBar heading='shopping' />
-                
-            <main 
-                className='px-0 xxs-sm:px-[20px] xs-sm2:px-[60px] mt-[3rem] flex gap-[2.5rem] items-start justify-start' 
+
+            <main
+                className='px-0 xxs-sm:px-[20px] xs-sm2:px-[60px] mt-[3rem] flex gap-[2.5rem] items-start justify-start'
                 id='productlist'
             >
-
-                
                 <motion.div
-                  initial={{ x: "-100%", opacity: 0 }}  
-                  animate={{ x: 0, opacity: 1 }}        
-                  transition={{ duration: 0.5, ease: "easeOut" }}
+                    initial={{ x: "-100%", opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ duration: 0.5, ease: "easeOut" }}
                 >
-                
-                    <FilterModule filter={filter} 
-                        setFilter={setFilter} 
-                        rating={rating} 
+
+                    <FilterModule
+                        filter={filter}
+                        setFilter={setFilter}
+                        rating={rating}
                         setRating={setRating}
                         categoryType={showCategoryTypeOf}
                         popularProducts={popularProducts}
@@ -219,28 +252,29 @@ export default function ProductList(){
 
                 </motion.div>
 
-
                 <section className='basis-full flex-grow'>
-                    <div> 
+                    <div>
 
-                        <ProductListingTools showByGrid={showByGrid} 
+                        <ProductListingTools
+                            showByGrid={showByGrid}
                             setShowByGrid={setShowByGrid}
-                            sortHandlers={{sorts, setSorts}}
+                            sortHandlers={{ sorts, setSorts }}
                             sortMenu={sortMenu}
-                            limiter={{limit, setLimit}}
+                            limiter={{ limit, setLimit }}
                             showFilter={true}
-                            filterHandler={()=> setIsFilterSidebarOpen(true)}
+                            filterHandler={() => setIsFilterSidebarOpen(true)}
                             queryOptions={queryOptions}
                             setQueryOptions={setQueryOptions}
                         />
-                             
+
                     </div>
-                    
+
                     <div className='mt-[2rem] w-auto x-sm:w-full xx-md:w-[64%] lg:w-[85%] x-lg:w-auto'>
 
-                        <ProductsDisplay gridView={showByGrid}
-                            pageReader={{currentPage, setCurrentPage}}
-                            limiter={{limit, setLimit}}
+                        <ProductsDisplay
+                            gridView={showByGrid}
+                            pageReader={{ currentPage, setCurrentPage }}
+                            limiter={{ limit, setLimit }}
                             totalPages={totalPages}
                             currentPage={currentPage}
                             setCurrentPage={setCurrentPage}
@@ -252,48 +286,46 @@ export default function ProductList(){
 
                     </div>
 
-                        <CartSidebar isOpen={isCartOpen} 
-                            onClose={()=> setIsCartOpen(false)} 
-                            retractedView={true} 
+                    <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} retractedView={true} />
+
+                    {isFilterSidebarOpen && (
+
+                        <ProductFilterSidebar
+                            isOpen={isFilterSidebarOpen}
+                            onClose={() => setIsFilterSidebarOpen(false)}
+                            popularProducts={popularProducts}
+                            muscleGroups={muscleGroups}
+                            brands={brands}
+                            applySidebarFilters={applySidebarFilters}
+                            saveCurrentFilters={setCurrentFilters}
+                            savedFilters={currentFilters}
+                            onClearedFilters={() =>
+                                setQueryOptions((queryOptions) => ({ sort: sorts, page: currentPage, limit }))
+                            }
                         />
 
-                        {   
-                            isFilterSidebarOpen &&
-                                <ProductFilterSidebar isOpen={isFilterSidebarOpen}
-                                    onClose={() => setIsFilterSidebarOpen(false)} 
-                                    popularProducts={popularProducts}
-                                    muscleGroups={muscleGroups}
-                                    brands={brands}
-                                    applySidebarFilters={applySidebarFilters}
-                                    saveCurrentFilters={setCurrentFilters}
-                                    savedFilters={currentFilters}
-                                    onClearedFilters={()=> 
-                                        setQueryOptions(queryOptions=> (
-                                            {sort: sorts, page: currentPage, limit}
-                                        ))
-                                    }
-                                />
-                        }
+                    )}
 
-                        { 
-                            openCouponApplicableModal.status &&
-                              <CouponApplicableModal
-                                open={openCouponApplicableModal.status}
-                                onClose={()=> setOpenCouponApplicableModal(modal=> ({...modal, status: false, code:''}))}
-                                couponLabel={openCouponApplicableModal.code}
-                                products={openCouponApplicableModal.products}
-                                categories={openCouponApplicableModal.categories}
-                              />
-                        }
+                    {openCouponApplicableModal.status && (
 
+                        <CouponApplicableModal
+                            open={openCouponApplicableModal.status}
+                            onClose={() =>
+                                setOpenCouponApplicableModal((modal) => ({ ...modal, status: false, code: "" }))
+                            }
+                            couponLabel={openCouponApplicableModal.code}
+                            products={openCouponApplicableModal.products}
+                            categories={openCouponApplicableModal.categories}
+                        />
+
+                    )}
                 </section>
-
             </main>
 
             <OfferShowcase />
 
-            <Footer/>
-
+            <Footer />
+            
         </>
     )
 }

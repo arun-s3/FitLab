@@ -1,82 +1,97 @@
-import React, {useState, useEffect} from 'react'
-import {useSelector, useDispatch} from 'react-redux'
-import {motion, AnimatePresence} from "framer-motion"
+import React, { useState, useEffect } from "react"
+import { useSelector, useDispatch } from "react-redux"
+import { motion, AnimatePresence } from "framer-motion"
 
-import {MapPin, Minus, X} from 'lucide-react'
-import {toast as sonnerToast} from 'sonner'
+import { MapPin, Minus, X } from "lucide-react"
+import { toast as sonnerToast } from "sonner"
 
-import PaypalPayment from '../PaymentPages/PayPalPayment'
-import {SiteSecondaryFillImpButton} from '../../../Components/UI/SiteButtons/SiteButtons'
-import {CustomHashLoader} from '../../../Components/UI/Loader/Loader'
-import {removeCoupon, resetCartStates} from '../../../Slices/cartSlice'
+import PaypalPayment from "../PaymentPages/PayPalPayment"
+import { SiteSecondaryFillImpButton } from "../../../Components/UI/SiteButtons/SiteButtons"
+import { CustomHashLoader } from "../../../Components/UI/Loader/Loader"
+import { removeCoupon } from "../../../Slices/cartSlice"
 import useTermsConsent from "../../../Hooks/useTermsConsent"
 import TermsDisclaimer from "../../../Components/UI/TermsDisclaimer/TermsDisclaimer"
 
 
-export default function OrderSummary({shippingAddress, paymentMethod, cancelPaymentMethods, onApplyDiscount, placeOrder, onPaymentError
-    , isLoading, isRequirementsFulfilled, setUserTermsConsent, didUserConsentTerms}){
+export default function OrderSummary({
+    shippingAddress,
+    paymentMethod,
+    cancelPaymentMethods,
+    onApplyDiscount,
+    placeOrder,
+    onPaymentError,
+    isLoading,
+    isRequirementsFulfilled,
+    setUserTermsConsent,
+    didUserConsentTerms,
+}) {
 
-    const [couponCode, setCouponCode] = useState('')
-    const [appliedDiscount, setAppliedDiscount] = useState('')
+    const [couponCode, setCouponCode] = useState("")
+    const [appliedDiscount, setAppliedDiscount] = useState("")
     const [discountAmount, setDiscountAmount] = useState(0)
 
     const [isCouponFocused, setIsCouponFocused] = useState(false)
 
-    const {cart} = useSelector(state=> state.cart)
+    const { cart } = useSelector((state) => state.cart)
 
     const dispatch = useDispatch()
 
-    const {acceptTermsOnFirstAction} = useTermsConsent()
+    const { acceptTermsOnFirstAction } = useTermsConsent()
 
-    const clearCoupon = ()=> {
+    const clearCoupon = () => {
         onApplyDiscount(null)
         sonnerToast.warning("Removing coupon...")
         dispatch(removeCoupon())
     }
 
-    useEffect(()=> {
-        if(paymentMethod === 'paypal' || paymentMethod === 'cards') {
+    useEffect(() => {
+        if (paymentMethod === "paypal" || paymentMethod === "cards") {
             const requirementsFulfilledStatus = isRequirementsFulfilled()
-            if(!requirementsFulfilledStatus) {
+            if (!requirementsFulfilledStatus) {
                 cancelPaymentMethods()
             }
         }
     }, [paymentMethod])
 
-    useEffect(()=> {
-        if(!didUserConsentTerms) {
+    useEffect(() => {
+        if (!didUserConsentTerms) {
             cancelPaymentMethods()
         }
     }, [didUserConsentTerms])
-    
+
 
     return (
         <motion.div
             className='self-baseline mt-[-20px] w-full lg:w-auto border border-inputBorderSecondary lg:border-0 
-           rounded-[7px] lg:rounded-none'
+                rounded-[7px] lg:rounded-none'
             initial={{ opacity: 0, x: 40 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}>
+            transition={{ duration: 0.5, ease: "easeOut" }}
+        >
             <motion.div
                 id='checkout-payment'
                 className='w-full lg:w-[400px] bg-white rounded-lg shadow-lg p-6'
                 style={{ boxShadow: "2px 2px 25px rgba(0,0,0,0.1)" }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.45, ease: "easeOut" }}>
+                transition={{ duration: 0.45, ease: "easeOut" }}
+            >
                 <motion.h2
                     className='text-[20px ] text-secondary font-[650] tracking-[0.5px] mb-6'
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1, duration: 0.4 }}>
+                    transition={{ delay: 0.1, duration: 0.4 }}
+                >
                     ORDER SUMMARY
                 </motion.h2>
+
                 {shippingAddress && (
                     <motion.div
                         className='mb-6 p-4 border border-primary rounded-lg'
                         initial={{ opacity: 0, scale: 0.97 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: 0.15, duration: 0.35 }}>
+                        transition={{ delay: 0.15, duration: 0.35 }}
+                    >
                         <div className='flex items-center mb-2'>
                             <MapPin className='w-5 h-5 text-gray-500 mr-2' />
                             <h3 className='font-semibold text-[16px]'>Delivery Address</h3>
@@ -86,7 +101,8 @@ export default function OrderSummary({shippingAddress, paymentMethod, cancelPaym
                                 className='text-[14px] text-gray-700 capitalize'
                                 initial={{ opacity: 0, y: 5 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.2, duration: 0.35 }}>
+                                transition={{ delay: 0.2, duration: 0.35 }}
+                            >
                                 <p className='break-words whitespace-pre-wrap line-clamp-3'>
                                     {shippingAddress.firstName + " " + shippingAddress.lastName}
                                 </p>
@@ -111,7 +127,8 @@ export default function OrderSummary({shippingAddress, paymentMethod, cancelPaym
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.4 }}>
+                            transition={{ duration: 0.4 }}
+                        >
                             <label
                                 htmlFor='couponCode'
                                 className={`absolute ${
@@ -136,13 +153,15 @@ export default function OrderSummary({shippingAddress, paymentMethod, cancelPaym
                                 <motion.button
                                     className={`text-orange-500 px-4 py-[0.55rem] max-xs-sm2:ml-[-75px] border border-l-0 rounded-r-md 
                                     ${isCouponFocused ? "border-primary" : ""} hover:text-orange-600 transition-colors`}
-                                    onClick={onApplyDiscount}>
+                                    onClick={onApplyDiscount}
+                                >
                                     Apply
                                 </motion.button>
                             </div>
                         </motion.div>
                     )}
                 </AnimatePresence>
+
                 <AnimatePresence>
                     {appliedDiscount && (
                         <motion.div
@@ -150,7 +169,8 @@ export default function OrderSummary({shippingAddress, paymentMethod, cancelPaym
                             initial={{ opacity: 0, y: 5 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -5 }}
-                            transition={{ duration: 0.35 }}>
+                            transition={{ duration: 0.35 }}
+                        >
                             <div className='flex-1'>
                                 <p className='text-gray-600'>Discount</p>
                                 <p className='text-gray-500'>{appliedDiscount}</p>
@@ -176,10 +196,13 @@ export default function OrderSummary({shippingAddress, paymentMethod, cancelPaym
                         <motion.div
                             className='flex justify-between !mt-[2rem]'
                             initial={{ opacity: 0, y: 5 }}
-                            animate={{ opacity: 1, y: 0 }}> 
+                            animate={{ opacity: 1, y: 0 }}
+                        >
                             <div className='flex items-center gap-[7px]'>
-                                <X className='w-[15px] h-[15px] text-red-500 cursor-pointer'
-                                    onClick={()=> clearCoupon()}/>
+                                <X
+                                    className='w-[15px] h-[15px] text-red-500 cursor-pointer'
+                                    onClick={() => clearCoupon()}
+                                />
                                 <span className='text-green-600'> Coupon Discount </span>
                             </div>
                             <span className='flex items-center gap-[5px]'>
@@ -191,7 +214,8 @@ export default function OrderSummary({shippingAddress, paymentMethod, cancelPaym
                         className='flex justify-between text-lg font-bold pt-2'
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.2, duration: 0.4 }}>
+                        transition={{ delay: 0.2, duration: 0.4 }}
+                    >
                         <span> Total </span>
                         <span> ₹{cart.absoluteTotalWithTaxes.toFixed(2)} </span>
                     </motion.div>
@@ -203,11 +227,13 @@ export default function OrderSummary({shippingAddress, paymentMethod, cancelPaym
                         onChecked={(status) => setUserTermsConsent(status)}
                     />
                 </div>
+
                 <motion.div
                     className=''
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.3, duration: 0.35 }}>
+                    transition={{ delay: 0.3, duration: 0.35 }}
+                >
                     {paymentMethod !== "paypal" ? (
                         <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.96 }}>
                             <SiteSecondaryFillImpButton
@@ -222,7 +248,8 @@ export default function OrderSummary({shippingAddress, paymentMethod, cancelPaym
                                             { duration: 5500 },
                                         )
                                     }
-                                }}>
+                                }}
+                            >
                                 {isLoading ? (
                                     <CustomHashLoader loading={isLoading} color='#fff' />
                                 ) : paymentMethod === "cashOnDelivery" || paymentMethod === "" ? (
@@ -234,11 +261,13 @@ export default function OrderSummary({shippingAddress, paymentMethod, cancelPaym
                         </motion.div>
                     ) : cart && cart?.absoluteTotalWithTaxes && didUserConsentTerms ? (
                         <motion.div className='mt-[1rem]' initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+
                             <PaypalPayment
                                 amount={cart.absoluteTotalWithTaxes.toFixed(2)}
                                 onPayment={(id) => handleStripeOrPaypalPayment("paypal", id)}
                                 onError={(msg = null) => onPaymentError(msg)}
                             />
+                            
                         </motion.div>
                     ) : null}
                 </motion.div>

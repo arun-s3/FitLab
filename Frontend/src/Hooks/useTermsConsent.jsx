@@ -7,35 +7,37 @@ import { termsVersion } from "../Data/TermsAndConditions"
 
 const useTermsConsent = () => {
 
-  const dispatch = useDispatch()
-  const { updatedTermsAcceptance, user } = useSelector((state) => state.user)
+    const dispatch = useDispatch()
+    const { updatedTermsAcceptance, user } = useSelector((state) => state.user)
 
-  const hasTriggeredRef = useRef(false)
+    const hasTriggeredRef = useRef(false)
 
-  const acceptTermsOnFirstAction = () => {
-    if (user?.hasAcceptedTerms && user?.termsVersion === termsVersion) return
+    const acceptTermsOnFirstAction = () => {
+        if (user?.hasAcceptedTerms && user?.termsVersion === termsVersion) return
 
-    if (hasTriggeredRef.current) return
+        if (hasTriggeredRef.current) return
 
-    const consent = {
-      hasAcceptedTerms: true,
-      termsAcceptedAt: new Date().toISOString(),
-      termsVersion,
+        const consent = {
+            hasAcceptedTerms: true,
+            termsAcceptedAt: new Date().toISOString(),
+            termsVersion,
+        }
+
+        dispatch(updateTermsAcceptance({ consent }))
+        hasTriggeredRef.current = true
     }
 
-    dispatch(updateTermsAcceptance({ consent }))
-    hasTriggeredRef.current = true
-  }
+    useEffect(() => {
+        if (updatedTermsAcceptance) {
+            dispatch(resetStates())
+        }
+    }, [updatedTermsAcceptance, dispatch])
 
-  useEffect(() => {
-    if (updatedTermsAcceptance) {
-      dispatch(resetStates())
+
+    return {
+        acceptTermsOnFirstAction,
     }
-  }, [updatedTermsAcceptance, dispatch])
-
-  return {
-    acceptTermsOnFirstAction,
-  }
+    
 }
 
 export default useTermsConsent

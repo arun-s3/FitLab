@@ -4,192 +4,199 @@ import { motion } from "framer-motion"
 import { Clock, Users, ChevronsLeftRightEllipsis, CheckCircle } from "lucide-react"
 
 
-export default function WaitingRoom({ socketContextItems, isAdminBusy, onCallStart, onEndCall}) {
+export default function WaitingRoom({ socketContextItems, isAdminBusy, onCallStart, onEndCall }) {
 
-  const [waitTime, setWaitTime] = useState(0)
-  const [queuePosition, setQueuePosition] = useState(null)
+    const [waitTime, setWaitTime] = useState(0)
+    const [queuePosition, setQueuePosition] = useState(null)
 
-  const [isConnected, setIsConnected] = useState(false)
+    const [isConnected, setIsConnected] = useState(false)
 
-  const {socket, userId, username} = socketContextItems
+    const { socket, userId, username } = socketContextItems
 
-  useEffect(() => {
-    if(socket){
+    useEffect(() => {
+        if (socket) {
+            if (userId) {
+                socket.emit("joinQueue", { userId, username })
 
-      if(userId){
-        socket.emit("joinQueue", {userId, username})
+                socket.on("JoinedQueue", () => setIsConnected(true))
 
-        socket.on("JoinedQueue", ()=> setIsConnected(true))
+                socket.on("queueUpdate", (data) => {
+                    setQueuePosition(data.position)
+                    setWaitTime(data.estimatedWaitTime)
+                })
 
-        socket.on("queueUpdate", (data) => {
-          setQueuePosition(data.position)
-          setWaitTime(data.estimatedWaitTime)
-        })
+                socket.on("callReady", (data) => {
+                    onCallStart(data.sessionId)
+                })
+            }
+            return () => {
+                socket.off("queueUpdate")
+                socket.off("callReady")
+            }
+        }
+    }, [onCallStart, socket])
 
-        socket.on("callReady", (data) => {
-          onCallStart(data.sessionId)
-        })
-
-      }
-      return () => {
-        socket.off("queueUpdate")
-        socket.off("callReady")
-      }
+    const cancelCall = () => {
+        socket.emit("leaveQueue")
+        onEndCall()
     }
-  }, [onCallStart, socket])
 
-  const cancelCall = ()=> {
-     socket.emit("leaveQueue")
-     onEndCall()
-  }
-  
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="relative overflow-hidden"
-    >
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-3xl"></div>
-
-      <div className="relative bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/50 p-8 md:p-12 text-center">
-        <div className="absolute top-4 right-4 w-20 h-20 bg-blue-200/30 rounded-full blur-xl"></div>
-        <div className="absolute bottom-4 left-4 w-16 h-16 bg-purple-200/30 rounded-full blur-xl"></div>
-
+    return (
         <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.2 }}
-          className="relative w-32 h-32 mx-auto mb-8"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className='relative overflow-hidden'
         >
-          <div className={`absolute inset-0 bg-gradient-to-br
-               ${
-                isConnected && !isAdminBusy ? 
-                  'from-blue-400 to-purple-600' 
-                  : isConnected && isAdminBusy ? 
-                  'from-yellow-500 to-orange-500'
-                  : 'from-red-100 to-red-400' 
-                } rounded-full`}>
-              
-          </div>
-          <div className="absolute inset-2 bg-white rounded-full flex items-center justify-center">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+            <div className='absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-3xl'></div>
+
+            <div className='relative bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/50 
+                p-8 md:p-12 text-center'
             >
-              <Clock className={`h-12 w-12 ${isConnected && !isAdminBusy ? 
-                                            ' text-blue-600'
-                                            : isConnected && isAdminBusy ?
-                                            'text-primryDark'
-                                            : 'text-red-500'}`
-              } />
-            </motion.div>
-          </div>
+                <div className='absolute top-4 right-4 w-20 h-20 bg-blue-200/30 rounded-full blur-xl'></div>
+                <div className='absolute bottom-4 left-4 w-16 h-16 bg-purple-200/30 rounded-full blur-xl'></div>
 
-          <motion.div
-            animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
-            transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
-            className={`absolute inset-0 
-              ${isConnected && !isAdminBusy ? 
-                'bg-blue-400 ' 
-                : isConnected && isAdminBusy ? 
-                'bg-yellow-300' 
-                : 'bg-red-200'} rounded-full`}
-          ></motion.div>
-        </motion.div>
+                <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.2 }}
+                    className='relative w-32 h-32 mx-auto mb-8'
+                >
+                    <div className={`absolute inset-0 bg-gradient-to-br
+                        ${
+                            isConnected && !isAdminBusy
+                                ? "from-blue-400 to-purple-600"
+                                : isConnected && isAdminBusy
+                                  ? "from-yellow-500 to-orange-500"
+                                  : "from-red-100 to-red-400"
+                        } rounded-full`}>
+                    </div>
+                    <div className='absolute inset-2 bg-white rounded-full flex items-center justify-center'>
+                        <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 3, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+                        >
+                            <Clock
+                                className={`h-12 w-12 ${
+                                    isConnected && !isAdminBusy
+                                        ? " text-blue-600"
+                                        : isConnected && isAdminBusy
+                                          ? "text-primryDark"
+                                          : "text-red-500"
+                                }`}
+                            />
+                        </motion.div>
+                    </div>
 
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="text-[30px] font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4"
-        >
-          {
-            isConnected && !isAdminBusy? 
-            "You're in the waiting room" 
-            : isConnected && isAdminBusy?
-            "Experts are busy right now! Please stay with us or do try after sometime!"
-            :"Error during connection. Please try after sometime!"
-          }
-        </motion.h2>
+                    <motion.div
+                        animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
+                        transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
+                        className={`absolute inset-0 
+                            ${
+                                isConnected && !isAdminBusy
+                                    ? "bg-blue-400 "
+                                    : isConnected && isAdminBusy
+                                      ? "bg-yellow-300"
+                                      : "bg-red-200"
+                            } rounded-full`}
+                    >
+                    </motion.div>
+                </motion.div>
 
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="text-gray-600 mb-8 text-[15px] leading-relaxed"
-        >
-          {
-            isConnected && !isAdminBusy ?
-              "An expert will join you shortly. Please stay on this page while we connect you." 
-              : isConnected && isAdminBusy ?
-              "🕒 All our experts are currently assisting other customers.We will connect you as soon as someone is available."
-              :"We're having trouble connecting. Please check your internet connection and try again. If the issue persists, our support team will reach out shortly."
-          }
-        </motion.p>
+                <motion.h2
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className='text-[30px] font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text 
+                        text-transparent mb-4'
+                >
+                    {isConnected && !isAdminBusy
+                        ? "You're in the waiting room"
+                        : isConnected && isAdminBusy
+                          ? "Experts are busy right now! Please stay with us or do try after sometime!"
+                          : "Error during connection. Please try after sometime!"}
+                </motion.h2>
 
-        <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 ${!isConnected && 'hidden'}`}>
-          {queuePosition && (
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.5 }}
-              className="bg-gradient-to-br from-blue-50 to-indigo-100 px-6 py-4 rounded-2xl border border-blue-200/50"
-            >
-              <div className="flex items-center justify-center mb-3">
-                <Users className="h-6 w-6 text-blue-600 mr-2" />
-                <span className="text-blue-800 font-semibold">Queue Position</span>
-              </div>
-              <div className="text-3xl font-bold text-blue-600">{queuePosition}</div>
-              <p className="text-blue-700/70 text-sm mt-1">in line</p>
-            </motion.div>
-          )}
+                <motion.p
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                    className='text-gray-600 mb-8 text-[15px] leading-relaxed'>
+                    {isConnected && !isAdminBusy
+                        ? "An expert will join you shortly. Please stay on this page while we connect you."
+                        : isConnected && isAdminBusy
+                          ? "🕒 All our experts are currently assisting other customers.We will connect you as soon as someone is available."
+                          : "We're having trouble connecting. Please check your internet connection and try again. If the issue persists, our support team will reach out shortly."}
+                </motion.p>
 
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.6 }}
-            className="bg-gradient-to-br from-green-50 to-emerald-100 px-6 py-4 rounded-2xl border border-green-200/50"
-          >
-            <div className="flex items-center justify-center mb-3">
-              <Clock className="h-6 w-6 text-green-600 mr-2" />
-              <span className="text-green-800 font-semibold">Estimated Wait</span>
+                <div className={`grid grid-cols-1 md:grid-cols-2 gap-6 mb-8 ${!isConnected && "hidden"}`}>
+                    {queuePosition && (
+                        <motion.div
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.5 }}
+                            className='bg-gradient-to-br from-blue-50 to-indigo-100 px-6 py-4 rounded-2xl border border-blue-200/50'
+                        >
+                            <div className='flex items-center justify-center mb-3'>
+                                <Users className='h-6 w-6 text-blue-600 mr-2' />
+                                <span className='text-blue-800 font-semibold'>Queue Position</span>
+                            </div>
+                            <div className='text-3xl font-bold text-blue-600'>{queuePosition}</div>
+                            <p className='text-blue-700/70 text-sm mt-1'>in line</p>
+                        </motion.div>
+                    )}
+
+                    <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.6 }}
+                        className='bg-gradient-to-br from-green-50 to-emerald-100 px-6 py-4 rounded-2xl border border-green-200/50'
+                    >
+                        <div className='flex items-center justify-center mb-3'>
+                            <Clock className='h-6 w-6 text-green-600 mr-2' />
+                            <span className='text-green-800 font-semibold'>Estimated Wait</span>
+                        </div>
+                        <div className='text-3xl font-bold text-green-600'>
+                            {!isAdminBusy ? waitTime || "~2" : waitTime * 15}
+                        </div>
+                        <p className='text-green-700/70 text-sm mt-1'>minutes</p>
+                    </motion.div>
+                </div>
+
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.7 }}
+                    className='flex items-center justify-center space-x-2 mb-[1.3rem] text-green-600'
+                >
+                    <ChevronsLeftRightEllipsis
+                        className={`h-[27px] w-[27px] ${isConnected ? "text-green-500" : "text-red-500"}`}
+                    />
+                    <span className={`text-[14px] font-medium ${!isConnected && "text-muted"}`}>
+                        {isConnected ? "Connected and ready" : "Connection Error"}
+                    </span>
+                    {isConnected && <CheckCircle className='h-[17px] w-[17px]' />}
+                </motion.div>
+
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.8 }}
+                    className='flex justify-center'>
+                    <button
+                        className='group relative overflow-hidden bg-red-50 text-red-600 hover:bg-gradient-to-r
+                            hover:from-red-500 hover:to-red-400 hover:text-white py-3 px-8 rounded-full font-semibold
+                            border border-red-200 hover:border-transparent transition-all duration-300
+                            transform hover:scale-105 shadow-lg hover:shadow-xl'
+                    >
+                        <span className='relative z-10' onClick={cancelCall}>
+                            {" "}
+                            Cancel Request{" "}
+                        </span>
+                    </button>
+                </motion.div>
+                
             </div>
-            <div className="text-3xl font-bold text-green-600">
-              {!isAdminBusy ? waitTime || "~2" : waitTime * 15}
-            </div>
-            <p className="text-green-700/70 text-sm mt-1">minutes</p>
-          </motion.div>
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.7 }}
-          className="flex items-center justify-center space-x-2 mb-[1.3rem] text-green-600"
-        >
-          <ChevronsLeftRightEllipsis className={`h-[27px] w-[27px] ${isConnected ? 'text-green-500' : 'text-red-500'}`} />
-          <span className={`text-[14px] font-medium ${!isConnected && 'text-muted'}`}> 
-            {isConnected ? 'Connected and ready' : 'Connection Error'} 
-          </span>
-          {isConnected && <CheckCircle className="h-[17px] w-[17px]" />}
         </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-          className="flex justify-center"
-        >
-            <button className="group relative overflow-hidden bg-red-50 text-red-600 hover:bg-gradient-to-r
-             hover:from-red-500 hover:to-red-400 hover:text-white py-3 px-8 rounded-full font-semibold
-               border border-red-200 hover:border-transparent transition-all duration-300
-                transform hover:scale-105 shadow-lg hover:shadow-xl">
-
-            <span className="relative z-10" onClick={cancelCall}> Cancel Request </span>
-          </button>
-        </motion.div>
-      </div>
-    </motion.div>
-  )
+    )
 }

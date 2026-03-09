@@ -5,13 +5,13 @@ import {motion} from "framer-motion"
 
 import {Search} from 'lucide-react'
 
-import SalesRevenueSection from "./Components/SalesRevenueSection"
-import OrdersFulfillmentSection from "./Components/OrderFulfillmentSection."
-import CustomerInsightsSection from "./Components/CustomerInsightsSection"
-import InventoryInsightsSection from './Components/InventoryInsightsSection'
-import CouponsInsightsSection from './Components/CouponsInsightsSection'
-import OffersInsightsSection from './Components/OffersInsightsSection'
-import PaymentsInsightsSection from './Components/PaymentsInsightsSection'
+import SalesRevenueSection from "./SalesRevenueSection"
+import OrdersFulfillmentSection from "./OrderFulfillmentSection."
+import CustomerInsightsSection from "./CustomerInsightsSection"
+import InventoryInsightsSection from './InventoryInsightsSection'
+import CouponsInsightsSection from './CouponsInsightsSection'
+import OffersInsightsSection from './OffersInsightsSection'
+import PaymentsInsightsSection from './PaymentsInsightsSection'
 
 import AdminTitleSection from '../../../Components/Layout/AdminTitleSection/AdminTitleSection'
 

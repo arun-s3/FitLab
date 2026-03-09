@@ -1,14 +1,14 @@
-import React from 'react'
-import {Route, Routes} from 'react-router-dom'
+import React from "react"
+import { Route, Routes } from "react-router-dom"
 
-import RestrictedEntryRoutes from '../Components/Route-guards/RestrictedEntryRoutes/RestrictedEntryRoutes'
+import RestrictedEntryRoutes from "../Components/Route-guards/RestrictedEntryRoutes/RestrictedEntryRoutes"
 
-import ErrorPage403 from '../Pages/Errors/403ErrorPage'
-import ErrorPage401 from '../Pages/Errors/401ErrorPage'
-import ErrorPage404 from '../Pages/Errors/404ErrorPage'
+import ErrorPage403 from "../Pages/Errors/403ErrorPage"
+import ErrorPage401 from "../Pages/Errors/401ErrorPage"
+import ErrorPage404 from "../Pages/Errors/404ErrorPage"
 
 
-export default function ErrorRoutes(){
+export default function ErrorRoutes() {
     
     return (
         <Routes>
@@ -20,5 +20,4 @@ export default function ErrorRoutes(){
             <Route path='404' element={<ErrorPage404 />} />
         </Routes>
     )
-    
 }

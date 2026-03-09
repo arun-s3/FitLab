@@ -1,11 +1,11 @@
-import React, {lazy, Suspense} from 'react'
-import {useSelector} from 'react-redux'
+import React, { lazy, Suspense } from "react"
+import { useSelector } from "react-redux"
 
 import HeroSection from "./HeroSection"
-import Header from '../../../Components/Layout/Header/Header'
-import BreadcrumbBar from '../../../Components/Layout/BreadcrumbBar/BreadcrumbBar'
-import Footer from '../../../Components/Layout/Footer/Footer'
-import CTASection from './CTASection'
+import Header from "../../../Components/Layout/Header/Header"
+import BreadcrumbBar from "../../../Components/Layout/BreadcrumbBar/BreadcrumbBar"
+import Footer from "../../../Components/Layout/Footer/Footer"
+import CTASection from "./CTASection"
 
 const StatsSection = lazy(() => import("./StatsSection"))
 const VisionSection = lazy(() => import("./VisionSection"))
@@ -14,71 +14,65 @@ const TimelineSection = lazy(() => import("./TimelineSection"))
 const CoreValuesSection = lazy(() => import("./CoreValuesSection"))
 const FeaturesSection = lazy(() => import("./FeaturesSection"))
 
-import Fallback from '../../../Components/Common/FallbackSuspense/Fallback'
+import Fallback from "../../../Components/Common/FallbackSuspense/Fallback"
 
 
 export default function AboutUsPage() {
 
-  const headerBg = {
-     backgroundImage: "url('/Images/header-bg.png')",
-     backgrounSize: 'cover'
-  }
+    const headerBg = {
+        backgroundImage: "url('/Images/header-bg.png')",
+        backgrounSize: "cover",
+    }
 
-  const {user} = useSelector(state=> state.user)
+    const { user } = useSelector((state) => state.user)
 
 
-  return (
-    <section id='ShoppingCartPage'>
+    return (
+        <section id='ShoppingCartPage'>
+            
+            <header style={headerBg} className='h-[5rem]'>
+                <Header currentPageChatBoxStatus={true} />
+            </header>
 
-      <header style={headerBg} className='h-[5rem]'>
-    
-        <Header currentPageChatBoxStatus={true}/>
-    
-      </header>
-    
-      <BreadcrumbBar heading='About Us'/>
+            <BreadcrumbBar heading='About Us' />
 
-      <main className='mt-[5px]'>
+            <main className='mt-[5px]'>
+                <div className='min-h-screen bg-white overflow-hidden'>
 
-        <div className="min-h-screen bg-white overflow-hidden">
+                    <HeroSection />
 
-          <HeroSection />
+                    <Suspense fallback={<Fallback variant='wave' height='h-32' />}>
+                        <StatsSection />
+                    </Suspense>
 
-          <Suspense fallback={<Fallback variant="wave" height="h-32" />}>
-            <StatsSection />
-          </Suspense>
+                    <Suspense fallback={<Fallback variant='products' height='h-32' />}>
+                        <VisionSection />
+                    </Suspense>
 
-          <Suspense fallback={<Fallback variant="products" height="h-32" />}>
-            <VisionSection />
-          </Suspense>
+                    <Suspense fallback={<Fallback variant='products' height='h-32' />}>
+                        <ReviewsSection />
+                    </Suspense>
 
-          <Suspense fallback={<Fallback variant="products" height="h-32" />}>
-            <ReviewsSection />
-          </Suspense>
+                    <Suspense fallback={<Fallback variant='wave' height='h-32' />}>
+                        <TimelineSection />
+                    </Suspense>
 
-          <Suspense fallback={<Fallback variant="wave" height="h-32" />}>
-            <TimelineSection />
-          </Suspense>
+                    <Suspense fallback={<Fallback variant='pulse' height='h-32' />}>
+                        <CoreValuesSection />
+                    </Suspense>
 
-          <Suspense fallback={<Fallback variant="pulse" height="h-32" />}>
-            <CoreValuesSection />
-          </Suspense>
+                    <Suspense fallback={<Fallback variant='products' height='h-32' />}>
+                        <FeaturesSection />
+                    </Suspense>
 
-          <Suspense fallback={<Fallback variant="products" height="h-32" />}>
-            <FeaturesSection />
-          </Suspense>
+                    {!user && <CTASection />}
 
-          {
-            !user &&
-              <CTASection />
-          }
+                </div>
 
-        </div>
+            </main>
 
-      </main>
+            <Footer />
 
-      <Footer/>
-    
-    </section>
-  )
+        </section>
+    )
 }

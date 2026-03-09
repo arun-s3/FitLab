@@ -1,42 +1,44 @@
-import React, {useState, useEffect, useRef} from 'react'
+import React, { useState, useEffect, useRef } from "react"
 
 
 export default function useStickyDropdown(dropdownKeys) {
-
-  const [openStickyDropdowns, setOpenStickyDropdowns] = useState( dropdownKeys.reduce((acc, key) => ({ ...acc, [key]: false }), {}) )
-
-  const stickyDropdownRefs = dropdownKeys.reduce( (acc, key) => ({ ...acc, [key]: useRef(null) }), {} )
-
-  useEffect(() => {
-    const handleClickOutsideStickyDropdowns = (e) => {
-      const isOutside = !Object.values(stickyDropdownRefs).some((ref)=> ref.current?.contains(e.target))
-
-      if (isOutside) {
-        setOpenStickyDropdowns( prevState=> 
-          Object.keys(prevState).reduce((newState, key) => {
-            newState[key] = false
-            return newState;
-          }, {})
-        )
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutsideStickyDropdowns)
-
-    return ()=> {
-      document.removeEventListener('mousedown', handleClickOutsideStickyDropdowns)
-    }
-  }, [stickyDropdownRefs, openStickyDropdowns])
-
-  const toggleStickyDropdown = (e, dropdownKey)=> {
-    e.stopPropagation()
-
-    setOpenStickyDropdowns((prevState) =>
-      Object.keys(prevState).reduce((newState, key) => {
-        newState[key] = key === dropdownKey ? !prevState[key] : false
-        return newState;
-      }, {})
+    
+    const [openStickyDropdowns, setOpenStickyDropdowns] = useState(
+        dropdownKeys.reduce((acc, key) => ({ ...acc, [key]: false }), {}),
     )
-  }
 
-  return {openStickyDropdowns, stickyDropdownRefs, toggleStickyDropdown}
+    const stickyDropdownRefs = dropdownKeys.reduce((acc, key) => ({ ...acc, [key]: useRef(null) }), {})
+
+    useEffect(() => {
+        const handleClickOutsideStickyDropdowns = (e) => {
+            const isOutside = !Object.values(stickyDropdownRefs).some((ref) => ref.current?.contains(e.target))
+
+            if (isOutside) {
+                setOpenStickyDropdowns((prevState) =>
+                    Object.keys(prevState).reduce((newState, key) => {
+                        newState[key] = false
+                        return newState
+                    }, {}),
+                )
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutsideStickyDropdowns)
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutsideStickyDropdowns)
+        }
+    }, [stickyDropdownRefs, openStickyDropdowns])
+
+    const toggleStickyDropdown = (e, dropdownKey) => {
+        e.stopPropagation()
+
+        setOpenStickyDropdowns((prevState) =>
+            Object.keys(prevState).reduce((newState, key) => {
+                newState[key] = key === dropdownKey ? !prevState[key] : false
+                return newState
+            }, {}),
+        )
+    }
+
+    return { openStickyDropdowns, stickyDropdownRefs, toggleStickyDropdown }
 }

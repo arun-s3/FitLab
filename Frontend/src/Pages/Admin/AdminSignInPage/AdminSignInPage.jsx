@@ -1,27 +1,27 @@
-import React,{useState, useEffect} from 'react'
-import './AdminSignInPage.css'
-import {Link,useNavigate} from 'react-router-dom'
-import {useSelector,useDispatch} from 'react-redux'
+import React, { useState, useEffect } from "react"
+import "./AdminSignInPage.css"
+import { Link, useNavigate } from "react-router-dom"
+import { useSelector, useDispatch } from "react-redux"
 
-import {toast as sonnerToast} from 'sonner'
-import {toast} from 'react-toastify'
-import {RiAdminLine} from "react-icons/ri"
-import {Eye, EyeOff} from 'lucide-react'
+import { toast as sonnerToast } from "sonner"
+import { toast } from "react-toastify"
+import { RiAdminLine } from "react-icons/ri"
+import { Eye, EyeOff } from "lucide-react"
 
-import {SiteButtonSquare} from '../../../Components/UI/SiteButtons/SiteButtons'
-import {CustomHashLoader} from '../../../Components/UI/Loader/Loader'
-import Logo from '../../../Components/UI/Logo/Logo'
-import {resetStates, adminSignin} from '../../../Slices/adminSlice'
+import { SiteButtonSquare } from "../../../Components/UI/SiteButtons/SiteButtons"
+import { CustomHashLoader } from "../../../Components/UI/Loader/Loader"
+import Logo from "../../../Components/UI/Logo/Logo"
+import { resetStates, adminSignin } from "../../../Slices/adminSlice"
 
 
-export default function AdminSignInPage(){
+export default function AdminSignInPage() {
 
     const bgImg = {
-        backgroundImage:"url('/Images/SignIn-bg.png')",
-        backgroundSize:"cover"
+        backgroundImage: "url('/Images/SignIn-bg.png')",
+        backgroundSize: "cover",
     }
 
-    const [formData,setFormData] = useState({})
+    const [formData, setFormData] = useState({})
 
     const [showPassword, setShowPassword] = useState(false)
 
@@ -29,15 +29,15 @@ export default function AdminSignInPage(){
 
     const dispatch = useDispatch()
 
-    const {adminError, adminLoading, adminSuccess, adminToken, admin} = useSelector((state)=> state.admin)
-    const {user} = useSelector(state=> state.user)
+    const { adminError, adminLoading, adminSuccess, adminToken, admin } = useSelector((state) => state.admin)
+    const { user } = useSelector((state) => state.user)
 
     useEffect(() => {
         if (adminSuccess) {
-            navigate('/admin/dashboard/business', { replace: true });
+            navigate("/admin/dashboard/business", { replace: true })
             dispatch(resetStates())
         } else if (!adminSuccess && admin) {
-            navigate('/admin/dashboard/business', {replace: true })
+            navigate("/admin/dashboard/business", { replace: true })
         }
     }, [adminSuccess, adminError, adminToken, dispatch, navigate])
 
@@ -45,84 +45,85 @@ export default function AdminSignInPage(){
         if (adminError) {
             sonnerToast.error(adminError)
             dispatch(resetStates())
-        } 
+        }
     }, [adminError])
 
-    useEffect(()=> {
-        if(user){
-            navigate('/error/401', {
+    useEffect(() => {
+        if (user) {
+            navigate("/error/401", {
                 replace: true,
                 state: { NoDirectAccess: true },
             })
         }
     }, [user])
-    
-    const handleChange = (e)=>{
-        setFormData({...formData, [e.target.id.toString()]:e.target.value})
+
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.id.toString()]: e.target.value })
     }
 
-    const displaySuccess = (e)=>{
-        e.target.nextElementSibling.style.visibility = 'hidden'
-        e.target.style.borderColor = 'green'
+    const displaySuccess = (e) => {
+        e.target.nextElementSibling.style.visibility = "hidden"
+        e.target.style.borderColor = "green"
     }
-    const displayError = (e,errorMessage)=>{
-        e.target.style.borderColor = 'red'
-        e.target.nextElementSibling.style.visibility = 'visible'
+    const displayError = (e, errorMessage) => {
+        e.target.style.borderColor = "red"
+        e.target.nextElementSibling.style.visibility = "visible"
         delete formData[e.target.id.toString()]
         e.target.nextElementSibling.innerText = errorMessage
     }
 
-    const handleInput = (e)=>{
-
+    const handleInput = (e) => {
         const emailPattern = /^([a-z\d\.-]+)@([a-z\d-]+)\.([a-z]{2,10})([\.a-z]?)$/
-        const usernamePattern =  /^[\w-]{5,15}$/
-        const passwordPattern = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[`~@#$%^&*()\-+={}\\/;:"'|,.?<>])[a-zA-Z\d`~@#$%^&*()\-+={}\\/;:"'|,.\?<>]{5,}/
+        const usernamePattern = /^[\w-]{5,15}$/
+        const passwordPattern =
+            /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[`~@#$%^&*()\-+={}\\/;:"'|,.?<>])[a-zA-Z\d`~@#$%^&*()\-+={}\\/;:"'|,.\?<>]{5,}/
 
-        if(!e.target.value.trim().length){
-            displayError(e,"This field cannot be empty")
+        if (!e.target.value.trim().length) {
+            displayError(e, "This field cannot be empty")
+        } else {
+            if (e.target.id == "identifier") {
+                if (new RegExp(`^(${emailPattern.source})|(${usernamePattern.source})$`).test(e.target.value)) {
+                    displaySuccess(e)
+                } else {
+                    displayError(e, "Enter a valid username or email address!")
+                }
+            } else {
+                if (passwordPattern.test(e.target.value)) {
+                    displaySuccess(e)
+                } else {
+                    displayError(
+                        e,
+                        "Password should have atleast a special characteer and a number. Must have atleast 5 letters!",
+                    )
+                }
+            }
         }
-        else{
-            if(e.target.id=="identifier"){
-                if(new RegExp(`^(${emailPattern.source})|(${usernamePattern.source})$`).test(e.target.value)){
-                    displaySuccess(e)
-                }
-                else{
-                    displayError(e,"Enter a valid username or email address!")
-                }
-            }
-            else{
-                if(passwordPattern.test(e.target.value)){
-                    displaySuccess(e)
-                }
-                else{
-                    displayError(e,"Password should have atleast a special characteer and a number. Must have atleast 5 letters!")
-                }
-            }
-          }
     }
 
-    const submitData = (e)=>{
+    const submitData = (e) => {
         e.preventDefault()
-        if((Object.keys(formData).length<2) || Object.values(formData).find(inputValues=>inputValues==='undefined')){
-            if(!Object.keys(formData).length){
+        if (
+            Object.keys(formData).length < 2 ||
+            Object.values(formData).find((inputValues) => inputValues === "undefined")
+        ) {
+            if (!Object.keys(formData).length) {
                 toast.error("Please enter all the fields!")
-            }
-            else{
+            } else {
                 sonnerToast.error("Please check the fields and submit again!")
             }
-        } 
-        else{
+        } else {
             dispatch(adminSignin(formData))
         }
-        
     }
-
     
+
     return (
         <section style={bgImg} className='h-[130vh]' id='admin-signin'>
+
             <main
-                className='transform translate-x-[-50%] translate-y-[-50%] absolute top-[50%] left-[50%] my-[2%] flex gap-[2rem] 
-                                    items-center'>
+                className='transform translate-x-[-50%] translate-y-[-50%] absolute top-[50%] left-[50%] my-[2%] flex 
+                    gap-[2rem] items-center'
+            >
                 <div className='hidden x-lg:inline-block'>
                     {/* <img src="/Images/Logo_main.png" alt="Fitlab"/> */}
                     <Logo customStyle={{ height: "30rem", width: "30rem" }} />
@@ -175,7 +176,8 @@ export default function AdminSignInPage(){
                                 type='button'
                                 data-password-toggle
                                 onClick={() => setShowPassword((status) => !status)}
-                                className='absolute top-[55%] -translate-y-1/2 right-4 text-secondary'>
+                                className='absolute top-[55%] -translate-y-1/2 right-4 text-secondary'
+                            >
                                 {showPassword ? (
                                     <Eye className='w-[18px] h-[18px]' />
                                 ) : (
@@ -183,6 +185,7 @@ export default function AdminSignInPage(){
                                 )}
                             </button>
                         </div>
+                        
                         <Link to='' className='text-[11px] s-sm:text-subtitleSmall1 text-secondary ml-[4px]'>
                             Forgot Password
                         </Link>
@@ -193,6 +196,7 @@ export default function AdminSignInPage(){
                             {adminLoading ? <CustomHashLoader adminLoading={adminLoading} /> : "Sign In"}
                         </SiteButtonSquare>
                     </form>
+
                 </div>
             </main>
         </section>

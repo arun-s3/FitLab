@@ -1,31 +1,29 @@
-import React, {useEffect} from 'react'
-import {Outlet, useNavigate} from "react-router-dom"
-import {useDispatch, useSelector} from "react-redux"
+import React, { useEffect } from "react"
+import { Outlet } from "react-router-dom"
+import { useDispatch } from "react-redux"
 
-import {resetStore} from "../../../Store/resetActions"
+import { resetStore } from "../../../Store/resetActions"
 
 
-export default function AdminRoutesWrapper(){
-
+export default function AdminRoutesWrapper() {
+    
     const dispatch = useDispatch()
 
-    useEffect(()=> {
-        const syncLogout = (e)=> {
-            if (e.key === "completeLogout"){
+    useEffect(() => {
+        const syncLogout = (e) => {
+            if (e.key === "completeLogout") {
                 dispatch(resetStore())
                 localStorage.clear()
                 sessionStorage.clear()
             }
         }
-        window.addEventListener("storage", syncLogout)  
+        window.addEventListener("storage", syncLogout)
         return () => {
-          window.removeEventListener("storage", syncLogout)
+            window.removeEventListener("storage", syncLogout)
         }
     }, [dispatch])
+
+
+    return <Outlet />
     
-
-    return (
-        <Outlet />
-    )
-
 }

@@ -1,219 +1,217 @@
-import React, {useState, useEffect, useContext} from "react"
-import './CouponPage.css'
-import {useLocation, useNavigate} from 'react-router-dom'
-import {useDispatch, useSelector} from 'react-redux'
+import React, { useState, useEffect, useContext } from "react"
+import "./CouponPage.css"
+import { useLocation, useNavigate } from "react-router-dom"
+import { useDispatch, useSelector } from "react-redux"
 
-import {toast as sonnerToast} from 'sonner'
+import { toast as sonnerToast } from "sonner"
 
 import CouponTools from "./CouponTools"
 import CouponList from "./CouponList"
 import RemoveCouponModal from "./RemoveCouponModal"
-import AuthPrompt from '../../../Components/Features/Auth/AuthPrompt/AuthPrompt'
-import {UserPageLayoutContext} from '../../../Layouts/UserPageLayout/UserPageLayout'
-import {ProtectedUserContext} from '../../../Components/Route-guards/ProtectedUserRoutes/ProtectedUserRoutes'
-import {getEligibleCoupons, getAllCoupons} from '../../../Slices/couponSlice'
-import {applyCoupon, removeCoupon, getTheCart, resetCartStates} from '../../../Slices/cartSlice'
-import PaginationV2 from '../../../Components/UI/PaginationV2/PaginationV2'
+import AuthPrompt from "../../../Components/Features/Auth/AuthPrompt/AuthPrompt"
+import PaginationV2 from "../../../Components/UI/PaginationV2/PaginationV2"
+
+import { UserPageLayoutContext } from "../../../Layouts/UserPageLayout/UserPageLayout"
+import { ProtectedUserContext } from "../../../Components/Route-guards/ProtectedUserRoutes/ProtectedUserRoutes"
+import { getEligibleCoupons, getAllCoupons } from "../../../Slices/couponSlice"
+import { applyCoupon, removeCoupon, getTheCart, resetCartStates } from "../../../Slices/cartSlice"
 
 
-export default function CouponPage(){
+export default function CouponPage() {
 
-  const {setBreadcrumbHeading, setPageLocation, setPageWrapperClasses, setSidebarTileClasses, setContentTileClasses, setPageBgUrl} = useContext(UserPageLayoutContext)
-  setBreadcrumbHeading('Coupons')
-  setPageWrapperClasses('gap-[2rem] px-4 xx-md:px-[4rem] pb-[10rem]')
-  setContentTileClasses('basis-full x-lg:basis-[75%] mt-[2rem] content-tile')
-  setSidebarTileClasses('hidden x-lg:inline-block')
-  setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.96),rgba(255,255,255,0.96)), url('/Images/admin-bg4.png')`)
+    const {
+        setBreadcrumbHeading,
+        setPageLocation,
+        setPageWrapperClasses,
+        setSidebarTileClasses,
+        setContentTileClasses,
+        setPageBgUrl,
+    } = useContext(UserPageLayoutContext)
+    setBreadcrumbHeading("Coupons")
+    setPageWrapperClasses("gap-[2rem] px-4 xx-md:px-[4rem] pb-[10rem]")
+    setContentTileClasses("basis-full x-lg:basis-[75%] mt-[2rem] content-tile")
+    setSidebarTileClasses("hidden x-lg:inline-block")
+    setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.96),rgba(255,255,255,0.96)), url('/Images/admin-bg4.png')`)
 
-  const {checkAuthOrOpenModal} = useContext(ProtectedUserContext)  
-  
-  const location = useLocation()
-  setPageLocation(location.pathname)
+    const { checkAuthOrOpenModal } = useContext(ProtectedUserContext)
 
-  const [coupons, setCoupons] = useState([])
+    const location = useLocation()
+    setPageLocation(location.pathname)
 
-  const [searchTerm, setSearchTerm] = useState("")
-  
-  const [limit, setLimit] = useState(6) 
-  const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(20) 
+    const [coupons, setCoupons] = useState([])
 
-  const [couponApplicableModal, setCouponApplicableModal] = useState({code: '', products: [], categories: []})
+    const [searchTerm, setSearchTerm] = useState("")
 
-  const [isRemoveModalOpen, setIsRemoveModalOpen] = useState({status: false, coupon: ''})
+    const [limit, setLimit] = useState(6)
+    const [currentPage, setCurrentPage] = useState(1)
+    const [totalPages, setTotalPages] = useState(20)
 
-  const [queryOptions, setQueryOptions] = useState({page: 1, limit: 6})
-  
-  const {coupons: allCoupons, totalCoupons} = useSelector(state=> state.coupons)
-  const {cart, couponApplied, couponRemoved, couponMessage, error} = useSelector(state=> state.cart)
-  const {user} = useSelector(state=> state.user)
-  
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
+    const [couponApplicableModal, setCouponApplicableModal] = useState({ code: "", products: [], categories: [] })
 
+    const [isRemoveModalOpen, setIsRemoveModalOpen] = useState({ status: false, coupon: "" })
 
-  useEffect(()=> {
-    if(allCoupons.length > 0){
-      setCoupons(allCoupons)
-      if(user) dispatch(getTheCart())
-    }
-    if(totalCoupons && totalPages && limit){
-      setTotalPages(Math.ceil(totalPages/limit))
-    }
-  }, [allCoupons, totalCoupons])
+    const [queryOptions, setQueryOptions] = useState({ page: 1, limit: 6 })
 
-  useEffect(()=> {
-    setQueryOptions(query=> {
-      return {...query, page: currentPage}
-    })
-  },[currentPage])
-  
-  useEffect(() => {
-    if(Object.keys(queryOptions).length > 0){
-      if(!user) {
-        dispatch( getAllCoupons({queryOptions}) )
-      }else dispatch( getEligibleCoupons({userId: user._id, queryOptions}) )
-    }
-  }, [queryOptions])
+    const { coupons: allCoupons, totalCoupons } = useSelector((state) => state.coupons)
+    const { cart, couponApplied, couponRemoved, couponMessage, error } = useSelector((state) => state.cart)
+    const { user } = useSelector((state) => state.user)
 
-  useEffect(()=> {
-    if(error){
-      sonnerToast.error(error)
-      dispatch(resetCartStates())
-    }
-  },[error])
+    const dispatch = useDispatch()
+    const navigate = useNavigate()
 
-  useEffect(()=> {
-    if(couponMessage){
-      sonnerToast.info(couponMessage)
-      dispatch(resetCartStates())
-    }
-  },[couponMessage])
-
-  useEffect(()=> {
-    if(couponApplied){
-      sonnerToast.success("Coupon applied successfully!")
-      dispatch(resetCartStates())
-      navigate('/shop', {
-        state: {
-          showCouponApplicableModal: true, 
-          couponCode: couponApplicableModal.code, 
-          products: couponApplicableModal.products, 
-          categories: couponApplicableModal.categories
+    useEffect(() => {
+        if (allCoupons.length > 0) {
+            setCoupons(allCoupons)
+            if (user) dispatch(getTheCart())
         }
-      })
-    }
-    if(couponRemoved){
-      sonnerToast.success("Coupon removed successfully!")
-      dispatch(resetCartStates())
-    }
-  },[couponApplied, couponRemoved])
+        if (totalCoupons && totalPages && limit) {
+            setTotalPages(Math.ceil(totalPages / limit))
+        }
+    }, [allCoupons, totalCoupons])
 
-  const filteredCoupons = coupons.filter(
-    (coupon) =>
-      coupon.code.toLowerCase().includes(searchTerm.toLowerCase())
-  )
-
-  const limitHandler = (value)=> {
-    setQueryOptions(query=> {
-      return {...query, limit: value}
-    })
-    setLimit(value)
-  }
-
-  const radioClickHandler = (e, sortBy)=>{
-    const value = Number.parseInt(e.target.value)
-    const checkStatus = queryOptions.sort === value
-    if(checkStatus){
-        return
-    }else{
-        setQueryOptions(query=> {
-          return {...query, sort: value, sortBy}
+    useEffect(() => {
+        setQueryOptions((query) => {
+            return { ...query, page: currentPage }
         })
-        const changeEvent = new Event('change', {bubbles:true})
-        e.target.dispatchEvent(changeEvent)
-    }
-  }
+    }, [currentPage])
 
-  const radioChangeHandler = (e, value, sortBy)=>{
-    e.target.checked = (queryOptions.sort === Number.parseInt(value))
-  }
-
-  const couponAction = (coupon)=> {
-    if(checkAuthOrOpenModal("coupon features")) return
-    if(cart?.couponUsed?._id === coupon._id){
-      setIsRemoveModalOpen({status: true, coupon: coupon.code})
-    }else{  
-      if(coupon?.applicableCategories && coupon?.applicableCategories.length > 0){
-        setCouponApplicableModal({code: coupon.code, categories: coupon.applicableCategories})
-      }
-      if(coupon?.applicableProducts && coupon.applicableProducts.length > 0){
-        setCouponApplicableModal({code: coupon.code, products: coupon.applicableProducts})
-      } 
-      dispatch( applyCoupon({couponCode: coupon.code}) )
-    }
-  }
-
-  const removeTheCoupon = ()=> {
-    if(checkAuthOrOpenModal("coupon features")) return
-    dispatch(removeCoupon())
-  }
-
-
-  return (
-    <section id='CouponPage'>
-
-      <div className="container mx-auto px-4 py-8">
-
-        <h1 className=" flex items-center gap-[10px] text-[22px] xxs-sm:text-[25px] text-secondary font-bold uppercase 
-          tracking-[1.2px] mb-[3rem]" 
-          style={{wordSpacing: '1.5px'}}>
-            Eligible Coupons
-        </h1>
-
-        <CouponTools 
-          searchTerm={searchTerm} 
-          setSearchTerm={setSearchTerm} 
-          limit={limit} 
-          onLimitChange={limitHandler} 
-          onSortClick={radioClickHandler} 
-          onSortChange={radioChangeHandler} 
-          options={queryOptions}
-        />
-
-        <CouponList 
-          coupons={filteredCoupons} 
-          onCouponApply={couponAction}
-        />
-
-        <RemoveCouponModal 
-          isOpen={isRemoveModalOpen.status} 
-          onClose={()=> setIsRemoveModalOpen({status: false, coupon: ''})} 
-          couponCode={isRemoveModalOpen.coupon}
-          onConfirm={removeTheCoupon} 
-        />
-
-      </div>
-
-      <div className='mt-[3rem] mb-[5rem]'>
-
-        {
-          coupons.length > 0 && totalPages &&
-            <PaginationV2 currentPage={currentPage} totalPages={totalPages} onPageChange={(page)=> setCurrentPage(page)} />
+    useEffect(() => {
+        if (Object.keys(queryOptions).length > 0) {
+            if (!user) {
+                dispatch(getAllCoupons({ queryOptions }))
+            } else dispatch(getEligibleCoupons({ userId: user._id, queryOptions }))
         }
+    }, [queryOptions])
 
-      </div>
+    useEffect(() => {
+        if (error) {
+            sonnerToast.error(error)
+            dispatch(resetCartStates())
+        }
+    }, [error])
 
-      {
-        !user &&
-          <div className='mt-8 flex justify-center'>
-          
-            <AuthPrompt/>
-          </div>
-      }
+    useEffect(() => {
+        if (couponMessage) {
+            sonnerToast.info(couponMessage)
+            dispatch(resetCartStates())
+        }
+    }, [couponMessage])
 
-    </section>
-    
-  )
+    useEffect(() => {
+        if (couponApplied) {
+            sonnerToast.success("Coupon applied successfully!")
+            dispatch(resetCartStates())
+            navigate("/shop", {
+                state: {
+                    showCouponApplicableModal: true,
+                    couponCode: couponApplicableModal.code,
+                    products: couponApplicableModal.products,
+                    categories: couponApplicableModal.categories,
+                },
+            })
+        }
+        if (couponRemoved) {
+            sonnerToast.success("Coupon removed successfully!")
+            dispatch(resetCartStates())
+        }
+    }, [couponApplied, couponRemoved])
+
+    const filteredCoupons = coupons.filter((coupon) => coupon.code.toLowerCase().includes(searchTerm.toLowerCase()))
+
+    const limitHandler = (value) => {
+        setQueryOptions((query) => {
+            return { ...query, limit: value }
+        })
+        setLimit(value)
+    }
+
+    const radioClickHandler = (e, sortBy) => {
+        const value = Number.parseInt(e.target.value)
+        const checkStatus = queryOptions.sort === value
+        if (checkStatus) {
+            return
+        } else {
+            setQueryOptions((query) => {
+                return { ...query, sort: value, sortBy }
+            })
+            const changeEvent = new Event("change", { bubbles: true })
+            e.target.dispatchEvent(changeEvent)
+        }
+    }
+
+    const radioChangeHandler = (e, value, sortBy) => {
+        e.target.checked = queryOptions.sort === Number.parseInt(value)
+    }
+
+    const couponAction = (coupon) => {
+        if (checkAuthOrOpenModal("coupon features")) return
+        if (cart?.couponUsed?._id === coupon._id) {
+            setIsRemoveModalOpen({ status: true, coupon: coupon.code })
+        } else {
+            if (coupon?.applicableCategories && coupon?.applicableCategories.length > 0) {
+                setCouponApplicableModal({ code: coupon.code, categories: coupon.applicableCategories })
+            }
+            if (coupon?.applicableProducts && coupon.applicableProducts.length > 0) {
+                setCouponApplicableModal({ code: coupon.code, products: coupon.applicableProducts })
+            }
+            dispatch(applyCoupon({ couponCode: coupon.code }))
+        }
+    }
+
+    const removeTheCoupon = () => {
+        if (checkAuthOrOpenModal("coupon features")) return
+        dispatch(removeCoupon())
+    }
+
+    return (
+        <section id='CouponPage'>
+            <div className='container mx-auto px-4 py-8'>
+
+                <h1
+                    className=' flex items-center gap-[10px] text-[22px] xxs-sm:text-[25px] text-secondary font-bold uppercase 
+                        tracking-[1.2px] mb-[3rem]'
+                    style={{ wordSpacing: "1.5px" }}
+                >
+                    Eligible Coupons
+                </h1>
+
+                <CouponTools
+                    searchTerm={searchTerm}
+                    setSearchTerm={setSearchTerm}
+                    limit={limit}
+                    onLimitChange={limitHandler}
+                    onSortClick={radioClickHandler}
+                    onSortChange={radioChangeHandler}
+                    options={queryOptions}
+                />
+
+                <CouponList coupons={filteredCoupons} onCouponApply={couponAction} />
+
+                <RemoveCouponModal
+                    isOpen={isRemoveModalOpen.status}
+                    onClose={() => setIsRemoveModalOpen({ status: false, coupon: "" })}
+                    couponCode={isRemoveModalOpen.coupon}
+                    onConfirm={removeTheCoupon}
+                />
+
+            </div>
+
+            <div className='mt-[3rem] mb-[5rem]'>
+                {coupons.length > 0 && totalPages && (
+                    <PaginationV2
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={(page) => setCurrentPage(page)}
+                    />
+                )}
+            </div>
+
+            {!user && (
+                <div className='mt-8 flex justify-center'>
+                    <AuthPrompt />
+                </div>
+            )}
+            
+        </section>
+    )
 }
-

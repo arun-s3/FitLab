@@ -1,51 +1,51 @@
-import React,{useState, useEffect, useRef} from 'react'
-import './AdminProductListPage.css'
-import {useNavigate, useOutletContext} from 'react-router-dom'
-import {useSelector, useDispatch} from 'react-redux'
+import React, { useState, useEffect, useRef } from "react"
+import "./AdminProductListPage.css"
+import { useNavigate, useOutletContext } from "react-router-dom"
+import { useSelector, useDispatch } from "react-redux"
 
-import {LiaSlidersHSolid} from "react-icons/lia"
-import {FiDownload} from "react-icons/fi"
-import {RiArrowDropDownLine} from "react-icons/ri"
-import {IoMdAdd} from "react-icons/io"
+import { LiaSlidersHSolid } from "react-icons/lia"
+import { FiDownload } from "react-icons/fi"
+import { RiArrowDropDownLine } from "react-icons/ri"
+import { IoMdAdd } from "react-icons/io"
 
-import {toast} from 'react-toastify'
-import {toast as sonnerToast} from 'sonner'
+import { toast } from "react-toastify"
+import { toast as sonnerToast } from "sonner"
 
-import apiClient from '../../../Api/apiClient'
+import apiClient from "../../../Api/apiClient"
 
-import AdminTitleSection from '../../../Components/Layout/AdminTitleSection/AdminTitleSection'
-import ProductListingTools from '../../../Components/Features/Product/ProductListingTools/ProductListingTools'
-import {SitePrimaryButtonWithShadow} from '../../../Components/UI/SiteButtons/SiteButtons'
-import {getAllProducts, resetStates} from '../../../Slices/productSlice'
-import ListingTabs from './ListingTabs'
-import ProductsDisplay from '../../../Components/Features/Product/ProductsDisplay/ProductsDisplay'
-import ProductFilterSidebar from '../../../Components/Features/Product/ProductFilterSidebar/ProductFilterSidebar'
-import ExportFileModal from './ExportFileModal'
+import AdminTitleSection from "../../../Components/Layout/AdminTitleSection/AdminTitleSection"
+import ProductListingTools from "../../../Components/Features/Product/ProductListingTools/ProductListingTools"
+import ListingTabs from "./ListingTabs"
+import ProductsDisplay from "../../../Components/Features/Product/ProductsDisplay/ProductsDisplay"
+import ProductFilterSidebar from "../../../Components/Features/Product/ProductFilterSidebar/ProductFilterSidebar"
+import ExportFileModal from "./ExportFileModal"
+
+import { SitePrimaryButtonWithShadow } from "../../../Components/UI/SiteButtons/SiteButtons"
+import { getAllProducts, resetStates } from "../../../Slices/productSlice"
 
 
-export default function AdminProductListPage(){
+export default function AdminProductListPage() {
 
     const [showSortBy, setShowSortBy] = useState(false)
     const [showByGrid, setShowByGrid] = useState(true)
     const [showByTable, setShowByTable] = useState(false)
-    const [toggleTab, setToggleTab] = useState({goTo: 'all'})
+    const [toggleTab, setToggleTab] = useState({ goTo: "all" })
 
     const [showTheseProducts, setShowTheseProducts] = useState([])
 
     const [minPrice, setMinPrice] = useState(0)
     const [maxPrice, setMaxPrice] = useState(null)
 
-    const [showFilter, setShowFilter] = useState(false)
-    const [filter, setFilter] = useState({status: 'all', categories: [], brands: []})
+    const [filter, setFilter] = useState({ status: "all", categories: [], brands: [] })
     const [totalFilter, setTotalFilter] = useState({})
     const [currentFilters, setCurrentFilters] = useState({})
 
-    const [limit, setLimit] = useState(9)  
+    const [limit, setLimit] = useState(9)
     const [currentPage, setCurrentPage] = useState(1)
-    const [totalPages, setTotalPages] = useState(20)  
+    const [totalPages, setTotalPages] = useState(20)
 
-    const [sorts, setSorts] = useState({}) 
-    const [queryOptions, setQueryOptions] = useState({page: 1, limit: 9})
+    const [sorts, setSorts] = useState({})
+    const [queryOptions, setQueryOptions] = useState({ page: 1, limit: 9 })
 
     const [isProductRestocking, setIsProductRestocking] = useState(false)
 
@@ -56,19 +56,45 @@ export default function AdminProductListPage(){
     const navigate = useNavigate()
     const dispatch = useDispatch()
 
-    const {products, productCounts, productRestocked, productStatusToggled, message, error} = useSelector(state=> state.productStore)
+    const { products, productCounts, productRestocked, productStatusToggled, message, error } = useSelector(
+        (state) => state.productStore,
+    )
 
-    const {setHeaderZIndex, setPageBgUrl} = useOutletContext() 
-    setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.94),rgba(255,255,255,0.94)), url('/Images/admin-ProductsListBg.jpg')`)
+    const { setHeaderZIndex, setPageBgUrl } = useOutletContext()
+    setPageBgUrl(
+        `linear-gradient(to right,rgba(255,255,255,0.94),rgba(255,255,255,0.94)), url('/Images/admin-ProductsListBg.jpg')`,
+    )
 
     const popularProducts = [
-        'benches', 'gymbell', 'treadmill', 'Ellipticals', 'bikes', 'proteinPowders', 'mutistationMachines', 'resistanceBands', 'yogaMats'
+        "benches",
+        "gymbell",
+        "treadmill",
+        "Ellipticals",
+        "bikes",
+        "proteinPowders",
+        "mutistationMachines",
+        "resistanceBands",
+        "yogaMats",
     ]
 
     const brands = ["Nike", "Adidas", "Under Armour", "Reebok", "Puma", "Gymshark"]
 
-    const muscleGroups = ["Chest", "Back", "Shoulders", "Biceps", "Triceps", "Forearms", "Quadriceps", "Hamstrings", "Glutes", "Calves",
-        "Core", "Abs", "Full Body", "Cardio"]
+    const muscleGroups = [
+        "Chest",
+        "Back",
+        "Shoulders",
+        "Biceps",
+        "Triceps",
+        "Forearms",
+        "Quadriceps",
+        "Hamstrings",
+        "Glutes",
+        "Calves",
+        "Core",
+        "Abs",
+        "Full Body",
+        "Cardio",
+    ]
 
     const sortMenu = [
         { name: "Price: High to Low", value: "price", order: "-1", invisibleOnTable: true },
@@ -79,47 +105,52 @@ export default function AdminProductListPage(){
         { name: "Best Sellers", value: "bestSellers" },
         { name: "Newest Arrivals", value: "newestArrivals" },
     ]
-    
-    useEffect(()=> {
-        dispatch( getAllProducts({queryOptions: {page: 1, limit: 9}}))
+
+    useEffect(() => {
+        dispatch(getAllProducts({ queryOptions: { page: 1, limit: 9 } }))
     }, [])
 
-    useEffect(()=>{
+    useEffect(() => {
         setShowTheseProducts(products)
-    },[products])
+    }, [products])
 
-    useEffect(()=> {
-        if(productStatusToggled && message){
-          sonnerToast.success(message)
-          dispatch(resetStates())
+    useEffect(() => {
+        if (productStatusToggled && message) {
+            sonnerToast.success(message)
+            dispatch(resetStates())
         }
-      },[productStatusToggled, message])
+    }, [productStatusToggled, message])
 
-    useEffect(()=>{
-        setTotalFilter({...filter, minPrice, maxPrice})
-    },[filter, minPrice, maxPrice])
+    useEffect(() => {
+        setTotalFilter({ ...filter, minPrice, maxPrice })
+    }, [filter, minPrice, maxPrice])
 
-    useEffect(()=>{
-        setQueryOptions( {filter: {...queryOptions.filter, ...totalFilter}, sort: {...queryOptions.sort, ...sorts}, page: currentPage, limit} )
-    },[totalFilter, sorts, currentPage, limit])
+    useEffect(() => {
+        setQueryOptions({
+            filter: { ...queryOptions.filter, ...totalFilter },
+            sort: { ...queryOptions.sort, ...sorts },
+            page: currentPage,
+            limit,
+        })
+    }, [totalFilter, sorts, currentPage, limit])
 
-    useEffect(()=>{
-        if(Object.keys(queryOptions).length){
-            dispatch( getAllProducts({queryOptions}))
+    useEffect(() => {
+        if (Object.keys(queryOptions).length) {
+            dispatch(getAllProducts({ queryOptions }))
         }
-    },[queryOptions])
+    }, [queryOptions])
 
-    useEffect(()=> {
-      if(products && productCounts && totalPages && limit){
-        setTotalPages(Math.ceil(productCounts/limit))
-      }
+    useEffect(() => {
+        if (products && productCounts && totalPages && limit) {
+            setTotalPages(Math.ceil(productCounts / limit))
+        }
     }, [products, productCounts])
 
-    useEffect(()=> {
-         if(error) {
-             sonnerToast.error(error)
-             dispatch(resetStates())
-         }
+    useEffect(() => {
+        if (error) {
+            sonnerToast.error(error)
+            dispatch(resetStates())
+        }
     }, [error])
 
     useEffect(() => {
@@ -132,66 +163,90 @@ export default function AdminProductListPage(){
 
     useEffect(() => {
         if (productRestocked) {
-          sonnerToast.success("Product restocked succesfully!")
-          dispatch(resetStates())
+            sonnerToast.success("Product restocked succesfully!")
+            dispatch(resetStates())
         }
         dispatch(getAllProducts({ queryOptions }))
     }, [productRestocked])
 
-    const showProducts = (type)=>{
-        setToggleTab({goTo: type})
-        if(type == 'all'){
+    const showProducts = (type) => {
+        setToggleTab({ goTo: type })
+        if (type == "all") {
             setShowTheseProducts(products)
         }
-        if(type == 'active'){
-            setShowTheseProducts( products.filter(product=> !product.isBlocked) )
+        if (type == "active") {
+            setShowTheseProducts(products.filter((product) => !product.isBlocked))
         }
-        if(type == 'blocked'){
-            setShowTheseProducts( products.filter(product=> product.isBlocked) )
+        if (type == "blocked") {
+            setShowTheseProducts(products.filter((product) => product.isBlocked))
         }
     }
 
-    const applySidebarFilters = (appliedFilters)=> {
-        if(appliedFilters.minPrice){
+    const applySidebarFilters = (appliedFilters) => {
+        if (appliedFilters.minPrice) {
             setMinPrice(appliedFilters.minPrice)
         }
-        if(appliedFilters.maxPrice){
+        if (appliedFilters.maxPrice) {
             setMaxPrice(appliedFilters.maxPrice)
         }
-        const {categories, brands, targetMuscles, startDate, endDate, productStatus: status, popularProducts: products,
-             rating, maxStock} = appliedFilters
-        setFilter({...filter, categories, brands, targetMuscles, products, startDate, endDate, status, averageRating: rating, maxStock})
+
+        const {
+            categories,
+            brands,
+            targetMuscles,
+            startDate,
+            endDate,
+            productStatus: status,
+            popularProducts: products,
+            rating,
+            maxStock,
+        } = appliedFilters
+
+        setFilter({
+            ...filter,
+            categories,
+            brands,
+            targetMuscles,
+            products,
+            startDate,
+            endDate,
+            status,
+            averageRating: rating,
+            maxStock,
+        })
     }
 
     const exportFile = async (type) => {
         setHeaderZIndex(10)
-        if(products && products.length > 0){
+        if (products && products.length > 0) {
             try {
-                const response = await apiClient.post(`/products/export/${type}`, {products}, {responseType: 'blob'})
+                const response = await apiClient.post(
+                    `/products/export/${type}`,
+                    { products },
+                    { responseType: "blob" },
+                )
 
-                const fileBlob = new Blob([response.data], { type: type === 'csv' ? 'text/csv' : 'application/pdf'})
+                const fileBlob = new Blob([response.data], { type: type === "csv" ? "text/csv" : "application/pdf" })
 
                 const url = window.URL.createObjectURL(fileBlob)
-                const link = document.createElement("a");
-                link.href = url;
+                const link = document.createElement("a")
+                link.href = url
                 link.download = type === "csv" ? "products.csv" : "products.pdf"
                 document.body.appendChild(link)
                 link.click()
 
                 link.remove()
                 window.URL.revokeObjectURL(url)
-
+            } catch (error) {
+                if (!error.response) {
+                    sonnerToast.error("Network error. Please check your internet.")
+                } else if (error.response?.status === 404) {
+                    sonnerToast.error(error.response.data.message || "No products found!")
+                } else {
+                    sonnerToast.error("Something went wrong while exporting files! Please retry later.")
                 }
-            catch (error) {
-              if (!error.response) {
-                sonnerToast.error("Network error. Please check your internet.")
-              } else if (error.response?.status === 404) {
-                sonnerToast.error(error.response.data.message || "No products found!")
-              } else {
-                sonnerToast.error("Something went wrong while exporting files! Please retry later.")
-              }
             }
-        }else{
+        } else {
             toast.error("Sorry.There is no available product in the store to export details!")
         }
     }
@@ -199,6 +254,7 @@ export default function AdminProductListPage(){
 
     return (
         <section id='AdminProductList'>
+
             <header className='flex flex-col md:flex-row gap-8 md:gap-0 justify-between items-center'>
                 <header>
                     <AdminTitleSection
@@ -206,18 +262,21 @@ export default function AdminProductListPage(){
                         subHeading='View, edit, filter, export and manage products across grid, list, and table views.'
                     />
                 </header>
+
                 <div
                     className='w-full md:w-auto flex items-center justify-between md:justify-normal gap-[10px] xx-md:gap-[10px]
-                 lg:gap-[1.5rem] x-md:gap-[1.5rem]'>
+                        lg:gap-[1.5rem] x-md:gap-[1.5rem]'
+                >
                     <SitePrimaryButtonWithShadow
                         tailwindClasses={`xxs-sm:text-[13px] x-md:text-[14px] xx-md:text-[13px] lg:text-[14px] xxs-sm:py-[3px]
                             xx-md:py-[3px] lg:py-[4px] x-md:py-[4px] xxs-sm:rounded-[6px] xx-md:rounded-[6px] lg:rounded-[8px] 
-                            x-md:rounded-[8px] ${isFilterSidebarOpen && 'bg-primaryDark'}`}
+                            x-md:rounded-[8px] ${isFilterSidebarOpen && "bg-primaryDark"}`}
                         className='chip relative'
                         animated={true}
                         clickHandler={(e) => {
                             setIsFilterSidebarOpen(true)
-                        }}>
+                        }}
+                    >
                         <i>
                             <LiaSlidersHSolid />
                         </i>
@@ -225,13 +284,15 @@ export default function AdminProductListPage(){
                     </SitePrimaryButtonWithShadow>
                     <SitePrimaryButtonWithShadow
                         tailwindClasses='xxs-sm:text-[13px] x-md:text-[14px] xx-md:text-[13px] lg:text-[14px] xxs-sm:py-[3px]
-                            xx-md:py-[3px] lg:py-[4px] x-md:py-[4px] xxs-sm:rounded-[6px] xx-md:rounded-[6px] lg:rounded-[8px] x-md:rounded-[8px]'
+                            xx-md:py-[3px] lg:py-[4px] x-md:py-[4px] xxs-sm:rounded-[6px] xx-md:rounded-[6px] lg:rounded-[8px] 
+                            x-md:rounded-[8px]'
                         className='chip'
                         animated={true}
                         clickHandler={() => {
                             setHeaderZIndex(0)
                             setIsExportModalOpen(true)
-                        }}>
+                        }}
+                    >
                         <i>
                             <FiDownload />
                         </i>
@@ -242,7 +303,8 @@ export default function AdminProductListPage(){
                     </SitePrimaryButtonWithShadow>
                     <SitePrimaryButtonWithShadow
                         tailwindClasses='xxs-sm:text-[13px] x-md:text-[14px] xx-md:text-[13px] lg:text-[14px] xxs-sm:py-[3px]
-                            xx-md:py-[3px] lg:py-[4px] x-md:py-[4px] xxs-sm:rounded-[6px] xx-md:rounded-[6px] lg:rounded-[8px] x-md:rounded-[8px]'
+                            xx-md:py-[3px] lg:py-[4px] x-md:py-[4px] xxs-sm:rounded-[6px] xx-md:rounded-[6px] lg:rounded-[8px] 
+                            x-md:rounded-[8px]'
                         clickHandler={() =>
                             navigate("/admin/products/add", {
                                 state: { from: location.pathname },
@@ -257,7 +319,9 @@ export default function AdminProductListPage(){
                     </SitePrimaryButtonWithShadow>
                 </div>
             </header>
+
             <main className='relative mt-[4.3rem]'>
+
                 <ListingTabs
                     showProducts={showProducts}
                     toggleTab={toggleTab}
@@ -266,6 +330,7 @@ export default function AdminProductListPage(){
                 />
 
                 <div className='border py-[1rem] px-[2rem] bg-white'>
+
                     <ProductListingTools
                         admin={true}
                         showSortBy={showSortBy}
@@ -279,7 +344,9 @@ export default function AdminProductListPage(){
                     />
 
                     <div className='mt-[2rem] px-[2rem]'>
+
                         {products && (
+
                             <ProductsDisplay
                                 gridView={showByGrid}
                                 showByTable={showByTable}
@@ -292,14 +359,17 @@ export default function AdminProductListPage(){
                                 restockingProduct={setIsProductRestocking}
                                 admin={true}
                             />
+
                         )}
                     </div>
                 </div>
+
             </main>
 
             {isFilterSidebarOpen && (
+
                 <ProductFilterSidebar
-                    isOpen={isFilterSidebarOpen} 
+                    isOpen={isFilterSidebarOpen}
                     onClose={() => setIsFilterSidebarOpen(false)}
                     isAdmin={true}
                     popularProducts={popularProducts}
@@ -308,19 +378,22 @@ export default function AdminProductListPage(){
                     applySidebarFilters={applySidebarFilters}
                     saveCurrentFilters={setCurrentFilters}
                     savedFilters={currentFilters}
-                    onClearedFilters={()=> 
-                        setQueryOptions( {sort: {...queryOptions.sort, ...sorts}, page: currentPage, limit} )
+                    onClearedFilters={() =>
+                        setQueryOptions({ sort: { ...queryOptions.sort, ...sorts }, page: currentPage, limit })
                     }
                 />
+
             )}
 
             {isExportModalOpen && (
+
                 <ExportFileModal
                     isOpen={isExportModalOpen}
                     onClose={() => setIsExportModalOpen(false)}
                     onExport={exportFile}
                     productCount={products.length}
                 />
+                
             )}
         </section>
     )

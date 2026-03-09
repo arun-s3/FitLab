@@ -9,6 +9,7 @@ import { toast as sonnerToast } from "sonner"
 import ResetPasswordBox from "../../../Components/Forms/ResetPasswordBox/ResetPasswordBox"
 import SelfieModal from "../../../Components/Features/Profile/SelfieModal/SelfieModal"
 import AdminTitleSection from "../../../Components/Layout/AdminTitleSection/AdminTitleSection"
+
 import { SingleDateSelector } from "../../../Components/UI/Calender/Calender"
 import { updateAdminDetails, updateAdminProfilePic, resetStates } from "../../../Slices/adminSlice"
 
@@ -31,7 +32,7 @@ export default function AdminSettingsPage() {
 
     const { admin, adminUpdated, adminDpUpdated, loading, adminError } = useSelector((state) => state.admin)
 
-    const {setPageBgUrl, setHeaderZIndex} = useOutletContext()  
+    const { setPageBgUrl, setHeaderZIndex } = useOutletContext()
     setHeaderZIndex(0)
     setPageBgUrl(
         `linear-gradient(to right,rgba(255,255,255,0.97),rgba(255,255,255,0.97)), url('/Images/admin-settings.png')`,
@@ -41,7 +42,9 @@ export default function AdminSettingsPage() {
         if (admin) {
             setFormData({ ...admin })
             const defaultDp = "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png"
-            setProfileImage(!admin?.profilePic || admin?.profilePic === defaultDp ? "/Images/adminDp.jpg" : admin.profilePic)
+            setProfileImage(
+                !admin?.profilePic || admin?.profilePic === defaultDp ? "/Images/adminDp.jpg" : admin.profilePic,
+            )
             if (admin.dob) setDob(new Date(admin.dob))
         }
         dispatch(resetStates())
@@ -53,10 +56,10 @@ export default function AdminSettingsPage() {
             setEditing(false)
             dispatch(resetStates())
         }
-    }, [adminUpdated]) 
-    
-    useEffect(()=> {
-        if(photoDispatched && adminDpUpdated){
+    }, [adminUpdated])
+
+    useEffect(() => {
+        if (photoDispatched && adminDpUpdated) {
             sonnerToast.success("Your profile pic has been updated!")
             dispatch(resetStates())
             setPhotoDispatched(false)
@@ -64,7 +67,7 @@ export default function AdminSettingsPage() {
     }, [adminDpUpdated])
 
     useEffect(() => {
-        if(adminError){
+        if (adminError) {
             setPhotoDispatched(false)
             dispatch(resetStates())
         }
@@ -121,7 +124,7 @@ export default function AdminSettingsPage() {
 
         const userDetails = { ...formData, dob }
 
-        dispatch( updateAdminDetails({userDetails}) )
+        dispatch(updateAdminDetails({ userDetails }))
     }
 
     const uploadPhoto = async (dataUrl) => {
@@ -130,19 +133,21 @@ export default function AdminSettingsPage() {
         const formData = new FormData()
         formData.append("image", blob, "photo.jpg")
 
-        dispatch(updateAdminProfilePic({formData}))
+        dispatch(updateAdminProfilePic({ formData }))
         setPhotoDispatched(true)
     }
 
 
     return (
         <section id='AdminSettingsPage'>
+
             <header>
                 <AdminTitleSection
                     heading='Settings'
                     subHeading='Control your administrative profile, identity, and security.'
                 />
             </header>
+
             <div className='flex justify-between items-center mt-14 mb-8'>
                 <div className='flex justify-between items-center mb-10'>
                     <div className='flex items-center gap-6'>
@@ -151,7 +156,7 @@ export default function AdminSettingsPage() {
                                 src={profileImage || "/Images/adminDp.jpg"}
                                 alt='Admin Profile'
                                 className={`w-full h-full object-cover rounded-full border-4 border-purple-100 shadow-md
-                                    ${!profileImage || profileImage === "/Images/adminDp.jpg" ? 'contrast-[78%]' : ''}`}
+                                    ${!profileImage || profileImage === "/Images/adminDp.jpg" ? "contrast-[78%]" : ""}`}
                             />
 
                             <label
@@ -175,7 +180,8 @@ export default function AdminSettingsPage() {
                 {!editing ? (
                     <button
                         className='flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg'
-                        onClick={() => setEditing(true)}>
+                        onClick={() => setEditing(true)}
+                    >
                         <Edit2 size={16} />
                         Edit Profile
                     </button>
@@ -183,13 +189,15 @@ export default function AdminSettingsPage() {
                     <div className='flex gap-2'>
                         <button
                             className='flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg'
-                            onClick={handleSubmit}>
+                            onClick={handleSubmit}
+                        >
                             <Check size={16} />
                             {loading ? "Saving..." : "Save"}
                         </button>
                         <button
                             className='flex items-center gap-2 bg-gray-600 text-white px-4 py-2 rounded-lg'
-                            onClick={() => setEditing(false)}>
+                            onClick={() => setEditing(false)}
+                        >
                             <X size={16} />
                             Cancel
                         </button>
@@ -198,6 +206,7 @@ export default function AdminSettingsPage() {
             </div>
 
             <div className='grid md:grid-cols-2 gap-6' id='admin-info'>
+
                 <InputField
                     label='First Name'
                     name='firstName'
@@ -271,7 +280,10 @@ export default function AdminSettingsPage() {
                         onChange={handleChange}
                         disabled={!editing}
                         className={`w-full py-2 pr-4 text-[13px] text-secondary rounded-lg border
-                            ${"border-gray-300 focus:ring-purple-600"} focus:ring-2 focus:border-transparent disabled:bg-gray-50`}>
+                            ${"border-gray-300 focus:ring-purple-600"} 
+                            focus:ring-2 focus:border-transparent disabled:bg-gray-50`
+                        }
+                    >
                         <option value='' className='text-muted'>
                             Select
                         </option>
@@ -294,8 +306,9 @@ export default function AdminSettingsPage() {
 
                     <button
                         className={`flex items-center gap-2 px-4 py-2 border rounded-lg
-              ${openSecurityMenu ? "bg-secondary text-white" : ""}`}
-                        onClick={() => setOpenSecurityMenu((prev) => !prev)}>
+                            ${openSecurityMenu ? "bg-secondary text-white" : ""}`}
+                        onClick={() => setOpenSecurityMenu((prev) => !prev)}
+                    >
                         <Lock size={16} />
                         Change Password
                         <ArrowRight size={16} />
@@ -304,7 +317,9 @@ export default function AdminSettingsPage() {
 
                 {openSecurityMenu && (
                     <div className='mt-6'>
+
                         <ResetPasswordBox setOpenSecurityMenu={setOpenSecurityMenu} admin={true} />
+
                     </div>
                 )}
             </div>
@@ -322,13 +337,16 @@ export default function AdminSettingsPage() {
                 userSystemPic={userSystemPic}
                 setUserSystemPic={setUserSystemPic}
             />
+
         </section>
     )
 }
 
 function InputField({ label, Icon, name, value, requiredMsg, onChange, onBlur, disabled, error }) {
+
     return (
         <div className='relative pb-6'>
+
             <label className='text-sm font-medium text-gray-700 flex justify-between items-center'>
                 {label}
                 {requiredMsg && <span className='text-red-500 text-[11px]'> *Required Field </span>}
@@ -353,11 +371,11 @@ function InputField({ label, Icon, name, value, requiredMsg, onChange, onBlur, d
 
             <p
                 className={`absolute left-0 bottom-0 text-xs text-red-500 transition-opacity duration-200
-        ${error ? "opacity-100" : "opacity-0"}`}>
+                    ${error ? "opacity-100" : "opacity-0"}`}
+            >
                 {error || " "}
             </p>
+            
         </div>
     )
 }
-
-

@@ -1,78 +1,76 @@
 import React, { useContext } from "react"
 
-import apiClient from '../../../Api/apiClient'
-import {toast as sonnerToast} from 'sonner'
+import apiClient from "../../../Api/apiClient"
+
+import { toast as sonnerToast } from "sonner"
 
 import ContactForm from "./ContactForm"
 import LocationInfo from "./LocationInfo"
 import FaqSection from "./FaqSection"
-import Header from '../../../Components/Layout/Header/Header'
-import BreadcrumbBar from '../../../Components/Layout/BreadcrumbBar/BreadcrumbBar'
-import Footer from '../../../Components/Layout/Footer/Footer'
-import {SocketContext} from '../../../Components/Socket-providers/SocketProvider/SocketProvider'
+import Header from "../../../Components/Layout/Header/Header"
+import BreadcrumbBar from "../../../Components/Layout/BreadcrumbBar/BreadcrumbBar"
+import Footer from "../../../Components/Layout/Footer/Footer"
+
+import { SocketContext } from "../../../Components/Socket-providers/SocketProvider/SocketProvider"
 
 
-export default function ContactUsPage(){
+export default function ContactUsPage() {
 
-  const headerBg = {
-     backgroundImage: "url('/Images/header-bg.png')",
-     backgrounSize: 'cover'
-  }
-
-  const {isConnected, isAdminOnline} = useContext(SocketContext)
-
-  const handleSubmit = async({details}) => {
-    try { 
-      const response = await apiClient.post(`/contact`, {details})
-      if(response.status === 201){
-        sonnerToast.success(response.data.message, {duration: 4500})
-        return true
-      }
-    }catch (error) {
-      if (!error.response) {
-          sonnerToast.error("Network error. Please check your internet.")
-      } else if (error.response?.status === 404) {
-          sonnerToast.error(error.response.data.message || "Error while submitting your message. Please try later!")
-      } else {
-          sonnerToast.error("Something went wrong! Please retry later.")
-      }
-      return false
+    const headerBg = {
+        backgroundImage: "url('/Images/header-bg.png')",
+        backgrounSize: "cover",
     }
-  }
+
+    const { isConnected, isAdminOnline } = useContext(SocketContext)
+
+    const handleSubmit = async ({ details }) => {
+        try {
+            const response = await apiClient.post(`/contact`, { details })
+            if (response.status === 201) {
+                sonnerToast.success(response.data.message, { duration: 4500 })
+                return true
+            }
+        } catch (error) {
+            if (!error.response) {
+                sonnerToast.error("Network error. Please check your internet.")
+            } else if (error.response?.status === 404) {
+                sonnerToast.error(
+                    error.response.data.message || "Error while submitting your message. Please try later!",
+                )
+            } else {
+                sonnerToast.error("Something went wrong! Please retry later.")
+            }
+            return false
+        }
+    }
 
 
-  return (
-    <section id='ContactUsPage'>
-    
-        <header style={headerBg} className='h-[5rem]'>
-        
-            <Header currentPageChatBoxStatus={true}/>
-        
-        </header>
-        
-        <BreadcrumbBar heading='Contact Us'/>
-    
-        <main className='mt-[5px]'>
+    return (
+        <section id='ContactUsPage'>
 
-            <div className="min-h-screen">   
+            <header style={headerBg} className='h-[5rem]'>
+                <Header currentPageChatBoxStatus={true} />
+            </header>
 
-              <ContactForm 
-                isSupportConnected={isAdminOnline} 
-                isCoachConnected={isConnected}
-                onSubmit={handleSubmit} 
-              />  
+            <BreadcrumbBar heading='Contact Us' />
 
-              <LocationInfo />
-                    
-              <FaqSection />
+            <main className='mt-[5px]'>
+                <div className='min-h-screen'>
+                    <ContactForm
+                        isSupportConnected={isAdminOnline}
+                        isCoachConnected={isConnected}
+                        onSubmit={handleSubmit}
+                    />
 
-            </div>
+                    <LocationInfo />
 
-        </main>
+                    <FaqSection />
 
-        <Footer/>
-                
-    </section>
-  )
+                </div>
+            </main>
+
+            <Footer />
+
+        </section>
+    )
 }
-

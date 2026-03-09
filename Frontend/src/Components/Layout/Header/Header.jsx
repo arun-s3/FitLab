@@ -1,83 +1,103 @@
-import React, {useState, useEffect, useContext} from 'react'
-import './Header.css'
-import {Link, useNavigate, useLocation} from 'react-router-dom'
-import {useSelector, useDispatch} from 'react-redux'
-import {motion} from "framer-motion"
+import React, { useState, useEffect, useContext } from "react"
+import "./Header.css"
+import { Link, useNavigate, useLocation } from "react-router-dom"
+import { useSelector, useDispatch } from "react-redux"
+import { motion } from "framer-motion"
 
-import {IoCartOutline} from "react-icons/io5"
+import { IoCartOutline } from "react-icons/io5"
 import { MdSportsGymnastics } from "react-icons/md"
-import {User, Heart, Headset, Store, Activity, Bot, LogIn} from "lucide-react"
+import { User, Heart, Headset, Store, Activity, Bot, LogIn } from "lucide-react"
 
-import {toast as sonnerToast} from 'sonner'
+import { toast as sonnerToast } from "sonner"
 
-import UserHead from '../UserHead/UserHead'
-import NotificationBell from '../../Notifications/Notification/NotificationBell'
-import VideoCallCommonModal from '../../../Pages/User/VideoCallCommonModal/VideoCallCommonModal'
-import {SiteButton} from '../../UI/SiteButtons/SiteButtons'
-import MobileSidebar from './MobileSidebar'
-import CartSidebar from '../../Features/Cart/CartSidebar/CartSidebar'
-import TextChatBox from '../../../Pages/User/TextChatBox/TextChatBox'
-import CoachPlus from '../../../Pages/User/Coach+/Coach+'
-import {resetStates} from '../../../Slices/userSlice'
-import {SocketContext} from '../../Socket-providers/SocketProvider/SocketProvider'
+import UserHead from "../UserHead/UserHead"
+import NotificationBell from "../../Notifications/Notification/NotificationBell"
+import VideoCallCommonModal from "../../Features/VideoChat/VideoCallCommonModal/VideoCallCommonModal"
+import { SiteButton } from "../../UI/SiteButtons/SiteButtons"
+import MobileSidebar from "./MobileSidebar"
+import CartSidebar from "../../Features/Cart/CartSidebar/CartSidebar"
+import TextChatBox from "../../../Pages/User/TextChatBox/TextChatBox"
+import CoachPlus from "../../../Pages/User/Coach+/Coach+"
+import { resetStates } from "../../../Slices/userSlice"
+import { SocketContext } from "../../Socket-providers/SocketProvider/SocketProvider"
 
-
-export default function Header({lighterLogo, customStyle, goToShopByCategorySec, currentPageChatBoxStatus = false,
-    currentPageCoachStatus = false
-}){
+export default function Header({
+    lighterLogo,
+    customStyle,
+    goToShopByCategorySec,
+    currentPageChatBoxStatus = false,
+    currentPageCoachStatus = false,
+}) {
 
     const [isCartOpen, setIsCartOpen] = useState(false)
 
     const [openChatBox, setOpenChatBox] = useState(false)
 
     const [openCoach, setopenCoach] = useState(false)
-    
-    const {user, error} = useSelector((state)=> state.user)
-    const {cart} = useSelector(state=> state.cart)    
+
+    const { user, error } = useSelector((state) => state.user)
+    const { cart } = useSelector((state) => state.cart)
 
     const navigate = useNavigate()
     const location = useLocation()
 
     const dispatch = useDispatch()
 
-    const {isAdminOnline, isConnected, notifications, setNotifications, markNotificationRead, markAllNotificationRead,
-         deleteNotification} = useContext(SocketContext)
+    const {
+        isAdminOnline,
+        isConnected,
+        notifications,
+        setNotifications,
+        markNotificationRead,
+        markAllNotificationRead,
+        deleteNotification,
+    } = useContext(SocketContext)
 
     // const {setOpenVideoCallModal, VideoCallCommonModal} = useContext(SocketContext)
     // const {socket} = socketContextItems
 
     // const [openVideoCallModal, setOpenVideoCallModal] = useState(false)
 
-    useEffect(()=> {
-        if(error) {
+    useEffect(() => {
+        if (error) {
             sonnerToast.error(error)
             dispatch(resetStates())
         }
     }, [error])
 
-    const openCartSidebar = ()=> {
+    const openCartSidebar = () => {
         setIsCartOpen(true)
     }
 
-    const jumpToShopByCategorySec = ()=> {
-        if(location.pathname !== '/' ){
-            setTimeout(() => navigate('/', { state: { scrollTo: "shopByCategories" }}), 0)
-        }else{
+    const jumpToShopByCategorySec = () => {
+        if (location.pathname !== "/") {
+            setTimeout(() => navigate("/", { state: { scrollTo: "shopByCategories" } }), 0)
+        } else {
             goToShopByCategorySec()
         }
     }
 
     const menuItems = [
-        {label: 'Home', path: '/'},
-        {label: 'Browse Categories', handleClick: ()=> jumpToShopByCategorySec(),
-             mobileLabel: 'Browse', className: 'hidden lg:hidden xl:inline-block', mobileClassName: 'xl:hidden'},
-        {label: 'Shop', path: '/shop'},
-        {label: 'Wallet', path: '/wallet'},
-        {label: 'Fitness Training', path: '/fitness/training', 
-            mobileLabel: 'Training', className: 'hidden lg:hidden x-lg:inline-block', mobileClassName: 'x-lg:hidden'},
-        {label: 'Tracker', path: '/fitness/tracker'},
-        {label: 'Coach+', handleClick: ()=> setopenCoach(status=> !status)},
-        {label: 'Support', path: '/support'},
+        { label: "Home", path: "/" },
+        {
+            label: "Browse Categories",
+            handleClick: () => jumpToShopByCategorySec(),
+            mobileLabel: "Browse",
+            className: "hidden lg:hidden xl:inline-block",
+            mobileClassName: "xl:hidden",
+        },
+        { label: "Shop", path: "/shop" },
+        { label: "Wallet", path: "/wallet" },
+        {
+            label: "Fitness Training",
+            path: "/fitness/training",
+            mobileLabel: "Training",
+            className: "hidden lg:hidden x-lg:inline-block",
+            mobileClassName: "x-lg:hidden",
+        },
+        { label: "Tracker", path: "/fitness/tracker" },
+        { label: "Coach+", handleClick: () => setopenCoach((status) => !status) },
+        { label: "Support", path: "/support" },
         // {label: 'About Us', path: '/about'}
     ]
 
@@ -94,7 +114,8 @@ export default function Header({lighterLogo, customStyle, goToShopByCategorySec,
             <motion.div
                 initial={{ opacity: 0, x: -30 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.4, duration: 0.8, ease: "easeOut" }}>
+                transition={{ delay: 0.4, duration: 0.8, ease: "easeOut" }}
+            >
                 <Link to='/' className='absolute top-[5px] max-xs-sm:left-0 lg:static'>
                     <img
                         src={!lighterLogo ? "/Images/Logo_main.png" : "/Images/logoDesign1.png"}
@@ -108,7 +129,8 @@ export default function Header({lighterLogo, customStyle, goToShopByCategorySec,
                 className='hidden lg:block ml-0 lg:ml-[-75px] x-lg:ml-[-50px]'
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.7, duration: 0.8, ease: "easeOut" }}>
+                transition={{ delay: 0.7, duration: 0.8, ease: "easeOut" }}
+            >
                 <motion.ul
                     className='inline-flex items-center lg:gap-[15px] xl:gap-[22px] xx-xl:gap-[30px] list-none 
                       lg:text-[14px] x-xl:text-descReg1 tracking-[0.2px]'
@@ -120,7 +142,9 @@ export default function Header({lighterLogo, customStyle, goToShopByCategorySec,
                         visible: {
                             transition: { staggerChildren: 0.12, delayChildren: 0.8 },
                         },
-                    }}>
+                    }}
+                >
+
                     {menuItems.map((item, i) => (
                         <motion.li
                             key={i}
@@ -128,19 +152,22 @@ export default function Header({lighterLogo, customStyle, goToShopByCategorySec,
                             variants={{
                                 hidden: { opacity: 0, y: -8 },
                                 visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-                            }}>
+                            }}
+                        >
                             {item?.mobileLabel && (
                                 <Link
                                     className={`${item?.mobileClassName ? item.mobileClassName : ""}`}
                                     to={!item.handleClick && item.path}
-                                    onClick={() => item.handleClick && item.handleClick()}>
+                                    onClick={() => item.handleClick && item.handleClick()}
+                                >
                                     {item.mobileLabel}
                                 </Link>
                             )}
                             <Link
                                 className={`${item?.className ? item.className : ""}`}
                                 to={!item.handleClick && item.path}
-                                onClick={() => item.handleClick && item.handleClick()}>
+                                onClick={() => item.handleClick && item.handleClick()}
+                            >
                                 {item.label}
                             </Link>
 
@@ -160,6 +187,7 @@ export default function Header({lighterLogo, customStyle, goToShopByCategorySec,
                             )}
                         </motion.li>
                     ))}
+
                 </motion.ul>
             </motion.nav>
 
@@ -174,7 +202,8 @@ export default function Header({lighterLogo, customStyle, goToShopByCategorySec,
                     visible: {
                         transition: { staggerChildren: 0.1, delayChildren: 1 },
                     },
-                }}>
+                }}
+            >
                 <i onClick={() => navigate("/account")}>
                     <User className='h-[22px] w-[22px] lg:h-[20px] lg:w-[20px] xl:w-[22px] xl:h-[21px] x-xl:w-[21px] x-xl:h-[22px]' />
                 </i>
@@ -182,7 +211,9 @@ export default function Header({lighterLogo, customStyle, goToShopByCategorySec,
                     <Store className='h-[20px] w-[20px' />
                 </i>
                 <i className='relative' onClick={() => navigate("/cart")} onMouseEnter={() => openCartSidebar()}>
-                    <IoCartOutline className='h-[23px] w-[23px] lg:h-[20px] lg:w-[20px] xl:h-[22px] xl:w-[22px] x-xl:h-[23px] x-xl:w-[23px]' />
+                    <IoCartOutline className='h-[23px] w-[23px] lg:h-[20px] lg:w-[20px] xl:h-[22px] 
+                        xl:w-[22px] x-xl:h-[23px] x-xl:w-[23px]' 
+                />
                     {cart?.products && cart.products.length > 0 && (
                         <span
                             className={`absolute top-[-32%] left-[45%] ${cart.products.length > 100 && "px-[12px] py-[10px]"}
@@ -220,9 +251,12 @@ export default function Header({lighterLogo, customStyle, goToShopByCategorySec,
                     className='hidden lg:inline-block ml-0 xx-lg:ml-[-7px] xxx-lg:ml-[-20px] deskt:ml-0'
                     initial={{ opacity: 0, x: 10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 1.4, duration: 0.6, ease: "easeOut" }}>
+                    transition={{ delay: 1.4, duration: 0.6, ease: "easeOut" }}
+                >
                     {user ? (
+
                         <UserHead />
+
                     ) : (
                         <div className='flex items-center gap-[10px]'>
                             <div className='hidden xl:inline-block x-xl:hidden'>
@@ -245,7 +279,8 @@ export default function Header({lighterLogo, customStyle, goToShopByCategorySec,
                                         paddingInline: "13px",
                                         paddingBlock: "8px",
                                         borderRadius: "10px",
-                                    }}>
+                                    }}
+                                >
                                     <Link to='/signin'>
                                         {" "}
                                         <LogIn className='w-[19px] h-[19px]' />{" "}
@@ -254,9 +289,10 @@ export default function Header({lighterLogo, customStyle, goToShopByCategorySec,
                             </div>
                             <button
                                 id='signup-icon'
-                                className='px-[22px] lg:px-[13px] xl:px-[22px] py-[9px] lg:py-[6px] x-xl:py-[9px] bg-white text-[15px]
-                                text-secondary font-medium tracking-[0.2px] rounded-[19px] lg:rounded-[10px] xl:rounded-[19px] hover:bg-purple-500
-                               hover:text-white transition duration-300'>
+                                className='px-[22px] lg:px-[13px] xl:px-[22px] py-[9px] lg:py-[6px] x-xl:py-[9px] bg-white 
+                                    text-[15px] text-secondary font-medium tracking-[0.2px] rounded-[19px] lg:rounded-[10px] 
+                                    xl:rounded-[19px] hover:bg-purple-500 hover:text-white transition duration-300'
+                            >
                                 <Link to='/signup'> Sign Up </Link>
                             </button>
                         </div>
@@ -265,6 +301,7 @@ export default function Header({lighterLogo, customStyle, goToShopByCategorySec,
             </motion.div>
 
             <div className='inline-block x-sm:hidden'>
+
                 <NotificationBell
                     notifications={notifications}
                     setNotifications={setNotifications}
@@ -274,26 +311,33 @@ export default function Header({lighterLogo, customStyle, goToShopByCategorySec,
                     containerStyle='absolute top-[27px] right-20'
                     bellStyle='w-[20px] h-[20px]'
                 />
+
             </div>
 
             <div className='mt-[25px] lg:hidden'>
+
                 <MobileSidebar
                     currentPageChatBoxStatus={currentPageChatBoxStatus}
                     currentPageCoachStatus={currentPageCoachStatus}
                 />
+
             </div>
 
             <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} retractedView={true} />
 
             {openChatBox && !currentPageChatBoxStatus && (
                 <div className='fixed bottom-[2rem] right-[2rem] z-50'>
+
                     <TextChatBox closeable={true} onCloseChat={() => setOpenChatBox(false)} />
+
                 </div>
             )}
 
             {openCoach && !currentPageCoachStatus && (
                 <div className='fixed bottom-[2rem] left-[2rem] z-50'>
+
                     <CoachPlus closeable={true} autoOpen={true} onCloseChat={() => setopenCoach(false)} />
+                        
                 </div>
             )}
 

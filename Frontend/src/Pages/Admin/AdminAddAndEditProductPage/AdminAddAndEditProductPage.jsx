@@ -1,149 +1,171 @@
-import React,{useState, useRef, useEffect} from 'react'
-import './AdminAddAndEditProductPage.css'
-import {useLocation, useNavigate, useOutletContext} from 'react-router-dom'
-import {useSelector, useDispatch} from 'react-redux'
-import {motion} from 'framer-motion'
+import React, { useState, useRef, useEffect } from "react"
+import "./AdminAddAndEditProductPage.css"
+import { useLocation, useNavigate, useOutletContext } from "react-router-dom"
+import { useSelector, useDispatch } from "react-redux"
+import { motion } from "framer-motion"
 
-import {GoPackage} from "react-icons/go"
-import {MdCurrencyRupee} from "react-icons/md"
-import {LuPackageSearch} from "react-icons/lu"
-import {LiaWeightSolid} from "react-icons/lia"
-import {BsLightningCharge} from "react-icons/bs"
-import {AiOutlineSafetyCertificate} from "react-icons/ai"
-import {CgDetailsMore} from "react-icons/cg"
-import {TbWeight} from "react-icons/tb"
-import {GoTag} from "react-icons/go"
-import {TbSquarePercentage} from "react-icons/tb"
-import {TbCirclePercentage} from "react-icons/tb"
-import {MdOutlineArrowDropDownCircle} from "react-icons/md"
-import {IoColorPaletteOutline} from "react-icons/io5"
+import { GoPackage } from "react-icons/go"
+import { MdCurrencyRupee } from "react-icons/md"
+import { LuPackageSearch } from "react-icons/lu"
+import { LiaWeightSolid } from "react-icons/lia"
+import { BsLightningCharge } from "react-icons/bs"
+import { AiOutlineSafetyCertificate } from "react-icons/ai"
+import { CgDetailsMore } from "react-icons/cg"
+import { TbWeight } from "react-icons/tb"
+import { GoTag } from "react-icons/go"
+import { TbCirclePercentage } from "react-icons/tb"
+import { MdOutlineArrowDropDownCircle } from "react-icons/md"
+import { IoColorPaletteOutline } from "react-icons/io5"
 
-import {toast as sonnerToast} from 'sonner'
-import {toast} from 'react-toastify'
+import { toast as sonnerToast } from "sonner"
 
-import AdminTitleSection from '../../../Components/Layout/AdminTitleSection/AdminTitleSection'
-import FileUpload from '../../../Components/Tools/FileUpload/FileUpload'
-import TagGenerator from '../../../Components/Tools/TagGenerator/TagGenerator'
-import PlaceholderIcon from '../../../Components/UI/PlaceholderIcon/PlaceholderIcon'
-import SelectCategoryForAdmin,{SelectSubCategoryForAdmin} from '../../../Components/Features/Category/SelectCategoryForAdmin/SelectCategoryForAdmin'
-import useFlexiDropdown from '../../../Hooks/FlexiDropdown'
-import {createProduct, updateProduct, resetStates} from '../../../Slices/productSlice'
-import {SiteButtonSquare} from '../../../Components/UI/SiteButtons/SiteButtons'
-import {CustomHashLoader} from '../../../Components/UI/Loader/Loader'
-import {handleImageCompression} from '../../../Utils/compressImages'
-import {handleInputValidation, displaySuccess, displayErrorAndReturnNewFormData, cancelErrorState} from '../../../Utils/fieldValidator'
+import { toast } from "react-toastify"
+
+import AdminTitleSection from "../../../Components/Layout/AdminTitleSection/AdminTitleSection"
+import FileUpload from "../../../Components/Tools/FileUpload/FileUpload"
+import TagGenerator from "../../../Components/Tools/TagGenerator/TagGenerator"
+import PlaceholderIcon from "../../../Components/UI/PlaceholderIcon/PlaceholderIcon"
+import useFlexiDropdown from "../../../Hooks/FlexiDropdown"
+
+import SelectCategoryForAdmin, {
+    SelectSubCategoryForAdmin,
+} from "../../../Components/Features/Category/SelectCategoryForAdmin/SelectCategoryForAdmin"
+import { createProduct, updateProduct, resetStates } from "../../../Slices/productSlice"
+import { SiteButtonSquare } from "../../../Components/UI/SiteButtons/SiteButtons"
+import { CustomHashLoader } from "../../../Components/UI/Loader/Loader"
+import { handleImageCompression } from "../../../Utils/compressImages"
+import {
+    handleInputValidation,
+    displaySuccess,
+    displayErrorAndReturnNewFormData,
+    cancelErrorState,
+} from "../../../Utils/fieldValidator"
 
 
-export default function AdminAddAndEditProductPage({ editProduct }){
+export default function AdminAddAndEditProductPage({ editProduct }) {
 
     const [tag, setTags] = useState([])
     const [thumbnail, setThumbnail] = useState({})
     const [thumbnailIndexOnEditProduct, setThumbnailIndexOnEditProduct] = useState(0)
     const [images, setImages] = useState([])
     const [category, setCategory] = useState([])
-    const [subCategory, setSubCategory] = useState('')
-    const [productData, setProductData] = useState({targetMuscles: [], discountType: 'percentage', discountValue: 0})
+    const [subCategory, setSubCategory] = useState("")
+    const [productData, setProductData] = useState({ targetMuscles: [], discountType: "percentage", discountValue: 0 })
 
-    const {setPageBgUrl} = useOutletContext() 
+    const { setPageBgUrl } = useOutletContext()
     setPageBgUrl(`linear-gradient(to right,rgba(255,255,255,0.9),rgba(255,255,255,0.9)), url('/Images/admin-bg.jpg')`)
 
     const [variantsDisabledMsg, setVariantsDisabledMsg] = useState(false)
 
     const [startedSubmission, setStartedSubmission] = useState(false)
 
-    const [categoryImgPreview, setCategoryImgPreview] = useState('')
+    const [categoryImgPreview, setCategoryImgPreview] = useState("")
 
-    const {openDropdowns, dropdownRefs, toggleDropdown} = useFlexiDropdown(['discountDropdown'])
-    
+    const { openDropdowns, dropdownRefs, toggleDropdown } = useFlexiDropdown(["discountDropdown"])
+
     const categoryBgImage = {
         backgroundImage: `linear-gradient(to right, rgba(243, 230, 251, 0.85), rgba(243, 230, 251, 0.85)), url('/Images${categoryImgPreview}')`,
-        backgroundPosition:'center',
-        backgroundSize:'cover'
+        backgroundPosition: "center",
+        backgroundSize: "cover",
     }
 
     const editProductItem = useRef(null)
 
-    const primaryColor = useRef('rgba(215, 241, 72, 1)')
+    const primaryColor = useRef("rgba(215, 241, 72, 1)")
 
     const dispatch = useDispatch()
-    const {productCreated, productUpdated, loading, error} = useSelector((state)=> state.productStore)
+    const { productCreated, productUpdated, loading, error } = useSelector((state) => state.productStore)
 
     const location = useLocation()
     const navigate = useNavigate()
 
     useEffect(() => {
-        if(category.length == 0) setCategoryImgPreview('')
+        if (category.length == 0) setCategoryImgPreview("")
 
-        setProductData({ ...productData, category: category, subCategory, images: images, thumbnail: thumbnail });
-    }, [category, subCategory, images, thumbnail]);
+        setProductData({ ...productData, category: category, subCategory, images: images, thumbnail: thumbnail })
+    }, [category, subCategory, images, thumbnail])
 
-    useEffect(()=>{
-        let tagStrings = tag.map(tag=> tag.key)
+    useEffect(() => {
+        let tagStrings = tag.map((tag) => tag.key)
         tagStrings = [...new Set(tagStrings)]
-        setProductData({...productData, tags: tagStrings})
-    },[tag])
+        setProductData({ ...productData, tags: tagStrings })
+    }, [tag])
 
     useEffect(() => {
         const convertToBlob = async (url) => {
             try {
-                const response = await fetch(url, { mode: 'cors' });
-                return await response.blob();
+                const response = await fetch(url, { mode: "cors" })
+                return await response.blob()
             } catch (error) {
                 sonnerToast.error("Error while loading the images!")
             }
         }
         const loadProductData = async () => {
             if (location?.state?.product) {
-                editProductItem.current = location.state.product;    
+                editProductItem.current = location.state.product
                 setProductData({
-                    "title": editProductItem.current.title,
-                    "price": editProductItem.current.prices || [],
-                    "stock": editProductItem.current.stocks || [],
-                    [`${editProductItem.current.variantType}s`] 
-                        : editProductItem.current[`${editProductItem.current.variantType}s`] || [],
-                    "brand": editProductItem.current.brand,
-                    "subtitle": editProductItem.current.subtitle || '',
-                    "targetMuscles":  editProductItem.current.targetMuscles || [],
-                    "description": editProductItem.current.description || '',
-                    "additionalInformation": editProductItem.current.additionalInformation || []
-                });
+                    title: editProductItem.current.title,
+                    price: editProductItem.current.prices || [],
+                    stock: editProductItem.current.stocks || [],
+                    [`${editProductItem.current.variantType}s`]:
+                        editProductItem.current[`${editProductItem.current.variantType}s`] || [],
+                    brand: editProductItem.current.brand,
+                    subtitle: editProductItem.current.subtitle || "",
+                    targetMuscles: editProductItem.current.targetMuscles || [],
+                    description: editProductItem.current.description || "",
+                    additionalInformation: editProductItem.current.additionalInformation || [],
+                })
                 setCategory(editProductItem.current.category)
                 setSubCategory(editProductItem.current.subCategory)
-                
+
                 const newImages = await Promise.all(
                     editProductItem.current.images.map(async (img) => {
-                        const blob = await convertToBlob(img.url);
-                        return {...img, blob};
-                    })
-                );
-                setImages(newImages);
-                const thumbnailBlob = await convertToBlob(editProductItem.current.thumbnail.url);
-                setThumbnail({ ...editProductItem.current.thumbnail, blob: thumbnailBlob});
-                const foundThumbnailIndex = newImages.map(img=> img.isThumbnail).findIndex(el=> el=='true')
+                        const blob = await convertToBlob(img.url)
+                        return { ...img, blob }
+                    }),
+                )
+                setImages(newImages)
+                const thumbnailBlob = await convertToBlob(editProductItem.current.thumbnail.url)
+                setThumbnail({ ...editProductItem.current.thumbnail, blob: thumbnailBlob })
+                const foundThumbnailIndex = newImages.map((img) => img.isThumbnail).findIndex((el) => el == "true")
                 setThumbnailIndexOnEditProduct(foundThumbnailIndex)
             }
-        };
-        loadProductData();  
-    },[location]);
-    
-    useEffect(()=>{
-        if(productCreated || (editProduct && productUpdated)){
-            productCreated && sonnerToast.success('Created product succesfully!')
-            productUpdated && sonnerToast.success('Updated product succesfully!')
+        }
+        loadProductData()
+    }, [location])
+
+    useEffect(() => {
+        if (productCreated || (editProduct && productUpdated)) {
+            productCreated && sonnerToast.success("Created product succesfully!")
+            productUpdated && sonnerToast.success("Updated product succesfully!")
             dispatch(resetStates())
             navigate("/admin/products", { replace: true })
         }
-    },[productCreated, productUpdated])
+    }, [productCreated, productUpdated])
 
-    useEffect(()=> {
-        if(error) {
+    useEffect(() => {
+        if (error) {
             sonnerToast.error(error)
             dispatch(resetStates())
         }
     }, [error])
 
-    const muscleGroups = ["Chest", "Back", "Shoulders", "Biceps", "Triceps", "Forearms", "Quadriceps", "Hamstrings", "Glutes", "Calves",
-        "Core", "Abs", "Full Body", "Cardio"]
+    const muscleGroups = [
+        "Chest",
+        "Back",
+        "Shoulders",
+        "Biceps",
+        "Triceps",
+        "Forearms",
+        "Quadriceps",
+        "Hamstrings",
+        "Glutes",
+        "Calves",
+        "Core",
+        "Abs",
+        "Full Body",
+        "Cardio",
+    ]
 
     const muscleGroupPics = {
         chest: "/Images/MuscleGroups/chest.jpg",
@@ -160,191 +182,206 @@ export default function AdminAddAndEditProductPage({ editProduct }){
     }
 
     const discountLabel = (() => {
-      if (!productData?.discountType) return null
+        if (!productData?.discountType) return null
 
-      const value = Math.max(Number(productData?.discountValue) || 0, 0)
+        const value = Math.max(Number(productData?.discountValue) || 0, 0)
 
-      if (productData.discountType === "percentage") {
-        return `${value} %`
-      }
-      if (productData.discountType === "fixed") {
-        return `₹ ${value}`
-      }
-      return null
+        if (productData.discountType === "percentage") {
+            return `${value} %`
+        }
+        if (productData.discountType === "fixed") {
+            return `₹ ${value}`
+        }
+        return null
     })()
 
-    const changeHandler = (e, fieldName)=> {
-        setProductData({...productData, [fieldName]: e.target.value})
+    const changeHandler = (e, fieldName) => {
+        setProductData({ ...productData, [fieldName]: e.target.value })
     }
 
-    const additionalInfoChangeHandler = (e)=> {
+    const additionalInfoChangeHandler = (e) => {
         const value = e.target.value
         const lines = value.split(/\r?\n/)
-        setProductData({...productData, additionalInformation: lines})
+        setProductData({ ...productData, additionalInformation: lines })
     }
 
-    const additionalInfoBlurHandler = (e)=> {
-            const infoArr = productData?.additionalInformation.filter(info=> info !== null && info.trim() !== "")
-            setProductData({...productData, additionalInformation: [...infoArr] })
+    const additionalInfoBlurHandler = (e) => {
+        const infoArr = productData?.additionalInformation.filter((info) => info !== null && info.trim() !== "")
+        setProductData({ ...productData, additionalInformation: [...infoArr] })
     }
-    
-    const inputFocusHandler = (e)=>{ e.target.previousElementSibling.style.display = 'none' }
 
-    const inputBlurHandler = (e, fieldName, options, limits)=>{
-         e.target.value.trim()? null : e.target.previousElementSibling.style.display = 'inline-block'
-         if(fieldName){
+    const inputFocusHandler = (e) => {
+        e.target.previousElementSibling.style.display = "none"
+    }
+
+    const inputBlurHandler = (e, fieldName, options, limits) => {
+        e.target.value.trim() ? null : (e.target.previousElementSibling.style.display = "inline-block")
+        if (fieldName) {
             let uniqueArr
-            const arrayFields = ['weights', 'stock', 'price', 'sizes', 'motorPowers', 'colors']
-            if(arrayFields.some(field=> field === fieldName)){
-                let arr = e.target.value.trim().split(',')
-                arr = arr.map(el=> el.trim())
+            const arrayFields = ["weights", "stock", "price", "sizes", "motorPowers", "colors"]
+            if (arrayFields.some((field) => field === fieldName)) {
+                let arr = e.target.value.trim().split(",")
+                arr = arr.map((el) => el.trim())
                 uniqueArr = new Set([...arr])
-                fieldName === 'weights' 
-                    ? setProductData({...productData, weights: [...uniqueArr]})
-                    : fieldName === 'stock' 
-                    ? setProductData({...productData, stock: [...uniqueArr]})
-                    : fieldName === 'price' 
-                    ? setProductData({...productData, price: [...uniqueArr]})
-                    : fieldName === 'sizes' 
-                    ? setProductData({...productData, sizes: [...uniqueArr]})
-                    : fieldName === 'motorPowers' 
-                    ? setProductData({...productData, motorPowers: [...uniqueArr]})
-                    : setProductData({...productData, colors: [...uniqueArr]})
+                fieldName === "weights"
+                    ? setProductData({ ...productData, weights: [...uniqueArr] })
+                    : fieldName === "stock"
+                      ? setProductData({ ...productData, stock: [...uniqueArr] })
+                      : fieldName === "price"
+                        ? setProductData({ ...productData, price: [...uniqueArr] })
+                        : fieldName === "sizes"
+                          ? setProductData({ ...productData, sizes: [...uniqueArr] })
+                          : fieldName === "motorPowers"
+                            ? setProductData({ ...productData, motorPowers: [...uniqueArr] })
+                            : setProductData({ ...productData, colors: [...uniqueArr] })
             }
-            const value = (arrayFields.some(field=> field === fieldName)) ? Array.from(uniqueArr) : productData[fieldName]
-            const statusObj = (options?.optionalField) 
-                ? handleInputValidation(fieldName, value, {optionalField: true}, limits) 
+            const value = arrayFields.some((field) => field === fieldName)
+                ? Array.from(uniqueArr)
+                : productData[fieldName]
+            const statusObj = options?.optionalField
+                ? handleInputValidation(fieldName, value, { optionalField: true }, limits)
                 : handleInputValidation(fieldName, value, limits)
-            if(!statusObj.error && statusObj.message.startsWith("Optional")){
+            if (!statusObj.error && statusObj.message.startsWith("Optional")) {
                 e.target.style.borderColor = primaryColor.current
                 return
             }
-            if(statusObj.error){
+            if (statusObj.error) {
                 const message = statusObj.message
                 const newProductData = displayErrorAndReturnNewFormData(e, message, productData, fieldName)
                 setProductData(newProductData)
-            }else{
+            } else {
                 displaySuccess(e)
             }
-         }
+        }
     }
 
     const handleMuscleChange = (muscle) => {
         setProductData((datas) => ({
-          ...datas,
-          targetMuscles: datas?.targetMuscles?.includes(muscle)
-            ? datas.targetMuscles.filter((m) => m !== muscle)
-            : [...datas?.targetMuscles, muscle]
+            ...datas,
+            targetMuscles: datas?.targetMuscles?.includes(muscle)
+                ? datas.targetMuscles.filter((m) => m !== muscle)
+                : [...datas?.targetMuscles, muscle],
         }))
     }
 
-    const radioClickHandler = (e)=>{
-      const value = e.target.value
-      const checkStatus = productData.discountType === value
-      if(checkStatus){
-          return
-      }else{
-          setProductData(data=> {
-            return {...data, discountType: value}
-          })
-          const changeEvent = new Event('change', {bubbles:true})
-          e.target.dispatchEvent(changeEvent)
-      }
-    }
-  
-    const radioChangeHandler = (e, value)=>{
-      e.target.checked = (productData.discountType === value)
+    const radioClickHandler = (e) => {
+        const value = e.target.value
+        const checkStatus = productData.discountType === value
+        if (checkStatus) {
+            return
+        } else {
+            setProductData((data) => {
+                return { ...data, discountType: value }
+            })
+            const changeEvent = new Event("change", { bubbles: true })
+            e.target.dispatchEvent(changeEvent)
+        }
     }
 
-    const submitHandler = async (e)=>{
+    const radioChangeHandler = (e, value) => {
+        e.target.checked = productData.discountType === value
+    }
+
+    const submitHandler = async (e) => {
         setStartedSubmission(true)
 
-        const checkVariantDataValidity = (variantAttribute)=> {
-            if(productData[variantAttribute] && productData[variantAttribute].length !== productData['stock'].length ){
-                sonnerToast.error(`Enter stock quantities for each ${variantAttribute} variant — exactly one per variant!`)
+        const checkVariantDataValidity = (variantAttribute) => {
+            if (productData[variantAttribute] && productData[variantAttribute].length !== productData["stock"].length) {
+                sonnerToast.error(
+                    `Enter stock quantities for each ${variantAttribute} variant — exactly one per variant!`,
+                )
                 return false
             }
-            if(productData[variantAttribute] && productData[variantAttribute].length !== productData['price'].length ){
+            if (productData[variantAttribute] && productData[variantAttribute].length !== productData["price"].length) {
                 sonnerToast.error(`Enter prices for each ${variantAttribute} variant — exactly one per variant!`)
                 return false
             }
             return true
         }
-        const variantAttributes = ['weights', 'sizes', 'motorPowers', 'colors']
-        const doesMultipleVariantAttrExists = variantAttributes.filter(attribute=> productData[attribute]).length > 1
-        if(doesMultipleVariantAttrExists){
+        const variantAttributes = ["weights", "sizes", "motorPowers", "colors"]
+        const doesMultipleVariantAttrExists = variantAttributes.filter((attribute) => productData[attribute]).length > 1
+        if (doesMultipleVariantAttrExists) {
             sonnerToast.error("Only one variant attribute (weights, sizes, motor power, or colors) can be selected!")
             return
         }
 
-        const userSelectedVariantAttr = variantAttributes.find(attribute=> productData[attribute])
-        if( !checkVariantDataValidity(userSelectedVariantAttr) ) return
+        const userSelectedVariantAttr = variantAttributes.find((attribute) => productData[attribute])
+        if (!checkVariantDataValidity(userSelectedVariantAttr)) return
 
         const optionalFields = ["description", "additionalInformation", "tags", ...variantAttributes]
-        const requiredFields = Object.keys(productData).filter(field=> !optionalFields.includes(field))
-        const isRequiredFieldsMissing = requiredFields.some(field=> productData[field] === undefined || productData[field].toString().trim() === '')
+        const requiredFields = Object.keys(productData).filter((field) => !optionalFields.includes(field))
+        const isRequiredFieldsMissing = requiredFields.some(
+            (field) => productData[field] === undefined || productData[field].toString().trim() === "",
+        )
 
-        if(isRequiredFieldsMissing){
-            if(!Object.keys(productData).length){
+        if (isRequiredFieldsMissing) {
+            if (!Object.keys(productData).length) {
                 toast.error("Please enter all the fields!")
-            }
-            else{
+            } else {
                 sonnerToast.error("Please check the fields and submit again!")
             }
-        } 
-        else{
+        } else {
             const formData = new FormData()
-            const {images, thumbnail, ...rest} = productData
+            const { images, thumbnail, ...rest } = productData
 
             rest.variantType = userSelectedVariantAttr
-            for (let field in rest){
-                if( Array.isArray(rest[field]) ){
+            for (let field in rest) {
+                if (Array.isArray(rest[field])) {
                     rest[field].forEach((item) => {
-                        formData.append(`${field}[]`, item); 
-                    });
-                }else{
+                        formData.append(`${field}[]`, item)
+                    })
+                } else {
                     formData.append(field, rest[field])
                 }
             }
 
-            const compressedImageBlobs = async(images)=>{
-                return await Promise.all( images.map( async(image)=> {
-                    if(image.size > (5*1024*1024)){
-                        const newBlob = await handleImageCompression(image.blob)
-                        sonnerToast.info("Some images have been compressed as its size exceeded 5 MB!")
-                        return newBlob
-                    }else{
-                        return image.blob
-                    }
-                }) )
-            } 
+            const compressedImageBlobs = async (images) => {
+                return await Promise.all(
+                    images.map(async (image) => {
+                        if (image.size > 5 * 1024 * 1024) {
+                            const newBlob = await handleImageCompression(image.blob)
+                            sonnerToast.info("Some images have been compressed as its size exceeded 5 MB!")
+                            return newBlob
+                        } else {
+                            return image.blob
+                        }
+                    }),
+                )
+            }
 
             const newBlobs = await compressedImageBlobs(images)
 
             newBlobs.forEach((blob, index) => {
-                formData.append('images', blob, `productImg${index}`);
+                formData.append("images", blob, `productImg${index}`)
             })
-            const thumbnailIndex = images.findIndex(img=> img.isThumbnail)
-            if(thumbnailIndex !== -1){
-                formData.append('thumbnail', newBlobs[thumbnailIndex], 'productThumbnail')
-                formData.append('thumbnailImageIndex', thumbnailIndex)
-            }else{
-                sonnerToast.error('Please select a Thumbnail!')
+            const thumbnailIndex = images.findIndex((img) => img.isThumbnail)
+            if (thumbnailIndex !== -1) {
+                formData.append("thumbnail", newBlobs[thumbnailIndex], "productThumbnail")
+                formData.append("thumbnailImageIndex", thumbnailIndex)
+            } else {
+                sonnerToast.error("Please select a Thumbnail!")
                 return
             }
-            editProduct?  dispatch( updateProduct({formData, id: editProductItem.current._id}) ) : dispatch( createProduct({formData}) )
+            editProduct
+                ? dispatch(updateProduct({ formData, id: editProductItem.current._id }))
+                : dispatch(createProduct({ formData }))
             sonnerToast.info("Uploading your product...")
             setStartedSubmission(false)
         }
     }
-    
 
-    return(
-        <section id='AdminAddProduct'> 
+    return (
+        <section id='AdminAddProduct'>
+            
             <header>
-                <AdminTitleSection heading={ editProduct ? 'Edit Product' : 'Add Product'} 
-                        subHeading={ editProduct ? "Update the product information" : "Fill in the details to add a new product"}/>
+                <AdminTitleSection
+                    heading={editProduct ? "Edit Product" : "Add Product"}
+                    subHeading={
+                        editProduct ? "Update the product information" : "Fill in the details to add a new product"
+                    }
+                />
             </header>
+
             <main className='flex gap-[10px]'>
                 <div className='flex flex-col gap-[15px] basis[60%] w-[60%]'>
 
@@ -352,89 +389,151 @@ export default function AdminAddAndEditProductPage({ editProduct }){
                         <div className='input-wrapper'>
                             <label for='product-name'> Product Name</label>
                             <div className='relative'>
-                                <PlaceholderIcon icon={<GoPackage/>}/>
-                                <input type='text' placeholder='Type name here' id='product-name' required className='pl-[21px] w-full' 
-                                            onFocus={(e)=> inputFocusHandler(e)} onBlur={(e)=> inputBlurHandler(e, "title")}
-                                                onChange={(e)=> changeHandler(e, "title")} value={productData.title}/>
-                                <p className='error' onClick={(e)=> cancelErrorState(e, primaryColor.current)}></p>
+                                <PlaceholderIcon icon={<GoPackage />} />
+                                <input
+                                    type='text'
+                                    placeholder='Type name here'
+                                    id='product-name'
+                                    required
+                                    className='pl-[21px] w-full'
+                                    onFocus={(e) => inputFocusHandler(e)}
+                                    onBlur={(e) => inputBlurHandler(e, "title")}
+                                    onChange={(e) => changeHandler(e, "title")}
+                                    value={productData.title}
+                                />
+                                <p className='error' onClick={(e) => cancelErrorState(e, primaryColor.current)}></p>
                             </div>
                         </div>
+
                         <div className='flex gap-[5px] items-center'>
                             <div className='input-wrapper'>
                                 <label for='product-price'> Price </label>
                                 <div className='relative'>
-                                    <PlaceholderIcon icon={<MdCurrencyRupee/>} fromTop={35}/>
-                                    <input type='text' id='product-price' required className='pl-[21px]' onFocus={(e)=> inputFocusHandler(e)} 
-                                       onBlur={(e)=> inputBlurHandler(e, "price")} onChange={(e)=> changeHandler(e, "price")} value={productData.price}/>
+                                    <PlaceholderIcon icon={<MdCurrencyRupee />} fromTop={35} />
+                                    <input
+                                        type='text'
+                                        id='product-price'
+                                        required
+                                        className='pl-[21px]'
+                                        onFocus={(e) => inputFocusHandler(e)}
+                                        onBlur={(e) => inputBlurHandler(e, "price")}
+                                        onChange={(e) => changeHandler(e, "price")}
+                                        value={productData.price}
+                                    />
                                     <span className='text-[10px] text-[#7e7d81] absolute left-0 -bottom-[31px]'>
                                         For multiple variants, enter the price for each variants separated by commas.
-                                    </span> 
-                                    <p className='error !absolute !top-[68px] left-0 !h-0 !mt-0' onClick={(e)=> cancelErrorState(e, primaryColor.current)}></p>
+                                    </span>
+                                    <p
+                                        className='error !absolute !top-[68px] left-0 !h-0 !mt-0'
+                                        onClick={(e) => cancelErrorState(e, primaryColor.current)}></p>
                                 </div>
                             </div>
                             <div className='input-wrapper'>
                                 <label for='product-stock'> Stock </label>
                                 <div className='relative'>
-                                    <PlaceholderIcon icon={<LuPackageSearch/>} fromTop={35}/>
-                                    <input type='text' placeholder='' id='product-stock' required className='pl-[21px]' onFocus={(e)=> inputFocusHandler(e)} 
-                                            onBlur={(e)=> inputBlurHandler(e, "stock")} onChange={(e)=> changeHandler(e, "stock")} value={productData.stock}/>
+                                    <PlaceholderIcon icon={<LuPackageSearch />} fromTop={35} />
+                                    <input
+                                        type='text'
+                                        placeholder=''
+                                        id='product-stock'
+                                        required
+                                        className='pl-[21px]'
+                                        onFocus={(e) => inputFocusHandler(e)}
+                                        onBlur={(e) => inputBlurHandler(e, "stock")}
+                                        onChange={(e) => changeHandler(e, "stock")}
+                                        value={productData.stock}
+                                    />
                                     <span className='text-[10px] text-[#7e7d81] absolute left-0 -bottom-[31px]'>
                                         For multiple variants, enter stock values for each variant separated by commas.
-                                    </span> 
-                                    <p className='error !absolute !top-[68px] right-0 !h-0 !mt-0' onClick={(e)=> cancelErrorState(e, primaryColor.current)}></p>
+                                    </span>
+                                    <p
+                                        className='error !absolute !top-[68px] right-0 !h-0 !mt-0'
+                                        onClick={(e) => cancelErrorState(e, primaryColor.current)}></p>
                                 </div>
                             </div>
                         </div>
+
                         <div className='input-wrapper mt-[2.5rem]'>
                             <label for='product-brand'> Brand </label>
                             <div className='relative'>
-                                <PlaceholderIcon icon={<AiOutlineSafetyCertificate/>}/>
-                                <input type='text' placeholder='Brand name' id='product-brand' required  className='pl-[21px] w-full' 
-                                   onFocus={(e)=> inputFocusHandler(e)} onBlur={(e)=> inputBlurHandler(e , "brand")} onChange={(e)=> changeHandler(e, "brand")}
-                                    value={productData.brand}/>
-                                <p className='error' onClick={(e)=> cancelErrorState(e, primaryColor.current)}></p>
+                                <PlaceholderIcon icon={<AiOutlineSafetyCertificate />} />
+                                <input
+                                    type='text'
+                                    placeholder='Brand name'
+                                    id='product-brand'
+                                    required
+                                    className='pl-[21px] w-full'
+                                    onFocus={(e) => inputFocusHandler(e)}
+                                    onBlur={(e) => inputBlurHandler(e, "brand")}
+                                    onChange={(e) => changeHandler(e, "brand")}
+                                    value={productData.brand}
+                                />
+                                <p className='error' onClick={(e) => cancelErrorState(e, primaryColor.current)}></p>
                             </div>
                         </div>
+
                         <div className='flex gap-[5px] items-center'>
                             <div className='input-wrapper'>
                                 <label for='product-discount-value'> Discount (optional) </label>
                                 <div className='relative'>
-                                    <PlaceholderIcon icon={<GoTag/>} fromTop={35}/>
-                                    <input type='text' id='product-discount-value' required className='pl-[21px]' onFocus={(e)=> inputFocusHandler(e)} 
-                                       onBlur={(e)=> inputBlurHandler(e, "discountValue", {optionalField: true})} onChange={(e)=> changeHandler(e, "discountValue")} value={productData.discountValue}/>
-                                    <p className='error !absolute !top-[2.4rem] left-0 !h-0 !mt-0' onClick={(e)=> cancelErrorState(e, primaryColor.current, {optionalField: true})}></p>
+                                    <PlaceholderIcon icon={<GoTag />} fromTop={35} />
+                                    <input
+                                        type='text'
+                                        id='product-discount-value'
+                                        required
+                                        className='pl-[21px]'
+                                        onFocus={(e) => inputFocusHandler(e)}
+                                        onBlur={(e) => inputBlurHandler(e, "discountValue", { optionalField: true })}
+                                        onChange={(e) => changeHandler(e, "discountValue")}
+                                        value={productData.discountValue}
+                                    />
+                                    <p
+                                        className='error !absolute !top-[2.4rem] left-0 !h-0 !mt-0'
+                                        onClick={(e) =>
+                                            cancelErrorState(e, primaryColor.current, { optionalField: true })
+                                        }></p>
                                 </div>
                             </div>
                             <div className='input-wrapper'>
                                 <label for='product-discount-value'> Discount Type </label>
-                                <div className='relative discountType' 
-                                  onClick={(e)=> toggleDropdown('discountDropdown')} ref={dropdownRefs.discountDropdown}>
-                                    <PlaceholderIcon fromTop={35} icon={<TbCirclePercentage/>}/>
-                                    <span className="text-[13px] text-[#554c4c] font-[470] tracking-[0.3px] capitalize flex justify-end items-center mt-[8px] mr-12">
-                                      {productData.discountType} (ie {discountLabel})
+                                <div
+                                    className='relative discountType'
+                                    onClick={(e) => toggleDropdown("discountDropdown")}
+                                    ref={dropdownRefs.discountDropdown}
+                                >
+                                    <PlaceholderIcon fromTop={35} icon={<TbCirclePercentage />} />
+                                    <span className='text-[13px] text-[#554c4c] font-[470] tracking-[0.3px] 
+                                        capitalize flex justify-end items-center mt-[8px] mr-12'
+                                    >
+                                        {productData.discountType} (ie {discountLabel})
                                     </span>
-                                    <MdOutlineArrowDropDownCircle className='h-[15px] w-[15px] absolute top-[25%] right-[8px]
-                                     text-[#6b7280] text-[11px] cursor-pointer'/>
-                                    {openDropdowns.discountDropdown && 
-                                    <ul className='list-none  px-[10px] py-[1rem] absolute top-[44px] right-0 flex flex-col gap-[10px] justify-center 
-                                            w-full text-[10px] bg-white border border-borderLight2 rounded-[8px] z-[5] cursor-pointer'>
-                                        {
-                                         ['Percentage', 'Fixed'].map(type=> (
-                                           <li key={`${type}`}> 
-                                            <span>  
-                                                <input type='radio' value={type.toLowerCase()} onClick={(e)=> radioClickHandler(e)}
-                                                    className='!w-[12px] !h-[12px] !rounded-full !text-secondary'
-                                                    onChange={(e)=> radioChangeHandler(e, type.toLowerCase())} 
-                                                    checked={productData.discountType === type.toLowerCase()}/>
-                                                <span className='text-[14px]'> {type} </span>
-                                            </span>
-                                           </li>
-                                         ))
-                                        }
-                                    </ul>
-                                    }
-                                    {/* <input type='text' placeholder='' id='product-discount-type' required className='pl-[21px]' onFocus={(e)=> inputFocusHandler(e)} 
-                                            onBlur={(e)=> inputBlurHandler(e, "stock")} onChange={(e)=> changeHandler(e, "discountType")} value={productData.discountType}/> */}
+                                    <MdOutlineArrowDropDownCircle
+                                        className='h-[15px] w-[15px] absolute top-[25%] right-[8px]
+                                     text-[#6b7280] text-[11px] cursor-pointer'
+                                    />
+                                    {openDropdowns.discountDropdown && (
+                                        <ul
+                                            className='list-none  px-[10px] py-[1rem] absolute top-[44px] right-0 flex flex-col 
+                                                 gap-[10px] justify-center w-full text-[10px] bg-white border 
+                                                border-borderLight2 rounded-[8px] z-[5] cursor-pointer'
+                                        >
+                                            {["Percentage", "Fixed"].map((type) => (
+                                                <li key={`${type}`}>
+                                                    <span>
+                                                        <input
+                                                            type='radio'
+                                                            value={type.toLowerCase()}
+                                                            onClick={(e) => radioClickHandler(e)}
+                                                            className='!w-[12px] !h-[12px] !rounded-full !text-secondary'
+                                                            onChange={(e) => radioChangeHandler(e, type.toLowerCase())}
+                                                            checked={productData.discountType === type.toLowerCase()}
+                                                        />
+                                                        <span className='text-[14px]'> {type} </span>
+                                                    </span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -443,100 +542,182 @@ export default function AdminAddAndEditProductPage({ editProduct }){
                     <div className='flex justify-center items-center product-input-wrapper'>
                         <div className='input-wrapper'>
                             <label for='product-subtitle' className='flex items-center gap-[10px]'>
-                                 <span> Subtitle </span>
-                                 <span className=' text-[10px] text-secondary'> (The subtitle should contain the primary information about the product.)  </span>
+                                <span> Subtitle </span>
+                                <span className=' text-[10px] text-secondary'>
+                                    {" "}
+                                    (The subtitle should contain the primary information about the product.){" "}
+                                </span>
                             </label>
                             <div className='relative'>
-                                <PlaceholderIcon icon={<CgDetailsMore/>} fromTop={14} />
-                                <textarea placeholder='Type subtitles here' rows='3' cols='70' maxlength='2000' id='product-subtitle'
-                                    required className='pl-[21px]' onFocus={(e)=> inputFocusHandler(e)} onBlur={(e)=> inputBlurHandler(e, "subtitle")}
-                                     onChange={(e)=> changeHandler(e, "subtitle")} value={productData.subtitle}/>
-                                <p className='error' onClick={(e)=> cancelErrorState(e, primaryColor.current)}></p>
+                                <PlaceholderIcon icon={<CgDetailsMore />} fromTop={14} />
+                                <textarea
+                                    placeholder='Type subtitles here'
+                                    rows='3'
+                                    cols='70'
+                                    maxlength='2000'
+                                    id='product-subtitle'
+                                    required
+                                    className='pl-[21px]'
+                                    onFocus={(e) => inputFocusHandler(e)}
+                                    onBlur={(e) => inputBlurHandler(e, "subtitle")}
+                                    onChange={(e) => changeHandler(e, "subtitle")}
+                                    value={productData.subtitle}
+                                />
+                                <p className='error' onClick={(e) => cancelErrorState(e, primaryColor.current)}></p>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div className='flex justify-center items-center product-input-wrapper'>
                         <div className='input-wrapper categories'>
-                        
-                        <SelectCategoryForAdmin category={category} setCategory={setCategory} {...(editProduct && { editCategory: editProductItem?.current?.category})}/>
+
+                            <SelectCategoryForAdmin
+                                category={category}
+                                setCategory={setCategory}
+                                {...(editProduct && { editCategory: editProductItem?.current?.category })}
+                            />
+
+                        </div>
+                    </div>
+                    <div
+                        className='flex justify-center items-center product-input-wrapper'
+                        style={categoryImgPreview ? categoryBgImage : {}}>
+                        <div className='input-wrapper categories'>
+
+                            <SelectSubCategoryForAdmin
+                                category={category}
+                                setCategory={setCategory}
+                                setSubCategory={setSubCategory}
+                                categoryImgPreview={categoryImgPreview}
+                                setCategoryImgPreview={setCategoryImgPreview}
+                            />
                             
                         </div>
                     </div>
-                    <div className='flex justify-center items-center product-input-wrapper' 
-                        style={ categoryImgPreview? categoryBgImage : {}}>
-                        <div className='input-wrapper categories'>
-                            <SelectSubCategoryForAdmin category={category} setCategory={setCategory} setSubCategory={setSubCategory} categoryImgPreview={categoryImgPreview} setCategoryImgPreview={setCategoryImgPreview}/>                    
-                        </div>
-                    </div>
 
-                    <div className='flex flex-col gap-[1rem] justify-center product-input-wrapper' 
-                        onMouseEnter={()=> !category.length ? setVariantsDisabledMsg(true) : setVariantsDisabledMsg(false)}
-                        onMouseLeave={()=> setVariantsDisabledMsg(false)}
+                    <div
+                        className='flex flex-col gap-[1rem] justify-center product-input-wrapper'
+                        onMouseEnter={() =>
+                            !category.length ? setVariantsDisabledMsg(true) : setVariantsDisabledMsg(false)
+                        }
+                        onMouseLeave={() => setVariantsDisabledMsg(false)}
                     >
-                    <div className='flex gap-8 items-center'> 
-                        <div className='input-wrapper'>  
-                            <label for='product-price'> Weights Available (For strength based products only) </label>
-                            <div className='relative'>  
-                                <PlaceholderIcon icon={<TbWeight/>} fromTop={20}/>
-                                <input type='text' id='product-weights' required className='pl-[21px] disabled:cursor-not-allowed ' 
-                                    placeholder='In Kg (Optional field)' onFocus={(e)=> inputFocusHandler(e)} 
-                                    onBlur={(e)=> inputBlurHandler(e, "weights", {optionalField: true})} onChange={(e)=> changeHandler(e, "weights")} 
-                                    value={productData.weights} disabled={category?.[0] !== 'strength'}
-                                />
-                                <p className='mt-[4px] text-[10px] text-[#7e7d81] left-0 -bottom-[31px]'>
-                                        For multiple variants, enter weight values for each variant separated by commas.
-                                </p> 
-                                <p className='error !absolute !top-[72px] right-0 !h-0 !mt-0' onClick={(e)=> cancelErrorState(e, primaryColor.current)}></p>
-                            </div>
-                        </div>
-                        <div className='input-wrapper'>
-                            <label for='product-stock'> Motor Powers (For cardio based products only) </label>
-                            <div className='relative'>
-                                <PlaceholderIcon icon={<BsLightningCharge/>} fromTop={20}/>
-                                <input type='text' placeholder='Eg: 5.5 (Optional field)' id='product-motorPowers' required className='pl-[21px] disabled:cursor-not-allowed ' 
-                                    onFocus={(e)=> inputFocusHandler(e)} 
-                                    onBlur={(e)=> inputBlurHandler(e, "motorPowers", {optionalField: true})} onChange={(e)=> changeHandler(e, "motorPowers")} 
-                                    value={productData.motorPowers} disabled={category?.[0] !== 'cardio'}/>
-                                <p className='mt-[4px] text-[10px] text-[#7e7d81] left-0 -bottom-[31px]'>
-                                    For multiple variants, enter power values for each variant separated by commas.
-                                </p> 
-                                <p className='error !absolute !top-[72px] right-0 !h-0 !mt-0' onClick={(e)=> cancelErrorState(e, primaryColor.current, {optionalField: true})}></p>
-                            </div>
-                        </div> 
-                        </div>
+
                         <div className='flex gap-8 items-center'>
                             <div className='input-wrapper'>
-                                <label for='product-brand'>  Colors (For accessory based products) </label>
+                                <label for='product-price'>
+                                    {" "}
+                                    Weights Available (For strength based products only){" "}
+                                </label>
                                 <div className='relative'>
-                                    <PlaceholderIcon icon={<IoColorPaletteOutline/>} fromTop={20}/>
-                                    <input type='text' placeholder='Eg: red (Optional field)' id='product-colors' required  className='pl-[21px] w-full disabled:cursor-not-allowed ' 
-                                       onFocus={(e)=> inputFocusHandler(e)} onBlur={(e)=> inputBlurHandler(e , "colors", {optionalField: true})} onChange={(e)=> changeHandler(e, "colors")}
-                                        value={productData.colors} disabled={category?.[0] !== 'accessories'}/>
+                                    <PlaceholderIcon icon={<TbWeight />} fromTop={20} />
+                                    <input
+                                        type='text'
+                                        id='product-weights'
+                                        required
+                                        className='pl-[21px] disabled:cursor-not-allowed '
+                                        placeholder='In Kg (Optional field)'
+                                        onFocus={(e) => inputFocusHandler(e)}
+                                        onBlur={(e) => inputBlurHandler(e, "weights", { optionalField: true })}
+                                        onChange={(e) => changeHandler(e, "weights")}
+                                        value={productData.weights}
+                                        disabled={category?.[0] !== "strength"}
+                                    />
+                                    <p className='mt-[4px] text-[10px] text-[#7e7d81] left-0 -bottom-[31px]'>
+                                        For multiple variants, enter weight values for each variant separated by commas.
+                                    </p>
+                                    <p
+                                        className='error !absolute !top-[72px] right-0 !h-0 !mt-0'
+                                        onClick={(e) => cancelErrorState(e, primaryColor.current)}></p>
+                                </div>
+                            </div>
+                            <div className='input-wrapper'>
+                                <label for='product-stock'> Motor Powers (For cardio based products only) </label>
+                                <div className='relative'>
+                                    <PlaceholderIcon icon={<BsLightningCharge />} fromTop={20} />
+                                    <input
+                                        type='text'
+                                        placeholder='Eg: 5.5 (Optional field)'
+                                        id='product-motorPowers'
+                                        required
+                                        className='pl-[21px] disabled:cursor-not-allowed '
+                                        onFocus={(e) => inputFocusHandler(e)}
+                                        onBlur={(e) => inputBlurHandler(e, "motorPowers", { optionalField: true })}
+                                        onChange={(e) => changeHandler(e, "motorPowers")}
+                                        value={productData.motorPowers}
+                                        disabled={category?.[0] !== "cardio"}
+                                    />
+                                    <p className='mt-[4px] text-[10px] text-[#7e7d81] left-0 -bottom-[31px]'>
+                                        For multiple variants, enter power values for each variant separated by commas.
+                                    </p>
+                                    <p
+                                        className='error !absolute !top-[72px] right-0 !h-0 !mt-0'
+                                        onClick={(e) =>
+                                            cancelErrorState(e, primaryColor.current, { optionalField: true })
+                                        }></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className='flex gap-8 items-center'>
+                            <div className='input-wrapper'>
+                                <label for='product-brand'> Colors (For accessory based products) </label>
+                                <div className='relative'>
+                                    <PlaceholderIcon icon={<IoColorPaletteOutline />} fromTop={20} />
+                                    <input
+                                        type='text'
+                                        placeholder='Eg: red (Optional field)'
+                                        id='product-colors'
+                                        required
+                                        className='pl-[21px] w-full disabled:cursor-not-allowed '
+                                        onFocus={(e) => inputFocusHandler(e)}
+                                        onBlur={(e) => inputBlurHandler(e, "colors", { optionalField: true })}
+                                        onChange={(e) => changeHandler(e, "colors")}
+                                        value={productData.colors}
+                                        disabled={category?.[0] !== "accessories"}
+                                    />
                                     <p className='mt-[4px] text-[10px] text-[#7e7d81]  left-0 -bottom-[31px]'>
                                         For multiple variants, enter color values for each variant separated by commas.
-                                    </p> 
-                                    <p className='error !absolute !top-[72px] right-0 !h-0 !mt-0' onClick={(e)=> cancelErrorState(e, primaryColor.current, {optionalField: true})}></p>
+                                    </p>
+                                    <p
+                                        className='error !absolute !top-[72px] right-0 !h-0 !mt-0'
+                                        onClick={(e) =>
+                                            cancelErrorState(e, primaryColor.current, { optionalField: true })
+                                        }></p>
                                 </div>
-                                <p className='error mt-[5px]' onClick={(e)=> cancelErrorState(e, primaryColor.current)}> 
+                                <p
+                                    className='error mt-[5px]'
+                                    onClick={(e) => cancelErrorState(e, primaryColor.current)}
+                                >
                                     {variantsDisabledMsg && "Please choose a category first!"}
                                 </p>
                             </div>
-                            <div className='input-wrapper !-mt-[24px]'>  
-                                <label for='product-brand'>  Sizes (For supplement based products only) </label>
+                            <div className='input-wrapper !-mt-[24px]'>
+                                <label for='product-brand'> Sizes (For supplement based products only) </label>
                                 <div className='relative'>
-                                    <PlaceholderIcon icon={<LiaWeightSolid/>} fromTop={20}/>
-                                    <input type='text' placeholder='Eg: 2L, 500ml, 2Kg, 2 serving (Optional field)' id='product-sizes' required  className='pl-[21px] w-full disabled:cursor-not-allowed ' 
-                                       onFocus={(e)=> inputFocusHandler(e)} onBlur={(e)=> inputBlurHandler(e , "sizes", {optionalField: true})} 
-                                       onChange={(e)=> changeHandler(e, "sizes")}
-                                        value={productData.sizes} disabled={category?.[0] !== 'supplements'}/>
-                                    <p className='mt-[4px] text-[10px] text-[#7e7d81]  left-0 -bottom-[31px]'> 
+                                    <PlaceholderIcon icon={<LiaWeightSolid />} fromTop={20} />
+                                    <input
+                                        type='text'
+                                        placeholder='Eg: 2L, 500ml, 2Kg, 2 serving (Optional field)'
+                                        id='product-sizes'
+                                        required
+                                        className='pl-[21px] w-full disabled:cursor-not-allowed '
+                                        onFocus={(e) => inputFocusHandler(e)}
+                                        onBlur={(e) => inputBlurHandler(e, "sizes", { optionalField: true })}
+                                        onChange={(e) => changeHandler(e, "sizes")}
+                                        value={productData.sizes}
+                                        disabled={category?.[0] !== "supplements"}
+                                    />
+                                    <p className='mt-[4px] text-[10px] text-[#7e7d81]  left-0 -bottom-[31px]'>
                                         For multiple variants, enter size values for each variant separated by commas.
-                                    </p> 
-                                    <p className='error !absolute !top-[72px] right-0 !h-0 !mt-0' onClick={(e)=> cancelErrorState(e, primaryColor.current, {optionalField: true})}></p>
+                                    </p>
+                                    <p
+                                        className='error !absolute !top-[72px] right-0 !h-0 !mt-0'
+                                        onClick={(e) =>
+                                            cancelErrorState(e, primaryColor.current, { optionalField: true })
+                                        }></p>
                                 </div>
                             </div>
-
                         </div>
                     </div>
 
@@ -544,92 +725,143 @@ export default function AdminAddAndEditProductPage({ editProduct }){
                         <div className='input-wrapper'>
                             <label for='product-description'> Description (optional)</label>
                             <div className='relative'>
-                                <PlaceholderIcon icon={<CgDetailsMore/>} fromTop={8} />
-                                <textarea placeholder='Type description here' rows='7' cols='70' maxlength='2000' id='product-description'
-                                    required className='pl-[21px]' onFocus={(e)=> inputFocusHandler(e)} 
-                                     onChange={(e)=> changeHandler(e, "description")} value={productData.description}/>
-                                <p className='error' onClick={(e)=> cancelErrorState(e, primaryColor.current, {optionalField: true})}></p>
+                                <PlaceholderIcon icon={<CgDetailsMore />} fromTop={8} />
+                                <textarea
+                                    placeholder='Type description here'
+                                    rows='7'
+                                    cols='70'
+                                    maxlength='2000'
+                                    id='product-description'
+                                    required
+                                    className='pl-[21px]'
+                                    onFocus={(e) => inputFocusHandler(e)}
+                                    onChange={(e) => changeHandler(e, "description")}
+                                    value={productData.description}
+                                />
+                                <p
+                                    className='error'
+                                    onClick={(e) =>
+                                        cancelErrorState(e, primaryColor.current, { optionalField: true })
+                                    }></p>
                             </div>
                         </div>
                     </div>
 
                     <div className='product-input-wrapper relative'>
                         <p className='label'> Target Muscles (optional)</p>
-                        <div className="mt-4 grid grid-cols-4 gap-2 overflow-visible pl-2">
-                          {muscleGroups.map((muscle, index) => (
-                            <span key={muscle}
-                              className="flex items-center space-x-2 cursor-pointer text-[11.6px]
-                                !text-gray-700 hover:text-secondary">
-                                <input
-                                  type="checkbox"
-                                  checked={productData?.targetMuscles?.includes(muscle)}
-                                  onChange={() => handleMuscleChange(muscle)}
-                                  className="!w-[12px] !h-[12px] !text-secondary !rounded-[2px] focus:ring-2 !ring-secondary !outline-secondary"
-                                />
-                                <span className="text-[11px] text-inherit dark:text-gray-300"> {muscle} </span>
-                            </span>
-                          ))}
+                        <div className='mt-4 grid grid-cols-4 gap-2 overflow-visible pl-2'>
+                            {muscleGroups.map((muscle, index) => (
+                                <span
+                                    key={muscle}
+                                    className='flex items-center space-x-2 cursor-pointer text-[11.6px]
+                                !text-gray-700 hover:text-secondary'>
+                                    <input
+                                        type='checkbox'
+                                        checked={productData?.targetMuscles?.includes(muscle)}
+                                        onChange={() => handleMuscleChange(muscle)}
+                                        className='!w-[12px] !h-[12px] !text-secondary !rounded-[2px] focus:ring-2 
+                                            !ring-secondary !outline-secondary'
+                                    />
+                                    <span className='text-[11px] text-inherit dark:text-gray-300'> {muscle} </span>
+                                </span>
+                            ))}
                         </div>
-                        {productData.targetMuscles && (
-                          (() => {
-                            const match = Object.keys(muscleGroupPics).find((muscle, picIndex) =>
-                              productData.targetMuscles.some((m, muscleIndex) =>
-                                m.toLowerCase().includes(muscle) && muscleIndex === productData.targetMuscles.length - 1
-                              )
-                            );
-                            return (
-                              match && (
-                                <img
-                                  src={muscleGroupPics[match]}
-                                  alt={match}
-                                  className="absolute -right-[30rem] -bottom-[9rem] w-[45%] h-auto rounded-[13px] outline outline-2 outline-primary"
-                                />
-                              )
-                            );
-                          })()
-                        )
-                        }
+                        {productData.targetMuscles &&
+                            (() => {
+                                const match = Object.keys(muscleGroupPics).find((muscle, picIndex) =>
+                                    productData.targetMuscles.some(
+                                        (m, muscleIndex) =>
+                                            m.toLowerCase().includes(muscle) &&
+                                            muscleIndex === productData.targetMuscles.length - 1,
+                                    ),
+                                )
+                                return (
+                                    match && (
+                                        <img
+                                            src={muscleGroupPics[match]}
+                                            alt={match}
+                                            className='absolute -right-[30rem] -bottom-[9rem] w-[45%] h-auto rounded-[13px] 
+                                                outline outline-2 outline-primary'
+                                        />
+                                    )
+                                )
+                            })()}
                     </div>
 
                     <div className='flex justify-center items-center product-input-wrapper'>
                         <div className='input-wrapper'>
                             <label for='product-additionalInfo'> Additional Information (optional) </label>
                             <div className='relative'>
-                                <PlaceholderIcon icon={<CgDetailsMore/>} fromTop={7} />
-                                <textarea placeholder='Type the additional informations and parameters of the product here line by line' rows='8' cols='70' maxlength='2000' id='product-additionalInformation'
-                                    required className='pl-[21px]' onFocus={(e)=> inputFocusHandler(e)} onBlur={(e)=> additionalInfoBlurHandler(e)}
-                                     onChange={(e)=> additionalInfoChangeHandler(e)} value={productData?.additionalInformation && productData.additionalInformation.join('\n')} />
-                                <p className='error' onClick={(e)=> cancelErrorState(e, primaryColor.current, {optionalField: true})}></p>
+                                <PlaceholderIcon icon={<CgDetailsMore />} fromTop={7} />
+                                <textarea
+                                    placeholder='Type the additional informations and parameters of the product here line by line'
+                                    rows='8'
+                                    cols='70'
+                                    maxlength='2000'
+                                    id='product-additionalInformation'
+                                    required
+                                    className='pl-[21px]'
+                                    onFocus={(e) => inputFocusHandler(e)}
+                                    onBlur={(e) => additionalInfoBlurHandler(e)}
+                                    onChange={(e) => additionalInfoChangeHandler(e)}
+                                    value={
+                                        productData?.additionalInformation &&
+                                        productData.additionalInformation.join("\n")
+                                    }
+                                />
+                                <p
+                                    className='error'
+                                    onClick={(e) =>
+                                        cancelErrorState(e, primaryColor.current, { optionalField: true })
+                                    }></p>
                             </div>
                         </div>
                     </div>
+
                     <div className='flex justify-center items-center product-input-wrapper'>
                         <div className='input-wrapper'>
-                            
-                            <TagGenerator tag={tag} setTags={setTags} SetPlaceholderIcon={PlaceholderIcon} {...(editProduct && {editTags: editProductItem?.current?.tags} )}/> 
+
+                            <TagGenerator
+                                tag={tag}
+                                setTags={setTags}
+                                SetPlaceholderIcon={PlaceholderIcon}
+                                {...(editProduct && { editTags: editProductItem?.current?.tags })}
+                            />
 
                         </div>
                     </div>
+
                     <div className='mt-[1rem] flex items-center gap-[1rem]'>
-                        <motion.div whileTap={{ scale: 0.98 }} >
-                            <SiteButtonSquare 
-                                tailwindClasses={`hover:!bg-primaryDark transition duration-300`} 
-                                customStyle={{paddingInline:'50px', paddingBlock:'9px', borderRadius:'7px'}}
-                                                clickHandler={(e)=>{ submitHandler(e)}}>
-                                 {loading? <CustomHashLoader loading={loading}/> : 'Submit'}  
+                        <motion.div whileTap={{ scale: 0.98 }}>
+                            <SiteButtonSquare
+                                tailwindClasses={`hover:!bg-primaryDark transition duration-300`}
+                                customStyle={{ paddingInline: "50px", paddingBlock: "9px", borderRadius: "7px" }}
+                                clickHandler={(e) => {
+                                    submitHandler(e)
+                                }}>
+                                {loading ? <CustomHashLoader loading={loading} /> : "Submit"}
                             </SiteButtonSquare>
                         </motion.div>
-                        <p className='text-[11.5px] text-red-500 tracking-[0.5px]'> 
-                            {(startedSubmission && !productData.subCategory) ? '*Please select a subcategory!' : '' } 
+                        <p className='text-[11.5px] text-red-500 tracking-[0.5px]'>
+                            {startedSubmission && !productData.subCategory ? "*Please select a subcategory!" : ""}
                         </p>
                     </div>
                 </div>
                 <div className='w-full basis-[37%]'>
- 
-                     <FileUpload images={images} setImages={setImages} imageLimit={6} needThumbnail={true} imageType='Product'
-                         thumbnail={thumbnail} setThumbnail={setThumbnail} thumbnailIndexOnEditProduct={thumbnailIndexOnEditProduct} 
-                            imageCropperBgBlur={false} editingMode={editProduct}/>
 
+                    <FileUpload
+                        images={images}
+                        setImages={setImages}
+                        imageLimit={6}
+                        needThumbnail={true}
+                        imageType='Product'
+                        thumbnail={thumbnail}
+                        setThumbnail={setThumbnail}
+                        thumbnailIndexOnEditProduct={thumbnailIndexOnEditProduct}
+                        imageCropperBgBlur={false}
+                        editingMode={editProduct}
+                    />
+                    
                 </div>
             </main>
         </section>

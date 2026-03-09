@@ -1,32 +1,35 @@
-import React,{useState, useEffect, useLayoutEffect, useRef} from 'react'
-import './SignUpAndInPage.css'
-import {Link, useNavigate, useLocation} from 'react-router-dom'
-import {useDispatch, useSelector} from 'react-redux'
-import {motion} from "framer-motion"
+import React, { useState, useEffect, useLayoutEffect, useRef } from "react"
+import "./SignUpAndInPage.css"
+import { Link, useNavigate, useLocation } from "react-router-dom"
+import { useDispatch, useSelector } from "react-redux"
+import { motion } from "framer-motion"
 
-import {toast} from 'react-toastify'
-import {toast as sonnerToast} from 'sonner'
-import {useGoogleLogin} from '@react-oauth/google'
-import {Eye, EyeOff} from 'lucide-react'
+import { toast } from "react-toastify"
 
-import apiClient from '../../../Api/apiClient'
-import axios from 'axios'
+import { toast as sonnerToast } from "sonner"
 
-import {SiteButtonSquare, SiteSecondaryBorderButtonSquare} from '../../../Components/UI/SiteButtons/SiteButtons'
-import Header from '../../../Components/Layout/Header/Header'
-import Footer from '../../../Components/Layout/Footer/Footer'
-import {signup, signin, googleSignin, resetStates} from '../../../Slices/userSlice'
-import {CustomHashLoader, CustomScaleLoader} from '../../../Components/UI/Loader/Loader'
+import { useGoogleLogin } from "@react-oauth/google"
+import { Eye, EyeOff } from "lucide-react"
+
+import apiClient from "../../../Api/apiClient"
+import axios from "axios"
+
+import Header from "../../../Components/Layout/Header/Header"
+import Footer from "../../../Components/Layout/Footer/Footer"
+import { SiteButtonSquare, SiteSecondaryBorderButtonSquare } from "../../../Components/UI/SiteButtons/SiteButtons"
+
+import { signup, signin, googleSignin, resetStates } from "../../../Slices/userSlice"
+import { CustomHashLoader, CustomScaleLoader } from "../../../Components/UI/Loader/Loader"
 
 
-export default function SignUpAndInPage({type}){
+export default function SignUpAndInPage({ type }) {
 
     const bgImg = {
-        backgroundImage:"url('/Images/SignIn-bg.png')",
-        backgroundSize:"cover"
+        backgroundImage: "url('/Images/SignIn-bg.png')",
+        backgroundSize: "cover",
     }
 
-    const [formData,setFormData] = useState({})
+    const [formData, setFormData] = useState({})
     const [googlePromptLoading, setGooglePromptLoading] = useState(false)
 
     const [showPassword, setShowPassword] = useState(false)
@@ -39,70 +42,71 @@ export default function SignUpAndInPage({type}){
     const location = useLocation()
 
     const [otpPageLoading, setOtpPageLoading] = useState(false)
- 
-    const dispatch = useDispatch()
-    const {error, loading, success, googleSuccess, user} = useSelector((state)=>state.user)
-    const {admin} = useSelector((state)=> state.admin)
 
-    const clearCookiesAndSignIn = async()=> {
+    const dispatch = useDispatch()
+    const { error, loading, success, googleSuccess, user } = useSelector((state) => state.user)
+    const { admin } = useSelector((state) => state.admin)
+
+    const clearCookiesAndSignIn = async () => {
         try {
             const response = await apiClient.get(`/clear-cookies`)
-            if(response.status === 200){
+            if (response.status === 200) {
                 dispatch(signin(formData))
             }
-        } catch(error) {
+        } catch (error) {
             if (!error.response) {
-              toast.error("Network error. Please check your internet.")
+                toast.error("Network error. Please check your internet.")
             } else {
-              toast.error("Internal Server Error. Please try after sometime!")
+                toast.error("Internal Server Error. Please try after sometime!")
             }
         }
     }
-     
-    useEffect(()=>{
-        const checkSuccessAndSendOtp = async()=> {
+
+    useEffect(() => {
+        const checkSuccessAndSendOtp = async () => {
             sonnerToast.success("Registered succesfully!")
-            try{
-                const response = await apiClient.post(`/sendOtp`, { email: formData.email });
-                if(response.status === 200){
-                    navigate('/otp-verify', {
-                        replace:true, 
-                        state:{email: formData.email, from: 'signup', NoDirectAccess: true}
-                    }) 
+            try {
+                const response = await apiClient.post(`/sendOtp`, { email: formData.email })
+                if (response.status === 200) {
+                    navigate("/otp-verify", {
+                        replace: true,
+                        state: { email: formData.email, from: "signup", NoDirectAccess: true },
+                    })
                     setOtpPageLoading(false)
                 }
-            } catch(error) {
+            } catch (error) {
                 if (!error.response) {
-                  sonnerToast.error(`
+                    sonnerToast.error(`
                     OTP verification failed due to a network error. Please check your internet connection. You will be asked to verify again at checkout.
                   `)
-                }else {
-                  sonnerToast.error("OTP verification failed due to internal server error. You will be asked to verify again at checkout.")
+                } else {
+                    sonnerToast.error(
+                        "OTP verification failed due to internal server error. You will be asked to verify again at checkout.",
+                    )
                 }
             }
         }
-        if(type=='signup' && success && (!googleSuccess||googleSuccess)){
+        if (type == "signup" && success && (!googleSuccess || googleSuccess)) {
             setOtpPageLoading(true)
-            checkSuccessAndSendOtp();
+            checkSuccessAndSendOtp()
         }
-        if(type=='signin' && success){
-            if(location && location.state?.currentPath){
-                const redirectingtPath = location.state.currentPath 
-                navigate(`${redirectingtPath}`, {replace:true})
-            }
-            else{
-                navigate('/', {replace:true})
+        if (type == "signin" && success) {
+            if (location && location.state?.currentPath) {
+                const redirectingtPath = location.state.currentPath
+                navigate(`${redirectingtPath}`, { replace: true })
+            } else {
+                navigate("/", { replace: true })
             }
             dispatch(resetStates())
         }
         dispatch(resetStates())
     })
-    
-    useLayoutEffect(()=>{
+
+    useLayoutEffect(() => {
         setFormData({})
-        if(identifierRef.current) identifierRef.current.value=""
-        passwordRef.current.value=""
-    },[type])
+        if (identifierRef.current) identifierRef.current.value = ""
+        passwordRef.current.value = ""
+    }, [type])
 
     useEffect(() => {
         const userNotFilledForm = Object.keys(formData).length === 0
@@ -117,170 +121,175 @@ export default function SignUpAndInPage({type}){
         }
     }, [user, admin])
 
-    useEffect(()=> {
-        if(error){
-            if(error === 'Bad request- User already logged in!'){
-                if(user){
-                    navigate('/',{replace:true})
-                }
-                else clearCookiesAndSignIn()
-            }
-            else if(error.includes('is Blocked')){
+    useEffect(() => {
+        if (error) {
+            if (error === "Bad request- User already logged in!") {
+                if (user) {
+                    navigate("/", { replace: true })
+                } else clearCookiesAndSignIn()
+            } else if (error.includes("is Blocked")) {
                 toast.error(error)
-                navigate('/blocked', {
-                    replace: true, 
-                    state: {NoDirectAccesss: true}
+                navigate("/blocked", {
+                    replace: true,
+                    state: { NoDirectAccesss: true },
                 })
-
-            }
-            else{
+            } else {
                 sonnerToast.error(error || "Something went wrong.")
             }
             dispatch(resetStates())
         }
     }, [error])
 
-    const handleChange = (e)=>{
-        setFormData({...formData, [e.target.id.toString()]:e.target.value})
+    const handleChange = (e) => {
+        setFormData({ ...formData, [e.target.id.toString()]: e.target.value })
     }
 
-    const displaySuccess = (e)=>{
-        e.target.nextElementSibling.style.visibility = 'hidden'
-        e.target.style.borderColor = 'green'
+    const displaySuccess = (e) => {
+        e.target.nextElementSibling.style.visibility = "hidden"
+        e.target.style.borderColor = "green"
     }
-    const displayError = (e,message)=>{
-        e.target.style.borderColor = 'red'
-        e.target.nextElementSibling.style.visibility = 'visible'
+
+    const displayError = (e, message) => {
+        e.target.style.borderColor = "red"
+        e.target.nextElementSibling.style.visibility = "visible"
         delete formData[e.target.id.toString()]
         e.target.nextElementSibling.innerText = message
-    } 
+    }
+
     const regexPatterns = {
         emailPattern: /^([a-z\d\.-]+)@([a-z\d-]+)\.([a-z]{2,10})([\.a-z]?)$/,
         usernamePattern: /^[\w-]{5,15}(?!@)$/,
         mobilePattern: /^\d{10}$/,
-        passwordPattern: /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[`~@#$%^&*()\-+={}\\/;:"'|,.?<>])[a-zA-Z\d`~@#$%^&*()\-+={}\\/;:"'|,.\?<>]{5,}/,
+        passwordPattern:
+            /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[`~@#$%^&*()\-+={}\\/;:"'|,.?<>])[a-zA-Z\d`~@#$%^&*()\-+={}\\/;:"'|,.\?<>]{5,}/,
 
-        validator: function(e,errorMessage){
-            const currentPattern = Object.keys(this).find( (pattern,index)=> {
-                if(pattern.toString().match(e.target.id.toString())) return pattern[index]
-            } )
-            if(currentPattern){
-                if(this[currentPattern].test(e.target.value)){
+        validator: function (e, errorMessage) {
+            const currentPattern = Object.keys(this).find((pattern, index) => {
+                if (pattern.toString().match(e.target.id.toString())) return pattern[index]
+            })
+            if (currentPattern) {
+                if (this[currentPattern].test(e.target.value)) {
                     displaySuccess(e)
+                } else {
+                    displayError(e, errorMessage)
                 }
-                else{
-                    displayError(e,errorMessage)
-                }
-            }
-            else{
-                if(new RegExp(`^(${this.emailPattern.source})|(${this.usernamePattern.source})$`).test(e.target.value)){
+            } else {
+                if (
+                    new RegExp(`^(${this.emailPattern.source})|(${this.usernamePattern.source})$`).test(e.target.value)
+                ) {
                     displaySuccess(e)
-                }
-                else{
+                } else {
                     displayError(e, errorMessage)
                 }
             }
-        }
+        },
     }
-    
-    const handleInput = (e)=>{
-        if(!e.target.value.trim().length){
-            displayError(e,"This field cannot be empty")
-        }
-        else{
-            switch(e.target.id){
+
+    const handleInput = (e) => {
+        if (!e.target.value.trim().length) {
+            displayError(e, "This field cannot be empty")
+        } else {
+            switch (e.target.id) {
                 case "email":
-                    return regexPatterns.validator(e,"Please enter a valid email-id!")
+                    return regexPatterns.validator(e, "Please enter a valid email-id!")
                 case "username":
-                    return regexPatterns.validator(e,"Username can be alphanumeric. Avoid special characters and must have atleast 5 letters! ")
+                    return regexPatterns.validator(
+                        e,
+                        "Username can be alphanumeric. Avoid special characters and must have atleast 5 letters! ",
+                    )
                 case "identifier":
-                    return regexPatterns.validator(e,"Enter a valid username or email address!")
+                    return regexPatterns.validator(e, "Enter a valid username or email address!")
                 case "mobile":
-                    return regexPatterns.validator(e,"Please enter a valid Mobile number!")
+                    return regexPatterns.validator(e, "Please enter a valid Mobile number!")
                 case "password":
-                    return regexPatterns.validator(e,"Password should have atleast a special characteer and a number. Must have atleast 5 letters!")
+                    return regexPatterns.validator(
+                        e,
+                        "Password should have atleast a special characteer and a number. Must have atleast 5 letters!",
+                    )
                 case "confirmPassword":
-                    if(e.target.value == formData.password){
-                        e.target.nextElementSibling.style.visibility = 'hidden'
-                        e.target.style.borderColor = 'green'
-                    }
-                    else {
-                        displayError(e,"The passwords doesn't match!")
+                    if (e.target.value == formData.password) {
+                        e.target.nextElementSibling.style.visibility = "hidden"
+                        e.target.style.borderColor = "green"
+                    } else {
+                        displayError(e, "The passwords doesn't match!")
                     }
             }
         }
     }
 
-    const submitData = (e)=>{
+    const submitData = (e) => {
         e.preventDefault()
-        if((type=="signup"? Object.keys(formData).length<5: Object.keys(formData).length<2) || Object.values(formData).find(inputValues=>inputValues==='undefined')){
-            if(!Object.keys(formData).length){
+        if (
+            (type == "signup" ? Object.keys(formData).length < 5 : Object.keys(formData).length < 2) ||
+            Object.values(formData).find((inputValues) => inputValues === "undefined")
+        ) {
+            if (!Object.keys(formData).length) {
                 sonnerToast.error("Please enter all the fields!")
-            }
-            else{
+            } else {
                 sonnerToast.error("Please check the fields and submit again!")
             }
-        } 
-        else{
-            type=="signup" ? dispatch(signup(formData)) : dispatch(signin(formData))
+        } else {
+            type == "signup" ? dispatch(signup(formData)) : dispatch(signin(formData))
         }
-        
     }
 
-    const googleSuccessHandler = async (response)=>{
+    const googleSuccessHandler = async (response) => {
         const googleToken = response.access_token
         try {
-            const userDetails = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {headers:{
-                Authorization:`Bearer ${googleToken}`
-            }})
-            if(userDetails){
-                const {email,name,sub,picture} = userDetails.data
-                const username = name.split(" ").join("").trim() + Math.random().toString().substr(2,4) 
-                const userData = {username, email, sub, picture}
+            const userDetails = await axios.get("https://www.googleapis.com/oauth2/v3/userinfo", {
+                headers: {
+                    Authorization: `Bearer ${googleToken}`,
+                },
+            })
+            if (userDetails) {
+                const { email, name, sub, picture } = userDetails.data
+                const username = name.split(" ").join("").trim() + Math.random().toString().substr(2, 4)
+                const userData = { username, email, sub, picture }
                 setGooglePromptLoading(false)
                 dispatch(googleSignin(userData))
-            } 
-            else{
+            } else {
                 sonnerToast.error("Couldn't find the user details!")
             }
-        }catch (error) {
-          if (!error.response) {
-            sonnerToast.error("Network error. Please check your internet.")
-          }else {
-            sonnerToast.error("Something went wrong! Please retry later.")
-          }
+        } catch (error) {
+            if (!error.response) {
+                sonnerToast.error("Network error. Please check your internet.")
+            } else {
+                sonnerToast.error("Something went wrong! Please retry later.")
+            }
         }
     }
-    const googleFailureHandler = (error)=>{
+
+    const googleFailureHandler = (error) => {
         toast.error("Please check your gmail id")
     }
+
     const googleLogin = useGoogleLogin({
-            onSuccess:googleSuccessHandler,
-            onFailure:googleFailureHandler
+        onSuccess: googleSuccessHandler,
+        onFailure: googleFailureHandler,
     })
 
     const sectionVariants = {
-      hidden: { opacity: 0,},
-      visible: { opacity: 1, transition: { duration: 0.8, ease: "easeOut" } }
+        hidden: { opacity: 0 },
+        visible: { opacity: 1, transition: { duration: 0.8, ease: "easeOut" } },
     }
 
     const mainVariants = {
-      hidden: { opacity: 0, scale: 0.97 },
-      visible: {
-        opacity: 1,
-        scale: 1,
-        transition: {
-          duration: 0.7,
-          ease: "easeOut",
-          when: "beforeChildren",
-          staggerChildren: 0.12,
+        hidden: { opacity: 0, scale: 0.97 },
+        visible: {
+            opacity: 1,
+            scale: 1,
+            transition: {
+                duration: 0.7,
+                ease: "easeOut",
+                when: "beforeChildren",
+                staggerChildren: 0.12,
+            },
         },
-      }
     }
 
     const childVariants = {
-      hidden: { opacity: 0, y: 10 },
-      visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } }
+        hidden: { opacity: 0, y: 10 },
+        visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
     }
 
 
@@ -292,7 +301,8 @@ export default function SignUpAndInPage({type}){
                 id='signup-and-in'
                 variants={sectionVariants}
                 initial='hidden'
-                animate='visible'>
+                animate='visible'
+            >
                 <header>
                     <Header />
                 </header>
@@ -304,7 +314,8 @@ export default function SignUpAndInPage({type}){
                         type == "signup"
                             ? "w-[90%] sm:w-[70%] md:w-[50%] lg:w-[40%] my-[16rem] sm:my-[12rem] sm:border"
                             : "w-[90%] x-md:w-[65%] lg:w-[50%] x-lg:w-[40%] my-[2%] before:h-[120vh]"
-                    }`}>
+                    }`}
+                >
                     <motion.div
                         className='absolute inset-0 border border-secondary rounded-[22px] pointer-events-none'
                         initial={{ clipPath: "inset(0 100% 100% 0)" }}
@@ -313,7 +324,8 @@ export default function SignUpAndInPage({type}){
                     />
                     <motion.h1
                         className='text-secondary font-funCity text-3xl sm:text-4xl mb-[60px] text-left my-[50px]'
-                        variants={childVariants}>
+                        variants={childVariants}
+                    >
                         SIGN
                         <span className='font-funCity'> {type.slice(4).toUpperCase()} </span>
                     </motion.h1>
@@ -321,7 +333,8 @@ export default function SignUpAndInPage({type}){
                     <motion.form
                         className='flex flex-col gap-[15px] text-descReg1 items-start'
                         onSubmit={(e) => submitData(e)}
-                        variants={mainVariants}>
+                        variants={mainVariants}
+                    >
                         <motion.div className='w-full' variants={childVariants}>
                             {type == "signup" ? (
                                 <>
@@ -359,7 +372,8 @@ export default function SignUpAndInPage({type}){
                         {type === "signup" ? (
                             <motion.div
                                 className='flex flex-col sm:flex-row gap-[20px] w-full'
-                                variants={childVariants}>
+                                variants={childVariants}
+                            >
                                 <div className='flex-1'>
                                     <label htmlFor='username'> User Name </label>
                                     <input
@@ -415,7 +429,8 @@ export default function SignUpAndInPage({type}){
                                     type='button'
                                     data-password-toggle
                                     onClick={() => setShowPassword((status) => !status)}
-                                    className='absolute top-[55%] -translate-y-1/2 right-4 text-secondary'>
+                                    className='absolute top-[55%] -translate-y-1/2 right-4 text-secondary'
+                                >
                                     {showPassword ? (
                                         <Eye className='w-[18px] h-[18px]' />
                                     ) : (
@@ -473,6 +488,7 @@ export default function SignUpAndInPage({type}){
                                 </div>
                             )}
                         </motion.div>
+                        
                         <motion.div variants={childVariants} className='w-full'>
                             <SiteButtonSquare
                                 shouldSubmit={true}
@@ -523,10 +539,14 @@ export default function SignUpAndInPage({type}){
                         ) : (
                             <></>
                         )}
+
                     </motion.form>
+
                 </main>
             </motion.section>
+
             <Footer />
+            
         </>
     )
 }

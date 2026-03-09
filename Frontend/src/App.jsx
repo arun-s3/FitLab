@@ -1,16 +1,16 @@
-import React from 'react'
-import {BrowserRouter, Route, Routes} from 'react-router-dom'
+import React from "react"
+import { BrowserRouter, Route, Routes } from "react-router-dom"
 
-import {Toaster as SonnerToaster} from 'sonner'
-import {ToastContainer} from 'react-toastify'
+import { Toaster as SonnerToaster } from "sonner"
+import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 
-import UserRoutes from './Routes/UserRoutes'
-import AdminRoutes from './Routes/AdminRoutes'
-import ErrorRoutes from './Routes/ErrorRoutes'
+import UserRoutes from "./Routes/UserRoutes"
+import AdminRoutes from "./Routes/AdminRoutes"
+import ErrorRoutes from "./Routes/ErrorRoutes"
 
 
-export default function App(){
+export default function App() {
     
     return (
         <BrowserRouter>
@@ -25,5 +25,4 @@ export default function App(){
             </Routes>
         </BrowserRouter>
     )
-    
 }

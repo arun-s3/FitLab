@@ -1,49 +1,34 @@
-import React, { useEffect } from "react";
-import {Outlet} from 'react-router-dom'
-import { useModal } from "./ModalContext";
+import React, { useEffect } from "react"
+import { useModal } from "./ModalContext"
 
-import {SocketContext} from '../../Socket-providers/SocketProvider/SocketProvider'
+import { SocketContext } from "../../Socket-providers/SocketProvider/SocketProvider"
 
-import VideoCallModal from "../../../Pages/User/VideoCallCommonModal/VideoCallCommonModal";
+import VideoCallModal from "../../Features/VideoChat/VideoCallCommonModal/VideoCallCommonModal"
 
-const SocketListener = ({children}) => {
-  const { openModal } = useModal();
 
-  // useEffect(() => {
-    // const handleOpenModal = (data) => {
-    //   openModal(<p>Session scheduled: {data.sessionId}</p>);
-    // };
+const SocketListener = ({ children }) => {
+    
+    const { openModal } = useModal()
 
-  //   socket.on("openModal", handleOpenModal);
+    const { socket } = useContext(SocketContext)
 
-  //   return () => {
-  //     socket.off("openModal", handleOpenModal); // Clean up
-  //   };
-  // }, []);
-   const {socket} = useContext(SocketContext)
-  
+    useEffect(() => {
+        if (socket) {
+            const handleOpenModal = () => {
+                openModal(<VideoCallModal />)
+            }
 
-    useEffect(()=> {
-        if(socket){
+            socket.on("notifySupportCalling", (sessionId) => {
+                handleOpenModal()
+            })
 
-          const handleOpenModal = () => {
-            openModal(<VideoCallModal/>)
-          }
-
-          socket.on("notifySupportCalling", (sessionId) => {
-            handleOpenModal()
-            // setOpenVideoCallModal(true)
-          })
-
-          return ()=> {
-            socket.off("notifySupportCalling")
-          }
+            return () => {
+                socket.off("notifySupportCalling")
+            }
         }
     }, [socket])
 
-  return (
-    {children}
-  ) 
-};
+    return { children }
+}
 
-export default SocketListener;
+export default SocketListener

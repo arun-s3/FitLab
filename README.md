@@ -25,6 +25,29 @@ The platform is designed to simulate **a complete digital fitness environment** 
 
 * **Frontend (user-side)** : [https://fitlab.co.in](https://fitlab.co.in)
 * **Frontend (admin-side)** : [https://fitlab.co.in/admin](https://fitlab.co.in/admin)
+
+---
+
+## 📑 Table of Contents
+
+* 📖 [Overview](#overview)
+* 🛠️ [Tech Stack](#tech-stack)
+* 🌐 [Live Demo](#live-demo)
+* 🚀 [Key Highlights](#-key-highlights)
+* 🏗️ [Platform &amp; System Features](#-platform--system-features)
+* ⚙️ [Backend Systems &amp; Services](#-backend-systems--services)
+* ☁️ [Infrastructure &amp; Deployment](#-infrastructure--deployment)
+* 📸 [Screenshots](#-screenshots)
+* 🧩 [Platform Capabilities](#-platform-capabilities)
+* 👤 [User Features](#-user-features)
+* 🛠️ [Admin Panel Features](#-admin-panel-features)
+* 📁 [Project Structure](#-project-structure)
+* 🎨 [Frontend Architecture](#-frontend-architecture)
+* 🧠 [Backend Architecture](#-backend-architecture)
+* 🔐 [Security Features](#-security-features)
+* ⚙️ [Installation](#-installation)
+* 🚀 [Future Improvements](#-future-improvements)
+
 ---
 
 ## 🚀 Key Highlights
@@ -89,6 +112,47 @@ The platform is designed to simulate **a complete digital fitness environment** 
 * 📄 **Extensive Pagination System** — Pagination implemented across data-heavy interfaces to ensure efficient browsing, structured navigation, and optimal performance when handling large datasets.
 * 🛡 **Strict Form Validation Framework** — Comprehensive validations across all forms using shared validation helpers along with contextual inline validation logic and clear error messaging.
 * ⚠ **Confirmation Modal Safeguards** — Confirmation dialogs triggered before destructive or critical actions to prevent accidental operations, alongside several page-specific interactive modals across the platform.
+
+............................................................................................................................
+
+## 🎨 Design
+
+* The UI/UX of FitLab was initially designed in **Figma**.
+* The design file is  available in the `/Design` folder.
+* Includes initial layout planning, component structure, and UI flow diagrams, although several UI refinements were introduced during development.
+
+---
+
+## ✨ Animation & Interaction System
+
+The platform uses **Framer Motion powered animations & some custom CSS animations** to create a smooth and engaging user experience.
+
+* Context-aware **page transitions and component animations**
+* Elegant **micro-interactions for modals, panels and UI elements**
+* Smooth **navigation feedback and interaction transitions**
+
+---
+
+## 🧠 Backend Systems & Services
+
+* 🧩 **Modular Node.js Architecture** — Layered backend structured with Controllers, Models, Services, Middleware, CronJobs, AI, utilities, and Routes modules for scalable server-side development.
+* 🔐 **Authentication & Security** — JWT auth with refresh tokens, role-based route protection, secure cookies, and middleware-driven validation.
+* 🧠 **AI Integration** — AI-powered fitness assistant generating contextual fitness, wrokout, health & business, insights using external APIs.
+* 🔄 **Automated Cron Jobs** — Background schedulers managing category activation, coupons' status, recurring offers, fitness dataset updates, and wallet auto-recharge workflows.
+* 💳 **Payment & Financial System** — Secure payment integrations with  **Stripe, Razorpay, and PayPal** for handling transactions and subscriptions.
+* 🔗 **Webhook Event Processing** — Webhooks used to securely verify payment events and trigger automated wallet recharge workflows.
+* 📡 **Real-Time Communication** — WebSocket-powered chat, notifications, and live updates implemented using Socket.io.
+* ☁ **Media & External Services** — Cloudinary media storage with integrations for fitness datasets, AI services, and third-party APIs.
+
+---
+
+## ☁ Infrastructure & Deployment
+
+* 🚀 **CI/CD Pipeline** — Automated builds and deployments via  **GitLab CI**  and GIthub Actions.
+* 🌍 **Frontend Hosting & CDN** — React frontend deployed on **AWS S3** and distributed globally via  **CloudFront** .
+* 🖥 **Backend Infrastructure** — Node.js API hosted on **AWS EC2** with **Nginx reverse proxy** and  **PM2 process management** .
+* 🌐 **Domain & DNS** — Domain registered via **BigRock** with DNS routing through  **AWS Route53** .
+* 🔐 **Secure Environment Management** — Sensitive credentials managed through environment variables in the CI/CD pipeline.
 
 ---
 
@@ -609,6 +673,29 @@ The admin panel is designed as a **structured operations console** for efficient
 
 ---
 
+## 📁 Project Structure
+
+The repository follows a modular full-stack structure separating frontend, backend, and supporting resources.
+
+```bash
+FitLab
+├── Frontend/                 → React application (UI, components, state management, routing)
+├── Backend/                  → Node.js API (controllers, services, middleware, cron jobs, sockets)
+├── Design/                   → Figma design files, layout planning, and UI flow diagrams
+│
+├── .github/workflows/        → GitHub Actions workflows
+│   └── mirroring.yml         → GitHub Action that mirrors the repository to GitLab for CI/CD execution
+│
+├── .gitlab-ci.yml            → CI/CD pipeline for automated build and deployment
+├── ecosystem.config.js       → PM2 configuration for production process management
+│
+├── package.json              → Project dependencies and scripts
+├── jsconfig.json             → JavaScript project configuration
+└── README.md
+```
+
+---
+
 ## 🧱 Frontend Architecture
 
 The frontend follows a **modular and scalable component architecture** designed for maintainability, separation of concerns, and feature isolation.
@@ -746,16 +833,6 @@ backend
 
 ---
 
-## ✨ Animation & Interaction System
-
-The platform uses **Framer Motion powered animations & some custom CSS animations** to create a smooth and engaging user experience.
-
-* Context-aware **page transitions and component animations**
-* Elegant **micro-interactions for modals, panels and UI elements**
-* Smooth **navigation feedback and interaction transitions**
-
----
-
 ## 📦 Installation
 
 ```bash
@@ -773,7 +850,7 @@ npm install
 npm run backend
 
 # Open another terminal
-cd FitLab/Frontend
+cd Frontend
 
 # Install frontend dependencies
 npm install
@@ -797,8 +874,3 @@ npm run dev
 # 📜 License
 
 This project is licensed under the MIT License.
-
-## 🌐 Live Demo
-
-Frontend: https://fitlab.app
-Admin Panel: https://admin.fitlab.app

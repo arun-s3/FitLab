@@ -1,7 +1,7 @@
 # 🏋️ FitLab — Unified Fitness Ecosystem
 
-**FitLab** is a **full-stack fitness platform** that goes far beyond traditional e-commerce.
-It combines **smart shopping, structured fitness training, health tracking, AI insights, wallet-based payments, real-time support, and personalized coaching** into a single ecosystem.
+**FitLab** is a **full-stack (MERN stack) fitness platform** that goes far beyond traditional e-commerce.
+It combines **smart shopping, structured fitness training, fitness tracking, health tracking, AI insights, wallet-based payments, real-time video/text support, and personalized coaching** into a single ecosystem.
 
 The platform is designed to simulate **a complete digital fitness environment** where users can train, shop, track health, receive AI guidance, and interact with support — all in one place.
 
@@ -9,22 +9,32 @@ The platform is designed to simulate **a complete digital fitness environment** 
 
 ## ⚙️ Tech Stack
 
-• React  • Redux • Tailwind CSS • Framer Motion • CSS • Node.js • Express.js • MongoDB • Mongoose  • Socket.io  • WebRTC  • JWT Auth
+#### Frontend
 
-**Other Tools**
+• React • Redux • Tailwind • CSS • Framer Motion • Vanilla JavaScript • Canvas api • postMessage api
 
-• Figma • Cloudinary • Nodemailer • Stripe • Razorpay • PayPal
+#### Backend
 
-**Deployment**
+• Node.js • Express.js • MongoDB • Mongoose • Socket.io • WebRTC • JWT Authentication
 
-• AWS EC2 • AWS S3 • AWS CloudFront • AWS Route53 • AWS ACM • NGINX • BigRock Domain • GitLab CI • GitHub Actions
+#### Design
+
+• Figma
+
+#### Payment & Services
+
+• Stripe • Razorpay • PayPal • Cloudinary • Nodemailer
+
+### Deployment & DevOps
+
+• AWS (EC2, S3, CloudFront, Route53, ACM) • NGINX GitLab CI (CI/CD) • GitHub Actions (CI/CD), • BigRock Domain
 
 ---
 
-## 🌐 Live Demo
+## 🌐 Live Web Application
 
-* **Frontend (user-side)** : [https://fitlab.co.in](https://fitlab.co.in)
-* **Frontend (admin-side)** : [https://fitlab.co.in/admin](https://fitlab.co.in/admin)
+* **Frontend (user-side)** : https://www.fitlab.co.in
+* **Frontend (admin-side)** : https://www.fitlab.co.in/[admin](https://fitlab.co.in/admin)
 
 ---
 
@@ -62,7 +72,7 @@ The platform is designed to simulate **a complete digital fitness environment** 
 * 🤖 **Coach+  Personal Fitness Companion** — Context-aware AI assistant providing workout guidance, insights, & product recommendations with disclaimers based on your activities like recent orders, wishlist, fitness & health tracking records.
 * 🧠 **AI-Powered Fitness Insights** —AI analyzes workouts, health metrics, and platform data to generate personalized fitness insights..
 * 🛍 **Smart Wishlist Planning System** — Create multiple wishlists with editable thumbnails using the built-in Fitlab Image editor, priorities, notes, reminders, expiry dates, and shareable or public lists.
-* 💸 **Advanced Coupon & Offer Engine** — Supports percentage, fixed, BOGO and free shipping campaigns with **automatic best-coupon detection**, **automatic best-offer detection.** Visual offer showcase carousels highlighting active campaigns with modal exploration of eligible products or categories.
+* 💸 **Advanced Coupon & Offer Engine** — Supports percentage, fixed, BOGO and free shipping campaigns with **automatic best-**coupon detection, automatic best-offer detection**.** Visual offer showcase carousels highlighting active campaigns with modal exploration of eligible products or categories.
 * 🧮 **Smart Discount Resolution System** — Automatically selects the best discount among product discounts, category discounts, and active offers.
 * 🛒 **Intelligent Cart System** — Automatic coupon suggestions, tax calculations, quantity adjustments, personalized product recommendations and a **dynamic cart sidebar** for quick cart previews.
 * 💳 **Unified Wallet & Multi-Gateway Payments** — Integrated Razorpay, Stripe, PayPal, wallet payments, COD, and automatic refund protection, robust error handling modals and retry options .
@@ -106,7 +116,7 @@ The platform is designed to simulate **a complete digital fitness environment** 
 * ⚡ **Robust Error Handling & UX Feedback** — Dedicated error UI components, custom error pages (401/403/404), validation helpers, and graceful failure handling.
 * 🔔 **Rich User Interaction System** — Toast notifications using Sonner and React-Toastify for real-time feedback and important alerts.
 * ⏳ **Optimized Loading Experience** — Skeleton loaders, custom spinners, and React-spinners to ensure smooth loading states across the platform.
-* 🧱 **Modular Frontend Architecture** — Feature-driven React component system with 60+ reusable UI components organized into structured layers (UI, layout, forms, modals, route-guards, socket providers, tools and feature modules) enabling scalable development and maintainable codebase.
+* 🧱 **Modular Frontend Architecture** — Feature-driven React component system with 50+ reusable UI components organized into structured layers (UI, layout, forms, modals, route-guards, socket providers, tools and feature modules) enabling scalable development and maintainable codebase.
 * 🏗 **Production-Grade Architecture** — The project follows a scalable modular architecture similar to production-grade React applications, allowing features to evolve independently while maintaining consistent UI patterns.
 * 🎨 **Professional Interface System** — Reusable UI architecture with elegant page transitions and micro-interactions powered by Framer Motion and custom CSS animations.
 * 📄 **Extensive Pagination System** — Pagination implemented across data-heavy interfaces to ensure efficient browsing, structured navigation, and optimal performance when handling large datasets.
@@ -153,6 +163,10 @@ The platform uses **Framer Motion powered animations & some custom CSS animation
 * 🖥 **Backend Infrastructure** — Node.js API hosted on **AWS EC2** with **Nginx reverse proxy** and  **PM2 process management** .
 * 🌐 **Domain & DNS** — Domain registered via **BigRock** with DNS routing through  **AWS Route53** .
 * 🔐 **Secure Environment Management** — Sensitive credentials managed through environment variables in the CI/CD pipeline.
+
+---
+
+## 📸 Screenshots
 
 ---
 
@@ -405,15 +419,14 @@ Notifications can be:
 ### 🖼 Built-in Media Editing Tools
 
 * Browser-based **image editing studio**
-* Cropping and resizing
-* Color adjustments (for adjusting brightness, contrast and saturation)
-* Filters (for grayscale, sepia, blur & opacity)
-* Color correction (for RGB channels, temperature, tint & hue rotate)
-* Color adjustments, color correction and filters
-* Rotation and flipping
-* Image compression and optimization
-* Each panel has a reset button too
-* Real-time preview before upload
+* **Cropping** and **resizing**
+* **Color adjustments** (for adjusting brightness, contrast and saturation)
+* **Filters** (for grayscale, sepia, blur & opacity)
+* **Color correction** (for RGB channels, temperature, tint & hue rotate)
+* **Rotation** and **flipping**
+* **Image compression and optimization**
+* Each panel has a **reset button** too
+* **Real-time preview** before upload
 
 ............................................................................................................................
 
@@ -863,7 +876,7 @@ npm run dev
 
 # 📌 Future Improvements
 
-* Make admiin pages responsive (under construction)
+* Expand admin panel responsiveness beyond desktop environments
 * Mobile application
 * Social fitness communities
 * Trainer marketplace

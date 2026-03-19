@@ -48,17 +48,15 @@ const packCategoryData = async (req) => {
         const start = parseDate(req.body.startDate)
         const end = parseDate(req.body.endDate)
 
-        if (start || end) {
-            const now = new Date()
-
-            categoryDatas.seasonalActivation = {
-                startDate: start,
-                endDate: end,
-            }
-
-            if (start && end) {
-                categoryDatas.isActive = start <= now && end >= now
-            }
+        const now = new Date()
+        categoryDatas.seasonalActivation = {
+            startDate: start,
+            endDate: end,
+        }
+        if (start && end) {
+            categoryDatas.isActive = start <= now && end >= now
+        } else {
+            categoryDatas.isActive = true
         }
 
         for (field in categoryDatas) {

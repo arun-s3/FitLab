@@ -1,4 +1,4 @@
-# 🏋️ FitLab — Unified Fitness Ecosystem
+# 🏋️ FitLab — Full Stack Unified Fitness Ecosystem with Smart e-commerce
 
 **FitLab** is a **full-stack (MERN stack) fitness platform** that goes far beyond traditional e-commerce.
 It combines **smart shopping, structured fitness training, fitness tracking, health tracking, AI insights, wallet-based payments, real-time video/text support, and personalized coaching** into a single ecosystem.
@@ -7,7 +7,7 @@ The platform is designed to simulate **a complete digital fitness environment** 
 
 ---
 
-## ⚙️ Tech Stack
+## ⚙️ Tech Stack (MERN)
 
 #### Frontend
 
@@ -27,14 +27,14 @@ The platform is designed to simulate **a complete digital fitness environment** 
 
 ### Deployment & DevOps
 
-• AWS (EC2, S3, CloudFront, Route53, ACM) • NGINX GitLab CI (CI/CD) • GitHub Actions (CI/CD), • BigRock Domain
+• AWS (EC2, S3, CloudFront, Route53, ACM) • NGINX • MongoDB Atlas  •GitLab CI (CI/CD) • GitHub Actions (CI/CD), • BigRock Domain
 
 ---
 
 ## 🌐 Live Web Application
 
 * **Frontend (user-side)** : https://www.fitlab.co.in
-* **Frontend (admin-side)** : https://www.fitlab.co.in/[admin](https://fitlab.co.in/admin)
+* **Frontend (admin-side)** : https://www.fitlab.co.in/admin
 
 ---
 
@@ -161,6 +161,7 @@ The platform uses **Framer Motion powered animations & some custom CSS animation
 * 🚀 **CI/CD Pipeline** — Automated builds and deployments via  **GitLab CI**  and GIthub Actions.
 * 🌍 **Frontend Hosting & CDN** — React frontend deployed on **AWS S3** and distributed globally via  **CloudFront** .
 * 🖥 **Backend Infrastructure** — Node.js API hosted on **AWS EC2** with **Nginx reverse proxy** and  **PM2 process management** .
+* 🗄 **Database Infrastructure** — Cloud-hosted **MongoDB Atlas** cluster for scalable and managed database operations.
 * 🌐 **Domain & DNS** — Domain registered via **BigRock** with DNS routing through  **AWS Route53** .
 * 🔐 **Secure Environment Management** — Sensitive credentials managed through environment variables in the CI/CD pipeline.
 
@@ -336,7 +337,7 @@ The product detail page provides a **rich, interactive product exploration exper
 
 ............................................................................................................................
 
-## 🏠 Address Management System
+### 🏠 Address Management System
 
 The platform includes a flexible **address management system** that simplifies the checkout and delivery experience.
 
@@ -418,7 +419,7 @@ Notifications can be:
 
 ### 🖼 Built-in Media Editing Tools
 
-* Browser-based **image editing studio**
+* Browser-based **image editing studio** built using Canvas api and postMessage api
 * **Cropping** and **resizing**
 * **Color adjustments** (for adjusting brightness, contrast and saturation)
 * **Filters** (for grayscale, sepia, blur & opacity)

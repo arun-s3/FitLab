@@ -4,6 +4,8 @@ import { useSelector, useDispatch } from "react-redux"
 
 import { toast as sonnerToast } from "sonner"
 
+import {X} from 'lucide-react'
+
 import {
     getAllCategories,
     getSingleCategory,
@@ -52,6 +54,7 @@ export default function SelectCategoryForAdmin({ category, setCategory, editCate
                     return
                 }
                 setCategory([e.target.value])
+                setCategoryStatus(stats=> ({...stats, [e.target.value]: true}))
             } else {
                 if (category.includes("supplements")) {
                     e.target.checked = false
@@ -62,9 +65,11 @@ export default function SelectCategoryForAdmin({ category, setCategory, editCate
                     return
                 }
                 setCategory([...category, e.target.value])
+                setCategoryStatus(stats=> ({...stats, [e.target.value]: true}))
             }
         } else {
             setCategory(category.filter((item) => item !== e.target.value))
+            setCategoryStatus(stats=> ({...stats, [e.target.value]: false}))
         }
     }
 
@@ -78,7 +83,7 @@ export default function SelectCategoryForAdmin({ category, setCategory, editCate
             </h5>
             <div
                 className='flex justify-between items-center mt-[10px] text-black'
-                onBlur={() => categoryBlurHandler()}>
+                >
                 {categories && categories.length > 0 &&
                     categories.map(
                         (category) =>
@@ -92,7 +97,7 @@ export default function SelectCategoryForAdmin({ category, setCategory, editCate
                                         type='checkbox'
                                         id={category.name}
                                         value={category.name}
-                                        checked={editCategory && categoryStatus[category.name]}
+                                        checked={categoryStatus[category.name]}
                                         onChange={(e) => categorySelectHandler(e)}
                                     />
                                 </div>
@@ -108,6 +113,7 @@ export function SelectSubCategoryForAdmin({
     category,
     setCategory,
     setSubCategory,
+    selectedAlready,
     categoryImgPreview,
     setCategoryImgPreview,
 }) {
@@ -122,6 +128,8 @@ export function SelectSubCategoryForAdmin({
     const [subcategoryLabel, setsubcategoryLabel] = useState("")
 
     const [defaultDisabled, setDefaultDisabled] = useState(true)
+
+    const [clearedSelectedAlready, setClearedSelectedAlready] = useState(false)
 
     const { categories, error, populatedSubCategories, firstLevelCategories } = useSelector(
         (state) => state.categoryStore,
@@ -146,6 +154,12 @@ export function SelectSubCategoryForAdmin({
             setDefaultDisabled(false)
         }
     }, [category])
+
+    useEffect(() => {
+        if (selectedAlready) {
+            setSubCategory(selectedAlready)
+        }
+    }, [selectedAlready, nestedSubcategories])
 
     useEffect(() => {
         if (firstLevelCategories && firstLevelCategories.length) {
@@ -184,18 +198,21 @@ export function SelectSubCategoryForAdmin({
     }, [category])
 
     useEffect(() => {
-        const subcategory = Object.values(checkedCategories)
-            .map((categoryValue) => {
-                if (typeof categoryValue === "object") {
-                    const subcategoryKey = Object.keys(categoryValue)[0]
-                    return subcategoryKey
-                }
-                return null
-            })
-            .filter(Boolean)
+        if(Object.values(checkedCategories).length > 0) {
+            if(selectedAlready && !clearedSelectedAlready) return
+            const subcategory = Object.values(checkedCategories)
+                .map((categoryValue) => {
+                    if (typeof categoryValue === "object") {
+                        const subcategoryKey = Object.keys(categoryValue)[0]
+                        return subcategoryKey
+                    }
+                    return null
+                })
+                .filter(Boolean)
 
-        setSubCategory(subcategory.find((value) => value))
-        makeSubCategoryLabel(checkedCategories)
+            setSubCategory(subcategory.find((value) => value))
+            makeSubCategoryLabel(checkedCategories)
+        }
     }, [checkedCategories])
 
     useEffect(() => {
@@ -243,13 +260,17 @@ export function SelectSubCategoryForAdmin({
         }
     }, [error])
 
-    const radioClickHandler = (e) => {
+    const radioClickHandler = (e, subcat) => { 
         const checkStatus = checkedCategories?.[e.target.parentElement.parentElement.id]?.[e.target.id]
-        if (checkStatus) {
+        if (checkStatus || (!clearedSelectedAlready && selectedAlready && selectedAlready === subcat.name)) {
             setCheckedCategories({ ...checkedCategories, [e.target.parentElement.parentElement.id]: false })
             setNestedSubcategories([])
             setCheckNestedSubcategories({})
             setCategoryImgPreview("")
+            if(selectedAlready) {
+                setSubCategory(null)
+                setClearedSelectedAlready(true)
+            }
             return
         } else {
             const changeEvent = new Event("change", { bubbles: true })
@@ -258,7 +279,8 @@ export function SelectSubCategoryForAdmin({
     }
 
     const radioChangeHandler = (e, subcat) => {
-        if (!Object.values(checkedCategories).every((status) => status === false)) {
+        const userAlreadySelected = !clearedSelectedAlready && selectedAlready && selectedAlready !== subcat.name
+        if (!Object.values(checkedCategories).every((status) => status === false) || userAlreadySelected) {
             e.target.checked = false
             setErrorMsg("Cannot select more than 1 subcategory!")
             return
@@ -279,11 +301,15 @@ export function SelectSubCategoryForAdmin({
 
     const nestedRadioClickHandler = (e, cat, subcat) => {
         const checkStatus = checkNestedSubcategories?.[subcat.parentCategory]?.[subcat.name]
-        if (checkStatus) {
+        if (checkStatus || (!clearedSelectedAlready && selectedAlready && selectedAlready === subcat.name)) {
             setCheckNestedSubcategories({
                 ...checkNestedSubcategories,
                 [subcat.parentCategory]: { [subcat.name]: false },
             })
+            if(selectedAlready) {
+                setSubCategory(null)
+                setClearedSelectedAlready(true)
+            }
             return
         } else {
             const changeEvent = new Event("change", { bubbles: true })
@@ -292,7 +318,8 @@ export function SelectSubCategoryForAdmin({
     }
 
     const nestedRadioChangeHandler = (e, cat, subcat) => {
-        if (Object.keys(checkNestedSubcategories).find((nestedParentCat) => nestedParentCat === cat.name)) {
+        const userAlreadySelected = !clearedSelectedAlready && selectedAlready && selectedAlready !== subcat.name
+        if (Object.keys(checkNestedSubcategories).find((nestedParentCat) => nestedParentCat === cat.name) || userAlreadySelected) {
             e.target.checked = false
             setErrorMsg("Cannot select more than 1 subcategory!")
             return
@@ -376,9 +403,15 @@ export function SelectSubCategoryForAdmin({
                                                                         ?.inactivate || defaultDisabled
                                                                 }
                                                                 checked={
-                                                                    checkedCategories[`${category.name}List`]?.[
+                                                                    !selectedAlready 
+                                                                    ? checkedCategories[`${category.name}List`]?.[
                                                                         `${subcat.name}`
-                                                                    ] || false
+                                                                      ] || false
+                                                                    : selectedAlready === subcat.name && !clearedSelectedAlready 
+                                                                    ? true
+                                                                    : checkedCategories[`${category.name}List`]?.[
+                                                                        `${subcat.name}`
+                                                                      ] || false
                                                                 }
                                                                 style={
                                                                     categoryRefs.current[category.name]?.current
@@ -387,7 +420,7 @@ export function SelectSubCategoryForAdmin({
                                                                         : { color: "rgba(215, 241, 72, 1)" }
                                                                 }
                                                                 onChange={(e) => radioChangeHandler(e, subcat)}
-                                                                onClick={(e) => radioClickHandler(e)}
+                                                                onClick={(e) => radioClickHandler(e, subcat)}
                                                                 onMouseOver={() => subCategoryBlockClickHandler()}
                                                             />
                                                         </li>
@@ -429,9 +462,15 @@ export function SelectSubCategoryForAdmin({
                                                         onChange={(e) => nestedRadioChangeHandler(e, cat, subcat)}
                                                         onClick={(e) => nestedRadioClickHandler(e, cat, subcat)}
                                                         checked={
-                                                            checkNestedSubcategories[subcat.parentCategory]?.[
+                                                            !selectedAlready 
+                                                            ? checkNestedSubcategories[subcat.parentCategory]?.[
                                                                 subcat.name
-                                                            ] || false
+                                                              ] || false
+                                                            : selectedAlready === subcat.name && !clearedSelectedAlready
+                                                            ? true
+                                                            : checkNestedSubcategories[subcat.parentCategory]?.[
+                                                                subcat.name
+                                                              ] || false
                                                         }
                                                     />
                                                     <label
@@ -447,6 +486,23 @@ export function SelectSubCategoryForAdmin({
                         </div>
                     ))}
             </div>
+
+            {
+                selectedAlready && !clearedSelectedAlready &&
+                    <p className='text-[11px] text-muted tracking-[0.3] flex items-center gap-[7px]'> 
+                        You have selected the sub-category: 
+                        <span className="px-[5px] py-[4px] flex items-center gap-[5px] text-secondary border 
+                            border-inputBorderSecondary rounded-[10px]" 
+                        onClick={()=> {
+                            setSubCategory(null)
+                            setClearedSelectedAlready(true)
+                        }}>
+                            {` ${selectedAlready}`}
+                            <X size={10} className="text-secondary cursor-pointer"/>
+                        </span>
+                    </p>
+
+            }
 
             <p
                 className={`h-[15px] w-full text-[11px] text-red-500 tracking-[0.1px] mt-[5px] ${categoryImgPreview && "mb-[1rem] ml-[5px]"} `}>

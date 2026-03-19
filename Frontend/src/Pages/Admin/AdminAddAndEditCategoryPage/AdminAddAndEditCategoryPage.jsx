@@ -296,6 +296,10 @@ export default function AdminAddAndEditCategoryPage({ editCategory }) {
             requiredFields.every((field) => Object.keys(categoryData).includes(field)) &&
             Object.values(categoryData).find((inputValues) => inputValues !== "undefined")
         ) {
+            if((startDate && !endDate) || (!startDate && endDate)) {
+                sonnerToast.error("Looks like a date is missing — please select both start and end dates for proper seasonal activation.")
+                return
+            }
             const formData = new FormData()
             const { images, ...rest } = categoryData
             for (let field in rest) {

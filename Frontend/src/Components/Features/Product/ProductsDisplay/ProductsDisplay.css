@@ -1,4 +1,3 @@
-product-infos
 #products-display .thumbnail{
     background: rgb(243, 245, 247);
 }
@@ -30,7 +29,7 @@ product-infos
     border-radius: 7px;
     font-size: 13px;
     color: transparent;
-    background: white;
+    background: white !important;
     display: flex;
     justify-content: center;
     align-items: center;

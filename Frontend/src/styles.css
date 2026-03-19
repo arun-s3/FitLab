@@ -8494,6 +8494,10 @@ select {
   letter-spacing: 0.2x;
 }
 
+.tracking-\[0\.3\] {
+  letter-spacing: 0.3;
+}
+
 .tracking-\[0\.3px\] {
   letter-spacing: 0.3px;
 }

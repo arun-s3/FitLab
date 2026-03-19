@@ -1,0 +1,897 @@
+require("dotenv").config({ path: require("path").resolve(__dirname, "../../.env") });
+const mongoose = require("mongoose");
+const Product = require("../Models/productModel");
+
+// 🔥 Placeholder image (used for all products)
+const placeholderImage = {
+  name: "placeholder",
+  size: 12345,
+  url: "https://via.placeholder.com/300",
+  public_id: "placeholder",
+  isThumbnail: "true",
+};
+
+const placeholderThumbnail = {
+  name: "placeholder",
+  size: 12345,
+  url: "https://via.placeholder.com/300",
+  public_id: "placeholder",
+};
+
+// 🔥 SAMPLE PRODUCTS (you can expand this)
+
+const products = [
+  // ================= STRENGTH =================
+  {
+    title: "Iron Grip Dumbbell Set",
+    subtitle: "Adjustable dumbbell set engineered for progressive strength training at home or gym",
+    description: "This premium adjustable dumbbell set supports progressive overload and versatile workouts. Built with durable materials and ergonomic grip, it allows seamless transitions between exercises for all fitness levels.",
+    additionalInformation: [
+      "Solid steel construction for durability",
+      "Adjustable plates for customization",
+      "Ergonomic grip for comfort",
+      "Ideal for full-body workouts",
+      "Compact home gym design"
+    ],
+    price: 4999,
+    brand: "FitForge",
+    category: ["strength"],
+    subCategory: "free weights",
+    tags: ["dumbbell", "strength", "home-gym", "adjustable", "muscle-building", "fitness"],
+    targetMuscles: ["Biceps", "Triceps", "Shoulders"],
+    weight: 20
+  },
+  {
+    title: "Rubber Hex Dumbbells",
+    subtitle: "Anti-roll rubber dumbbells for safe and stable strength training",
+    description: "Designed for durability and safety, these rubber hex dumbbells prevent rolling and provide excellent grip for controlled workouts.",
+    additionalInformation: [
+      "Hex shape prevents rolling",
+      "Rubber coating protects floors",
+      "Enhanced grip texture",
+      "Durable construction",
+      "Ideal for home gyms"
+    ],
+    price: 3999,
+    brand: "USI",
+    category: ["strength"],
+    subCategory: "free weights",
+    tags: ["dumbbell", "home-gym", "anti-roll", "strength", "fitness", "training"],
+    targetMuscles: ["Biceps", "Forearms"],
+    weight: 15
+  },
+  {
+    title: "Olympic Barbell Pro",
+    subtitle: "Heavy-duty Olympic barbell built for powerlifting and compound training",
+    description: "Engineered for serious lifters, this Olympic barbell delivers durability, balance, and precision for heavy compound movements.",
+    additionalInformation: [
+      "High-strength steel construction",
+      "Chrome finish for longevity",
+      "Knurled grip for control",
+      "Balanced weight distribution",
+      "Olympic plate compatibility"
+    ],
+    price: 8999,
+    brand: "PowerMax",
+    category: ["strength"],
+    subCategory: "plates and bars",
+    tags: ["barbell", "powerlifting", "compound", "strength", "gym", "heavy-duty"],
+    targetMuscles: ["Full Body"],
+    weight: 20
+  },
+  {
+    title: "Standard Weight Plates",
+    subtitle: "Durable iron plates for progressive overload and strength training",
+    description: "Reliable and long-lasting weight plates designed for consistent strength progression and balanced lifting.",
+    additionalInformation: [
+      "Solid iron construction",
+      "Accurate weight distribution",
+      "Long-lasting durability",
+      "Standard bar compatibility",
+      "Ideal for progressive overload"
+    ],
+    price: 2999,
+    brand: "Fitkit",
+    category: ["strength"],
+    subCategory: "plates and bars",
+    tags: ["plates", "strength", "gym", "weight-training", "fitness", "lifting"],
+    targetMuscles: ["Full Body"],
+    weight: 25
+  },
+  {
+    title: "Adjustable Weight Bench",
+    subtitle: "Multi-position bench designed for versatile upper body strength training",
+    description: "Supports incline, flat, and decline workouts with strong build quality and comfort-focused design.",
+    additionalInformation: [
+      "Multiple angle adjustments",
+      "Foldable design",
+      "High-density cushioning",
+      "Stable steel frame",
+      "Home and gym use"
+    ],
+    price: 6999,
+    brand: "Kore",
+    category: ["strength"],
+    subCategory: "weight benches",
+    tags: ["bench", "adjustable", "strength", "home-gym", "upper-body", "fitness"],
+    targetMuscles: ["Chest", "Shoulders"],
+    color: "Black"
+  },
+  {
+    title: "Flat Gym Bench",
+    subtitle: "Heavy-duty flat bench for stable and focused strength workouts",
+    description: "A reliable flat bench providing stability and comfort for essential strength exercises.",
+    additionalInformation: [
+      "Durable steel frame",
+      "Compact design",
+      "Non-slip base",
+      "Comfort padding",
+      "Beginner-friendly"
+    ],
+    price: 4999,
+    brand: "FitForge",
+    category: ["strength"],
+    subCategory: "weight benches",
+    tags: ["bench", "flat-bench", "strength", "gym", "fitness", "training"],
+    targetMuscles: ["Chest"],
+    color: "Red"
+  },
+  {
+    title: "Leg Press Machine",
+    subtitle: "Heavy-duty lower body machine for effective leg strength development",
+    description: "Designed for powerful lower body workouts, this machine targets quads and glutes with stability and safety.",
+    additionalInformation: [
+      "Heavy steel construction",
+      "Smooth resistance system",
+      "Adjustable seating",
+      "High load capacity",
+      "Commercial-grade build"
+    ],
+    price: 45999,
+    brand: "BodySolid",
+    category: ["strength"],
+    subCategory: "leg press machines",
+    tags: ["leg-machine", "lower-body", "gym", "strength", "quads", "glutes"],
+    targetMuscles: ["Quadriceps", "Glutes"],
+    weight: 150
+  },
+  {
+    title: "Vertical Leg Press",
+    subtitle: "Compact vertical leg press for targeted quad and hamstring workouts",
+    description: "Efficient and space-saving leg press designed for controlled and effective lower body training.",
+    additionalInformation: [
+      "Compact footprint",
+      "Smooth motion system",
+      "Durable frame",
+      "Optimized for leg workouts",
+      "Stable base design"
+    ],
+    price: 42999,
+    brand: "Impulse",
+    category: ["strength"],
+    subCategory: "leg press machines",
+    tags: ["leg-press", "quads", "hamstrings", "strength", "fitness", "gym"],
+    targetMuscles: ["Quadriceps", "Hamstrings"],
+    weight: 140
+  },
+  {
+    title: "Cable Crossover Machine",
+    subtitle: "Versatile dual pulley system for full-body functional training",
+    description: "A complete functional training system offering flexibility for a wide range of exercises.",
+    additionalInformation: [
+      "Dual adjustable pulleys",
+      "Smooth cable system",
+      "Heavy-duty frame",
+      "Wide exercise variety",
+      "Commercial use ready"
+    ],
+    price: 79999,
+    brand: "Fitline",
+    category: ["strength"],
+    subCategory: "cable machines",
+    tags: ["cable", "functional-training", "full-body", "gym", "strength", "fitness"],
+    targetMuscles: ["Full Body"],
+    weight: 200
+  },
+  {
+    title: "Compact Cable Machine",
+    subtitle: "Space-saving cable machine for complete home gym workouts",
+    description: "Designed for compact spaces, this cable machine offers full-body training versatility at home.",
+    additionalInformation: [
+      "Space-saving design",
+      "Smooth pulley operation",
+      "Durable frame",
+      "Easy to use",
+      "Ideal for home gyms"
+    ],
+    price: 59999,
+    brand: "Durafit",
+    category: ["strength"],
+    subCategory: "cable machines",
+    tags: ["cable", "home-gym", "functional", "strength", "fitness", "compact"],
+    targetMuscles: ["Full Body"],
+    weight: 180
+  },
+
+  // ================= CARDIO =================
+  {
+    title: "Motorized Treadmill X1",
+    subtitle: "Smart motorized treadmill designed for efficient home cardio training",
+    description: "Offers smooth performance with advanced features for walking, jogging, and running workouts.",
+    additionalInformation: [
+      "Powerful motor",
+      "LCD display",
+      "Foldable design",
+      "Shock absorption",
+      "User-friendly controls"
+    ],
+    price: 55999,
+    brand: "CardioMax",
+    category: ["cardio"],
+    subCategory: "motorized treadmills",
+    tags: ["treadmill", "running", "cardio", "fitness", "home-gym", "fat-loss"],
+    targetMuscles: ["Cardio"],
+    motorPower: 3
+  },
+  {
+    title: "Advanced Treadmill Pro",
+    subtitle: "High-speed treadmill with incline control for intense cardio sessions",
+    description: "Designed for high-performance training, ideal for runners and advanced cardio workouts.",
+    additionalInformation: [
+      "High-speed motor",
+      "Incline control",
+      "Advanced display",
+      "Shock absorption",
+      "Durable build"
+    ],
+    price: 65999,
+    brand: "PowerMax",
+    category: ["cardio"],
+    subCategory: "motorized treadmills",
+    tags: ["treadmill", "running", "cardio", "endurance", "fitness", "advanced"],
+    targetMuscles: ["Cardio"],
+    motorPower: 4
+  },
+  {
+    title: "Manual Treadmill",
+    subtitle: "Self-powered treadmill for eco-friendly and efficient cardio workouts",
+    description: "No electricity required, offering a natural running experience and compact design.",
+    additionalInformation: [
+      "Self-powered operation",
+      "Compact design",
+      "Lightweight build",
+      "Low maintenance",
+      "Eco-friendly usage"
+    ],
+    price: 14999,
+    brand: "Fitkit",
+    category: ["cardio"],
+    subCategory: "manual treadmills",
+    tags: ["manual", "treadmill", "cardio", "eco-friendly", "fitness", "home-use"],
+    targetMuscles: ["Cardio"],
+    motorPower: 1
+  },
+  {
+    title: "Elliptical Trainer",
+    subtitle: "Low-impact elliptical trainer for smooth and joint-friendly cardio workouts",
+    description: "Provides a full-body cardio workout with minimal joint stress.",
+    additionalInformation: [
+      "Smooth elliptical motion",
+      "Digital tracking display",
+      "Low-impact training",
+      "Stable base",
+      "Quiet operation"
+    ],
+    price: 29999,
+    brand: "Reach",
+    category: ["cardio"],
+    subCategory: "ellipticals",
+    tags: ["elliptical", "cardio", "low-impact", "fitness", "home-gym", "endurance"],
+    targetMuscles: ["Cardio"],
+    motorPower: 2
+  },
+  {
+    title: "Air Rower",
+    subtitle: "Fan resistance rowing machine for full-body cardio and endurance training",
+    description: "Provides dynamic resistance for an effective full-body workout.",
+    additionalInformation: [
+      "Fan-based resistance",
+      "Smooth rowing motion",
+      "Adjustable intensity",
+      "Durable construction",
+      "Full-body engagement"
+    ],
+    price: 34999,
+    brand: "Concept2",
+    category: ["cardio"],
+    subCategory: "air rowers",
+    tags: ["rower", "cardio", "full-body", "endurance", "fitness", "training"],
+    targetMuscles: ["Full Body"],
+    motorPower: 2
+  },
+  {
+    title: "Water Rower",
+    subtitle: "Realistic water resistance rower for immersive cardio workouts",
+    description: "Simulates real rowing experience with smooth and natural resistance.",
+    additionalInformation: [
+      "Water resistance system",
+      "Natural rowing feel",
+      "Premium wooden frame",
+      "Quiet operation",
+      "Durable design"
+    ],
+    price: 59999,
+    brand: "First Degree",
+    category: ["cardio"],
+    subCategory: "water rowers",
+    tags: ["rower", "water-rower", "cardio", "full-body", "fitness", "premium"],
+    targetMuscles: ["Full Body"],
+    motorPower: 2
+  },
+  {
+    title: "Stationary Bike",
+    subtitle: "Indoor cycling bike for effective and convenient cardio workouts at home",
+    description: "A reliable stationary bike designed for endurance and calorie-burning workouts.",
+    additionalInformation: [
+      "Adjustable seating",
+      "Smooth pedaling system",
+      "Compact design",
+      "Durable frame",
+      "Quiet operation"
+    ],
+    price: 19999,
+    brand: "SpinX",
+    category: ["cardio"],
+    subCategory: "stationary bike",
+    tags: ["bike", "cardio", "cycling", "fitness", "home-gym", "fat-loss"],
+    targetMuscles: ["Quadriceps", "Calves"],
+    motorPower: 2
+  },
+
+  // ================= SUPPLEMENTS =================
+  {
+    title: "Whey Protein Isolate",
+    subtitle: "Fast-absorbing protein for muscle recovery and lean muscle growth",
+    description: "Supports muscle repair and recovery with high-quality protein content.",
+    additionalInformation: [
+      "High protein content",
+      "Fast absorption",
+      "Low fat",
+      "Supports muscle growth",
+      "Easy digestion"
+    ],
+    price: 2999,
+    brand: "MuscleBlaze",
+    category: ["supplements"],
+    subCategory: "protein",
+    tags: ["protein", "recovery", "muscle-growth", "nutrition", "fitness", "supplement"],
+    targetMuscles: ["Full Body"],
+    size: "2Kg"
+  },
+  {
+    title: "Mass Gainer",
+    subtitle: "High-calorie supplement designed for muscle mass and weight gain",
+    description: "Provides a balanced blend of protein and carbohydrates to support muscle growth.",
+    additionalInformation: [
+      "High calorie formula",
+      "Carb-protein blend",
+      "Supports mass gain",
+      "Easy mixing",
+      "Ideal for bulking"
+    ],
+    price: 3499,
+    brand: "BigMuscles",
+    category: ["supplements"],
+    subCategory: "protein",
+    tags: ["mass-gainer", "bulking", "muscle-gain", "nutrition", "fitness", "supplement"],
+    targetMuscles: ["Full Body"],
+    size: "3Kg"
+  },
+  {
+    title: "Pre Workout Booster",
+    subtitle: "Energy-boosting formula designed to enhance workout performance and focus",
+    description: "Improves energy, focus, and endurance for high-intensity workouts.",
+    additionalInformation: [
+      "Contains caffeine",
+      "Boosts energy",
+      "Enhances focus",
+      "Improves endurance",
+      "Quick absorption"
+    ],
+    price: 1999,
+    brand: "GNC",
+    category: ["supplements"],
+    subCategory: "energy boosters",
+    tags: ["pre-workout", "energy", "focus", "performance", "fitness", "supplement"],
+    targetMuscles: ["Cardio"],
+    size: "300g"
+  },
+  {
+    title: "Creatine Pre Workout",
+    subtitle: "Creatine-based formula for enhanced strength and workout performance",
+    description: "Supports increased strength, endurance, and muscle performance.",
+    additionalInformation: [
+      "Creatine enriched",
+      "Improves strength",
+      "Boosts performance",
+      "Supports endurance",
+      "Fast acting"
+    ],
+    price: 2499,
+    brand: "MuscleTech",
+    category: ["supplements"],
+    subCategory: "creatine based pre-workouts",
+    tags: ["creatine", "strength", "performance", "fitness", "supplement", "pre-workout"],
+    targetMuscles: ["Full Body"],
+    size: "250g"
+  },
+  {
+    title: "Post Workout Recovery",
+    subtitle: "Recovery supplement designed to repair muscles and replenish energy after workouts",
+    description: "Helps reduce muscle soreness and speeds up recovery with essential nutrients.",
+    additionalInformation: [
+      "Electrolyte blend",
+      "Supports recovery",
+      "Reduces soreness",
+      "Replenishes energy",
+      "Hydration support"
+    ],
+    price: 1799,
+    brand: "HealthKart",
+    category: ["supplements"],
+    subCategory: "post-workout",
+    tags: ["recovery", "post-workout", "hydration", "fitness", "supplement", "muscle-repair"],
+    targetMuscles: ["Full Body"],
+    size: "500g"
+  },
+  {
+    title: "Thermogenic Fat Burner",
+    subtitle: "Advanced fat-burning supplement designed to boost metabolism and energy levels",
+    description: "Supports fat loss by increasing metabolic rate and energy expenditure.",
+    additionalInformation: [
+      "Thermogenic formula",
+      "Boosts metabolism",
+      "Supports fat loss",
+      "Enhances energy",
+      "Easy to consume"
+    ],
+    price: 1499,
+    brand: "GNC",
+    category: ["supplements"],
+    subCategory: "thermogenic fat burners",
+    tags: ["fat-burner", "weight-loss", "metabolism", "fitness", "supplement", "cutting"],
+    targetMuscles: ["Cardio"],
+    size: "60 Capsules"
+  },
+  {
+    title: "Non-Stim Fat Burner",
+    subtitle: "Caffeine-free fat burner for safe and effective weight management",
+    description: "Ideal for those sensitive to stimulants, offering safe fat-burning support.",
+    additionalInformation: [
+      "No caffeine",
+      "Supports fat metabolism",
+      "Safe formulation",
+      "Daily use friendly",
+      "Non-stimulant formula"
+    ],
+    price: 1399,
+    brand: "MuscleXP",
+    category: ["supplements"],
+    subCategory: "non-stimulant fat burners",
+    tags: ["fat-burner", "non-stim", "weight-loss", "fitness", "supplement", "safe"],
+    targetMuscles: ["Cardio"],
+    size: "60 Capsules"
+  },
+
+  // ================= ACCESSORIES =================
+  {
+    title: "Premium Yoga Mat",
+    subtitle: "Non-slip eco-friendly yoga mat designed for comfort and stability",
+    description: "Provides a soft and stable surface for yoga, stretching, and bodyweight workouts.",
+    additionalInformation: [
+      "Non-slip texture",
+      "Eco-friendly material",
+      "Lightweight",
+      "Comfort cushioning",
+      "Easy to carry"
+    ],
+    price: 999,
+    brand: "Reebok",
+    category: ["accessories"],
+    subCategory: "yoga mats",
+    tags: ["yoga", "mat", "fitness", "stretching", "core", "home-workout"],
+    targetMuscles: ["Core", "Abs"],
+    color: "Blue"
+  },
+  {
+    title: "Lifting Gloves",
+    subtitle: "Breathable gym gloves designed to improve grip and reduce hand fatigue",
+    description: "Enhances grip and protects hands during intense strength training sessions.",
+    additionalInformation: [
+      "Breathable material",
+      "Improved grip",
+      "Hand protection",
+      "Comfort fit",
+      "Durable design"
+    ],
+    price: 799,
+    brand: "Nike",
+    category: ["accessories"],
+    subCategory: "gloves and straps",
+    tags: ["gloves", "grip", "gym", "lifting", "fitness", "protection"],
+    targetMuscles: ["Forearms"],
+    color: "Black"
+  },
+  {
+    title: "Wrist Straps",
+    subtitle: "Heavy-duty wrist straps designed to support lifting and reduce strain",
+    description: "Provides extra wrist support for heavy lifting and strength training exercises.",
+    additionalInformation: [
+      "Strong cotton build",
+      "Reduces wrist strain",
+      "Improves lifting grip",
+      "Durable design",
+      "Easy to use"
+    ],
+    price: 499,
+    brand: "Adidas",
+    category: ["accessories"],
+    subCategory: "gloves and straps",
+    tags: ["straps", "wrist-support", "lifting", "gym", "strength", "fitness"],
+    targetMuscles: ["Forearms"],
+    color: "Black"
+  },
+  {
+    title: "Protein Shaker Bottle",
+    subtitle: "Leak-proof shaker bottle for smooth and convenient supplement mixing",
+    description: "Ideal for protein shakes and supplements with a secure, portable design.",
+    additionalInformation: [
+      "Leak-proof lid",
+      "BPA-free material",
+      "Easy mixing",
+      "Portable design",
+      "Durable plastic"
+    ],
+    price: 499,
+    brand: "Boldfit",
+    category: ["accessories"],
+    subCategory: "shakers and bottles",
+    tags: ["shaker", "bottle", "supplement", "gym", "fitness", "portable"],
+    targetMuscles: ["Full Body"],
+    size: "700ml"
+  },
+  {
+    title: "Steel Water Bottle",
+    subtitle: "Insulated stainless steel bottle designed to keep beverages cold for longer durations",
+    description: "A durable and stylish bottle that maintains temperature and supports hydration throughout workouts.",
+    additionalInformation: [
+      "Insulated steel body",
+      "Leak-proof design",
+      "Temperature retention",
+      "Durable build",
+      "Eco-friendly alternative"
+    ],
+    price: 899,
+    brand: "Puma",
+    category: ["accessories"],
+    subCategory: "shakers and bottles",
+    tags: ["bottle", "hydration", "steel", "fitness", "gym", "eco-friendly"],
+    targetMuscles: ["Full Body"],
+    size: "1L"
+  },
+  {
+    title: "Rubber Coated Dumbbells 10kg Pair",
+    subtitle: "Premium anti-slip rubber coated dumbbells designed for safe, comfortable and long-lasting strength training sessions",
+    description: "Upgrade your home or commercial gym setup with these high-quality rubber coated dumbbells. Designed for durability and performance, they offer a firm ergonomic grip that minimizes slipping during intense workouts. The rubber coating protects your floors while reducing noise, making them perfect for both home and professional use.",
+    additionalInformation: [
+      "Ergonomically designed handles ensure a secure and comfortable grip during every workout session.",
+      "High-quality rubber coating protects both the equipment and your flooring from damage.",
+      "Perfect for a wide range of exercises including curls, presses, and functional training routines.",
+      "Durable construction ensures long-term usage even under heavy training conditions."
+    ],
+    price: 3200,
+    brand: "ProIron",
+    category: ["strength"],
+    subCategory: "free weights",
+    tags: ["dumbbells", "home gym", "strength training", "free weights", "muscle building", "fitness equipment", "arm workout"],
+    targetMuscles: ["Biceps", "Shoulders"],
+    weight: 10
+  },
+
+  {
+    title: "EZ Curl Bar 5ft",
+    subtitle: "Ergonomically angled curl bar crafted to reduce wrist strain while maximizing arm workout efficiency",
+    description: "The EZ Curl Bar is engineered to provide a more natural grip position, reducing stress on your wrists and elbows during workouts. Ideal for both beginners and advanced users, it allows you to perform curls, skull crushers, and other arm exercises with improved comfort and control.",
+    additionalInformation: [
+      "Specially designed angled grip reduces wrist discomfort during heavy lifting.",
+      "Constructed with high-grade steel for enhanced durability and strength.",
+      "Compatible with standard weight plates for versatile training options.",
+      "Ideal for targeting biceps, triceps, and forearm muscles effectively."
+    ],
+    price: 2500,
+    brand: "Kore",
+    category: ["strength"],
+    subCategory: "plates and bars",
+    tags: ["curl bar", "barbell", "arm workout", "biceps training", "triceps workout", "gym equipment", "strength training"],
+    targetMuscles: ["Biceps", "Triceps"],
+    weight: 8
+  },
+
+  {
+    title: "Adjustable Incline Bench",
+    subtitle: "Heavy-duty multi-angle adjustable bench designed for versatile full-body strength training at home or gym",
+    description: "This adjustable incline bench is built for flexibility and performance, allowing you to switch between incline, flat, and decline positions with ease. Whether you're targeting chest, shoulders, or core, this bench offers stability and support for a wide variety of workouts.",
+    additionalInformation: [
+      "Multiple adjustable positions allow for diverse workout routines including incline and decline exercises.",
+      "Foldable design makes it convenient to store in compact spaces after use.",
+      "Strong steel frame ensures maximum stability and safety during workouts.",
+      "Comfortable cushioning provides proper back support for extended training sessions."
+    ],
+    price: 7800,
+    brand: "FitKing",
+    category: ["strength"],
+    subCategory: "weight benches",
+    tags: ["adjustable bench", "weight bench", "chest workout", "home gym", "strength equipment", "incline bench", "gym setup"],
+    targetMuscles: ["Chest"],
+    color: "Black"
+  },
+
+  {
+    title: "Horizontal Leg Press Machine",
+    subtitle: "Commercial-grade horizontal leg press machine built for smooth, controlled and safe lower body strength training",
+    description: "Train your legs with confidence using this horizontal leg press machine designed for smooth and guided motion. Its heavy-duty structure ensures stability while allowing you to focus on building strength in your quadriceps, hamstrings, and glutes.",
+    additionalInformation: [
+      "Smooth sliding mechanism ensures controlled and effective movement during workouts.",
+      "Heavy-duty frame provides stability even during high-weight training sessions.",
+      "Designed to target major lower body muscle groups including quads and glutes.",
+      "Suitable for both commercial gym environments and advanced home setups."
+    ],
+    price: 52000,
+    brand: "BodyMax",
+    category: ["strength"],
+    subCategory: "horizontal leg press machines",
+    tags: ["leg press", "leg workout", "lower body training", "gym machine", "quadriceps training", "glutes workout", "strength equipment"],
+    targetMuscles: ["Quadriceps", "Glutes"],
+    weight: 180
+  },
+
+  {
+    title: "Vertical Leg Press Machine",
+    subtitle: "Space-efficient vertical leg press machine designed to deliver powerful lower body workouts with controlled resistance",
+    description: "The vertical leg press machine uses gravity-based resistance to help you build strength and stability in your lower body. Its compact design makes it ideal for gyms with limited space while still delivering high-performance results.",
+    additionalInformation: [
+      "Gravity-based resistance system ensures effective muscle engagement during workouts.",
+      "Compact structure makes it suitable for space-saving gym setups.",
+      "Strong build quality supports heavy lifting and long-term durability.",
+      "Ideal for improving lower body strength, stability, and muscle tone."
+    ],
+    price: 48000,
+    brand: "FitKing",
+    category: ["strength"],
+    subCategory: "vertical leg press machines",
+    tags: ["vertical leg press", "leg day", "lower body strength", "gym equipment", "muscle building", "quadriceps workout"],
+    targetMuscles: ["Quadriceps"],
+    weight: 170
+  },
+
+  {
+    title: "Multi Functional Cable Machine",
+    subtitle: "All-in-one multi functional cable machine designed to target every muscle group with smooth adjustable resistance",
+    description: "This cable machine is the ultimate solution for full-body workouts, offering versatility and efficiency in one compact system. With adjustable pulleys and multiple attachments, it allows you to perform a wide range of exercises for strength and conditioning.",
+    additionalInformation: [
+      "Adjustable pulley system allows for a wide range of exercise variations.",
+      "Designed to target all major muscle groups effectively.",
+      "Heavy-duty frame ensures stability and safety during intense workouts.",
+      "Ideal for both home gyms and commercial fitness centers."
+    ],
+    price: 85000,
+    brand: "BodyMax",
+    category: ["strength"],
+    subCategory: "cable machines",
+    tags: ["cable machine", "functional trainer", "full body workout", "gym setup", "strength training", "home gym equipment", "multi gym"],
+    targetMuscles: ["Full Body"],
+    weight: 200
+  },
+
+  {
+    title: "Elliptical Trainer X5",
+    subtitle: "Advanced low-impact elliptical trainer designed for smooth, joint-friendly full body cardio workouts",
+    description: "The Elliptical Trainer X5 offers a seamless and low-impact cardio experience, making it ideal for users of all fitness levels. Its smooth motion helps reduce stress on joints while delivering an effective calorie-burning workout.",
+    additionalInformation: [
+      "Low-impact design minimizes stress on knees and joints during workouts.",
+      "Integrated LCD display helps track essential workout metrics like time and calories.",
+      "Perfect for both beginners and advanced users aiming for weight loss and endurance.",
+      "Compact design fits well in home environments without occupying too much space."
+    ],
+    price: 30000,
+    brand: "PowerMax",
+    category: ["cardio"],
+    subCategory: "ellipticals",
+    tags: ["elliptical trainer", "cardio workout", "fat burn", "weight loss", "home cardio", "low impact exercise", "fitness machine"],
+    targetMuscles: ["Cardio"],
+    motorPower: 2
+  },
+
+  {
+    title: "Spin Bike Pro",
+    subtitle: "High-performance indoor cycling bike built for intense cardio sessions, endurance training and fat burning",
+    description: "Take your cardio workouts to the next level with the Spin Bike Pro. Designed for high-intensity training, it features a heavy flywheel that ensures a smooth and consistent ride, making it ideal for endurance and fat-burning workouts.",
+    additionalInformation: [
+      "Heavy flywheel provides a smooth and stable cycling experience during intense workouts.",
+      "Adjustable resistance levels allow customization based on fitness goals.",
+      "Ergonomic seat and handle design ensures comfort during long sessions.",
+      "Ideal for improving cardiovascular endurance and burning calories effectively."
+    ],
+    price: 22000,
+    brand: "CultFit",
+    category: ["cardio"],
+    subCategory: "stationary bike",
+    tags: ["spin bike", "indoor cycling", "cardio training", "fat loss", "endurance workout", "calorie burn", "fitness bike"],
+    targetMuscles: ["Quadriceps"],
+    motorPower: 1.5
+  },
+
+  {
+    title: "Compact Rowing Machine",
+    subtitle: "Space-saving rowing machine designed to deliver powerful full body cardio and strength workouts at home",
+    description: "This compact rowing machine combines efficiency with performance, allowing you to achieve a full-body workout without taking up too much space. It targets multiple muscle groups while improving cardiovascular fitness.",
+    additionalInformation: [
+      "Provides a full body workout engaging both upper and lower muscles.",
+      "Foldable and compact design makes it ideal for home use.",
+      "Smooth rowing mechanism ensures a comfortable and consistent workout.",
+      "Helps improve endurance, strength, and overall fitness levels."
+    ],
+    price: 27000,
+    brand: "Aerofit",
+    category: ["cardio"],
+    subCategory: "air rowers",
+    tags: ["rowing machine", "full body cardio", "fat burn", "endurance training", "home workout", "back workout", "cardio equipment"],
+    targetMuscles: ["Back"],
+    motorPower: 1.2
+  },
+
+  {
+    title: "Advanced Motorized Treadmill Pro",
+    subtitle: "High-performance motorized treadmill designed to deliver a premium running experience with advanced smart features",
+    description: "Experience professional-level running at home with this advanced treadmill. Built with powerful motor performance and smart controls, it helps you achieve your fitness goals with precision and comfort.",
+    additionalInformation: [
+      "Powerful motor ensures smooth and consistent performance during workouts.",
+      "Smart control features enhance the overall user experience.",
+      "Spacious running surface provides comfort and safety.",
+      "Ideal for walking, jogging, and high-intensity running sessions."
+    ],
+    price: 45000,
+    brand: "PowerMax",
+    category: ["cardio"],
+    subCategory: "motorized treadmills",
+    tags: ["treadmill", "running machine", "cardio training", "fat loss", "weight loss", "home gym", "fitness equipment"],
+    targetMuscles: ["Cardio"],
+    motorPower: 3
+  },
+
+  {
+    title: "Mass Gainer 3kg",
+    subtitle: "High-calorie mass gainer formula designed to support muscle growth, weight gain and post-workout recovery",
+    description: "This mass gainer is formulated to provide a perfect blend of proteins and carbohydrates to support muscle building and recovery. Ideal for individuals looking to increase their calorie intake and gain lean muscle mass effectively.",
+    additionalInformation: [
+      "Rich in carbohydrates and proteins to support muscle growth and recovery.",
+      "Helps increase daily calorie intake for effective weight gain.",
+      "Easy to mix formula ensures quick preparation and consumption.",
+      "Suitable for beginners and advanced fitness enthusiasts aiming for bulking."
+    ],
+    price: 4200,
+    brand: "MuscleBlaze",
+    category: ["supplements"],
+    subCategory: "protein",
+    tags: ["mass gainer", "weight gain", "muscle building", "bulking supplement", "protein powder", "fitness nutrition"],
+    targetMuscles: ["Full Body"],
+    size: "3kg"
+  },
+
+  {
+    title: "BCAA Recovery Drink",
+    subtitle: "Advanced BCAA recovery formula designed to reduce muscle soreness and accelerate post-workout recovery",
+    description: "Enhance your recovery process with this BCAA drink that helps reduce muscle fatigue and soreness. Ideal for post-workout use, it supports faster muscle repair and hydration.",
+    additionalInformation: [
+      "Supports faster muscle recovery after intense workout sessions.",
+      "Helps reduce soreness and fatigue for better performance.",
+      "Instant mix formula ensures quick and easy consumption.",
+      "Ideal for athletes and fitness enthusiasts at all levels."
+    ],
+    price: 1800,
+    brand: "BigMuscles",
+    category: ["supplements"],
+    subCategory: "post-workout",
+    tags: ["bcaa", "recovery supplement", "muscle recovery", "post workout", "hydration", "fitness supplement"],
+    targetMuscles: ["Full Body"],
+    size: "250g"
+  },
+
+  {
+    title: "Pre Workout Extreme Shot",
+    subtitle: "Fast-acting pre-workout energy shot designed to boost performance, focus and endurance instantly",
+    description: "This ready-to-drink pre-workout shot delivers an instant surge of energy and focus, helping you push your limits during workouts. Perfect for high-intensity training sessions.",
+    additionalInformation: [
+      "Provides instant energy boost for high-intensity workouts.",
+      "Enhances focus and mental clarity during training sessions.",
+      "Convenient ready-to-drink format for on-the-go usage.",
+      "Supports improved endurance and workout performance."
+    ],
+    price: 300,
+    brand: "GNC",
+    category: ["supplements"],
+    subCategory: "energy boosters",
+    tags: ["pre workout", "energy boost", "workout energy", "performance enhancer", "fitness supplement"],
+    targetMuscles: ["Cardio"],
+    size: "60ml"
+  },
+
+  {
+    title: "Advanced Creatine Capsules",
+    subtitle: "High-quality creatine capsules designed to improve strength, endurance and overall athletic performance",
+    description: "These creatine capsules provide a convenient way to enhance your workout performance by increasing strength and endurance. Ideal for those looking to push their limits and achieve better results.",
+    additionalInformation: [
+      "Supports improved strength and muscle performance during workouts.",
+      "Convenient capsule form eliminates the need for mixing powders.",
+      "Enhances endurance for longer and more effective training sessions.",
+      "Suitable for both beginners and experienced athletes."
+    ],
+    price: 2100,
+    brand: "HealthKart",
+    category: ["supplements"],
+    subCategory: "creatine based pre-workouts",
+    tags: ["creatine", "strength supplement", "muscle growth", "performance booster", "gym supplement"],
+    targetMuscles: ["Full Body"],
+    size: "120 capsules"
+  },
+
+  {
+    title: "Fat Burner Plus",
+    subtitle: "Advanced thermogenic fat burner supplement formulated to accelerate metabolism and support effective weight loss",
+    description: "Fat Burner Plus is designed to enhance your body's natural fat-burning process by boosting metabolism and energy levels. It helps you stay active and focused while supporting your weight loss journey.",
+    additionalInformation: [
+      "Thermogenic formula helps increase metabolism and promote fat loss.",
+      "Supports sustained energy levels throughout the day and workouts.",
+      "Formulated with carefully selected ingredients for effective results.",
+      "Ideal for individuals aiming for cutting and weight management phases."
+    ],
+    price: 2600,
+    brand: "MuscleTech",
+    category: ["supplements"],
+    subCategory: "thermogenic fat burners",
+    tags: ["fat burner", "weight loss", "thermogenic", "fat loss supplement", "cutting supplement", "metabolism booster"],
+    targetMuscles: ["Cardio"],
+    size: "60 capsules"
+  }
+];
+
+
+// 🔥 Add placeholder images to ALL products
+const finalProducts = products.map((product) => ({
+  ...product,
+  images: [placeholderImage, placeholderImage, placeholderImage], // 3 images
+  thumbnail: placeholderThumbnail,
+}));
+
+
+async function seedProducts() {
+  try {
+    await mongoose.connect(process.env.MONGOURI);
+    console.log("✅ MongoDB Connected");
+
+    // ⚠️ Optional: clear old products
+    await Product.deleteMany({});
+    console.log("🧹 Old products removed");
+
+    await Product.insertMany(finalProducts);
+
+    console.log(`✅ ${finalProducts.length} products inserted`);
+
+    process.exit();
+  } catch (error) {
+    console.error("❌ Error seeding products:", error);
+    process.exit(1);
+  }
+}
+
+seedProducts();

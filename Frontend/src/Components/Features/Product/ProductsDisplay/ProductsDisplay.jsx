@@ -393,8 +393,8 @@ export default function ProductsDisplay({
                                                     className='w-[30px] md:bg-white l-md:bg-transparent xx-lg:bg-white 
                                                         x-xl:bg-transparent p-[5px] border rounded-[20px] flex items-center 
                                                         justify-center relative cursor-pointer md:border-mutedDashedSeperation
-                                                        order-inputBorderLow xx-lg:border-mutedDashedSeperation 
-                                                        x-xl:border-inputBorderLow admin-control'
+                                                        border-inputBorderLow xx-lg:border-mutedDashedSeperation 
+                                                        x-xl:border-inputBorderLow admin-control z-10'
                                                     onClick={() =>
                                                         admin &&
                                                         navigate(
@@ -416,8 +416,8 @@ export default function ProductsDisplay({
                                                     className='w-[30px] md:bg-white l-md:bg-transparent xx-lg:bg-white 
                                                         x-xl:bg-transparent p-[5px] border rounded-[20px] flex items-center 
                                                         justify-center relative cursor-pointer admin-control 
-                                                        md:border-mutedDashedSeperation order-inputBorderLow 
-                                                        xx-lg:border-mutedDashedSeperation x-xl:border-inputBorderLow admin-control'
+                                                        md:border-mutedDashedSeperation border-inputBorderLow 
+                                                        xx-lg:border-mutedDashedSeperation x-xl:border-inputBorderLow admin-control z-10'
                                                     onClick={() => openRestockModal(product)}
                                                 >
                                                     <i>
@@ -430,7 +430,7 @@ export default function ProductsDisplay({
                                                         x-xl:bg-transparent p-[5px] border rounded-[20px] flex items-center 
                                                         justify-center relative cursor-pointer admin-control 
                                                         md:border-mutedDashedSeperation order-inputBorderLow 
-                                                        xx-lg:border-mutedDashedSeperation x-xl:border-inputBorderLow admin-control'
+                                                        xx-lg:border-mutedDashedSeperation x-xl:border-inputBorderLow admin-control z-10'
                                                     onClick={() => dispatch(toggleProductStatus(product._id))}
                                                 >
                                                     <i>

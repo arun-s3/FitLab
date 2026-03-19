@@ -81,7 +81,6 @@ export default function AdminAddAndEditProductPage({ editProduct }) {
 
     useEffect(() => {
         if (category.length == 0) setCategoryImgPreview("")
-
         setProductData({ ...productData, category: category, subCategory, images: images, thumbnail: thumbnail })
     }, [category, subCategory, images, thumbnail])
 
@@ -588,6 +587,8 @@ export default function AdminAddAndEditProductPage({ editProduct }) {
                                 category={category}
                                 setCategory={setCategory}
                                 setSubCategory={setSubCategory}
+                                subCategory={subCategory}
+                                selectedAlready={editProductItem?.current?.subCategory || null}
                                 categoryImgPreview={categoryImgPreview}
                                 setCategoryImgPreview={setCategoryImgPreview}
                             />

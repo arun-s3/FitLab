@@ -31,7 +31,7 @@ const productSchema = mongoose.Schema(
             type: Number,
             default: 0,
         },
-        brand: {
+        brand: { 
             type: String,
             required: [true, "Must enter the brand name"],
         },
@@ -105,7 +105,7 @@ const productSchema = mongoose.Schema(
             type: Boolean,
             default: false,
         },
-        weight: {
+        weight: { 
             type: Number,
             default: null,
         },
@@ -123,7 +123,7 @@ const productSchema = mongoose.Schema(
             default: null,
             trim: true,
         },
-        variantOf: {
+        variantOf: { 
             type: mongoose.Schema.ObjectId,
             ref: "Product",
             default: null,

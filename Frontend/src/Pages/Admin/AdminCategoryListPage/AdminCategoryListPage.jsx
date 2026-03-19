@@ -237,7 +237,8 @@ export default function AdminCategoryListPage() {
                                             <img
                                                 src={category?.image?.url}
                                                 alt='category-image'
-                                                className='w-[150px] h-[150px] object-cover rounded-[5px]'
+                                                className={`w-[150px] h-[150px] object-cover rounded-[5px] 
+                                                    ${!category.isActive ? 'grayscale' : ''}`}
                                             />
                                             <figcaption
                                                 className='absolute bottom-[10px] left-[10px] mt-[5px] text-[12px] font-[550] capitalize
@@ -246,8 +247,8 @@ export default function AdminCategoryListPage() {
                                             </figcaption>
                                         </figure>
                                         <div className='relative'>
-                                            <div className='flex flex-col gap-[2px] justify-center h-[122px] border-l-[3.5px] 
-                                                border-[#8f8989] '>
+                                            <div className={`flex flex-col gap-[2px] justify-center h-[122px] border-l-[3.5px] 
+                                                    ${category.isActive ? 'border-[#8f8989]' : 'border-red-400'}`}>
                                                 <span
                                                     className='w-[200px] capitalize text-[10px] text-[#8f8989] tracking-[0.2px] 
                                                         text-right break-words px-[10px] py-[5px] rounded-[5px] mt-[15px] 
@@ -256,6 +257,24 @@ export default function AdminCategoryListPage() {
                                                     {" "}
                                                     {category.description}
                                                 </span>
+                                                {
+                                                    !category.isActive && !category.isBlocked && toggleTab.goTo === 'all' &&
+                                                        <span className="mt-[5px] text-[10px] text-red-500">
+                                                             This category is not active 
+                                                        </span>
+                                                }
+                                                {
+                                                    category.isBlocked && category.isActive && toggleTab.goTo === 'all' &&
+                                                        <span className="mt-[5px] text-[10px] text-red-500">
+                                                             This category is blocked
+                                                        </span>
+                                                }
+                                                {
+                                                    category.isBlocked && !category.isActive && toggleTab.goTo === 'all' &&
+                                                        <span className="mt-[5px] text-[10px] text-red-500">
+                                                             This category is blocked & non-active
+                                                        </span>
+                                                }
                                             </div>
                                             <div className='absolute left-[10px] top-[5px] flex gap-[25px] w-full'>
                                                 <div className='flex items-center gap-[5px]'>

@@ -863,8 +863,25 @@ const products = [
     targetMuscles: ["Cardio"],
     size: "60 capsules"
   }
-];
+];  
 
+const topBrands = [
+  "PowerMax",    
+  "MuscleBlaze",
+  "BigMuscles",
+  "Fitkit",
+  "Kore",
+  "MuscleTech",
+  "FitKing",
+  "HealthKart",
+  "FitForge",
+  "Nike", 
+  "Adidas", 
+  "Reebok", 
+  "Puma",
+  "Aerofit",
+  "CardioMax",
+];
 
 // 🔥 Add placeholder images to ALL products
 const finalProducts = products.map((product) => ({

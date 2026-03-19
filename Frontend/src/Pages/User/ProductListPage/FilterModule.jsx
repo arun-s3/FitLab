@@ -297,7 +297,7 @@ export default function FilterModule({
                                 initial='hidden'
                                 animate='show'
                                 exit='hidden'
-                                className='space-y-2 overflow-visible ml-[10px]'
+                                className='grid grid-cols-2 gap-2 overflow-visible pl-2'
                             >
                                 {brands.map((brand) => (
                                     <motion.label

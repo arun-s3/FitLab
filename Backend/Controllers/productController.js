@@ -245,7 +245,12 @@ const getAllProducts = async (req, res, next) => {
         }
 
         if (queryOptions?.filter?.products?.length) {
-            filters.title = { $in: queryOptions.filter.products }
+            filters.$or = [
+                ...(filters.$or || []),
+                ...queryOptions.filter.products.map((product) => ({
+                    title: { $regex: product, $options: "i" },
+                })),
+            ]
         }
 
         if (queryOptions?.status && queryOptions.status !== "all") {

@@ -118,18 +118,36 @@ export default function ProductList() {
     ]
 
     const popularProducts = [
-        "benches",
-        "gymbell",
+        "dumbbell",
+        "bench",
         "treadmill",
-        "Ellipticals",
-        "bikes",
-        "proteinPowders",
-        "mutistationMachines",
-        "resistanceBands",
-        "yogaMats",
+        "barbell",
+        "Elliptical",
+        "bike",
+        "protein",
+        "rower",
+        "mass gainer",
+        "yoga mat",
+        "wrist strap"
     ]
 
-    const brands = ["Nike", "Adidas", "Under Armour", "Reebok", "Puma", "Gymshark"]
+    const brands = [ 
+        "PowerMax",    
+        "MuscleBlaze",
+        "BigMuscles",
+        "Fitkit",
+        "Kore",
+        "MuscleTech",
+        "FitKing",
+        "HealthKart",
+        "FitForge",
+        "Nike", 
+        "Adidas", 
+        "Reebok", 
+        "Puma",
+        "Aerofit",
+        "CardioMax"
+    ]
 
     const muscleGroups = [
         "Chest",

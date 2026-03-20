@@ -2,14 +2,10 @@ require("dotenv").config({
   path: require("path").resolve(__dirname, "../../.env"),
 });
 
-console.log("FULL ENV:", process.env);
-console.log("MONGOURI:", process.env.MONGOURI);const mongoose = require("mongoose");
+const mongoose = require("mongoose");
 const Category = require("../Models/categoryModel");
 
 const data = require("../Data/fitlab_cleaned_final.json");
-
-console.log("DATA LENGTH:", data.length);
-console.log("FIRST ITEM:", data[0]);
 
 async function seedCategories() {
   try {

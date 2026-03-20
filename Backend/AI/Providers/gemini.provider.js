@@ -7,8 +7,6 @@ const GEMINI_URL =
 
 async function callGemini(prompt) {
   try {
-    console.log("Inside callGemini...")
-
     const res = await axios.post(
       `${GEMINI_URL}?key=${process.env.GEMINI_API_KEY}`,
       {

@@ -103,10 +103,34 @@ export default function AdminAddAndEditCategoryPage({ editCategory }) {
         setRelatedCategory(relatedCategories)
     }, [manualCheckCategory])
 
+    const resetAllStates = () => {
+        setStartDate(null)
+        setEndDate(null)
+        setImages([])
+        setParentCategory(null)
+        setRelatedCategory([])
+        setRadioCheckedCategory("")
+        setManualCheckCategory({})
+
+        setCategoryData({
+            categoryName: "",
+            categoryDescription: "",
+            categoryDiscount: 0,
+            categoryBadge: "",
+        })
+
+        editCategoryItem.current = null
+    }
+
     useEffect(() => {
         if (location?.state?.category) {
             editCategoryItem.current = location.state.category
             dispatch(getCategoryNames({ id: location.state.category._id }))
+        } else {
+             if (location?.state?.from === "/admin/category/edit") {
+                console.group("Resetting states...")
+                resetAllStates()
+            }
         }
     }, [location])
 
@@ -137,7 +161,7 @@ export default function AdminAddAndEditCategoryPage({ editCategory }) {
     }
 
     useEffect(() => {
-        if (editCategoryItem.current) {
+        if (editCategoryItem?.current && location?.state?.category) {
             const convertToBlob = async (url) => {
                 try {
                     const response = await fetch(url, { mode: "cors" })
@@ -163,8 +187,8 @@ export default function AdminAddAndEditCategoryPage({ editCategory }) {
                 setEndDate(end ? new Date(end) : null)
 
                 const categoryParentAndRelated = await loadCategoryInfo(editCategoryItem.current._id)
-                setParentCategory(categoryParentAndRelated.parentCategory || null)
-                setRelatedCategory(categoryParentAndRelated.relatedCategory || [])
+                setParentCategory(categoryParentAndRelated?.parentCategory || null)
+                setRelatedCategory(categoryParentAndRelated?.relatedCategory || [])
                 const blob = await convertToBlob(editCategoryItem.current.image.url)
                 const newImage = { ...editCategoryItem.current.image, blob }
                 setImages([newImage])

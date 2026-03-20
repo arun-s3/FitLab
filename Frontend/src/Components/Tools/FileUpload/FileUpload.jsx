@@ -479,8 +479,8 @@ export default function FileUpload({
                     <div className='flex gap-[15px] h-[200px]'>
                         <figure className='h-[200px] w-[200px] rounded-[10px]'>
                             <img
-                                src={images[Number.parseInt(currentImageIndex)].url}
-                                alt={images[Number.parseInt(currentImageIndex)].name}
+                                src={images[Number.parseInt(currentImageIndex)]?.url}
+                                alt={images[Number.parseInt(currentImageIndex)]?.name}
                                 className='h-[200px]  w-[200px] rounded-[10px] object-cover'
                             />
                         </figure>
@@ -514,11 +514,19 @@ export default function FileUpload({
                             <SiteButtonSquare
                                 customStyle={{ paddingBlock: "6px", width: "12.5rem", borderRadius: "5px" }}
                                 tailwindClasses={`!text-[13px] hover:bg-primaryDark 
-                                    ${Object.keys(thumbnail).length > 0 && "!bg-primaryDark"}`
+                                    ${Object.keys(thumbnail).length > 0 
+                                        && (images[currentImageIndex]?.isThumbnail === true 
+                                            || images[currentImageIndex]?.isThumbnail === "true") 
+                                        && "!bg-primaryDark"
+                                    }`
                                 }
                                 clickHandler={(e) => thumbnailSetter(e)}
                             >
-                                Set as thumbnail
+                                {
+                                    (images[currentImageIndex]?.isThumbnail === true || images[currentImageIndex]?.isThumbnail === "true") 
+                                    ? 'Product Thumbnail' 
+                                    : 'Set as thumbnail'
+                                }
                             </SiteButtonSquare>
                         </motion.div>
                     </div>

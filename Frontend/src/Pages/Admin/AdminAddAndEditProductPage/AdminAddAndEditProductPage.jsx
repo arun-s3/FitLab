@@ -80,6 +80,7 @@ export default function AdminAddAndEditProductPage({ editProduct }) {
     const navigate = useNavigate()
 
     useEffect(() => {
+        console.log("images------>", images)
         if (category.length == 0) setCategoryImgPreview("")
         setProductData({ ...productData, category: category, subCategory, images: images, thumbnail: thumbnail })
     }, [category, subCategory, images, thumbnail])
@@ -91,6 +92,32 @@ export default function AdminAddAndEditProductPage({ editProduct }) {
     }, [tag])
 
     useEffect(() => {
+        console.log("productData------>", productData)
+    }, [productData])
+
+    const resetAllStates = () => {
+        setProductData({
+            title: "",
+            price: [],
+            stock: [],
+            brand: "",
+            subtitle: "",
+            targetMuscles: [],
+            description: "",
+            additionalInformation: [],
+            discountType: "percentage",
+            discountValue: 0,
+        })
+        setImages([])
+        setThumbnail({})
+        setCategory([])
+        setSubCategory("")
+        setTags([])
+        setThumbnailIndexOnEditProduct(0)
+        editProductItem.current = null
+    }
+
+    useEffect(() => {
         const convertToBlob = async (url) => {
             try {
                 const response = await fetch(url, { mode: "cors" })
@@ -100,20 +127,24 @@ export default function AdminAddAndEditProductPage({ editProduct }) {
             }
         }
         const loadProductData = async () => {
-            if (location?.state?.product) {
+            if (location?.state?.product && editProduct) {
+                console.log("location.state.product---->", location.state.product)
                 editProductItem.current = location.state.product
-                setProductData({
+                setProductData((productData) => ({
+                    ...productData,
                     title: editProductItem.current.title,
                     price: editProductItem.current.prices || [],
                     stock: editProductItem.current.stocks || [],
-                    [`${editProductItem.current.variantType}s`]:
-                        editProductItem.current[`${editProductItem.current.variantType}s`] || [],
+                    ...(editProductItem.current.variantType && {
+                        [`${editProductItem.current.variantType}s`]:
+                            editProductItem.current[`${editProductItem.current.variantType}s`] || [],
+                    }),
                     brand: editProductItem.current.brand,
                     subtitle: editProductItem.current.subtitle || "",
                     targetMuscles: editProductItem.current.targetMuscles || [],
                     description: editProductItem.current.description || "",
                     additionalInformation: editProductItem.current.additionalInformation || [],
-                })
+                }))
                 setCategory(editProductItem.current.category)
                 setSubCategory(editProductItem.current.subCategory)
 
@@ -128,6 +159,11 @@ export default function AdminAddAndEditProductPage({ editProduct }) {
                 setThumbnail({ ...editProductItem.current.thumbnail, blob: thumbnailBlob })
                 const foundThumbnailIndex = newImages.map((img) => img.isThumbnail).findIndex((el) => el == "true")
                 setThumbnailIndexOnEditProduct(foundThumbnailIndex)
+            } 
+            else {
+                 if (location?.state?.from === "/admin/products/edit") {
+                    resetAllStates()
+                }
             }
         }
         loadProductData()
@@ -305,13 +341,24 @@ export default function AdminAddAndEditProductPage({ editProduct }) {
         }
 
         const userSelectedVariantAttr = variantAttributes.find((attribute) => productData[attribute])
+        console.log("userSelectedVariantAttr----------->", userSelectedVariantAttr)
         if (!checkVariantDataValidity(userSelectedVariantAttr)) return
 
-        const optionalFields = ["description", "additionalInformation", "tags", ...variantAttributes]
+        console.log("ProductData before submission---->", productData)
+
+        const optionalFields = ["description", "additionalInformation", "tags", "discountType", "discountValue", ...variantAttributes]
         const requiredFields = Object.keys(productData).filter((field) => !optionalFields.includes(field))
+        console.log("requiredFields---->", requiredFields)
         const isRequiredFieldsMissing = requiredFields.some(
             (field) => productData[field] === undefined || productData[field].toString().trim() === "",
         )
+
+        const isRequiredFieldsMissingData = requiredFields.find(
+            (field) => productData[field] === undefined || productData[field].toString().trim() === "",
+        )
+
+        console.log("isRequiredFieldsMissing---->", isRequiredFieldsMissing)
+        console.log("isRequiredFieldsMissingData---->", isRequiredFieldsMissingData)
 
         if (isRequiredFieldsMissing) {
             if (!Object.keys(productData).length) {
@@ -323,7 +370,10 @@ export default function AdminAddAndEditProductPage({ editProduct }) {
             const formData = new FormData()
             const { images, thumbnail, ...rest } = productData
 
-            rest.variantType = userSelectedVariantAttr
+            if(userSelectedVariantAttr) {
+                rest.variantType = userSelectedVariantAttr
+            }
+
             for (let field in rest) {
                 if (Array.isArray(rest[field])) {
                     rest[field].forEach((item) => {

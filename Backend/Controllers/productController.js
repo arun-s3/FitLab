@@ -88,7 +88,8 @@ const createProduct = async (req, res, next) => {
         }
 
         if (!variantType) {
-            const newProduct = new Product(productData)
+            const newProductData = {...productData, price: req.body.price[0], stock: req.body.stock[0]}
+            const newProduct = new Product(newProductData)
             const saved = await newProduct.save()
             return res.status(201).json({ createdProduct: true, mainProduct: saved })
         }

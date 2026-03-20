@@ -342,7 +342,9 @@ export default function ProductList() {
 
             <OfferShowcase />
 
-            <Footer />
+            <div className="mt-16">
+                <Footer />
+            </div>
             
         </>
     )

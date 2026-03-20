@@ -38,7 +38,7 @@ export default function SelectCategoryForAdmin({ category, setCategory, editCate
         if (editCategory) {
             const updatedStatus = { ...categoryStatus }
             editCategory.forEach((category) => {
-                if (Object.keys(categoryStatus).includes(category)) {
+                if (Object.keys(categoryStatus).includes(category.toLowerCase())) {
                     updatedStatus[category] = true
                 }
             })

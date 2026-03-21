@@ -37,8 +37,8 @@ app.use(
     }),
 )
 
-app.use(express.json({ limit: "10mb" }))
-app.use(express.urlencoded({ extended: true, limit: "10mb" }))
+app.use(express.json({ limit: "20mb" }))
+app.use(express.urlencoded({ extended: true, limit: "20mb" }))
 const cookieParser = require("cookie-parser")
 app.use(cookieParser())
 
@@ -137,6 +137,14 @@ walletCron(io)
 
 
 app.use((error, req, res, next) => {
+    if (error.code === "LIMIT_FILE_SIZE") {
+        return res.status(400).json({ message: "File too large (max 5MB)" })
+    }
+
+    if (error.message === "Only images allowed") {
+        return res.status(400).json({ message: "Only JPEG, PNG, WEBP images are allowed" })
+    }
+
     const message = error.message || "Internal Server Error"
     const statusCode = error.statusCode || 500
     res.status(statusCode).json({ message })

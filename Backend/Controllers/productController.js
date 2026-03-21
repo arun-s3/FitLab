@@ -2,6 +2,8 @@ const Product = require("../Models/productModel")
 const cloudinary = require("../Utils/cloudinary")
 const { muscleGroups } = require("./controllerUtils/fitnessUtils")
 
+const fs = require("fs/promises")
+
 const { Parser } = require("json2csv")
 const PDFDocument = require("pdfkit")
 require("pdfkit-table")
@@ -18,26 +20,63 @@ const MAXPRICE = 500000
 
 const packProductData = async (req, next) => {
     try {
-        const uploadedImages = await Promise.all(
-            req.files["images"].map(async (image, index) => {
-                const result = await cloudinary.uploader.upload(image.path, {
-                    folder: "products/images",
-                    resource_type: "image",
-                    transformation: [{ width: 400, height: 400, crop: "limit" }],
-                })
-                return {
-                    public_id: result.public_id,
-                    name: image.originalname,
-                    url: result.secure_url,
-                    size: result.bytes,
-                    isThumbnail: index == req.body.thumbnailImageIndex ? true : false,
-                }
-            }),
-        )
+        // const uploadedImages = await Promise.all(
+        //     req.files["images"].map(async (image, index) => {
+        //         const result = await cloudinary.uploader.upload(image.path, {
+        //             folder: "products/images",
+        //             resource_type: "image",
+        //             transformation: [{ width: 400, height: 400, crop: "limit" }, { fetch_format: "jpg" }, { quality: "auto" }],
+        //         })
+        //         return {
+        //             public_id: result.public_id,
+        //             name: image.originalname,
+        //             url: result.secure_url,
+        //             size: result.bytes,
+        //             isThumbnail: index == req.body.thumbnailImageIndex ? true : false,
+        //         }
+        //     }),
+        // )
+
+        const uploadImages = async (images, thumbnailIndex) => {
+            const results = []
+            const concurrency = 2
+
+            for (let i = 0; i < images.length; i += concurrency) {
+                const batch = images.slice(i, i + concurrency)
+
+                const uploadedBatch = await Promise.all(
+                    batch.map(async (image, index) => {
+                        const result = await cloudinary.uploader.upload(image.path, {
+                            folder: "products/images",
+                            transformation: [
+                                { width: 400, height: 400, crop: "limit" },
+                                { fetch_format: "jpg" },
+                                { quality: "auto" },
+                            ],
+                        })
+
+                        return {
+                            public_id: result.public_id,
+                            name: image.originalname,
+                            url: result.secure_url,
+                            size: result.bytes,
+                            isThumbnail: i + index === Number(thumbnailIndex),
+                        }
+                    }),
+                )
+
+                results.push(...uploadedBatch)
+            }
+
+            return results
+        }
+        
+        const uploadedImages = await uploadImages( req.files["images"], req.body.thumbnailImageIndex )
+
         const thumbnailResult = await cloudinary.uploader.upload(req.files["thumbnail"][0].path, {
             folder: "products/thumbnails",
             resource_type: "image",
-            transformation: [{ width: 400, height: 400, crop: "limit" }],
+            transformation: [{ width: 400, height: 400, crop: "limit" }, { fetch_format: "jpg" }, { quality: "auto" }],
         })
         const thumbnailImage = {
             public_id: thumbnailResult.public_id,
@@ -67,6 +106,18 @@ const packProductData = async (req, next) => {
     } catch (error) {
         console.error(error)
         next(error)
+    } finally {
+        try {
+            if (req.files?.images) {
+                await Promise.all(req.files.images.map((file) => fs.unlink(file.path)))
+            }
+
+            if (req.files?.thumbnail) {
+                await fs.unlink(req.files.thumbnail[0].path)
+            }
+        } catch (err) {
+            console.error("Cleanup error:", err)
+        }
     }
 }
 

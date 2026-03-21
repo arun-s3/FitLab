@@ -60,19 +60,19 @@ const finalProducts = products.map((product) => ({
 async function seedProducts() {
     try {
         await mongoose.connect(process.env.MONGOURI)
-        console.log("✅ MongoDB Connected")
+        console.log("MongoDB Connected...")
 
         await Product.deleteMany({})
-        console.log("🧹 Old products removed")
+        console.log("Old products removed!")
 
-        await Product.insertMany(finalProducts)
+        await Product.insertMany(finalProducts);
 
-        console.log(`✅ ${finalProducts.length} products inserted`)
+        console.log(`${finalProducts.length} products inserted`)
 
-        process.exit()
+        process.exit();
     } catch (error) {
-        console.error("❌ Error seeding products:", error)
-        process.exit(1)
+        console.error("---Error seeding products:", error)
+        process.exit(1);
     }
 }
 

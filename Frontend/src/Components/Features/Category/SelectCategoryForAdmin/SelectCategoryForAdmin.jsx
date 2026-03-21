@@ -491,7 +491,7 @@ export function SelectSubCategoryForAdmin({
                 selectedAlready && !clearedSelectedAlready &&
                     <p className='text-[11px] text-muted tracking-[0.3] flex items-center gap-[7px]'> 
                         You have selected the sub-category: 
-                        <span className="px-[5px] py-[4px] flex items-center gap-[5px] text-secondary border 
+                        <span className="px-[5px] py-[4px] flex items-center gap-[5px] text-secondary capitalize border 
                             border-inputBorderSecondary rounded-[10px]" 
                         onClick={()=> {
                             setSubCategory(null)

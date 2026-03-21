@@ -80,7 +80,6 @@ export default function AdminAddAndEditProductPage({ editProduct }) {
     const navigate = useNavigate()
 
     useEffect(() => {
-        console.log("images------>", images)
         if (category.length == 0) setCategoryImgPreview("")
         setProductData({ ...productData, category: category, subCategory, images: images, thumbnail: thumbnail })
     }, [category, subCategory, images, thumbnail])
@@ -90,10 +89,6 @@ export default function AdminAddAndEditProductPage({ editProduct }) {
         tagStrings = [...new Set(tagStrings)]
         setProductData({ ...productData, tags: tagStrings })
     }, [tag])
-
-    useEffect(() => {
-        console.log("productData------>", productData)
-    }, [productData])
 
     const resetAllStates = () => {
         setProductData({
@@ -128,7 +123,6 @@ export default function AdminAddAndEditProductPage({ editProduct }) {
         }
         const loadProductData = async () => {
             if (location?.state?.product && editProduct) {
-                console.log("location.state.product---->", location.state.product)
                 editProductItem.current = location.state.product
                 setProductData((productData) => ({
                     ...productData,
@@ -341,14 +335,11 @@ export default function AdminAddAndEditProductPage({ editProduct }) {
         }
 
         const userSelectedVariantAttr = variantAttributes.find((attribute) => productData[attribute])
-        console.log("userSelectedVariantAttr----------->", userSelectedVariantAttr)
         if (!checkVariantDataValidity(userSelectedVariantAttr)) return
-
-        console.log("ProductData before submission---->", productData)
 
         const optionalFields = ["description", "additionalInformation", "tags", "discountType", "discountValue", ...variantAttributes]
         const requiredFields = Object.keys(productData).filter((field) => !optionalFields.includes(field))
-        console.log("requiredFields---->", requiredFields)
+
         const isRequiredFieldsMissing = requiredFields.some(
             (field) => productData[field] === undefined || productData[field].toString().trim() === "",
         )
@@ -356,9 +347,6 @@ export default function AdminAddAndEditProductPage({ editProduct }) {
         const isRequiredFieldsMissingData = requiredFields.find(
             (field) => productData[field] === undefined || productData[field].toString().trim() === "",
         )
-
-        console.log("isRequiredFieldsMissing---->", isRequiredFieldsMissing)
-        console.log("isRequiredFieldsMissingData---->", isRequiredFieldsMissingData)
 
         if (isRequiredFieldsMissing) {
             if (!Object.keys(productData).length) {

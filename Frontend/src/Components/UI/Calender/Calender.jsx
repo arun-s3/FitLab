@@ -56,6 +56,9 @@ export function DateSelector({
     const { startDate, endDate } = dateGetter
     const { setStartDate, setEndDate } = dateSetter
 
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
     return (
         <div id='calender' className='flex gap-[5px] items-center'>
             <div className='date-picker'>
@@ -63,6 +66,7 @@ export function DateSelector({
                     selected={startDate}
                     onChange={(date) => setStartDate(date)}
                     selectsStart
+                    minDate={startDate || today}
                     startDate={startDate}
                     endDate={endDate}
                     placeholderText='Select start date'

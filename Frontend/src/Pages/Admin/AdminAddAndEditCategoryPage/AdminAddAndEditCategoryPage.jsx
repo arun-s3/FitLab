@@ -59,6 +59,8 @@ export default function AdminAddAndEditCategoryPage({ editCategory }) {
     const [radioCheckedCategory, setRadioCheckedCategory] = useState("")
     const [manualCheckCategory, setManualCheckCategory] = useState({})
 
+    const [errors, setErrors] = useState({})
+
     const { openDropdowns, dropdownRefs, toggleDropdown } = useFlexiDropdown([
         "parentCatDropdown",
         "relatedCatDropdown",
@@ -128,7 +130,6 @@ export default function AdminAddAndEditCategoryPage({ editCategory }) {
             dispatch(getCategoryNames({ id: location.state.category._id }))
         } else {
              if (location?.state?.from === "/admin/category/edit") {
-                console.group("Resetting states...")
                 resetAllStates()
             }
         }
@@ -249,15 +250,18 @@ export default function AdminAddAndEditCategoryPage({ editCategory }) {
                 ? handleInputValidation(fieldName, value, { optionalField: true })
                 : handleInputValidation(fieldName, value)
             if (!statusObj.error && statusObj.message.startsWith("Optional")) {
+                setErrors(errors=> ({...errors, [fieldName]: false}))
                 e.target.nextElementSibling.textContent = ""
                 e.target.style.borderColor = primaryColor.current
                 return
             }
             if (statusObj.error) {
+                setErrors(errors=> ({...errors, [fieldName]: true}))
                 const message = statusObj.message
                 const newCategoryData = displayErrorAndReturnNewFormData(e, message, categoryData, fieldName)
                 setCategoryData(newCategoryData)
             } else {
+                setErrors(errors=> ({...errors, [fieldName]: false}))
                 displaySuccess(e)
             }
         }
@@ -313,12 +317,19 @@ export default function AdminAddAndEditCategoryPage({ editCategory }) {
     }
 
     const submitHandler = async (e) => {
-        if (!images.length) delete categoryData["images"]
+        if (images.length === 0) {
+             delete categoryData["images"]
+             sonnerToast.error("Please add a category banner image")
+             return
+        }
         const requiredFields = ["categoryName", "categoryDescription", "images"]
+        const hasErrorField = Object.keys(errors).some(field=> errors[field])
+
         if (
             Object.keys(categoryData).length >= 3 &&
+            !hasErrorField &&
             requiredFields.every((field) => Object.keys(categoryData).includes(field)) &&
-            Object.values(categoryData).find((inputValues) => inputValues !== "undefined")
+            Object.keys(categoryData).some((field) => requiredFields.includes(field) && categoryData[field] && categoryData[field] !== "undefined" && categoryData[field] !== undefined)
         ) {
             if((startDate && !endDate) || (!startDate && endDate)) {
                 sonnerToast.error("Looks like a date is missing — please select both start and end dates for proper seasonal activation.")
@@ -359,13 +370,13 @@ export default function AdminAddAndEditCategoryPage({ editCategory }) {
                 : dispatch(createCategory({ formData }))
             sonnerToast.info("Uploading the category...")
         } else {
-            if (!Object.keys(categoryData).length) {
+            if (Object.keys(categoryData).length === 0) {
                 sonnerToast.error("Please enter all the fields!", {
-                    description: "Some required details are missing. Fill them in to continue.",
+                    description: "All the required details are missing. Fill them in to continue.",
                 })
             } else {
                 sonnerToast.error("Please check the fields and submit!", {
-                    description: "Some required details are wrong. Check them and continue.",
+                    description: "Some details are wrong. Check them and continue.",
                 })
             }
         }

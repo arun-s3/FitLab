@@ -20,23 +20,7 @@ const MAXPRICE = 500000
 
 const packProductData = async (req, next) => {
     try {
-        // const uploadedImages = await Promise.all(
-        //     req.files["images"].map(async (image, index) => {
-        //         const result = await cloudinary.uploader.upload(image.path, {
-        //             folder: "products/images",
-        //             resource_type: "image",
-        //             transformation: [{ width: 400, height: 400, crop: "limit" }, { fetch_format: "jpg" }, { quality: "auto" }],
-        //         })
-        //         return {
-        //             public_id: result.public_id,
-        //             name: image.originalname,
-        //             url: result.secure_url,
-        //             size: result.bytes,
-        //             isThumbnail: index == req.body.thumbnailImageIndex ? true : false,
-        //         }
-        //     }),
-        // )
-
+        
         const uploadImages = async (images, thumbnailIndex) => {
             const results = []
             const concurrency = 2

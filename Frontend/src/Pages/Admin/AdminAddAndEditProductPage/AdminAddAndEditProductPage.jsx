@@ -61,6 +61,8 @@ export default function AdminAddAndEditProductPage({ editProduct }) {
 
     const [categoryImgPreview, setCategoryImgPreview] = useState("")
 
+    const [errors, setErrors] = useState({})
+
     const { openDropdowns, dropdownRefs, toggleDropdown } = useFlexiDropdown(["discountDropdown"])
 
     const categoryBgImage = {
@@ -235,6 +237,7 @@ export default function AdminAddAndEditProductPage({ editProduct }) {
     }
 
     const additionalInfoBlurHandler = (e) => {
+        if(!productData?.additionalInformation) return
         const infoArr = productData?.additionalInformation.filter((info) => info !== null && info.trim() !== "")
         setProductData({ ...productData, additionalInformation: [...infoArr] })
     }
@@ -271,14 +274,18 @@ export default function AdminAddAndEditProductPage({ editProduct }) {
                 ? handleInputValidation(fieldName, value, { optionalField: true }, limits)
                 : handleInputValidation(fieldName, value, limits)
             if (!statusObj.error && statusObj.message.startsWith("Optional")) {
+                setErrors(errors=> ({...errors, [fieldName]: false}))
                 e.target.style.borderColor = primaryColor.current
+                displaySuccess(e)
                 return
             }
             if (statusObj.error) {
                 const message = statusObj.message
+                setErrors(errors=> ({...errors, [fieldName]: true}))
                 const newProductData = displayErrorAndReturnNewFormData(e, message, productData, fieldName)
                 setProductData(newProductData)
             } else {
+                setErrors(errors=> ({...errors, [fieldName]: false}))
                 displaySuccess(e)
             }
         }
@@ -315,7 +322,8 @@ export default function AdminAddAndEditProductPage({ editProduct }) {
         setStartedSubmission(true)
 
         const checkVariantDataValidity = (variantAttribute) => {
-            if (productData[variantAttribute] && productData[variantAttribute].length !== productData["stock"].length) {
+            if (!productData?.["stock"]) return true
+            if (productData[variantAttribute] && productData[variantAttribute].length !== productData?.["stock"].length) {
                 sonnerToast.error(
                     `Enter stock quantities for each ${variantAttribute} variant — exactly one per variant!`,
                 )
@@ -327,6 +335,7 @@ export default function AdminAddAndEditProductPage({ editProduct }) {
             }
             return true
         }
+
         const variantAttributes = ["weights", "sizes", "motorPowers", "colors"]
         const doesMultipleVariantAttrExists = variantAttributes.filter((attribute) => productData[attribute]).length > 1
         if (doesMultipleVariantAttrExists) {
@@ -337,23 +346,45 @@ export default function AdminAddAndEditProductPage({ editProduct }) {
         const userSelectedVariantAttr = variantAttributes.find((attribute) => productData[attribute])
         if (!checkVariantDataValidity(userSelectedVariantAttr)) return
 
-        const optionalFields = ["description", "additionalInformation", "tags", "discountType", "discountValue", ...variantAttributes]
-        const requiredFields = Object.keys(productData).filter((field) => !optionalFields.includes(field))
+        const requiredFields = ["title", "subtitle", "price", "stock", "brand", "category", "subCategory", "targetMuscles", "images"]
+        
+        const isRequiredFieldsInvalid = requiredFields.some((field) => {
+            const value = productData[field]
 
-        const isRequiredFieldsMissing = requiredFields.some(
-            (field) => productData[field] === undefined || productData[field].toString().trim() === "",
-        )
+            if (value === undefined || value === null) return true
+            if (Array.isArray(value)) return value.length === 0
 
-        const isRequiredFieldsMissingData = requiredFields.find(
-            (field) => productData[field] === undefined || productData[field].toString().trim() === "",
-        )
+            return value.toString().trim() === ""
+        })
 
-        if (isRequiredFieldsMissing) {
-            if (!Object.keys(productData).length) {
-                toast.error("Please enter all the fields!")
+        const doesNoRequiredFieldsExists = requiredFields.every((field) => {
+            const value = productData[field]
+
+            if (value === undefined || value === null) return true
+            if (Array.isArray(value)) return value.length === 0
+
+            return value.toString().trim() === ""
+        })
+
+        if (isRequiredFieldsInvalid) {
+            if (doesNoRequiredFieldsExists) {
+                toast.error("Please enter all the required fields!")
+                return
             } else {
-                sonnerToast.error("Please check the fields and submit again!")
+                sonnerToast.error("Please check the fields with errors and submit again!")
             }
+            return
+        } 
+
+        if (images.length < 2) { 
+            sonnerToast.error("Please add atleast 2 images for authenticity!")
+            return
+        }
+
+        const hasErrorField = Object.keys(errors).some(field=> errors[field])
+        if (hasErrorField) {
+            sonnerToast.error("Please check the fields with errors and submit again!")
+            return
         } else {
             const formData = new FormData()
             const { images, thumbnail, ...rest } = productData
@@ -665,9 +696,8 @@ export default function AdminAddAndEditProductPage({ editProduct }) {
                                     <p className='mt-[4px] text-[10px] text-[#7e7d81] left-0 -bottom-[31px]'>
                                         For multiple variants, enter weight values for each variant separated by commas.
                                     </p>
-                                    <p
-                                        className='error !absolute !top-[72px] right-0 !h-0 !mt-0'
-                                        onClick={(e) => cancelErrorState(e, primaryColor.current)}></p>
+                                    <p className='error absolute !top-[72px] right-0 !h-0 !mt-0'
+                                                onClick={(e) => cancelErrorState(e, primaryColor.current)}></p>
                                 </div>
                             </div>
                             <div className='input-wrapper'>
@@ -732,12 +762,12 @@ export default function AdminAddAndEditProductPage({ editProduct }) {
                                 </p>
                             </div>
                             <div className='input-wrapper !-mt-[24px]'>
-                                <label for='product-brand'> Sizes (For supplement based products only) </label>
+                                <label for='product-brand'> Sizes/Flavors (For supplement based products only) </label>
                                 <div className='relative'>
                                     <PlaceholderIcon icon={<LiaWeightSolid />} fromTop={20} />
                                     <input
                                         type='text'
-                                        placeholder='Eg: 2L, 500ml, 2Kg, 2 serving (Optional field)'
+                                        placeholder='Eg: 2L, 500ml, 2Kg, 2 serving, chocolate flavor (Optional field)'
                                         id='product-sizes'
                                         required
                                         className='pl-[21px] w-full disabled:cursor-not-allowed '
@@ -787,7 +817,7 @@ export default function AdminAddAndEditProductPage({ editProduct }) {
                     </div>
 
                     <div className='product-input-wrapper relative'>
-                        <p className='label'> Target Muscles (optional)</p>
+                        <p className='label'> Target Muscles </p>
                         <div className='mt-4 grid grid-cols-4 gap-2 overflow-visible pl-2'>
                             {muscleGroups.map((muscle, index) => (
                                 <span

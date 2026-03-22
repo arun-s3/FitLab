@@ -4,7 +4,7 @@ const regexPatterns = {
     titlePattern: /^([a-zA-Z]){3,}[a-zA-Z0-9\s,'-]{0,100}$/,
     pricePattern: /^\d+(\.\d{1,2})?$/,
     stockPattern: /^\d{1,}$/,
-    sizesPattern: /^\d+(\.\d+)?\s?[a-zA-Z]+(?:\s?[a-zA-Z]+)*$/,
+    sizesPattern: /^(\d+(\.\d+)?\s?[a-zA-Z]+(?:\s?[a-zA-Z]+)*|[a-zA-Z]+(?:\s[a-zA-Z]+)*)$/,
     motorPowersPattern: /^\d+(\.\d+)?\s?(HP|hp|W|w)?$/,
     weightsPattern: /^\d+(\.\d+)?$/,
     colorsPattern: /^[A-Za-z]{3,}(?:\s[A-Za-z]{2,})*$/,

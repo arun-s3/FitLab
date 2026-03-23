@@ -120,7 +120,8 @@ export default function OfferModal({ isOpen, onClose, offer }) {
                     ? [...selectedCategories.categories]
                     : [...selectedCategories.categories],
             }))
-            if (selectedCategories?.categories.length <= 0) {
+            if ((selectedCategories?.categories.length === 0 || selectedCategories?.subCategories.length === 0) 
+                    && formData.applicableCategories.length === 0) {
                 setError((error) => ({ ...error, applicableCategories: "Choose atleast one category" }))
             } else {
                 setError((error) => {
@@ -128,6 +129,16 @@ export default function OfferModal({ isOpen, onClose, offer }) {
                     return rest
                 })
             }
+        }
+
+        if (selectedCategories?.subCategories) {
+            const subCategoriesElements = selectedCategories.subCategories.split(',')
+            setFormData((formData) => ({
+                ...formData,
+                applicableCategories: Array.isArray(formData.applicableCategories)
+                    ? [...selectedCategories.categories, ...subCategoriesElements]
+                    : [...selectedCategories.categories, ...subCategoriesElements]
+            }))
         }
 
         if (selectedProducts) {
@@ -141,7 +152,7 @@ export default function OfferModal({ isOpen, onClose, offer }) {
                     applicableProducts: [...selectedProducts.map((product) => product.title)],
                 }))
             }
-            if (selectedProducts.length === 0) {
+            if (selectedProducts.length === 0 && formData.applicableType === 'products' && formData.applicableProducts.length === 0) {
                 setError((error) => ({ ...error, applicableProducts: "Choose atleast one product!" }))
             }
         }
@@ -298,19 +309,25 @@ export default function OfferModal({ isOpen, onClose, offer }) {
     }
 
     const applicableTypeHandler = (e) => {
+        setError((error) => ({ ...error, applicableProducts: "" }))
         const selectedValue = e.target.value
         setFormData((prev) => ({ ...prev, applicableType: selectedValue }))
         if (selectedValue === "categories") {
             setShowCategories(true)
             setSelectedProducts([])
             setFormData((prev) => ({ ...prev, applicableProducts: [] }))
+            setError((error) => ({ ...error, applicableProducts: "" }))
         } else if (selectedValue === "products") {
             setShowCategories(false)
             setSelectedCategories({})
             setFormData((prev) => ({ ...prev, applicableCategories: [] }))
+             setError((error) => ({ ...error, applicableCategories: "" }))
         } else {
             setShowCategories(false)
+            setSelectedProducts([])
+            setSelectedCategories({})
             setFormData((prev) => ({ ...prev, applicableProducts: [], applicableCategories: [] }))
+            setError((error) => ({ ...error, applicableCategories: "", applicableProducts: "" }))
         }
     }
 
@@ -329,6 +346,7 @@ export default function OfferModal({ isOpen, onClose, offer }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
+        
         const { name, startDate, endDate, discountType, discountValue, applicableType } = formData
         if (!name || !startDate || !endDate || !discountType || !discountValue || !applicableType) {
             toast.error("Please fill the required fields!")
@@ -348,6 +366,10 @@ export default function OfferModal({ isOpen, onClose, offer }) {
         }
         if (formData.applicableType === "categories" && selectedCategories.length === 0) {
             sonnerToast.error("Choose atleast one category!")
+            return
+        }
+        if (images.length === 0) {
+            sonnerToast.error("Add an offer banner image for user authenticity!")
             return
         }
         if (Object.values(error).some((error) => error.trim() !== "")) {
@@ -645,13 +667,38 @@ export default function OfferModal({ isOpen, onClose, offer }) {
                                             className='px-[5px] py-[2px] flex items-center gap-[4px]'
                                         >
                                             <GoDotFill className='w-[10px] h-[10px] text-primaryDark' />
-                                            <span className='text-[11px] text-secondary capitalize'>
+                                            <span className='flex items-center gap-[1px] text-[11px] text-secondary capitalize'>
                                                 {" "}
                                                 {category?.name || category}{" "}
+                                                <X
+                                                    className='h-[11px] w-[11px] text-muted cursor-pointer'
+                                                    onClick={() =>
+                                                        setFormData((formData) => ({
+                                                            ...formData,
+                                                            applicableCategories: [
+                                                                ...formData.applicableCategories.filter(
+                                                                    (cat) => cat.name !== category.name,
+                                                                ),
+                                                            ],
+                                                        }))
+                                                    }
+                                                />
                                             </span>
                                         </div>
                                     ))}
                                 </div>
+                            )}
+                            {!showCategories && (
+                                <h5
+                                    className='mt-[10px] ml-[10px] mb-[5px] text-[11px] text-muted font-[450] hover:underline
+                                    transition duration-150 cursor-pointer'
+                                    onClick={() => {
+                                        setFormData((formData) => ({ ...formData, applicableCategories: [] }))
+                                        setShowCategories(true)
+                                    }}
+                                >
+                                    Choose different Categories
+                                </h5>
                             )}
                             <p className='mt-[4px] h-[17px] text-[10px] text-red-500 tracking-[0.2px] visible'>
                                 {error.applicableCategories && error.applicableCategories}

@@ -65,7 +65,7 @@ export default function AdminCouponManagementPage() {
         `linear-gradient(to right,rgba(255,255,255,0.94),rgba(255,255,255,0.94)), url('/Images/admin-bg4.png')`,
     )
 
-    const { coupons: allCoupons, totalCoupons, couponDeactivated, couponError } = useSelector((state) => state.coupons)
+    const { coupons: allCoupons, totalCoupons, couponDeactivated, couponCreated, couponError } = useSelector((state) => state.coupons)
     const dispatch = useDispatch()
 
     useEffect(() => {
@@ -88,7 +88,7 @@ export default function AdminCouponManagementPage() {
         if (Object.keys(queryOptions).length > 0) {
             dispatch(getAllCoupons({ queryOptions }))
         }
-    }, [queryOptions])
+    }, [queryOptions, couponCreated])
 
     useEffect(() => {
         if (couponDeactivated) {

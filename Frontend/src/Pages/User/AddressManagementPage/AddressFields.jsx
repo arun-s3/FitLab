@@ -277,7 +277,7 @@ export default function AddressFields({
                          s-sm:text-[16px] tracking-[0.2px] text-black flex items-center justify-center gap-[10px] font-semibold
                          w-full xxs-sm:w-auto transition duration-300 border-2 border-secondaryLight2 rounded-[7px]
                          hover:text-white hover:bg-purple-500 hover:border-purple-500'
-                        clickHandler={() => navigate("../")}
+                        onClick={() => navigate("../")}
                     >
                         <ArrowLeft size={17} className='text-inherit' />
                         Back

@@ -26,7 +26,7 @@ const createCoupon = async (req, res, next) => {
             startDate,
             endDate,
         } = req.body.couponDetails
-        if (!code || !discountType || !startDate || !endDate) {
+        if (!code || !description || !discountType || !startDate || !endDate) {
             return next(errorHandler(400, "Required fields are missing!"))
         }
         if (discountType === "percentage" && !discountValue) {

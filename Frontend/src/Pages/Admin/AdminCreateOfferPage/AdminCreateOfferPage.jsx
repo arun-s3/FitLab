@@ -107,7 +107,7 @@ export default function AdminCreateOfferPage() {
                     ? [...selectedCategories.categories]
                     : [...selectedCategories.categories],
             }))
-            if (selectedCategories?.categories.length <= 0) {
+            if (selectedCategories?.categories.length === 0) {
                 setError((error) => ({ ...error, applicableCategories: "Choose atleast one category" }))
             } else {
                 setError((error) => {
@@ -116,8 +116,7 @@ export default function AdminCreateOfferPage() {
                 })
             }
         }
-
-        if (selectedProducts) {
+        if (selectedProducts && selectedProducts.length > 0) {
             setFormData((formData) => ({
                 ...formData,
                 applicableProducts: [...selectedProducts.map((product) => product.title)],
@@ -184,7 +183,6 @@ export default function AdminCreateOfferPage() {
                 setShowSearchResults(false)
             }
         }
-
         document.addEventListener("click", handleClickOutside)
         return () => {
             document.removeEventListener("click", handleClickOutside)
@@ -335,6 +333,7 @@ export default function AdminCreateOfferPage() {
         const selectedValue = e.target.value
         setFormData((prev) => ({ ...prev, applicableType: selectedValue }))
         if (selectedValue === "categories") {
+            setError((error) => ({ ...error, applicableCategories: "" }))
             setShowCategories(true)
             setSelectedProducts([])
             // setError(error=> {
@@ -343,6 +342,7 @@ export default function AdminCreateOfferPage() {
             // })
             setFormData((prev) => ({ ...prev, applicableProducts: [] }))
         } else if (selectedValue === "products") {
+            setError((error) => ({ ...error, applicableProducts: "" }))
             setShowCategories(false)
             setSelectedCategories({})
             // setError(error=> {
@@ -377,6 +377,7 @@ export default function AdminCreateOfferPage() {
 
     const handleSubmit = async () => {
         const { name, discountType, discountValue, applicableType, startDate, endDate } = formData
+
         if (!name || !startDate || !endDate || !discountType || !discountValue || !applicableType) {
             toast.error("Please fill the required fields!")
             return
@@ -414,6 +415,9 @@ export default function AdminCreateOfferPage() {
                 }
             }
             newBlob = await compressedImageBlob(images[0])
+        } else {
+            sonnerToast.error("Add a banner image for the offer")
+            return 
         }
 
         const offerData = new FormData()

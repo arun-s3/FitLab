@@ -696,7 +696,7 @@ export default function AdminAddAndEditCategoryPage({ editCategory }) {
                         setImages={setImages}
                         imageLimit={1}
                         needThumbnail={false}
-                        imageType='Category'
+                        imageType='Category Banner'
                         imagePreview={{
                             status: true,
                             imageName: `${categoryData?.categoryName ? categoryData?.categoryName : "Category Name"}`,

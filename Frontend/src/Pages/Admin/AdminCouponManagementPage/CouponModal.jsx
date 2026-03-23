@@ -6,6 +6,7 @@ import { debounce } from "lodash"
 
 import { X, BadgePercent, Plus, Minus, Search, ChevronDown, ChevronUp } from "lucide-react"
 import { RiCoupon4Line } from "react-icons/ri"
+import { GoDotFill } from "react-icons/go"
 
 import { toast as sonnerToast } from "sonner"
 
@@ -13,6 +14,7 @@ import { toast } from "react-toastify"
 
 import CategoryDisplay from "../../../Components/Features/Category/CategoryDisplay/CategoryDisplay"
 import useModalHelpers from "../../../Hooks/ModalHelpers"
+import { DateSelector } from "../../../Components/UI/Calender/Calender"
 
 import { createCoupon, updateCoupon, resetCouponStates } from "../../../Slices/couponSlice"
 import { searchProduct, getAllProducts } from "../../../Slices/productSlice"
@@ -59,6 +61,12 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
     const [productQueryOptions, setProductQueryOptions] = useState({ page: 1, limit: 6 })
     const [showSearchResults, setShowSearchResults] = useState({ products: false, customers: false })
 
+    const [insideProductResults, setInsideProductResults] = useState(false)
+    const [insideCustomerResults, setInsideCustomerResults] = useState(false)
+
+    const [startDate, setStartDate] = useState(null)
+    const [endDate, setEndDate] = useState(null)
+
     const [customerQueryOptions, setCustomerQueryOptions] = useState({ page: 1, limit: 6 })
 
     const { products, productCounts } = useSelector((state) => state.productStore)
@@ -78,6 +86,8 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
             if (coupon?.assignedCustomers && coupon.assignedCustomers.length > 0) {
                 setSelectedCustomers([...coupon.assignedCustomers])
             }
+            setStartDate(new Date(coupon.startDate))
+            setEndDate(new Date(coupon.endDate))
             setShowCategories(false)
             setFormData({ ...coupon, startDate: coupon.startDate.split("T")[0], endDate: coupon.endDate.split("T")[0] })
         } else {
@@ -102,33 +112,82 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
     }, [coupon])
 
     useEffect(() => {
-        if (Object.keys(error).some((error) => error.trim() !== "")) {
-            setTimeout(() => setError({}), 3000)
+        if (startDate) {
+            setFormData((formData) => ({ ...formData, startDate }))
         }
-    }, [error])
+        if (endDate) {
+            setFormData((formData) => ({ ...formData, endDate }))
+        }
+    }, [startDate, endDate])
 
     useEffect(() => {
-        if (selectedCategories?.categories && selectedCategories.categories.length > 0) {
+        if (selectedCategories?.categories) {
             setFormData((formData) => ({
                 ...formData,
                 applicableCategories: [
-                    ...new Set([...formData.applicableCategories, ...selectedCategories.categories]),
+                    ...new Set([...selectedCategories?.categories]),
                 ],
             }))
+            if ((selectedCategories?.categories.length === 0 || selectedCategories?.subCategories.length === 0) 
+                    && formData.applicableCategories.length === 0) {
+                setError((error) => ({ ...error, applicableCategories: "Choose atleast one category" }))
+            } else {
+                setError((error) => {
+                    const { applicableCategories, ...rest } = error
+                    return rest
+                })
+            }
+        }
+        if (selectedCategories?.subCategories) {
+                const subCategoriesElements = selectedCategories.subCategories.split(',')
+                setFormData((formData) => ({
+                    ...formData,
+                    applicableCategories: [
+                        ...new Set([...selectedCategories?.categories, ...subCategoriesElements]), 
+                    ],
+                }))
         }
         if (selectedProducts) {
             setFormData((formData) => ({
                 ...formData,
                 applicableProducts: [...selectedProducts.map((product) => product.title)],
             }))
+            if (selectedProducts.length > 0) {
+                setError((error) => {
+                    const { applicableProducts, ...rest } = error
+                    return rest
+                })
+            }
+            if (selectedProducts.length === 0 && formData.applicableType === 'products' && formData.applicableProducts.length === 0) {
+                setError((error) => ({ ...error, applicableProducts: "Choose atleast one product!" }))
+            }
         }
-        if (selectedCustomers) {
+        if (selectedCustomers && formData?.customerSpecific) {
             setFormData((formData) => ({
                 ...formData,
                 assignedCustomers: [...selectedCustomers.map((customer) => customer.username)],
             }))
+            if (selectedCustomers.length === 0 && formData.assignedCustomers.length === 0) {
+                setError((error) => ({ ...error, applicableCustomers: "Choose atleast one customer!" }))
+            } else {
+                setError((error) => {
+                    const { applicableCustomers, ...rest } = error
+                    return rest
+                })
+            }
         }
     }, [selectedCategories, selectedProducts, selectedCustomers])
+
+    useEffect(() => {
+        if (!formData.customerSpecific) {
+            setSelectedCustomers([])
+            setError((error) => ({ ...error, applicableCustomers: "" }))
+            setFormData((formData) => ({
+                ...formData,
+                assignedCustomers: []
+            }))
+        }
+    }, [formData?.customerSpecific])
 
     useEffect(() => {
         if (Object.keys(productQueryOptions).length) {
@@ -232,6 +291,9 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
             debouncedProductSearch(searchData)
         } else {
             setShowSearchResults((results) => ({ ...results, products: false }))
+            if (selectedProducts.length === 0) {
+                setError((error) => ({ ...error, applicableProducts: "Choose atleast one product!" }))
+            }
         }
     }
 
@@ -251,6 +313,9 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
             setSelectedProducts((products) => [...products, { title: productName }])
         } else {
             setSelectedProducts((products) => products.filter((product) => product.title !== productName))
+            if (selectedProducts.length === 0) {
+                setError((error) => ({ ...error, applicableProducts: "Choose atleast one product!" }))
+            }
         }
     }
 
@@ -290,26 +355,33 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
     }
 
     const applicableTypeHandler = (e) => {
+        setError((error) => ({ ...error, applicableProducts: "" }))
         const selectedValue = e.target.value
         setFormData((prev) => ({ ...prev, applicableType: selectedValue }))
         if (selectedValue === "categories") {
             setShowCategories(true)
             setSelectedProducts([])
             setFormData((prev) => ({ ...prev, applicableProducts: [] }))
+            setError((error) => ({ ...error, applicableProducts: "" }))
         } else if (selectedValue === "products") {
             setShowCategories(false)
             setSelectedCategories({})
             setFormData((prev) => ({ ...prev, applicableCategories: [] }))
+            setError((error) => ({ ...error, applicableCategories: "" }))
         } else {
             setShowCategories(false)
+            setSelectedProducts([])
+            setSelectedCategories({})
             setFormData((prev) => ({ ...prev, applicableProducts: [], applicableCategories: [] }))
+            setError((error) => ({ ...error, applicableCategories: "", applicableProducts: "" }))
         }
     }
 
     const handleSubmit = (e) => {
         e.preventDefault()
-        const { code, startDate, endDate } = formData
-        if (!code || !startDate || !endDate) {
+        const { code, description, startDate, endDate } = formData
+
+        if (!code || !description || !startDate || !endDate) {
             toast.error("Please fill the required fields!")
             return
         }
@@ -319,6 +391,18 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
         }
         if (new Date(endDate) <= new Date(startDate)) {
             sonnerToast.error("Start date must be before the End date!")
+            return
+        }
+        if (formData.applicableType === "products" && selectedProducts.length === 0) {
+            sonnerToast.error("Choose atleast one product!")
+            return
+        }
+        if (formData.applicableType === "categories" && selectedCategories.length === 0) {
+            sonnerToast.error("Choose atleast one category!")
+            return
+        }
+        if (formData.assignedCustomers.length > 0 && selectedCustomers.length === 0) {
+            sonnerToast.error("Choose atleast one customer!")
             return
         }
         if (Object.values(error).some((error) => error.trim() !== "")) {
@@ -398,7 +482,7 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
 
                     <div>
                         <label htmlFor='description' className='block text-sm font-medium text-gray-700'>
-                            Description (optional)
+                            Description 
                         </label>
                         <textarea
                             id='description'
@@ -486,22 +570,26 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
                         </span>
                     </div>
 
-                    <div className='grid grid-cols-2 gap-4'>
+                    <div>
                         <div className='relative'>
                             <label htmlFor='startDate' className='block text-sm font-medium text-gray-700'>
-                                Start Date
+                                Start Date and End Date
                             </label>
-                            <input
+                            {/* <input
                                 type='date'
                                 id='startDate'
                                 name='startDate'
                                 value={formData.startDate}
                                 onChange={handleChange}
                                 onBlur={(e) => inputBlurHandler(e, "startDate")}
+                            /> */}
+                            <DateSelector
+                                dateGetter={{ startDate, endDate }}
+                                dateSetter={{ setStartDate, setEndDate }}
                             />
                             <span className='error top-0 right-0'> {error.startDate && error.startDate} </span>
                         </div>
-                        <div className='relative'>
+                        {/* <div className='relative'>
                             <label htmlFor='endDate' className='block text-sm font-medium text-gray-700'>
                                 End Date
                             </label>
@@ -514,7 +602,7 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
                                 onBlur={(e) => inputBlurHandler(e, "endDate")}
                             />
                             <span className='error top-0 right-0'> {error.endDate && error.endDate} </span>
-                        </div>
+                        </div> */}
                     </div>
 
                     <div className='grid grid-cols-2 gap-4'>
@@ -604,6 +692,26 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
                                     />
                                 )}
 
+                                {formData?.applicableCategories?.length > 0 && showCategories && (
+                                    <div className='mt-[10px] flex gap-[10px]'>
+                                        {formData.applicableCategories.map((category) => (
+                                            <div
+                                                key={category._id}
+                                                className='px-[5px] py-[2px] flex items-center gap-[4px]'
+                                            >
+                                                <GoDotFill className='w-[10px] h-[10px] text-primaryDark' />
+                                                <span className='text-[11px] text-secondary capitalize'>
+                                                    {" "}
+                                                    {category}{" "}
+                                                </span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                                <p className='mt-[4px] h-[17px] text-[10px] text-red-500 tracking-[0.2px] visible'>
+                                    {error.applicableCategories && error.applicableCategories}
+                                </p>
+
                                 {
                                     isEditing &&
                                         formData.applicableCategories &&
@@ -671,12 +779,23 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
                                         placeholder:text-[11px] border-muted  order-dotted rounded-[4px] focus:border-secondary 
                                         focus:outline-none focus:ring-0'
                                     onChange={(e) => searchProducts(e)}
+                                    onBlur={() => {
+                                        !insideProductResults && setShowSearchResults(results=> ({...results, products: false}))
+                                        if (selectedProducts.length === 0) {
+                                            setError((error) => ({
+                                                ...error,
+                                                applicableProducts: "Choose atleast one product!",
+                                            }))
+                                        }
+                                    }}
                                 />
                                 <Search className='absolute top-[12px] left-[12px] w-[14px] h-[14px] text-muted' />
                                 {showSearchResults.products && (
                                     <ul
                                         className='absolute top-[110%] w-full bg-white list-none flex flex-col gap-[7px] 
                                             px-[7px] py-[10px] border order-dropdownBorder rounded-[4px] z-[100]'
+                                        onMouseEnter={() => setInsideProductResults(true)}
+                                        onMouseLeave={() => setInsideProductResults(false)}
                                     >
                                         {products.length > 0 ? (
                                             products
@@ -738,11 +857,18 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
                                                     border-inputBorderSecondary rounded-[12px]'>
                                                 <X
                                                     className='h-[8px] w-[8px] text-muted cursor-pointer'
-                                                    onClick={() =>
-                                                        setSelectedProducts((products) =>
-                                                            products.filter((item) => item.title !== product.title),
+                                                    onClick={() => {
+                                                        const newSelectedProducts = selectedProducts.filter(
+                                                            (item) => item.title !== product.title,
                                                         )
-                                                    }
+                                                        setSelectedProducts(newSelectedProducts)
+                                                        if (newSelectedProducts.length === 0) {
+                                                            setError((error) => ({
+                                                                ...error,
+                                                                applicableProducts: "Choose atleast one product!",
+                                                            }))
+                                                        }
+                                                    }}
                                                 />
                                                 <span className='text-[11px] text-secondary capitalize'>
                                                     {" "}
@@ -784,12 +910,23 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
                                     className='mt-[5px] w-full h-[1.7rem] text-[12px] px-[5px] pl-[35px] py-[2px] placeholder:text-[11px] border-muted
                                         border-dotted rounded-[4px] focus:border-secondary focus:outline-none focus:ring-0'
                                     onChange={(e) => searchCustomers(e)}
+                                    onBlur={() => {
+                                        if (!insideCustomerResults) setShowSearchResults(results=> ({...results, customers: false}))
+                                        if (selectedCustomers.length === 0) {
+                                            setError((error) => ({
+                                                ...error,
+                                                applicableCustomers: "Choose atleast one customer!",
+                                            }))
+                                        }
+                                    }}
                                 />
                                 <Search className='absolute top-[12px] left-[12px] w-[14px] h-[14px] text-muted' />
                                 {showSearchResults.customers && (
                                     <ul
                                         className='absolute top-[110%] w-full bg-white list-none flex flex-col gap-[7px] px-[7px] py-[10px] border
                                             border-dropdownBorder rounded-[4px] z-[100]'
+                                        onMouseEnter={() => setInsideCustomerResults(true)}
+                                        onMouseLeave={() => setInsideCustomerResults(false)}
                                     >
                                         {allUsers.length > 0 ? (
                                             allUsers.map((user) => (
@@ -845,11 +982,18 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
                                                     rounded-[12px]'>
                                                 <X
                                                     className='h-[8px] w-[8px] text-muted cursor-pointer'
-                                                    onClick={() =>
-                                                        setSelectedCustomers((users) =>
-                                                            users.filter((user) => user.username !== customer.username),
+                                                    onClick={() => {
+                                                        const newSelectedCustomer = selectedCustomers.filter(
+                                                            (user) => user.username !== customer.username
                                                         )
-                                                    }
+                                                        setSelectedCustomers(newSelectedCustomer)
+                                                        if (newSelectedCustomer.length === 0) {
+                                                            setError((error) => ({
+                                                                ...error,
+                                                                applicableCustomers: "Choose atleast one customer!",
+                                                            }))
+                                                        }
+                                                    }}
                                                 />
                                                 <span className='text-[11px] text-secondary capitalize'>
                                                     {" "}
@@ -860,6 +1004,9 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
                                     </div>
                                 </div>
                             )}
+                            <p className='mt-[4px] h-[17px] text-[10px] text-red-500 tracking-[0.2px] visible'>
+                                {error.applicableCustomers && error.applicableCustomers}
+                            </p>
                         </div>
                     )}
 

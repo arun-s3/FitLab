@@ -67,6 +67,36 @@
     border-radius: 2px;
     cursor: pointer;
 }
+ 
+#CouponModal #calender .date-picker {
+    flex-basis: 50%;
+}
+#CouponModal #calender .date-picker .react-datepicker-wrapper{
+    width: 100%;
+}
+#CouponModal #calender .date-picker input{
+    height: 2.5rem;
+    padding-inline: 28px;
+    border: 1px solid var(--INPUT-BORDER-LOW);
+    border-radius: 6px;
+    font-size: 10px;
+    letter-spacing: 0.2px;
+    word-spacing: 1px;
+}
+#CouponModal #calender .date-picker input::placeholder{
+    color: #4f5359;
+    letter-spacing: 0.2px;
+    word-spacing: 1px;
+}
+#CouponModal #calender .date-picker svg{
+    position: absolute;
+    top: 16px;
+    left: 4px;
+    height: 17px;
+    width: 17px;
+    color: var(--SECONDARY);
+}
+
 #CouponModal form #applicableCategories-section #applicableCategories #category-content > li .category-name{
     gap: 7px;
 }

@@ -38,6 +38,8 @@ const createOffer = async (req, res, next) => {
                 url: result.secure_url,
                 size: result.bytes,
             }
+        } else {
+            return next(errorHandler(400, "Offer banner image is required!"))
         }
 
         if (!name || !discountType || !startDate || !endDate) {

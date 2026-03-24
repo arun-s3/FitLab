@@ -1,7 +1,8 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
+import { useNavigate, useLocation } from "react-router-dom"
 import { motion } from "framer-motion"
 
-import { Mail, Phone, MapPin, AlertTriangle } from "lucide-react"
+import { Mail, Phone, MapPin, AlertTriangle, Home } from "lucide-react"
 
 import TextChatBox from "../../Pages/User/TextChatBox/TextChatBox"
 
@@ -9,6 +10,19 @@ import TextChatBox from "../../Pages/User/TextChatBox/TextChatBox"
 export default function BlockedPage() {
 
     const [openChatBox, setOpenChatBox] = useState(false)
+
+    const navigate = useNavigate()
+    
+    const location = useLocation()
+
+    useEffect(() => {
+        if (!location?.state?.NoDirectAccess) {
+            navigate('/error/403', {
+                replace: true,
+                state: { NoDirectAccess: true },
+            })
+        }
+    }, [location])
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -110,14 +124,26 @@ export default function BlockedPage() {
                                 Our security team will review your account within 24-48 hours. You can contact our admin
                                 team using the information shown or can chat with us right now.
                             </p>
-                            <motion.button
-                                className='bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-[7px] font-semibold transition-all duration-200 shadow-lg hover:shadow-xl'
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                onClick={() => setOpenChatBox(true)}
-                            >
-                                Chat With Admin
-                            </motion.button>
+                            <div className="flex justify-between">
+                                <motion.button
+                                    className='bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-[7px] 
+                                        font-semibold transition-all duration-200 shadow-lg hover:shadow-xl'
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => setOpenChatBox(true)}
+                                >
+                                    Chat With Admin
+                                </motion.button>
+                                <motion.button
+                                    className='bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-[7px] 
+                                        font-semibold transition-all duration-200 shadow-lg hover:shadow-xl'
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => navigate('/')}
+                                >
+                                    <Home size={22} className="text-white"/>
+                                </motion.button>
+                            </div>
                         </motion.div>
                     </div>
 

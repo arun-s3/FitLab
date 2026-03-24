@@ -21,7 +21,7 @@ const isLogin = async (req, res, next) => {
             return res.status(401).json({ message: "User not found" })
         }
 
-        if (currentUser.isBlocked) {
+        if (currentUser.isBlocked && !req?.allowBlocked) {
             return res.status(403).json({
                 message: "You are Blocked! For more info, contact support",
             })

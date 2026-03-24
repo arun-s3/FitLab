@@ -1,6 +1,7 @@
 import React from "react"
 import "./HeroSection.css"
 import { useNavigate } from "react-router-dom"
+import {useSelector} from 'react-redux'
 
 import { CiFacebook, CiInstagram, CiLinkedin } from "react-icons/ci"
 
@@ -9,11 +10,14 @@ export default function HeroSection() {
 
     const navigate = useNavigate()
 
+    const {user} = useSelector(state=> state.user)
+
     return (
         <div>
             <div
                 className='absolute top-[30%] left-[10%] text-white w-full l-md:w-3/4 x-lg:w-1/2 overflow-visible ml-0 
                     xx-md:ml-14 x-lg:ml-0'>
+
                 <h5 className='hero-subtitle text-primary text-subtitleSmall1 mb-[8px]'>
                     #1 Innovative Home Gym makers on the market
                 </h5>

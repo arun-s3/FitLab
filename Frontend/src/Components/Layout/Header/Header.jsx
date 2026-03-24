@@ -101,10 +101,19 @@ export default function Header({
         // {label: 'About Us', path: '/about'}
     ]
 
+    const blockedUserMenuItems = [
+        { label: "Home", path: "/" },
+        { label: "Privacy policy", path: "/privacy" },
+        { label: "Contact Us", path: "/contact" },
+        { label: "About Us", path: "/about" },
+        { label: "Support", path: "/support" }
+    ]
+
 
     return (
         <motion.div
-            className='flex justify-between items-center relative lg:sticky text-white px-[30px] overflow-x-clip z-10'
+            className={`flex justify-between items-center relative lg:sticky text-white px-[30px] overflow-x-clip z-10
+                ${user && user.isBlocked && 'h-24'}`}
             id='headerMenu'
             style={customStyle}
             initial={{ opacity: 0, y: -20 }}
@@ -124,6 +133,13 @@ export default function Header({
                     />{" "}
                 </Link>
             </motion.div>
+
+            {
+                user && user.isBlocked &&
+                    <p className="absolute top-[0.5rem] left-[40%] text-[12px] text-red-500 tracking-[0.4]">
+                        * Your account is currently restricted. Most features are unavailable.
+                    </p>
+            }
 
             <motion.nav
                 className='hidden lg:block ml-0 lg:ml-[-75px] x-lg:ml-[-50px]'
@@ -145,7 +161,7 @@ export default function Header({
                     }}
                 >
 
-                    {menuItems.map((item, i) => (
+                    { (!user || (user && !user.isBlocked)) && menuItems.map((item, i) => (
                         <motion.li
                             key={i}
                             className={`${(item.label === "Support" || item.label === "Coach+") && "flex items-center gap-[5px]"}`}
@@ -188,12 +204,39 @@ export default function Header({
                         </motion.li>
                     ))}
 
+                    { user && user.isBlocked && blockedUserMenuItems.map((item, i) => (
+                        <motion.li
+                            key={i}
+                            className={`flex items-center gap-[5px]`}
+                            variants={{
+                                hidden: { opacity: 0, y: -8 },
+                                visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+                            }}
+                        >
+                            <Link
+                                className={`${item?.className ? item.className : ""}`}
+                                to={item.path}
+                            >
+                                {item.label}
+                            </Link>
+
+                            {item.label === "Support" && (
+                                <motion.div
+                                    className={`w-[5px] h-[5px] rounded-full ${isAdminOnline ? "bg-green-400" : "bg-red-400"}`}
+                                    animate={{ scale: [1, 1.4, 1] }}
+                                    transition={{ repeat: Number.POSITIVE_INFINITY, duration: 2 }}
+                                />
+                            )}
+                        </motion.li>
+                    ))}
+
                 </motion.ul>
             </motion.nav>
 
             <motion.div
-                className='hidden x-sm:inline-flex x-sm:gap-[15px] l-md:gap-[1.8rem] x-md:gap-[2.2rem] lg:gap-[12px] x-xl:gap-[15px]
-                    sm:ml-[13rem] x-sm:ml-[17rem] lg:ml-0 mt-[25px] lg:mt-0 items-center'
+                className={`${user && user.isBlocked ? 'gap-0 ml-0' : `hidden x-sm:inline-flex x-sm:gap-[15px] l-md:gap-[1.8rem] 
+                    x-md:gap-[2.2rem] lg:gap-[12px] x-xl:gap-[15px] sm:ml-[13rem] x-sm:ml-[17rem] lg:ml-0 mt-[25px] 
+                    lg:mt-0 items-center`}`}
                 id='icons'
                 initial='hidden'
                 animate='visible'
@@ -204,51 +247,65 @@ export default function Header({
                     },
                 }}
             >
-                <i onClick={() => navigate("/account")}>
-                    <User className='h-[22px] w-[22px] lg:h-[20px] lg:w-[20px] xl:w-[22px] xl:h-[21px] x-xl:w-[21px] x-xl:h-[22px]' />
-                </i>
-                <i onClick={() => navigate("/shop")} className='inline-block lg:hidden'>
-                    <Store className='h-[20px] w-[20px' />
-                </i>
-                <i className='relative' onClick={() => navigate("/cart")} onMouseEnter={() => openCartSidebar()}>
-                    <IoCartOutline className='h-[23px] w-[23px] lg:h-[20px] lg:w-[20px] xl:h-[22px] 
-                        xl:w-[22px] x-xl:h-[23px] x-xl:w-[23px]' 
-                />
-                    {cart?.products && cart.products.length > 0 && (
-                        <span
-                            className={`absolute top-[-32%] left-[45%] ${cart.products.length > 100 && "px-[12px] py-[10px]"}
-                             h-[18px] w-[18px] flex justify-center items-center text-secondary bg-primary text-[10px]
-                                 font-[600] not-italic rounded-[10px]`}>
-                            {cart.products.length}
-                        </span>
-                    )}
-                </i>
-                <i onClick={() => navigate("/wishlist")}>
-                    <Heart className='w-[20px] h-[20px] lg:w-[19px] lg:h-[19px] x-xl:h-[20px] x-xl:w-[20px]' />
-                </i>
-                <i onClick={() => setopenCoach((status) => !status)} className='inline-block lg:hidden'>
-                    <Bot className='w-[23px] h-[23px] lg:w-[21px] lg:h-[21px] xl:w-[22px] xl:h-[22px] x-xl:w-[23px] x-xl:h-[23px]' />
-                </i>
-                <i onClick={() => navigate("/fitness/training")} className='inline-block lg:hidden'>
-                    <MdSportsGymnastics className='h-[20px] w-[20px]' />
-                </i>
-                <i onClick={() => navigate("/fitness/tracker")} className='inline-block lg:hidden'>
-                    <Activity className='h-[20px] w-[20px]' />
-                </i>
+                {
+                    (!user || (user && !user.isBlocked)) &&
+                        <>
+                            <i onClick={() => navigate("/account")}>
+                                <User className='h-[22px] w-[22px] lg:h-[20px] lg:w-[20px] xl:w-[22px] xl:h-[21px] x-xl:w-[21px]
+                                     x-xl:h-[22px]'/>
+                            </i>
+                            <i onClick={() => navigate("/shop")} className='inline-block lg:hidden'>
+                                <Store className='h-[20px] w-[20px' />
+                            </i>
+                            <i className='relative' onClick={() => navigate("/cart")} onMouseEnter={() => openCartSidebar()}>
+                                <IoCartOutline className='h-[23px] w-[23px] lg:h-[20px] lg:w-[20px] xl:h-[22px] 
+                                    xl:w-[22px] x-xl:h-[23px] x-xl:w-[23px]' 
+                            />
+                                {cart?.products && cart.products.length > 0 && (
+                                    <span
+                                        className={`absolute top-[-32%] left-[45%] ${cart.products.length > 100 && "px-[12px] py-[10px]"}
+                                         h-[18px] w-[18px] flex justify-center items-center text-secondary bg-primary text-[10px]
+                                             font-[600] not-italic rounded-[10px]`}>
+                                        {cart.products.length}
+                                    </span>
+                                )}
+                            </i>
+                            <i onClick={() => navigate("/wishlist")}>
+                                <Heart className='w-[20px] h-[20px] lg:w-[19px] lg:h-[19px] x-xl:h-[20px] x-xl:w-[20px]' />
+                            </i>
+                            <i onClick={() => setopenCoach((status) => !status)} className='inline-block lg:hidden'>
+                                <Bot className='w-[23px] h-[23px] lg:w-[21px] lg:h-[21px] xl:w-[22px] xl:h-[22px] x-xl:w-[23px]
+                                    x-xl:h-[23px]' />
+                            </i>
+                            <i onClick={() => navigate("/fitness/training")} className='inline-block lg:hidden'>
+                                <MdSportsGymnastics className='h-[20px] w-[20px]' />
+                            </i>
+                            <i onClick={() => navigate("/fitness/tracker")} className='inline-block lg:hidden'>
+                                <Activity className='h-[20px] w-[20px]' />
+                            </i>
+                        </> 
+                }
+
                 <i onClick={() => setOpenChatBox(true)}>
-                    <Headset className='w-[21px] h-[21px] lg:w-[19px] lg:h-[19px] xl:w-[20px] xl:h-[20px] x-xl:w-[21px] x-xl:h-[21px]' />
+                    <Headset className={`w-[21px] h-[21px] lg:w-[19px] lg:h-[19px] xl:w-[20px] xl:h-[20px] 
+                        x-xl:w-[21px] x-xl:h-[21px] ${user && user.isBlocked && 'max-sm:mt-[19px] mt-0 lg:mt-[7px] absolute right-28'}`}/>
                 </i>
 
-                <NotificationBell
-                    notifications={notifications}
-                    setNotifications={setNotifications}
-                    onNotificationRead={(id) => markNotificationRead(id, user._id)}
-                    onAllNotifcationsRead={() => markAllNotificationRead(user._id)}
-                    onNotificationDelete={(id) => deleteNotification(id, user._id)}
-                />
+                {
+                    (!user || (user && !user.isBlocked)) &&         
+
+                        <NotificationBell
+                            notifications={notifications}
+                            setNotifications={setNotifications}
+                            onNotificationRead={(id) => markNotificationRead(id, user._id)}
+                            onAllNotifcationsRead={() => markAllNotificationRead(user._id)}
+                            onNotificationDelete={(id) => deleteNotification(id, user._id)}
+                        />
+                }
 
                 <motion.div
-                    className='hidden lg:inline-block ml-0 xx-lg:ml-[-7px] xxx-lg:ml-[-20px] deskt:ml-0'
+                    className={`hidden lg:inline-block ${user && user.isBlocked ? '-ml-[35px]' : `ml-0 xx-lg:ml-[-7px] 
+                        xxx-lg:ml-[-20px] deskt:ml-0`}`}
                     initial={{ opacity: 0, x: 10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 1.4, duration: 0.6, ease: "easeOut" }}
@@ -300,19 +357,24 @@ export default function Header({
                 </motion.div>
             </motion.div>
 
-            <div className='inline-block x-sm:hidden'>
+            {
+                    (!user || (user && !user.isBlocked)) &&    
 
-                <NotificationBell
-                    notifications={notifications}
-                    setNotifications={setNotifications}
-                    onNotificationRead={(id) => markNotificationRead(id, user._id)}
-                    onAllNotifcationsRead={() => markAllNotificationRead(user._id)}
-                    onNotificationDelete={(id) => deleteNotification(id, user._id)}
-                    containerStyle='absolute top-[27px] right-20'
-                    bellStyle='w-[20px] h-[20px]'
-                />
+                        <div className='inline-block x-sm:hidden'>
+                        
+                            <NotificationBell
+                                notifications={notifications}
+                                setNotifications={setNotifications}
+                                onNotificationRead={(id) => markNotificationRead(id, user._id)}
+                                onAllNotifcationsRead={() => markAllNotificationRead(user._id)}
+                                onNotificationDelete={(id) => deleteNotification(id, user._id)}
+                                containerStyle='absolute top-[27px] right-20'
+                                bellStyle='w-[20px] h-[20px]'
+                            />
 
-            </div>
+                        </div>
+
+            }
 
             <div className='mt-[25px] lg:hidden'>
 

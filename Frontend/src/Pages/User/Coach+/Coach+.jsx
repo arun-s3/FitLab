@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useContext } from "react"
 import { useNavigate } from "react-router-dom"
-import { useSelector } from "react-redux"
+import { useSelector, useDispatch } from "react-redux"
 import { motion, AnimatePresence } from "framer-motion"
 
 import { Bot, X, Send, User } from "lucide-react"
@@ -8,6 +8,7 @@ import { toast as sonnerToast } from "sonner"
 
 import AnimatedBotIcon from "./AnimatedBot"
 import TermsDisclaimer from "../../../Components/UI/TermsDisclaimer/TermsDisclaimer"
+import { updateFitnessGoal } from "../../../Slices/userSlice"
 
 import { SocketContext } from "../../../Components/Socket-providers/SocketProvider/SocketProvider"
 
@@ -30,11 +31,27 @@ export default function CoachPlus({ autoOpen, onCloseChat }) {
         coachError,
         handleSendMessageToCoach,
         handleUserTypingForCoach,
+        // askUserFitnessGoal
     } = useContext(SocketContext)
 
     const { user } = useSelector((state) => state.user)
 
     const navigate = useNavigate()
+
+    const dispatch = useDispatch()
+
+    const [userFitnessGoal, setUserFitnessGoal] = useState("not_set")
+    const [goalSubmitted, setGoalSubmitted] = useState(false)
+
+    const fitnessGoals = [
+        { label: "weight loss", value: "weight_loss" },
+        { label: "muscle gain", value: "muscle_gain" },
+        { label: "general fitness", value: "general_fitness" },
+        { label: "endurance", value: "endurance" },
+        { label: "strength", value: "strength" },
+        { label: "flexibility", value: "flexibility" },
+        { label: "recovery", value: "recovery" },
+    ]
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -68,6 +85,11 @@ export default function CoachPlus({ autoOpen, onCloseChat }) {
             sonnerToast.error(coachError)
         }
     }, [coachError])
+
+    const goalCheckHandler = (e) => {
+        const goal = e.target.value
+        setUserFitnessGoal(goal)
+    }
 
     const formatTime = (timestamp) => {
         return new Date(timestamp).toLocaleTimeString([], {
@@ -192,10 +214,66 @@ export default function CoachPlus({ autoOpen, onCloseChat }) {
                                                 {formatTime(message.timestamp)}
                                             </p>
 
+                                            {
+                                                message.isCoach && message.askGoalNow && !goalSubmitted &&
+                                                    <div className='mt-[10px] p-4 text-[12px] text-secondary tracking-[0.3px] text-wrap 
+                                                        bg-purple-100 border border-purple-300 rounded-lg'
+                                                    >
+                                                        <p className="text-[13px] text-gray-800"> Choose your current urgent fitness goal: </p>
+                                                        <ul className="mt-[5px]">
+                                                            {fitnessGoals.map((goal) => (
+                                                                <li key={goal.value} className='mb-[3px] flex items-center gap-[4px] cursor-pointer'>
+                                                                    <input
+                                                                        type='radio'
+                                                                        value={goal.value}
+                                                                        name="fitnessGoal"
+                                                                        checked={userFitnessGoal === goal.value}
+                                                                        onChange={goalCheckHandler}
+                                                                        className={`w-[13px] h-[13px] accent-purple-600 border-gray-300 
+                                                                            text-purple-600 focus:ring-0 `
+                                                                        }
+                                                                    />
+                                                                    <label className="capitalize"> {goal.label} </label>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                        <button
+                                                            className={`mt-[8px] ml-auto px-4 py-[4px] text-[12px] 
+                                                                font-medium rounded-[6px] transition duration-200
+                                                                    ${userFitnessGoal === "not_set"
+                                                                        ? "bg-gray-300 cursor-not-allowed"
+                                                                        : "bg-primary hover:bg-yellow-400"
+                                                                    }
+                                                                `}
+                                                            disabled={userFitnessGoal === "not_set"}
+                                                            onClick={()=> {
+                                                                if (userFitnessGoal === "not_set") {
+                                                                    sonnerToast.error("Please select a fitness goal!")
+                                                                    return
+                                                                }
+                                                            
+                                                                dispatch(updateFitnessGoal({ fitnessGoal: userFitnessGoal }))
+                                                                setGoalSubmitted(true)
+                                                            }}
+                                                        >
+                                                            Submit 
+                                                        </button>
+                                                    </div>
+                                            }
+                                            {message.isCoach && message.askGoalNow && goalSubmitted && (
+                                                <div className="mt-[10px] px-3 py-2 text-[12px] text-green-700 
+                                                    bg-green-100 border border-green-300 rounded-lg"
+                                                >
+                                                    Thank you for your response. This will help Coach+ give you more personalized 
+                                                    guidance based on your goals.
+                                                </div>
+                                            )}
+
                                         </div>
                                     </motion.div>
                                 ))}
                             </AnimatePresence>
+
 
                             <AnimatePresence>
 

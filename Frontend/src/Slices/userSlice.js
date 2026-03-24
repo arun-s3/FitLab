@@ -80,6 +80,17 @@ export const updateUserWeight = createAsyncThunk("updateUserWeight", async ({ us
     }
 })
 
+export const updateFitnessGoal = createAsyncThunk("updateFitnessGoal", async ({ fitnessGoal }, thunkAPI) => {
+    try {
+        const response = await apiClient.put("/update/goal", { fitnessGoal })
+        return response.data
+    } catch (error) {
+        const errorMessage =
+            error.response?.data?.message || error.message || "Something went wrong.  Please try again later."
+        return thunkAPI.rejectWithValue(errorMessage)
+    }
+})
+
 export const updateTermsAcceptance = createAsyncThunk("updateTermsAcceptance", async ({ consent }, thunkAPI) => {
     try {
         const response = await apiClient.post("/terms", { consent })
@@ -123,6 +134,9 @@ const userSlice = createSlice({
         },
         makeUserVerified: (state, action) => {
             state.user.isVerified = true
+        },
+        makeUserBlocked: (state, action) => {
+            state.user.isBlocked = true
         },
     },
     extraReducers: (builder) => {
@@ -190,7 +204,7 @@ const userSlice = createSlice({
             .addCase(updateUserProfilePic.rejected, (state, action) => {
                 state.error = action.payload
                 state.loading = false
-                state.success = false
+                state.success = false 
             })
             .addCase(updateUserWeight.pending, (state, action) => {
                 state.loading = true
@@ -205,6 +219,23 @@ const userSlice = createSlice({
                 state.userWeightUpdated = true
             })
             .addCase(updateUserWeight.rejected, (state, action) => {
+                state.error = action.payload
+                state.loading = false
+                state.success = false
+            })
+            .addCase(updateFitnessGoal.pending, (state, action) => {
+                state.loading = true
+                state.success = false
+                state.error = null
+            })
+            .addCase(updateFitnessGoal.fulfilled, (state, action) => {
+                state.loading = false
+                state.error = null
+                state.success = true
+                state.user.fitnessGoal = action.payload.fitnessGoal
+                // state.userGoalUpdated = true
+            })
+            .addCase(updateFitnessGoal.rejected, (state, action) => {
                 state.error = action.payload
                 state.loading = false
                 state.success = false
@@ -257,4 +288,4 @@ const userSlice = createSlice({
 
 
 export default userSlice.reducer
-export const { resetStates, makeUserVerified } = userSlice.actions
+export const { resetStates, makeUserVerified, makeUserBlocked } = userSlice.actions

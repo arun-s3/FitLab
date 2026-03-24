@@ -1,11 +1,12 @@
 import React, { createContext, useState, useEffect, useMemo, useRef } from "react"
-import { Outlet } from "react-router-dom"
-import { useSelector } from "react-redux"
+import { Outlet, useNavigate } from "react-router-dom"
+import { useSelector, useDispatch } from "react-redux"
 
 import { io } from "socket.io-client"
 
 import apiClient from "../../../Api/apiClient"
 
+import { toast } from "react-toastify"
 import { toast as sonnerToast } from "sonner"
 
 import { Wallet } from "lucide-react"
@@ -15,6 +16,7 @@ import { decryptData } from "../../../Utils/decryption"
 import SemiAutoRechargeModal from "../../Features/Wallet/SemiAutoRechargeModal/SemiAutoRechargeModal"
 import VideoCallCommonModal from "../../Features/VideoChat/VideoCallCommonModal/VideoCallCommonModal"
 import useTermsConsent from "../../../Hooks/useTermsConsent"
+import { makeUserBlocked } from "../../../Slices/userSlice"
 
 export const SocketContext = createContext()
 
@@ -32,6 +34,8 @@ export default function SocketProvider() {
     const [isAdminOnline, setIsAdminOnline] = useState(false)
 
     const [userWasGuest, setUserWasGuest] = useState({ wasGuest: false, credentials: {} })
+
+    const userRef = useRef(user)
 
     const [messages, setMessages] = useState([
         {
@@ -90,6 +94,9 @@ export default function SocketProvider() {
 
     const { acceptTermsOnFirstAction } = useTermsConsent()
 
+    const dispatch = useDispatch()
+    const navigate = useNavigate()
+
     const baseApiUrl = import.meta.env.VITE_API_BASE_URL
 
     useEffect(() => {
@@ -122,6 +129,10 @@ export default function SocketProvider() {
         } else {
             fetchGuestId()
         }
+    }, [user])
+
+    useEffect(() => {
+        userRef.current = user
     }, [user])
 
     useEffect(() => {
@@ -195,7 +206,14 @@ export default function SocketProvider() {
         })
 
         socket.on("coach-response", (message) => {
-            setCoachMessages((prev) => [...prev, message])
+            const alreadyAsked = localStorage.getItem("fitnessGoalAsked")
+
+            const askUserFitnessGoalStatus = !alreadyAsked && userRef.current?.fitnessGoal === "not_set"
+            const newMessage = {...message, askGoalNow: askUserFitnessGoalStatus}
+            setCoachMessages((prev) => [...prev, newMessage])
+            if (askUserFitnessGoalStatus) {
+                localStorage.setItem("fitnessGoalAsked", "true")
+            }
         })
 
         socket.on("coach-loading", (status) => {
@@ -254,10 +272,20 @@ export default function SocketProvider() {
 
         socket.on("notification-deleted", (id) => {
             setNotifications((notifications) => notifications.filter((notification) => notification._id !== id))
-        })
+        }) 
 
         socket.on("notification-error", (message) => {
             sonnerToast.error(message)
+        })
+
+        socket.on("user-kickingOut", async() => {
+            toast.error(`We’ve detected unusual activity on your account, and access has been restricted. 
+                Please contact customer support for further assistance.`, {autoClose: 6000})
+            dispatch(makeUserBlocked())
+            navigate("/blocked", {
+                replace: true,
+                state: { NoDirectAccess: true },
+            })
         })
 
         setSocket(socket)
@@ -368,6 +396,7 @@ export default function SocketProvider() {
                 isCoachLoading,
                 setIsCoachLoading,
                 coachError,
+                // askUserFitnessGoal,
                 handleSendMessageToCoach,
                 handleUserTypingForCoach,
                 openVideoCallModal,

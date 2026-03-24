@@ -40,6 +40,7 @@ import SocketProvider from "../Components/Socket-providers/SocketProvider/Socket
 import UserPageLayout from "../Layouts/UserPageLayout/UserPageLayout"
 import GlobalVideoCallModalLayout from "../Pages/User/GlobalModalLayouts/GlobalVideoCallModalLayout"
 import UserRoutesWrapper from "../Components/Route-guards/UserRoutesWrapper/UserRoutesWrapper"
+import NonRestrictedRoutes from "../Components/Route-guards/NonRestrictedRoutes/NonRestrictedRoutes"
 import RoutesAccessWrapper from "../Components/Route-guards/RoutesAccessWrapper/RoutesAccessWrapper"
 import ProtectedUserRoutes from "../Components/Route-guards/ProtectedUserRoutes/ProtectedUserRoutes"
 import PrivateUserRoutes from "../Components/Route-guards/ProtectedUserRoutes/ProtectedUserRoutes"
@@ -57,18 +58,25 @@ export default function UserRoutes() {
 
                 <Route element={<SocketProvider />}>
                     <Route element={<GlobalVideoCallModalLayout />}>
+
                         <Route path='signup'>
                             <Route index element={<SignUpAndInPage type='signup' />} />
                         </Route>
-                        <Route path='signin' element={<SignUpAndInPage type='signin' />} />
-                        <Route element={<RoutesAccessWrapper />}>
-                            <Route path='forgot-password' element={<ForgotAndResetPasswordPage />} />
+                        <Route path='signin' element={<SignUpAndInPage type='signin' />} /> 
+
+                        <Route element={<NonRestrictedRoutes />}>
                             <Route index element={<HomePage />} />
                             <Route path='about' element={<AboutUsPage />} />
                             <Route path='contact' element={<ContactUsPage />} />
                             <Route path='privacy' element={<PrivacyPolicyPage />} />
+                            <Route path='support' element={<CustomerSupportPage />} />
+                        </Route>
+
+                        <Route element={<RoutesAccessWrapper />}>
+                            <Route path='forgot-password' element={<ForgotAndResetPasswordPage />} />
                             <Route path='terms' element={<TermsAndConditionsPage />} />
                             <Route path='cart' element={<CartPage />} />
+
                             <Route element={<ProtectedUserRoutes />}>
                                 <Route path='shop'>
                                     <Route index element={<ProductListPage />} />
@@ -91,22 +99,27 @@ export default function UserRoutes() {
                                     <Route path='coupons' element={<CouponPage />} />
                                 </Route>
                             </Route>
+
                             <Route element={<PrivateUserRoutes />}>
                                 <Route path='orders' element={<OrderHistoryPage />} />
                                 <Route path='checkout' element={<CheckoutPage />} />
                             </Route>
+
                             <Route element={<RestrictedEntryRoutes />}>
-                                <Route path='blocked' element={<UserBlockedPage />} />
                                 <Route path='otp-verify' element={<OtpVerificationPage />} />
                                 <Route path='order-confirm' element={<OrderConfirmationPage />} />
                             </Route>
-                            <Route path='support' element={<CustomerSupportPage />} />
+
                             <Route path='fitness'>
                                 <Route index element={<Navigate to='training' replace />} />
                                 <Route path='training' element={<FitnessTrainingPage />} />
                                 <Route path='tracker' element={<FitnessTrackerPage />} />
                             </Route>
+
                         </Route>
+
+                        <Route path='blocked' element={<UserBlockedPage />} />
+
                     </Route>
                 </Route>
 

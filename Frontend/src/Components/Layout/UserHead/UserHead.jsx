@@ -122,7 +122,7 @@ export default function UserHead() {
                         {" "}
                         {user.email.length > 15 ? user.email.slice(0, 15) + "..." : user.email}{" "}
                     </li>
-                    {menuItems.map((item) => (
+                    {(!user || (user && !user.isBlocked)) && menuItems.map((item) => (
                         <li key={item.label} className='hover:text-secondary hover:font-[500]'>
                             <Link to={item.path} className='flex items-center gap-[6px]'>
                                 <item.icon
@@ -133,10 +133,13 @@ export default function UserHead() {
                             </Link>
                         </li>
                     ))}
-                    <li className='mt-[6px] border-t border-gray-200 pt-[6px] !pl-[5px]'>
+                    <li className={`mt-[6px] pt-[6px] !pl-[5px]
+                            ${user && user.isBlocked ? 'border-t-0' : 'border-t border-gray-200'}`}>
                         <ul className='my-[3px]'>
                             {fitlabMenuItems.map((item) => (
-                                <li key={item.label} className='hover:text-orange-400 hover:font-[500] text-[13px]'>
+                                <li key={item.label} className={`hover:text-orange-400 hover:font-[500] text-[13px]
+                                    ${user && user.isBlocked && item.path === '/terms' && 'hidden'}`}
+                                >
                                     <Link to={item.path} className='flex items-center gap-[10px]'>
                                         <span className=''> {item.label} </span>
                                     </Link>

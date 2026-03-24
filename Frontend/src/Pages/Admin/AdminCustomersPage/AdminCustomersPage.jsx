@@ -34,16 +34,24 @@ import { camelToCapitalizedWords } from "../../../Utils/helperFunctions"
 export default function AdminCustomersPageV1() {
 
     const dispatch = useDispatch()
-    const { adminLoading, adminMessage, allUsers, totalUsers } = useSelector((state) => state.admin)
+    const { adminLoading, adminMessage, allUsers, totalUsers, userFlaggedFraud } = useSelector((state) => state.admin)
 
     const [localUsers, setLocalUsers] = useState([])
     const [tempUsers, setTempUsers] = useState([])
 
     const [timerDelay, setTimerDelay] = useState(null)
-    const [suspiciousId, setSuspiciousId] = useState(null)
+    const [suspiciousId, setSuspiciousId] = useState(null) 
     let timerId = useRef(null)
 
     const { openDropdowns, dropdownRefs, toggleDropdown } = useFlexiDropdown(["limitDropdown", "statusDropdown"])
+
+    const { setPageBgUrl, setHeaderZIndex } = useOutletContext()
+    setHeaderZIndex(0)
+    setPageBgUrl(
+        `linear-gradient(to right,rgba(255,255,255,0.95),rgba(255,255,255,0.95)), url('/Images/admin-bg13.png')`,
+    )
+
+    const { activeUsers, kickOutUser } = useContext(AdminSocketContext)
 
     const [matchCase, setMatchCase] = useState(false)
 
@@ -68,14 +76,6 @@ export default function AdminCustomersPageV1() {
 
     const [riskyUserNotes, setRiskyUserNotes] = useState(null)
 
-    const { setPageBgUrl, setHeaderZIndex } = useOutletContext()
-    setHeaderZIndex(0)
-    setPageBgUrl(
-        `linear-gradient(to right,rgba(255,255,255,0.95),rgba(255,255,255,0.95)), url('/Images/admin-bg13.png')`,
-    )
-
-    const { activeUsers } = useContext(AdminSocketContext)
-
     const mainBgImg = {
         colorImage: "linear-gradient(to right,rgba(255,255,255),rgba(255,255,255))",
     }
@@ -95,6 +95,14 @@ export default function AdminCustomersPageV1() {
             setTotalPages(Math.ceil(totalUsers / limit))
         }
     }, [totalUsers])
+
+    useEffect(() => {
+        if (userFlaggedFraud && suspiciousId) {
+            kickOutUser(suspiciousId)
+            dispatch(resetStates())
+            setSuspiciousId(null)
+        }
+    }, [userFlaggedFraud])
 
     useEffect(() => {
         dispatch(showUsers({ queryOptions: { page: currentPage, limit, searchData, status } }))

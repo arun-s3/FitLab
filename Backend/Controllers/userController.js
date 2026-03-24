@@ -389,6 +389,47 @@ const updateUserWeight = async (req, res, next) => {
 }
 
 
+const updateFitnessGoal = async (req, res, next) => {
+    try {
+        const userId = req.user._id
+        const { fitnessGoal } = req.body
+
+        if (!fitnessGoal) {
+            return next(errorHandler(400, "Fitness goal is required!"))
+        }
+
+        const allowedGoals = [
+            "weight_loss",
+            "muscle_gain",
+            "general_fitness",
+            "endurance",
+            "strength",
+            "flexibility",
+            "recovery",
+            "not_set",
+        ]
+
+        if (!allowedGoals.includes(fitnessGoal)) {
+            return next(errorHandler(400, "Invalid fitness goal provided!"))
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { $set: { fitnessGoal } },
+            { new: true}
+        )
+
+        res.status(200).json({
+            message: "Fitness goal updated successfully.",
+            fitnessGoal,
+        })
+    } catch (error) {
+        console.error(error)
+        next(error)
+    }
+}
+
+
 const clearAllCookies = async (req, res, next) => {
     try {
         const isProd = process.env.NODE_ENV === "production"
@@ -618,6 +659,7 @@ module.exports = {
     getUserByUsername,
     generateUniqueGuestUser,
     updateUserWeight,
+    updateFitnessGoal,
     verifyAndDeleteGuestUser,
     updateTermsAcceptance,
     signout,

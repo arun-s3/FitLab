@@ -23,6 +23,7 @@ const {
     generateUniqueGuestUser,
     verifyAndDeleteGuestUser,
     updateUserWeight,
+    updateFitnessGoal,
     getUserByUsername,
     updateTermsAcceptance,
     googleSignout,
@@ -40,7 +41,7 @@ userRouter.post("/password/reset", isLogin, updateForgotPassword)
 userRouter.post("/password/update", isLogin, resetPassword)
 userRouter.put("/profilePic", isLogin, upload.single("image"), updateProfilePic)
 userRouter.put("/update/weight", isLogin, updateUserWeight)
-userRouter.get("/signout", isLogin, signout)
+userRouter.put("/update/goal", isLogin, updateFitnessGoal)
 userRouter.get("/search/:searchTerm", isLogin, authorizeAdmin, searchUsernames)
 userRouter.get("/getUserid", isLogin, getUserId)
 userRouter.get("/totalUsers", optionalAuth, totalUsersCount)
@@ -48,5 +49,11 @@ userRouter.get("/user/:username", isLogin, authorizeAdmin, getUserByUsername)
 userRouter.post("/terms", isLogin, updateTermsAcceptance)
 userRouter.get("/guest", optionalAuth, generateUniqueGuestUser)
 userRouter.get("/guest-check", optionalAuth, verifyAndDeleteGuestUser)
+
+userRouter.get("/signout", (req, res, next) => {
+    req.allowBlocked = true
+    next()
+}, isLogin, signout)
+
 
 module.exports = userRouter

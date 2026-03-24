@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, lazy, Suspense } from "react"
 import { useLocation } from "react-router-dom"
+import { useSelector } from 'react-redux'
 import { motion } from "framer-motion"
 
 import { toast as sonnerToast } from "sonner"
@@ -26,6 +27,7 @@ const TestimonialSection = lazy(() => import("./TestimonialSection"))
 
 export default function HomePage() {
 
+    const [restrictedMode, setRestrictedMode] = useState(false)
     const [showHighlights, setShowHighlights] = useState(false)
     const [popularproducts, setPopularProducts] = useState([])
 
@@ -36,6 +38,8 @@ export default function HomePage() {
     const location = useLocation()
 
     const shopByCategoryRef = useRef(null)
+
+    const {user} = useSelector(state=> state.user)
 
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -62,6 +66,12 @@ export default function HomePage() {
             }, 200)
         }
     }, [location])
+
+    useEffect(() => {
+        if (user && user.isBlocked) {
+            setRestrictedMode(true)
+        }
+    }, [user])
 
     useEffect(() => {
         async function loadPopularProducts() {
@@ -107,7 +117,7 @@ export default function HomePage() {
             <div className='my-16'>
                 <Suspense fallback={<Fallback variant='products' height='h-56' />}>
 
-                    {popularproducts && popularproducts.length > 0 && (
+                    {popularproducts && popularproducts.length > 0 && !restrictedMode && (
                         <Carousal
                             products={popularproducts}
                             title='Most Popular Products'
@@ -145,7 +155,10 @@ export default function HomePage() {
 
             <div className='w-full py-8'>
                 <Suspense fallback={<Fallback variant='products' height='h-56' />}>
-                    <LatestProductsCarousel />
+                    {
+                        !restrictedMode &&
+                            <LatestProductsCarousel />
+                    }
                 </Suspense>
             </div>
 
@@ -157,7 +170,10 @@ export default function HomePage() {
 
             <div ref={highlightsRef}>
                 <Suspense fallback={<Fallback variant='pulse' height='h-64' />}>
-                    {showHighlights && <FitlabHighlights />}
+                    {
+                        showHighlights && 
+                            <FitlabHighlights />
+                    }
                 </Suspense>
             </div>
 

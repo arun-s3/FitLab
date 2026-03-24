@@ -274,6 +274,10 @@ async function textChatBoxSocket(io) {
                     socket.emit("coach-error", { message: error.message })
                 }
             })
+
+            socket.on("user-kickOut", (userId) => {
+                io.to(userId).emit("user-kickingOut")
+            } )
         })
     }
 }

@@ -12,7 +12,7 @@ export default function ErrorRoutes() {
     
     return (
         <Routes>
-            <Route element={<RestrictedEntryRoutes redirectTo='/error/404' />}>
+            <Route element={<RestrictedEntryRoutes redirectTo='error/404' />}>
                 <Route path='401' element={<ErrorPage401 />} />
                 <Route path='403' element={<ErrorPage403 />} />
             </Route>

@@ -10,6 +10,7 @@ import {
     Wallet,
     ShieldCheck,
     ShieldAlert,
+    OctagonAlert,
     ShoppingBag,
     Package,
     RotateCcw,
@@ -19,6 +20,7 @@ import {
     Ticket,
     Clock,
 } from "lucide-react"
+import { GoBlocked } from "react-icons/go"
 
 import useModalHelpers from "../../../Hooks/ModalHelpers"
 
@@ -38,6 +40,9 @@ export default function CustomerDetailsModal({ isOpen, onClose, customerData, or
         mobile,
         dob,
         isVerified,
+        isBlocked,
+        riskyUserStatus,
+        riskyUserNotes,
         walletBalance = 0,
     } = customerData
 
@@ -189,7 +194,32 @@ export default function CustomerDetailsModal({ isOpen, onClose, customerData, or
                                                     }`}>
                                                     {isVerified ? "Verified" : "Not Verified"}
                                                 </span>
-                                            </div>
+                                                {
+                                                    isBlocked &&
+                                                        <span className="px-3 py-1 flex items-center gap-[4px] rounded-full text-xs 
+                                                                font-semibold bg-red-100 text-red-700" 
+                                                        >
+                                                            <GoBlocked size={16} className="text-red-500"/>
+                                                            Blocked
+                                                        </span>
+                                                }
+                                            </div>  
+
+                                            { 
+                                                riskyUserStatus && 
+                                                    <p className="p-[10px] flex items-center gap-[10px] text-[14px] text-red-500 
+                                                        tracking-[0.3] bg-red-100 border border-red-400 rounded-[6px]"
+                                                    >
+                                                        <OctagonAlert className="w-[20px] h-[20px] text-red-600"/>
+                                                        <span>
+                                                            This user is found to be suspicious
+                                                            {
+                                                                riskyUserNotes &&
+                                                                    <span className="capitalize"> : {riskyUserNotes} </span>
+                                                            }
+                                                        </span>
+                                                    </p>
+                                            }
 
                                             <div className='grid grid-cols-1 md:grid-cols-2 gap-4 mt-4'>
                                                 <div className='flex items-center gap-3 bg-white p-3 rounded-lg shadow-sm'>

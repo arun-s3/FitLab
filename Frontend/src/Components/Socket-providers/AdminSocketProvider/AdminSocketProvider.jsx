@@ -211,6 +211,10 @@ export default function AdminSocketProvider() {
         socket.emit("admin-send-notification", data)
     }
 
+    const kickOutUser = (id)=> {
+        socket.emit("user-kickOut", id )
+    }
+
 
     return (
         <AdminSocketContext.Provider
@@ -233,6 +237,7 @@ export default function AdminSocketProvider() {
                 handleSendMessage,
                 handleSendOfflineMessage,
                 sendUserNotification,
+                kickOutUser
             }}>
                 
             <Outlet />

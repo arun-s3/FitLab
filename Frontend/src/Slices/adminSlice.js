@@ -94,6 +94,7 @@ const initialState = {
     adminMessage: null,
     adminUpdated: false,
     adminDpUpdated: false,
+    userFlaggedFraud: false,
     allUsers: null,
     totalUsers: null,
 }
@@ -110,6 +111,7 @@ const adminSlice = createSlice({
             state.adminMessage = null
             state.adminUpdated = false
             state.adminDpUpdated = false
+            state.userFlaggedFraud = false
         },
     },
     extraReducers: (builder) => {
@@ -220,6 +222,7 @@ const adminSlice = createSlice({
                 state.success = true
                 state.adminError = null
                 state.adminMessage = action.payload.message
+                state.userFlaggedFraud = true
 
                 if (action.payload.updatedUser) {
                     const updated = action.payload.updatedUser

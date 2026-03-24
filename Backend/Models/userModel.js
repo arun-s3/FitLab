@@ -76,7 +76,7 @@ const userSchema = mongoose.Schema(
             enum: ["local", "google"],
             default: "local",
         },
-        riskyUserStatus: {
+        riskyUserStatus: {  
             type: Boolean,
             default: false,
         },

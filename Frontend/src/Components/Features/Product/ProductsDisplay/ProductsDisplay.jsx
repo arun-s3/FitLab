@@ -222,15 +222,7 @@ export default function ProductsDisplay({
 
     const addToWishlist = (product) => {
         if (checkAuthOrOpenModal && checkAuthOrOpenModal()) return
-        const userCreatedListsExists =
-            Object.keys(wishlist).length &&
-            wishlist?.lists.some((list) => list.name === "Default Shopping List") &&
-            wishlist?.lists.length > 1
-        if (userCreatedListsExists) {
-            openWishlistOptionsModal(product)
-        } else {
-            dispatch(addProductToList({ productId: product._id }))
-        }
+        openWishlistOptionsModal(product)
     }
 
     const deleteFromWishlist = (product) => {

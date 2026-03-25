@@ -1096,6 +1096,71 @@ const generateInvoice = async (req, res, next) => {
 }
 
 
+const getTopProductByOrders = async (req, res, next) => {
+    try {
+        const result = await Order.aggregate([
+            { $unwind: "$products" },
+
+            {
+                $match: {
+                    "products.productStatus": {
+                        $nin: ["cancelled", "refunded"],
+                    },
+                },
+            },
+            {
+                $group: {
+                    _id: {
+                        productId: "$products.productId",
+                        title: "$products.title",
+                        price: "$products.price",
+                        thumbnail: "$products.thumbnail",
+                    },
+                    totalSold: { $sum: "$products.quantity" },
+                },
+            },
+            {
+                $sort: { totalSold: -1 },
+            },
+            {
+                $limit: 5,
+            },
+            {
+                $lookup: {
+                    from: "products",
+                    localField: "_id.productId",
+                    foreignField: "_id",
+                    as: "productDetails",
+                },
+            },
+            {
+                $unwind: {
+                    path: "$productDetails",
+                    preserveNullAndEmptyArrays: true,
+                },
+            },
+
+            {
+                $project: {
+                    _id: 0,
+                    productId: "$_id.productId",
+                    product: "$_id.title",
+                    price: "$_id.price",
+                    thumbnail: "$_id.thumbnail",
+                    rating: "$productDetails.averageRating", 
+                    orders: "$totalSold",
+                },
+            },
+        ])
+
+        res.status(200).json({ topProductData: result })
+    } catch (error) {
+        console.error(error)
+        next(error)
+    }
+}
+
+
 module.exports = {
     createOrder,
     getOrders,
@@ -1113,4 +1178,5 @@ module.exports = {
     getTodaysLatestOrder,
     checkIfUserBoughtProduct,
     generateInvoice,
+    getTopProductByOrders
 }

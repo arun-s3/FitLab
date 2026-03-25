@@ -65,7 +65,7 @@ export default function WishlistPage() {
     const [isCartOpen, setIsCartOpen] = useState(false)
 
     const { cart, productAdded, productRemoved, error, message } = useSelector((state) => state.cart)
-    const { wishlist, wishlistProducts, wishlistError } = useSelector((state) => state.wishlist)
+    const { wishlist, fetchedListProducts, wishlistProducts, wishlistError } = useSelector((state) => state.wishlist)
     const { user } = useSelector((state) => state.user)
 
     const dispatch = useDispatch()
@@ -91,7 +91,7 @@ export default function WishlistPage() {
     }, [])
 
     useEffect(() => {
-        if (!user) return
+        if (!user && !wishlist) return
         dispatch(getAllWishlistProducts({ queryOptions }))
     }, [wishlist])
 
@@ -179,16 +179,19 @@ export default function WishlistPage() {
                     </h2>
                 </motion.div>
 
-                <ListBoard
-                    currentList={currentList}
-                    onNewCurrenList={setCurrentList}
-                    onSearch={searchHandler}
-                    onUpdateList={updateListHandler}
-                    onDeleteList={openDeleteListModal}
-                    setLoadingListCard={setLoadingListCard}
-                    isListCardLoading={loadingListCard}
-                    onOpenNewListModal={checkAuthAndOpenListModal}
-                />
+                {
+                    fetchedListProducts &&
+                        <ListBoard
+                            currentList={currentList}
+                            onNewCurrenList={setCurrentList}
+                            onSearch={searchHandler}
+                            onUpdateList={updateListHandler}
+                            onDeleteList={openDeleteListModal}
+                            setLoadingListCard={setLoadingListCard}
+                            isListCardLoading={loadingListCard}
+                            onOpenNewListModal={checkAuthAndOpenListModal}
+                        />
+                }
 
                 <WishlistModal
                     isOpen={isWishlistModalOpen}

@@ -20,6 +20,7 @@ const {
     getTodaysLatestOrder,
     checkIfUserBoughtProduct,
     generateInvoice,
+    getTopProductByOrders
 } = require("../Controllers/orderController")
 
 const { isLogin, authorizeAdmin } = require("../Middlewares/Authentication")
@@ -40,5 +41,6 @@ orderRouter.post("/return/decision", isLogin, handleReturnDecision)
 orderRouter.post("/return/cancel", isLogin, cancelReturnRequest)
 orderRouter.post("/refund", isLogin, processRefund)
 orderRouter.get("/invoice/:orderId", isLogin, generateInvoice)
+orderRouter.get("/stats/top", isLogin, getTopProductByOrders)
 
 module.exports = orderRouter

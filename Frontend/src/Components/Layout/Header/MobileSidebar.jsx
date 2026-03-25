@@ -29,6 +29,9 @@ import {
 } from "lucide-react"
 import { MdSportsGymnastics } from "react-icons/md"
 import { IoBagCheckOutline } from "react-icons/io5"
+import { FaStar } from "react-icons/fa"
+
+import apiClient from "../../../Api/apiClient"
 
 import CartSidebar from "../../Features/Cart/CartSidebar/CartSidebar"
 import TextChatBox from "../../../Pages/User/TextChatBox/TextChatBox"
@@ -51,6 +54,8 @@ export default function MobileSidebar({ currentPageChatBoxStatus = false, curren
     const [isCartOpen, setIsCartOpen] = useState(false)
 
     const [openCoach, setopenCoach] = useState(false)
+
+    const [topProduct, setTopProduct] = useState(null)
 
     const { user } = useSelector((state) => state.user)
     const dispatch = useDispatch()
@@ -95,6 +100,21 @@ export default function MobileSidebar({ currentPageChatBoxStatus = false, curren
         return () => window.removeEventListener("keydown", onKey)
     }, [])
 
+    async function getTopProduct() {
+        try {
+            const response = await apiClient.get(`/order/stats/top`)
+            if (response.status === 200) {
+                setTopProduct(response.data.topProductData[2])
+            }
+        } catch (error) {
+            setTopProduct(null)
+        }
+    }
+
+    useEffect(() => {
+        getTopProduct()
+    }, [open])
+
     useEffect(() => {
         const prev = document.body.style.overflow
         if (open) document.body.style.overflow = "hidden"
@@ -113,14 +133,15 @@ export default function MobileSidebar({ currentPageChatBoxStatus = false, curren
 
     return (
         <>
-            <header className='lg:mt-0 mr-auto sm:-mr-[25px] x-sm:mr-auto absolute sm:sticky right-[1.7rem] sm:right-0 top-[25px] z-40'>
+            <header
+                className={`lg:mt-0 mr-auto sm:-mr-[25px] x-sm:mr-auto absolute sm:sticky z-40
+                ${user && user.isBlocked ? "right-[1.7rem]" : "right-[5px]"} sm:right-0 top-[25px]`}>
                 <nav className='mx-auto flex items-center justify-between rounded-full px-4  text-white lg:px-6'>
                     <motion.button
                         whileTap={{ scale: 0.96 }}
                         onClick={() => setOpen(true)}
                         className='inline-flex items-center justify-center rounded-full border border-white/15 
-                            bg-white/5 p-2 text-white hover:bg-white/10 lg:hidden'
-                    >
+                            bg-white/5 p-2 text-white hover:bg-white/10 lg:hidden'>
                         <Menu className='h-5 w-5' />
                     </motion.button>
                 </nav>
@@ -154,23 +175,20 @@ export default function MobileSidebar({ currentPageChatBoxStatus = false, curren
                             onDragEnd={(_, info) => {
                                 if (info.offset.x > 80) setOpen(false)
                             }}
-                            style={{ touchAction: "none" }}
-                        >
+                            style={{ touchAction: "none" }}>
                             <div className='relative grid h-full grid-rows-[auto,1fr,auto]'>
                                 <div>
                                     <div
                                         className='flex items-center justify-between bg-neutral-900/95 px-4 py-3 backdrop-blur
-                                            supports-[backdrop-filter]:bg-neutral-900/75'
-                                    >
+                                            supports-[backdrop-filter]:bg-neutral-900/75'>
                                         <div className='flex items-center gap-3'>
-                                            {topBarIcons && topBarIcons.map((item) => (
+                                            {topBarIcons &&
+                                                topBarIcons.map((item) => (
                                                     <span
                                                         key={item.label}
                                                         className={`grid h-8 w-8 place-items-center rounded-full 
                                                             bg-white/5 ring-1 ring-white/10 cursor-pointer
-                                                            ${user && user.isBlocked && item.path !== '/' && 'hidden'}`
-                                                        }
-                                                    >
+                                                            ${user && user.isBlocked && item.path !== "/" && "hidden"}`}>
                                                         <item.Icon
                                                             className='h-4 w-4'
                                                             onClick={() => {
@@ -187,11 +205,9 @@ export default function MobileSidebar({ currentPageChatBoxStatus = false, curren
                                         <button
                                             onClick={() => setOpen(false)}
                                             className='inline-flex h-9 w-9 items-center justify-center rounded-full 
-                                                bg-neutral-800 ring-1 ring-white/10 transition hover:bg-neutral-700'
-                                        >
+                                                bg-neutral-800 ring-1 ring-white/10 transition hover:bg-neutral-700'>
                                             <X className='h-4 w-4' />
                                         </button>
-
                                     </div>
 
                                     <div className='mx-4 h-px bg-white/10' />
@@ -205,64 +221,75 @@ export default function MobileSidebar({ currentPageChatBoxStatus = false, curren
                                 </div>
 
                                 <div ref={scrollRef} className='scroll-smooth overflow-y-auto overscroll-contain'>
-                                    {
-                                        (!user || (user && !user.isBlocked)) &&
-                                            <div className='px-5 pt-4'>
-                                                <div className='overflow-hidden rounded-xl bg-gradient-to-br 
-                                                    from-neutral-800 to-neutral-900 ring-1 ring-white/10'
-                                                >
-                                                    <div className='flex items-stretch gap-4 p-4'>
-                                                        <div className='min-w-0'>
-                                                            <p className='text-xs font-medium text-white/60'>
-                                                                {" "}
-                                                                Frequently ordered{" "}
-                                                            </p>
-                                                            <h3 className='mt-1 text-base font-semibold tracking-tight'>
-                                                                {" "}
-                                                                Gym product of the month{" "}
-                                                            </h3>
-                                                            <p className='mt-1 text-xs text-white/70'>
-                                                                {" "}
-                                                                Creatine Monohydrate 100g • 30 servings{" "}
-                                                            </p>
-                                                            <p className='mt-1 text-xs text-white/50'>
-                                                                {" "}
-                                                                4.8 • Free delivery for members{" "}
-                                                            </p>
-                                                        </div>
-                                                        <img
-                                                            src='/Images/creatine.jpg'
-                                                            alt='Creatine Monohydrate thumbnail'
-                                                            className='h-24 w-24 shrink-0 rounded-lg object-cover ring-1 ring-white/10'
-                                                        />
+                                    {(!user || (user && !user.isBlocked)) && topProduct && (
+                                        <div className='px-5 pt-4'>
+                                            <div
+                                                className='overflow-hidden rounded-xl bg-gradient-to-br 
+                                                    from-neutral-800 to-neutral-900 ring-1 ring-white/10'>
+                                                <div className='flex items-stretch gap-4 p-4'>
+                                                    <div className='min-w-0'>
+                                                        <p className='text-xs font-medium text-white/60'>
+                                                            {" "}
+                                                            Frequently ordered{" "}
+                                                        </p>
+                                                        <h3 className='mt-1 text-base font-semibold tracking-tight'>
+                                                            {" "}
+                                                            Gym product of the month{" "}
+                                                        </h3>
+                                                        <p className='mt-1 text-xs text-white/70'>
+                                                            {" "}
+                                                            {topProduct.product}
+                                                        </p>
+                                                        <p className='mt-4 flex items-center gap-[8px] text-xs text-white/50 whitespace-nowrap'>
+                                                            {" "}
+                                                            <div className="flex items-center gap-[5px]">
+                                                                <FaStar size={17} className="text-primaryDark" />
+                                                                {topProduct.rating} 
+                                                            </div>
+                                                            • Free delivery for members{" "}
+                                                        </p>
                                                     </div>
+                                                    <img
+                                                        src={topProduct.thumbnail}
+                                                        alt={topProduct.product}
+                                                        className='h-24 w-24 shrink-0 rounded-lg object-cover ring-1 ring-white/10'
+                                                    />
+                                                </div>
 
-                                                    <div className='flex items-center justify-between bg-neutral-800/60 px-4 py-2 text-sm'>
-                                                        <button className='inline-flex items-center gap-1.5 text-white transition 
-                                                            hover:text-white/90'
-                                                        >
-                                                            <span className='font-medium'>Subscribe</span>
-                                                            <ChevronRight size={18} className='text-white/50' />
-                                                        </button>
-                                                        <button
-                                                            className='inline-flex items-center gap-1.5 rounded-full bg-primary px-3 
+                                                <div className='flex items-center justify-between bg-neutral-800/60 px-4 py-2 text-sm'>
+                                                    <button
+                                                        className='inline-flex items-center gap-1.5 text-white transition 
+                                                            hover:text-white/90'>
+                                                        <span className='font-medium'>Subscribe</span>
+                                                        <ChevronRight size={18} className='text-white/50' />
+                                                    </button>
+                                                    <button
+                                                        className='inline-flex items-center gap-1.5 rounded-full bg-primary px-3 
                                                                 py-1.5 font-semibold text-black ring-1 ring-black/10 transition 
                                                                 hover:bg-amber-300'
-                                                        >
-                                                            Order now <ArrowUpRight size={16} />
-                                                        </button>
-                                                    </div>
+                                                        onClick={() =>
+                                                            navigate(
+                                                                {
+                                                                    pathname: "/shop/product",
+                                                                    search: `?id=${topProduct.productId}`,
+                                                                },
+                                                                { state: { product: topProduct} },
+                                                            )
+                                                        }
+                                                    >
+                                                        Order now <ArrowUpRight size={16} />
+                                                    </button>
                                                 </div>
                                             </div>
-                                    }
+                                        </div>
+                                    )}
 
                                     <div className='px-5 pt-5'>
                                         {user ? (
                                             <button
                                                 className='w-full flex flex-1 items-center justify-between gap-2 
                                                     rounded-lg bg-white/5 px-3 py-2 text-[15px] text-whitesmoke ring-1 
-                                                    ring-white/10 transition hover:bg-white/10'
-                                            >
+                                                    ring-white/10 transition hover:bg-white/10'>
                                                 <div className='flex items-center gap-[5px]'>
                                                     {user && user?.profilePic ? (
                                                         <div className='w-[33px] h-[33px] rounded-[15px]'>
@@ -291,8 +318,7 @@ export default function MobileSidebar({ currentPageChatBoxStatus = false, curren
                                                 <button
                                                     className='flex flex-1 items-center justify-center gap-2 rounded-lg 
                                                         bg-white/5 px-3 py-2 text-sm ring-1 ring-white/10 transition 
-                                                        hover:bg-white/10'
-                                                >
+                                                        hover:bg-white/10'>
                                                     <Link to='/signin'>
                                                         {" "}
                                                         <LogIn size={18} /> Login{" "}
@@ -301,8 +327,7 @@ export default function MobileSidebar({ currentPageChatBoxStatus = false, curren
                                                 <button
                                                     className='flex flex-1 items-center justify-center gap-2 rounded-lg 
                                                     bg-white px-3 py-2 text-sm font-medium text-black ring-1 
-                                                    ring-black/10 transition hover:bg-white/90'
-                                                >
+                                                    ring-black/10 transition hover:bg-white/90'>
                                                     <Link to='/signup'>
                                                         {" "}
                                                         <UserPlus size={18} /> Sign up{" "}
@@ -326,8 +351,7 @@ export default function MobileSidebar({ currentPageChatBoxStatus = false, curren
                                                             ...options,
                                                             browse: !options.browse,
                                                         }))
-                                                    }
-                                                >
+                                                    }>
                                                     {showOptions.browse ? "-" : "+"}
                                                 </span>
                                             </div>
@@ -356,12 +380,11 @@ export default function MobileSidebar({ currentPageChatBoxStatus = false, curren
                                                                 onClick={() => {
                                                                     navigate(path)
                                                                     setOpen(false)
-                                                                }}
-                                                            >
+                                                                }}>
                                                                 <span className='flex items-center gap-3 text-white/90'>
-                                                                    <span className='grid h-8 w-8 place-items-center 
-                                                                        rounded-md bg-white/5 ring-1 ring-white/10 text-white/80'
-                                                                    >
+                                                                    <span
+                                                                        className='grid h-8 w-8 place-items-center 
+                                                                        rounded-md bg-white/5 ring-1 ring-white/10 text-white/80'>
                                                                         <Icon size={18} />
                                                                     </span>
                                                                     {label}
@@ -379,70 +402,71 @@ export default function MobileSidebar({ currentPageChatBoxStatus = false, curren
 
                                         <div className='my-3 h-px w-full bg-white/10' />
 
-                                        {
-                                            (!user || (user && !user.isBlocked)) &&
-                                                <div className='px-5'>
-                                                    <div className='mb-2 flex items-center justify-between'>
-                                                        <p className='text-xs font-medium uppercase tracking-wide text-white/60'>
-                                                            Menu
-                                                        </p>
-                                                        <span
-                                                            className='text-white/40 cursor-pointer'
-                                                            onClick={() =>
-                                                                setShowOptions((options) => ({
-                                                                    ...options,
-                                                                    menu: !options.menu,
-                                                                }))
-                                                            }>
-                                                            {showOptions.menu ? "-" : "+"}
-                                                        </span>
-                                                    </div>
-                                                    {showOptions.menu && (
-                                                        <motion.ul
-                                                            className='flex flex-col'
-                                                            initial='hidden'
-                                                            animate='show'
-                                                            variants={{
-                                                                hidden: {
-                                                                    transition: { staggerChildren: 0.04, staggerDirection: -1 },
-                                                                },
-                                                                show: { transition: { staggerChildren: 0.06 } },
-                                                            }}
-                                                        >
-                                                            {menuItems.map(({ label, Icon, path, handleClick = null }) => (
-                                                                <motion.li
-                                                                    key={label}
-                                                                    variants={{
-                                                                        hidden: { opacity: 0, x: 16 },
-                                                                        show: { opacity: 1, x: 0 },
-                                                                    }}>
-                                                                    <button
-                                                                        className='group flex w-full items-center justify-between rounded-lg 
-                                                                            px-2.5 py-2 text-left text-sm hover:bg-white/5'
-                                                                        onClick={() => {
-                                                                            if (!handleClick) navigate(path)
-                                                                            else handleClick()
-                                                                            setOpen(false)
-                                                                        }}
-                                                                    >
-                                                                        <span className='flex items-center gap-3 text-white/90'>
-                                                                            <span className='grid h-8 w-8 place-items-center rounded-md 
-                                                                                bg-white/5 ring-1 ring-white/10 text-white/80'>
-                                                                                <Icon size={18} />
-4                                                                            </span>
-                                                                            {label}
-                                                                        </span>
-                                                                        <ChevronRight
-                                                                            className='text-white/30 group-hover:text-white/60'
-                                                                            size={18}
-                                                                        />
-                                                                    </button>
-                                                                </motion.li>
-                                                            ))}
-                                                        </motion.ul>
-                                                    )}
+                                        {(!user || (user && !user.isBlocked)) && (
+                                            <div className='px-5'>
+                                                <div className='mb-2 flex items-center justify-between'>
+                                                    <p className='text-xs font-medium uppercase tracking-wide text-white/60'>
+                                                        Menu
+                                                    </p>
+                                                    <span
+                                                        className='text-white/40 cursor-pointer'
+                                                        onClick={() =>
+                                                            setShowOptions((options) => ({
+                                                                ...options,
+                                                                menu: !options.menu,
+                                                            }))
+                                                        }>
+                                                        {showOptions.menu ? "-" : "+"}
+                                                    </span>
                                                 </div>
-                                        }
+                                                {showOptions.menu && (
+                                                    <motion.ul
+                                                        className='flex flex-col'
+                                                        initial='hidden'
+                                                        animate='show'
+                                                        variants={{
+                                                            hidden: {
+                                                                transition: {
+                                                                    staggerChildren: 0.04,
+                                                                    staggerDirection: -1,
+                                                                },
+                                                            },
+                                                            show: { transition: { staggerChildren: 0.06 } },
+                                                        }}>
+                                                        {menuItems.map(({ label, Icon, path, handleClick = null }) => (
+                                                            <motion.li
+                                                                key={label}
+                                                                variants={{
+                                                                    hidden: { opacity: 0, x: 16 },
+                                                                    show: { opacity: 1, x: 0 },
+                                                                }}>
+                                                                <button
+                                                                    className='group flex w-full items-center justify-between rounded-lg 
+                                                                            px-2.5 py-2 text-left text-sm hover:bg-white/5'
+                                                                    onClick={() => {
+                                                                        if (!handleClick) navigate(path)
+                                                                        else handleClick()
+                                                                        setOpen(false)
+                                                                    }}>
+                                                                    <span className='flex items-center gap-3 text-white/90'>
+                                                                        <span
+                                                                            className='grid h-8 w-8 place-items-center rounded-md 
+                                                                                bg-white/5 ring-1 ring-white/10 text-white/80'>
+                                                                            <Icon size={18} />4{" "}
+                                                                        </span>
+                                                                        {label}
+                                                                    </span>
+                                                                    <ChevronRight
+                                                                        className='text-white/30 group-hover:text-white/60'
+                                                                        size={18}
+                                                                    />
+                                                                </button>
+                                                            </motion.li>
+                                                        ))}
+                                                    </motion.ul>
+                                                )}
+                                            </div>
+                                        )}
 
                                         <div className='my-3 h-px w-full bg-white/10' />
 
@@ -459,8 +483,7 @@ export default function MobileSidebar({ currentPageChatBoxStatus = false, curren
                                                             ...options,
                                                             support: !options.support,
                                                         }))
-                                                    }
-                                                >
+                                                    }>
                                                     {showOptions.support ? "-" : "+"}
                                                 </span>
                                             </div>
@@ -477,8 +500,7 @@ export default function MobileSidebar({ currentPageChatBoxStatus = false, curren
                                                         key={label}
                                                         className={`group flex w-full items-center justify-between 
                                                             rounded-lg px-2.5 py-2 text-left text-sm
-                                                            hover:bg-white/5 ${styleClasses && styleClasses}`
-                                                        }
+                                                            hover:bg-white/5 ${styleClasses && styleClasses}`}
                                                         onClick={() => {
                                                             if (label === "Text Chat") {
                                                                 setOpenChatBox(true)
@@ -486,10 +508,10 @@ export default function MobileSidebar({ currentPageChatBoxStatus = false, curren
                                                                 navigate("/support")
                                                             }
                                                             setOpen(fale)
-                                                        }}
-                                                >
+                                                        }}>
                                                         <span className='flex items-center gap-3 text-white/90'>
-                                                            <span className='grid h-8 w-8 place-items-center rounded-md
+                                                            <span
+                                                                className='grid h-8 w-8 place-items-center rounded-md
                                                              bg-white/5 ring-1 ring-white/10 text-white/80'>
                                                                 <Icon size={18} />
                                                             </span>
@@ -518,8 +540,7 @@ export default function MobileSidebar({ currentPageChatBoxStatus = false, curren
                                                             ...options,
                                                             notice: !options.notice,
                                                         }))
-                                                    }
-                                                >
+                                                    }>
                                                     {showOptions.notice ? "-" : "+"}
                                                 </span>
                                             </div>
@@ -532,12 +553,11 @@ export default function MobileSidebar({ currentPageChatBoxStatus = false, curren
                                                         onClick={() => {
                                                             navigate(item.path)
                                                             setOpen(false)
-                                                        }}
-                                                    >
+                                                        }}>
                                                         <span className='flex items-center gap-3 text-white/90'>
-                                                            <span className='grid h-8 w-8 place-items-center rounded-md 
-                                                                bg-white/5 ring-1 ring-white/10 text-white/80'
-                                                            >
+                                                            <span
+                                                                className='grid h-8 w-8 place-items-center rounded-md 
+                                                                bg-white/5 ring-1 ring-white/10 text-white/80'>
                                                                 <ChevronRight size={18} />
                                                             </span>
                                                             {item.label}
@@ -552,14 +572,13 @@ export default function MobileSidebar({ currentPageChatBoxStatus = false, curren
                                     </nav>
                                 </div>
 
-                                <div className='p-5 border-t border-white/10 bg-neutral-900/60 backdrop-blur 
-                                    supports-[backdrop-filter]:bg-neutral-900/50'
-                                >
+                                <div
+                                    className='p-5 border-t border-white/10 bg-neutral-900/60 backdrop-blur 
+                                    supports-[backdrop-filter]:bg-neutral-900/50'>
                                     <button
                                         className='w-full rounded-xl bg-primary px-4 py-3 text-center text-sm 
                                             font-semibold text-black shadow-sm  ring-1 ring-black/10 transition 
-                                            hover:bg-amber-300'
-                                    >
+                                            hover:bg-amber-300'>
                                         Join Fitlab Community
                                     </button>
                                 </div>
@@ -572,20 +591,15 @@ export default function MobileSidebar({ currentPageChatBoxStatus = false, curren
 
                 {openChatBox && !currentPageChatBoxStatus && (
                     <div className='fixed bottom-[2rem] right-[2rem] z-50'>
-
                         <TextChatBox closeable={true} onCloseChat={() => setOpenChatBox(false)} />
-
                     </div>
                 )}
 
                 {openCoach && !currentPageCoachStatus && (
                     <div className='fixed bottom-[2rem] left-[2rem] z-50'>
-
                         <CoachPlus closeable={true} autoOpen={true} onCloseChat={() => setopenCoach(false)} />
-                            
                     </div>
                 )}
-
             </AnimatePresence>
         </>
     )

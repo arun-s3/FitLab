@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react"
 import { useDispatch } from "react-redux"
+import { motion } from "framer-motion"
 
 import { X, Heart, Flag, Plus } from "lucide-react"
 
@@ -10,7 +11,7 @@ import { SiteSecondaryFillButton } from "../../../UI/SiteButtons/SiteButtons"
 
 export default function WishlistOptionsModal({ isOpen, onClose, product, setIsWishlistModalOpen, wishlist }) {
     
-    const [selectedList, setSelectedList] = useState("")
+    const [selectedList, setSelectedList] = useState(null)
     const [productNote, setProductNote] = useState("")
     const [productPriority, setProductPriority] = useState(2)
     const [isHovered, setIsHovered] = useState(false)
@@ -35,12 +36,14 @@ export default function WishlistOptionsModal({ isOpen, onClose, product, setIsWi
                     <h2 className='text-[18px] text-secondary capitalize font-semibold' style={{ wordSpacing: "1px" }}>
                         Add to Wishlist
                     </h2>
-                    <button
+                    <motion.button
+                        whileHover={{ rotate: 90, scale: 1.1 }}
+                        transition={{ type: "spring", stiffness: 300 }}
                         onClick={onClose}
-                        className='text-gray-400 hover:text-gray-600 transition duration-150 ease-in-out 
-                                ocus:outline-none focus:border-none focus-within:outline-none focus-within:border-none focus-visible:ring-2 focus-visible:ring-gray-50 '>
+                        className='text-gray-400 
+                                focus:outline-none focus:border-none focus-within:outline-none focus-within:border-none focus-visible:ring-2 focus-visible:ring-gray-50 '>
                         <X className='h-6 w-6' />
-                    </button>
+                    </motion.button>
                 </div>
                 <div className='p-6 pb-[1rem]' ref={modalRef}>
                     <div className='flex items-center space-x-4 mb-6'>
@@ -69,13 +72,19 @@ export default function WishlistOptionsModal({ isOpen, onClose, product, setIsWi
                                     focus:outline-none focus:ring-secondary focus:border-secondary'
                             >
                                 <option value=''>Select a wishlist</option>
-                                {wishlist.lists
-                                    .filter((list) => list.name !== "Default Shopping List")
-                                    .map((list) => (
-                                        <option key={list.name} value={list.name}>
-                                            {list.name}
+                                {
+                                wishlist.lists.filter((list) => list.name !== "Default Shopping List").length > 0 
+                                    ?   wishlist.lists
+                                            .filter((list) => list.name !== "Default Shopping List")
+                                            .map((list) => (
+                                                <option key={list.name} value={list.name} className="text-purple-500">
+                                                    {list.name}
+                                                </option>
+                                            ))
+                                    :   <option disabled className="text-muted" onClick={() => setIsWishlistModalOpen(true)}>
+                                            No wishlist created 
                                         </option>
-                                    ))}
+                                }
                             </select>
                         </div>
 
@@ -122,7 +131,12 @@ export default function WishlistOptionsModal({ isOpen, onClose, product, setIsWi
 
                         <div className='flex items-center justify-between'>
                             <SiteSecondaryFillButton
-                                className='flex items-center text-[14px] font-medium hover:bg-purple-700 transition-colors'
+                                className={`flex items-center text-[14px] font-medium disabled:cursor-not-allowed transition-colors
+                                    ${!selectedList
+                                        ? '!bg-muted '
+                                        : 'hover:bg-purple-700'
+                                    }`}
+                                isDisabled={!selectedList}
                                 shouldSubmit={true}
                             >
                                 <Heart className='h-5 w-5 mr-2' />
@@ -133,7 +147,10 @@ export default function WishlistOptionsModal({ isOpen, onClose, product, setIsWi
                                 className='flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm
                                     font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 
                                     focus:ring-offset-  ocus:ring-indigo-500'
-                                onClick={() => onClose()}
+                                onClick={(e) => {
+                                    handleSubmit(e)
+                                    onClose()
+                                }}
                             >
                                 Add to default list
                             </button>

@@ -224,6 +224,7 @@ export function SiteSecondaryFillButton({
     clickHandler,
     customStyle,
     children,
+    isDisabled = false, 
     shouldSubmit = false,
 }) {
 
@@ -234,6 +235,7 @@ export function SiteSecondaryFillButton({
                 ${size === "icon" ? "p-[8px]" : ""} ${className}`}
             onClick={clickHandler ? () => clickHandler() : undefined}
             style={customStyle}
+            disabled={isDisabled}
             type={shouldSubmit ? "submit" : "button"}
         >
             {children}

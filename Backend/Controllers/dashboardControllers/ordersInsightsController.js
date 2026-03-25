@@ -114,17 +114,26 @@ const getTopFiveProductsByOrders = async (req, res, next) => {
     try {
         const result = await Order.aggregate([
             { $unwind: "$products" },
+
+            {
+                $match: {
+                    "products.productStatus": { 
+                        $nin: ["cancelled", "refunded"] 
+                    }
+                }
+            },
             {
                 $group: {
                     _id: {
                         productId: "$products.productId",
                         title: "$products.title",
+                        price: "$products.price"
                     },
-                    orderCount: { $sum: 1 },
+                    totalSold: { $sum: "$products.quantity" }, 
                 },
             },
             {
-                $sort: { orderCount: -1 },
+                $sort: { totalSold: -1 },
             },
             {
                 $limit: 5,
@@ -133,7 +142,8 @@ const getTopFiveProductsByOrders = async (req, res, next) => {
                 $project: {
                     _id: 0,
                     product: "$_id.title",
-                    orders: "$orderCount",
+                    price: "$_id.price",
+                    orders: "$totalSold",
                 },
             },
         ])

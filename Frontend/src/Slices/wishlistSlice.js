@@ -109,6 +109,7 @@ export const searchList = createAsyncThunk("searchList", async ({ find }, thunkA
 const initialState = {
     wishlist: { lists: [] },
     wishlistProducts: [],
+    fetchedListProducts: false,
     listCreated: false,
     listRemoved: false,
     listUpdated: false,
@@ -128,6 +129,7 @@ const wishlistSlice = createSlice({
             state.loading = false
             state.wishlistError = null
             state.wishlistSuccess = false
+            state.fetchedListProducts = false
             state.listCreated = false
             state.listRemoved = false
             state.listUpdated = false
@@ -231,6 +233,7 @@ const wishlistSlice = createSlice({
                 state.loading = false
                 state.wishlistSuccess = true
                 state.wishlistProducts = action.payload.wishlistProducts
+                state.fetchedListProducts = true
             })
             .addCase(getAllWishlistProducts.pending, (state) => {
                 state.loading = true

@@ -837,12 +837,11 @@ const updateProduct = async (req, res, next) => {
 
         const existingVariants = await Product.find({ variantOf: id })
 
+        let variantIds = []
+
         if (existingVariants.length !== variantValues.length - 1) {
             await Product.deleteMany({ variantOf: id })
-            updatedMain.variants = []
         }
-
-        const updatedVariants = []
 
         for (let i = 1; i < variantValues.length; i++) {
             const variantPayload = {
@@ -856,7 +855,7 @@ const updateProduct = async (req, res, next) => {
 
             let variantDoc
 
-            if (existingVariants[i - 1]) {
+            if (existingVariants[i - 1] && existingVariants.length === variantValues.length - 1) {
                 variantDoc = await Product.findByIdAndUpdate(
                     existingVariants[i - 1]._id,
                     { $set: variantPayload },
@@ -866,9 +865,10 @@ const updateProduct = async (req, res, next) => {
                 variantDoc = await new Product(variantPayload).save()
             }
 
-            updatedVariants.push(variantDoc)
-            updatedMain.variants.push(variantDoc._id)
+            variantIds.push(variantDoc._id)
         }
+
+        updatedMain.variants = variantIds
 
         await updatedMain.save()
 

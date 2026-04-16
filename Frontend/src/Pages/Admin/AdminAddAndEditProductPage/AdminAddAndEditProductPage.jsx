@@ -140,6 +140,8 @@ export default function AdminAddAndEditProductPage({ editProduct }) {
                     targetMuscles: editProductItem.current.targetMuscles || [],
                     description: editProductItem.current.description || "",
                     additionalInformation: editProductItem.current.additionalInformation || [],
+                    discountType: editProductItem.current?.discountType || "percentage",
+                    discountValue: editProductItem.current?.discountValue || 0
                 }))
                 setCategory(editProductItem.current.category)
                 setSubCategory(editProductItem.current.subCategory)

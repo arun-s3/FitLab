@@ -205,7 +205,6 @@ export default function SelfieModal({ isOpen, onClose, onCapture, userSystemPic,
                                             imageType='Profile pic'
                                             imagePreview={{
                                                 status: true,
-                                                size: "landscape",
                                                 imageName: null,
                                             }}
                                             imageCropperPositionFromTop={"0px"}

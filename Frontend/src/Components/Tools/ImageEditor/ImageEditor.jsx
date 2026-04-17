@@ -460,7 +460,7 @@ export default function ImageEditor() {
                                     <img
                                         src={previewURL || image.url}
                                         alt='current image'
-                                        className='max-w-[700px] h-full'
+                                        className='max-w-[700px] max-h-full'
                                         ref={previewRef}
                                     />
                                     <img ref={imgRef} />

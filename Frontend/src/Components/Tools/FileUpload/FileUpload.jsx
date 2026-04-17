@@ -34,7 +34,7 @@ export default function FileUpload({
     editingMode,
 }) {
 
-    const [error, setError] = useState("error")
+    const [error, setError] = useState("")
     const [imageMessage, setImageMessage] = useState("")
     const imageMessageDisplay = useRef(null)
     const [displayCompressButton, setDisplayCompressButton] = useState(false)
@@ -47,7 +47,7 @@ export default function FileUpload({
 
     useEffect(() => {
         if (error) {
-            setTimeout(() => setError(""), 3000)
+            setTimeout(() => setError(""), 3500)
         }
         if (error && error == "Please add files each of size below 3Mb!") {
             imageMessageDisplay.current.parentElement.style.visibility = "visible"
@@ -60,11 +60,11 @@ export default function FileUpload({
             )
             setDisplayCompressButton(true)
         }
-        if (!images.length) {
-            setError("")
-            setImageMessage("")
-            setDisplayCompressButton(false)
-        }
+        // if (!images.length) {
+        //     setError("")
+        //     setImageMessage("")
+        //     setDisplayCompressButton(false)
+        // }
         if (!imageCropperState && !editingMode) {
             if (images.some((img) => !img.isCropped && !cropWarnOnce)) {
                 // imageMessageDisplay.current.parentElement.style.visibility = 'visible'
@@ -102,6 +102,10 @@ export default function FileUpload({
             }
         })
     })
+
+    useEffect(() => {
+        console.log('Error--->', error)
+    }, [error])
 
     useEffect(() => {
         if (editedImage.size > 5 * 1024 * 1024) {
@@ -152,7 +156,7 @@ export default function FileUpload({
 
     const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
-    const validateAndSetImage = (files) => {
+    const validateAndSetImage = async(files) => {
         const newImages = []
         if (images.length + 1 > imageLimit) {
             const imageLabel = imageLimit > 1 ? "images are" : "image is"
@@ -173,6 +177,22 @@ export default function FileUpload({
                     setError(
                         "Please upload an image smaller than 5MB. Images between 3MB and 5MB can be compressed or deleted. Files larger than 5MB are not allowed.",
                     )
+                    continue
+                }
+
+                const isLandscape = await new Promise((resolve) => {
+                    const img = new Image()
+                    img.src = URL.createObjectURL(files[i])
+                
+                    img.onload = () => {
+                        resolve(img.width > img.height)
+                    }
+                
+                    img.onerror = () => resolve(false)
+                })
+            
+                if (imagePreview?.size === 'landscape' && !isLandscape) {
+                    setError("Only landscape image is allowed!")
                     continue
                 }
 
@@ -391,10 +411,17 @@ export default function FileUpload({
                         Images exceeding this size will be automatically resized to 400×400 pixels.
                         Only ${imageLimit} such images are allowed to upload`}
             </p>
+            {
+                imagePreview?.size === "landscape" && !error &&
+                    <p className={`text-secondary text-[10px] h-[20px] mt-4`}>
+                        * Only landscape image is allowed
+                    </p>
+            }
             {imageCropperState && (
 
                 <ImageCropper
                     images={images}
+                    isLandscapeImage={imagePreview?.size === 'landscape' || false}
                     onCropComplete={handleCropComplete}
                     imageCropperState={imageCropperState}
                     setImageCropperState={setImageCropperState}
@@ -414,11 +441,15 @@ export default function FileUpload({
                 <div className='flex gap-[27px] flex-wrap mt-[20px]' id='image-section'>
                     {images.map((image, index) => (
                         <div key={image?.name || index} className='flex flex-col'>
-                            <figure key={image.name} className='relative w-[75px] h-[75px] rounded-[5px]'>
+                            <figure key={image.name} 
+                                className={`relative rounded-[5px]
+                                    ${imagePreview?.size === 'landscape' ? 'w-[100px] h-auto' : 'w-[75px] h-[75px]'}`}
+                            >
                                 <img
                                     src={image.url}
                                     alt={image.name}
-                                    className='w-[75px] h-[75px] rounded-[5px] object-cover'
+                                    className={`${imagePreview?.size === 'landscape' ? 'w-[100px] h-auto' : 'w-[75px] h-[75px]'}
+                                        rounded-[5px] object-cover`}
                                 />
                                 <span className='absolute top-0 right-[-17px] h-full flex flex-col justify-between 
                                     text-secondary cursor-pointer '
@@ -477,11 +508,12 @@ export default function FileUpload({
                         <span className='text-[14px]'>P</span>roduct Thumbnail{" "}
                     </h4>
                     <div className='flex gap-[15px] h-[200px]'>
-                        <figure className='h-[200px] w-[200px] rounded-[10px]'>
+                        <figure className={`${imagePreview?.size === 'landscape' ? 'w-[200px] h-auto' : 'w-[200px] h-[200px]'} rounded-[10px]`}>
                             <img
                                 src={images[Number.parseInt(currentImageIndex)]?.url}
                                 alt={images[Number.parseInt(currentImageIndex)]?.name}
-                                className='h-[200px]  w-[200px] rounded-[10px] object-cover'
+                                className={`${imagePreview?.size === 'landscape' ? 'w-[200px] h-auto' : 'w-[200px] h-[200px]'}
+                                    rounded-[10px] object-cover`}
                             />
                         </figure>
                         <div className='flex flex-col justify-between h-full arrows'>
@@ -535,16 +567,18 @@ export default function FileUpload({
                 ""
             )}
             {imagePreview && imagePreview.status && images.length > 0 && (
-                <div className='h-[auto] w-full rounded-[10px] mt-[2rem] relative' id='category-preview'>
-                    <div className={` ${imagePreview?.size === "landscape" ? "w-full" : "w-[200px]"} `}>
+                <div className={`${imageType !== 'Profile pic' ? 'mt-8' : 'flex justify-center items-center'} 
+                        h-[auto] w-full rounded-[10px] relative`} 
+                    id='category-preview'>
+                    <div className={`${imagePreview?.size === "landscape" ? "w-full" : "w-[200px]"} `}>
                         <figure
-                            className={` ${imagePreview?.size === "landscape" ? "w-full h-[300px]" : "h-[200px] w-[200px]"} 
+                            className={` ${imagePreview?.size === "landscape" ? "w-full h-auto" : "h-[200px] w-[200px]"} 
                                 rounded-[10px] outline outline-secondary outline-1 outline-offset-[2px]`}
                         >
                             <img
                                 src={images[0].url}
                                 alt={images[0].name}
-                                className={` ${imagePreview?.size === "landscape" ? "w-full h-[300px]" : "h-[200px] w-[200px]"} 
+                                className={` ${imagePreview?.size === "landscape" ? "w-full h-auto" : "h-[200px] w-[200px]"} 
                                     rounded-[10px] object-cover`}
                             />
                         </figure>
@@ -559,13 +593,25 @@ export default function FileUpload({
                             </span>
                         )}
 
-                        <SiteButtonSquare
-                            tailwindClasses={` w-full text-secondary !mt-[10px] !hover:primaryDark transition duration-300`}
-                            customStyle={{ paddingBlock: "9px", borderRadius: "5px", marginTop: "10px" }}
-                            lowerFont={true}
-                            clickHandler={(e) => openImageEditor(images[0].url, images[0].name, images[0].blob)}>
-                            {`Edit ${imageType} Image`}
-                        </SiteButtonSquare>
+                        {
+                            imageType === 'Profile pic' ?
+                                <button 
+                                    className="mx-auto flex items-center gap-[5px] text-[13px] text-muted !mt-[10px] 
+                                        tracking-[0.3px] !hover:primaryDark transition duration-300"
+                                    onClick={(e) => openImageEditor(images[0].url, images[0].name, images[0].blob)}
+                                >
+                                    <RiImageEditLine size={17} className="text-secondary"/>
+                                    Edit profile pic
+                                </button>
+                                : 
+                                <SiteButtonSquare
+                                    tailwindClasses={` w-full text-secondary !mt-[10px] !hover:primaryDark transition duration-300`}
+                                    customStyle={{ paddingBlock: "9px", borderRadius: "5px", marginTop: "10px" }}
+                                    lowerFont={true}
+                                    clickHandler={(e) => openImageEditor(images[0].url, images[0].name, images[0].blob)}>
+                                    {`Edit ${imageType} Image`}
+                                </SiteButtonSquare>
+                        }
 
                     </div>
                 </div>

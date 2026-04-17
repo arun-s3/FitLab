@@ -18,6 +18,7 @@ import { getCroppedImg } from "../../../Utils/ImageCropperUtilities"
 
 const ImageCropper = ({
     images,
+    isLandscapeImage,
     onCropComplete,
     imageCropperState,
     setImageCropperState,
@@ -223,7 +224,7 @@ const ImageCropper = ({
                                         image={images[currentImageIndex].url}
                                         crop={crop}
                                         zoom={zoom}
-                                        aspect={1}
+                                        aspect={isLandscapeImage ? 16/9 : 1}
                                         onCropChange={setCrop}
                                         onZoomChange={setZoom}
                                         onCropComplete={onCropCompleteHandler}

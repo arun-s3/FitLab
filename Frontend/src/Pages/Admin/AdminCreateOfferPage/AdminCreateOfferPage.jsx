@@ -66,6 +66,8 @@ export default function AdminCreateOfferPage() {
 
     const [images, setImages] = useState([])
 
+    const discountRef = useRef(null)
+
     const [error, setError] = useState({
         name: "",
         startDate: "",
@@ -103,11 +105,11 @@ export default function AdminCreateOfferPage() {
         if (selectedCategories?.categories) {
             setFormData((formData) => ({
                 ...formData,
-                applicableCategories: Array.isArray(formData.applicableCategories)
-                    ? [...selectedCategories.categories]
-                    : [...selectedCategories.categories],
+                applicableCategories: [
+                    ...new Set([...selectedCategories?.categories]),
+                ],
             }))
-            if (selectedCategories?.categories.length === 0) {
+            if ((selectedCategories?.categories.length === 0 && selectedCategories?.subCategories.length === 0)) {
                 setError((error) => ({ ...error, applicableCategories: "Choose atleast one category" }))
             } else {
                 setError((error) => {
@@ -115,6 +117,15 @@ export default function AdminCreateOfferPage() {
                     return rest
                 })
             }
+        }
+        if (selectedCategories?.subCategories) {
+                const subCategoriesElements = selectedCategories.subCategories.split(',')
+                setFormData((formData) => ({
+                    ...formData,
+                    applicableCategories: [
+                        ...new Set([...selectedCategories?.categories, ...subCategoriesElements]), 
+                    ],
+                }))
         }
         if (selectedProducts && selectedProducts.length > 0) {
             setFormData((formData) => ({
@@ -234,6 +245,17 @@ export default function AdminCreateOfferPage() {
         }
     }
 
+    const validateDiscount = ()=> {
+        if(!formData.discountValue) return
+        if (formData.discountType === 'percentage' && formData.discountValue > 100) {
+            setError((error) => ({ ...error, discountValue: "Discount value must be less than 100!" }))
+            discountRef.current.style.borderColor = "#e74c3c"
+        } else {
+            setError((error) => ({ ...error, discountValue: "" }))
+            discountRef.current.style.borderColor = "rgb(209, 213, 219)"
+        }
+    }
+
     const inputBlurHandler = (e, fieldName) => {
         const value = e.target.value.trim()
         const regexPattern = /^\d+$/
@@ -266,7 +288,7 @@ export default function AdminCreateOfferPage() {
         ) {
             setError((error) => ({ ...error, discountValue: `Discount cannot be empty!` }))
             e.target.style.borderColor = "#e74c3c"
-        } else if (fieldName === "discountValue" && formData[fieldName] > 100) {
+        } else if (fieldName === "discountValue" && formData.discountType === 'percentage' && formData[fieldName] > 100) {
             setError((error) => ({ ...error, discountValue: "Discount value must be less than 100!" }))
             e.target.style.borderColor = "#e74c3c"
         } else {
@@ -529,6 +551,7 @@ export default function AdminCreateOfferPage() {
                                 name='discountType'
                                 value={formData.discountType}
                                 onChange={handleChange}
+                                onBlur={validateDiscount}
                                 className='text-[13px] text-secondary pl-[1.5rem]'
                             >
                                 <option value='percentage'> Percentage </option>
@@ -586,6 +609,7 @@ export default function AdminCreateOfferPage() {
                                 id='discountValue'
                                 required
                                 name='discountValue'
+                                ref={discountRef}
                                 value={formData.discountValue}
                                 onChange={handleChange}
                                 placeholder={`Enter the discount value in ${formData?.discountType && formData.discountType === "percentage" ? "%" : "\u20B9"}`}

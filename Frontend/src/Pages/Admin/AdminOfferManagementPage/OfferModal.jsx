@@ -76,6 +76,8 @@ export default function OfferModal({ isOpen, onClose, offer }) {
 
     const { products, productCounts } = useSelector((state) => state.productStore)
 
+    const discountRef = useRef(null)
+
     const { offerCreated, offerUpdated, loading } = useSelector((state) => state.offers)
     const dispatch = useDispatch()
 
@@ -113,15 +115,14 @@ export default function OfferModal({ isOpen, onClose, offer }) {
     }, [offer])
 
     useEffect(() => {
-        if (selectedCategories?.categories) {
+        if (selectedCategories?.categories) { 
             setFormData((formData) => ({
                 ...formData,
-                applicableCategories: Array.isArray(formData.applicableCategories)
-                    ? [...selectedCategories.categories]
-                    : [...selectedCategories.categories],
+                applicableCategories: [
+                    ...new Set([...selectedCategories?.categories]),
+                ],
             }))
-            if ((selectedCategories?.categories.length === 0 || selectedCategories?.subCategories.length === 0) 
-                    && formData.applicableCategories.length === 0) {
+            if ((selectedCategories?.categories.length === 0 && selectedCategories?.subCategories.length === 0)) {
                 setError((error) => ({ ...error, applicableCategories: "Choose atleast one category" }))
             } else {
                 setError((error) => {
@@ -130,15 +131,14 @@ export default function OfferModal({ isOpen, onClose, offer }) {
                 })
             }
         }
-
         if (selectedCategories?.subCategories) {
-            const subCategoriesElements = selectedCategories.subCategories.split(',')
-            setFormData((formData) => ({
-                ...formData,
-                applicableCategories: Array.isArray(formData.applicableCategories)
-                    ? [...selectedCategories.categories, ...subCategoriesElements]
-                    : [...selectedCategories.categories, ...subCategoriesElements]
-            }))
+                const subCategoriesElements = selectedCategories.subCategories.split(',')
+                setFormData((formData) => ({
+                    ...formData,
+                    applicableCategories: [
+                        ...new Set([...selectedCategories?.categories, ...subCategoriesElements]), 
+                    ],
+                }))
         }
 
         if (selectedProducts) {
@@ -244,7 +244,7 @@ export default function OfferModal({ isOpen, onClose, offer }) {
         //   setError(error=> ( {...error, discountValue: `Discount cannot be empty!`} ) )
         //   e.target.style.borderColor = '#e74c3c'
         // }
-        else if (fieldName === "discountValue" && formData[fieldName] > 100) {
+        else if (fieldName === "discountValue" && formData.discountType === 'percentage' && formData[fieldName] > 100) {
             setError((error) => ({ ...error, discountValue: "Discount value must be less than 100!" }))
             e.target.style.borderColor = "#e74c3c"
         } else {
@@ -264,6 +264,17 @@ export default function OfferModal({ isOpen, onClose, offer }) {
                 }
             }
         } else return
+    }
+
+    const validateDiscount = ()=> {
+        if(!formData.discountValue) return
+        if (formData.discountType === 'percentage' && formData.discountValue > 100) {
+            setError((error) => ({ ...error, discountValue: "Discount value must be less than 100!" }))
+            discountRef.current.style.borderColor = "#e74c3c"
+        } else {
+            setError((error) => ({ ...error, discountValue: "" }))
+            discountRef.current.style.borderColor = "rgb(209, 213, 219)"
+        }
     }
 
     const debouncedProductSearch = useRef(
@@ -502,6 +513,7 @@ export default function OfferModal({ isOpen, onClose, offer }) {
                                 name='discountType'
                                 value={formData.discountType}
                                 onChange={handleChange}
+                                onBlur={validateDiscount}
                                 className='text-[13px] text-secondary'
                             >
                                 <option value='percentage'> Percentage </option>
@@ -513,16 +525,19 @@ export default function OfferModal({ isOpen, onClose, offer }) {
 
                         <div className='relative'>
                             <div className='flex justify-between items-center'>
-                                <label htmlFor='discountValue' className='block text-sm font-medium text-gray-700'>
+                                <label htmlFor='discountValue' className='block text-sm whitespace-nowrap font-medium text-gray-700'>
                                     {"Discount Value " +
                                         `( ${formData?.discountType && formData.discountType === "percentage" ? "%" : "\u20B9"} )`}
                                 </label>
-                                <span className='error'> {error && error.discountValue && error.discountValue} </span>
+                                <span className='error ml-[5px] whitespace-nowrap'>
+                                    {error && error.discountValue && error.discountValue}
+                                </span>
                             </div>
                             <input
                                 type='text'
                                 id='discountValue'
                                 name='discountValue'
+                                ref={discountRef}
                                 value={formData.discountValue}
                                 onChange={handleChange}
                                 placeholder={`Enter the discount value in ${formData?.discountType && formData.discountType === "percentage" ? "%" : "\u20B9"}`}

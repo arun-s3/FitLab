@@ -67,6 +67,8 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
     const [startDate, setStartDate] = useState(null)
     const [endDate, setEndDate] = useState(null)
 
+    const discountRef = useRef(null)
+
     const [customerQueryOptions, setCustomerQueryOptions] = useState({ page: 1, limit: 6 })
 
     const { products, productCounts } = useSelector((state) => state.productStore)
@@ -78,20 +80,8 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
     const modalRef = useRef(null)
     useModalHelpers({ open: isOpen, onClose, modalRef })
 
-    useEffect(() => {
-        if (coupon) {
-            if (coupon.applicableProducts.length > 0) {
-                setSelectedProducts([...coupon.applicableProducts])
-            }
-            if (coupon?.assignedCustomers && coupon.assignedCustomers.length > 0) {
-                setSelectedCustomers([...coupon.assignedCustomers])
-            }
-            setStartDate(new Date(coupon.startDate))
-            setEndDate(new Date(coupon.endDate))
-            setShowCategories(false)
-            setFormData({ ...coupon, startDate: coupon.startDate.split("T")[0], endDate: coupon.endDate.split("T")[0] })
-        } else {
-            setFormData({
+    const resetAllStates = ()=> {
+        setFormData({
                 code: "",
                 description: "",
                 discountType: "percentage",
@@ -108,6 +98,34 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
                 customerSpecific: false,
                 assignedCustomers: [],
             })
+        setStartDate(null)
+        setEndDate(null)
+        setError({
+            code: "",
+            startDate: "",
+            endDate: "",
+            discountValue: "",
+            maxDiscount: "",
+            minimumOrderValue: "",
+            usageLimit: "",
+            usageLimitPerCustomer: "",
+        })
+    }
+
+    useEffect(() => {
+        if (coupon) {
+            if (coupon.applicableProducts.length > 0) {
+                setSelectedProducts([...coupon.applicableProducts])
+            }
+            if (coupon?.assignedCustomers && coupon.assignedCustomers.length > 0) {
+                setSelectedCustomers([...coupon.assignedCustomers])
+            }
+            setStartDate(new Date(coupon.startDate))
+            setEndDate(new Date(coupon.endDate))
+            setShowCategories(false)
+            setFormData({ ...coupon, startDate: coupon.startDate.split("T")[0], endDate: coupon.endDate.split("T")[0] })
+        } else {
+            resetAllStates()
         }
     }, [coupon])
 
@@ -121,15 +139,14 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
     }, [startDate, endDate])
 
     useEffect(() => {
-        if (selectedCategories?.categories) {
+        if (selectedCategories?.categories) { 
             setFormData((formData) => ({
                 ...formData,
                 applicableCategories: [
                     ...new Set([...selectedCategories?.categories]),
                 ],
             }))
-            if ((selectedCategories?.categories.length === 0 || selectedCategories?.subCategories.length === 0) 
-                    && formData.applicableCategories.length === 0) {
+            if ((selectedCategories?.categories.length === 0 && selectedCategories?.subCategories.length === 0)) {
                 setError((error) => ({ ...error, applicableCategories: "Choose atleast one category" }))
             } else {
                 setError((error) => {
@@ -207,6 +224,8 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
             sonnerToast.success("A coupon is successfully updated!")
             dispatch(resetCouponStates())
         }
+        resetAllStates()
+        onClose()
     }, [couponCreated, couponUpdated])
 
     useEffect(() => {
@@ -253,7 +272,7 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
                 [fieldName]: `Please enter a valid ${camelToCapitalizedWords(fieldName)}!`,
             }))
             e.target.style.borderColor = "#e74c3c"
-        } else if (fieldName === "discountValue" && formData[fieldName] > 100) {
+        } else if (fieldName === "discountValue" && formData.discountType === 'percentage' && formData[fieldName] > 100) {
             setError((error) => ({ ...error, discountValue: "Discount value must be less than 100!" }))
             e.target.style.borderColor = "#e74c3c"
         } else if (fieldName === "usageLimitPerCustomer" && formData[fieldName] > 10) {
@@ -276,6 +295,17 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
                 }
             }
         } else return
+    }
+
+    const validateDiscount = ()=> {
+        if(!formData.discountValue) return
+        if (formData.discountType === 'percentage' && formData.discountValue > 100) {
+            setError((error) => ({ ...error, discountValue: "Discount value must be less than 100!" }))
+            discountRef.current.style.borderColor = "#e74c3c"
+        } else {
+            setError((error) => ({ ...error, discountValue: "" }))
+            discountRef.current.style.borderColor = "rgb(209, 213, 219)"
+        }
     }
 
     const debouncedProductSearch = useRef(
@@ -418,6 +448,10 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
             ? dispatch(updateCoupon({ couponDetails: formData, couponId }))
             : dispatch(createCoupon({ couponDetails: formData }))
         sonnerToast.info("Uploading the coupon...")
+    }
+
+    const closeModal = ()=> {
+        resetAllStates()
         onClose()
     }
 
@@ -436,7 +470,7 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
                         {coupon ? "Edit Coupon" : "Create Coupon"}{" "}
                     </h2>
                     <button
-                        onClick={onClose}
+                        onClick={closeModal}
                         className='text-secondary hover:text-purple-700 transition duration-150 ease-in-out'>
                         <X className='h-6 w-6' />
                     </button>
@@ -470,6 +504,7 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
                                 name='discountType'
                                 value={formData.discountType}
                                 onChange={handleChange}
+                                onBlur={validateDiscount}
                                 className='text-[13px] text-secondary'
                             >
                                 <option value='percentage'> Percentage </option>
@@ -496,16 +531,19 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
                     <div className='grid grid-cols-2 gap-4'>
                         <div className='relative'>
                             <div className='flex justify-between items-center'>
-                                <label htmlFor='discountValue' className='block text-sm font-medium text-gray-700'>
+                                <label htmlFor='discountValue' className='block text-sm font-medium text-gray-700  whitespace-nowrap'>
                                     {"Discount Value " +
                                         `( ${formData?.discountType && formData.discountType === "percentage" ? "%" : "\u20B9"} )`}
                                 </label>
-                                <span className='error'> {error && error.discountValue && error.discountValue} </span>
+                                <span className='error ml-[5px] whitespace-nowrap'>
+                                    {error && error.discountValue && error.discountValue} 
+                                </span>
                             </div>
                             <input
                                 type='text'
                                 id='discountValue'
                                 name='discountValue'
+                                ref={discountRef}
                                 value={formData.discountValue}
                                 onChange={handleChange}
                                 placeholder={`Enter the discount value in ${formData?.discountType && formData.discountType === "percentage" ? "%" : "\u20B9"}`}
@@ -1013,7 +1051,7 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
                     <div className='flex justify-end space-x-3 mt-6'>
                         <button
                             type='button'
-                            onClick={onClose}
+                            onClick={closeModal}
                             className='px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm
                                 font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 
                                 focus:ring-offset-2 focus:ring-secondary'

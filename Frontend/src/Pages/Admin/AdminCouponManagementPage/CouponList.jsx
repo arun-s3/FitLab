@@ -73,11 +73,8 @@ export default function CouponList({ coupons, onEdit, onDelete, onDeactivate, on
                                     </div>
                                 </td>
                                 <td className='px-6 py-4'>
-                                    <div className='text-sm text-gray-500'>
-                                        {coupon?.description && coupon?.description.length > 12
-                                            ? coupon?.description.substring(0, 12) + "..."
-                                            : coupon.description
-                                        }
+                                    <div className='text-sm text-gray-500 w-20 break-words whitespace-pre-wrap line-clamp-3'>
+                                        {coupon?.description}
                                     </div>
                                 </td>
                                 <td className='px-6 py-4 whitespace-nowrap'>
@@ -101,7 +98,7 @@ export default function CouponList({ coupons, onEdit, onDelete, onDeactivate, on
                                             <span
                                                 className='relative'
                                                 onMouseEnter={() => setShowItemsOf(coupon?.code)}
-                                                onMouseLeave={() => setShowItemsOf("")}
+                                                // onMouseLeave={() => setShowItemsOf("")}
                                             >
                                                 <span> Products - </span>
                                                 <span
@@ -120,9 +117,7 @@ export default function CouponList({ coupons, onEdit, onDelete, onDeactivate, on
                                                             className={`absolute bottom-[100%] left-[50%] py-[10px] px-[10px] bg-white
                                                                 border border-dropdownBorder rounded-[4px] z-[10] capitalize 
                                                                 text-muted opacity-100 transition-opacity duration-1000 ease-in
-                                                                ${coupon?.applicableProducts?.length > 6 
-                                                                    ? "h-[10rem] overflow-y-scroll" 
-                                                                    : "h-fit"} 
+                                                                max-h-[5.2rem] overflow-y-auto
                                                             `}
                                                         >
                                                             Applies to all products
@@ -131,10 +126,8 @@ export default function CouponList({ coupons, onEdit, onDelete, onDeactivate, on
                                                         <ul
                                                             className={`absolute bottom-[100%] left-[50%] py-[10px] px-[22px] 
                                                                 list-disc bg-white shadow-md
-                                                                ${coupon?.applicableProducts?.length > 6 
-                                                                    ? "max-h-[15rem] overflow-y-scroll" 
-                                                                    : "h-fit"
-                                                                } border border-dropdownBorder rounded-[4px] z-[10]`}
+                                                                max-h-[5.2rem] overflow-y-auto border border-dropdownBorder 
+                                                                rounded-[4px] z-[10]`}
                                                         >
                                                             {coupon?.applicableProducts?.map((product) => (
                                                                 <li
@@ -163,10 +156,7 @@ export default function CouponList({ coupons, onEdit, onDelete, onDeactivate, on
                                                     <ul
                                                         className={`absolute bottom-[100%] left-[50%] py-[10px] px-[22px] list-disc 
                                                             bg-white border border-dropdownBorder rounded-[4px] z-[10]
-                                                            ${coupon?.applicableCategories?.length > 6 
-                                                                ? "h-[10rem] overflow-y-scroll" 
-                                                                : "h-fit"
-                                                            } 
+                                                            max-h-[5.2rem] overflow-y-auto
                                                         `}
                                                     >
                                                         {coupon?.applicableCategories?.map((category) => (
@@ -195,9 +185,7 @@ export default function CouponList({ coupons, onEdit, onDelete, onDeactivate, on
                                                         <ul
                                                             className={`absolute bottom-[100%] left-[50%] py-[10px] px-[22px] list-disc 
                                                                 bg-white shadow-md border border-dropdownBorder rounded-[4px] z-[10]
-                                                                ${coupon?.assignedCustomers?.length > 6
-                                                                    ? "max-h-[15rem] overflow-y-scroll" 
-                                                                    : "h-fit"}
+                                                                max-h-[5.2rem] overflow-y-auto
                                                             `}
                                                         >
                                                             {coupon.assignedCustomers.map((customer) => (

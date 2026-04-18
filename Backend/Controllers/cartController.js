@@ -44,7 +44,6 @@ const addToCart = async (req, res, next) => {
                 bestDiscount,
                 offerApplied,
                 maxOfferDiscountApplied,
-                isBOGO,
                 actualProductQuantity,
                 nonOfferDiscountValue,
                 offerOrOtherDiscount,
@@ -58,7 +57,6 @@ const addToCart = async (req, res, next) => {
                     maxOfferDiscountApplied: Boolean(maxOfferDiscountApplied),
                     offerDiscountType,
                     offerDiscount: bestDiscount,
-                    ...(isBOGO ? { extraQuantity: Math.floor(actualProductQuantity / 2) } : {}),
                     offerOrOtherDiscount,
                     nonOfferDiscountValue,
                 }
@@ -102,7 +100,6 @@ const addToCart = async (req, res, next) => {
                     bestDiscount,
                     offerApplied,
                     maxOfferDiscountApplied,
-                    isBOGO,
                     actualProductQuantity,
                     nonOfferDiscountValue,
                     offerOrOtherDiscount,
@@ -117,11 +114,6 @@ const addToCart = async (req, res, next) => {
                 existingProduct.maxOfferDiscountApplied = Boolean(maxOfferDiscountApplied)
                 existingProduct.offerOrOtherDiscount = offerOrOtherDiscount
                 existingProduct.nonOfferDiscountValue = nonOfferDiscountValue
-                if (isBOGO) {
-                    existingProduct.extraQuantity = Math.floor(actualProductQuantity / 2)
-                } else {
-                    existingProduct.extraQuantity = 0
-                }
 
                 appliedOfferId = offerApplied
             } else {
@@ -130,7 +122,6 @@ const addToCart = async (req, res, next) => {
                     bestDiscount,
                     offerApplied,
                     maxOfferDiscountApplied,
-                    isBOGO,
                     actualProductQuantity,
                     nonOfferDiscountValue,
                     offerOrOtherDiscount,
@@ -144,7 +135,6 @@ const addToCart = async (req, res, next) => {
                         maxOfferDiscountApplied: Boolean(maxOfferDiscountApplied),
                         offerDiscountType,
                         offerDiscount: bestDiscount,
-                        ...(isBOGO ? { extraQuantity: Math.floor(actualProductQuantity / 2) } : {}),
                         offerOrOtherDiscount,
                         nonOfferDiscountValue,
                     }
@@ -265,7 +255,6 @@ const reduceFromCart = async (req, res, next) => {
                 bestDiscount,
                 offerApplied,
                 maxOfferDiscountApplied,
-                isBOGO,
                 actualProductQuantity,
                 offerOrOtherDiscount,
                 nonOfferDiscountValue,
@@ -280,15 +269,11 @@ const reduceFromCart = async (req, res, next) => {
             existingProduct.maxOfferDiscountApplied = Boolean(maxOfferDiscountApplied)
             existingProduct.offerOrOtherDiscount = offerOrOtherDiscount
             existingProduct.nonOfferDiscountValue = nonOfferDiscountValue
-
-            if (isBOGO) {
-                existingProduct.extraQuantity = Math.floor(actualProductQuantity / 2)
-            } else {
-                existingProduct.extraQuantity = 0
-            }
         }
 
         cart.absoluteTotal = cart.products.reduce((acc, item) => acc + item.total, 0)
+
+        let couponMessage = ""
 
         if (cart.products.length > 0) {
             const { deliveryCharges, gstCharge, absoluteTotalWithTaxes } = calculateCharges(
@@ -301,7 +286,7 @@ const reduceFromCart = async (req, res, next) => {
 
             if (cart.couponUsed && absoluteTotalWithTaxes > 0) {
                 const coupon = await Coupon.findOne({ _id: cart.couponUsed })
-                const { absoluteTotalWithTaxes, couponDiscount, deliveryCharge } = await recalculateAndValidateCoupon(
+                const { absoluteTotalWithTaxes, couponDiscount, deliveryCharge, couponWarning } = await recalculateAndValidateCoupon(
                     req,
                     res,
                     next,
@@ -314,14 +299,14 @@ const reduceFromCart = async (req, res, next) => {
                 )
                 if (couponWarning) {
                     couponMessage = couponWarning
-                    if (shouldCouponRemove) {
-                        cart.couponUsed = null
-                        if (cart.couponDiscount) {
-                            cart.couponDiscount = 0
-                        }
-                        cart.deliveryCharge = Number(deliveryCharges)
-                        cart.absoluteTotalWithTaxes = Number(currentAbsoluteTotalWithTaxes)
-                    }
+                    // if (shouldCouponRemove) {
+                    //     cart.couponUsed = null
+                    //     if (cart.couponDiscount) {
+                    //         cart.couponDiscount = 0
+                    //     }
+                    //     cart.deliveryCharge = Number(deliveryCharges)
+                    //     cart.absoluteTotalWithTaxes = Number(currentAbsoluteTotalWithTaxes)
+                    // }
                 } else {
                     cart.couponDiscount = Number(couponDiscount)
                     cart.deliveryCharge = Number(deliveryCharge)
@@ -581,9 +566,9 @@ const applyCoupon = async (req, res, next) => {
 
         if (coupon.discountType === "percentage") {
             const maxAllowed =
-                coupon.maxDiscount !== null && coupon.maxDiscount !== undefined ? coupon.maxDiscount : absoluteTotal
+                coupon.maxDiscount !== null && coupon.maxDiscount !== undefined ? coupon.maxDiscount : cart.absoluteTotal
 
-            discountAmount = Math.min(absoluteTotal * (coupon.discountValue / 100), maxAllowed)
+            discountAmount = Math.min(cart.absoluteTotal * (coupon.discountValue / 100), maxAllowed)
         } else if (coupon.discountType === "fixed") {
             discountAmount = Math.min(coupon.discountValue, orderTotal)
         } else if (coupon.discountType === "freeShipping") {
@@ -616,8 +601,10 @@ const applyCoupon = async (req, res, next) => {
             }
 
             if (expandedPrices.length < 2) {
-                couponWarning = "Buy One Get One coupon requires at least two eligible products."
-                return { couponDiscount: 0, deliveryCharge, shouldCouponRemove, couponWarning }
+                // couponWarning = "Buy One Get One coupon requires at least two eligible products."
+                return next(
+                    errorHandler(400, "Buy One Get One coupon requires at least two eligible products.")
+                )
             } else {
                 expandedPrices.sort((a, b) => a - b)
 

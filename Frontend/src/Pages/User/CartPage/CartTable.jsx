@@ -128,7 +128,7 @@ export default function CartTable({ products, omIncQuantity, onDecQuantity, onRe
                                             )
                                         )}
                                     </p>
-                                    {product?.offerDiscount && (
+                                    {product?.offerDiscount ? (
                                         <div>
                                             <p className='ml-[1rem] x-sm:ml-[2rem] px-[3px] x-sm:px-[5px] py-[2px] flex items-center
                                                 gap-[2px] x-sm:gap-[3px] text-[9px] s-sm:text-[10px] text-secondary'
@@ -167,7 +167,7 @@ export default function CartTable({ products, omIncQuantity, onDecQuantity, onRe
                                                     </span>
                                                 )}
                                         </div>
-                                    )}
+                                    ) : null }
                                 </div>
                                 <div className='flex items-center justify-center space-x-[5px] s-sm:space-x-[8px]'>
                                     <button
@@ -205,9 +205,10 @@ export default function CartTable({ products, omIncQuantity, onDecQuantity, onRe
                                         {(product?.offerOrOtherDiscount === "offer" &&
                                             product?.offerDiscount &&
                                             product?.maxOfferDiscountApplied) ||
-                                            (product?.offerOrOtherDiscount !== "offer" && (
+                                            (product?.offerOrOtherDiscount && product?.offerOrOtherDiscount !== "offer") && (
                                                 <span className='block'> ₹{product.total.toLocaleString()} </span>
-                                            ))}
+                                            
+                                        )}
                                     </span>
                                     <button
                                         className='text-red-500 hover:text-red-700'

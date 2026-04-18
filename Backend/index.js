@@ -51,6 +51,7 @@ app.use(
     }),
 )
 
+app.use(express.static(path.join(__dirname, "dist")))
 
 const Server = require("socket.io").Server
 
@@ -123,7 +124,6 @@ app.use("/ai", aiRoutes)
 app.use("/admin", adminRoutes)
 app.use("/admin/dashboard", adminDashboardRoutes)
 app.use("/admin/locations", adminCustomerGeographyRoutes)
-
 
 require("./CronJobs/couponCrons.js")
 require("./CronJobs/offerCrons.js")

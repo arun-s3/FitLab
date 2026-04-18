@@ -11,12 +11,11 @@ const offerSchema = new mongoose.Schema(
         },
         discountType: {
             type: String,
-            enum: ["percentage", "fixed", "freeShipping", "buyOneGetOne"],
+            enum: ["percentage", "fixed"],
             required: true,
         },
         discountValue: {
             type: Number,
-            required: true,
             min: 0,
         },
         minimumOrderValue: {

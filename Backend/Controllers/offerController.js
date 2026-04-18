@@ -42,14 +42,12 @@ const createOffer = async (req, res, next) => {
             return next(errorHandler(400, "Offer banner image is required!"))
         }
 
-        if (!name || !discountType || !startDate || !endDate) {
+        if (!name || !discountType || !discountValue || !startDate || !endDate) {
             return next(errorHandler(400, "Required fields are missing!"))
         }
-
-        if (discountType === "percentage" && (!discountValue || discountValue <= 0)) {
-            return next(errorHandler(400, "Discount value is missing or invalid!"))
+        if (discountType === "percentage" &&  discountValue <= 0) {
+            return next(errorHandler(400, "Discount value is invalid!"))
         }
-
         if (new Date(endDate) <= new Date(startDate)) {
             return next(errorHandler(400, "End date must be after start date!"))
         }
@@ -260,6 +258,17 @@ const updateOffer = async (req, res, next) => {
             const products = await Product.find({ title: { $in: applicableProducts }, variantOf: null }, "_id")
             productIds = products.map((prod) => prod._id)
         }
+
+        const now = new Date()
+
+        let computedStatus = "active"
+
+        if (new Date(endDate) < now) {
+            computedStatus = "expired"
+        } else {
+            computedStatus = "active"
+        }
+
         const updatedOffer = await Offer.findByIdAndUpdate(
             offerId,
             {
@@ -275,6 +284,7 @@ const updateOffer = async (req, res, next) => {
                 applicableProducts: productIds,
                 startDate,
                 endDate,
+                status: computedStatus,
                 recurringOffer,
                 recurringFrequency,
                 ...(uploadedImage ? { offerBanner: uploadedImage } : {}),
@@ -340,7 +350,6 @@ const getBestOffer = async (req, res, next) => {
             bestDiscount,
             maxOfferDiscountApplied,
             offerApplied,
-            isBOGO,
             offerDetails,
             offerOrOtherDiscount,
             nonOfferDiscountValue,
@@ -351,13 +360,11 @@ const getBestOffer = async (req, res, next) => {
             offerDiscountType,
             bestDiscount,
             offerApplied,
-            isBOGO,
             bestOffer: {
                 offerDiscountType,
                 bestDiscount,
                 maxOfferDiscountApplied,
                 offerApplied,
-                isBOGO,
                 offerDetails,
                 offerOrOtherDiscount,
                 nonOfferDiscountValue,

@@ -88,7 +88,7 @@ export default function CouponList({ coupons, onEdit, onDelete, onDeactivate, on
                                     </div>
                                     <p className='text-[11px] text-muted'>
                                         Max Discount -{" "}
-                                        {`${coupon?.maxDiscount ? "&#8377;" + coupon.maxDiscount : "Nil"}`}
+                                        {`${coupon?.maxDiscount ? "₹" + coupon.maxDiscount : "Nil"}`}
                                     </p>
                                 </td>
                                 <td className='px-6 py-4 whitespace-nowrap'>
@@ -98,7 +98,7 @@ export default function CouponList({ coupons, onEdit, onDelete, onDeactivate, on
                                             <span
                                                 className='relative'
                                                 onMouseEnter={() => setShowItemsOf(coupon?.code)}
-                                                // onMouseLeave={() => setShowItemsOf("")}
+                                                onMouseLeave={() => setShowItemsOf("")}
                                             >
                                                 <span> Products - </span>
                                                 <span
@@ -132,7 +132,7 @@ export default function CouponList({ coupons, onEdit, onDelete, onDeactivate, on
                                                             {coupon?.applicableProducts?.map((product) => (
                                                                 <li
                                                                     key={product.title}
-                                                                    className='capitalize text-muted'>
+                                                                    className='capitalize text-muted text-[13px]'>
                                                                     {product.title}
                                                                 </li>
                                                             ))}
@@ -160,7 +160,7 @@ export default function CouponList({ coupons, onEdit, onDelete, onDeactivate, on
                                                         `}
                                                     >
                                                         {coupon?.applicableCategories?.map((category) => (
-                                                            <li key={category.name} className='capitalize text-muted'>
+                                                            <li key={category.name} className='capitalize text-muted text-[13px]'>
                                                                 {category.name}
                                                             </li>
                                                         ))}
@@ -191,7 +191,7 @@ export default function CouponList({ coupons, onEdit, onDelete, onDeactivate, on
                                                             {coupon.assignedCustomers.map((customer) => (
                                                                 <li
                                                                     key={customer.username}
-                                                                    className='capitalize text-muted'>
+                                                                    className='capitalize text-muted text-[13px]'>
                                                                     {customer.username}
                                                                 </li>
                                                             ))}

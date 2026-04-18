@@ -254,8 +254,8 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
         if (
             (fieldName === "code" ||
                 fieldName === "startDate" ||
-                fieldName === "endDate" ||
-                fieldName === "discountValue") &&
+                fieldName === "endDate"
+            ) &&
             !value
         ) {
             setError((error) => ({ ...error, [fieldName]: `${camelToCapitalizedWords(fieldName)} cannot be empty!` }))
@@ -271,6 +271,12 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
                 ...error,
                 [fieldName]: `Please enter a valid ${camelToCapitalizedWords(fieldName)}!`,
             }))
+            e.target.style.borderColor = "#e74c3c"
+        } else if (
+            fieldName === "discountValue" && formData.discountType !== 'buyOneGetOne' && formData.discountType !== 'freeShipping' &&
+            !value
+        ) {
+            setError((error) => ({ ...error, discountValue: `Discount cannot be empty!` }))
             e.target.style.borderColor = "#e74c3c"
         } else if (fieldName === "discountValue" && formData.discountType === 'percentage' && formData[fieldName] > 100) {
             setError((error) => ({ ...error, discountValue: "Discount value must be less than 100!" }))
@@ -510,7 +516,7 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
                                 <option value='percentage'> Percentage </option>
                                 <option value='fixed'> Fixed Amount </option>
                                 <option value='freeShipping'> Free Shipping </option>
-                                <option value='bogo'> Buy 1 Get 1 </option>
+                                <option value='buyOneGetOne'> Buy 1 Get 1 </option>
                             </select>
                         </div>
                     </div>
@@ -546,9 +552,19 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
                                 ref={discountRef}
                                 value={formData.discountValue}
                                 onChange={handleChange}
-                                placeholder={`Enter the discount value in ${formData?.discountType && formData.discountType === "percentage" ? "%" : "\u20B9"}`}
+                                placeholder={(
+                                    ()=> {
+                                        const symbol = formData?.discountType && formData.discountType === "percentage" ? "%" : "\u20B9"
+                                        const relevance = (formData?.discountType === 'buyOneGetOne' || formData?.discountType === 'freeShipping')
+                                            ? "(irrelevant)"
+                                            : ""
+                                        return `Enter the discount value in ${symbol} ${relevance}`
+                                    }
+                                    )()
+                                }
                                 onBlur={(e) => inputBlurHandler(e, "discountValue")}
-                                className='h-[2.5rem]'
+                                disabled={formData?.discountType === 'buyOneGetOne' || formData?.discountType === 'freeShipping'}
+                                className='h-[2.5rem] disabled:cursor-not-allowed'
                                 style={{ paddingLeft: "30px" }}
                             />
                             <BadgePercent className='absolute top-[60%] left-[10px] w-[13px] h-[13px] text-muted' />
@@ -561,7 +577,13 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
                         <div className='relative'>
                             <div className='flex justify-between items-center'>
                                 <label htmlFor='maxDiscount' className='block text-sm font-medium text-gray-700'>
-                                    Maximum Discount Value (optional)
+                                    Maximum Discount Value 
+                                    {
+                                    formData?.discountType && (formData?.discountType === 'buyOneGetOne' 
+                                        || formData?.discountType === 'freeShipping' ) 
+                                            ? <span className="ml-[5px]"> (irrelevant) </span>
+                                            : <span className="ml-[5px]"> (optional) </span>
+                                    }
                                 </label>
                             </div>
                             <input
@@ -570,8 +592,9 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
                                 name='maxDiscount'
                                 value={formData.maxDiscount}
                                 placeholder='Leave blank for no limit'
-                                className='h-[2.5rem]'
+                                className='h-[2.5rem] disabled:cursor-not-allowed'
                                 onBlur={(e) => inputBlurHandler(e, "maxDiscount")}
+                                disabled={formData?.discountType === 'buyOneGetOne' || formData?.discountType === 'freeShipping'}
                                 onChange={handleChange}
                             />
                             <div className='input-contoller'>

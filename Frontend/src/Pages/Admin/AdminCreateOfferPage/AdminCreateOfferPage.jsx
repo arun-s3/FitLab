@@ -261,11 +261,7 @@ export default function AdminCreateOfferPage() {
         const regexPattern = /^\d+$/
 
         if (
-            (fieldName === "name" ||
-                fieldName === "startDate" ||
-                fieldName === "endDate" ||
-                fieldName === "discountValue") &&
-            !value
+            (fieldName === "name" || fieldName === "startDate" || fieldName === "endDate" || fieldName === "discountValue" ) && !value
         ) {
             setError((error) => ({ ...error, [fieldName]: `${camelToCapitalizedWords(fieldName)} cannot be empty!` }))
             e.target.style.borderColor = "#e74c3c"
@@ -280,13 +276,6 @@ export default function AdminCreateOfferPage() {
                 ...error,
                 [fieldName]: `Please enter a valid ${camelToCapitalizedWords(fieldName)}!`,
             }))
-            e.target.style.borderColor = "#e74c3c"
-        } else if (
-            (fieldName === "discountValue" || fieldName === "fixed") &&
-            formData.discountType === "percentage" &&
-            !value
-        ) {
-            setError((error) => ({ ...error, discountValue: `Discount cannot be empty!` }))
             e.target.style.borderColor = "#e74c3c"
         } else if (fieldName === "discountValue" && formData.discountType === 'percentage' && formData[fieldName] > 100) {
             setError((error) => ({ ...error, discountValue: "Discount value must be less than 100!" }))
@@ -402,10 +391,6 @@ export default function AdminCreateOfferPage() {
 
         if (!name || !startDate || !endDate || !discountType || !discountValue || !applicableType) {
             toast.error("Please fill the required fields!")
-            return
-        }
-        if ((formData.discountType === "percentage" || formData.discountType === "fixed") && !formData.discountValue) {
-            sonnerToast.error("Please fill the Discount value!")
             return
         }
         if (new Date(endDate) <= new Date(startDate)) {
@@ -535,9 +520,8 @@ export default function AdminCreateOfferPage() {
                         <div className='offer-labels'>
                             <label for='discountType'> Discount Type </label>
                             <p>
-                                Select the discount type that best suits your offer: Percentage for a percentage off,
-                                Fixed for a set discount, Buy One Get One for BOGO deals, or Free Shipping for shipping
-                                discounts.
+                                Select the discount type that best suits your offer: Percentage for a percentage off or
+                                Fixed for a set discount.
                             </p>
                         </div>
                         <div className='relative'>
@@ -556,8 +540,6 @@ export default function AdminCreateOfferPage() {
                             >
                                 <option value='percentage'> Percentage </option>
                                 <option value='fixed'> Fixed Amount </option>
-                                <option value='freeShipping'> Free Shipping </option>
-                                <option value='bogo'> Buy 1 Get 1 </option>
                             </select>
                         </div>
                     </div>
@@ -614,7 +596,7 @@ export default function AdminCreateOfferPage() {
                                 onChange={handleChange}
                                 placeholder={`Enter the discount value in ${formData?.discountType && formData.discountType === "percentage" ? "%" : "\u20B9"}`}
                                 onBlur={(e) => inputBlurHandler(e, "discountValue")}
-                                className='h-[2.5rem] '
+                                className='h-[2.5rem]'
                                 style={{ paddingLeft: "30px" }}
                             />
                             <div className='input-contoller'>
@@ -627,7 +609,9 @@ export default function AdminCreateOfferPage() {
 
                     <div className='offer-content-wrapper'>
                         <div className='offer-labels'>
-                            <label for='maxDiscount'> Maximum Discount Value (optional)</label>
+                            <label for='maxDiscount'> 
+                                Maximum Discount Value (optional)
+                            </label>
                             <p>
                                 Set the maximum discount limit a user can avail from this offer. This applies to -based
                                 discounts to prevent excessive reductions. Leave blank for no limit.

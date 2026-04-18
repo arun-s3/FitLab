@@ -68,7 +68,6 @@ const calculateBestOffer = async (userId, productId, quantity) => {
         let offerDiscountType = null
         let bestOffer = null
         let maxOfferDiscountApplied = false
-        let isBOGO = false
         let offerDetails = null
 
         const calculateDiscount = (offer) => {
@@ -85,9 +84,8 @@ const calculateBestOffer = async (userId, productId, quantity) => {
                 if (offer?.maxDiscount) {
                     discount = Math.min(discount, offer.maxDiscount)
                 }
-            } else if (offer.discountType === "buyOneGetOne") {
-                isBOGO = true
             }
+    
             if (discount > bestDiscount) {
                 bestDiscount = discount
                 offerDetails = offer
@@ -100,7 +98,7 @@ const calculateBestOffer = async (userId, productId, quantity) => {
         offers.forEach((offer) => {
             if (
                 offer.applicableType === "categories" &&
-                categoryIds.some((id) => offer.applicableCategories.includes(id))
+                categoryIds.some((id) => offer.applicableCategories.includes(id._id))
             ) {
                 calculateDiscount(offer)
             }
@@ -187,7 +185,6 @@ const calculateBestOffer = async (userId, productId, quantity) => {
             maxOfferDiscountApplied,
             offerApplied: bestOffer,
             offerDetails,
-            isBOGO,
             actualProductQuantity: finalQuantity,
             nonOfferDiscountValue,
             ...offerOrOtherDiscount,

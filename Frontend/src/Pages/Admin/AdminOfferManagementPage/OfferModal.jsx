@@ -219,11 +219,7 @@ export default function OfferModal({ isOpen, onClose, offer }) {
         const regexPattern = /^\d+$/
 
         if (
-            (fieldName === "name" ||
-                fieldName === "startDate" ||
-                fieldName === "endDate" ||
-                fieldName === "discountValue") &&
-            !value
+            (fieldName === "name" || fieldName === "startDate" || fieldName === "endDate" || fieldName === "discountValue" ) && !value
         ) {
             setError((error) => ({ ...error, [fieldName]: `${camelToCapitalizedWords(fieldName)} cannot be empty!` }))
             e.target.style.borderColor = "#e74c3c"
@@ -358,13 +354,9 @@ export default function OfferModal({ isOpen, onClose, offer }) {
     const handleSubmit = async (e) => {
         e.preventDefault()
         
-        const { name, startDate, endDate, discountType, discountValue, applicableType } = formData
-        if (!name || !startDate || !endDate || !discountType || !discountValue || !applicableType) {
+        const { name, startDate, endDate, discountType, applicableType } = formData
+        if (!name || !startDate || !endDate || !discountType|| !discountValue || !applicableType) {
             toast.error("Please fill the required fields!")
-            return
-        }
-        if ((formData.discountType === "percentage" || formData.discountType === "fixed") && !formData.discountValue) {
-            sonnerToast.error("Please fill the Discount value!")
             return
         }
         if (new Date(endDate) <= new Date(startDate)) {
@@ -518,8 +510,6 @@ export default function OfferModal({ isOpen, onClose, offer }) {
                             >
                                 <option value='percentage'> Percentage </option>
                                 <option value='fixed'> Fixed Amount </option>
-                                <option value='freeShipping'> Free Shipping </option>
-                                <option value='bogo'> Buy 1 Get 1 </option>
                             </select>
                         </div>
 
@@ -564,7 +554,7 @@ export default function OfferModal({ isOpen, onClose, offer }) {
                             id='maxDiscount'
                             name='maxDiscount'
                             value={formData.maxDiscount}
-                            placeholder='Leave blank for no limit'
+                            placeholder={`Leave blank for no limit`}
                             className='h-[2.5rem] !pl-[30px]'
                             onBlur={(e) => inputBlurHandler(e, "maxDiscount")}
                             onChange={handleChange}

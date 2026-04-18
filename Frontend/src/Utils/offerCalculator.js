@@ -34,11 +34,6 @@ export function calculateOfferPricing(offer, unitPrice, quantity = 1) {
             rawDiscount = (totalOriginalPrice * offer.discountValue) / 100
         } else if (offer.discountType === "fixed") {
             rawDiscount = offer.discountValue
-        } else if (offer.discountType === "freeShipping") {
-            rawDiscount = 0
-        } else if (offer.discountType === "buyOneGetOne") {
-            const freeItems = Math.floor(quantity / 2)
-            rawDiscount = freeItems * unitPrice
         }
 
         if (offer.maxDiscount !== null && offer.maxDiscount !== undefined && rawDiscount > offer.maxDiscount) {

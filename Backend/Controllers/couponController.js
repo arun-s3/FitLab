@@ -16,6 +16,7 @@ const createCoupon = async (req, res, next) => {
             discountType,
             discountValue,
             minimumOrderValue,
+            maxDiscount,
             usageLimit,
             usageLimitPerCustomer,
             applicableType,
@@ -29,8 +30,11 @@ const createCoupon = async (req, res, next) => {
         if (!code || !description || !discountType || !startDate || !endDate) {
             return next(errorHandler(400, "Required fields are missing!"))
         }
-        if (discountType === "percentage" && !discountValue) {
+        if ((discountType === "percentage" || discountType === "fixed") && !discountValue) {
             return next(errorHandler(400, "Discount value is missing!"))
+        }
+        if (discountType === "percentage" &&  discountValue <= 0) {
+            return next(errorHandler(400, "Discount value is invalid!"))
         }
         if (new Date(endDate) <= new Date(startDate)) {
             return next(errorHandler(400, "Expiry date must be after start date!"))
@@ -70,6 +74,7 @@ const createCoupon = async (req, res, next) => {
             discountType,
             discountValue,
             minimumOrderValue,
+            maxDiscount,
             usageLimit,
             usageLimitPerCustomer,
             oneTimeUse,
@@ -112,6 +117,7 @@ const updateCoupon = async (req, res, next) => {
             discountType,
             discountValue,
             minimumOrderValue,
+            maxDiscount,
             usageLimit,
             usageLimitPerCustomer,
             oneTimeUse,
@@ -170,6 +176,7 @@ const updateCoupon = async (req, res, next) => {
                 discountType,
                 discountValue,
                 minimumOrderValue,
+                maxDiscount,
                 usageLimit,
                 usageLimitPerCustomer,
                 oneTimeUse: newOneTimeUse,
@@ -396,7 +403,14 @@ const getBestCoupon = async (req, res, next) => {
             return next(errorHandler(400, "Cart is empty."))
         }
 
-        const coupons = await Coupon.find({})
+        const now = new Date()
+
+        const coupons = await Coupon.find({
+            status: "active",
+            startDate: { $lte: now },
+            endDate: { $gte: now },
+        })
+
         let bestCoupon = null
         let maxDiscount = 0
 

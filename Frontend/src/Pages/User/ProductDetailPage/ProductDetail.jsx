@@ -341,14 +341,7 @@ export default function ProductDetail({ product = null, quantity, setQuantity, o
                                 >
                                     &#8377;{" "}
                                     {bestOffer.offerOrOtherDiscount === "offer"
-                                        ? calculateOfferPricing(
-                                              {
-                                                  ...bestOffer?.offerDetails,
-                                                  offerOrOtherDiscount: bestOffer?.offerOrOtherDiscount,
-                                              },
-                                              product.prices[variantValueIndex],
-                                              quantity,
-                                          ).totalFinalPrice
+                                        ? product.prices[variantValueIndex] - bestOffer.bestDiscount
                                         : calculateOfferPricing(bestOffer, product.prices[variantValueIndex], quantity)
                                               .totalFinalPrice}
                                 </motion.span>
@@ -403,15 +396,6 @@ export default function ProductDetail({ product = null, quantity, setQuantity, o
                                         <span className='pl-[3px] xs-sm:pl-[5px] capitalize text-green-500'>
                                             {`(Max discount: ₹ ${bestOffer?.offerDetails?.maxDiscount})`}
                                         </span>
-                                )}
-
-                                {bestOffer && bestOffer.offerOrOtherDiscount === "offer" && bestOffer.isBogo && (
-                                    <figure className='h-[80px] xs-sm:h-[100px] w-auto'>
-                                        <img
-                                            src='/Images/bogo.png'
-                                            className='h-[80px] xs-sm:h-[100px] w-auto object-cover'
-                                        />
-                                    </figure>
                                 )}
                                 
                             </motion.p>

@@ -93,10 +93,10 @@ export default function OfferList({ offers, onEdit, onDelete, onSort, onDeactiva
                                             <i className='absolute bottom-[-10px] left-[5px] w-[12%] h-[50%] z-[20] cursor-pointer'>
                                                 <Scaling className='w-[15px] h-[15px] text-white hover:transition hover:scale-110 hover:duration-500' />
                                             </i>
-                                            <div className='fixed inset-0 pointer-events-none'>
+                                            <div className='fixed inset-0 pointer-events-none z-[900]'>
                                                 <img
                                                     src={offer.offerBanner.url}
-                                                    className='absolute top-[30%] left-[35%] w-[900px] h-[300px]
+                                                    className='absolute top-[30%] left-[35%] max-w-[900px] max-h-[500px]
                                                         object-cover rounded shadow-lg opacity-0 group-hover:opacity-100
                                                         transition-opacity duration-200'
                                                 />
@@ -159,18 +159,15 @@ export default function OfferList({ offers, onEdit, onDelete, onSort, onDeactiva
                                                                 ) : (
                                                                     <ul
                                                                         className={`absolute bottom-[100%] left-[50%] py-[10px] 
-                                                                            px-[22px] list-disc bg-white
-                                                                            ${offer?.applicableProducts?.length > 6 
-                                                                                ? "h-[10rem] overflow-y-scroll" 
-                                                                                : "h-fit"
-                                                                            } border border-dropdownBorder rounded-[4px] z-[10]`}
+                                                                            px-[22px] list-disc bg-white max-h-[5.2rem] overflow-y-auto
+                                                                            order border-dropdownBorder rounded-[4px] z-[10]`}
                                                                     >
                                                                         {offer?.applicableProducts
                                                                             ?.filter((product) => !product.variantOf)
                                                                             .map((product) => (
                                                                                 <li
                                                                                     key={product.title}
-                                                                                    className='capitalize text-muted'>
+                                                                                    className='capitalize text-muted text-[13px]'>
                                                                                     {product.title}
                                                                                 </li>
                                                                             ))}
@@ -197,15 +194,13 @@ export default function OfferList({ offers, onEdit, onDelete, onSort, onDeactiva
                                                                 <ul
                                                                     className={`absolute bottom-[100%] left-[50%] py-[10px] 
                                                                         px-[22px] list-disc bg-white 
-                                                                        ${offer?.applicableCategories?.length > 6 
-                                                                            ? "h-[10rem] overflow-y-scroll" 
-                                                                            : "h-fit"} 
+                                                                        max-h-[5.2rem] overflow-y-auto 
                                                                         border border-dropdownBorder rounded-[4px] z-[10]`}
                                                                 >
                                                                     {offer?.applicableCategories?.map((category) => (
                                                                         <li
                                                                             key={category.name}
-                                                                            className='capitalize text-muted'>
+                                                                            className='capitalize text-muted text-[13px]'>
                                                                             {category.name}
                                                                         </li>
                                                                     ))}

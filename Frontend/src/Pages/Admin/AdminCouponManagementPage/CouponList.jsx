@@ -82,13 +82,13 @@ export default function CouponList({ coupons, onEdit, onDelete, onDeactivate, on
                                         {coupon?.discountType === "percentage"
                                             ? `${coupon?.discountValue} %`
                                             : coupon?.discountType === "fixed"
-                                              ? `&#8377; ${coupon?.discountValue}`
+                                              ? `₹ ${coupon?.discountValue}`
                                               : `${coupon?.discountType}`
                                         }
                                     </div>
                                     <p className='text-[11px] text-muted'>
                                         Max Discount -{" "}
-                                        {`${coupon?.maxDiscount ? "₹" + coupon.maxDiscount : "Nil"}`}
+                                        {`${coupon?.maxDiscount ? "₹ " + coupon.maxDiscount : "Nil"}`}
                                     </p>
                                 </td>
                                 <td className='px-6 py-4 whitespace-nowrap'>

@@ -235,6 +235,16 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
         }
     }, [couponError])
 
+    useEffect(() => {
+        if (formData.discountType === "buyOneGetOne" || formData.discountType === "freeShipping") {
+            setFormData(prev => ({
+                ...prev,
+                discountValue: "",
+                maxDiscount: ""
+            }))
+        }
+    }, [formData.discountType, formData.maxDiscount])
+
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target
         if (type === "checkbox") {
@@ -550,7 +560,7 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
                                 id='discountValue'
                                 name='discountValue'
                                 ref={discountRef}
-                                value={formData.discountValue}
+                                value={formData.discountValue || ''}
                                 onChange={handleChange}
                                 placeholder={(
                                     ()=> {
@@ -754,14 +764,14 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
                                 )}
 
                                 {formData?.applicableCategories?.length > 0 && showCategories && (
-                                    <div className='mt-[10px] flex gap-[10px]'>
+                                    <div className='mt-[10px] flex gap-[10px] flex-wrap'>
                                         {formData.applicableCategories.map((category) => (
                                             <div
                                                 key={category._id}
                                                 className='px-[5px] py-[2px] flex items-center gap-[4px]'
                                             >
                                                 <GoDotFill className='w-[10px] h-[10px] text-primaryDark' />
-                                                <span className='text-[11px] text-secondary capitalize'>
+                                                <span className='text-[11px] text-secondary capitalize whitespace-nowrap'>
                                                     {" "}
                                                     {category}{" "}
                                                 </span>
@@ -778,7 +788,7 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
                                         formData.applicableCategories &&
                                         formData.applicableCategories?.length > 0 &&
                                         !showCategories && (
-                                            <div className='mt-[5px] flex gap-[10px]'>
+                                            <div className='mt-[5px] flex gap-[10px] flex-wrap'>
                                                 {formData.applicableCategories.map((category) => (
                                                     <div
                                                         key={category._id}
@@ -798,7 +808,7 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
                                                                 }))
                                                             }
                                                         />
-                                                        <span className='text-[11px] text-secondary capitalize'>
+                                                        <span className='text-[11px] text-secondary capitalize whitespace-nowrap'>
                                                             {" "}
                                                             {category.name}{" "}
                                                         </span>
@@ -910,7 +920,7 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
                             {selectedProducts.length > 0 && (
                                 <div className='mt-[5px] px-[10px] py-[5px] border border-dropdownBorder rounded-[4px]'>
                                     <h5 className='mb-[5px] text-[12px] text-muted font-[450]'> Selected Products </h5>
-                                    <div className='flex gap-[10px]'>
+                                    <div className='flex gap-[10px] flex-wrap'>
                                         {selectedProducts.map((product) => (
                                             <div
                                                 key={product.title}
@@ -931,7 +941,7 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
                                                         }
                                                     }}
                                                 />
-                                                <span className='text-[11px] text-secondary capitalize'>
+                                                <span className='text-[11px] text-secondary capitalize whitespace-nowrap'>
                                                     {" "}
                                                     {product.title}{" "}
                                                 </span>
@@ -1035,7 +1045,7 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
                             {selectedCustomers.length > 0 && (
                                 <div className='mt-[5px] px-[10px] py-[5px] border border-dropdownBorder rounded-[4px]'>
                                     <h5 className='mb-[5px] text-[12px] text-muted font-[450]'> Selected Users </h5>
-                                    <div className='flex gap-[10px]'>
+                                    <div className='flex gap-[10px] flex-wrap'>
                                         {selectedCustomers.map((customer) => (
                                             <div
                                                 key={customer.username}
@@ -1056,7 +1066,7 @@ export default function CouponModal({ isOpen, onClose, coupon, isEditing }) {
                                                         }
                                                     }}
                                                 />
-                                                <span className='text-[11px] text-secondary capitalize'>
+                                                <span className='text-[11px] text-secondary capitalize whitespace-nowrap'>
                                                     {" "}
                                                     {customer.username}{" "}
                                                 </span>

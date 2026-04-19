@@ -54,16 +54,10 @@ export default function ProductDetail({ product = null, quantity, setQuantity, o
 
     useEffect(() => {
         if (product && Object.keys(product).length > 0) {
-            if (!product?.mainProduct) {
+            
+            if (product?.variantType) {
                 setSelectedVariantValue(product[`${product.variantType}s`][0])
-            } else {
-                const requiredVariantIndex =
-                    product.mainProduct.variants.findIndex(
-                        (variant) => variant._id.toString() === product._id.toString(),
-                    ) + 1
-                setSelectedVariantValue(product[`${product.variantType}s`][requiredVariantIndex])
-                setVariantValueIndex(requiredVariantIndex)
-            }
+            } else setSelectedVariantValue(0)
 
             const thumbnailIndex = product.images.findIndex((img) => img.isThumbnail)
             setCurrentImageIndex(thumbnailIndex)

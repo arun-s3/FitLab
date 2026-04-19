@@ -665,14 +665,14 @@ export default function OfferModal({ isOpen, onClose, offer }) {
                                 </div>
                             )}
                             {formData?.applicableCategories?.length > 0 && (
-                                <div className='mt-[10px] flex gap-[10px]'>
+                                <div className='mt-[10px] flex gap-[10px] flex-wrap'>
                                     {formData.applicableCategories.map((category) => (
                                         <div
                                             key={category._id}
                                             className='px-[5px] py-[2px] flex items-center gap-[4px]'
                                         >
                                             <GoDotFill className='w-[10px] h-[10px] text-primaryDark' />
-                                            <span className='flex items-center gap-[1px] text-[11px] text-secondary capitalize'>
+                                            <span className='flex items-center gap-[1px] text-[11px] text-secondary capitalize whitespace-nowrap'>
                                                 {" "}
                                                 {category?.name || category}{" "}
                                                 <X
@@ -797,7 +797,7 @@ export default function OfferModal({ isOpen, onClose, offer }) {
                             </div>
                             {selectedProducts.length > 0 && (
                                 <div className='mt-[10px] px-[10px] py-[5px]'>
-                                    <div className='flex gap-[10px]'>
+                                    <div className='flex gap-[10px] flex-wrap'>
                                         {selectedProducts.map((product) => (
                                             <div
                                                 key={product.title}
@@ -819,7 +819,7 @@ export default function OfferModal({ isOpen, onClose, offer }) {
                                                         }
                                                     }}
                                                 />
-                                                <span className='text-[11px] text-secondary capitalize'>
+                                                <span className='text-[11px] text-secondary capitalize whitespace-nowrap'>
                                                     {" "}
                                                     {product.title}{" "}
                                                 </span>

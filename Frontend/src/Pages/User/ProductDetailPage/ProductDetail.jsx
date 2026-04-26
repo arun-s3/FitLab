@@ -104,7 +104,13 @@ export default function ProductDetail({ product = null, quantity, setQuantity, o
     const images = product?.images || []
     const mainImageUrl = images[currentImageIndex]?.url || product?.thumbnail?.url || ""
 
+    
     const lists = Array.isArray(wishlist?.lists) ? wishlist.lists : []
+
+    useEffect(()=> {
+        console.log("wishlist:", wishlist)
+        console.log("lists:", lists)
+    }, [lists])
 
     const selectImage = (index) => {
         thumbnailRef.current.src = product.images[index].url
@@ -141,16 +147,17 @@ export default function ProductDetail({ product = null, quantity, setQuantity, o
             variantValueIndex === 0 ? product._id : product.variants[variantValueIndex - 1]._id
         const productOfDefaultList =
             wishlist && Object.keys(wishlist).length && 
-            lists.some((list) => {
+            lists.some((list) => 
                 list.name === "Default Shopping List" && 
                 Array.isArray(list.products) &&
                 list?.products?.length > 0 && list.products.some((item) => item.product === product._id)
-            })
+            )
 
         if (productOfDefaultList) {
             dispatch(removeProductFromList({ productId: product._id }))
         } else {
             const targetList = wishlist && lists.find((list) =>
+                Array.isArray(list.products) &&
                 list.products.find((item) => item.product === requiredProductVariantId),
             )
             dispatch(removeProductFromList({ listName: targetList.name, productId: requiredProductVariantId }))

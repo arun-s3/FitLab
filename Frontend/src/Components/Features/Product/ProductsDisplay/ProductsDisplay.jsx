@@ -228,10 +228,11 @@ export default function ProductsDisplay({
     const deleteFromWishlist = (product) => {
         if (checkAuthOrOpenModal && checkAuthOrOpenModal()) return
         const productOfDefaultList =
+            wishlist &&
             Object.keys(wishlist).length &&
-            wishlist?.lists.some((list) => {
-                list.name === "Default Shopping List" && list.products.some((item) => item.product === product._id)
-            })
+            wishlist?.lists?.some((list) => 
+                list.name === "Default Shopping List" && list.products?.some((item) => item.product === product._id)
+            )
 
         if (productOfDefaultList) {
             dispatch(removeProductFromList({ productId: product._id }))
@@ -244,7 +245,7 @@ export default function ProductsDisplay({
     return (
         <>
             {wishlistDisplay && currentList &&
-                wishlist.lists.some((list) => list.name === currentList) &&
+                wishlist && wishlist?.lists?.length > 0 && wishlist?.lists?.some((list) => list.name === currentList) &&
                 (() => {
                     const list = wishlist.lists.find((list) => list.name === currentList)
                     const index = wishlistPriorityDetails.findIndex((status) => status.value === list.priority)
@@ -461,9 +462,10 @@ export default function ProductsDisplay({
                                       <div className='absolute top-[15px] right-[15px] p-[5px] rounded-[15px] bg-white favourite'>
                                           <i className='cursor-pointer'>
                                                {!wishlistDisplay ? (
+                                                    wishlist &&
                                                     Object.keys(wishlist).length > 0 ? (
-                                                        wishlist.lists.some((list) =>
-                                                            list.products.some((item) => item.product === product._id),
+                                                        wishlist?.lists?.length > 0 && wishlist?.lists?.some((list) =>
+                                                            list?.products?.length > 0 && list?.products?.some((item) => item.product === product._id),
                                                         ) ? (
                                                             <MdFavorite
                                                                 className='hover:scale-110 transition-transform duration-100'
@@ -717,25 +719,23 @@ export default function ProductsDisplay({
                 </div>
             )}
 
-            {selectedProductForWishlist && (
-                <>
-                    <WishlistOptionsModal
-                        isOpen={isWishlistOptionsModalOpen}
-                        onClose={() => setIsWishlistOptionsModalOpen(false)}
-                        product={selectedProductForWishlist}
-                        setIsWishlistModalOpen={setIsWishlistModalOpen}
-                        wishlist={wishlist}
-                    />
+            <>
+                <WishlistOptionsModal
+                    isOpen={isWishlistOptionsModalOpen}
+                    onClose={() => setIsWishlistOptionsModalOpen(false)}
+                    product={selectedProductForWishlist}
+                    setIsWishlistModalOpen={setIsWishlistModalOpen}
+                    wishlist={wishlist}
+                />
 
-                    <RemoveWishlistItemModal
-                        isOpen={isRemoveModalOpen}
-                        onClose={() => setIsRemoveModalOpen(false)}
-                        product={selectedProductForWishlist}
-                        listName={selectedList}
-                        removeProductFromWishlist={removeProductFromWishlist}
-                    />
-                </>
-            )}
+                <RemoveWishlistItemModal
+                    isOpen={isRemoveModalOpen}
+                    onClose={() => setIsRemoveModalOpen(false)}
+                    product={selectedProductForWishlist}
+                    listName={selectedList}
+                    removeProductFromWishlist={removeProductFromWishlist}
+                />
+            </>
 
             <WishlistModal isOpen={isWishlistModalOpen} onClose={() => setIsWishlistModalOpen(false)} />
 

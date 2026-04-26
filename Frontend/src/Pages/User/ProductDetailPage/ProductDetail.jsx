@@ -18,7 +18,6 @@ import { CustomHashLoader } from "../../../Components/UI/Loader/Loader"
 import { increaseOfferImpression } from "../../../Slices/offerSlice"
 import { ProtectedUserContext } from "../../../Components/Route-guards/ProtectedUserRoutes/ProtectedUserRoutes"
 import {
-    addProductToList,
     removeProductFromList,
     getUserWishlist,
     resetWishlistStates,
@@ -105,6 +104,8 @@ export default function ProductDetail({ product = null, quantity, setQuantity, o
     const images = product?.images || []
     const mainImageUrl = images[currentImageIndex]?.url || product?.thumbnail?.url || ""
 
+    const lists = Array.isArray(wishlist?.lists) ? wishlist.lists : []
+
     const selectImage = (index) => {
         thumbnailRef.current.src = product.images[index].url
         setCurrentImageIndex(index)
@@ -139,15 +140,17 @@ export default function ProductDetail({ product = null, quantity, setQuantity, o
         const requiredProductVariantId =
             variantValueIndex === 0 ? product._id : product.variants[variantValueIndex - 1]._id
         const productOfDefaultList =
-            Object.keys(wishlist).length && wishlist?.lists?.length > 0 &&
-            wishlist.lists.some((list) => {
-                list.name === "Default Shopping List" && list?.products?.length > 0 && list.products.some((item) => item.product === product._id)
+            wishlist && Object.keys(wishlist).length && 
+            lists.some((list) => {
+                list.name === "Default Shopping List" && 
+                Array.isArray(list.products) &&
+                list?.products?.length > 0 && list.products.some((item) => item.product === product._id)
             })
 
         if (productOfDefaultList) {
             dispatch(removeProductFromList({ productId: product._id }))
         } else {
-            const targetList = wishlist.lists.find((list) =>
+            const targetList = wishlist && lists.find((list) =>
                 list.products.find((item) => item.product === requiredProductVariantId),
             )
             dispatch(removeProductFromList({ listName: targetList.name, productId: requiredProductVariantId }))
@@ -480,7 +483,8 @@ export default function ProductDetail({ product = null, quantity, setQuantity, o
 
                         <motion.div initial='rest' whileHover='hover' whileTap='tap' variants={smallButton}>
                             <SiteSecondaryFillButton variant='outline' size='icon' className='!px-[10px] !py-[8px]'>
-                                {wishlist?.lists?.length > 0 && wishlist.lists.some((list) =>
+                                {lists.some((list) =>
+                                    Array.isArray(list.products) &&
                                     list?.products?.length > 0 && list.products.some((item) => item.product === product._id),
                                 ) ? (
                                     <MdFavorite

@@ -296,7 +296,7 @@ export default function CheckoutPage() {
             setIsLoading(false)
             return false
         }
-        if (Object.keys(shippingAddress).length === 0) {
+        if (!shippingAddress || Object.keys(shippingAddress).length === 0) {
             sonnerToast.error("Please select a delivery address!")
             setIsLoading(false)
             return false

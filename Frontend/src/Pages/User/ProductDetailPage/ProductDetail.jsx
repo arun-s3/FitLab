@@ -131,17 +131,7 @@ export default function ProductDetail({ product = null, quantity, setQuantity, o
 
     const addToWishlist = () => {
         if (checkAuthOrOpenModal && checkAuthOrOpenModal()) return
-        const requiredProductVariantId =
-            variantValueIndex === 0 ? product._id : product.variants[variantValueIndex - 1]._id
-        const userCreatedListsExists =
-            Object.keys(wishlist).length &&
-            wishlist?.lists.some((list) => list.name === "Default Shopping List") &&
-            wishlist?.lists.length > 1
-        if (userCreatedListsExists) {
-            setIsWishlistOptionsModalOpen(true)
-        } else {
-            dispatch(addProductToList({ productId: requiredProductVariantId }))
-        }
+        setIsWishlistOptionsModalOpen(true)
     }
 
     const deleteFromWishlist = () => {
@@ -149,9 +139,9 @@ export default function ProductDetail({ product = null, quantity, setQuantity, o
         const requiredProductVariantId =
             variantValueIndex === 0 ? product._id : product.variants[variantValueIndex - 1]._id
         const productOfDefaultList =
-            Object.keys(wishlist).length &&
-            wishlist?.lists.some((list) => {
-                list.name === "Default Shopping List" && list.products.some((item) => item.product === product._id)
+            Object.keys(wishlist).length && wishlist?.lists?.length > 0 &&
+            wishlist.lists.some((list) => {
+                list.name === "Default Shopping List" && list?.products?.length > 0 && list.products.some((item) => item.product === product._id)
             })
 
         if (productOfDefaultList) {
@@ -490,8 +480,8 @@ export default function ProductDetail({ product = null, quantity, setQuantity, o
 
                         <motion.div initial='rest' whileHover='hover' whileTap='tap' variants={smallButton}>
                             <SiteSecondaryFillButton variant='outline' size='icon' className='!px-[10px] !py-[8px]'>
-                                {wishlist.lists.some((list) =>
-                                    list.products.some((item) => item.product === product._id),
+                                {wishlist?.lists?.length > 0 && wishlist.lists.some((list) =>
+                                    list?.products?.length > 0 && list.products.some((item) => item.product === product._id),
                                 ) ? (
                                     <MdFavorite
                                         className='hover:scale-110 transition-transform duration-100 text-secondary'

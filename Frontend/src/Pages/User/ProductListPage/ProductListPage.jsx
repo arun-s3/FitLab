@@ -64,7 +64,7 @@ export default function ProductList() {
 
     const { products, productCounts, error: productError } = useSelector((state) => state.productStore)
     const { cart, productAdded, error, message, couponMessage } = useSelector((state) => state.cart)
-    const { wishlistError } = useSelector((state) => state.wishlist)
+    const { listProductAdded, wishlistError } = useSelector((state) => state.wishlist)
 
     const location = useLocation()
 
@@ -87,6 +87,13 @@ export default function ProductList() {
             setTotalPages(Math.ceil(productCounts / limit))
         }
     }, [products, productCounts])
+
+    useEffect(() => {
+        if (listProductAdded) {
+            sonnerToast.success("The product have been added to the Wishlist!")
+            dispatch(resetWishlistStates())
+        }
+    }, [listProductAdded])
 
     useEffect(() => {
         if (wishlistError) {

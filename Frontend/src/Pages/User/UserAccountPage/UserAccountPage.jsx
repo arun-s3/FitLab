@@ -55,7 +55,7 @@ export default function UserAccountPage() {
     const errorRef = useRef(null)
 
     const dispatch = useDispatch()
-    const { user, userUpdated, loading: userLoading } = useSelector((state) => state.user)
+    const { user, userUpdated, loading: userLoading, error: userError } = useSelector((state) => state.user)
     const {
         currentDefaultAddress,
         addressUpdated,
@@ -111,6 +111,13 @@ export default function UserAccountPage() {
             setAddressDetails((addressDetails) => ({ ...addressDetails, type: addressType }))
         }
     }, [gender, dob, addressType])
+
+    useEffect(() => {
+        if (userError) {
+            setUserDetails({ ...user })
+            dispatch(resetUserStates())
+        }
+    }, [userError])
 
     useEffect(() => {
         if (userUpdated && addressUpdated) {
@@ -235,9 +242,11 @@ export default function UserAccountPage() {
                         type='text'
                         value={detailType === "personal" ? userDetails[infoType.type] : addressDetails[infoType.type]}
                         disabled={!editing}
-                        className={`w-full px-4 py-2 capitalize ${editing ? "text-secondary" : "text-muted"}
-                ${infoType?.Icon ? "pl-10" : ""} text-[13px] rounded-lg border border-gray-300 focus:ring-2
-                   focus:ring-purple-600 focus:border-transparent disabled:bg-gray-50`}
+                        className={`w-full px-4 py-2 ${editing ? "text-secondary" : "text-muted"}
+                            ${infoType?.Icon ? "pl-10" : ""} text-[13px] rounded-lg border border-gray-300 focus:ring-2
+                               focus:ring-purple-600 focus:border-transparent disabled:bg-gray-50
+                            ${detailType !== "personal" && infoType.type !== 'email' ? 'capitalize' : ''}
+                        `}
                         id={infoType.type}
                         onChange={(e) =>
                             detailType === "personal"

@@ -1,5 +1,7 @@
 const ContactMessage = require("../Models/contactMessageModel")
-const nodemailer = require("nodemailer")
+
+const { sendEmail } = require("../Services/email.service")
+const { sendContactConfirmation } = require("../Services/emailTemplates")
 
 const errorHandler = require("../Utils/errorHandler")
 
@@ -13,25 +15,8 @@ const createContactMessage = async (req, res, next) => {
         }
 
         const contactMessage = await ContactMessage.create({ name, email, phone, message })
-        const transporter = nodemailer.createTransport({
-            service: "gmail",
-            auth: {
-                user: "fitlab0101@gmail.com",
-                pass: process.env.FITLABPASS,
-            },
-        })
 
-        try {
-            await transporter.sendMail({
-                from: `"FitLab Support" <fitlab0101@gmail.com>`,
-                to: email,
-                subject: "We’ve received your message – FitLab",
-                text: `Hi ${name}, Thank you for contacting FitLab. We’ve received your message and our team will get back to you shortly.
-            – FitLab Team`,
-            })
-        } catch (emailError) {
-            console.error("Confirmation email failed:", emailError.message)
-        }
+        await sendContactConfirmation( sendEmail, {name, email} )
 
         return res.status(201).json({
             success: true,

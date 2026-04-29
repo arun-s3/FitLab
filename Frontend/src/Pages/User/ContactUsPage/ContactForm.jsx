@@ -94,6 +94,7 @@ export default function ContactForm({ isSupportConnected, isCoachConnected, onSu
         e.preventDefault()
         acceptTermsOnFirstAction()
         const fields = Object.keys(formData)
+        
         if (fields.some((field) => !formData[field])) {
             sonnerToast.error("Please fill all the details!")
             setLoading(false)
@@ -318,6 +319,7 @@ export default function ContactForm({ isSupportConnected, isCoachConnected, onSu
                                 placeholder='+91'
                                 name='country code'
                                 id='countryCode'
+                                value={formData.countryCode}
                                 onBlur={handleBlurInput}
                                 onChange={handleInputChange}
                                 className={`w-16 px-3 py-3 text-[15px] placeholder:text-[14px] bg-gray-100 border

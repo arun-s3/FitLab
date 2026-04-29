@@ -763,12 +763,12 @@ export default function AdminOrderHistoryPage() {
                                                         <td className='px-6 py-4'>
                                                             <div className='flex items-center gap-3'>
                                                                 <img
-                                                                    src={order.userId.profilePic}
-                                                                    alt={order.userId.username}
+                                                                    src={order?.userId?.profilePic || ''}
+                                                                    alt={order?.userId?.username || ''}
                                                                     className='w-8 h-8 rounded-full'
                                                                 />
                                                                 <span className='text-sm font-medium text-gray-900'>
-                                                                    {order.userId.username}
+                                                                    {order?.userId?.username || ''}
                                                                 </span>
                                                             </div>
                                                         </td>

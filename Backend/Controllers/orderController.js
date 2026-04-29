@@ -5,6 +5,7 @@ const Offer = require("../Models/offerModel")
 const Coupon = require("../Models/couponModel")
 const Payment = require("../Models/paymentModel")
 const Wallet = require("../Models/walletModel")
+const User = require("../Models/userModel")
 const cloudinary = require("../Utils/cloudinary")
 
 const { v4: uuidv4 } = require("uuid")
@@ -14,6 +15,10 @@ const { format } = require("date-fns")
 const { calculateCharges } = require("./controllerUtils/taxesUtils")
 const { recalculateAndValidateCoupon } = require("./controllerUtils/couponsUtils")
 const { generateUniqueAccountNumber } = require("../Controllers/controllerUtils/walletUtils")
+
+const { sendEmail } = require("../Services/email.service")
+const { sendOrderConfirmation } = require("../Services/emailTemplates")
+
 const { errorHandler } = require("../Utils/errorHandler")
 
 const ESTIMATED_DELIVERY_DAYS = 5
@@ -152,6 +157,18 @@ const createOrder = async (req, res, next) => {
             payment.orderId = order._id
             await payment.save()
         }
+
+        const user = await User.findById(userId)
+
+        await sendOrderConfirmation(
+            sendEmail,
+            {
+                name: user?.firstName ? `${user.firstName} {user.lastName}` : user.username, 
+                email: user.email, 
+                orderId: fitlabOrderId, 
+                amount: totalAmountWithTax 
+            }
+        )
 
         for (const item of cart.products) {
             const result = await Product.updateOne(

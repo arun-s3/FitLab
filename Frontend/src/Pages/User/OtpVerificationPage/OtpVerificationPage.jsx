@@ -53,7 +53,7 @@ export default function OtpVerificationPage() {
 
     useEffect(() => {
         const img = new Image()
-        img.src = "/otp-bg.png"
+        img.src = "Images/otp-bg.png"
         img.onload = () => setBgLoaded(true)
     }, [])
 

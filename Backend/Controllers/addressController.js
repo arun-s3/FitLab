@@ -108,9 +108,9 @@ const getDefaultAddress = async (req, res, next) => {
 
         const defaultAddress = await Address.findOne({ userId: id, defaultAddress: true })
 
-        if (!defaultAddress) {
-            next(errorHandler(404, "Default address not found for you!"))
-        }
+        // if (!defaultAddress) {
+        //     next(errorHandler(404, "Default address not found for you!"))
+        // }
 
         res.status(200).json({ message: "Default address retrieved successfully", address: defaultAddress })
     } catch (error) {

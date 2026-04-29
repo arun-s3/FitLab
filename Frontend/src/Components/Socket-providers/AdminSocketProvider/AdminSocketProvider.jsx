@@ -118,8 +118,10 @@ export default function AdminSocketProvider() {
             setGuestCount(count)
         })
 
-        socket.on("notification-sent", (data) => {
-            sonnerToast.success("Notification sent to the user!")
+        socket.on("notification-sent", (title) => {
+            if(title.toLowerCase().includes('order update')) {
+                sonnerToast.success("Order updated successfully!")
+            } else sonnerToast.success("Notification sent to the user!")
         })
 
         socket.on("notification-error", (message) => {

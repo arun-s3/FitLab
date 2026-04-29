@@ -78,7 +78,7 @@ export const changeOrderStatus = createAsyncThunk(
     async ({ orderId, newStatus }, thunkAPI) => {
         try {
             const response = await apiClient.patch(`/order/status/${orderId}`, { newStatus })
-            return { orderId, updatedOrder: response.data.updatedOrder }
+            return { orderId, updatedOrder: response.data.updatedOrder, message: response.data.message }
         } catch (error) {
             const errorMessage =
                 error.response?.data?.message || error.message || "Something went wrong.  Please try again later."

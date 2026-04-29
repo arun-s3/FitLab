@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect, useRef, useContext } from "react"
 import { useOutletContext } from "react-router-dom"
 import "./AdminOrderHistoryPage.css"
 import { useDispatch, useSelector } from "react-redux"
@@ -16,6 +16,7 @@ import {
     CalendarArrowDown,
     SquareCheckBig,
     Truck,
+    RotateCcw,
     PackageCheck,
     ChevronDown,
     TextSearch,
@@ -38,6 +39,7 @@ import { DateSelector } from "../../../Components/UI/Calender/Calender"
 import { SiteSecondaryFillImpButton } from "../../../Components/UI/SiteButtons/SiteButtons"
 import PaginationV2 from "../../../Components/UI/PaginationV2/PaginationV2"
 
+
 import {
     getAllUsersOrders,
     cancelOrder,
@@ -47,6 +49,8 @@ import {
     processRefund,
     resetOrderStates,
 } from "../../../Slices/orderSlice"
+
+import { AdminSocketContext } from "../../../Components/Socket-providers/AdminSocketProvider/AdminSocketProvider"
 
 
 export default function AdminOrderHistoryPage() {
@@ -65,6 +69,8 @@ export default function AdminOrderHistoryPage() {
 
     const [metricError, setMetricError] = useState(false)
 
+    const { sendUserNotification } = useContext(AdminSocketContext)
+
     const [queryDetails, setQueryDetails] = useState({ page: 1, limit: 8, sort: -1, orderStatus: "orders" })
 
     const mouseInSort = useRef(true)
@@ -79,6 +85,8 @@ export default function AdminOrderHistoryPage() {
     const [isHovered, setIsHovered] = useState({})
     const [showProducts, setShowProducts] = useState({})
 
+    const [focusedUserId, setFocusedUserId] = useState(null)
+
     const [refundDetails, setRefundDetails] = useState({ orderId: null, productId: null, refundType: null })
 
     const [showReturnRequestModal, setshowReturnRequestModal] = useState({
@@ -88,7 +96,7 @@ export default function AdminOrderHistoryPage() {
         returnOrderOrProduct: null,
     })
 
-    const { orders, totalUsersOrders, handledOrderDecision, refundSuccess, orderError } = useSelector(
+    const { orders, totalUsersOrders, orderMessage, handledOrderDecision, refundSuccess, orderError } = useSelector(
         (state) => state.order,
     )
     const dispatch = useDispatch()
@@ -180,7 +188,22 @@ export default function AdminOrderHistoryPage() {
             sonnerToast.success("The user is successfully refunded!")
             dispatch(resetOrderStates())
         }
-    }, [handledOrderDecision, refundSuccess])
+    }, [handledOrderDecision, refundSuccess]) 
+
+    useEffect(() => {
+        if (orderMessage && orderMessage?.trim() && focusedUserId) {
+            const data = {
+                userId: focusedUserId,
+                title: "Order update!",
+                message: orderMessage,
+                type: "admin",
+                referenceModel: "Admin",
+            }
+            sendUserNotification(data)
+            setFocusedUserId(null)
+            dispatch(resetOrderStates())
+        }
+    }, [orderMessage])
 
     useEffect(() => {
         if (orderError) {
@@ -439,7 +462,8 @@ export default function AdminOrderHistoryPage() {
         }
     }
 
-    const changeTheOrderStatus = (orderId, order = null, newStatus) => {
+    const changeTheOrderStatus = (userId, orderId, order = null, newStatus) => {
+        setFocusedUserId(userId) 
         if (newStatus === "Review return request") {
             setshowReturnRequestModal({ status: true, order, product: null, returnOrderOrProduct: "order" })
         } else dispatch(changeOrderStatus({ orderId, newStatus }))
@@ -715,7 +739,7 @@ export default function AdminOrderHistoryPage() {
                                                 "Products",
                                                 "Status",
                                                 "Tax(GST)",
-                                                "Total",
+                                                "Total (with tax)",
                                                 "Payment Status",
                                             ].map((tableHeader) => (
                                                 <th
@@ -890,6 +914,7 @@ export default function AdminOrderHistoryPage() {
                                                                             ).status
                                                                             if (requiredStatus !== "refund") {
                                                                                 changeTheOrderStatus(
+                                                                                    order.userId._id,
                                                                                     order._id,
                                                                                     order,
                                                                                     changeStatus(

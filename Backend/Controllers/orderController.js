@@ -58,17 +58,17 @@ const createOrder = async (req, res, next) => {
         let orderTotal = 0
         let couponDiscounts = 0
         let deliveryPrice = cart.deliveryCharge
-        let totalAmountWithTax = 0
 
         for (const item of cart.products) {
             orderTotal += item.total
         }
 
         const { deliveryCharges, gstCharge, absoluteTotalWithTaxes } = calculateCharges(orderTotal, cart.products)
-        cart.deliveryPrice = deliveryCharges
+        cart.deliveryCharge = deliveryCharges
         cart.totalAmountWithTax = absoluteTotalWithTaxes
 
         let currentAbsoluteTotalWithTaxes = absoluteTotalWithTaxes
+        let totalAmountWithTax = currentAbsoluteTotalWithTaxes
 
         const now = new Date()
         let coupon = null
@@ -376,7 +376,7 @@ const getAllUsersOrders = async (req, res, next) => {
             }
         }
         const orders = await Order.find(filter)
-            .populate("userId", "username email profilePic")
+            .populate("userId", "_id username email profilePic")
             .populate("products.productId", "variantType weight color size motorPower")
             .populate("shippingAddress")
             .sort({ createdAt: sort })
@@ -548,9 +548,22 @@ const changeOrderStatus = async (req, res, next) => {
         order.products = order.products.map((product) => ({ ...product, productStatus: requiredStatus }))
 
         await order.save()
+
+        const statusMessages = {
+            processing: "🛠️ Your order is being processed.",
+            confirmed: "✅ Your order has been confirmed.",
+            shipped: "🚚 Your order is on the way!",
+            delivered: "📦 Your order has been delivered successfully.",
+            returning: "↩️ Your return request is in progress.",
+            cancelled: "❌ Your order has been cancelled.",
+            refunded: "💸 Your refund has been completed.",
+        }
+
+        const message = `${statusMessages[requiredStatus]} (Order ${order.fitlabOrderId})`
+
         return res
             .status(200)
-            .json({ success: true, message: "Order and product statuses updated successfully", updatedOrder: order })
+            .json({ success: true, message, updatedOrder: order })
     } catch (error) {
         console.error(error)
         next(error)

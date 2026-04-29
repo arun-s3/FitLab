@@ -16,7 +16,7 @@ export default function CategoryDisplay({
     type,
     filter,
     setFilter,
-    categoryType,
+    autoCheckCategory,
     radioCheckedCategory,
     setRadioCheckedCategory,
     manualCheckCategory,
@@ -63,7 +63,7 @@ export default function CategoryDisplay({
 
     useEffect(() => {
         const categoryArray = checkedCategories.map((category) => category.name)
-        if (!storeCheckedCategories) {
+        if (!storeCheckedCategories && !autoCheckCategory) {
             const topLevelCategories = categories.map((cat) => cat.name)
             const mainCategories = categoryArray.filter((cat) => topLevelCategories.includes(cat))
             const subCategories = categoryArray.filter((cat) => !topLevelCategories.includes(cat))
@@ -156,12 +156,12 @@ export default function CategoryDisplay({
 
     useEffect(() => {
         async function checkRequestedCategory() {
-            if (categoryType) {
-                await checkboxHandler(null, categoryType.id, categoryType.subCategory)
+            if (autoCheckCategory) {
+                await checkboxHandler(null, autoCheckCategory.id, autoCheckCategory.subCategory)
             }
         }
         checkRequestedCategory()
-    }, [categoryType])
+    }, [autoCheckCategory])
 
     const radioClickHandler = (name) => {
         const checkStatus = radioCheckedCategory === name

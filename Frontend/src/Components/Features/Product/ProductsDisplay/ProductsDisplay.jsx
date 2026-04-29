@@ -451,7 +451,7 @@ export default function ProductsDisplay({
                                                 tailwindClasses='w-[12rem] xx-md:w-[9rem] lg:w-[12rem] 
                                                     text-[15px] xx-md:text-[14px] lg:text-[15px]'
                                             >
-                                                {!product.variantOf && !product.variants.length
+                                                {!product?.variantOf && !product?.variants?.length
                                                     ? "Add to Cart"
                                                     : "View Product"}
                                             </SiteButtonSquare>

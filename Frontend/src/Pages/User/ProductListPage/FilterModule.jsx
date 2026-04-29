@@ -52,6 +52,7 @@ export default function FilterModule({
             try {
                 const response = await apiClient.get(`/categories/id/${categoryType}`)
                 setShowSubcategoriesOf({ id: response.data.id, subCategory: response.data.subCategory })
+                setFilter({ ...filter, categories: [...filter.categories, response.data.name] })
             } catch (error) {
                 if (!error.response) {
                     sonnerToast.error("Network error. Please check your internet.")
@@ -170,7 +171,7 @@ export default function FilterModule({
                             exit={{ height: 0, opacity: 0 }}>
                             <CategoryDisplay
                                 type='checkboxType'
-                                categoryType={categoryType ? showSubcategoriesOf : null}
+                                autoCheckCategory={categoryType ? showSubcategoriesOf : null}
                                 filter={filter}
                                 setFilter={setFilter}
                             />

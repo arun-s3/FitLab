@@ -30,7 +30,7 @@ async function notificationSocket(io) {
 
                     io.to(userId.toString()).emit("receive-notification", notification)
 
-                    socket.emit("notification-sent", { success: true })
+                    socket.emit("notification-sent", { title })
                 } catch (error) {
                     console.error("Notification error:", error.message)
                     socket.emit("notification-error", "Failed to send notification. Please try after sometime.")

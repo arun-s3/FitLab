@@ -233,7 +233,7 @@ export default function FeaturesSection() {
                                     <motion.button
                                         whileHover={{ x: 4 }}
                                         transition={{ duration: 0.2 }}
-                                        onClick={feature.learnMoreLink}
+                                        onClick={() => feature?.learnMoreAction()}
                                         className='inline-flex items-center gap-1 text-xs font-semibold text-slate-700 
                                             group-hover:text-slate-900 transition-colors duration-300'
                                     >

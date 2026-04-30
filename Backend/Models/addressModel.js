@@ -21,7 +21,6 @@ const addressSchema = mongoose.Schema(
         },
         nickName: {
             type: String,
-            required: true,
         },
         district: {
             type: String,

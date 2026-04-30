@@ -22,7 +22,7 @@ export default function FeaturesSection() {
             description:
                 "Strength, cardio, accessories, and supplements — intelligently organized. Browse deeply nested product categories designed for both beginners and advanced athletes.",
             color: "from-amber-400 to-orange-400",
-            learnMoreLink: () => setTimeout(() => navigate("/", { state: { scrollTo: "shopByCategories" } }), 500),
+            learnMoreAction: () => setTimeout(() => navigate("/", { state: { scrollTo: "shopByCategories" } }), 500),
         },
         {
             id: 2,
@@ -32,7 +32,7 @@ export default function FeaturesSection() {
             description:
                 "Shop equipment based on how you train, not just what you buy. Users can explore exercises by body part, equipment, difficulty, and variants.",
             color: "from-blue-400 to-cyan-400",
-            learnMoreLink: () => setTimeout(() => navigate("/shop"), 500),
+            learnMoreAction: () => setTimeout(() => navigate("/shop"), 500),
         },
         {
             id: 3,
@@ -42,7 +42,7 @@ export default function FeaturesSection() {
             description:
                 "Create multiple wishlists with custom thumbnails, set priorities for both lists and individual products, and easily edit, organize, and share them with others to plan fitness goals smarter.",
             color: "from-red-400 to-pink-400",
-            learnMoreLink: () => setTimeout(() => navigate("/wishlist"), 500),
+            learnMoreAction: () => setTimeout(() => navigate("/wishlist"), 500),
         },
         {
             id: 4,
@@ -52,7 +52,7 @@ export default function FeaturesSection() {
             description:
                 "One wallet. Multiple gateways. Zero friction. Supports Razorpay, Stripe, and PayPal with smart auto-recharge capabilities.",
             color: "from-green-400 to-emerald-400",
-            learnMoreLink: () => setTimeout(() => navigate("/wallet"), 500),
+            learnMoreAction: () => setTimeout(() => navigate("/wallet"), 500),
         },
         {
             id: 5,
@@ -62,7 +62,7 @@ export default function FeaturesSection() {
             description:
                 "Borrow, lend, and support — powered by trust. FitLab enables users to give loans and receive funds within the platform.",
             color: "from-purple-400 to-violet-400",
-            learnMoreLink: () => setTimeout(() => navigate("/wallet"), 500),
+            learnMoreAction: () => setTimeout(() => navigate("/wallet"), 500),
         },
         {
             id: 6,
@@ -72,7 +72,7 @@ export default function FeaturesSection() {
             description:
                 "Always get the best deal — automatically. Multiple coupons and offers are intelligently evaluated at checkout.",
             color: "from-orange-400 to-red-400",
-            learnMoreLink: () => setTimeout(() => navigate("/coupons"), 500),
+            learnMoreAction: () => setTimeout(() => navigate("/coupons"), 500),
         },
         {
             id: 7,
@@ -82,7 +82,7 @@ export default function FeaturesSection() {
             description:
                 "Pay your way. Track every step. Supports Cash on Delivery, real-time order tracking, and transparent logistics visibility.",
             color: "from-sky-400 to-blue-400",
-            learnMoreLink: () => setTimeout(() => navigate("/orders"), 500),
+            learnMoreAction: () => setTimeout(() => navigate("/orders"), 500),
         },
         {
             id: 8,
@@ -92,7 +92,7 @@ export default function FeaturesSection() {
             description:
                 "Train smarter with structure and precision. Create reusable exercise templates, track workouts with timers, and monitor progression.",
             color: "from-lime-400 to-green-400",
-            learnMoreLink: () => setTimeout(() => navigate("/fitness/tracker"), 500),
+            learnMoreAction: () => setTimeout(() => navigate("/fitness/tracker"), 500),
         },
         {
             id: 9,
@@ -102,7 +102,7 @@ export default function FeaturesSection() {
             description:
                 "Your body, fully quantified. Track comprehensive health metrics including height, weight, blood pressure, and body fat.",
             color: "from-yellow-400 to-amber-400",
-            learnMoreLink: () => setTimeout(() => navigate("/fitness/tracker", { state: { goTo: "bmi" } }), 500),
+            learnMoreAction: () => setTimeout(() => navigate("/fitness/tracker", { state: { goTo: "bmi" } }), 500),
         },
         {
             id: 10,
@@ -112,7 +112,7 @@ export default function FeaturesSection() {
             description:
                 "Turn raw fitness and business data into clarity. Interactive dashboards and AI-generated insights help you understand trends and opportunities.",
             color: "from-indigo-400 to-purple-400",
-            learnMoreLink: () => setTimeout(() => navigate("/fitness/tracker", { state: { goTo: "dashboard" } }), 500),
+            learnMoreAction: () => setTimeout(() => navigate("/fitness/tracker", { state: { goTo: "dashboard" } }), 500),
         },
         {
             id: 11,
@@ -122,7 +122,7 @@ export default function FeaturesSection() {
             description:
                 "Your intelligent training partner for consistent progress. Coach+ provides personalized fitness guidance, workout insights, and contextual recommendations.",
             color: "from-rose-400 to-red-400",
-            learnMoreLink: () => setopenCoach(true),
+            learnMoreAction: () => setopenCoach(true),
         },
         {
             id: 12,
@@ -131,7 +131,7 @@ export default function FeaturesSection() {
             title: "Real-Time Support via Chat & Video",
             description: "Human help, when you need it. Instant chat and video support ensure users are never stuck.",
             color: "from-teal-400 to-cyan-400",
-            learnMoreLink: () => setTimeout(() => navigate("/support"), 500),
+            learnMoreAction: () => setTimeout(() => navigate("/support"), 500),
         },
     ]
 
@@ -157,7 +157,7 @@ export default function FeaturesSection() {
 
 
     return (
-        <section className='w-full bg-white py-20 px-4 md:px-8 lg:px-12'>
+        <section className='w-full bg-white px-4 md:px-8 lg:px-12'>
             <div className='max-w-7xl mx-auto'>
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
@@ -215,7 +215,7 @@ export default function FeaturesSection() {
                                             transition={{ duration: 0.3 }}
                                             className='flex items-center gap-2 text-orange-500 font-semibold text-sm 
                                                 cursor-pointer'
-                                            onClick={() => feature?.learnMoreLink()}
+                                            onClick={() => feature?.learnMoreAction()}
                                         >
                                             <span>Learn More</span>
                                             <svg

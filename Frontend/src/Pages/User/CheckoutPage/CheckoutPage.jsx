@@ -100,7 +100,7 @@ export default function CheckoutPage() {
             const fitlabAutoInitiated = { status: true, userId: cart.userId, refundAmount: cart.absoluteTotalWithTaxes }
             dispatch(processRefund({ refundInfos: { fitlabAutoInitiated } }))
         }
-        if (orderPlaced && orderFailed && !autoInitiateRefund) {
+        if (orderPlaced && orderFailed && !autoInitiateRefund && paymentMethod !== "cashOnDelivery") {
             sonnerToast.info(`
             Your order could not be completed due to server error, so ₹${cart.absoluteTotalWithTaxes} has been safely credited back to your wallet.
         `)

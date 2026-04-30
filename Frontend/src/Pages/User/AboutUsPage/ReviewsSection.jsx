@@ -74,7 +74,7 @@ export default function ReviewsSection() {
                 if (response.status === 200) {
                     const fetchedTestimonials = response.data.testimonies.slice(0, 4).map((testimony) => {
                         const { userId, ...rest } = testimony
-                        const fullName =
+                        const fullName = 
                             userId?.firstName && userId?.lastName
                                 ? `${userId.firstName} ${userId.lastName}`
                                 : userId?.username

@@ -51,13 +51,10 @@ export default function AddressManager({
 
         const optionalFieldNames = ["nickName", "landmark", "alternateMobile", "deliveryInstructions"]
         const requiredFields = Object.keys(newAddressData).filter((field) => !optionalFieldNames.includes(field))
+
         const missingRequiredFields = requiredFields.filter(
             (field) => !newAddressData[field] || newAddressData[field] === "",
         )
-        if (requiredFields.length < 9) {
-            toast.error("Please enter all required fields!")
-            return
-        }
 
         if (missingRequiredFields.length > 0 || Object.values(newAddressData).some((value) => value === undefined)) {
             sonnerToast.error("Some of non-optional fields are not filled. Please check and submit again!")

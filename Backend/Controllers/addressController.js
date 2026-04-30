@@ -12,10 +12,11 @@ const createNewAddress = async (req, res, next) => {
         }
 
         const optionalFieldNames = ["nickName", "landmark", "alternateMobile", "deliveryInstructions"]
-        const requiredFieldsExists =
-            Object.keys(addressData).filter((field) => !optionalFieldNames.includes(field)).length === 9
+        const requiredFields = Object.keys(addressData).filter((field) => !optionalFieldNames.includes(field))
 
-        if (!requiredFieldsExists || Object.values(addressData).some((value) => value === undefined)) {
+        const missingRequiredFields = requiredFields.filter( (field) => !addressData[field] || addressData[field] === "")
+
+        if (missingRequiredFields.length > 0 || Object.values(addressData).some((value) => value === undefined)) {
             next(errorHandler(400, "Please enter all the required fields"))
         } else {
             const adressAlreadyExists = await Address.findOne({ street: addressData.street })

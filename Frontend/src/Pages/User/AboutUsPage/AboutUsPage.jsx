@@ -50,6 +50,10 @@ export default function AboutUsPage() {
                     </Suspense>
 
                     <Suspense fallback={<Fallback variant='products' height='h-32' />}>
+                        <FeaturesSection />
+                    </Suspense>
+
+                    <Suspense fallback={<Fallback variant='products' height='h-32' />}>
                         <ReviewsSection />
                     </Suspense>
 
@@ -59,10 +63,6 @@ export default function AboutUsPage() {
 
                     <Suspense fallback={<Fallback variant='pulse' height='h-32' />}>
                         <CoreValuesSection />
-                    </Suspense>
-
-                    <Suspense fallback={<Fallback variant='products' height='h-32' />}>
-                        <FeaturesSection />
                     </Suspense>
 
                     {!user && <CTASection />}

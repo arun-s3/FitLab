@@ -46,7 +46,7 @@ export default function TransactionDetailsSection({ transactions, queryOptions, 
     const [totalPages, setTotalPages] = useState(20)
 
     const dispatch = useDispatch()
-    const { moneyRequestConfirmed, moneyRequestDeclined, transactionsCount } = useSelector((state) => state.wallet)
+    const { moneyRequestConfirmed, moneyRequestDeclined, walletFunded, transactionsCount } = useSelector((state) => state.wallet)
     const { user } = useSelector((state) => state.user)
 
     const sortTypes = [
@@ -77,7 +77,7 @@ export default function TransactionDetailsSection({ transactions, queryOptions, 
         setQueryOptions((query) => {
             return { ...query, page: currentPage, limit }
         })
-    }, [currentPage, limit])
+    }, [currentPage, limit, walletFunded])
 
     const containerVariants = {
         hidden: { opacity: 0, y: 20 },

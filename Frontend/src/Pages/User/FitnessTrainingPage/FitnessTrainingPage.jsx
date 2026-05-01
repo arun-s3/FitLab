@@ -89,8 +89,8 @@ export default function FitnessTrainingPage() {
 
             const response = await apiClient.post(`/fitness/exercises/list`, { queryDetails })
 
-            if (response.data.data.success) {
-                const totalPagesRequired = Math.ceil(response.data.data.metadata.totalExercises / exercisesPerPage)
+            if (response.data.success) {
+                const totalPagesRequired = Math.ceil(response.data.data.meta.total / exercisesPerPage)
                 setTotalPages(totalPagesRequired)
                 return response.data.data.data
             }

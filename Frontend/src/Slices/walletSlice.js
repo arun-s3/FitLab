@@ -111,6 +111,7 @@ const initialState = {
     peerAccountAdded: true,
     walletCreated: false,
     walletUpdated: false,
+    walletFunded: false,
     walletSettingsUpdated: false,
     stripeClientSecret: null,
     transactionsCount: null,
@@ -142,6 +143,9 @@ const handleAsyncThunkCases = (builder, asyncThunk) => {
             }
             if (asyncThunk === declineMoneyRequest) {
                 state.moneyRequestDeclined = true
+            }
+            if (asyncThunk === addFundsToWallet) {
+                state.walletFunded = true
             }
             if (asyncThunk === updateAutoRechargeSettings) {
                 state.walletUpdated = true
@@ -177,6 +181,7 @@ const walletSlice = createSlice({
             state.walletSuccess = false
             state.walletCreated = false
             state.walletUpdated = false
+            state.walletFunded = false
             state.walletSettingsUpdated = false
             state.stripeClientSecret = null
         },

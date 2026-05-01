@@ -118,19 +118,15 @@ const getExercisesList = async (req, res, next) => {
             sortBy,
             sortOrder,
         } = req.body.queryDetails
-        const response = await axios.get(`${EXERCISE_API_URL}/exercises/filter`, {
+        const response = await axios.get(`${EXERCISE_API_URL}/exercises`, {
             params: {
-                offset: Number(offset),
-                limit: Number(limit),
+                limit: Number(limit) || 10,
 
-                muscles: muscles || undefined,
+                name: search || undefined,
+
+                targetMuscles: muscles || undefined,
                 bodyParts: bodyParts || undefined,
-                equipment: equipment || undefined,
-
-                search: search || undefined,
-
-                sortBy: sortBy || undefined,
-                sortOrder: sortOrder || undefined,
+                equipments: equipment || undefined,
             },
             timeout: 15000,
         })

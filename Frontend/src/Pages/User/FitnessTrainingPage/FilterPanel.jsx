@@ -198,9 +198,7 @@ export default function FilterPanel({
                             <div className='grid grid-cols-1 gap-2'>
                                 {[
                                     { value: "name", label: "Name" },
-                                    { value: "muscle", label: "Muscle" },
                                     { value: "equipment", label: "Equipment" },
-                                    { value: "bodyPart", label: "Body Part" },
                                 ].map((option) => (
                                     <motion.button
                                         key={option.value}

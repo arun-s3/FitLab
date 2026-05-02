@@ -5,9 +5,9 @@ import apiClient from "../../../Api/apiClient"
 import { TriangleAlert, RotateCcw } from "lucide-react"
 
 import { capitalizeFirstLetter } from "../../../Utils/helperFunctions"
+import { SiteButtonSquare } from "../../../Components/UI/SiteButtons/SiteButtons"
 
 import ExerciseCard from "./ExerciseCard"
-import PaginationV2 from "../../../Components/UI/PaginationV2/PaginationV2"
 import TermsDisclaimer from "../../../Components/UI/TermsDisclaimer/TermsDisclaimer"
 
 
@@ -19,6 +19,7 @@ export default function TrainingExercisesList({
     fetchError,
     currentPage,
     totalPages,
+    loadMore,
     refetchExercises,
     onSelectExercise,
     onPageChange,
@@ -103,21 +104,7 @@ export default function TrainingExercisesList({
                                 {children}
                             </div>
 
-                            {isLoading && (
-                                <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    className='flex justify-center py-12'
-                                >
-                                    <motion.div
-                                        animate={{ rotate: 360 }}
-                                        transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-                                        className='w-12 h-12 border-4 border-slate-200 border-t-secondary rounded-full'
-                                    />
-                                </motion.div>
-                            )}
-
-                            {!isLoading && exercises.length > 0 && (
+                            {exercises.length > 0 && (
                                 <motion.div
                                     className='space-y-6'
                                     initial={{ opacity: 0 }}
@@ -136,6 +123,20 @@ export default function TrainingExercisesList({
                                             />
 
                                         ))}
+                                </motion.div>
+                            )}
+
+                            {isLoading && (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className='flex justify-center py-12'
+                                >
+                                    <motion.div
+                                        animate={{ rotate: 360 }}
+                                        transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+                                        className='w-12 h-12 border-4 border-slate-200 border-t-secondary rounded-full'
+                                    />
                                 </motion.div>
                             )}
 
@@ -159,18 +160,26 @@ export default function TrainingExercisesList({
                                 </motion.div>
                             )}
 
-                            <TermsDisclaimer
-                                style='mt-6 !text-right'
-                                startWith='By using this fitness training service'
-                            />
+                            <motion.div 
+                                whileTap={{ scale: 0.98 }}
+                                className="mt-12 w-full flex justify-between items-center"
+                            >
 
-                            {totalPages && (
-                                <PaginationV2
-                                    currentPage={currentPage}
-                                    totalPages={totalPages}
-                                    onPageChange={(page) => onPageChange(page)}
+                                <TermsDisclaimer
+                                    style='!text-right'
+                                    startWith='By using this fitness training service'
                                 />
-                            )}
+
+                                <SiteButtonSquare
+                                    tailwindClasses={`hover:!bg-primaryDark transition duration-300`}
+                                    customStyle={{ paddingInline: "65px", paddingBlock: "9px", borderRadius: "7px" }}
+                                    clickHandler={()=> loadMore()}
+                                >
+                                    Load More
+                                </SiteButtonSquare>
+                                
+                            </motion.div>
+
                         </motion.div>
                     )}
             </AnimatePresence>

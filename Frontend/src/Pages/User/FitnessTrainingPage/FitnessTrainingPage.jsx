@@ -29,7 +29,7 @@ export default function FitnessTrainingPage() {
     const [availableEquipments, setAvailableEquipments] = useState([])
     const [availableMuscles, setAvailableMuscles] = useState([])
 
-    const [sort, setSort] = useState({ by: "", order: "" })
+    const [sort, setSort] = useState({ by: "name", order: "asc" })
 
     const [exercises, setExercises] = useState([])
     const [firstExerciseIndex, setFirstExerciseIndex] = useState(0)
@@ -38,9 +38,14 @@ export default function FitnessTrainingPage() {
 
     const [selectedExercise, setSelectedExercise] = useState(null)
 
-    const [currentPage, setCurrentPage] = useState(1)
+    const [currentPage, setCurrentPage] = useState(0)
     const [totalPages, setTotalPages] = useState(1)
+    const [totalExercises, setTotalExercises] = useState(0)
     const exercisesPerPage = 3
+
+    const [cursor, setCursor] = useState(null)
+    const [cursorAfterOrBefore, setCursorAfterOrBefore] = useState('after')
+    const [hasMore, setHasMore] = useState(true)
 
     const [openCoach, setopenCoach] = useState(true)
 
@@ -67,6 +72,21 @@ export default function FitnessTrainingPage() {
         loadBodyParts()
     }, [])
 
+    const sortExercises = (exercises)=> {
+        exercises.sort((a, b) => {
+            const valA = a[sort.by]
+            const valB = b[sort.by]
+        
+            if (!valA) return 1
+            if (!valB) return -1
+        
+            return sort.order === "asc"
+                ? valA.localeCompare(valB, undefined, { sensitivity: "base" })
+                : valB.localeCompare(valA, undefined, { sensitivity: "base" })
+        })
+        return exercises
+    }
+
     const fetchExercises = async (options) => {
         try {
             if (options?.searchQueryRemoved && selectedBodyParts?.length === 0) {
@@ -74,8 +94,9 @@ export default function FitnessTrainingPage() {
                 return
             }
 
+            if (!hasMore) return
+
             const queryDetails = {
-                offset: firstExerciseIndex,
                 limit: exercisesPerPage,
                 muscles: selectedMuscles.length > 0 ? selectedMuscles.join(",") : undefined,
                 bodyParts: selectedBodyParts.length > 0 ? selectedBodyParts.join(",") : undefined,
@@ -83,16 +104,33 @@ export default function FitnessTrainingPage() {
 
                 search: options?.searchQueryRemoved ? undefined : searchQuery || undefined,
 
-                sortBy: sort.by ? sort.by : undefined,
-                sortOrder: sort.order ? sort.order : undefined,
+                after: cursor || undefined
             }
 
             const response = await apiClient.post(`/fitness/exercises/list`, { queryDetails })
 
             if (response.data.success) {
-                const totalPagesRequired = Math.ceil(response.data.data.meta.total / exercisesPerPage)
-                setTotalPages(totalPagesRequired)
-                return response.data.data.data
+                const newExercises = response.data.data.data
+                
+                const lastItem = newExercises[newExercises.length - 1]
+                const nextCursor = lastItem?.exerciseId
+            
+                setCursor(nextCursor)
+            
+                if (!nextCursor) {
+                    setHasMore(false)
+                }
+            
+                setExercises(prev => {
+                    const merged = [...prev, ...newExercises]
+                
+                    if (sort.by) {
+                        return sortExercises(merged)
+                    }
+                
+                    return merged 
+                })
+            
             }
         } catch (error) {
             setError(true)
@@ -112,8 +150,8 @@ export default function FitnessTrainingPage() {
         setLoading(true)
         setError(false)
 
-        const result = await fetchExercises(options)
-        setExercises(result || [])
+        await fetchExercises(options)
+        // setExercises(result || [])
     }
 
     useEffect(() => {
@@ -123,15 +161,16 @@ export default function FitnessTrainingPage() {
     }, [searchQuery])
 
     useEffect(() => {
-        if (
-            selectedEquipments.length > 0 ||
-            selectedMuscles.length > 0 ||
-            sort.by.trim() !== "" ||
-            sort.order.trim() !== ""
-        ) {
+        if ( selectedEquipments.length > 0 || selectedMuscles.length > 0 ) {
             loadExercises()
         }
-    }, [selectedEquipments, selectedMuscles, sort.by, sort.order])
+    }, [selectedEquipments, selectedMuscles])
+
+    useEffect(() => {
+        if ( sort.by.trim() !== "" || sort.order.trim() !== "" ) {
+            sortExercises(exercises)
+        }
+    }, [sort.by, sort.order])
 
     useEffect(() => {
         if ((!selectedBodyParts || selectedBodyParts.length === 0) && !searchQuery) {
@@ -197,6 +236,7 @@ export default function FitnessTrainingPage() {
                                     onfetchMusclesAndEquipments={saveMusclesAndEquipments}
                                     currentPage={currentPage}
                                     totalPages={totalPages}
+                                    loadMore={loadExercises}
                                     onSelectExercise={setSelectedExercise}
                                     onPageChange={setCurrentPage}
                                     isLoading={loading}
@@ -210,7 +250,7 @@ export default function FitnessTrainingPage() {
                                         selectedMuscles={selectedMuscles}
                                         onMusclesChange={setSelectedMuscles}
                                         selectedEquipments={selectedEquipments}
-                                        onEquipmentsChange={setSelectedEquipments}
+                                        onEquipmentsChange={setSelectedEquipments} 
                                         sortBy={sort.by}
                                         onSortByChange={(value) => setSort((sorts) => ({ ...sorts, by: value }))}
                                         sortOrder={sort.order}

@@ -109,14 +109,12 @@ const getExerciseVideos = async (req, res, next) => {
 const getExercisesList = async (req, res, next) => {
     try {
         const {
-            offset = 0,
             limit = 10,
             muscles,
             bodyParts,
             equipment,
+            after,
             search,
-            sortBy,
-            sortOrder,
         } = req.body.queryDetails
         const response = await axios.get(`${EXERCISE_API_URL}/exercises`, {
             params: {
@@ -127,6 +125,8 @@ const getExercisesList = async (req, res, next) => {
                 targetMuscles: muscles || undefined,
                 bodyParts: bodyParts || undefined,
                 equipments: equipment || undefined,
+
+                after: after || undefined
             },
             timeout: 15000,
         })

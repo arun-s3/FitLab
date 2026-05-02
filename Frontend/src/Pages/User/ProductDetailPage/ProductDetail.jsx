@@ -104,7 +104,6 @@ export default function ProductDetail({ product = null, quantity, setQuantity, o
     const images = product?.images || []
     const mainImageUrl = images[currentImageIndex]?.url || product?.thumbnail?.url || ""
 
-    
     const lists = Array.isArray(wishlist?.lists) ? wishlist.lists : []
 
     useEffect(()=> {

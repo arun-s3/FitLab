@@ -81,6 +81,9 @@ export default function ListBoard({
         exit: { opacity: 0, y: 15, transition: { duration: 0.3 } },
     }
 
+    const lists = Array.isArray(wishlist?.lists) ? wishlist.lists : []
+
+
     return (
         <div className='max-md:relative'>
             <h3 className='inline-block md:hidden mb-4 text-[17px] text-secondary font-[600] tracking-[0.3px]'>
@@ -93,7 +96,7 @@ export default function ListBoard({
                 transition={{ duration: 0.5, ease: "easeOut" }}
                 className={`p-[12px] px-[20px] bg-purple-50 border border-dashed border-secondary rounded-[7px] h-[20rem] 
                     ${
-                        wishlist.lists.length > 2
+                        lists.length > 2
                             ? "md:h-[30rem] overflow-y-auto"
                             : "md:h-fit overflow-y-auto md:overflow-visible"
                     }
@@ -161,9 +164,7 @@ export default function ListBoard({
                     className='w-full pr-[5px] flex flex-col gap-[10px]'
                 >
                     <AnimatePresence>
-                        {wishlist?.lists &&
-                            wishlist.lists.length > 0 &&
-                            [...wishlist.lists]
+                        {   [...lists]
                                 .sort((a, b) => {
                                     const priorityA = a.priority.toString()
                                     const priorityB = b.priority.toString()
@@ -228,8 +229,8 @@ export default function ListBoard({
                                                         </h4>
                                                     </div>
                                                     <h5 className='text-[11px] text-muted font-[450] capitalize'>
-                                                        {` (${list.products.length} ${
-                                                            list.products.length === 1 ? "item" : "items"
+                                                        {` (${list.products?.length || 0} ${
+                                                            list.products?.length === 1 ? "item" : "items"
                                                         }) `}
                                                     </h5>
                                                 </div>

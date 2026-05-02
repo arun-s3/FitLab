@@ -10405,11 +10405,6 @@ select {
   border-color: rgb(203 213 225 / var(--tw-border-opacity));
 }
 
-.hover\:border-slate-400:hover {
-  --tw-border-opacity: 1;
-  border-color: rgb(148 163 184 / var(--tw-border-opacity));
-}
-
 .hover\:border-transparent:hover {
   border-color: transparent;
 }
@@ -10699,11 +10694,6 @@ select {
 .hover\:bg-slate-400:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(148 163 184 / var(--tw-bg-opacity));
-}
-
-.hover\:bg-slate-50:hover {
-  --tw-bg-opacity: 1;
-  background-color: rgb(248 250 252 / var(--tw-bg-opacity));
 }
 
 .hover\:bg-slate-600:hover {
@@ -13491,10 +13481,6 @@ select {
     height: 2.75rem;
   }
 
-  .sm\:h-5 {
-    height: 1.25rem;
-  }
-
   .sm\:h-60 {
     height: 15rem;
   }
@@ -13525,10 +13511,6 @@ select {
 
   .sm\:w-40 {
     width: 10rem;
-  }
-
-  .sm\:w-5 {
-    width: 1.25rem;
   }
 
   .sm\:w-96 {
@@ -13599,10 +13581,6 @@ select {
     justify-items: start;
   }
 
-  .sm\:gap-3 {
-    gap: 0.75rem;
-  }
-
   .sm\:gap-4 {
     gap: 1rem;
   }
@@ -13627,10 +13605,6 @@ select {
 
   .sm\:p-0 {
     padding: 0px;
-  }
-
-  .sm\:p-2\.5 {
-    padding: 0.625rem;
   }
 
   .sm\:p-4 {
@@ -13718,10 +13692,6 @@ select {
 
   .sm\:pt-8 {
     padding-top: 2rem;
-  }
-
-  .sm\:text-left {
-    text-align: left;
   }
 
   .sm\:text-3xl {
@@ -15216,10 +15186,6 @@ select {
 
   .lg\:bg-\[position\:initial\] {
     background-position: initial;
-  }
-
-  .lg\:p-12 {
-    padding: 3rem;
   }
 
   .lg\:px-12 {

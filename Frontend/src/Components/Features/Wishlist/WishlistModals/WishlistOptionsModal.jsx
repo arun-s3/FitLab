@@ -23,6 +23,8 @@ export default function WishlistOptionsModal({ isOpen, onClose, product, setIsWi
 
     if (!isOpen) return null
 
+    const lists = Array.isArray(wishlist?.lists) ? wishlist.lists : []
+
     const handleSubmit = (e) => {
         e.preventDefault()
         dispatch(addProductToList({ listName: selectedList, productId: product._id, productNote, productPriority }))
@@ -73,8 +75,8 @@ export default function WishlistOptionsModal({ isOpen, onClose, product, setIsWi
                             >
                                 <option value=''>Select a wishlist</option>
                                 {
-                                wishlist.lists.filter((list) => list.name !== "Default Shopping List").length > 0 
-                                    ?   wishlist.lists
+                                lists.filter((list) => list.name !== "Default Shopping List").length > 0 
+                                    ?   lists
                                             .filter((list) => list.name !== "Default Shopping List")
                                             .map((list) => (
                                                 <option key={list.name} value={list.name} className="text-purple-500">

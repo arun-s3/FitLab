@@ -57,6 +57,9 @@ export default function WalletCard({ children }) {
         }
         return "FTL" + " " + num
     }
+    
+    const walletData = user && safeWallet ? decryptData(safeWallet) : null
+    const balance = walletData?.balance ?? 0
 
 
     return (
@@ -82,7 +85,7 @@ export default function WalletCard({ children }) {
                     <span className='ml-[5px] font-bold text-secondary block mob:inline'>
                         {firstTimeUser &&
                             message?.toLowerCase().includes("welcome to fitlab wallet") &&
-                            decryptData(safeWallet)?.accountNumber}
+                            walletData?.accountNumber}
                     </span>
                 </motion.p>
 
@@ -113,13 +116,13 @@ export default function WalletCard({ children }) {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.25, duration: 0.4 }}
                     >
-                        ₹ {user && safeWallet ? decryptData(safeWallet)?.balance : !user ? 0 : null}
+                        ₹ {balance.toFixed(2)}
                     </motion.div>
 
                     <div className='flex flex-wrap items-center gap-[6px] mob:gap-[10px]'>
                         <pre className='t:text-[11px] mob:text-xs x-sm:text-sm opacity-80 break-all'>
                             {user && safeWallet && showAcNumber
-                                ? formatAccountNumber(decryptData(safeWallet)?.accountNumber)
+                                ? formatAccountNumber(walletData?.accountNumber)
                                 : !user
                                   ? "**** **** **** ****"
                                   : user && safeWallet && !showAcNumber

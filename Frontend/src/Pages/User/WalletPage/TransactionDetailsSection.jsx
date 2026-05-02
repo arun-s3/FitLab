@@ -165,7 +165,7 @@ export default function TransactionDetailsSection({ transactions, queryOptions, 
             return capitalizeFirstLetter(
                 detailsObj.account +
                     " " +
-                    `( ${type === "auto-recharge" ? "Auto-recharge credit" : "Credited by you"})`,
+                    `(${type === "auto-recharge" ? "Auto-recharge credit" : "Credited by you"})`,
             )
         else if (detailsObj.type === "user") return `User (${detailsObj.account})`
     }
@@ -365,7 +365,7 @@ export default function TransactionDetailsSection({ transactions, queryOptions, 
                                                 `border border-dashed border-x-0 ${transactionBorder}`
                                             }`}
                                         >
-                                            {TransactionSymbol} ₹ {transaction.amount}
+                                            {TransactionSymbol} ₹ {transaction.amount.toFixed(2)}
                                         </td>
 
                                         <td

@@ -106,11 +106,6 @@ export default function ProductDetail({ product = null, quantity, setQuantity, o
 
     const lists = Array.isArray(wishlist?.lists) ? wishlist.lists : []
 
-    useEffect(()=> {
-        console.log("wishlist:", wishlist)
-        console.log("lists:", lists)
-    }, [lists])
-
     const selectImage = (index) => {
         thumbnailRef.current.src = product.images[index].url
         setCurrentImageIndex(index)

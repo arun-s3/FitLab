@@ -207,13 +207,15 @@ export default function ProductsDisplay({
         setIsWishlistOptionsModalOpen(true)
     }
 
+    const lists = Array.isArray(wishlist?.lists) ? wishlist.lists : []
+
     const openWishlistItemRemoveModal = (product) => {
         setSelectedProductForWishlist(product)
         let targetList
         if (!wishlistDisplay) {
-            targetList = wishlist.lists.find((list) => list.products.find((item) => item.product === product._id))
+            targetList = lists.find((list) => list.products?.find((item) => item?.product === product._id))
         } else {
-            targetList = wishlist.lists.find((list) => list.products.find((item) => item.product === product.productId))
+            targetList = lists.find((list) => list.products?.find((item) => item?.product === product.productId))
             setRemoveProductFromWishlist(product.productId)
         }
         setSelectedList(targetList.name)
@@ -229,9 +231,12 @@ export default function ProductsDisplay({
         if (checkAuthOrOpenModal && checkAuthOrOpenModal()) return
         const productOfDefaultList =
             wishlist &&
-            Object.keys(wishlist).length &&
-            wishlist?.lists?.some((list) => 
-                list.name === "Default Shopping List" && list.products?.some((item) => item.product === product._id)
+            Object.keys(wishlist)?.length &&
+            lists.some((list) => 
+                list.name === "Default Shopping List" 
+                    && Array.isArray(list?.products) 
+                    && list?.products?.length > 0 
+                    && list?.products?.some((item) => item.product === product._id)
             )
 
         if (productOfDefaultList) {
@@ -245,10 +250,10 @@ export default function ProductsDisplay({
     return (
         <>
             {wishlistDisplay && currentList &&
-                wishlist && wishlist?.lists?.length > 0 && wishlist?.lists?.some((list) => list.name === currentList) &&
+                lists.some((list) => list.name === currentList) &&
                 (() => {
-                    const list = wishlist.lists.find((list) => list.name === currentList)
-                    const index = wishlistPriorityDetails.findIndex((status) => status.value === list.priority)
+                    const list = lists.find((list) => list?.name === currentList)
+                    const index = wishlistPriorityDetails.findIndex((status) => status?.value === list.priority)
 
                     return (
                         <div className='mx-[1.5rem] mb-[1rem] p-[1rem] flex flex-col gap-[15px] bg-inputBgSecondary 
@@ -464,8 +469,10 @@ export default function ProductsDisplay({
                                                {!wishlistDisplay ? (
                                                     wishlist &&
                                                     Object.keys(wishlist).length > 0 ? (
-                                                        wishlist?.lists?.length > 0 && wishlist?.lists?.some((list) =>
-                                                            list?.products?.length > 0 && list?.products?.some((item) => item.product === product._id),
+                                                        lists.length > 0 && lists.some((list) =>
+                                                            Array.isArray(list?.products) 
+                                                            && list?.products?.length > 0 
+                                                            && list?.products?.some((item) => item.product === product._id),
                                                         ) ? (
                                                             <MdFavorite
                                                                 className='hover:scale-110 transition-transform duration-100'

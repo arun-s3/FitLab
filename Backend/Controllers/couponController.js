@@ -479,11 +479,11 @@ const getBestCoupon = async (req, res, next) => {
                     totalBOGODiscount += freeItemQuantity * item.price
                 }
 
-                discountAmount = totalBOGODiscount
-
                 if (totalBOGODiscount === 0) {
-                    return next(errorHandler(400, "Buy One Get One coupon requires at least one eligible product."))
+                    continue
                 }
+
+                discountAmount = totalBOGODiscount
             }
             if (discountAmount > maxDiscount) {
                 maxDiscount = discountAmount

@@ -60,9 +60,9 @@ export const getTheCart = createAsyncThunk("cart/getTheCart", async (_, thunkAPI
     }
 })
 
-export const applyCoupon = createAsyncThunk("cart/applyCoupon", async ({ couponCode }, thunkAPI) => {
+export const applyCoupon = createAsyncThunk("cart/applyCoupon", async ({ couponCode, autoApplied = false }, thunkAPI) => {
     try {
-        const response = await apiClient.post("/cart/apply-coupon", { couponCode })
+        const response = await apiClient.post("/cart/apply-coupon", { couponCode, autoApplied })
         return response.data
     } catch (error) {
         const errorMessage =

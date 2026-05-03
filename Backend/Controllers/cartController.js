@@ -163,6 +163,8 @@ const addToCart = async (req, res, next) => {
             cart.products,
         )
         const currentAbsoluteTotalWithTaxes = absoluteTotalWithTaxes
+        cart.gst = gstCharge
+        
         let couponMessage = ""
         if (cart.couponUsed) {
             const coupon = await Coupon.findOne({ _id: cart.couponUsed }).populate("applicableCategories", "name")
@@ -466,8 +468,14 @@ const applyCoupon = async (req, res, next) => {
         const coupon = await Coupon.findOne({ code: couponCode.toUpperCase() })
         let cart = await Cart.findOne({ userId }).populate("products.productId")
 
-        if (!coupon || coupon.status !== "active") {
-            return next(errorHandler(400, "Invalid or expired coupon code."))
+        if (!coupon) {
+            return next(errorHandler(400, "Invalid coupon code!"))
+        }
+        if (coupon.status !== "active") {
+            return next(errorHandler(400, "This coupon code is expired!"))
+        }
+        if (coupon.status === "deactivated") {
+            return next(errorHandler(400, "This coupon is currently unavailable due to operational reasons!"))
         }
         const now = new Date()
         if (now < coupon.startDate || now > coupon.endDate) {

@@ -155,13 +155,18 @@ export default function BestCouponModal({ open, onClose, coupon }) {
                                     </div>
                                 ) : null}
                                 {coupon.endDate ? (
-                                    <div className='flex items-center gap-2 rounded-[7px] border border-border 
-                                        bg-inputBgSecondary px-3 py-1.5'
+                                    <div className='rounded-[7px] border border-border bg-inputBgSecondary px-3 py-1.5'
                                     >
-                                        <CalendarClock className='h-4 w-4 text-secondary' />
-                                        <p className='text-[12px] font-medium'>
+                                        <div className='flex items-center gap-2'>
+                                            <CalendarClock className='h-4 w-4 text-secondary' />
+                                            <p className='text-[12px] font-medium'>
+                                                {" "}
+                                                Expires on: {format(new Date(coupon.endDate), "MMMM dd, yyyy")}
+                                            </p>
+                                        </div>
+                                        <p className='mt-[7px] text-[10px] font-medium text-red-500'>
                                             {" "}
-                                            Expires on: {format(new Date(coupon.endDate), "MMMM dd, yyyy")}
+                                            *Please use this coupon to order before expiration!
                                         </p>
                                     </div>
                                 ) : null}

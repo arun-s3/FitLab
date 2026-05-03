@@ -29,7 +29,7 @@ export default function CouponCodeInput({
         if (!user) return
         if (Object.keys(bestCoupon).length > 0 && !couponCode && cart && !cart?.couponUsed) {
             setCouponCode(bestCoupon.code)
-            dispatch(applyCoupon({ couponCode: bestCoupon.code }))
+            dispatch(applyCoupon({ couponCode: bestCoupon.code, autoApplied: true }))
             setBestCouponAppliedStatus({ dispatched: true, applied: false })
         }
     }, [bestCoupon])

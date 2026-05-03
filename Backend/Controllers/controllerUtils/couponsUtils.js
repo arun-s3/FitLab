@@ -18,9 +18,22 @@ const recalculateAndValidateCoupon = async (
     try {
         let couponWarning = ""
         let shouldCouponRemove = false
-        if (!coupon || coupon.status !== "active") {
+
+        if (!coupon) {
             shouldCouponRemove = true
-            couponWarning = "Invalid or expired coupon code.Hence coupon wont be applicable"
+            couponWarning = "Invalid coupon code.Hence coupon wont be applicable"
+            return { couponDiscount: 0, deliveryCharge, shouldCouponRemove, couponWarning }
+        }
+
+        if (coupon.status !== "active") {
+            shouldCouponRemove = true
+            couponWarning = "This coupon code is expired.Hence coupon wont be applicable"
+            return { couponDiscount: 0, deliveryCharge, shouldCouponRemove, couponWarning }
+        }
+
+        if (coupon.status === "deactivated") {
+            shouldCouponRemove = true
+            couponWarning = "This coupon is currently unavailable due to operational reasons. Please try another code."
             return { couponDiscount: 0, deliveryCharge, shouldCouponRemove, couponWarning }
         }
 

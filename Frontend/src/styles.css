@@ -2539,14 +2539,6 @@ select {
   margin-top: 9px;
 }
 
-.mt-\[\] {
-  margin-top: ;
-}
-
-.mt-\[7\] {
-  margin-top: 7;
-}
-
 .line-clamp-1 {
   overflow: hidden;
   display: -webkit-box;
@@ -8398,10 +8390,6 @@ select {
 .text-xs {
   font-size: 0.75rem;
   line-height: 1rem;
-}
-
-.text-\[1px\] {
-  font-size: 1px;
 }
 
 .\!font-medium {

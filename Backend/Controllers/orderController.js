@@ -163,7 +163,7 @@ const createOrder = async (req, res, next) => {
         await sendOrderConfirmation(
             sendEmail,
             {
-                name: user?.firstName ? `${user.firstName} {user.lastName}` : user.username, 
+                name: user?.firstName ? `${user.firstName} ${user.lastName}` : user.username, 
                 email: user.email, 
                 orderId: fitlabOrderId, 
                 amount: totalAmountWithTax 

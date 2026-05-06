@@ -33,16 +33,17 @@ The platform is designed to simulate **a complete digital fitness environment** 
 
 ## 🌐 Live Web Application
 
-* **Frontend (user-side)** : https://www.fitlab.co.in
-* **Frontend (admin-side)** : https://www.fitlab.co.in/admin
+* **User-side** : https://www.fitlab.co.in
+* **Admin-side** : https://www.fitlab.co.in/admin
+
+> 🚀 **Quick Access:**
+> Jump directly to 👉 [Product Walkthrough &amp; Feature Demonstrations](#-product-walkthrough--feature-demonstrations)
 
 ---
 
 ## 📑 Table of Contents
 
-* 📖 [Overview](#overview)
-* 🛠️ [Tech Stack](#tech-stack)
-* 🌐 [Live Demo](#live-demo)
+* 🚀 [Product Walkthrough &amp; Feature Demonstrations with gif images](#-product-walkthrough--feature-demonstrations)
 * 🚀 [Key Highlights](#-key-highlights)
 * 🏗️ [Platform &amp; System Features](#-platform--system-features)
 * ⚙️ [Backend Systems &amp; Services](#-backend-systems--services)
@@ -58,6 +59,246 @@ The platform is designed to simulate **a complete digital fitness environment** 
 * ⚙️ [Installation](#-installation)
 * 🚀 [Future Improvements](#-future-improvements)
 
+---
+
+## 🚀 Product Walkthrough & Feature Demonstrations
+
+Below are real interactions from the live system demonstrating core platform capabilities across fitness, commerce, AI, and admin operations.
+
+### 🏠 Platform Overview & Home page Experience
+
+* Home page showcasing navigation across modules, glimpses on- cart-sidebar, notifications, Coach+, and real-time support.
+
+![HomePage](./gifs/home1.gif)
+
+* Glimpses on- Important pages.
+
+![HomePage](./gifs/home2.gif)
+
+* Home page focuses on- Popular products carousal, Shop by categories, latest products, exclusive offers to choose, FitLab features, and testimonies
+
+![HomePage](./gifs/home3.gif)
+
+............................................................................................................................
+
+### 📊 Admin Dashboard (Business & Operations Overview) & Customer Heatmap
+
+Comprehensive complex analytics dashboards with multiple chart types, searching charts, and real-time business insights with appropriate loaders + Customer heatmap with info on top 5 state, top state with most orders vs with most customers
+
+![AdminDashboard](./gifs/admin-dashboard.gif)
+............................................................................................................................
+
+### 🤖 AI Business Insights Engine (Admin)
+
+AI-powered insights with recommendations, predictions, and probability-based analysis.
+
+![AdminAiInsights](./gifs/admin-ai-insights.gif)
+............................................................................................................................
+
+### 🏋️ Fitness Training System
+
+Discover exercises by muscle group, equipment, and difficulty with GIF demos, guided steps with videos & smart equipment recommendations with cursor based pagination, complex filtering, sorting and searching
+
+![FitnessTrainingPage](./gifs/fitness-training.gif)
+............................................................................................................................
+
+### 🛒 Smart Shopping Experience
+
+Advanced product discovery with highly flexible multi-filtering, debounced searching, limiting, sorting, with deeply nested category navigation, wishlist control, pagination and grid & list based views.
+
+![Shopping](./gifs/shopping.gif)
+
+............................................................................................................................
+
+### 📦 Product Detail & Review System
+
+Detailed product exploration with zoom-enabled images, product/category discount or offer info, variant selection, specifications, rich product information, verified reviews & system(add/edit, helpful, sorting), similar product recommendations and active offers.
+
+![ProductDetailPage](./gifs/product-detail.gif)
+
+............................................................................................................................
+
+### 📦 Admin Product Management + Image Editor
+
+Advanced product creation system supporting variants, nested categories, flexible pricing/discount logic, and strict field & image validation with real-time feedback + Image editor (crop, filters, color tuning, RGB, hue-rotate, transforms) with automatic compression.
+
+![AdminProductsPage](./gifs/admin-products.gif)
+
+![AdminProductsPage](./gifs/admin-products-list.gif)
+
+............................................................................................................................
+
+### 📊 Fitness & Health Tracking System with dashboard and AI driven insights
+
+* Comprehensive workout , templates, current workout detailed info including calories burned,  structured logging, workout history, AI driven progress insights and dashboard.
+
+![FitnessTrackingPage](./gifs/fitness-tracker1.gif)
+
+* Track BMI, weight, blood pressure, glucose, body composition, waist-hip ratio & other metrics & intelligent estimation of **potential health risks** and get weekly health progress with AI driven insights. Built-in reminders for consistent health logging.
+
+![FitnessTrackingPage](./gifs/fitness-tracker2.gif)
+
+............................................................................................................................
+
+### 🤖 Coach+ AI Fitness Companion
+
+Context-aware AI with session providing personalized fitness guidance and recommendations considering user's workout routines, health profile, orders, wishlist, etc.
+
+![CoachPlus](./gifs/coach+.gif)
+
+............................................................................................................................
+
+### 💬 Real-Time Video/Text Chat Support System (User & Admin)
+
+* Live persistent text chat and support console enabling instant communication, guest-mode chat, admin can search users and chat. Chats are saved. Also shows FAQ accordion
+
+![SupportPage](./gifs/support1.gif)
+
+* Video chat support , queue management, in-call messaging, admin-availabilitycontrol
+
+![SupportPage](./gifs/support2.gif)
+
+* Scheduling video chat sessions with topics and details and admin session filtering
+
+![SupportPage](./gifs/support3.gif)
+
+............................................................................................................................
+
+### 💸 Wallet & Transaction System
+
+* Integrated wallet with funding via Raorpay/Stripe/Paypal, transaction tracking with advanced filtering, sorting & pagination.
+
+![WalletPage](./gifs/wallet1.gif)
+
+* Lending & borrow money (peer to peer fitness economy), auto & semi-auto recharge
+  ![WalletPage](./gifs/wallet2.gif)
+
+............................................................................................................................
+
+### 🛍 End-to-End Shopping Flow (Cart → Checkout)
+
+Seamless purchase flow with smart coupon handling(with auto-application of best coupons), pricing breakdown with tax and product/category discounts.
+
+![CartCheckoutFlow](./gifs/cart-checkout.gif)
+
+............................................................................................................................
+
+### 💳 Multi-Payment System, Checkout & Failure Handling
+
+Multi-gateway payments (Razorpay, Stripe, Paypal, Wallet) with robust error handling, retry flows, automated refund fallback workflows and email confirmation.
+
+![CheckoutError](./gifs/checkout-error.gif)
+
+* Razorpay Integration
+
+![CheckoutError](./gifs/checkout-razorpay.gif)
+
+* Stripe integration
+
+![CheckoutError](./gifs/checkout-stripe.gif)
+
+* Payments via wallet
+
+![CheckoutError](./gifs/checkout-wallet.gif)
+
+............................................................................................................................
+
+### 🎟 Admin Coupon Management
+
+Advanced & flexible coupon creation(with percentage, fixed, bogo & free shipping based coupons) with plethora of options,advanced filtering, sorting and limiting targeting, scheduling, and analytics.
+
+![Shopping](./gifs/admin-coupons.gif)
+
+---
+
+<details>
+<summary>📸 <b>Explore More Features (Click to Expand)</b></summary>
+
+A deeper look into supporting systems, extended workflows, and platform-wide capabilities.
+
+---
+
+### ❤️ Wishlist Planning System
+
+Create and manage multiple wishlists with priorities, notes, reminders, editable thumbnail and shareable/public lists.
+
+![Wishlist](./gifs/wishlist1.gif)
+![Wishlist](./gifs/wishlist2.gif)
+
+............................................................................................................................
+
+### 👥 Admin Customer Management
+
+Search, sort, filter, monitor user activity, block/unblock users, fraud controls, manage accounts, message users and analyze customer behavior & order insights.
+
+![AdminCustomers](./gifs/admin-customers.gif)
+
+............................................................................................................................
+
+### 🔔 Real-Time Notification System
+
+Socket-powered notifications with live updates, read/unread status, automation updaetes and system alerts.
+
+![Notifications](./gifs/notifications.gif)
+
+............................................................................................................................
+
+### 🗂 Admin Category Management
+
+Manage deeply nested categories, apply category discounts, block/unblock catgeory and control catalog structure dynamically.
+
+![AdminCategories](./gifs/admin-categories.gif)
+
+............................................................................................................................
+
+### 📦 Order History & Tracking
+
+Track past orders, cancel orders, refund orders, view status updates, manage returns, access invoices, add FItlab testimony and product review.
+
+![OrderHistory](./gifs/order-history1.gif)
+![OrderHistory](./gifs/order-history2.gif)
+
+............................................................................................................................
+
+### 👤 User Account & Profile System
+
+Manage personal information, address, preferences, profile customization, reset password, change profile pic with front cam or upload file.
+
+![UserAccount](./gifs/user-account.gif)
+
+............................................................................................................................
+
+### 🏷 Admin Offer Management
+
+Create and manage highly flexible offer campaigns with thumbnail, complex options, scheduling, targeting, and performance tracking.
+
+![AdminOffers](./gifs/admin-offers.gif)
+
+............................................................................................................................
+
+### 📑 Admin Order Management
+
+Monitor all orders, change status, handle cancellations, approve returns, and process refunds.
+
+![Admin Orders](./gifs/admin-orders.gif)
+
+............................................................................................................................
+
+### 🎟 User Coupons & Address Management
+
+View search & apply coupons in the cart, add/edit/remove/make default addresses.
+
+![Coupons & Address](./gifs/user-coupons-address.gif)
+
+............................................................................................................................
+
+### 📄 Platform, Error and Legal Pages
+
+Includes Privacy Policy, Terms & Conditions, Contact Us, About Us, and custom error pages (401, 403, 404).
+
+![Pages](./gifs/legal-pages.gif)
+
+</details>
 ---
 
 ## 🚀 Key Highlights

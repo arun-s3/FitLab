@@ -640,7 +640,7 @@ export default function CheckoutPage() {
                     />
                 )}
 
-                {isPaymentFailedModalOpen.status && (
+                {/* {isPaymentFailedModalOpen.status && (
                     <PaymentFailedModal
                         isOpen={isPaymentFailedModalOpen.status}
                         message={isPaymentFailedModalOpen.msg}
@@ -649,7 +649,7 @@ export default function CheckoutPage() {
                         paymentMethod={paymentMethod}
                         onContactSupport={() => setOpenChatBox(true)}
                     />
-                )}
+                )} */}
 
                 {openChatBox && (
                     <div className='fixed bottom-[2rem] right-[2rem] z-50'>

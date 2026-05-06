@@ -251,7 +251,7 @@ export default function MoneyExchange({ walletBalance, onAuthCheckModal }) {
                                     const value = e.target.value.replace(/[^\d\s]/g, "")
                                     setSelectedRecipient({ name: "", accountNumber: value })
                                 }}
-                                onBlur={() => onValidateAccount("sendMoney")}
+                                onBlur={() => onValidateAccount("sendMoney", selectedRecipient?.accountNumber)}
                                 value={selectedRecipient?.accountNumber}
                             />
 
@@ -339,7 +339,7 @@ export default function MoneyExchange({ walletBalance, onAuthCheckModal }) {
                                     const value = e.target.value.replace(/[^\d\s]/g, "")
                                     setSelectedCreditor({ name: "", accountNumber: value })
                                 }}
-                                onBlur={() => onValidateAccount("receiveMoney")}
+                                onBlur={() => onValidateAccount("receiveMoney", selectedCreditor?.accountNumber)}
                                 value={selectedCreditor?.accountNumber}
                             />
 

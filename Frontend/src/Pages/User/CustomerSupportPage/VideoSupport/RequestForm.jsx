@@ -114,7 +114,7 @@ export default function RequestForm({ onImmediateRequest, onScheduleRequest }) {
                             </div>
                         </div>
 
-                        <h2 className='text-2xl font-bold mb-3 transition-colors duration-500'>Schedule a Session</h2>
+                        <h2 className='text-2xl font-bold mb-3 transition-colors duration-500'>Schedule a Video Session</h2>
 
                         <p className='text-gray-600 text-center mb-6 leading-relaxed transition-colors duration-500'>
                             Book a personalized consultation at your preferred time with our expert trainers

@@ -365,7 +365,7 @@ export default function TransactionDetailsSection({ transactions, queryOptions, 
                                                 `border border-dashed border-x-0 ${transactionBorder}`
                                             }`}
                                         >
-                                            {TransactionSymbol} ₹ {transaction.amount.toFixed(2)}
+                                            {TransactionSymbol} ₹ {transaction.amount}
                                         </td>
 
                                         <td

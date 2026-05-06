@@ -6,7 +6,7 @@ async function callOpenRouter(prompt, model = "anthropic/claude-3.5-sonnet") {
     {
       model,
       messages: [{ role: "user", content: prompt }],
-      max_tokens: 1500,  
+      max_tokens: 350,  
       temperature: 0.7
     },
     {

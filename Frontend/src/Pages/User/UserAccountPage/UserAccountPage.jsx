@@ -85,7 +85,18 @@ export default function UserAccountPage() {
         const getUserDefaultAddress = async () => {
             if (user) {
                 setUserDetails({ ...user })
-                setDob(new Date(user.dob))
+                if (user?.dob) {
+                    const parsedDob = new Date(user.dob)
+
+                    if (!isNaN(parsedDob.getTime())) {
+                        setDob(parsedDob)
+                    } else {
+                        setDob(null)
+                    }
+                } else {
+                    setDob(null)
+                }
+
                 dispatch(getDefaultAddress({ id: user._id }))
             }
         }
@@ -143,11 +154,6 @@ export default function UserAccountPage() {
         { type: "landmark", Icon: MapPinHouse, optionalField: true },
         { type: "alternateMobile", Icon: Phone, optionalField: true },
     ]
-
-    const headerBg = {
-        backgroundImage: "url('/Images/header-bg.png')",
-        backgrounSize: "cover",
-    }
 
     const toggleDropdown = (dropdownKey) => {
         setOpenDropdowns((prevState) =>
@@ -334,7 +340,7 @@ export default function UserAccountPage() {
                                                 setDate={setDob}
                                                 placeholderText={`${editing ? "Select your DOB" : ""}`}
                                                 isDisabled={!editing}
-                                                value={userDetails.dob || dob}
+                                                value={dob}
                                             />
 
                                             {!editing && (

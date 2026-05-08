@@ -642,42 +642,54 @@ const addOrUpdateDailyHealthProfile = async (req, res, next) => {
             }
         }
 
-        const today = new Date()
-        today.setHours(0, 0, 0, 0)
+        // const today = new Date()
+        // today.setHours(0, 0, 0, 0)
 
         const latestProfile = await HealthProfile.findOne({ userId }).sort({ date: -1 })
+
+        const today = new Date().toISOString().split("T")[0]
 
         const profilePayload = {
             userId,
             age,
             height,
             weight,
+        
             waistCircumference: waistCircumference ?? null,
+        
             hipCircumference: hipCircumference ?? null,
+        
             bloodPressure: {
                 systolic: bloodPressure?.systolic ?? null,
                 diastolic: bloodPressure?.diastolic ?? null,
             },
+        
             bodyFatPercentage: bodyFatPercentage ?? null,
+        
             glucose: glucose ?? null,
+        
+            recordDate: today,
         }
-
-        if (latestProfile) {
-            const profileDate = new Date(latestProfile.date)
-            profileDate.setHours(0, 0, 0, 0)
-
-            if (profileDate.getTime() === today.getTime()) {
-                const updatedProfile = await HealthProfile.findByIdAndUpdate(latestProfile._id, profilePayload, {
-                    new: true,
-                })
-
-                return res.status(200).json({ success: true, message: "Health profile updated for today!" })
+        
+        const updatedProfile = await HealthProfile.findOneAndUpdate(
+            {
+                userId,
+                recordDate: today,
+            },
+            {
+                $set: profilePayload,
+            },
+            {
+                upsert: true,
+                new: true,
             }
-        }
-
-        const newProfile = await HealthProfile.create({ ...profilePayload, date: Date.now() })
-
-        return res.status(201).json({ success: true, message: "New daily health profile created!" })
+        )
+        
+        return res.status(200).json({
+            success: true,
+            message: "Health profile saved successfully!",
+            profile: updatedProfile,
+        })
     } catch (error) {
         console.error(error)
         next(error)

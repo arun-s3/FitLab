@@ -11,6 +11,10 @@ const HealthProfileSchema = new mongoose.Schema(
             type: Date,
             default: Date.now,
         },
+        recordDate: {
+            type: String,
+            required: true,
+        },
         age: {
             type: Number,
             min: 1,
@@ -85,6 +89,11 @@ const HealthProfileSchema = new mongoose.Schema(
         },
     },
     { timestamps: true },
+)
+
+HealthProfileSchema.index(
+    { userId: 1, recordDate: 1 },
+    { unique: true }
 )
 
 module.exports = mongoose.model("HealthProfile", HealthProfileSchema)

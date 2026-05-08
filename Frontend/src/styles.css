@@ -3891,6 +3891,10 @@ select {
   min-width: 15rem;
 }
 
+.min-w-\[17rem\] {
+  min-width: 17rem;
+}
+
 .min-w-\[250px\] {
   min-width: 250px;
 }

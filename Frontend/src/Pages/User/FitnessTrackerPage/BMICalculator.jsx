@@ -12,6 +12,7 @@ import TermsDisclaimer from "../../../Components/UI/TermsDisclaimer/TermsDisclai
 import AuthPrompt from "../../../Components/Features/Auth/AuthPrompt/AuthPrompt"
 import AuthModal from "../../../Components/Features/Auth/AuthModal/AuthModal"
 
+import { CustomHashLoader } from "../../../Components/UI/Loader/Loader"
 import { updateUserWeight } from "../../../Slices/userSlice"
 
 
@@ -32,6 +33,8 @@ export default function BMICalculator() {
 
     const [results, setResults] = useState(null)
     const [showResults, setShowResults] = useState(false)
+
+    const [loading, setLoading] = useState(false)
 
     const [isAuthModalOpen, setIsAuthModalOpen] = useState({ status: false, accessFor: "this feature" })
 
@@ -78,19 +81,22 @@ export default function BMICalculator() {
     }
 
     const updateHealthProfile = async (healthProfile) => {
-        if (checkAuthOrOpenModal()) return
+        const shouldTerminate = await checkAuthOrOpenModal()
+        if (shouldTerminate) return
+
         acceptTermsOnFirstAction()
+
         try {
+            setLoading(true)
             const response = await apiClient.post(`/fitness/tracker/health/update`, { healthProfile })
             if (response.status === 200 || response.status === 201) {
                 sonnerToast.success("Your health profile updated!")
                 sonnerToast.info(
-                    "Keep your health profile updated every week/month for accurate insights and trackig. We'll remind you weekly.",
+                    "Keep your health profile updated every week/month for accurate insights and tracking. We'll remind you weekly.",
                     { duration: 5500 },
                 )
                 const userWeightObj = { weight: healthProfile.weight }
                 dispatch(updateUserWeight({ userWeight: userWeightObj }))
-                setLoading(false)
             }
         } catch (error) {
             if (!error.response) {
@@ -100,6 +106,8 @@ export default function BMICalculator() {
             } else {
                 sonnerToast.error("Internal server error")
             }
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -108,8 +116,14 @@ export default function BMICalculator() {
             const response = await apiClient.get(`/fitness/tracker/health`)
             if (response.status === 200) {
                 const { bodyFatPercentage, bloodPressure, ...rest } = response.data.latestProfile
-                const { systolic, diastolic } = bloodPressure
-                const latestProfileDatas = { bodyFat: bodyFatPercentage, systolic, diastolic, ...rest }
+                const systolic = bloodPressure?.systolic || ""
+                const diastolic = bloodPressure?.diastolic || ""
+                const latestProfileDatas = {
+                    bodyFat: bodyFatPercentage || "",
+                    systolic: systolic || "",
+                    diastolic: diastolic || "",
+                    ...rest,
+                }
                 setFormData((prev) => ({ ...prev, ...latestProfileDatas }))
                 sonnerToast.info("Your latest health indicators are shown. Update fields as needed!", {
                     duration: 7000,
@@ -513,11 +527,11 @@ export default function BMICalculator() {
                                 <motion.button
                                     type='submit'
                                     className='flex-1 bg-gradient-to-r from-purple-600 to-purple-500 text-white font-bold py-3 
-                                        px-6 rounded-lg hover:shadow-lg hover:shadow-purple-600/30 transition-all'
+                                        min-w-[17rem] px-6 rounded-lg hover:shadow-lg hover:shadow-purple-600/30 transition-all'
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
                                 >
-                                    Calculate
+                                    {loading ? <CustomHashLoader loading={loading} /> : "Calculate"}
                                 </motion.button>
                                 <motion.button
                                     type='button'

@@ -36,15 +36,15 @@ The platform is designed to simulate **a complete digital fitness environment** 
 * **User-side** : https://www.fitlab.co.in
 * **Admin-side** : https://www.fitlab.co.in/admin
 
-## 🎥 Project Demonstration Video
+## 🎥 Project Demonstration Video & GIF Walkthroughs
 
 📺 Watch the complete platform walkthrough and feature demonstrations (with Chapter timestamps available):
 
 https://www.youtube.com/watch?v=YTgUzVmnheo
 
-🚀 **Quick Access:**
+⬇️ Detailed GIF walkthroughs are available below.
 
-> Jump directly to 👉 [Product Walkthrough &amp; Feature Demonstrations (with gif images)](#-product-walkthrough--feature-demonstrations)
+[Product Walkthrough &amp; Feature Demonstrations with gif images](#-product-walkthrough--feature-demonstrations)
 
 ---
 
@@ -55,7 +55,6 @@ https://www.youtube.com/watch?v=YTgUzVmnheo
 * 🏗️ [Platform &amp; System Features](#-platform--system-features)
 * ⚙️ [Backend Systems &amp; Services](#-backend-systems--services)
 * ☁️ [Infrastructure &amp; Deployment](#-infrastructure--deployment)
-* 📸 [Screenshots](#-screenshots)
 * 🧩 [Platform Capabilities](#-platform-capabilities)
 * 👤 [User Features](#-user-features)
 * 🛠️ [Admin Panel Features](#-admin-panel-features)
@@ -414,10 +413,6 @@ The platform uses **Framer Motion powered animations & some custom CSS animation
 * 🗄 **Database Infrastructure** — Cloud-hosted **MongoDB Atlas** cluster for scalable and managed database operations.
 * 🌐 **Domain & DNS** — Domain registered via **BigRock** with DNS routing through  **AWS Route53** .
 * 🔐 **Secure Environment Management** — Sensitive credentials managed through environment variables in the CI/CD pipeline.
-
----
-
-## 📸 Screenshots
 
 ---
 

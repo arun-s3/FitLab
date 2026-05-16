@@ -26,7 +26,7 @@ export default function ReturnRequestModal({
     const [currentImageIndex, setCurrentImageIndex] = useState(1)
     const [selectedAction, setSelectedAction] = useState(null)
 
-    const [images, setImages] = useState(null)
+    const [images, setImages] = useState([])
 
     const { handledOrderDecision } = useSelector((state) => state.order)
     const dispatch = useDispatch()
@@ -259,9 +259,11 @@ export default function ReturnRequestModal({
                                             <div className='relative bg-gradient-to-br from-slate-50 to-slate-100 
                                                 rounded-xl overflow-hidden border border-slate-200'
                                             >
+                                               {
+                                                images && images.length > 1 &&
                                                 <motion.img
                                                     key={currentImageIndex}
-                                                    src={images[currentImageIndex]}
+                                                    src={images?.[currentImageIndex] || ''}
                                                     alt={`Evidence ${currentImageIndex + 1}`}
                                                     className='w-full h-80 object-cover'
                                                     initial={{ opacity: 0 }}
@@ -269,6 +271,7 @@ export default function ReturnRequestModal({
                                                     exit={{ opacity: 0 }}
                                                     transition={{ duration: 0.3 }}
                                                 />
+                                               }
 
                                                 {images.length > 1 && (
                                                     <>

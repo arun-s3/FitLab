@@ -36,14 +36,21 @@ The platform is designed to simulate **a complete digital fitness environment** 
 * **User-side** : https://www.fitlab.co.in
 * **Admin-side** : https://www.fitlab.co.in/admin
 
-> 🚀 **Quick Access:**
-> Jump directly to 👉 [Product Walkthrough &amp; Feature Demonstrations](#-product-walkthrough--feature-demonstrations)
+## 🎥 Project Demonstration Video
+
+📺 Watch the complete platform walkthrough and feature demonstrations (with Timestamps available):
+
+https://www.youtube.com/watch?v=YTgUzVmnheo
+
+🚀 **Quick Access:**
+> Jump directly to 👉 [Product Walkthrough &amp; Feature Demonstrations (with gif images)](#-product-walkthrough--feature-demonstrations)
+
 
 ---
 
 ## 📑 Table of Contents
 
-* 🚀 [Product Walkthrough &amp; Feature Demonstrations with gif images](#-product-walkthrough--feature-demonstrations)
+* 🎬 [Product Walkthrough &amp; Feature Demonstrations with gif images](#-product-walkthrough--feature-demonstrations)
 * 🚀 [Key Highlights](#-key-highlights)
 * 🏗️ [Platform &amp; System Features](#-platform--system-features)
 * ⚙️ [Backend Systems &amp; Services](#-backend-systems--services)
@@ -61,7 +68,7 @@ The platform is designed to simulate **a complete digital fitness environment** 
 
 ---
 
-## 🚀 Product Walkthrough & Feature Demonstrations
+## 🎬  Product Walkthrough & Feature Demonstrations
 
 Below are real interactions from the live system demonstrating core platform capabilities across fitness, commerce, AI, and admin operations.
 
@@ -120,9 +127,11 @@ Detailed product exploration with zoom-enabled images, product/category discount
 
 ### 📦 Admin Product Management + Image Editor
 
-Advanced product creation system supporting variants, nested categories, flexible pricing/discount logic, and strict field & image validation with real-time feedback + Image editor (crop, filters, color tuning, RGB, hue-rotate, transforms) with automatic compression.
+* Advanced product creation system supporting variants, nested categories, flexible pricing/discount logic, and strict field & image validation with real-time feedback + Image editor (crop, filters, color tuning, RGB, hue-rotate, transforms) with automatic compression.
 
 ![AdminProductsPage](./gifs/admin-products.gif)
+
+* Advanced product listing system with multi-filtering, sorting, search, and pagination, featuring real-time inventory management, block/unblock controls, inline editing, and CSV/PDF export across grid, list, and table views.
 
 ![AdminProductsPage](./gifs/admin-products-list.gif)
 

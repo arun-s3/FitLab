@@ -38,13 +38,13 @@ The platform is designed to simulate **a complete digital fitness environment** 
 
 ## 🎥 Project Demonstration Video
 
-📺 Watch the complete platform walkthrough and feature demonstrations (with Timestamps available):
+📺 Watch the complete platform walkthrough and feature demonstrations (with Chapter timestamps available):
 
 https://www.youtube.com/watch?v=YTgUzVmnheo
 
 🚀 **Quick Access:**
-> Jump directly to 👉 [Product Walkthrough &amp; Feature Demonstrations (with gif images)](#-product-walkthrough--feature-demonstrations)
 
+> Jump directly to 👉 [Product Walkthrough &amp; Feature Demonstrations (with gif images)](#-product-walkthrough--feature-demonstrations)
 
 ---
 
@@ -68,7 +68,7 @@ https://www.youtube.com/watch?v=YTgUzVmnheo
 
 ---
 
-## 🎬  Product Walkthrough & Feature Demonstrations
+## 🎬 Product Walkthrough & Feature Demonstrations
 
 Below are real interactions from the live system demonstrating core platform capabilities across fitness, commerce, AI, and admin operations.
 

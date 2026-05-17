@@ -2,26 +2,48 @@ const { CoachSessionStateSchema, DEFAULT_COACH_STATE } = require("../../AI/Const
 
 
 function parseAIJsonResponse(aiText) {
-    if (!aiText || typeof aiText !== "string") return null
+
+    if (!aiText || typeof aiText !== "string") {
+        return null
+    }
 
     try {
+
         const cleaned = aiText
             .replace(/```json\s*/i, "")
             .replace(/```/g, "")
             .trim()
 
-        const parsed = JSON.parse(cleaned)
+        const match = cleaned.match(/\{[\s\S]*\}/)
 
-        if (typeof parsed !== "object" || Array.isArray(parsed)) {
-            throw new Error("Parsed AI response is not an object")
+        if (!match) {
+            throw new Error("No JSON object found")
+        }
+
+        const parsed = JSON.parse(match[0])
+
+        if (
+            typeof parsed !== "object" ||
+            parsed === null ||
+            Array.isArray(parsed)
+        ) {
+            throw new Error("Parsed response is not an object")
         }
 
         return parsed
+
     } catch (error) {
-        console.error("Failed to parse AI JSON:", error.message)
+
+        console.error(
+            "Failed to parse AI JSON:",
+            error.message
+        )
+
         return null
     }
 }
+
+module.exports = { parseAIJsonResponse }
 
 
 function getPeriodRange(periodType, baseDate = new Date()) {

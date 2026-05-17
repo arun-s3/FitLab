@@ -87,8 +87,8 @@ async function runAICoach({ userId, query, userGoal }) {
         userGoal,
     })
 
-    const aiResponse = await generateAIResponse(prompt)
-    const parsed = parseAIJsonResponse(aiResponse)
+    const parsed = await generateAIResponse(prompt)
+    // const parsed = parseAIJsonResponse(aiResponse)
     if (!parsed?.responseText) {
         throw new Error("Invalid AI response")
     }

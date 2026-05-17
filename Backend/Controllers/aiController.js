@@ -152,9 +152,9 @@ const askAIForAnalysis = async (req, res, next) => {
             const isRelativeAnalysis = Boolean(prevWorkout)
             const prompt = buildLastWorkoutPrompt(lastWorkout, isRelativeAnalysis ? prevWorkout : null)
 
-            const aiResponse = await generateAIResponse(prompt)
+            const aiAnalysis = await generateAIResponse(prompt)
 
-            const aiAnalysis = parseAIJsonResponse(aiResponse)
+            // const aiAnalysis = parseAIJsonResponse(aiResponse)
             await FitnessTracker.updateOne(
                 { _id: trackerId, "exercises._id": lastWorkout._id },
                 {
@@ -168,9 +168,9 @@ const askAIForAnalysis = async (req, res, next) => {
         if (analysisType === "latestHealthProfile") {
             const isRelativeAnalysis = Boolean(prevProfile)
             const prompt = buildLatestHealthPrompt(latestProfile, isRelativeAnalysis ? prevProfile : null)
-            const aiResponse = await generateAIResponse(prompt)
+            const aiAnalysis = await generateAIResponse(prompt)
 
-            const aiAnalysis = parseAIJsonResponse(aiResponse)
+            // const aiAnalysis = parseAIJsonResponse(aiResponse)
             if (!aiAnalysis || typeof aiAnalysis !== "object") {
                 return next(errorHandler(502, "Failed to analyze workout"))
             }
@@ -188,9 +188,9 @@ const askAIForAnalysis = async (req, res, next) => {
         if (analysisType === "periodFitnessProfile") {
             const prompt = buildPeriodFitnessPrompts(fitnessProfile, periodType)
 
-            const aiResponse = await generateAIResponse(prompt)
+            const aiAnalysis = await generateAIResponse(prompt)
 
-            const aiAnalysis = parseAIJsonResponse(aiResponse)
+            // const aiAnalysis = parseAIJsonResponse(aiResponse)
             if (!aiAnalysis || typeof aiAnalysis !== "object") {
                 return next(errorHandler(502, "Failed to health profile"))
             }
@@ -210,9 +210,9 @@ const askAIForAnalysis = async (req, res, next) => {
 
         if (analysisType === "fitlabDashboardDatas") {
             const prompt = buildBusinessPrompts(dashboardDatas)
-            const aiResponse = await generateAIResponse(prompt)
+            const aiAnalysis = await generateAIResponse(prompt)
 
-            const aiAnalysis = parseAIJsonResponse(aiResponse)
+            // const aiAnalysis = parseAIJsonResponse(aiResponse)
             if (!aiAnalysis || typeof aiAnalysis !== "object") {
                 return next(errorHandler(502, "Failed to analyze the business"))
             }
@@ -324,8 +324,8 @@ const askAICoach = async (req, res, next) => {
             userGoal,
         })
 
-        const aiResponse = await generateAIResponse(prompt)
-        const parsedResponse = parseAIJsonResponse(aiResponse)
+        const parsedResponse = await generateAIResponse(prompt)
+        // const parsedResponse = parseAIJsonResponse(aiResponse)
 
         if (!parsedResponse || typeof parsedResponse !== "object" || !parsedResponse.responseText) {
             return next(errorHandler(502, "Invalid AI coach response"))
